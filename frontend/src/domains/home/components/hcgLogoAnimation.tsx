@@ -130,7 +130,7 @@ export default function HcgLogoAnimation({
     if (!container) return;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000);
+    scene.background = new THREE.Color(0x2D2D2D);
 
     const camera = new THREE.OrthographicCamera(0, 0, 0, 0, 0.1, 1000);
     camera.position.z = 10;

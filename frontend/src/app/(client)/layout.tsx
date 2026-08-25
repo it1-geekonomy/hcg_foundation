@@ -12,7 +12,7 @@ export default function ClientLayout({
 }: ClientLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col">
-      <Navbar />
+      {/* <Navbar /> */}
 
       <main className="flex-1">{children}</main>
 
