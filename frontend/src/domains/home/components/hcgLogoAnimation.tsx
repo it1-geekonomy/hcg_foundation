@@ -314,7 +314,14 @@ export default function HcgLogoAnimation({
     };
   }, []);
 
-  const lettersCenterX = (H_POS[0] + G_POS[0]) / 2;
+  // Text block is anchored to the LEFT edge of H and stretched to the
+  // RIGHT edge of G, so both lines can be justified across that exact span
+  // (matching the red guide lines: text starts at H's left edge and ends
+  // at G's right edge).
+  const lettersLeftX = H_POS[0] - H_SIZE[0] / 2;
+  const lettersRightX = G_POS[0] + G_SIZE[0] / 2;
+  const lettersWidth = lettersRightX - lettersLeftX;
+
   const CONTENT_GAP = 4;
   const lettersBottomEdgeY = G_POS[1] - G_SIZE[1] / 2;
   const lettersBottomY = lettersBottomEdgeY - CONTENT_GAP;
@@ -331,32 +338,32 @@ export default function HcgLogoAnimation({
       <div ref={containerRef} className="absolute inset-0" />
 
       <div
-        className="pointer-events-none absolute flex flex-col items-center text-center"
+        className="pointer-events-none absolute flex flex-col items-start text-left"
         style={{
-          left: `calc(50% + ${lettersCenterX}px)`,
+          left: `calc(50% + ${lettersLeftX}px)`,
           top: `calc(50% - ${lettersBottomY}px)`,
-          transform: "translate(-50%, 0)",
         }}
       >
         <span
-          className="text-xl font-bold tracking-wide text-white"
+          className="text-xl font-bold leading-tight tracking-wide text-white"
           style={{
             opacity: showFoundation ? 1 : 0,
             transform: showFoundation ? "translateY(0) scale(1)" : "translateY(10px) scale(0.85)",
             transition: "opacity 380ms ease-out, transform 480ms cubic-bezier(0.33, 1, 0.32, 1)",
           }}
         >
-          Foundation
+          FOUNDATION
         </span>
+
         <span
-          className="mt-1 text-base font-semibold text-white"
+          className="mt-0.5 text-base font-medium leading-tight text-white"
           style={{
             opacity: showSubtitle ? 1 : 0,
             transform: showSubtitle ? "translateY(0) scale(1)" : "translateY(10px) scale(0.85)",
             transition: "opacity 380ms ease-out, transform 480ms cubic-bezier(0.33, 1, 0.32, 1)",
           }}
         >
-          Lasting inspiration
+          Lasting Inspiration
         </span>
       </div>
 
