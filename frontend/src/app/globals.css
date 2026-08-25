@@ -48,6 +48,22 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+@utility font-manrope {
+  font-family: var(--font-manrope);
+}
+
+@utility font-tiempos-fine {
+  font-family: var(--font-tiempos-fine);
+}
+
+@utility font-tiempos-headline {
+  font-family: var(--font-tiempos-headline);
+}
+
+@utility font-argestadisplay {
+  font-family: var(--font-argestadisplay);
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
