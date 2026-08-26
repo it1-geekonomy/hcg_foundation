@@ -2,14 +2,7 @@
 
 import Image from "next/image";
 import Typography from "@/lib/Typography";
-
-const images = [
-  { src: "/Kindness/kindness.png", rotate: "-rotate-6", delay: "0s", duration: "4s", top: "top-2 md:top-4" },
-  { src: "/Kindness/kindness2.png", rotate: "rotate-3", delay: "0.7s", duration: "4.5s", top: "top-6 md:top-16" },
-  { src: "/Kindness/kindness3.png", rotate: "-rotate-2", delay: "1.3s", duration: "5s", top: "top-0" },
-  { src: "/Kindness/kindness4.png", rotate: "rotate-6", delay: "0.4s", duration: "4.2s", top: "top-4 md:top-10" },
-  { src: "/Kindness/kindness5.png", rotate: "-rotate-3", delay: "1s", duration: "4.8s", top: "top-2 md:top-6" },
-];
+import { images } from "@/domains/home/constants/float";
 
 export default function HopeSection() {
   return (
@@ -21,7 +14,7 @@ export default function HopeSection() {
             key={i}
             className={`relative flex-1 min-w-0 md:flex-none md:shrink-0 ${img.top} ${img.rotate} animate-float sm:animate-float-sm md:animate-float-md [animation-delay:${img.delay}] [animation-duration:${img.duration}]`}
           >
-            <div className="w-full aspect-[3/4] md:w-32 md:h-40 lg:w-36 lg:h-48 xl:w-40 xl:h-52 md:aspect-auto rounded-md sm:rounded-xl md:rounded-2xl overflow-hidden">
+            <div className="w-full aspect-[3/4] md:aspect-auto md:w-[clamp(8rem,10vw,10rem)] md:h-[clamp(10rem,13vw,13rem)] rounded-md sm:rounded-xl md:rounded-2xl overflow-hidden">
               <Image
                 src={img.src}
                 alt={`Family photo ${i + 1}`}
