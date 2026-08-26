@@ -20,7 +20,7 @@ function FooterHeading({ children }: { children: React.ReactNode }) {
     <Typography
       variant="footer-heading"
       as="h3"
-      className="text-white uppercase tracking-wider"
+      className="text-white uppercase tracking-wider font-manrope"
     >
       {children}
     </Typography>
@@ -110,7 +110,7 @@ export default function Footer() {
               {FOOTER_QUICK_LINKS.map((label) => (
                 <li key={label}>
                   <Link href="/" className="hover:text-[#FDB723] transition-colors">
-                    <Typography variant="footer-heading" as="span" className="text-white font-normal!">
+                    <Typography variant="footer-heading" as="span" className="text-white font-normal! font-manrope">
                       {label}
                     </Typography>
                   </Link>
@@ -126,7 +126,7 @@ export default function Footer() {
               {FOOTER_INNER_PAGES.map((label) => (
                 <li key={label}>
                   <Link href="/" className="hover:text-[#FDB723] transition-colors">
-                    <Typography variant="footer-heading" as="span" className="text-white font-normal!">
+                    <Typography variant="footer-heading" as="span" className="text-white font-normal! font-manrope">
                       {label}
                     </Typography>
                   </Link>
@@ -151,7 +151,7 @@ export default function Footer() {
               <div className="flex items-center space-x-4">
                 <Phone className="w-5 h-5 text-[#787878] flex-shrink-0" />
                 <a href={FOOTER_CONTACT_INFO.phoneLink}>
-                  <Typography variant="body-sm" as="span" className="text-white hover:text-[#FDB723] transition-colors">
+                  <Typography variant="body-sm" as="span" className="text-white hover:text-[#FDB723] transition-colors font-manrope">
                     {FOOTER_CONTACT_INFO.phone}
                   </Typography>
                 </a>
@@ -161,7 +161,7 @@ export default function Footer() {
               <div className="flex items-center space-x-4">
                 <Mail className="w-5 h-5 text-[#787878] flex-shrink-0" />
                 <a href={FOOTER_CONTACT_INFO.emailLink}>
-                  <Typography variant="body-sm" as="span" className="text-white hover:text-[#FDB723] transition-colors">
+                  <Typography variant="body-sm" as="span" className="text-white hover:text-[#FDB723] transition-colors font-manrope">
                     {FOOTER_CONTACT_INFO.email}
                   </Typography>
                 </a>
