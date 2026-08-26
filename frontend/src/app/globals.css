@@ -64,6 +64,17 @@
   font-family: var(--font-argestadisplay);
 }
 
+.card-panel {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.card-panel::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -142,5 +153,37 @@
   }
   html {
     @apply font-sans;
+  }
+}
+@theme {
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-float-sm: float-sm 4s ease-in-out infinite;
+  --animate-float-md: float-md 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes float-sm {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+@keyframes float-md {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
   }
 }
