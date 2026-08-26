@@ -1,4 +1,10 @@
 export { default as BannerSection } from "./components/bannerSection";
+export { default as StatSection } from "./components/StatSection";
+export { default as ProjectsSection } from "./components/ProjectsSection";
+export { default as Smilestories } from "./components/Smilestories";
+export { default as HopeSection } from "./components/HopeSection";
+export { default as Community } from "./components/Community";
+export { default as FloatingImages } from "./components/FloatingImages";
 export { default as OurImpact } from './components/ourImpact';
 export { default as AboutUs } from './components/aboutUs';
 export { default as OurInitiatives } from './components/ourInitiatives';
