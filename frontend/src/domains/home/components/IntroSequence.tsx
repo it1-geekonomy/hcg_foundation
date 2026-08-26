@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import HcgLogoAnimation from "./hcgLogoAnimation";
 import ParticleField from "./ParticleField";
-import { STATS, T_SEED, T_GROW, T_SOLID, T_HOLD, STAT_MS, type Stage, type Phase } from "./constants";
+import { STATS, T_SEED, T_GROW, T_SOLID, T_HOLD, STAT_MS, type Stage, type Phase } from "../constants/footer";
 
 export function IntroSequence({
   onDone,
@@ -51,8 +51,8 @@ export function IntroSequence({
       setTimeout(
         () => setStage("hold"),
         T_SEED +
-          T_GROW +
-          T_SOLID,
+        T_GROW +
+        T_SOLID,
       ),
 
       setTimeout(
@@ -61,9 +61,9 @@ export function IntroSequence({
           setShowCopy(false);
         },
         T_SEED +
-          T_GROW +
-          T_SOLID +
-          T_HOLD,
+        T_GROW +
+        T_SOLID +
+        T_HOLD,
       ),
     ];
 
@@ -245,11 +245,10 @@ export function IntroSequence({
             {STATS.map((s, i) => (
               <span
                 key={s.value}
-                className={`h-px transition-all duration-500 ${
-                  i <= activeIndex
-                    ? "w-10 bg-[#FFD43B]/80"
-                    : "w-5 bg-white/15"
-                }`}
+                className={`h-px transition-all duration-500 ${i <= activeIndex
+                  ? "w-10 bg-[#FFD43B]/80"
+                  : "w-5 bg-white/15"
+                  }`}
               />
             ))}
           </div>
