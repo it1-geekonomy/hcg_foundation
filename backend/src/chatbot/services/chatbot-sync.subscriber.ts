@@ -65,6 +65,8 @@ export class ChatbotSyncSubscriber implements EntitySubscriberInterface {
     if (!TRACKED_TABLES.has(tableName) || !entity) return;
 
     const tableConfig = SOURCE_TABLES.find((t) => t.table === tableName);
+    if (!tableConfig) return;
+
     const id = entity[tableConfig.idColumn];
     if (id === undefined) return;
 
@@ -80,6 +82,8 @@ export class ChatbotSyncSubscriber implements EntitySubscriberInterface {
     if (!TRACKED_TABLES.has(tableName) || !entity) return;
 
     const tableConfig = SOURCE_TABLES.find((t) => t.table === tableName);
+    if (!tableConfig) return;
+
     const id = entity[tableConfig.idColumn];
     if (id === undefined) return;
 

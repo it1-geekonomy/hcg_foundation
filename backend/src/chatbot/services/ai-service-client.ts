@@ -8,7 +8,9 @@ export class AiServiceClient {
 
   constructor(private readonly configService: ConfigService) {
     this.baseUrl = this.configService.get<string>('AI_SERVICE_URL', 'http://localhost:8001');
-    this.apiKey = this.configService.get<string>('AI_SERVICE_INTERNAL_KEY');
+    this.apiKey =
+      this.configService.get<string>('AI_SERVICE_INTERNAL_KEY') ??
+      'hcg-dev-internal-key-change-me';
   }
 
   async syncEvent(payload: {
@@ -34,7 +36,12 @@ export class AiServiceClient {
     }
   }
 
-  async chat(question: string): Promise<{ answer: string; sources: string[] }> {
+  async chat(question: string): Promise<{
+    answer: string;
+    sources: string[];
+    cached?: boolean;
+    cache?: string | null;
+  }> {
     const response = await fetch(`${this.baseUrl}/chat`, {
       method: 'POST',
       headers: {

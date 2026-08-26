@@ -1,104 +1,134 @@
-import json
 from openai import OpenAI
 from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.services import vector_store
+from app.services import embeddings, privacy, query_repair, vector_store
+from app.services.answer_cache import answer_cache
 
-_client = OpenAI(api_key=settings.openai_api_key)
+_client = OpenAI(
+    api_key=settings.openai_api_key,
+    base_url=settings.openai_base_url or None,
+)
 
-SEARCH_TOOL = {
-    "type": "function",
-    "function": {
-        "name": "search_knowledge_base",
-        "description": (
-            "Searches the NGO's website content (programs, events, FAQs, pages) "
-            "for information relevant to a query. Call this whenever you need "
-            "facts to answer the visitor — never guess. You may call it more "
-            "than once with different phrasing if the first search doesn't "
-            "surface what you need."
-        ),
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "A focused search query, not the full user question verbatim.",
-                }
-            },
-            "required": ["query"],
-        },
-    },
-}
+SYSTEM_PROMPT = """You are the public HCG Foundation assistant.
 
-SYSTEM_PROMPT = """You are a helpful assistant for an NGO's website.
+Rules:
+- Answer ONLY from CONTEXT. Never invent facts.
+- The user question may have typos/grammar issues — interpret their intended meaning.
+- Lead with a direct clear answer, then short bullets only if listing steps/points.
+- Use plain language. Do not dump whole pages or long quotes.
+- Privacy: never reveal emails, phones, addresses, donor/patient private records, IDs, cards, credentials.
+- If CONTEXT has [redacted], do not guess originals.
+- If CONTEXT does not support the question, say so briefly and suggest contacting HCG Foundation.
+"""
 
-You have a tool, search_knowledge_base, that searches the organization's own
-content. Use it to find facts before answering — never invent details about
-programs, events, or policies. You may call the tool multiple times if the
-first result doesn't fully answer the question (e.g. try a rephrased query).
+NO_HIT_ANSWER = (
+    "I could not find matching public information in the HCG Foundation knowledge base. "
+    "Please try rephrasing your question, or contact the foundation directly."
+)
 
-If, after searching, you still don't have the answer, say so plainly and
-suggest the visitor contact the organization directly. Keep answers concise
-and friendly. When you do answer from retrieved content, you don't need to
-cite chunk numbers to the user — just answer naturally."""
 
-MAX_TOOL_ITERATIONS = 3
+def _build_context(results: list[dict]) -> str:
+    blocks: list[str] = []
+    max_chars = settings.context_excerpt_chars
+    for i, r in enumerate(results, start=1):
+        safe = privacy.redact_pii(r["content"])
+        excerpt = safe if len(safe) <= max_chars else safe[:max_chars].rsplit(" ", 1)[0] + "..."
+        blocks.append(f"[{i}] ({r['source_table']}#{r['source_id']})\n{excerpt}")
+    return "\n\n".join(blocks)
+
+
+def _merge_results(*result_lists: list[dict], limit: int) -> list[dict]:
+    best: dict[tuple[str, str, str], dict] = {}
+    for results in result_lists:
+        for r in results:
+            key = (r["source_table"], r["source_id"], r["content"][:80])
+            prev = best.get(key)
+            if prev is None or r["distance"] < prev["distance"]:
+                best[key] = r
+    merged = sorted(best.values(), key=lambda x: x["distance"])
+    return merged[:limit]
 
 
 def answer_question(db: Session, question: str) -> dict:
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": question},
-    ]
-    sources: set[str] = set()
+    raw = (question or "").strip()
+    if len(raw) < 2:
+        return {
+            "answer": "Please ask a short question about HCG Foundation.",
+            "sources": [],
+            "cached": False,
+        }
 
-    for _ in range(MAX_TOOL_ITERATIONS):
-        completion = _client.chat.completions.create(
-            model=settings.chat_model,
-            messages=messages,
-            tools=[SEARCH_TOOL],
-            temperature=0.3,
-        )
-        message = completion.choices[0].message
+    if privacy.is_blocked_question(raw):
+        return {"answer": privacy.REFUSAL_MESSAGE, "sources": [], "cached": False}
 
-        if not message.tool_calls:
-            # Model is done — it has enough to answer.
-            return {"answer": message.content or "", "sources": sorted(sources)}
+    # Repair typos before cache/retrieval so "privacey polcy" hits the same path.
+    search_q, cleaned_q = query_repair.repair_question(db, raw)
+    if not search_q:
+        return {
+            "answer": "Please ask a short question about HCG Foundation.",
+            "sources": [],
+            "cached": False,
+        }
 
-        # Model wants to search. Append its tool-call message, then run
-        # every requested search and feed results back in.
-        messages.append(message.model_dump(exclude_none=True))
+    for key_q in (search_q, cleaned_q, raw):
+        hit = answer_cache.get_exact(key_q)
+        if hit:
+            return hit
 
-        for tool_call in message.tool_calls:
-            args = json.loads(tool_call.function.arguments)
-            query = args.get("query", question)
+    query_vector = embeddings.embed_text(search_q)
+    hit = answer_cache.get_semantic(search_q, query_vector)
+    if hit:
+        return hit
 
-            results = vector_store.similarity_search(db, query, settings.top_k_chunks)
-            for r in results:
-                sources.add(f"{r['source_table']}#{r['source_id']}")
+    results = vector_store.similarity_search_with_vector(
+        db, query_vector, settings.top_k_chunks
+    )
 
-            tool_result_text = (
-                "\n\n".join(r["content"] for r in results)
-                if results
-                else "No relevant results found."
+    # If the repaired query still looks weak and differs from original, try original too.
+    if cleaned_q.lower() != search_q.lower():
+        if not results or results[0]["distance"] > settings.max_retrieval_distance * 0.85:
+            original_vector = embeddings.embed_text(cleaned_q)
+            alt = vector_store.similarity_search_with_vector(
+                db, original_vector, settings.top_k_chunks
             )
+            results = _merge_results(results, alt, limit=settings.top_k_chunks)
 
-            messages.append(
-                {
-                    "role": "tool",
-                    "tool_call_id": tool_call.id,
-                    "content": tool_result_text,
-                }
-            )
+    sources = sorted({f"{r['source_table']}#{r['source_id']}" for r in results})
 
-    # Hit the iteration cap — ask for a final answer without further tool use.
+    if not results or results[0]["distance"] > settings.max_retrieval_distance:
+        payload = {"answer": NO_HIT_ANSWER, "sources": [], "cached": False}
+        answer_cache.put(search_q, payload["answer"], [], query_vector)
+        answer_cache.put(raw, payload["answer"], [], query_vector)
+        return payload
+
+    context = _build_context(results)
+    user_prompt = (
+        f"CONTEXT:\n{context}\n\n"
+        f"USER QUESTION (may contain typos): {cleaned_q}\n"
+        f"INTERPRETED QUESTION: {search_q}\n\n"
+        "Write a clear, direct public-safe answer for the user."
+    )
+
     completion = _client.chat.completions.create(
         model=settings.chat_model,
-        messages=messages,
-        temperature=0.3,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_prompt},
+        ],
+        temperature=0.15,
+        max_tokens=settings.chat_max_tokens,
     )
-    return {
-        "answer": completion.choices[0].message.content or "",
-        "sources": sorted(sources),
-    }
+
+    answer = privacy.redact_pii((completion.choices[0].message.content or "").strip())
+    payload = {"answer": answer, "sources": sources, "cached": False}
+
+    # Cache under repaired + original so future typos/repeats skip the LLM.
+    answer_cache.put(search_q, answer, sources, query_vector)
+    if normalize_differs(raw, search_q):
+        answer_cache.put(raw, answer, sources, query_vector)
+    return payload
+
+
+def normalize_differs(a: str, b: str) -> bool:
+    return a.strip().lower() != b.strip().lower()

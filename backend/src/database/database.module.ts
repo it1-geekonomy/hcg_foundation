@@ -1,24 +1,37 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CMS_ENTITIES } from '../cms/cms.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get<string>('DB_HOST', 'localhost'),
-        port: config.get<number>('DB_PORT', 5432),
-        username: config.get<string>('DB_USERNAME', 'postgres'),
-        password: config.get<string>('DB_PASSWORD', 'postgres'),
-        database: config.get<string>('DB_NAME', 'nestjs_db'),
-        autoLoadEntities: true,
-        synchronize: config.get<string>('DB_SYNCHRONIZE', 'false') === 'true',
-        migrations: [__dirname + '/migrations/*{.ts,.js}'],
-        migrationsRun: false,
-      }),
+      useFactory: (config: ConfigService) => {
+        const dbType = config.get<string>('DB_TYPE', 'mysql');
+        const common = {
+          host: config.get<string>('DB_HOST', 'localhost'),
+          port: Number(config.get<string>('DB_PORT') || (dbType === 'mysql' ? 3306 : 5432)),
+          username: config.get<string>('DB_USERNAME', 'hcg'),
+          password: config.get<string>('DB_PASSWORD', 'hcg'),
+          database: config.get<string>('DB_NAME', 'hcgfoundation'),
+          entities: CMS_ENTITIES,
+          autoLoadEntities: true,
+          synchronize: config.get<string>('DB_SYNCHRONIZE', 'false') === 'true',
+          logging: config.get<string>('DB_LOGGING', 'false') === 'true',
+        };
+
+        if (dbType === 'postgres') {
+          return { ...common, type: 'postgres' as const };
+        }
+
+        return {
+          ...common,
+          type: 'mysql' as const,
+          charset: 'utf8mb4',
+        };
+      },
     }),
   ],
 })

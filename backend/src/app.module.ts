@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
+import { CmsModule } from './cms/cms.module';
 
 @Module({
   imports: [
@@ -12,9 +13,11 @@ import { ChatbotModule } from './chatbot/chatbot.module';
       envFilePath: '.env',
     }),
     DatabaseModule,
+    CmsModule,
     ChatbotModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
+

@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 
 from app.models.document_chunk import DocumentChunk
-from app.services import chunker, embeddings
+from app.services import chunker, embeddings, privacy
 
 
 def upsert_row(db: Session, source_table: str, source_id: str, content: str) -> int:
@@ -20,7 +20,8 @@ def upsert_row(db: Session, source_table: str, source_id: str, content: str) -> 
         db.commit()
         return 0
 
-    chunks = chunker.split_text(content)
+    safe_content = privacy.redact_pii(content)
+    chunks = chunker.split_text(safe_content)
     if not chunks:
         db.commit()
         return 0
@@ -52,11 +53,14 @@ def delete_row(db: Session, source_table: str, source_id: str) -> None:
 
 
 def similarity_search(db: Session, query: str, top_k: int) -> list[dict]:
-    """
-    Embeds the query and returns the top_k most similar chunks using
-    pgvector's cosine distance operator (<=>). Lower distance = more similar.
-    """
     query_vector = embeddings.embed_text(query)
+    return similarity_search_with_vector(db, query_vector, top_k)
+
+
+def similarity_search_with_vector(
+    db: Session, query_vector: list[float], top_k: int
+) -> list[dict]:
+    """Reuse an existing query embedding (avoid double-embed on cache miss path)."""
     vector_literal = f"[{','.join(str(v) for v in query_vector)}]"
 
     rows = db.execute(

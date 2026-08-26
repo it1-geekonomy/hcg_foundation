@@ -4,9 +4,12 @@ pydantic-settings==2.6.1
 python-dotenv==1.0.1
 
 sqlalchemy==2.0.36
-psycopg2-binary==2.9.10
+psycopg[binary]>=3.2.9
 alembic==1.14.0
 pgvector==0.3.6
 
 openai==1.57.0
 tiktoken==0.8.0
+
+# Local embeddings (Groq has no embedding endpoint). Prefer fastembed over full torch.
+fastembed==0.4.2

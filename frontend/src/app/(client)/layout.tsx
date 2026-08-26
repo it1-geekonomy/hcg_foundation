@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import ChatbotWidget from "@/domains/chatbot/components/ChatbotWidget";
 import Navbar from "@/shared/components/navbar/navbar";
 import Footer from "@/shared/components/footer/footer";
 
@@ -17,6 +18,7 @@ export default function ClientLayout({
       <main className="flex-1">{children}</main>
 
       <Footer />
+      <ChatbotWidget />
     </div>
   );
 }
