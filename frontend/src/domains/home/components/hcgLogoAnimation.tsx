@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 const YELLOW_HAND = "/hcg-logo/yellow-hand.png";
@@ -102,6 +102,15 @@ export default function HcgLogoAnimation({
   const [showSubtitle, setShowSubtitle] = useState(false);
   const [showStar, setShowStar] = useState(false);
   const doneRef = useRef(false);
+
+  // Refs used to measure each line's natural (unscaled) text width so it
+  // can be horizontally scaled to exactly fill the HCG span, without
+  // touching letter-spacing/kerning — the font itself stays untouched,
+  // it's just stretched/condensed like a logotype.
+  const foundationTextRef = useRef<HTMLSpanElement>(null);
+  const subtitleTextRef = useRef<HTMLSpanElement>(null);
+  const [foundationScaleX, setFoundationScaleX] = useState(1);
+  const [subtitleScaleX, setSubtitleScaleX] = useState(1);
 
   const finish = () => {
     if (doneRef.current) return;
@@ -329,6 +338,28 @@ export default function HcgLogoAnimation({
   const gTopRightX = G_POS[0] + G_SIZE[0] / 2;
   const gTopRightY = G_POS[1] + G_SIZE[1] / 2;
 
+  useLayoutEffect(() => {
+    function measure() {
+      if (foundationTextRef.current) {
+        const natural = foundationTextRef.current.offsetWidth;
+        if (natural > 0) setFoundationScaleX(lettersWidth / natural);
+      }
+      if (subtitleTextRef.current) {
+        const natural = subtitleTextRef.current.offsetWidth;
+        if (natural > 0) setSubtitleScaleX(lettersWidth / natural);
+      }
+    }
+    // Measure once fonts are ready (web fonts can shift natural width),
+    // and again after a tick as a safety net.
+    measure();
+    if (typeof document !== "undefined" && "fonts" in document) {
+      document.fonts.ready.then(measure);
+    }
+    const t = setTimeout(measure, 100);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lettersWidth]);
+
   return (
     <section
       className={`relative flex w-full items-center justify-center overflow-hidden bg-black ${
@@ -338,32 +369,39 @@ export default function HcgLogoAnimation({
       <div ref={containerRef} className="absolute inset-0" />
 
       <div
-        className="pointer-events-none absolute flex flex-col items-start text-left"
+        className="pointer-events-none absolute flex flex-col items-start"
         style={{
           left: `calc(50% + ${lettersLeftX}px)`,
           top: `calc(50% - ${lettersBottomY}px)`,
+          width: `${lettersWidth}px`,
         }}
       >
         <span
-          className="text-xl font-bold leading-tight tracking-wide text-white"
+          className="whitespace-nowrap text-xl font-bold leading-tight text-white"
           style={{
+            transformOrigin: "left top",
             opacity: showFoundation ? 1 : 0,
-            transform: showFoundation ? "translateY(0) scale(1)" : "translateY(10px) scale(0.85)",
+            transform: showFoundation
+              ? `translateY(0) scaleX(${foundationScaleX}) scaleY(1)`
+              : `translateY(10px) scaleX(${foundationScaleX * 0.85}) scaleY(0.85)`,
             transition: "opacity 380ms ease-out, transform 480ms cubic-bezier(0.33, 1, 0.32, 1)",
           }}
         >
-          FOUNDATION
+          <span ref={foundationTextRef}>FOUNDATION</span>
         </span>
 
         <span
-          className="mt-0.5 text-base font-medium leading-tight text-white"
+          className="mt-0.5 whitespace-nowrap text-base font-medium leading-tight text-white"
           style={{
+            transformOrigin: "left top",
             opacity: showSubtitle ? 1 : 0,
-            transform: showSubtitle ? "translateY(0) scale(1)" : "translateY(10px) scale(0.85)",
+            transform: showSubtitle
+              ? `translateY(0) scaleX(${subtitleScaleX}) scaleY(1)`
+              : `translateY(10px) scaleX(${subtitleScaleX * 0.85}) scaleY(0.85)`,
             transition: "opacity 380ms ease-out, transform 480ms cubic-bezier(0.33, 1, 0.32, 1)",
           }}
         >
-          Lasting Inspiration
+          <span ref={subtitleTextRef}>Lasting Inspiration</span>
         </span>
       </div>
 
