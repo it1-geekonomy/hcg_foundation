@@ -4,12 +4,12 @@ import Typography from "@/lib/Typography";
 
 export default function AboutSection() {
   return (
-    <section className="bg-gradient-to-b from-[#FFF6D8] to-white px-6 py-6 md:py-10 lg:py-20">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-16">
+    <section className="py-6 md:py-10 lg:py-30 px-4 md:px-10 lg:px-16 xl:px-30 lg:py-20">
+      <div className="grid max-w-full grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-16">
         <Typography
-          variant="editorial-lg"
+          variant="hero"
           as="h2"
-          className="font-tiempos-headline leading-tight text-[#382E07]"
+          className="font-tiempos-headline leading-tight text-[#382E07] !tracking-[0.1em] lg:text-nowrap"
         >
           {ABOUT_CONTENT.heading.map((line) => (
             <span key={line} className="block">

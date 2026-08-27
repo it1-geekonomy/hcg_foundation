@@ -26,18 +26,18 @@ function StoryCard({
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl bg-[#8D8D8D66] p-6 shadow-2xl backdrop-blur-xl">
       {/* photo, inset inside the glass card */}
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl">
+      <div className="relative aspect-[8/9] w-full overflow-hidden rounded-xl">
         <Image
           src={image}
           alt={name}
           fill
-          sizes="(max-width: 639px) clamp(240px, 65vw, 320px), (max-width: 767px) clamp(260px, 50vw - 34px, 340px), (max-width: 1023px) clamp(300px, 50vw - 42px, 380px), (max-width: 1279px) clamp(260px, 30vw - 40px, 340px), clamp(260px, 25vw - 48px, 320px)"
+          sizes="(max-width: 639px) clamp(240px, 65vw, 320px), (max-width: 767px) clamp(280px, 52vw - 34px, 360px), (max-width: 1023px) clamp(320px, 52vw - 42px, 400px), (max-width: 1279px) clamp(340px, 32vw - 20px, 430px), clamp(280px, 24vw - 6px, 460px)"
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
       </div>
 
       {/* name / date / arrow, below the photo, inside the card */}
-      <div className="flex items-end justify-between gap-2 pt-4">
+      <div className="flex items-center justify-between gap-2 pt-4">
         <div>
           <Typography variant="subheading" as="p" className="text-left text-[#FFFFFF] font-bold font-manrope">
             {name}
@@ -45,7 +45,7 @@ function StoryCard({
           <Typography
             variant="body-lg"
             as="p"
-            className="mt-1 flex items-center gap-2 text-[#FFFFFF] font-manrope font-medium"
+            className="mt-1 flex items-center gap-2 text-[#FFFFFF] font-manrope font-medium text-nowrap"
           >
             <Calendar className="h-4 w-4" strokeWidth={1.75} />
             {date}
@@ -272,19 +272,19 @@ export default function SmileStories() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full bg-gradient-to-b from-[#FFE380] to-[#FFF6D8] py-20"
+      className="relative w-full py-6 md:py-10 lg:py-20"
     >
       <Typography
         variant="hero"
         as="h2"
-        className="mx-auto mb-14 text-center px-4 font-manrope font-medium text-neutral-800"
+        className="mx-auto mb-14 text-center px-4 font-manrope font-medium text-neutral-800 !tracking-[0.1em]" 
       >
-        Behind Every <em className="text-neutral-900 font-tiempos-headline font-medium">Smile Is a Story</em>
+        Behind Every <em className="text-neutral-900 font-tiempos-headline font-medium !tracking-[0.1em]">Smile Is a Story</em>
       </Typography>
 
       <div
         ref={viewportRef}
-        className="mx-auto w-full max-w-[1800px] overflow-hidden px-4 sm:px-6 md:px-8 lg:px-12"
+        className="mx-auto w-full overflow-hidden px-4 sm:px-6 md:px-8 lg:px-12"
       >
         <div
           ref={trackRef}
@@ -301,7 +301,7 @@ export default function SmileStories() {
           {loopedStories.map((story, i) => (
             <div
               key={`${story.name}-${i}`}
-              className="shrink-0 basis-[clamp(240px,65vw,320px)] cursor-pointer sm:basis-[clamp(260px,50vw-34px,340px)] md:basis-[clamp(300px,50vw-42px,380px)] lg:basis-[clamp(260px,30vw-40px,340px)] xl:basis-[clamp(260px,25vw-48px,320px)]"
+              className="shrink-0 basis-[clamp(240px,65vw,320px)] cursor-pointer sm:basis-[clamp(280px,52vw-34px,360px)] md:basis-[clamp(320px,52vw-42px,400px)] lg:basis-[clamp(340px,32vw-20px,430px)] xl:basis-[clamp(280px,24vw-6px,460px)]"
               onPointerEnter={(e) => {
                 if (e.pointerType === "mouse") {
                   isHoverPausedRef.current = true;
