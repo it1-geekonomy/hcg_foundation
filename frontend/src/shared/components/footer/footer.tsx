@@ -64,7 +64,7 @@ export default function Footer() {
       <div className={`${CONTAINER} py-8`}>
         <div
           className="
-            grid grid-cols-2 md:grid-cols-3 lg:grid-cols-[1.5fr_1fr_1fr_1fr] gap-x-6 md:gap-x-8 gap-y-10 lg:gap-y-0
+            grid grid-cols-2 md:grid-cols-3 lg:grid-cols-[minmax(280px,320px)_1fr] gap-x-6 md:gap-x-8 gap-y-10 lg:gap-y-0 lg:gap-x-0
           "
         >
           {/* Column 1: Logo and Newsletter */}
@@ -103,6 +103,8 @@ export default function Footer() {
             </div>
           </div>
 
+          {/* Columns 2–4: grouped, shifted right, tighter gaps */}
+          <div className="col-span-2 md:col-span-3 lg:col-span-1 grid grid-cols-2 md:grid-cols-3 gap-x-6 md:gap-x-8 gap-y-10 lg:flex lg:flex-row lg:items-start lg:justify-end lg:gap-x-10 xl:gap-x-14 2xl:gap-x-28">
           {/* Column 2: Quick Links */}
           <div className="col-span-1">
             <FooterHeading>QUICK LINKS</FooterHeading>
@@ -136,7 +138,7 @@ export default function Footer() {
           </div>
 
           {/* Column 4: Contact Us */}
-          <div className="col-span-2 md:col-span-1 lg:col-span-1">
+          <div className="col-span-2 md:col-span-1">
             <FooterHeading>CONTACT US</FooterHeading>
             <div className="mt-8 space-y-4">
               {/* Address */}
@@ -182,6 +184,7 @@ export default function Footer() {
                 ))}
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>
