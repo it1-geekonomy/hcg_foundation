@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import Typography from "@/lib/Typography";
 
 /** Put the woman/mother-daughter photo at: public/formimage.png */
 
@@ -132,25 +133,30 @@ function DonationModal({
               "linear-gradient(to right, black 0%, black 85%, transparent 100%)",
           }}
         >
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+          <Typography variant="label-1" as="p" className="uppercase text-gray-500">
             Together, we can
-          </p>
+          </Typography>
 
           <h2
             id="donation-modal-title"
-            className="mt-4 font-serif text-4xl leading-tight text-gray-900"
+            className="mt-4 text-gray-900"
           >
-            <span className="italic">Bring Hope</span>
-            <br />
-            {/* GRADIENT #3 — "Beyond Cancer" text fill gradient (Tailwind). Small, decorative, on the heading text only — not part of the background wash. Left unchanged. */}
-            <span className="italic bg-gradient-to-r from-[#F9BF16] to-[#B98A00] bg-clip-text text-transparent">Beyond Cancer</span>
+            <Typography variant="heading-6" as="span" className="block italic text-gray-900">
+              Bring Hope
+            </Typography>
+            <Typography variant="heading-6"
+              as="span"
+              className="block italic bg-gradient-to-r from-[#F9BF16] to-[#B98A00] bg-clip-text text-transparent"
+            >
+              Beyond Cancer
+            </Typography>
           </h2>
 
-          <p className="mt-6 max-w-md text-sm leading-relaxed text-gray-500">
+          <Typography variant="body-6" as="p" className="mt-6 max-w-md text-white/58">
             Your contribution helps provide life-saving treatment, emotional
             care, and financial support to cancer patients and their
             families in need.
-          </p>
+          </Typography>
 
           {/* Impact grid */}
           <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -160,12 +166,12 @@ function DonationModal({
                   {item.emoji}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900">
+                  <Typography variant="button-3" as="p" className="text-gray-900">
                     {item.title}
-                  </p>
-                  <p className="text-xs leading-snug text-gray-400">
+                  </Typography>
+                  <Typography variant="body-8" as="p" className="text-gray-400">
                     {item.desc}
-                  </p>
+                  </Typography>
                 </div>
               </div>
             ))}
@@ -174,9 +180,9 @@ function DonationModal({
           {/* Amount selector and CTA share the same width on desktop. */}
           <div className="mt-10 w-full lg:w-fit">
             <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+            <Typography variant="label-1" as="p" className="uppercase text-gray-500">
               Choose an amount
-            </p>
+            </Typography>
             <div className="mt-3 flex flex-wrap gap-2">
               {AMOUNTS.map((amount) => {
                 const active = amount === selectedAmount;
@@ -184,28 +190,34 @@ function DonationModal({
                   <button
                     key={amount}
                     onClick={() => onSelectAmount(amount)}
-                    className={`rounded-xl border px-4 py-2 text-sm font-semibold transition ${active
+                    className={`rounded-xl border px-4 py-2 transition ${active
                       ? "border-gray-900 bg-gray-900 text-white"
                       : "border-gray-200 bg-white text-gray-700 hover:border-gray-400"
                       }`}
                   >
-                    {amount}
+                    <Typography variant="button-5" as="span" className={active ? "text-white" : "text-[#3C2F02]"}>
+                      {amount}
+                    </Typography>
                   </button>
                 );
               })}
-              <button className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:border-gray-400">
-                More
+              <button className="rounded-xl border border-gray-200 bg-white px-4 py-2 hover:border-gray-400">
+                <Typography variant="button-5" as="span" className="text-[#3C2F02]">
+                  More
+                </Typography>
               </button>
             </div>
             </div>
 
           {/* Donate CTA matches the amount row width at 1024px and above. */}
-          <button className="mt-8 flex w-fit items-center justify-center gap-2 self-start rounded-xl bg-[#FDC61D] px-10 py-3 text-sm font-bold text-gray-900 shadow-sm transition hover:bg-[#E9B510] lg:w-full lg:self-auto lg:px-0 lg:py-3.5">
-            ❤️ DONATE NOW →
+          <button className="mt-8 flex w-fit items-center justify-center gap-2 self-start rounded-xl bg-[#FDC61D] px-10 py-3 shadow-sm transition hover:bg-[#E9B510] lg:w-full lg:self-auto lg:px-0 lg:py-3.5">
+            <Typography variant="button-6" as="span" className="text-[#211007]">
+              ❤️ DONATE NOW →
+            </Typography>
           </button>
-          <p className="mt-2 text-left lg:text-center text-xs text-gray-400">
+          <Typography variant="body-8" as="p" className="mt-2 text-left lg:text-center text-gray-400">
             🔒 Secure Payment | Powered by Razorpay
-          </p>
+          </Typography>
           </div>
 
           {/* Trust row */}
@@ -213,12 +225,12 @@ function DonationModal({
             {TRUST_ITEMS.map((item) => (
               <div key={item.title} className="flex min-w-0 flex-col gap-1">
                 <span className="text-base">{item.icon}</span>
-                <p className="text-xs font-semibold text-gray-900">
+                <Typography variant="button-3" as="p" className="text-gray-900">
                   {item.title}
-                </p>
-                <p className="text-[11px] leading-snug text-gray-400">
+                </Typography>
+                <Typography variant="body-8" as="p" className="text-gray-400">
                   {item.desc}
-                </p>
+                </Typography>
               </div>
             ))}
           </div>

@@ -39,13 +39,12 @@ function StoryCard({
       {/* name / date / arrow, below the photo, inside the card */}
       <div className="flex items-center justify-between gap-2 pt-4">
         <div>
-          <Typography variant="subheading" as="p" className="text-left text-[#FFFFFF] font-bold font-manrope">
+          <Typography variant="heading-8" as="p" className="text-left text-white">
             {name}
           </Typography>
-          <Typography
-            variant="body-lg"
+          <Typography variant="text-2"
             as="p"
-            className="mt-1 flex items-center gap-2 text-[#FFFFFF] font-manrope font-medium text-nowrap"
+            className="mt-1 flex items-center gap-2 text-white text-nowrap"
           >
             <Calendar className="h-4 w-4" strokeWidth={1.75} />
             {date}
@@ -274,12 +273,11 @@ export default function SmileStories() {
       ref={sectionRef}
       className="relative w-full py-6 md:py-10 lg:py-20"
     >
-      <Typography
-        variant="hero"
+      <Typography variant="heading-3"
         as="h2"
-        className="mx-auto mb-14 text-center px-4 font-manrope font-medium text-neutral-800 !tracking-[0.1em]" 
+        className="mx-auto mb-14 text-center px-4 text-neutral-800"
       >
-        Behind Every <em className="text-neutral-900 font-tiempos-headline font-medium !tracking-[0.1em]">Smile Is a Story</em>
+        Behind Every <em className="text-neutral-900 not-italic font-tiempos-headline">Smile Is a Story</em>
       </Typography>
 
       <div
