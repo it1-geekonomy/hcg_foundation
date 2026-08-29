@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
 import Typography from "@/lib/Typography";
 import type { NavLink } from "./dropdown";
@@ -53,6 +54,8 @@ export function MobileMenuPanel({
   toggleDropdown,
   donateButton,
 }: MobileMenuPanelProps) {
+  const pathname = usePathname();
+
   return (
     <div
       className={`xl:hidden overflow-hidden transition-all duration-300 ease-in-out ${
@@ -77,11 +80,10 @@ export function MobileMenuPanel({
                     } as React.CSSProperties
                   }
                 >
-                  <Typography
-                    variant="body-lg"
+                  <Typography variant="text-2"
                     as="span"
-                    className={`font-manrope font-bold transition-colors duration-300 ${
-                      isOpen ? "text-[#FED034]" : "text-[#FFFFFF] group-hover:text-[#FED034]"
+                    className={`transition-colors duration-300 ${
+                      isOpen ? "text-[#FED034]" : "text-white group-hover:text-[#FED034]"
                     }`}
                   >
                     {link.label}
@@ -106,10 +108,9 @@ export function MobileMenuPanel({
                     } as React.CSSProperties
                   }
                 >
-                  <Typography
-                    variant="body-lg"
+                  <Typography variant={link.href === pathname ? "text-1" : "text-2"}
                     as="span"
-                    className="font-manrope font-bold text-[#FFFFFF] transition-colors duration-300 group-hover:text-[#FED034]"
+                    className="text-white transition-colors duration-300 group-hover:text-[#FED034]"
                   >
                     {link.label}
                   </Typography>
@@ -140,10 +141,9 @@ export function MobileMenuPanel({
                           }
                         >
                           <span className="absolute inset-0 origin-left scale-x-0 bg-[#FED034]/10 transition-transform duration-300 ease-out group-hover/item:scale-x-100" />
-                          <Typography
-                            variant="body-lg"
+                          <Typography variant="text-2"
                             as="span"
-                            className="relative z-10 font-manrope font-bold text-[#FFFFFF] transition-colors duration-300 group-hover/item:text-[#FED034]"
+                            className="relative z-10 text-white transition-colors duration-300 group-hover/item:text-[#FED034]"
                           >
                             {item.label}
                           </Typography>
@@ -170,7 +170,7 @@ export function MobileMenuPanel({
             } as React.CSSProperties
           }
         >
-          <Typography variant="body-lg" as="span" className="font-manrope font-bold text-[#262626]">
+          <Typography variant="button-4" as="span" className="text-[#262626]">
             {donateButton.label}
           </Typography>
         </Link>

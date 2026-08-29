@@ -49,7 +49,7 @@ function MoreDetailsButton({ className = "" }: { className?: string }) {
       href="/#"
       className={`inline-flex w-fit shrink-0 items-center justify-center gap-2 bg-[#FFD43B] px-5 py-2.5 uppercase tracking-wider text-neutral-900 transition-colors hover:bg-[#f0c527] ${className}`}
     >
-      <Typography variant="label" as="span" className="text-neutral-900 font-manrope font-semibold">
+      <Typography variant="button-3" as="span" className="uppercase text-neutral-900">
         More details
       </Typography>
       <ArrowIcon />
@@ -234,19 +234,17 @@ export default function VerticalCards() {
       <div className="max-w-full">
         {/* Heading */}
         <div className="mb-10 flex flex-col gap-4 lg:mb-14 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-          <Typography
-            variant="hero"
+          <Typography variant="heading-1"
             as="h2"
-            className="max-w-full text-left font-medium font-tiempos-headline text-[#382E07] !tracking-[0.1em]"
+            className="max-w-full text-left text-[#382E07]"
           >
             Changing Lives Through
             <br />
             HCG Foundation Projects
           </Typography>
-          <Typography
-            variant="subheading"
+          <Typography variant="body-2"
             as="p"
-            className="max-w-xl leading-6 text-black/60 lg:pt-2 lg:text-left font-argestadisplay font-regular"
+            className="max-w-xl text-black/60 lg:pt-2 lg:text-left"
           >
             Explore the programs and community initiatives that are creating
             meaningful impact across healthcare, awareness, education, and
@@ -300,7 +298,7 @@ export default function VerticalCards() {
 
               {/* Collapsed-state number badge, top-left */}
               <div className="card-badge-collapsed absolute left-4 top-4 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-white">
-                <Typography variant="caption" as="span" className="font-medium font-manrope text-white">
+                <Typography variant="caption-1" as="span" className="text-white">
                   {card.number}
                 </Typography>
               </div>
@@ -311,7 +309,7 @@ export default function VerticalCards() {
                   className="whitespace-nowrap font-medium uppercase tracking-[0.2em] text-white"
                   style={{ writingMode: "vertical-rl", transform: "rotate(360deg)" }}
                 >
-                  <Typography variant="subheading" as="span" className="text-white font-manrope font-medium">
+                  <Typography variant="heading-7" as="span" className="uppercase tracking-[0.2em] text-white">
                     {card.title}
                   </Typography>
                 </span>
@@ -323,23 +321,23 @@ export default function VerticalCards() {
                 style={{ transformOrigin: "top right" }}
               >
                 <div className="panel-badge mb-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black/70 text-white">
-                  <Typography variant="caption" as="span" className="font-medium font-manrope text-white">
+                  <Typography variant="caption-1" as="span" className="text-white">
                     {card.number}
                   </Typography>
                 </div>
 
-                <Typography variant="subheading" as="h3" className="panel-title mb-18 xl:mb-36 font-manrope font-bold leading-tight text-[#FFFFFF]">
+                <Typography variant="heading-7" as="h3" className="panel-title mb-18 xl:mb-36 text-white">
                   {card.title}
                 </Typography>
 
                 <div className="panel-date mb-8 flex items-center gap-2 text-white/90">
                   <CalendarIcon />
-                  <Typography variant="body-lg" as="span" className="text-[#FFFFFF] font-medium font-manrope">
+                  <Typography variant="text-2" as="span" className="text-white">
                     Project Date: {card.date}
                   </Typography>
                 </div>
 
-                <Typography variant="body" as="p" className="panel-desc mb-6 leading-5 text-[#FFFFFF] font-normal font-manrope">
+                <Typography variant="body-7" as="p" className="panel-desc mb-6 text-white">
                   {card.description}
                 </Typography>
 
@@ -401,11 +399,7 @@ export default function VerticalCards() {
                       aria-hidden="true"
                       className="invisible absolute inset-x-0 top-0 flex items-center gap-3 overflow-hidden"
                     >
-                      <Typography
-                        variant="body-lg"
-                        as="span"
-                        className="whitespace-nowrap font-manrope font-bold"
-                      >
+                      <Typography variant="heading-7" as="span" className="whitespace-nowrap text-white">
                         {card.title}
                       </Typography>
                       <MoreDetailsButton className="shrink-0 px-4 py-2" />
@@ -415,10 +409,9 @@ export default function VerticalCards() {
                         never cut off. The button only renders here when it
                         actually fits beside the title. */}
                     <div className="flex items-start gap-3">
-                      <Typography
-                        variant="body-lg"
+                      <Typography variant="heading-7"
                         as="h3"
-                        className="min-w-0 flex-1 font-manrope font-bold leading-tight text-white"
+                        className="min-w-0 flex-1 leading-tight text-white"
                       >
                         {card.title}
                       </Typography>
@@ -430,11 +423,7 @@ export default function VerticalCards() {
 
                   <div className="mt-2 flex items-center gap-1.5 text-white/70 sm:mt-3">
                     <CalendarIcon />
-                    <Typography
-                      variant="body-lg"
-                      as="span"
-                      className="font-manrope font-medium text-[#FFFFFF]"
-                    >
+                    <Typography variant="text-2" as="span" className="text-white">
                       Project Date: {card.date}
                     </Typography>
                   </div>

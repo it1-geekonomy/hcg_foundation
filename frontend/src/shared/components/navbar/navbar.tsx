@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Typography from "@/lib/Typography";
 import { navLinks, navbarContent } from "@/domains/home/constants/navbar";
 import DesktopDropdown from "./dropdown";
 import { HamburgerButton, MobileMenuPanel } from "./hamburger";
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -100,10 +102,9 @@ export default function Navbar() {
                     href={link.href}
                     className="group relative flex items-center gap-1 py-1"
                   >
-                    <Typography
-                      variant="body-lg"
+                    <Typography variant={link.href === pathname ? "text-1" : "text-2"}
                       as="span"
-                      className="font-manrope font-bold text-[#FFFFFF] transition-colors duration-300 group-hover:text-[#FED034]"
+                      className="text-white transition-colors duration-300 group-hover:text-[#FED034]"
                     >
                       {link.label}
                     </Typography>
@@ -133,7 +134,7 @@ export default function Navbar() {
               href={navbarContent.donateButton.href}
               className="hidden xl:inline-block shrink-0 px-5 py-2.5 bg-[#FED034] hover:bg-[#e6bc2e] transition-all duration-300 hover:shadow-[0_0_20px_rgba(254,208,52,0.5)]"
             >
-              <Typography variant="body-lg" as="span" className="font-manrope font-bold text-[#262626]">
+              <Typography variant="button-4" as="span" className="text-[#262626]">
                 {navbarContent.donateButton.label}
               </Typography>
             </Link>
@@ -143,7 +144,7 @@ export default function Navbar() {
               href={navbarContent.donateButton.href}
               className="hidden sm:inline-block xl:hidden shrink-0 px-5 py-2.5 bg-[#FED034] hover:bg-[#e6bc2e] transition-all duration-300 hover:shadow-[0_0_20px_rgba(254,208,52,0.5)]"
             >
-              <Typography variant="body-lg" as="span" className="font-manrope font-bold text-[#262626]">
+              <Typography variant="button-4" as="span" className="text-[#262626]">
                 {navbarContent.donateButton.label}
               </Typography>
             </Link>

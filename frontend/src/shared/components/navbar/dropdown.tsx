@@ -44,11 +44,10 @@ export default function DesktopDropdown({
         aria-expanded={isOpen}
         className="group relative flex items-center gap-1 py-1"
       >
-        <Typography
-          variant="body-lg"
+        <Typography variant="text-2"
           as="span"
-          className={`font-manrope font-bold transition-colors duration-300 ${
-            isOpen ? "text-[#FED034]" : "text-[#FFFFFF] group-hover:text-[#FED034]"
+          className={`transition-colors duration-300 ${
+            isOpen ? "text-[#FED034]" : "text-white group-hover:text-[#FED034]"
           }`}
         >
           {link.label}
@@ -106,10 +105,9 @@ export default function DesktopDropdown({
                   >
                     {/* Sweep-fill background */}
                     <span className="absolute inset-0 origin-left scale-x-0 bg-[#FED034]/10 transition-transform duration-300 ease-out group-hover/item:scale-x-100" />
-                    <Typography
-                      variant="body-lg"
+                    <Typography variant="text-2"
                       as="span"
-                      className="relative z-10 font-manrope font-bold text-[#FFFFFF] transition-colors duration-300 group-hover/item:text-[#FED034]"
+                      className="relative z-10 text-white transition-colors duration-300 group-hover/item:text-[#FED034]"
                     >
                       {item.label}
                     </Typography>
