@@ -30,24 +30,13 @@ export default function StatSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-white px-6 py-6 lg:py-10">
-      {/* =====================================================
-          BACKGROUND
-      ===================================================== */}
-
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: "linear-gradient(180deg, #FFE486 0%, #FFF6D8 100%)",
-        }}
-      />
-
+    <section ref={sectionRef} className="relative overflow-hidden px-6 py-6 lg:py-10">
       {/* =====================================================
           TITLE
       ===================================================== */}
 
-      <div className="relative mx-auto max-w-3xl text-center">
-        <Typography variant="editorial-lg" as="h2" className="font-tiempos-headline text-black">
+      <div className="relative max-w-full text-center">
+        <Typography variant="hero" as="h2" className="font-tiempos-headline text-black !tracking-[0.1em]">
           Our Journey of Impact
         </Typography>
       </div>

@@ -37,7 +37,7 @@ export default function StatCard({ stat, active, id }: { stat: Stat; active: boo
       <Typography
         variant="body-lg"
         as="p"
-        className="mt-2 whitespace-pre-line text-center font-tiempos-headline font-normal text-[#000000]"
+        className="mt-2 whitespace-pre-line text-center font-tiempos-headline font-light text-[#000000]"
       >
         {stat.label}
       </Typography>

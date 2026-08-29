@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { CARDS, COLLAPSED_WIDTH } from "@/domains/home/constants/project";
 import Typography from "@/lib/Typography";
@@ -44,15 +45,15 @@ function ArrowIcon({ className = "" }: { className?: string }) {
  */
 function MoreDetailsButton({ className = "" }: { className?: string }) {
   return (
-    <button
-      type="button"
+    <Link
+      href="/#"
       className={`inline-flex w-fit shrink-0 items-center justify-center gap-2 bg-[#FFD43B] px-5 py-2.5 uppercase tracking-wider text-neutral-900 transition-colors hover:bg-[#f0c527] ${className}`}
     >
       <Typography variant="label" as="span" className="text-neutral-900 font-manrope font-semibold">
         More details
       </Typography>
       <ArrowIcon />
-    </button>
+    </Link>
   );
 }
 
@@ -153,8 +154,6 @@ export default function VerticalCards() {
   }, []);
 
   // ---- Expand / collapse animation (desktop accordion only) ----
-  // Plain gsap calls, no context/revert wrapper — each call to this effect
-  // just redirects the existing tweens toward the new target.
   useEffect(() => {
     const cards = cardsRef.current.filter((c): c is HTMLDivElement => c !== null);
     const reduceMotion = reduceMotionRef.current;
@@ -176,19 +175,10 @@ export default function VerticalCards() {
       const isActive = index === activeIndex;
       const d = reduceMotion ? 0.001 : 0.65;
 
-      // overwrite:"auto" is what makes rapid re-hovers seamless — GSAP
-      // grabs the tween's CURRENT interpolated value and redirects toward
-      // the new target instead of restarting from the original value.
       const tl = gsap.timeline({
         defaults: { ease: "power3.out", overwrite: "auto", duration: d },
       });
 
-      // NOTE: previously this animated the `flex` shorthand directly
-      // ("1 1 0%" <-> "0 0 130px"). GSAP can't cleanly interpolate a
-      // shorthand whose flex-basis switches units (% <-> px) mid-tween,
-      // which is what caused the glitchy/snappy hover behavior. Animating
-      // flex-grow / flex-shrink / flex-basis as separate numeric-ish
-      // properties (and keeping flex-basis in a single unit, px) fixes it.
       tl.to(
         card,
         {
@@ -199,49 +189,64 @@ export default function VerticalCards() {
         0
       )
         .to(image, { scale: isActive ? 1 : 1.1, duration: reduceMotion ? 0.001 : 1.2, ease: "power2.out" }, 0)
-        .to(tint, { opacity: isActive ? 0 : 1, duration: reduceMotion ? 0.001 : 0.5 }, 0)
-        .to(badgeCollapsed, { opacity: isActive ? 0 : 1, duration: reduceMotion ? 0.001 : 0.3 }, isActive ? 0 : 0.2)
-        .to(verticalLabel, { opacity: isActive ? 0 : 1, duration: reduceMotion ? 0.001 : 0.3 }, isActive ? 0 : 0.2);
+        .to(tint, { opacity: isActive ? 0 : 1, duration: reduceMotion ? 0.001 : 0.5 }, 0);
 
       if (isActive) {
+        // Collapsed elements must be fully gone BEFORE the panel starts
+        // revealing — no shared time window where both are visible.
+        tl.to(
+          [badgeCollapsed, verticalLabel],
+          { opacity: 0, duration: reduceMotion ? 0.001 : 0.16 },
+          0
+        );
+
+        const panelStart = reduceMotion ? 0.001 : 0.2;
         tl.fromTo(
           panel,
           { opacity: 0, y: 24, scale: 0.97 },
-          { opacity: 1, y: 0, scale: 1, duration: reduceMotion ? 0.001 : 0.55 },
-          0.12
+          { opacity: 1, y: 0, scale: 1, duration: reduceMotion ? 0.001 : 0.5 },
+          panelStart
         )
-          .fromTo(panelBadge, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.4 }, 0.22)
-          .fromTo(title, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.45 }, 0.26)
-          .fromTo(date, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.4 }, 0.32)
-          .fromTo(desc, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.4 }, 0.38)
-          .fromTo(cta, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.4 }, 0.44);
+          .fromTo(panelBadge, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.35 }, panelStart + 0.08)
+          .fromTo(title, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.4 }, panelStart + 0.12)
+          .fromTo(date, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.35 }, panelStart + 0.18)
+          .fromTo(desc, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.35 }, panelStart + 0.24)
+          .fromTo(cta, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.35 }, panelStart + 0.3);
         panel.style.pointerEvents = "auto";
       } else {
-        tl.to(panel, { opacity: 0, y: 16, scale: 0.97, duration: reduceMotion ? 0.001 : 0.3, ease: "power2.in" }, 0);
+        // Panel must be fully gone BEFORE the collapsed badge/label fade in.
+        const panelOutDuration = reduceMotion ? 0.001 : 0.26;
+        tl.to(panel, { opacity: 0, y: 16, scale: 0.97, duration: panelOutDuration, ease: "power2.in" }, 0);
+
+        const collapsedStart = reduceMotion ? 0.001 : panelOutDuration + 0.04;
+        tl.to(
+          [badgeCollapsed, verticalLabel],
+          { opacity: 1, duration: reduceMotion ? 0.001 : 0.25 },
+          collapsedStart
+        );
         panel.style.pointerEvents = "none";
       }
     });
-    // No cleanup/revert here on purpose — see comment above.
   }, [activeIndex]);
 
   return (
-    <section ref={sectionRef} className="bg-[#FFF6D8] px-6 py-10 md:px-10 lg:py-20 text-black">
-      <div className="mx-auto max-w-7xl">
+    <section ref={sectionRef} className="text-black py-6 md:py-10 lg:py-20 px-4 md:px-10 lg:px-16 xl:px-30">
+      <div className="max-w-full">
         {/* Heading */}
         <div className="mb-10 flex flex-col gap-4 lg:mb-14 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
           <Typography
-            variant="editorial-lg"
+            variant="hero"
             as="h2"
-            className="max-w-xl font-medium font-tiempos-headline font-[#382E07]"
+            className="max-w-full text-left font-medium font-tiempos-headline text-[#382E07] !tracking-[0.1em]"
           >
             Changing Lives Through
             <br />
             HCG Foundation Projects
           </Typography>
           <Typography
-            variant="body-medium"
+            variant="subheading"
             as="p"
-            className="max-w-sm leading-6 text-black/60 lg:pt-2 lg:text-left font-argestadisplay font-regular"
+            className="max-w-xl leading-6 text-black/60 lg:pt-2 lg:text-left font-argestadisplay font-regular"
           >
             Explore the programs and community initiatives that are creating
             meaningful impact across healthcare, awareness, education, and
@@ -252,7 +257,7 @@ export default function VerticalCards() {
         {/* ===== Desktop / tablet-landscape: hover accordion (>=1024px) ===== */}
         <div
           ref={containerRef}
-          className="hidden h-[480px] w-full gap-3 overflow-hidden rounded-2xl lg:flex"
+          className="hidden h-[480px] w-full gap-3 overflow-hidden rounded-2xl lg:flex xl:h-[600px]"
           onMouseLeave={() => setActiveIndex(0)}
         >
           {CARDS.map((card, index) => (
@@ -287,8 +292,7 @@ export default function VerticalCards() {
 
               {/* Flat gold wash — fully covers the photo while collapsed, fades away when active */}
               <div
-                className="card-tint absolute inset-0"
-                style={{ background: "#FFD43B6E" }}
+                className="card-tint absolute inset-0 bg-[#FFD43B6E]"
               />
 
               {/* Subtle darken over the photo for legibility when expanded */}
@@ -315,7 +319,7 @@ export default function VerticalCards() {
 
               {/* Expanded-state glass panel */}
               <div
-                className="card-panel pointer-events-none absolute bottom-5 right-5 top-5 z-30 flex h-[calc(100%-2.5rem)] w-[72%] max-w-sm flex-col overflow-y-auto rounded-2xl bg-[#8D8D8D66] p-6 opacity-0 shadow-2xl backdrop-blur-xl md:w-[56%]"
+                className="card-panel pointer-events-none absolute bottom-5 right-5 top-5 z-30 flex h-[calc(100%-2.5rem)] w-[clamp(20rem,60%,30rem)] flex-col overflow-y-auto rounded-2xl bg-[#8D8D8D66] p-6 opacity-0 shadow-2xl backdrop-blur-xl"
                 style={{ transformOrigin: "top right" }}
               >
                 <div className="panel-badge mb-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black/70 text-white">
@@ -324,7 +328,7 @@ export default function VerticalCards() {
                   </Typography>
                 </div>
 
-                <Typography variant="subheading" as="h3" className="panel-title mb-20 font-manrope font-bold leading-tight text-[#FFFFFF]">
+                <Typography variant="subheading" as="h3" className="panel-title mb-18 xl:mb-36 font-manrope font-bold leading-tight text-[#FFFFFF]">
                   {card.title}
                 </Typography>
 
