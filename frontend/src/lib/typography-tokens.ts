@@ -78,15 +78,59 @@ export interface TypeStyle {
   source: string;
   weight: number;
   fontStyle: "normal" | "italic";
-  /** clamp(min, preferred, max) string, ready to drop into fontSize */
+  /** clamp(min, preferred, max) — applied only at lg (1024px+) */
   size: string;
-  /** desktop / mobile px, kept for reference & QA, not used at runtime */
+  /** base = mobile (< sm), sm/md = fixed tablet steps, max = lg clamp ceiling */
   sizeRange: { minPx: number; maxPx: number };
   lineHeight: number; // unitless
   letterSpacing: string; // em
   textAlign?: "left" | "center" | "right";
   textTransform?: "capitalize" | "uppercase" | "lowercase" | "none";
 }
+
+/** Convert px to rem for fixed breakpoint sizes */
+export function pxToRem(px: number): string {
+  return `${(px / 16).toFixed(4)}rem`;
+}
+
+/**
+ * Below lg: fixed sizes per breakpoint (no clamp).
+ * At lg (1024px+): fluid clamp between min and max.
+ */
+export function getBreakpointFontSizes(minPx: number, maxPx: number, clamp: string) {
+  const smPx = Math.round(minPx + (maxPx - minPx) * 0.2);
+  const mdPx = Math.round(minPx + (maxPx - minPx) * 0.45);
+
+  return {
+    base: pxToRem(minPx),
+    sm: pxToRem(smPx),
+    md: pxToRem(mdPx),
+    lgClamp: clamp,
+    px: { base: minPx, sm: smPx, md: mdPx, max: maxPx },
+  };
+}
+
+export function getVariantFontSizes(variant: TypographyVariant) {
+  const scale = typography[variant];
+  return getBreakpointFontSizes(scale.sizeRange.minPx, scale.sizeRange.maxPx, scale.size);
+}
+
+/** CSS custom properties for data-typo-fluid (see globals.css) */
+export function fluidTypoVars(
+  minPx: number,
+  maxPx: number,
+  clamp: string,
+): Record<string, string> {
+  const sizes = getBreakpointFontSizes(minPx, maxPx, clamp);
+  return {
+    "--typo-size-base": sizes.base,
+    "--typo-size-sm": sizes.sm,
+    "--typo-size-md": sizes.md,
+    "--typo-clamp": sizes.lgClamp,
+  };
+}
+
+export const TYPO_FLUID_ATTR = "data-typo-fluid";
 
 /**
  * The type scale — no `family` field anywhere. Pair any of these with
