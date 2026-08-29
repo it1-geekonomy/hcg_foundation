@@ -64,6 +64,32 @@
   font-family: var(--font-argestadisplay);
 }
 
+/*
+ * Fluid typography: fixed sizes below lg, clamp from lg (1024px) upward.
+ * Set CSS vars via fluidTypoVars() and add data-typo-fluid on the element.
+ */
+[data-typo-fluid] {
+  font-size: var(--typo-size-base);
+}
+
+@media (min-width: 640px) {
+  [data-typo-fluid] {
+    font-size: var(--typo-size-sm);
+  }
+}
+
+@media (min-width: 768px) {
+  [data-typo-fluid] {
+    font-size: var(--typo-size-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  [data-typo-fluid] {
+    font-size: var(--typo-clamp);
+  }
+}
+
 .card-panel {
   scrollbar-width: none;
   -ms-overflow-style: none;

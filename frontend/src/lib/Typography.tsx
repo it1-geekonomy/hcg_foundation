@@ -1,11 +1,16 @@
 import React from "react";
 import { cn } from "./utils";
-import { typography, type TypographyVariant } from "./typography-tokens";
+import {
+  typography,
+  TYPO_FLUID_ATTR,
+  fluidTypoVars,
+  type TypographyVariant,
+} from "./typography-tokens";
 
 export interface TypographyProps {
   children: React.ReactNode;
   /** Controls size / weight / line-height / letter-spacing / alignment.
-   *  Font-family is NOT handled here — set it via `className` 
+   *  Font-family is NOT handled here — set it via `className`
    *  (e.g. `font-[Manrope]`, or your own font utility class). */
   variant?: TypographyVariant;
   /** Override the element rendered, e.g. render "hero" as an <h1> */
@@ -46,24 +51,27 @@ const Typography = ({
   const Tag: React.ElementType = as ?? defaultTag[variant];
 
   const computedStyle: React.CSSProperties = {
+    ...fluidTypoVars(scale.sizeRange.minPx, scale.sizeRange.maxPx, scale.size),
     fontWeight: scale.weight,
     fontStyle: scale.fontStyle,
-    fontSize: scale.size, // clamp(min, preferred, max)
-    lineHeight: scale.lineHeight, // unitless — scales with the fluid size
-    letterSpacing: scale.letterSpacing, // em — scales with the fluid size
-    ...style, // caller can still override anything ad hoc
+    lineHeight: scale.lineHeight,
+    letterSpacing: scale.letterSpacing,
+    ...style,
   };
 
-  // Handle optional properties separately to avoid TypeScript errors
-  if ('textAlign' in scale && scale.textAlign) {
+  if ("textAlign" in scale && scale.textAlign) {
     computedStyle.textAlign = scale.textAlign;
   }
-  if ('textTransform' in scale && scale.textTransform) {
+  if ("textTransform" in scale && scale.textTransform) {
     computedStyle.textTransform = scale.textTransform;
   }
 
   return (
-    <Tag className={cn("text-black", className)} style={computedStyle}>
+    <Tag
+      {...{ [TYPO_FLUID_ATTR]: "" }}
+      className={cn("text-black", className)}
+      style={computedStyle}
+    >
       {children}
     </Tag>
   );
