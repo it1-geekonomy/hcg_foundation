@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import Typography from "@/lib/Typography";
@@ -27,6 +26,10 @@ export default function CommunitySection() {
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  const scrollToDonateForm = () => {
+    document.getElementById("donate-form")?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <section className="w-full py-10 md:py-10 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
@@ -119,15 +122,16 @@ export default function CommunitySection() {
               {communityContent.overlay.description}
             </Typography>
 
-            <Link
-              href="/#"
+            <button
+              type="button"
+              onClick={scrollToDonateForm}
               className="inline-flex items-center gap-2 px-5 py-2 md:px-6 md:py-2.5 lg:py-3 bg-[#FCCC2D] hover:bg-[#e0b410] transition-colors"
             >
               <Typography variant="button-1" as="span" className="text-[#373737] font-manrope font-medium">
                 {communityContent.overlay.buttonText}
               </Typography>
               <ArrowUpRight className="h-5 w-5 text-[#373737]" strokeWidth={2.5} />
-            </Link>
+            </button>
           </div>
         </div>
       </div>

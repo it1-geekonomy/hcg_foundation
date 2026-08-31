@@ -30,7 +30,9 @@ export default function ClientPage() {
         <Community />
         <FloatingImages />
       </div>
+      <div id="donate-form">
       <DonateForm />
+      </div>
       <div className={gradientClass}>
       <Togetherwecreatehope />
       </div>
