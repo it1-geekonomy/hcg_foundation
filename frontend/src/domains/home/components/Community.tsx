@@ -4,9 +4,11 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import Typography from "@/lib/Typography";
-import { communityTags, communityContent } from "@/domains/home/constants/community";
-
-const tagRows = [communityTags.slice(0, 3), communityTags.slice(3, 6)];
+import {
+  communityContent,
+  communityTagRows,
+  communityTheme,
+} from "@/domains/home/constants/community";
 
 export default function CommunitySection() {
   const mediaRef = useRef<HTMLDivElement>(null);
@@ -32,37 +34,29 @@ export default function CommunitySection() {
   };
 
   return (
-    <section className="w-full py-10 md:py-10 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
-      <div className="max-w-full">
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 lg:gap-12 mb-10 md:mb-14">
-          <div className="order-2 lg:order-1 lg:w-auto shrink-0">
-            <div className="flex sm:hidden flex-wrap gap-2 font-manrope">
-              {communityTags.map((tag, i) => (
-                <Typography variant="label-1"
-                  as="span"
-                  key={i}
-                  className="px-3 py-1.5 bg-[#876900] text-white text-center whitespace-nowrap font-light"
-                >
-                  {tag}
-                </Typography>
-              ))}
-            </div>
-
-            <div className="hidden sm:flex flex-col gap-2 md:gap-3">
-              {tagRows.map((row, rowIndex) => (
-                <div key={rowIndex} className="flex gap-2 md:gap-3 font-manrope">
-                  {row.map((tag, i) => (
-                    <Typography variant="label-1"
-                      as="span"
-                      key={i}
-                      className="px-3 md:px-4 py-1.5 md:py-2 bg-[#876900] text-white text-center whitespace-nowrap font-light"
-                    >
-                      {tag}
-                    </Typography>
-                  ))}
-                </div>
-              ))}
-            </div>
+    <section className="w-full px-6 py-10 sm:px-10 md:px-14 md:py-14 lg:px-16 lg:py-16 xl:px-24 2xl:px-32">
+      <div className="mx-auto max-w-[1400px]">
+        {/* Tags left · heading + body right · vertically centered (Figma) */}
+        <div className="mb-10 flex flex-col gap-8 md:mb-14 lg:mb-14 lg:flex-row lg:items-center lg:justify-between lg:gap-12 xl:gap-20">
+          <div className="order-2 flex flex-col gap-2 md:gap-5 lg:order-1 lg:max-w-[min(100%,32rem)] lg:shrink-0">
+            {communityTagRows.map((row, rowIndex) => (
+              <div key={rowIndex} className="flex flex-wrap gap-2 md:gap-3">
+                {row.map((tag) => (
+                  <Typography
+                    key={tag}
+                    variant="label-2"
+                    as="span"
+                    className="rounded-xs px-3 py-1.5 text-center font-manrope font-normal whitespace-nowrap md:px-4 md:py-2"
+                    style={{
+                      backgroundColor: communityTheme.tagBg,
+                      color: communityTheme.tagText,
+                    }}
+                  >
+                    {tag}
+                  </Typography>
+                ))}
+              </div>
+            ))}
           </div>
 
           <div className="order-1 lg:order-2 max-w-4xl lg:text-left font-tiempos-text">
@@ -94,40 +88,53 @@ export default function CommunitySection() {
             src={communityContent.image.src}
             alt={communityContent.image.alt}
             fill
-            className="object-cover object-center hidden md:block"
+            className="hidden object-cover object-center md:block"
             priority
           />
 
           <div
-            className={`absolute left-4 right-4 bottom-4 w-auto max-w-none p-4 md:left-8 md:right-auto md:top-auto md:bottom-8 md:max-w-xs lg:bottom-12 lg:max-w-lg lg:p-6 xl:bottom-20 xl:max-w-lg xl:p-6 bg-white/[0.12] backdrop-blur-sm border border-white/10 rounded-xl transition-all duration-700 ease-out ${inView
-              ? "opacity-100 scale-100 translate-y-0"
-              : "opacity-0 scale-95 translate-y-10"
+            className={`absolute bottom-4 left-4 right-4 w-auto max-w-none rounded-xl border border-white/10 bg-white/[0.12] p-4 backdrop-blur-sm transition-all duration-700 ease-out md:bottom-8 md:left-8 md:right-auto md:max-w-xs lg:bottom-12 lg:max-w-lg lg:p-6 xl:bottom-20 xl:max-w-lg xl:p-6 ${inView
+              ? "translate-y-0 scale-100 opacity-100"
+              : "translate-y-10 scale-95 opacity-0"
               }`}
           >
-            <div className="flex items-center gap-2 mb-2 md:mb-3 lg:mb-16">
-              <span className="w-3 h-3 rounded-full bg-white" />
-              <Typography variant="body-3" as="span" className="text-white font-argestadisplay font-light">
+            <div className="mb-2 flex items-center gap-2 md:mb-3 lg:mb-16">
+              <span className="h-3 w-3 rounded-full bg-white" />
+              <Typography
+                variant="body-3"
+                as="span"
+                className="font-argestadisplay font-light text-white"
+              >
                 {communityContent.overlay.label}
               </Typography>
             </div>
 
-            <Typography variant="heading-6"
+            <Typography
+              variant="heading-6"
               as="h3"
-              className="text-white mb-2 md:mb-3 lg:mb-6 font-tiempos-fine font-normal"
+              className="mb-2 font-tiempos-fine font-normal text-white md:mb-3 lg:mb-6"
             >
               {communityContent.overlay.heading}
             </Typography>
 
-            <Typography variant="body-7" as="p" className="text-white mb-4 md:mb-5 lg:mb-6 font-light font-argestadisplay">
+            <Typography
+              variant="body-7"
+              as="p"
+              className="mb-4 font-argestadisplay font-light text-white md:mb-5 lg:mb-6"
+            >
               {communityContent.overlay.description}
             </Typography>
 
             <button
               type="button"
               onClick={scrollToDonateForm}
-              className="inline-flex items-center gap-2 px-5 py-2 md:px-6 md:py-2.5 lg:py-3 bg-[#FCCC2D] hover:bg-[#e0b410] transition-colors"
+              className="inline-flex items-center gap-2 bg-[#FCCC2D] px-5 py-2 transition-colors hover:bg-[#e0b410] md:px-6 md:py-2.5 lg:py-3"
             >
-              <Typography variant="button-1" as="span" className="text-[#373737] font-manrope font-medium">
+              <Typography
+                variant="button-1"
+                as="span"
+                className="font-manrope font-medium text-[#373737]"
+              >
                 {communityContent.overlay.buttonText}
               </Typography>
               <ArrowUpRight className="h-5 w-5 text-[#373737]" strokeWidth={2.5} />

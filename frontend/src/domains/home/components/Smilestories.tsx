@@ -50,12 +50,12 @@ function StoryCard({
             {date}
           </Typography>
         </div>
-        <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FFFFFF] group-hover:bg-white/70">
+        <span className="relative flex lg:h-12 lg:w-12 h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FFFFFF] group-hover:bg-white/70">
           <Image
             src="/Smilestories/Vector.png"
             alt="View story"
-            width={14}
-            height={14}
+            width={20}
+            height={20}
           />
         </span>
       </div>

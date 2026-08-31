@@ -1,4 +1,21 @@
 import localFont from "next/font/local";
+import { Poppins, Roboto } from "next/font/google";
+
+/** Poppins — brand logotype (FOUNDATION). */
+export const poppins = Poppins({
+	subsets: ["latin"],
+	weight: ["600"],
+	variable: "--font-poppins",
+	display: "swap",
+});
+
+/** Roboto — brand tagline (Lasting Inspiration). */
+export const roboto = Roboto({
+	subsets: ["latin"],
+	weight: ["400"],
+	variable: "--font-roboto",
+	display: "swap",
+});
 
 /** Manrope — regular through bold interface and body text. */
 export const manrope = localFont({
@@ -38,6 +55,8 @@ export const argestaDisplay = localFont({
 /** Apply on <html> to register all local font variables. */
 export const fontVariableClassNames = [
 	manrope.variable,
+	poppins.variable,
+	roboto.variable,
 	tiemposFine.variable,
 	tiemposHeadline.variable,
 	argestaDisplay.variable,
