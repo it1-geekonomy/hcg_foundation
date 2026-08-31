@@ -6,7 +6,7 @@ import { images } from "@/domains/home/constants/float";
 
 export default function HopeSection() {
   return (
-    <section className="relative w-full overflow-x-hidden py-10 sm:py-10 md:py-12 px-4 lg:px-6 lg:py-30">
+    <section className="relative w-full overflow-x-hidden py-10 md:py-10 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
       <div className="flex flex-nowrap justify-center items-start gap-4 sm:gap-4 md:gap-4 lg:gap-8 xl:gap-16 max-w-full mb-16 sm:mb-18 md:mb-26 lg:mb-38">
         {images.map((img, i) => (
           <div
@@ -30,14 +30,14 @@ export default function HopeSection() {
       <div className="text-center px-2">
         <Typography variant="heading-2"
           as="h2"
-          className="text-[#382E07]"
+          className="text-[#382E07] font-tiempos-headline font-normal"
         >
           Hope Begins With
         </Typography>
 
         <Typography variant="heading-2"
           as="p"
-          className="mt-1 text-[#382E07]"
+          className="mt-1 text-[#382E07] font-tiempos-headline font-normal"
         >
           Your Kindness
         </Typography>

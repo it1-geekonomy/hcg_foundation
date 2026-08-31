@@ -2,26 +2,10 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import gsap from "gsap";
 import { CARDS, COLLAPSED_WIDTH } from "@/domains/home/constants/project";
 import Typography from "@/lib/Typography";
-
-function CalendarIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className={className}
-    >
-      <rect x="3" y="5" width="18" height="16" rx="2" />
-      <path d="M16 3v4M8 3v4M3 10h18" />
-    </svg>
-  );
-}
 
 function ArrowIcon({ className = "" }: { className?: string }) {
   return (
@@ -67,22 +51,10 @@ export default function VerticalCards() {
   const [activeIndex, setActiveIndex] = useState<number>(0);
 
   // ---- Mobile/tablet grid: does the button fit next to the title? ----
-  // Rather than guessing fixed px breakpoints (which break the moment a
-  // title is a character longer or shorter than expected), we measure the
-  // actual rendered row for each card. This is a SHARED decision, not
-  // per-card: if even one card's title + button don't fit at the current
-  // width, every card drops its button below the project date together, so
-  // the grid stays visually uniform instead of some cards stacking while
-  // others don't.
   const titleRowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [anyBtnOverflows, setAnyBtnOverflows] = useState(false);
 
   useLayoutEffect(() => {
-    // Read refs live (inside the callback) instead of capturing a snapshot
-    // array once — captured snapshots can be stale/incomplete if any row's
-    // ref wasn't attached yet at effect-run time (e.g. right after
-    // hydration), which was causing some cards' rows to never be measured
-    // and their button placement to fall out of sync / not render.
     const checkAll = () => {
       const rows = titleRowRefs.current;
       const overflowing = rows.some(
@@ -91,16 +63,11 @@ export default function VerticalCards() {
       setAnyBtnOverflows((prev) => (prev === overflowing ? prev : overflowing));
     };
 
-    // Single observer watching every row, rather than one observer per row.
     const ro = new ResizeObserver(checkAll);
     titleRowRefs.current.forEach((row) => {
       if (row) ro.observe(row);
     });
 
-    // Initial measurement can be wrong if fonts haven't swapped in yet
-    // (fallback font metrics differ from the final font), which was the
-    // main reason some cards' overflow state came out wrong. Re-check
-    // after layout settles and after webfonts finish loading.
     const raf = requestAnimationFrame(checkAll);
     let cancelled = false;
     if (typeof document !== "undefined" && "fonts" in document) {
@@ -118,15 +85,57 @@ export default function VerticalCards() {
     };
   }, []);
 
-  // ---- One-time setup: entrance animation + reduced-motion check ----
-  // IMPORTANT: this runs ONCE ([] deps). We never wrap the hover/click
-  // animation below in its own gsap.context()+revert() per render — doing
-  // that kills the in-flight tween and snaps elements back to their
-  // pre-animation state on every single hover, which is what caused the
-  // glitchy/snappy behavior. A context (or none at all) that persists for
-  // the component's lifetime lets GSAP's overwrite:"auto" redirect tweens
-  // smoothly from wherever they currently are, exactly like the plain
-  // HTML/JS version.
+  // ---- Mobile/tablet grid: equal card height across ALL cards, not just per-row ----
+  // CSS Grid's `items-stretch` only equalizes cards within the same row track, so a
+  // two-line title in row 2 leaves row 1 shorter. We measure each card's content
+  // block (badge + title + date + button) and apply the tallest as a fixed height
+  // to every card, so all four stay visually even regardless of which row they're in.
+  const cardContentRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [cardContentHeight, setCardContentHeight] = useState<number | null>(null);
+
+  // Extra space reserved above the content panel so photo is still visible
+  // (accounts for the panel's own margin + a minimum image reveal).
+  const TOP_RESERVE = 190;
+
+  useLayoutEffect(() => {
+    const checkAll = () => {
+      const blocks = cardContentRefs.current;
+      const maxContent = blocks.reduce((max, block) => {
+        if (!block) return max;
+        // Measure natural height without our own fixed-height override skewing it.
+        const prevHeight = block.style.height;
+        block.style.height = "auto";
+        const natural = block.scrollHeight;
+        block.style.height = prevHeight;
+        return Math.max(max, natural);
+      }, 0);
+      if (maxContent > 0) {
+        setCardContentHeight((prev) => (prev === maxContent ? prev : maxContent));
+      }
+    };
+
+    const ro = new ResizeObserver(checkAll);
+    cardContentRefs.current.forEach((block) => {
+      if (block) ro.observe(block);
+    });
+
+    const raf = requestAnimationFrame(checkAll);
+    let cancelled = false;
+    if (typeof document !== "undefined" && "fonts" in document) {
+      (document as Document & { fonts: FontFaceSet }).fonts.ready.then(() => {
+        if (!cancelled) checkAll();
+      });
+    }
+    window.addEventListener("resize", checkAll);
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", checkAll);
+      ro.disconnect();
+    };
+  }, []);
+
   useLayoutEffect(() => {
     reduceMotionRef.current = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
@@ -145,7 +154,6 @@ export default function VerticalCards() {
       });
     }
 
-    // Kill any running tweens on unmount only — not on every activeIndex change.
     return () => {
       gsap.killTweensOf(cards);
       cards.forEach((card) => gsap.killTweensOf(card.querySelectorAll("*")));
@@ -153,7 +161,6 @@ export default function VerticalCards() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ---- Expand / collapse animation (desktop accordion only) ----
   useEffect(() => {
     const cards = cardsRef.current.filter((c): c is HTMLDivElement => c !== null);
     const reduceMotion = reduceMotionRef.current;
@@ -192,8 +199,6 @@ export default function VerticalCards() {
         .to(tint, { opacity: isActive ? 0 : 1, duration: reduceMotion ? 0.001 : 0.5 }, 0);
 
       if (isActive) {
-        // Collapsed elements must be fully gone BEFORE the panel starts
-        // revealing — no shared time window where both are visible.
         tl.to(
           [badgeCollapsed, verticalLabel],
           { opacity: 0, duration: reduceMotion ? 0.001 : 0.16 },
@@ -214,7 +219,6 @@ export default function VerticalCards() {
           .fromTo(cta, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.35 }, panelStart + 0.3);
         panel.style.pointerEvents = "auto";
       } else {
-        // Panel must be fully gone BEFORE the collapsed badge/label fade in.
         const panelOutDuration = reduceMotion ? 0.001 : 0.26;
         tl.to(panel, { opacity: 0, y: 16, scale: 0.97, duration: panelOutDuration, ease: "power2.in" }, 0);
 
@@ -230,21 +234,22 @@ export default function VerticalCards() {
   }, [activeIndex]);
 
   return (
-    <section ref={sectionRef} className="text-black py-6 md:py-10 lg:py-20 px-4 md:px-10 lg:px-16 xl:px-30">
+    <section ref={sectionRef} className="text-black bg-[#FFF6D8] py-10 md:py-10 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
       <div className="max-w-full">
         {/* Heading */}
         <div className="mb-10 flex flex-col gap-4 lg:mb-14 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-          <Typography variant="heading-1"
+          <Typography variant="heading-2"
             as="h2"
-            className="max-w-full text-left text-[#382E07]"
+            className="w-full text-left font-medium font-tiempos-headline text-[#382E07]"
           >
             Changing Lives Through
-            <br />
+            <br className="hidden 2xl:block" />
+            {" "}
             HCG Foundation Projects
           </Typography>
           <Typography variant="body-2"
             as="p"
-            className="max-w-xl text-black/60 lg:pt-2 lg:text-left"
+            className="w-full lg:max-w-md xl:max-w-xl leading-6 text-black/60 lg:pt-2 lg:text-left font-argestadisplay font-normal"
           >
             Explore the programs and community initiatives that are creating
             meaningful impact across healthcare, awareness, education, and
@@ -306,19 +311,18 @@ export default function VerticalCards() {
               {/* Collapsed-state vertical title */}
               <div className="card-vertical-label absolute inset-x-0 bottom-6 z-20 flex justify-center">
                 <span
-                  className="whitespace-nowrap font-medium uppercase tracking-[0.2em] text-white"
+                  className="whitespace-nowrap font-medium text-white"
                   style={{ writingMode: "vertical-rl", transform: "rotate(360deg)" }}
                 >
-                  <Typography variant="heading-7" as="span" className="uppercase tracking-[0.2em] text-white">
+                  <Typography variant="body-2" as="span" className="text-white font-medium font-manrope">
                     {card.title}
                   </Typography>
                 </span>
               </div>
 
-              {/* Expanded-state glass panel */}
+              {/* Expanded-state glass panel — widened so it overlays further onto the image side (lg+ only) */}
               <div
-                className="card-panel pointer-events-none absolute bottom-5 right-5 top-5 z-30 flex h-[calc(100%-2.5rem)] w-[clamp(20rem,60%,30rem)] flex-col overflow-y-auto rounded-2xl bg-[#8D8D8D66] p-6 opacity-0 shadow-2xl backdrop-blur-xl"
-                style={{ transformOrigin: "top right" }}
+                className="card-panel pointer-events-none absolute bottom-5 right-5 top-5 z-30 flex h-[calc(100%-2.5rem)] w-[clamp(26rem,78%,44rem)] flex-col overflow-y-auto rounded-2xl bg-[#8D8D8D66] p-6 opacity-0 shadow-2xl backdrop-blur-xl xl:w-[clamp(24rem,55%,36rem)]" style={{ transformOrigin: "top right" }}
               >
                 <div className="panel-badge mb-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black/70 text-white">
                   <Typography variant="caption-1" as="span" className="text-white">
@@ -326,52 +330,47 @@ export default function VerticalCards() {
                   </Typography>
                 </div>
 
-                <Typography variant="heading-7" as="h3" className="panel-title mb-18 xl:mb-36 text-white">
+                <Typography variant="heading-7" as="h3" className="panel-title mb-18 xl:mb-36 text-white font-bold font-manrope">
                   {card.title}
                 </Typography>
 
                 <div className="panel-date mb-8 flex items-center gap-2 text-white/90">
-                  <CalendarIcon />
-                  <Typography variant="text-2" as="span" className="text-white">
+                  <div className="relative h-4 w-4">
+                    <Image
+                      src="/calendar1.png"
+                      alt=""
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                  <Typography variant="text-2" as="span" className="text-white font-normal font-manrope">
                     Project Date: {card.date}
                   </Typography>
                 </div>
 
-                <Typography variant="body-7" as="p" className="panel-desc mb-6 text-white">
+                <Typography variant="body-7" as="p" className="panel-desc mb-6 text-white font-light font-manrope" >
                   {card.description}
                 </Typography>
 
-                <MoreDetailsButton className="panel-cta" />
+                <MoreDetailsButton className="panel-cta font-semibold font-manrope" />
               </div>
             </div>
           ))}
         </div>
 
-        {/* ===== Mobile / tablet-portrait: static grid (<1024px) =====
-            Hover-to-expand doesn't translate to touch, so every card shows
-            only its title, date, and button — no number badge, no
-            description. 1 column with a fixed card size below 640px,
-            2 columns with an aspect-ratio size from 640px up.
-
-            Layout logic (identical mechanism across the whole ~350px–1024px
-            range, not separate hardcoded breakpoint blocks):
-              - Title sits on the left of a row, button on the right —
-                button right-aligned in the same row as the title.
-              - The row is measured (see titleRowRefs / btnOverflows above).
-                If title + button don't actually fit side by side at the
-                card's current width, the inline button is hidden
-                (invisible, not removed — it still holds its layout space
-                so the measurement stays accurate on the next resize) and a
-                second, real button is rendered on its own line BELOW the
-                project date instead of squeezing, wrapping under the
-                title, or centering. */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-4 lg:hidden">
+        {/* ===== Mobile / tablet-portrait: static grid (<1024px) — unchanged ===== */}
+        <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-4 lg:hidden">
           {CARDS.map((card, index) => {
             const overflows = anyBtnOverflows;
             return (
               <div
                 key={card.number}
                 className="group relative flex min-h-[260px] flex-col justify-end overflow-hidden rounded-2xl sm:min-h-[300px]"
+                style={
+                  cardContentHeight
+                    ? { height: `${cardContentHeight + TOP_RESERVE}px` }
+                    : undefined
+                }
               >
                 <img
                   src={card.image}
@@ -380,18 +379,18 @@ export default function VerticalCards() {
                   className="absolute inset-0 h-full w-full object-cover"
                 />
 
-                {/* Darken for legibility, same tone as desktop panel gradient */}
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
 
-                {/* Content block, bottom — glass card matching the desktop panel */}
-                <div className="relative z-10 m-3 rounded-2xl bg-[#8D8D8D66] p-3 backdrop-blur-xl sm:m-4 sm:p-4">
+                <div
+                  ref={(el) => {
+                    cardContentRefs.current[index] = el;
+                  }}
+                  className="relative z-10 m-3 flex flex-col justify-center rounded-2xl bg-[#8D8D8D66] p-3 backdrop-blur-xl sm:m-4 sm:p-4"
+                  style={
+                    cardContentHeight ? { height: `${cardContentHeight}px` } : undefined
+                  }
+                >
                   <div className="relative">
-                    {/* Hidden measurer — a single-line (nowrap) title +
-                        button, invisible and taken out of flow via
-                        `absolute`. Its only job is to tell us, via
-                        scrollWidth vs clientWidth, whether title + button
-                        would fit on one line at the current width. It never
-                        affects visible layout and never clips text. */}
                     <div
                       ref={(el) => {
                         titleRowRefs.current[index] = el;
@@ -399,39 +398,41 @@ export default function VerticalCards() {
                       aria-hidden="true"
                       className="invisible absolute inset-x-0 top-0 flex items-center gap-3 overflow-hidden"
                     >
-                      <Typography variant="heading-7" as="span" className="whitespace-nowrap text-white">
+                      <Typography variant="heading-7" as="span" className="whitespace-nowrap text-white font-semibold font-manrope">
                         {card.title}
                       </Typography>
-                      <MoreDetailsButton className="shrink-0 px-4 py-2" />
+                      <MoreDetailsButton className="shrink-0 px-4 py-2 font-semibold" />
                     </div>
 
-                    {/* Visible row — title always wraps normally and is
-                        never cut off. The button only renders here when it
-                        actually fits beside the title. */}
                     <div className="flex items-start gap-3">
                       <Typography variant="heading-7"
                         as="h3"
-                        className="min-w-0 flex-1 leading-tight text-white"
+                        className="min-w-0 flex-1 leading-tight text-white font-bold font-manrope"
                       >
                         {card.title}
                       </Typography>
                       {!overflows && (
-                        <MoreDetailsButton className="shrink-0 px-4 py-2" />
+                        <MoreDetailsButton className="shrink-0 px-4 py-2 font-semibold font-manrope" />
                       )}
                     </div>
                   </div>
 
                   <div className="mt-2 flex items-center gap-1.5 text-white/70 sm:mt-3">
-                    <CalendarIcon />
-                    <Typography variant="text-2" as="span" className="text-white">
+                    <div className="relative h-4 w-4">
+                      <Image
+                        src="/calendar1.png"
+                        alt=""
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    <Typography variant="text-2" as="span" className="text-white font-medium font-manrope">
                       Project Date: {card.date}
                     </Typography>
                   </div>
 
-                  {/* Button didn't fit next to the title — drop it below
-                      the project date instead of squeezing or clipping. */}
                   {overflows && (
-                    <MoreDetailsButton className="mt-3 px-4 py-2" />
+                    <MoreDetailsButton className="mt-3 px-4 py-2 font-semibold font-manrope" />
                   )}
                 </div>
               </div>

@@ -48,7 +48,7 @@ export default function StatSection() {
 
       <Typography variant="body-1"
         as="p"
-        className="relative mx-auto mt-14 max-w-2xl text-[#262626]/55"
+        className="relative mx-auto mt-14 max-w-4xl text-[#262626]/55"
       >
         Every number represents a life touched, a family supported, and a community strengthened{" "}
         <span className="text-[#262626]">through hope, compassion, and care.</span>

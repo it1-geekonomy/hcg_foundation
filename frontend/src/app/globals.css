@@ -52,6 +52,18 @@
   font-family: var(--font-manrope);
 }
 
+@utility font-poppins {
+  font-family: 'Poppins', sans-serif;
+}
+
+@utility font-roboto {
+  font-family: 'Roboto', sans-serif;
+}
+
+@utility font-tiempos-text {
+  font-family: 'Tiempos Text', Georgia, serif;
+}
+
 @utility font-tiempos-fine {
   font-family: var(--font-tiempos-fine);
 }
@@ -63,6 +75,7 @@
 @utility font-argestadisplay {
   font-family: var(--font-argestadisplay);
 }
+
 
 /*
  * Fluid typography: compressed mobile floor, gentle sm/md steps, clamp from lg (1024px).

@@ -4,6 +4,8 @@ import {
   DEFAULT_TYPOGRAPHY_VARIANT,
   TYPO_FLUID_ATTR,
   getTypographyStyles,
+  getWeightClass,
+  getFontStyleClass,
   typographyDefaultTags,
   type TypographyVariant,
 } from "./type-scale";
@@ -28,10 +30,13 @@ const Typography = ({
   const Tag: React.ElementType =
     as ?? (typographyDefaultTags[variant as TypographyVariant] as React.ElementType | undefined) ?? "span";
 
+  const weightClass = getWeightClass(scale.weight);
+  const fontStyleClass = getFontStyleClass(scale.fontStyle);
+
   return (
     <Tag
       {...{ [TYPO_FLUID_ATTR]: "" }}
-      className={cn(scale.fontClass, className)}
+      className={cn(scale.fontClass, weightClass, fontStyleClass, className)}
       style={{ ...variantStyle, ...style }}
     >
       {children}
