@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { MapPin, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Typography from "@/lib/Typography";
 import {
   TOGETHER_CONTENT,
@@ -45,7 +45,14 @@ function TogetherCarousel() {
 
       {/* Location badge */}
       <div className="absolute left-[clamp(1.5rem,4vw,3rem)] top-[clamp(0.75rem,2vw,2rem)] flex items-center gap-2 bg-[#FCCC2D] px-2.5 py-1.5 rounded">
-        <MapPin className="h-4 w-4 text-[#090909]" />
+        <div className="relative h-4 w-4">
+          <Image
+            src="/location1.png"
+            alt=""
+            fill
+            className="object-contain"
+          />
+        </div>
         <Typography variant="body-9" as="span" className="font-semibold text-[#090909] font-manrope">
           {CAROUSEL_SLIDES[active].location}
         </Typography>

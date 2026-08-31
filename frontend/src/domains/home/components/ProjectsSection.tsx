@@ -2,26 +2,10 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import gsap from "gsap";
 import { CARDS, COLLAPSED_WIDTH } from "@/domains/home/constants/project";
 import Typography from "@/lib/Typography";
-
-function CalendarIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className={className}
-    >
-      <rect x="3" y="5" width="18" height="16" rx="2" />
-      <path d="M16 3v4M8 3v4M3 10h18" />
-    </svg>
-  );
-}
 
 function ArrowIcon({ className = "" }: { className?: string }) {
   return (
@@ -351,7 +335,14 @@ export default function VerticalCards() {
                 </Typography>
 
                 <div className="panel-date mb-8 flex items-center gap-2 text-white/90">
-                  <CalendarIcon />
+                  <div className="relative h-4 w-4">
+                    <Image
+                      src="/calendar1.png"
+                      alt=""
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
                   <Typography variant="text-2" as="span" className="text-white font-normal font-manrope">
                     Project Date: {card.date}
                   </Typography>
@@ -427,7 +418,14 @@ export default function VerticalCards() {
                   </div>
 
                   <div className="mt-2 flex items-center gap-1.5 text-white/70 sm:mt-3">
-                    <CalendarIcon />
+                    <div className="relative h-4 w-4">
+                      <Image
+                        src="/calendar1.png"
+                        alt=""
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
                     <Typography variant="text-2" as="span" className="text-white font-medium font-manrope">
                       Project Date: {card.date}
                     </Typography>
