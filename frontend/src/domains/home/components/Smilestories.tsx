@@ -24,7 +24,7 @@ function StoryCard({
   image: string;
 }) {
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl bg-[#8D8D8D66] p-6 shadow-2xl backdrop-blur-xl">
+    <div className="group flex flex-col overflow-hidden rounded-2xl bg-[#8D8D8D66] p-6 backdrop-blur-xl">
       {/* photo, inset inside the glass card */}
       <div className="relative aspect-[8/9] w-full overflow-hidden rounded-xl">
         <Image
