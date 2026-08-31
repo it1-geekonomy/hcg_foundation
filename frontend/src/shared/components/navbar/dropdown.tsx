@@ -46,7 +46,7 @@ export default function DesktopDropdown({
       >
         <Typography variant="text-2"
           as="span"
-          className={`transition-colors duration-300 ${
+          className={`font-light transition-colors duration-300 ${
             isOpen ? "text-[#FED034]" : "text-white group-hover:text-[#FED034]"
           }`}
         >
@@ -107,7 +107,7 @@ export default function DesktopDropdown({
                     <span className="absolute inset-0 origin-left scale-x-0 bg-[#FED034]/10 transition-transform duration-300 ease-out group-hover/item:scale-x-100" />
                     <Typography variant="text-2"
                       as="span"
-                      className="relative z-10 text-white transition-colors duration-300 group-hover/item:text-[#FED034]"
+                      className="relative z-10 text-white font-light transition-colors duration-300 group-hover/item:text-[#FED034]"
                     >
                       {item.label}
                     </Typography>

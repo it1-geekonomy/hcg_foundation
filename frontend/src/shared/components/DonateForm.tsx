@@ -51,7 +51,7 @@ export default function DonateSection() {
           <Typography
             variant="heading-6"
             as="h3"
-            className="font-tiempos-headline font-bold text-white"
+            className="font-tiempos-fine font-normal text-white"
           >
             Donate Now
           </Typography>
@@ -60,7 +60,7 @@ export default function DonateSection() {
         <Typography
           variant="body-7"
           as="p"
-          className="w-full leading-snug !font-light text-white/70 px-8 sm:px-10 mb-8 lg:px-12 lg:mb-6"
+          className="w-full leading-snug font-light text-white/70 px-8 sm:px-10 mb-8 lg:px-12 lg:mb-6 font-argestadisplay"
         >
           Your contribution helps us provide care, support and hope to those
           who need it most.
@@ -72,7 +72,7 @@ export default function DonateSection() {
         <Typography
           variant="body-7"
           as="span"
-          className="!font-semibold text-white mb-6 md:mb-0"
+          className="font-medium text-white mb-6 md:mb-0 font-manrope"
         >
           Choose an Amount
         </Typography>
@@ -85,13 +85,12 @@ export default function DonateSection() {
                 key={amount}
                 type="button"
                 onClick={() => pickPreset(amount)}
-                className={`w-[88%] mx-auto rounded border py-2.5 font-semibold transition-colors ${
-                  active
-                    ? "bg-[#FCCC2D] border-[#FCCC2D] text-[#3A2E00]"
-                    : "bg-transparent border-white/35 text-white"
-                }`}
+                className={`w-[88%] mx-auto rounded border py-2.5 font-semibold transition-colors ${active
+                  ? "bg-[#FCCC2D] border-[#FCCC2D] text-[#3A2E00]"
+                  : "bg-transparent border-white/35 text-white"
+                  }`}
               >
-                <Typography variant="body-8" as="span" className="text-inherit">
+                <Typography variant="body-8" as="span" className="text-inherit font-manrope">
                   {amount}
                 </Typography>
               </button>
@@ -100,7 +99,7 @@ export default function DonateSection() {
 
           {isCustom ? (
             <div className="flex w-[88%] mx-auto items-center justify-center gap-1 rounded border border-[#FCCC2D] bg-[#FCCC2D]/15 py-2.5 px-2 backdrop-blur-sm">
-              <Typography variant="body-8" as="span" className="text-white/70">
+              <Typography variant="body-8" as="span" className="text-white/70 font-manrope">
                 ₹
               </Typography>
               <input
@@ -119,7 +118,7 @@ export default function DonateSection() {
               onClick={pickCustom}
               className="w-[88%] mx-auto rounded border-1 border-[#FCCC2D] bg-[#FCCC2D]/15 py-2.5 text-white font-semibold backdrop-blur-sm transition-colors"
             >
-              <Typography variant="body-8" as="span" className="text-inherit">
+              <Typography variant="body-8" as="span" className="text-inherit font-manrope">
                 More
               </Typography>
             </button>
@@ -130,7 +129,7 @@ export default function DonateSection() {
       {/* Divider */}
       <div className="hidden md:flex items-center gap-3 lg:mb-4">
         <span className="h-px flex-1 bg-white/15" />
-        <Typography variant="body-6" as="span" className="text-[#909299]">
+        <Typography variant="body-6" as="span" className="text-[#909299] font-manrope">
           or
         </Typography>
         <span className="h-px flex-1 bg-white/25" />
@@ -141,13 +140,13 @@ export default function DonateSection() {
         <Typography
           variant="body-8"
           as="span"
-          className="!font-light text-white mb-4 lg:mb-6"
+          className="font-light text-white mb-4 lg:mb-6 font-manrope"
         >
           Custom Amount
         </Typography>
 
         <div className="flex items-center gap-2 border-b border-white/30 pb-2 mb-4 lg:mb-8">
-          <Typography variant="body-2" as="span" className="text-[#909299]">
+          <Typography variant="body-2" as="span" className="text-[#909299] font-manrope">
             ₹
           </Typography>
           <input
@@ -175,7 +174,7 @@ export default function DonateSection() {
             />
           ))}
         </div>
-        <Typography variant="brand-2" as="span" className="text-white/90 !font-light">
+        <Typography variant="brand-2" as="span" className="text-white/90 font-light font-manrope">
           126 kind donors have contributed this month. Join with them today.❤️
         </Typography>
       </div>
@@ -184,7 +183,7 @@ export default function DonateSection() {
       <div className="flex justify-center mb-4 md:mb-0">
         <button
           type="button"
-          className="rounded py-3 font-bold bg-[#FCCC2D] w-[300px] md:w-full"
+          className="rounded py-3 font-bold bg-[#FCCC2D] w-[300px] md:w-full font-manrope"
         >
           <Typography variant="button-1" as="span">
             Donate Now
@@ -195,13 +194,13 @@ export default function DonateSection() {
       {/* Footer */}
       <div className="flex items-center justify-center gap-1.5">
         <Lock className="h-3 w-3 text-white/70" />
-        <Typography variant="brand-2" as="span" className="text-white/60 !font-light">
+        <Typography variant="brand-2" as="span" className="text-white/60 font-light font-manrope">
           Secure Payment
         </Typography>
-        <Typography variant="brand-2" as="span" className="text-white/60 !font-light">
+        <Typography variant="brand-2" as="span" className="text-white/60 font-light font-manrope">
           •
         </Typography>
-        <Typography variant="brand-2" as="span" className="text-white/60 !font-light">
+        <Typography variant="brand-2" as="span" className="text-white/60 font-light font-manrope">
           Trusted by Thousands
         </Typography>
       </div>

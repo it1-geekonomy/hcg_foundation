@@ -30,6 +30,8 @@ export {
   fontClassByToken,
   loadedFontTokens,
   resolveFontFamily,
+  getWeightClass,
+  getFontStyleClass,
   type FontFamilyToken,
 } from "./fonts";
 

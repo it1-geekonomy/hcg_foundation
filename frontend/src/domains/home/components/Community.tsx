@@ -33,12 +33,12 @@ export default function CommunitySection() {
       <div className="max-w-full">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 lg:gap-12 mb-10 md:mb-14">
           <div className="order-2 lg:order-1 lg:w-auto shrink-0">
-            <div className="flex sm:hidden flex-wrap gap-2">
+            <div className="flex sm:hidden flex-wrap gap-2 font-manrope">
               {communityTags.map((tag, i) => (
-                <Typography variant="label-2"
+                <Typography variant="label-1"
                   as="span"
                   key={i}
-                  className="px-3 py-1.5 bg-[#876900] text-white text-center whitespace-nowrap !font-medium"
+                  className="px-3 py-1.5 bg-[#876900] text-white text-center whitespace-nowrap font-light"
                 >
                   {tag}
                 </Typography>
@@ -47,12 +47,12 @@ export default function CommunitySection() {
 
             <div className="hidden sm:flex flex-col gap-2 md:gap-3">
               {tagRows.map((row, rowIndex) => (
-                <div key={rowIndex} className="flex gap-2 md:gap-3">
+                <div key={rowIndex} className="flex gap-2 md:gap-3 font-manrope">
                   {row.map((tag, i) => (
-                    <Typography variant="label-2"
+                    <Typography variant="label-1"
                       as="span"
                       key={i}
-                      className="px-3 md:px-4 py-1.5 md:py-2 bg-[#876900] text-white text-center whitespace-nowrap"
+                      className="px-3 md:px-4 py-1.5 md:py-2 bg-[#876900] text-white text-center whitespace-nowrap font-light"
                     >
                       {tag}
                     </Typography>
@@ -62,14 +62,14 @@ export default function CommunitySection() {
             </div>
           </div>
 
-          <div className="order-1 lg:order-2 max-w-4xl lg:text-left">
+          <div className="order-1 lg:order-2 max-w-4xl lg:text-left font-tiempos-text">
             <Typography variant="heading-2"
               as="h2"
-              className="text-[#382E07]"
+              className="text-[#382E07] font-medium"
             >
               {communityContent.heading}
             </Typography>
-            <Typography variant="body-2" as="p" className="text-[#2D2300C2] mt-3 md:mt-4 !font-regular">
+            <Typography variant="body-2" as="p" className="text-[#2D2300C2] mt-3 md:mt-4 font-light font-argestadisplay">
               {communityContent.description}
             </Typography>
           </div>
@@ -96,27 +96,26 @@ export default function CommunitySection() {
           />
 
           <div
-            className={`absolute left-4 right-4 bottom-4 w-auto max-w-none p-4 md:left-8 md:right-auto md:top-auto md:bottom-8 md:max-w-xs lg:bottom-12 lg:max-w-lg lg:p-6 xl:bottom-20 xl:max-w-lg xl:p-6 bg-white/[0.12] backdrop-blur-sm border border-white/10 rounded-xl transition-all duration-700 ease-out ${
-              inView
-                ? "opacity-100 scale-100 translate-y-0"
-                : "opacity-0 scale-95 translate-y-10"
-            }`}
+            className={`absolute left-4 right-4 bottom-4 w-auto max-w-none p-4 md:left-8 md:right-auto md:top-auto md:bottom-8 md:max-w-xs lg:bottom-12 lg:max-w-lg lg:p-6 xl:bottom-20 xl:max-w-lg xl:p-6 bg-white/[0.12] backdrop-blur-sm border border-white/10 rounded-xl transition-all duration-700 ease-out ${inView
+              ? "opacity-100 scale-100 translate-y-0"
+              : "opacity-0 scale-95 translate-y-10"
+              }`}
           >
-            <div className="flex items-center gap-2 mb-2 md:mb-3 lg:mb-16 !font-light">
+            <div className="flex items-center gap-2 mb-2 md:mb-3 lg:mb-16">
               <span className="w-3 h-3 rounded-full bg-white" />
-              <Typography variant="body-3" as="span" className="text-white">
+              <Typography variant="body-3" as="span" className="text-white font-argestadisplay font-light">
                 {communityContent.overlay.label}
               </Typography>
             </div>
 
             <Typography variant="heading-6"
               as="h3"
-              className="text-white mb-2 md:mb-3 lg:mb-6"
+              className="text-white mb-2 md:mb-3 lg:mb-6 font-tiempos-fine font-normal"
             >
               {communityContent.overlay.heading}
             </Typography>
 
-            <Typography variant="body-3" as="p" className="text-white mb-4 md:mb-5 lg:mb-6 !font-light">
+            <Typography variant="body-7" as="p" className="text-white mb-4 md:mb-5 lg:mb-6 font-light font-argestadisplay">
               {communityContent.overlay.description}
             </Typography>
 
@@ -124,7 +123,7 @@ export default function CommunitySection() {
               href="/#"
               className="inline-flex items-center gap-2 px-5 py-2 md:px-6 md:py-2.5 lg:py-3 bg-[#FCCC2D] hover:bg-[#e0b410] transition-colors"
             >
-              <Typography variant="button-1" as="span" className="text-[#373737]">
+              <Typography variant="button-1" as="span" className="text-[#373737] font-manrope font-medium">
                 {communityContent.overlay.buttonText}
               </Typography>
               <ArrowUpRight className="h-5 w-5 text-[#373737]" strokeWidth={2.5} />

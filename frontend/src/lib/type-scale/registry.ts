@@ -67,9 +67,6 @@ export function getTypographyStyles(variant: TypographyVariant | string) {
     variant: resolved,
     style: {
       ...fluidTypoVars(scale.sizeRange.minPx, scale.sizeRange.maxPx, scale.size),
-      fontFamily: scale.fontFamily,
-      fontWeight: scale.weight,
-      fontStyle: scale.fontStyle,
       lineHeight: scale.lineHeight,
       letterSpacing: scale.letterSpacing,
       ...(scale.textAlign ? { textAlign: scale.textAlign } : {}),

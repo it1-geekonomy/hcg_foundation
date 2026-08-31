@@ -256,7 +256,7 @@ export default function VerticalCards() {
         <div className="mb-10 flex flex-col gap-4 lg:mb-14 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
           <Typography variant="heading-2"
             as="h2"
-            className="w-full text-left !font-medium font-tiempos-headline text-[#382E07]"
+            className="w-full text-left font-medium font-tiempos-headline text-[#382E07]"
           >
             Changing Lives Through
             <br className="hidden 2xl:block" />
@@ -265,7 +265,7 @@ export default function VerticalCards() {
           </Typography>
           <Typography variant="body-2"
             as="p"
-            className="max-w-full lg:max-w-sm xl:max-w-lg leading-6 text-black/60 lg:pt-2 lg:text-left font-argestadisplay !font-regular"
+            className="w-full lg:max-w-md xl:max-w-xl leading-6 text-black/60 lg:pt-2 lg:text-left font-argestadisplay font-normal"
           >
             Explore the programs and community initiatives that are creating
             meaningful impact across healthcare, awareness, education, and
@@ -327,10 +327,10 @@ export default function VerticalCards() {
               {/* Collapsed-state vertical title */}
               <div className="card-vertical-label absolute inset-x-0 bottom-6 z-20 flex justify-center">
                 <span
-                  className="whitespace-nowrap font-medium uppercase tracking-[0.2em] text-white"
+                  className="whitespace-nowrap font-medium text-white"
                   style={{ writingMode: "vertical-rl", transform: "rotate(360deg)" }}
                 >
-                  <Typography variant="label-3" as="span" className="uppercase tracking-[0.2em] text-white !font-medium">
+                  <Typography variant="body-2" as="span" className="text-white font-medium font-manrope">
                     {card.title}
                   </Typography>
                 </span>
@@ -346,22 +346,22 @@ export default function VerticalCards() {
                   </Typography>
                 </div>
 
-                <Typography variant="heading-7" as="h3" className="panel-title mb-18 xl:mb-36 text-white !font-bold">
+                <Typography variant="heading-7" as="h3" className="panel-title mb-18 xl:mb-36 text-white font-bold font-manrope">
                   {card.title}
                 </Typography>
 
                 <div className="panel-date mb-8 flex items-center gap-2 text-white/90">
                   <CalendarIcon />
-                  <Typography variant="text-2" as="span" className="text-white !font-medium">
+                  <Typography variant="text-2" as="span" className="text-white font-normal font-manrope">
                     Project Date: {card.date}
                   </Typography>
                 </div>
 
-                <Typography variant="body-7" as="p" className="panel-desc mb-6 text-white !font-regular" >
+                <Typography variant="body-7" as="p" className="panel-desc mb-6 text-white font-light font-manrope" >
                   {card.description}
                 </Typography>
 
-                <MoreDetailsButton className="panel-cta !font-semiboldS" />
+                <MoreDetailsButton className="panel-cta font-semibold font-manrope" />
               </div>
             </div>
           ))}
@@ -407,34 +407,34 @@ export default function VerticalCards() {
                       aria-hidden="true"
                       className="invisible absolute inset-x-0 top-0 flex items-center gap-3 overflow-hidden"
                     >
-                      <Typography variant="heading-7" as="span" className="whitespace-nowrap text-white !font-bold">
+                      <Typography variant="heading-7" as="span" className="whitespace-nowrap text-white font-semibold font-manrope">
                         {card.title}
                       </Typography>
-                      <MoreDetailsButton className="shrink-0 px-4 py-2 !font-semibold" />
+                      <MoreDetailsButton className="shrink-0 px-4 py-2 font-semibold" />
                     </div>
 
                     <div className="flex items-start gap-3">
                       <Typography variant="heading-7"
                         as="h3"
-                        className="min-w-0 flex-1 leading-tight text-white !font-bold"
+                        className="min-w-0 flex-1 leading-tight text-white font-bold font-manrope"
                       >
                         {card.title}
                       </Typography>
                       {!overflows && (
-                        <MoreDetailsButton className="shrink-0 px-4 py-2 !font-semibold" />
+                        <MoreDetailsButton className="shrink-0 px-4 py-2 font-semibold font-manrope" />
                       )}
                     </div>
                   </div>
 
                   <div className="mt-2 flex items-center gap-1.5 text-white/70 sm:mt-3">
                     <CalendarIcon />
-                    <Typography variant="text-2" as="span" className="text-white !font-mediumS">
+                    <Typography variant="text-2" as="span" className="text-white font-medium font-manrope">
                       Project Date: {card.date}
                     </Typography>
                   </div>
 
                   {overflows && (
-                    <MoreDetailsButton className="mt-3 px-4 py-2 !font-semibold" />
+                    <MoreDetailsButton className="mt-3 px-4 py-2 font-semibold font-manrope" />
                   )}
                 </div>
               </div>

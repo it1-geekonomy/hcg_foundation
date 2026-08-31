@@ -35,9 +35,8 @@ function TogetherCarousel() {
           alt={s.title}
           fill
           priority={i === 0}
-          className={`object-cover object-center lg:object-top transition-opacity duration-700 ease-in-out ${
-            i === active ? "opacity-100" : "opacity-0"
-          }`}
+          className={`object-cover object-center lg:object-top transition-opacity duration-700 ease-in-out ${i === active ? "opacity-100" : "opacity-0"
+            }`}
         />
       ))}
 
@@ -47,7 +46,7 @@ function TogetherCarousel() {
       {/* Location badge */}
       <div className="absolute left-[clamp(1.5rem,4vw,3rem)] top-[clamp(0.75rem,2vw,2rem)] flex items-center gap-2 bg-[#FCCC2D] px-2.5 py-1.5 rounded">
         <MapPin className="h-4 w-4 text-[#090909]" />
-        <Typography variant="body-9" as="span" className="font-semibold font-semibold text-[#090909]">
+        <Typography variant="body-9" as="span" className="font-semibold text-[#090909] font-manrope">
           {CAROUSEL_SLIDES[active].location}
         </Typography>
       </div>
@@ -57,11 +56,11 @@ function TogetherCarousel() {
         <Typography
           variant="heading-2"
           as="h3"
-          className="font-tiempos-headline !font-normal text-white"
+          className="font-tiempos-headline font-normal text-white"
         >
           {CAROUSEL_SLIDES[active].title}
         </Typography>
-        <Typography variant="body-3" as="p" className="max-w-lg text-white/70 lg:mb-12 !font-light">
+        <Typography variant="body-3" as="p" className="max-w-lg text-white/70 lg:mb-12 font-light font-argestadisplay">
           {CAROUSEL_SLIDES[active].description}
         </Typography>
 
@@ -73,9 +72,8 @@ function TogetherCarousel() {
               type="button"
               onClick={() => goTo(i)}
               aria-label={`Go to slide ${i + 1}`}
-              className={`h-[clamp(4px,0.5vw,8px)] flex-1 rounded-full transition-colors ${
-                i === active ? "bg-[#FCCC2D]" : "bg-white/25"
-              }`}
+              className={`h-[clamp(4px,0.5vw,8px)] flex-1 rounded-full transition-colors ${i === active ? "bg-[#FCCC2D]" : "bg-white/25"
+                }`}
             />
           ))}
         </div>
@@ -96,7 +94,7 @@ export default function TogetherWeCreateHope() {
         >
           {TOGETHER_CONTENT.heading}
         </Typography>
-        <Typography variant="body-2" as="p" className="max-w-3xl text-[#686868C2] !font-regular">
+        <Typography variant="body-2" as="p" className="max-w-4xl text-[#686868C2] font-normal font-argestadisplay">
           {TOGETHER_CONTENT.description}
         </Typography>
       </div>
@@ -125,11 +123,11 @@ export default function TogetherWeCreateHope() {
                 <Typography
                   variant="heading-3"
                   as="p"
-                  className="!text-left font-tiempos-headline !font-bold text-[#090909]"
+                  className="!text-left font-manrope font-bold text-[#090909]"
                 >
                   {TOGETHER_CONTENT.stat.value}
                 </Typography>
-                <Typography variant="heading-9" as="p" className="text-[#090909]/70 !font-medium">
+                <Typography variant="heading-9" as="p" className="text-[#090909]/70 font-medium font-manrope">
                   {TOGETHER_CONTENT.stat.label}
                 </Typography>
               </div>
@@ -154,12 +152,12 @@ export default function TogetherWeCreateHope() {
             >
               {TOGETHER_CONTENT.content.heading}
             </Typography>
-            <Typography variant="body-2" as="p" className="text-white/90 !font-regular mb-[clamp(0rem,4vw,3.5rem)]">
+            <Typography variant="body-2" as="p" className="text-white/90 font-light mb-[clamp(0rem,4vw,3.5rem)] font-argestadisplay">
               {TOGETHER_CONTENT.content.description}
             </Typography>
 
-            
-            <a  href={TOGETHER_CONTENT.content.cta.href}
+
+            <a href={TOGETHER_CONTENT.content.cta.href}
               className="mt-2 inline-flex w-fit items-stretch overflow-hidden bg-[#FCCC2D]"
             >
               <span className="flex items-center px-5 py-2">

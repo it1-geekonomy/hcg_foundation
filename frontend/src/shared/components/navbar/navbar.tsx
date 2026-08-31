@@ -74,9 +74,8 @@ export default function Navbar() {
 
   return (
     <div
-      className={`fixed top-[clamp(0.75rem,2vw,1.5rem)] inset-x-[clamp(1rem,8vw,8rem)] xl:inset-x-[clamp(0.5rem,3vw,4rem)] 2xl:inset-x-[clamp(1rem,10vw,10rem)] z-50 transition-transform duration-300 ease-in-out ${
-        isVisible ? "translate-y-0" : "-translate-y-[150%]"
-      }`}
+      className={`fixed top-[clamp(0.75rem,2vw,1.5rem)] inset-x-[clamp(1rem,8vw,8rem)] xl:inset-x-[clamp(0.5rem,3vw,4rem)] 2xl:inset-x-[clamp(1rem,10vw,10rem)] z-50 transition-transform duration-300 ease-in-out ${isVisible ? "translate-y-0" : "-translate-y-[150%]"
+        }`}
     >
       <nav className="w-full border border-white/10 bg-white/[0.08] backdrop-blur-[60px] px-[clamp(1rem,2vw,1.5rem)] xl:px-0">
         <div className="flex items-center justify-between h-[clamp(3.5rem,6vw,4.5rem)] xl:ml-8">
@@ -104,7 +103,7 @@ export default function Navbar() {
                   >
                     <Typography variant={link.href === pathname ? "text-1" : "text-2"}
                       as="span"
-                      className="text-white transition-colors duration-300 group-hover:text-[#FED034]"
+                      className="text-white font-manrope transition-colors duration-300 group-hover:text-[#FED034]"
                     >
                       {link.label}
                     </Typography>
@@ -134,7 +133,7 @@ export default function Navbar() {
               href={navbarContent.donateButton.href}
               className="hidden xl:inline-block shrink-0 px-5 py-2.5 bg-[#FED034] hover:bg-[#e6bc2e] transition-all duration-300 hover:shadow-[0_0_20px_rgba(254,208,52,0.5)] mr-6"
             >
-              <Typography variant="button-4" as="span" className="text-[#262626]">
+              <Typography variant="button-4" as="span" className="text-[#262626] font-manrope font-light">
                 {navbarContent.donateButton.label}
               </Typography>
             </Link>

@@ -8,7 +8,7 @@ export default function AboutSection() {
       <div className="w-full grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-16">
         <Typography variant="heading-2"
           as="h2"
-          className="text-[#382E07] lg:text-nowrap"
+          className="text-[#382E07] lg:text-nowrap font-tiempos-headline"
         >
           {ABOUT_CONTENT.heading.map((line) => (
             <span key={line} className="block">
@@ -19,7 +19,7 @@ export default function AboutSection() {
 
         <div className="flex flex-col gap-5">
           {ABOUT_CONTENT.paragraphs.map((paragraph) => (
-            <Typography key={paragraph} variant="body-2" as="p" className="text-[#293239] !font-regular">
+            <Typography key={paragraph} variant="body-2" as="p" className="text-[#293239] font-normal font-argestadisplay">
               {paragraph}
             </Typography>
           ))}
@@ -29,7 +29,7 @@ export default function AboutSection() {
             className="mt-2 inline-flex w-fit items-stretch overflow-hidden bg-[#FCCC2D]"
           >
             <span className="flex items-center px-5 py-2">
-              <Typography variant="button-3" as="span" className="text-[#212121] !font-semibold">
+              <Typography variant="button-3" as="span" className="text-[#212121] font-semibold font-manrope">
                 {ABOUT_CONTENT.cta.label}
               </Typography>
             </span>

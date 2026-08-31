@@ -30,14 +30,14 @@ export default function HopeSection() {
       <div className="text-center px-2">
         <Typography variant="heading-2"
           as="h2"
-          className="text-[#382E07]"
+          className="text-[#382E07] font-tiempos-headline font-normal"
         >
           Hope Begins With
         </Typography>
 
         <Typography variant="heading-2"
           as="p"
-          className="mt-1 text-[#382E07]"
+          className="mt-1 text-[#382E07] font-tiempos-headline font-normal"
         >
           Your Kindness
         </Typography>
