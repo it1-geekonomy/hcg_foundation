@@ -32,6 +32,8 @@ export const fontClassByToken: Record<FontFamilyToken, string> = {
 /** Mirrors @font-face loaders in src/lib/fonts.ts */
 export const loadedFontTokens = new Set<FontFamilyToken>([
   "manrope",
+  "poppins",
+  "roboto",
   "tiempos-fine",
   "tiempos-headline",
   "argesta-display",

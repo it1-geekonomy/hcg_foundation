@@ -110,8 +110,8 @@ export default function HcgLogoAnimation({
   // it's just stretched/condensed like a logotype.
   const foundationTextRef = useRef<HTMLSpanElement>(null);
   const subtitleTextRef = useRef<HTMLSpanElement>(null);
-  const [foundationScaleX, setFoundationScaleX] = useState(1);
-  const [subtitleScaleX, setSubtitleScaleX] = useState(1);
+  const [foundationFontPx, setFoundationFontPx] = useState<number | null>(null);
+  const [subtitleFontPx, setSubtitleFontPx] = useState<number | null>(null);
 
   const finish = () => {
     if (doneRef.current) return;
@@ -332,7 +332,7 @@ export default function HcgLogoAnimation({
   const lettersRightX = G_POS[0] + G_SIZE[0] / 2;
   const lettersWidth = lettersRightX - lettersLeftX;
 
-  const CONTENT_GAP = 4;
+  const CONTENT_GAP = 8;
   const lettersBottomEdgeY = G_POS[1] - G_SIZE[1] / 2;
   const lettersBottomY = lettersBottomEdgeY - CONTENT_GAP;
 
@@ -340,18 +340,27 @@ export default function HcgLogoAnimation({
   const gTopRightY = G_POS[1] + G_SIZE[1] / 2;
 
   useLayoutEffect(() => {
-    function measure() {
-      if (foundationTextRef.current) {
-        const natural = foundationTextRef.current.offsetWidth;
-        if (natural > 0) setFoundationScaleX(lettersWidth / natural);
-      }
-      if (subtitleTextRef.current) {
-        const natural = subtitleTextRef.current.offsetWidth;
-        if (natural > 0) setSubtitleScaleX(lettersWidth / natural);
+    function fitLine(
+      el: HTMLSpanElement,
+      setPx: (px: number) => void,
+    ) {
+      const computed = window.getComputedStyle(el);
+      const currentPx = parseFloat(computed.fontSize);
+      const natural = el.offsetWidth;
+      if (currentPx > 0 && natural > 0) {
+        setPx(currentPx * (lettersWidth / natural));
       }
     }
-    // Measure once fonts are ready (web fonts can shift natural width),
-    // and again after a tick as a safety net.
+
+    function measure() {
+      if (foundationTextRef.current) {
+        fitLine(foundationTextRef.current, setFoundationFontPx);
+      }
+      if (subtitleTextRef.current) {
+        fitLine(subtitleTextRef.current, setSubtitleFontPx);
+      }
+    }
+
     measure();
     if (typeof document !== "undefined" && "fonts" in document) {
       document.fonts.ready.then(measure);
@@ -359,48 +368,49 @@ export default function HcgLogoAnimation({
     const t = setTimeout(measure, 100);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lettersWidth]);
+  }, [lettersWidth, showFoundation, showSubtitle]);
 
   return (
     <section
-      className={`relative flex w-full items-center justify-center overflow-hidden bg-black ${
+      className={`relative flex w-full items-center justify-center bg-black ${
         embedded ? "h-full" : "h-screen"
       }`}
     >
-      <div ref={containerRef} className="absolute inset-0" />
+      <div ref={containerRef} className="absolute inset-0 z-0" />
 
       <div
-        className="pointer-events-none absolute flex flex-col items-start"
+        className="pointer-events-none absolute z-20 flex flex-col items-start overflow-visible"
         style={{
           left: `calc(50% + ${lettersLeftX}px)`,
           top: `calc(50% - ${lettersBottomY}px)`,
           width: `${lettersWidth}px`,
+          minHeight: "2.75rem",
         }}
       >
-        <Typography variant="brand-1"
+        <Typography
+          variant="brand-1"
           as="span"
-          className="whitespace-nowrap text-white"
+          className="block w-full whitespace-nowrap text-white antialiased"
           style={{
-            transformOrigin: "left top",
+            fontSize: foundationFontPx ? `${foundationFontPx}px` : undefined,
+            lineHeight: 1.49,
             opacity: showFoundation ? 1 : 0,
-            transform: showFoundation
-              ? `translateY(0) scaleX(${foundationScaleX}) scaleY(1)`
-              : `translateY(10px) scaleX(${foundationScaleX * 0.85}) scaleY(0.85)`,
+            transform: showFoundation ? "translateY(0)" : "translateY(8px)",
             transition: "opacity 380ms ease-out, transform 480ms cubic-bezier(0.33, 1, 0.32, 1)",
           }}
         >
           <span ref={foundationTextRef}>FOUNDATION</span>
         </Typography>
 
-        <Typography variant="brand-2"
+        <Typography
+          variant="brand-2"
           as="span"
-          className="mt-0.5 whitespace-nowrap text-white"
+          className="mt-1 block w-full whitespace-nowrap text-white antialiased"
           style={{
-            transformOrigin: "left top",
+            fontSize: subtitleFontPx ? `${subtitleFontPx}px` : undefined,
+            lineHeight: 1.25,
             opacity: showSubtitle ? 1 : 0,
-            transform: showSubtitle
-              ? `translateY(0) scaleX(${subtitleScaleX}) scaleY(1)`
-              : `translateY(10px) scaleX(${subtitleScaleX * 0.85}) scaleY(0.85)`,
+            transform: showSubtitle ? "translateY(0)" : "translateY(8px)",
             transition: "opacity 380ms ease-out, transform 480ms cubic-bezier(0.33, 1, 0.32, 1)",
           }}
         >
@@ -409,7 +419,7 @@ export default function HcgLogoAnimation({
       </div>
 
       <div
-        className="pointer-events-none absolute"
+        className="pointer-events-none absolute z-20"
         style={{
           left: `calc(50% + ${gTopRightX}px)`,
           top: `calc(50% - ${gTopRightY}px)`,
