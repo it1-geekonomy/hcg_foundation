@@ -4,12 +4,11 @@ import Typography from "@/lib/Typography";
 
 export default function AboutSection() {
   return (
-    <section className="py-6 md:py-10 lg:py-30 px-4 md:px-10 lg:px-16 xl:px-30 lg:py-20">
-      <div className="grid max-w-full grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-16">
-        <Typography
-          variant="hero"
+    <section className="py-10 md:py-10 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
+      <div className="w-full grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-16">
+        <Typography variant="heading-2"
           as="h2"
-          className="font-tiempos-headline leading-tight text-[#382E07] !tracking-[0.1em] lg:text-nowrap"
+          className="text-[#382E07] lg:text-nowrap"
         >
           {ABOUT_CONTENT.heading.map((line) => (
             <span key={line} className="block">
@@ -20,12 +19,7 @@ export default function AboutSection() {
 
         <div className="flex flex-col gap-5">
           {ABOUT_CONTENT.paragraphs.map((paragraph) => (
-            <Typography
-              key={paragraph}
-              variant="subheading"
-              as="p"
-              className="font-argestadisplay font-normal text-[#293239]"
-            >
+            <Typography key={paragraph} variant="body-2" as="p" className="text-[#293239] !font-regular">
               {paragraph}
             </Typography>
           ))}
@@ -35,11 +29,7 @@ export default function AboutSection() {
             className="mt-2 inline-flex w-fit items-stretch overflow-hidden bg-[#FCCC2D]"
           >
             <span className="flex items-center px-5 py-2">
-              <Typography
-                variant="body"
-                as="span"
-                className="font-manrope font-bold tracking-wide text-[#090909]"
-              >
+              <Typography variant="button-3" as="span" className="text-[#212121] !font-semibold">
                 {ABOUT_CONTENT.cta.label}
               </Typography>
             </span>

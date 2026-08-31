@@ -66,18 +66,18 @@ export default function ReelsSection() {
     >
       <div className="mx-auto flex max-w-[1400px] flex-col items-center gap-6 rounded-3xl p-3 md:gap-8 md:p-4 lg:gap-10 lg:p-6">
         <Typography
-          variant="hero"
+          variant="heading-1"
           as="h2"
-          className="max-w-full font-medium font-tiempos-headline text-[#382E07] !tracking-[0.1em]"
+          className="w-full font-medium font-tiempos-headline text-[#382E07] !tracking-[0.1em] lg:mb-8"
         >
-          Hope. Care. Impact.
+          Hope.Care.Impact.
         </Typography>
 
         {/* Design: controls outside the strip, bottom-aligned, small gap.
             md uses a fluid center column (minmax(0,1fr)) instead of a fixed
             px width so the side arrow columns never get squeezed against
             the viewport edge on tablet widths. */}
-        <div className="isolate grid w-full max-w-[360px] grid-cols-[2rem_minmax(0,1fr)_2rem] items-end gap-3 md:w-auto md:max-w-none md:grid-cols-[2.5rem_476px_2.5rem] md:gap-4 lg:grid-cols-[2rem_812px_2rem] xl:grid-cols-[2rem_872px_2rem]">
+        <div className="isolate grid w-full max-w-[360px] grid-cols-[2rem_minmax(0,1fr)_2rem] items-end gap-3 md:w-auto md:max-w-none md:grid-cols-[2.5rem_476px_2.5rem] md:gap-4 lg:grid-cols-[2rem_812px_2rem] xl:grid-cols-[2rem_872px_2rem] lg:mb-20">
           <button
             type="button"
             onClick={(e) => {

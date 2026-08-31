@@ -6,22 +6,14 @@ import {
   FOOTER_CONTACT_INFO,
   FOOTER_SOCIAL_LINKS,
   FOOTER_DEVELOPER,
-  FOOTER_LEGAL_LINKS,
 } from "@/domains/home/constants/footer";
 import Typography from "@/lib/Typography";
 
-// Shared container: fixed at 1200px through the 2xl breakpoint,
-// then steps up to a fixed 1600px on very large screens.
-// Explicit stepped values, no fluid clamp() math to second-guess.
 const CONTAINER = "max-w-[1200px] 2xl:max-w-[1600px] mx-auto px-6";
 
 function FooterHeading({ children }: { children: React.ReactNode }) {
   return (
-    <Typography
-      variant="footer-heading"
-      as="h3"
-      className="text-white uppercase tracking-wider font-manrope"
-    >
+    <Typography variant="label-3" as="h3" className="text-white">
       {children}
     </Typography>
   );
@@ -60,38 +52,30 @@ const InstagramIcon = () => (
 export default function Footer() {
   return (
     <footer className="bg-[#373737] text-white">
-      {/* Main Footer Section */}
       <div className={`${CONTAINER} py-8`}>
-        <div
-          className="
-            grid grid-cols-2 md:grid-cols-3 lg:grid-cols-[minmax(280px,320px)_1fr] gap-x-6 md:gap-x-8 gap-y-10 lg:gap-y-0 lg:gap-x-0
-          "
-        >
-          {/* Column 1: Logo and Newsletter */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-[minmax(280px,320px)_1fr] gap-x-6 md:gap-x-8 gap-y-10 lg:gap-y-0 lg:gap-x-0">
           <div className="col-span-2 md:col-span-3 lg:col-span-1 space-y-8 lg:max-w-xs lg:shrink-0">
             <div className="space-y-8 lg:space-y-6">
               <Logo />
 
-              {/* 80G Text */}
-              <Typography
-                variant="footer-heading"
+              <Typography variant="body-8"
                 as="p"
-                className="text-gray-300 font-normal! leading-relaxed max-w-[280px] font-manrope text-center lg:text-left mx-auto lg:mx-0"
+                className="text-gray-300 max-w-[280px] text-center lg:text-left mx-auto lg:mx-0"
               >
                 The HCG Foundation is approved under sec 80G of the IT Act.
               </Typography>
             </div>
 
-            {/* Newsletter */}
             <div className="space-y-4">
-              <Typography variant="footer-heading" as="h4" className="font-normal! font-manrope text-white text-center lg:text-left">
+              <Typography variant="body-9" as="h4" className="text-white text-center lg:text-left">
                 Subscribe to our Newsletter
               </Typography>
               <div className="flex w-full max-w-[280px] h-12 rounded-md overflow-hidden border border-[#FDB723] mx-auto lg:mx-0">
                 <input
                   type="email"
                   placeholder="Enter your email address"
-                  className="flex-1 min-w-0 h-full px-4 bg-[#FDB723] text-gray-900 placeholder:text-[#373737] font-manrope text-base font-normal border-0 outline-none focus:outline-none"
+                  className="flex-1 min-w-0 h-full px-4 bg-[#FDB723] text-gray-900 placeholder:text-[#373737] font-manrope border-0 outline-none focus:outline-none"
+                  style={{ fontSize: "1rem" }}
                 />
                 <button
                   type="button"
@@ -103,16 +87,14 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Columns 2–4: grouped, shifted right, tighter gaps */}
           <div className="col-span-2 md:col-span-3 lg:col-span-1 grid grid-cols-2 md:grid-cols-3 gap-x-6 md:gap-x-8 gap-y-10 lg:flex lg:flex-row lg:items-start lg:justify-end lg:gap-x-10 xl:gap-x-14 2xl:gap-x-28">
-          {/* Column 2: Quick Links */}
           <div className="col-span-1">
             <FooterHeading>QUICK LINKS</FooterHeading>
             <ul className="mt-8 space-y-3">
               {FOOTER_QUICK_LINKS.map((label) => (
                 <li key={label}>
                   <Link href="/" className="hover:text-[#FDB723] transition-colors">
-                    <Typography variant="footer-heading" as="span" className="text-white font-normal! font-manrope">
+                    <Typography variant="body-9" as="span" className="text-white">
                       {label}
                     </Typography>
                   </Link>
@@ -121,14 +103,13 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 3: Inner Pages */}
           <div className="col-span-1">
             <FooterHeading>INNER PAGES</FooterHeading>
             <ul className="mt-8 space-y-3">
               {FOOTER_INNER_PAGES.map((label) => (
                 <li key={label}>
                   <Link href="/" className="hover:text-[#FDB723] transition-colors">
-                    <Typography variant="footer-heading" as="span" className="text-white font-normal! font-manrope">
+                    <Typography variant="body-9" as="span" className="text-white">
                       {label}
                     </Typography>
                   </Link>
@@ -137,39 +118,34 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 4: Contact Us */}
           <div className="col-span-2 md:col-span-1">
             <FooterHeading>CONTACT US</FooterHeading>
             <div className="mt-8 space-y-4">
-              {/* Address */}
               <div className="flex items-start space-x-4 max-w-[260px]">
                 <MapPin className="w-5 h-5 text-[#787878] flex-shrink-0 mt-0.5" />
-                <Typography variant="body" as="p" className="text-white leading-relaxed font-manrope">
+                <Typography variant="body-8" as="p" className="text-white">
                   {FOOTER_CONTACT_INFO.address}
                 </Typography>
               </div>
 
-              {/* Phone */}
               <div className="flex items-center space-x-4">
                 <Phone className="w-5 h-5 text-[#787878] flex-shrink-0" />
                 <a href={FOOTER_CONTACT_INFO.phoneLink}>
-                  <Typography variant="body-sm" as="span" className="text-white hover:text-[#FDB723] transition-colors font-manrope">
+                  <Typography variant="body-8" as="span" className="text-white hover:text-[#FDB723] transition-colors">
                     {FOOTER_CONTACT_INFO.phone}
                   </Typography>
                 </a>
               </div>
 
-              {/* Email */}
               <div className="flex items-center space-x-4">
                 <Mail className="w-5 h-5 text-[#787878] flex-shrink-0" />
                 <a href={FOOTER_CONTACT_INFO.emailLink}>
-                  <Typography variant="body-sm" as="span" className="text-white hover:text-[#FDB723] transition-colors font-manrope">
+                  <Typography variant="body-8" as="span" className="text-white hover:text-[#FDB723] transition-colors">
                     {FOOTER_CONTACT_INFO.email}
                   </Typography>
                 </a>
               </div>
 
-              {/* Social Media Icons */}
               <div className="flex space-x-4 pt-2">
                 {FOOTER_SOCIAL_LINKS.map((social) => (
                   <a
@@ -189,17 +165,14 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom Section - Golden Yellow */}
       <div className="bg-[#FDB723] py-2">
         <div className={CONTAINER}>
           <div className="flex flex-col lg:flex-row justify-between items-center text-gray-900 gap-1 lg:gap-0">
-            {/* Copyright */}
-            <Typography variant="footer-heading" as="p" className="font-manrope text-gray-900 font-normal!">
+            <Typography variant="caption-2" as="p" className="text-gray-900">
               © {new Date().getFullYear()} The HCG Foundation
             </Typography>
 
-            {/* Developer Credit */}
-            <Typography variant="footer-heading" as="p" className="font-manrope text-gray-900 font-normal!">
+            <Typography variant="caption-2" as="p" className="text-gray-900">
               {FOOTER_DEVELOPER.text}{" "}
               <a
                 href={FOOTER_DEVELOPER.href}

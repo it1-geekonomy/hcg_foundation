@@ -31,19 +31,14 @@ export default function StatSection() {
 
   return (
     <section ref={sectionRef} className="relative overflow-hidden px-6 py-6 lg:py-10">
-      {/* =====================================================
-          TITLE
-      ===================================================== */}
-
       <div className="relative max-w-full text-center">
-        <Typography variant="hero" as="h2" className="font-tiempos-headline text-black !tracking-[0.1em]">
+        <Typography variant="heading-1"
+          as="h2"
+          className="text-[#382E07]"
+        >
           Our Journey of Impact
         </Typography>
       </div>
-
-      {/* =====================================================
-          STATS
-      ===================================================== */}
 
       <div className="relative mx-auto mt-16 grid max-w-5xl grid-cols-2 gap-6 md:grid-cols-[repeat(2,max-content)] md:justify-center md:gap-1 lg:grid-cols-4 lg:gap-10">
         {STATS.map((stat, i) => (
@@ -51,17 +46,12 @@ export default function StatSection() {
         ))}
       </div>
 
-      {/* =====================================================
-          DESCRIPTION
-      ===================================================== */}
-
-      <Typography
-        variant="heading-center"
+      <Typography variant="body-1"
         as="p"
-        className="relative mx-auto mt-14 max-w-2xl text-center font-argestadisplay text-stone-500"
+        className="relative mx-auto mt-14 max-w-2xl text-[#262626]/55"
       >
         Every number represents a life touched, a family supported, and a community strengthened{" "}
-        <span className="text-black">through hope, compassion, and care.</span>
+        <span className="text-[#262626]">through hope, compassion, and care.</span>
       </Typography>
     </section>
   );

@@ -49,18 +49,18 @@ export default function DonateSection() {
             className="h-[clamp(2rem,5vw,2.5rem)] w-[clamp(2rem,5vw,2.5rem)]"
           />
           <Typography
-            variant="hero"
+            variant="heading-6"
             as="h3"
-            className="font-tiempos-headline font-light text-white"
+            className="font-tiempos-headline font-bold text-white"
           >
             Donate Now
           </Typography>
         </div>
 
         <Typography
-          variant="body-lg"
+          variant="body-7"
           as="p"
-          className="w-full leading-snug text-white/70 px-8 sm:px-10 mb-8 lg:px-12 lg:mb-6"
+          className="w-full leading-snug !font-light text-white/70 px-8 sm:px-10 mb-8 lg:px-12 lg:mb-6"
         >
           Your contribution helps us provide care, support and hope to those
           who need it most.
@@ -70,9 +70,9 @@ export default function DonateSection() {
       {/* Amount picker */}
       <div className="flex flex-col gap-3 mb-6 md:mb-0">
         <Typography
-          variant="subheading"
+          variant="body-7"
           as="span"
-          className="font-semibold text-white mb-6 md:mb-0"
+          className="!font-semibold text-white mb-6 md:mb-0"
         >
           Choose an Amount
         </Typography>
@@ -91,7 +91,7 @@ export default function DonateSection() {
                     : "bg-transparent border-white/35 text-white"
                 }`}
               >
-                <Typography variant="subheading" as="span" className="text-inherit">
+                <Typography variant="body-8" as="span" className="text-inherit">
                   {amount}
                 </Typography>
               </button>
@@ -100,7 +100,7 @@ export default function DonateSection() {
 
           {isCustom ? (
             <div className="flex w-[88%] mx-auto items-center justify-center gap-1 rounded border border-[#FCCC2D] bg-[#FCCC2D]/15 py-2.5 px-2 backdrop-blur-sm">
-              <Typography variant="subheading" as="span" className="text-white/70">
+              <Typography variant="body-8" as="span" className="text-white/70">
                 ₹
               </Typography>
               <input
@@ -119,7 +119,7 @@ export default function DonateSection() {
               onClick={pickCustom}
               className="w-[88%] mx-auto rounded border-1 border-[#FCCC2D] bg-[#FCCC2D]/15 py-2.5 text-white font-semibold backdrop-blur-sm transition-colors"
             >
-              <Typography variant="body" as="span" className="text-inherit">
+              <Typography variant="body-8" as="span" className="text-inherit">
                 More
               </Typography>
             </button>
@@ -128,9 +128,9 @@ export default function DonateSection() {
       </div>
 
       {/* Divider */}
-      <div className="hidden md:flex items-center gap-3 lg:mb-6">
+      <div className="hidden md:flex items-center gap-3 lg:mb-4">
         <span className="h-px flex-1 bg-white/15" />
-        <Typography variant="body" as="span" className="text-[#909299]">
+        <Typography variant="body-6" as="span" className="text-[#909299]">
           or
         </Typography>
         <span className="h-px flex-1 bg-white/25" />
@@ -139,15 +139,15 @@ export default function DonateSection() {
       {/* Custom amount */}
       <div className="flex flex-col gap-2">
         <Typography
-          variant="subheading"
+          variant="body-8"
           as="span"
-          className="font-semibold text-white mb-4 lg:mb-6"
+          className="!font-light text-white mb-4 lg:mb-6"
         >
           Custom Amount
         </Typography>
 
         <div className="flex items-center gap-2 border-b border-white/30 pb-2 mb-4 lg:mb-8">
-          <Typography variant="subheading" as="span" className="text-[#909299]">
+          <Typography variant="body-2" as="span" className="text-[#909299]">
             ₹
           </Typography>
           <input
@@ -175,7 +175,7 @@ export default function DonateSection() {
             />
           ))}
         </div>
-        <Typography variant="body-sm" as="span" className="text-white/70">
+        <Typography variant="brand-2" as="span" className="text-white/90 !font-light">
           126 kind donors have contributed this month. Join with them today.❤️
         </Typography>
       </div>
@@ -186,7 +186,7 @@ export default function DonateSection() {
           type="button"
           className="rounded py-3 font-bold bg-[#FCCC2D] w-[300px] md:w-full"
         >
-          <Typography variant="subheading" as="span">
+          <Typography variant="button-1" as="span">
             Donate Now
           </Typography>
         </button>
@@ -195,13 +195,13 @@ export default function DonateSection() {
       {/* Footer */}
       <div className="flex items-center justify-center gap-1.5">
         <Lock className="h-3 w-3 text-white/70" />
-        <Typography variant="meta" as="span" className="text-white/70">
+        <Typography variant="brand-2" as="span" className="text-white/60 !font-light">
           Secure Payment
         </Typography>
-        <Typography variant="meta" as="span" className="text-white/70">
+        <Typography variant="brand-2" as="span" className="text-white/60 !font-light">
           •
         </Typography>
-        <Typography variant="meta" as="span" className="text-white/70">
+        <Typography variant="brand-2" as="span" className="text-white/60 !font-light">
           Trusted by Thousands
         </Typography>
       </div>
@@ -242,7 +242,7 @@ export default function DonateSection() {
           />
           <div className="relative z-10 flex justify-end py-6 pl-6 pr-10 md:pr-[60px] lg:py-8 lg:pl-8 lg:pr-20 xl:py-10 xl:pl-10 xl:pr-28">
             <div
-              className="flex w-[440px] flex-col gap-5 rounded border border-white/15 p-8 backdrop-blur-md lg:w-[540px] lg:gap-6 lg:p-12 xl:w-[600px] xl:p-14"
+              className="flex w-[440px] flex-col gap-5 rounded border border-white/15 p-8 backdrop-blur-md lg:w-[540px] lg:gap-6 lg:p-12 xl:w-[600px] xl:p-10"
               style={{ backgroundColor: donateTheme.glassBg }}
             >
               {cardContent}

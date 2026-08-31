@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import Typography from "@/lib/Typography";
 
 const YELLOW_HAND = "/hcg-logo/yellow-hand.png";
 const BLUE_HAND = "/hcg-logo/blue-hand.png";
@@ -376,8 +377,9 @@ export default function HcgLogoAnimation({
           width: `${lettersWidth}px`,
         }}
       >
-        <span
-          className="whitespace-nowrap text-xl font-bold leading-tight text-white"
+        <Typography variant="brand-1"
+          as="span"
+          className="whitespace-nowrap text-white"
           style={{
             transformOrigin: "left top",
             opacity: showFoundation ? 1 : 0,
@@ -388,10 +390,11 @@ export default function HcgLogoAnimation({
           }}
         >
           <span ref={foundationTextRef}>FOUNDATION</span>
-        </span>
+        </Typography>
 
-        <span
-          className="mt-0.5 whitespace-nowrap text-base font-medium leading-tight text-white"
+        <Typography variant="brand-2"
+          as="span"
+          className="mt-0.5 whitespace-nowrap text-white"
           style={{
             transformOrigin: "left top",
             opacity: showSubtitle ? 1 : 0,
@@ -402,7 +405,7 @@ export default function HcgLogoAnimation({
           }}
         >
           <span ref={subtitleTextRef}>Lasting Inspiration</span>
-        </span>
+        </Typography>
       </div>
 
       <div

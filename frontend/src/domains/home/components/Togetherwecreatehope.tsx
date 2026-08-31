@@ -47,33 +47,33 @@ function TogetherCarousel() {
       {/* Location badge */}
       <div className="absolute left-[clamp(1.5rem,4vw,3rem)] top-[clamp(0.75rem,2vw,2rem)] flex items-center gap-2 bg-[#FCCC2D] px-2.5 py-1.5 rounded">
         <MapPin className="h-4 w-4 text-[#090909]" />
-        <Typography variant="body" as="span" className="font-semibold text-[#090909]">
+        <Typography variant="body-9" as="span" className="font-semibold font-semibold text-[#090909]">
           {CAROUSEL_SLIDES[active].location}
         </Typography>
       </div>
 
       {/* Text content */}
-      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-[clamp(1.25rem,3vw,2rem)]">
+      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-6 p-[clamp(1.25rem,3vw,2rem)] xl:px-16">
         <Typography
-          variant="subheading"
+          variant="heading-2"
           as="h3"
-          className="font-tiempos-headline italic font-light text-white"
+          className="font-tiempos-headline !font-normal text-white"
         >
           {CAROUSEL_SLIDES[active].title}
         </Typography>
-        <Typography variant="body-sm" as="p" className="max-w-md text-white/70">
+        <Typography variant="body-3" as="p" className="max-w-lg text-white/70 lg:mb-12 !font-light">
           {CAROUSEL_SLIDES[active].description}
         </Typography>
 
         {/* Progress / pagination bar — still clickable */}
-        <div className="mt-3 flex gap-1.5">
+        <div className="mt-3 flex gap-2">
           {CAROUSEL_SLIDES.map((_, i) => (
             <button
               key={i}
               type="button"
               onClick={() => goTo(i)}
               aria-label={`Go to slide ${i + 1}`}
-              className={`h-[clamp(2px,0.3vw,4px)] flex-1 rounded-full transition-colors ${
+              className={`h-[clamp(4px,0.5vw,8px)] flex-1 rounded-full transition-colors ${
                 i === active ? "bg-[#FCCC2D]" : "bg-white/25"
               }`}
             />
@@ -90,13 +90,13 @@ export default function TogetherWeCreateHope() {
       {/* Heading */}
       <div className="flex flex-col items-center gap-2 text-center mb-[clamp(2rem,4vw,3.5rem)]">
         <Typography
-          variant="hero"
+          variant="heading-1"
           as="h2"
-          className="font-tiempos-headline italic font-light text-[#090909]"
+          className="font-tiempos-headline italic text-[#090909]"
         >
           {TOGETHER_CONTENT.heading}
         </Typography>
-        <Typography variant="body-lg" as="p" className="max-w-2xl text-[#6B6B6B]">
+        <Typography variant="body-2" as="p" className="max-w-3xl text-[#686868C2] !font-regular">
           {TOGETHER_CONTENT.description}
         </Typography>
       </div>
@@ -123,13 +123,13 @@ export default function TogetherWeCreateHope() {
 
               <div className="mt-[clamp(2.5rem,6vw,3.5rem)] mb-[clamp(2rem,5vw,3rem)] flex flex-col gap-1">
                 <Typography
-                  variant="hero"
+                  variant="heading-3"
                   as="p"
-                  className="font-tiempos-headline font-light text-[#090909]"
+                  className="!text-left font-tiempos-headline !font-bold text-[#090909]"
                 >
                   {TOGETHER_CONTENT.stat.value}
                 </Typography>
-                <Typography variant="body-lg" as="p" className="text-[#090909]/70">
+                <Typography variant="heading-9" as="p" className="text-[#090909]/70 !font-medium">
                   {TOGETHER_CONTENT.stat.label}
                 </Typography>
               </div>
@@ -146,15 +146,15 @@ export default function TogetherWeCreateHope() {
           </div>
 
           {/* Content panel — rectangle, fills remaining space */}
-          <div className="flex flex-1 flex-col justify-center gap-4 bg-[#141414] p-[clamp(1.5rem,4vw,3rem)] rounded">
+          <div className="flex flex-1 flex-col justify-center gap-4 bg-gradient-to-br from-[#535353] to-[#000000] p-[clamp(1.5rem,4vw,3rem)] rounded">
             <Typography
-              variant="hero"
+              variant="heading-2"
               as="h3"
               className="font-tiempos-headline italic font-light text-white"
             >
               {TOGETHER_CONTENT.content.heading}
             </Typography>
-            <Typography variant="body" as="p" className="text-white/70 mb-[clamp(0rem,4vw,3.5rem)]">
+            <Typography variant="body-2" as="p" className="text-white/90 !font-regular mb-[clamp(0rem,4vw,3.5rem)]">
               {TOGETHER_CONTENT.content.description}
             </Typography>
 
@@ -164,7 +164,7 @@ export default function TogetherWeCreateHope() {
             >
               <span className="flex items-center px-5 py-2">
                 <Typography
-                  variant="body"
+                  variant="button-1"
                   as="span"
                   className="font-manrope font-bold tracking-wide text-[#090909]"
                 >

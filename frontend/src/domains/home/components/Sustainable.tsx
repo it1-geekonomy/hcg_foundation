@@ -13,7 +13,7 @@ export default function SustainableGoalsSection() {
           Hidden at lg+, where the box-version below takes over instead. */}
       <div className="mb-6 lg:hidden">
         <Typography
-          variant="editorial-lg"
+          variant="heading-2"
           as="h2"
           className="max-w-full font-tiempos-headline font-light text-[#090909]"
         >
@@ -22,13 +22,13 @@ export default function SustainableGoalsSection() {
       </div>
 
       <div
-        className="mx-auto flex w-full flex-col overflow-hidden rounded-sm lg:flex-row lg:items-center"
+        className="flex w-full flex-col overflow-hidden rounded-sm lg:flex-row lg:items-center"
         style={{ backgroundColor: sustainableGoalsTheme.panelBg }}
       >
         {/* Box heading: only rendered from lg up, back on the colored panel */}
         <div className="hidden flex-1 items-center px-6 py-16 lg:flex lg:px-6 xl:px-14 xl:py-16 2xl:px-20">
           <Typography
-            variant="editorial-lg"
+            variant="heading-2"
             as="h2"
             className="max-w-full font-tiempos-headline font-light text-white"
           >
@@ -46,13 +46,13 @@ export default function SustainableGoalsSection() {
           {sustainableGoals.map((goal) => (
             <div
               key={goal.number}
-              className="relative flex aspect-square w-[clamp(140px,38vw,180px)] flex-col p-2 sm:w-[clamp(140px,30vw,180px)] sm:p-3 md:w-full lg:w-36 xl:w-44 2xl:w-48"
+              className="relative flex aspect-square w-[clamp(140px,38vw,180px)] flex-col p-2 sm:w-[clamp(140px,30vw,180px)] sm:p-4 md:w-full lg:w-36 xl:w-44 2xl:w-48"
               style={{ backgroundColor: goal.bg }}
             >
               <Typography
-                variant="hero"
+                variant="display-2"
                 as="span"
-                className="block shrink-0 font-bold leading-none text-white/30"
+                className="block shrink-0 font-bold text-left leading-none text-white/30"
               >
                 {goal.number}
               </Typography>
@@ -61,7 +61,7 @@ export default function SustainableGoalsSection() {
                   height on every card, because the number row and the label
                   box below are both fixed heights now (not just min-heights),
                   so all four icons land on the same row. */}
-              <div className="flex flex-1 items-center justify-center">
+              <div className="flex flex-1 items-center justify-center mt-6">
                 <Image
                   src={goal.icon}
                   alt={goal.title}
@@ -73,11 +73,11 @@ export default function SustainableGoalsSection() {
 
               {/* Fixed height (not min-h) + line-clamp-2 = identical box on
                   every card whether the label is 1 line or 2. */}
-              <div className="flex h-8 shrink-0 items-center justify-center sm:h-9 lg:mt-3 lg:h-10 xl:h-11">
+              <div className="w-full flex h-8 shrink-0 items-center justify-center sm:h-9 lg:mt-3 lg:h-10 xl:h-11">
                 <Typography
-                  variant="caption"
+                  variant="caption-1"
                   as="span"
-                  className="line-clamp-2 text-center font-semibold uppercase leading-tight tracking-wide text-white"
+                  className="line-clamp-4 text-center font-semibold uppercase leading-tight tracking-wide text-white"
                 >
                   {goal.title}
                 </Typography>

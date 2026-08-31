@@ -65,7 +65,8 @@
 }
 
 /*
- * Fluid typography: fixed sizes below lg, clamp from lg (1024px) upward.
+ * Fluid typography: compressed mobile floor, gentle sm/md steps, clamp from lg (1024px).
+ * Mobile compression is applied in resolveMobilePx() — see type-scale/constants.ts.
  * Set CSS vars via fluidTypoVars() and add data-typo-fluid on the element.
  */
 [data-typo-fluid] {
