@@ -6,7 +6,11 @@ import {
   HopeSection,
   Community,
   FloatingImages,
+  Togetherwecreatehope,
+  Sustainable,
+  Reelsection,
 } from "@/domains/home/index";
+import DonateForm from "@/shared/components/DonateForm";
 
 const gradientClass = "bg-[linear-gradient(180deg,#FFE486_0%,#FFF6D8_100%)]";
 
@@ -26,6 +30,12 @@ export default function ClientPage() {
         <Community />
         <FloatingImages />
       </div>
+      <DonateForm />
+      <div className={gradientClass}>
+      <Togetherwecreatehope />
+      </div>
+      <Sustainable />
+        <Reelsection />
     </>
   );
 }
