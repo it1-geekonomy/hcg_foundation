@@ -54,7 +54,7 @@ export const navbarContent = {
     alt: "HCG Foundation",
   },
   donateButton: {
-    label: "Contact-Us",
-    href: "/contact",
+    label: "Donate Now",
+    href: "",
   },
 };
