@@ -187,14 +187,20 @@ function TrustItems({
       {TRUST_ITEMS.map((item) => (
         <div
           key={item.title}
-          className="flex min-w-0 flex-col gap-1 lg:flex-row lg:items-start lg:gap-2"
+          className="flex min-w-0 items-start gap-2 lg:flex-row lg:items-start lg:gap-2"
         >
-          <span className="">{item.icon}</span>
+          <span className="shrink-0">{item.icon}</span>
           <div className="min-w-0">
-            <Typography variant="brand-2" as="p" className="font-semibold font-manrope text-[#1C1C1C]">
+            <Typography variant="brand-1" as="p" className="lg:hidden font-semibold font-manrope text-[#1C1C1C]">
               {item.title}
             </Typography>
-            <Typography variant="brand-2" as="p" className="leading-snug font-light font-manrope text-[#9D9590]">
+            <Typography variant="brand-2" as="p" className="hidden lg:block font-semibold font-manrope text-[#1C1C1C]">
+              {item.title}
+            </Typography>
+            <Typography variant="brand-1" as="p" className="lg:hidden leading-snug font-light font-manrope text-[#9D9590]">
+              {item.desc}
+            </Typography>
+            <Typography variant="brand-2" as="p" className="hidden lg:block leading-snug font-light font-manrope text-[#9D9590]">
               {item.desc}
             </Typography>
           </div>
@@ -302,7 +308,10 @@ function DonateButton({ className }: { className: string }) {
           ❤️ DONATE NOW →
         </Typography>
       </button>
-      <Typography variant="brand-2" as="p" className="mt-2 font-light font-manrope text-center text-[#B0A99F] lg:text-center">
+      <Typography variant="caption-1" as="p" className="lg:hidden mt-2 font-light font-manrope text-center text-[#B0A99F]">
+        🔒 Secure Payment | Powered by Razorpay
+      </Typography>
+      <Typography variant="brand-2" as="p" className="hidden lg:block mt-2 font-light font-manrope text-center text-[#B0A99F]">
         🔒 Secure Payment | Powered by Razorpay
       </Typography>
     </>
