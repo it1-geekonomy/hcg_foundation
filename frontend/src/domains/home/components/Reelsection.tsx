@@ -97,7 +97,7 @@ export default function ReelsSection() {
   return (
     <section
       id="homereels"
-      className="w-full bg-[#FFF6D8] px-4 py-10 md:px-6 md:py-14 lg:px-8 lg:py-16"
+      className="w-full bg-[#FFF6D8] px-4 pt-10 pb-10 md:px-6 lg:px-8 lg:py-16"
     >
       <div className="mx-auto flex max-w-[1400px] flex-col items-center gap-8 md:gap-10 lg:gap-12">
         <Typography

@@ -7,7 +7,7 @@ import {
 
 export default function SustainableGoalsSection() {
   return (
-    <section className="w-full bg-[#FFF6D8] py-10 md:py-10 px-4 md:px-4 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
+    <section className="w-full bg-[#FFF6D8] px-4 md:px-4 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
 
       <div
         className="flex w-full flex-col overflow-hidden rounded-sm lg:flex-row lg:items-center"

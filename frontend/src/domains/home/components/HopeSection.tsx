@@ -4,7 +4,7 @@ import Typography from "@/lib/Typography";
 
 export default function AboutSection() {
   return (
-    <section className="py-10 md:py-10 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
+    <section className="pt-8 pb-8 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
       <div className="w-full grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-16">
         <Typography variant="heading-2"
           as="h2"

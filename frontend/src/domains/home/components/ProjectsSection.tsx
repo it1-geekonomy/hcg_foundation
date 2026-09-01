@@ -278,7 +278,7 @@ export default function VerticalCards() {
   }, [mobileActiveIndex, mobileContentHeights]);
 
   return (
-    <section ref={sectionRef} className="text-black bg-[#FFF6D8] py-10 md:py-10 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
+    <section ref={sectionRef} className="text-black bg-[#FFF6D8] pb-8 pt-8 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
       <div className="max-w-full">
         <div className="mb-10 flex flex-col gap-4 lg:mb-14 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
           <Typography variant="heading-2"

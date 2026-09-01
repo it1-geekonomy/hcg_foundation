@@ -6,7 +6,7 @@ import { images } from "@/domains/home/constants/float";
 
 export default function HopeSection() {
   return (
-    <section className="relative w-full overflow-x-hidden py-10 md:py-10 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
+    <section className="relative w-full overflow-x-hidden pt-10 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
       <div className="flex flex-nowrap justify-center items-start gap-4 sm:gap-4 md:gap-4 lg:gap-8 xl:gap-16 max-w-full mb-16 sm:mb-18 md:mb-26 lg:mb-38">
         {images.map((img, i) => (
           <div
