@@ -160,7 +160,7 @@ export default function DonateSection() {
       </div>
 
       {/* Social proof */}
-      <div className="flex items-center gap-8 sm:gap-2 md:gap-8 mb-10 md:mb-0">
+      <div className="flex items-center gap-10 sm:gap-4 md:gap-8 mb-10 md:mb-0">
         <div className="flex -space-x-2">
           {donorAvatars.map((src, i) => (
             <Image
@@ -174,7 +174,7 @@ export default function DonateSection() {
             />
           ))}
         </div>
-        <Typography variant="body-7" as="span" className="text-white/90 font-light font-manrope lg:hidden">
+        <Typography variant="body-5" as="span" className="text-white/90 font-light font-manrope lg:hidden">
           126 kind donors have contributed this month.Join with them today.❤️
         </Typography>
         <Typography variant="brand-2" as="span" className="text-white/90 font-light font-manrope hidden lg:block">
@@ -197,7 +197,7 @@ export default function DonateSection() {
       {/* Footer */}
       <div className="flex items-center justify-center gap-1.5">
         <Lock className="h-4 w-4 text-white/70" />
-        <Typography variant="body-5" as="span" className="text-white/60 font-light font-manrope lg:hidden">
+        <Typography variant="caption-1" as="span" className="text-white/60 font-light font-manrope lg:hidden">
           Secure Payment • Trusted by Thousands
         </Typography>
         <Typography variant="brand-2" as="span" className="text-white/60 font-light font-manrope hidden lg:block">
@@ -220,7 +220,7 @@ export default function DonateSection() {
             priority
             className="object-cover object-top"
           />
-          <div className="relative z-10 pt-[300px] px-[10px] pb-[10px]">
+          <div className="relative z-10 px-8 py-8 sm:px-18 sm:py-18">
             <div
               className="flex w-full flex-col gap-4 rounded border border-white/15 p-5 backdrop-blur-md"
               style={{ backgroundColor: donateTheme.glassBg }}
