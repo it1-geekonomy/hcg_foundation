@@ -44,6 +44,7 @@ interface MobileMenuPanelProps {
   openDropdown: number | null;
   toggleDropdown: (index: number) => void;
   donateButton: { href: string; label: string };
+  onDonate: () => void;
 }
 
 export function MobileMenuPanel({
@@ -53,6 +54,7 @@ export function MobileMenuPanel({
   openDropdown,
   toggleDropdown,
   donateButton,
+  onDonate,
 }: MobileMenuPanelProps) {
   const pathname = usePathname();
 
@@ -160,7 +162,11 @@ export function MobileMenuPanel({
         {/* Donate Button — only inside hamburger below sm (640px) */}
         <Link
           href={donateButton.href}
-          onClick={() => setIsMenuOpen(false)}
+          onClick={(event) => {
+            event.preventDefault();
+            setIsMenuOpen(false);
+            onDonate();
+          }}
           className={`sm:hidden mt-3 inline-flex justify-center px-5 py-2.5 bg-[#FED034] hover:bg-[#e6bc2e] transition-all duration-300 ease-in-out delay-[var(--stagger-delay)] ${
             isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
           }`}

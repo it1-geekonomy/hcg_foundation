@@ -72,6 +72,10 @@ export default function Navbar() {
     }, 150);
   };
 
+  const scrollToDonateForm = () => {
+    document.getElementById("donate-form")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <div
       className={`fixed top-[clamp(0.75rem,2vw,1.5rem)] inset-x-[clamp(1rem,8vw,8rem)] xl:inset-x-[clamp(0.5rem,3vw,4rem)] 2xl:inset-x-[clamp(1rem,10vw,10rem)] z-50 transition-transform duration-300 ease-in-out ${isVisible ? "translate-y-0" : "-translate-y-[150%]"
@@ -131,6 +135,10 @@ export default function Navbar() {
             {/* Donate Button — visible xl and up, next to nav links */}
             <Link
               href={navbarContent.donateButton.href}
+              onClick={(event) => {
+                event.preventDefault();
+                scrollToDonateForm();
+              }}
               className="hidden xl:inline-block shrink-0 px-5 py-2.5 bg-[#FED034] hover:bg-[#e6bc2e] transition-all duration-300 hover:shadow-[0_0_20px_rgba(254,208,52,0.5)] mr-6"
             >
               <Typography variant="button-4" as="span" className="text-[#262626] font-manrope font-light">
@@ -141,6 +149,10 @@ export default function Navbar() {
             {/* Donate Button — visible sm to xl, sits before hamburger */}
             <Link
               href={navbarContent.donateButton.href}
+              onClick={(event) => {
+                event.preventDefault();
+                scrollToDonateForm();
+              }}
               className="hidden sm:inline-block xl:hidden shrink-0 px-5 py-2.5 bg-[#FED034] hover:bg-[#e6bc2e] transition-all duration-300 hover:shadow-[0_0_20px_rgba(254,208,52,0.5)]"
             >
               <Typography variant="button-4" as="span" className="text-[#262626]">
@@ -164,6 +176,7 @@ export default function Navbar() {
           openDropdown={openDropdown}
           toggleDropdown={toggleDropdown}
           donateButton={navbarContent.donateButton}
+          onDonate={scrollToDonateForm}
         />
       </nav>
     </div>
