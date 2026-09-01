@@ -1,28 +1,63 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { STATS } from "@/domains/home/constants/stat";
 import Typography from "@/lib/Typography";
 import StatCard from "./Statcard";
 
-const DESC_LEAD =
-  "Every number represents a life touched, a family supported, and a community strengthened ";
-const DESC_HIGHLIGHT = "through hope, compassion, and care.";
+const DESC_TEXT =
+  "Every number represents a life touched, a family supported, and a community strengthened through hope, compassion, and care.";
 
-const TOTAL_LENGTH = DESC_LEAD.length + DESC_HIGHLIGHT.length;
-const LEAD_END = DESC_LEAD.length / TOTAL_LENGTH;
-
-const BASE_COLOR = "rgba(38,38,38,0.35)"; // unfilled text color (matches your old /55-ish fade)
+const BASE_COLOR = "rgba(38,38,38,0.35)"; // unfilled text color
 const FILL_COLOR = "#262626"; // fully filled text color
 
 export default function StatSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const [active, setActive] = useState(false);
 
-  // scroll-fill tracking for the description
-  const descWrapRef = useRef<HTMLDivElement | null>(null);
+  const descWrapRef = useRef<HTMLParagraphElement | null>(null);
+  const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const rafRef = useRef<number | null>(null);
+
   const [progress, setProgress] = useState(0);
+  // lineIndexForWord[i] = which visual line word i belongs to
+  const [lineIndexForWord, setLineIndexForWord] = useState<number[]>([]);
+  const [lineCount, setLineCount] = useState(1);
+
+  const words = DESC_TEXT.split(" ");
+
+  // Group words into visual lines by comparing their rendered offsetTop.
+  // Recomputed on resize since wrapping changes with viewport width.
+  const measureLines = useCallback(() => {
+    const tops = wordRefs.current.map((el) => el?.offsetTop ?? 0);
+    if (tops.length === 0) return;
+
+    let currentTop = tops[0];
+    let currentLine = 0;
+    const indices: number[] = [];
+
+    tops.forEach((top) => {
+      if (top > currentTop + 2) {
+        // new visual line detected (allow 2px tolerance for sub-pixel rounding)
+        currentLine += 1;
+        currentTop = top;
+      }
+      indices.push(currentLine);
+    });
+
+    setLineIndexForWord(indices);
+    setLineCount(currentLine + 1);
+  }, []);
+
+  useLayoutEffect(() => {
+    measureLines();
+    const t = setTimeout(measureLines, 100); // catch late font loads
+    window.addEventListener("resize", measureLines);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("resize", measureLines);
+    };
+  }, [measureLines]);
 
   const updateProgress = useCallback(() => {
     const node = descWrapRef.current;
@@ -78,15 +113,20 @@ export default function StatSection() {
     return () => observer.disconnect();
   }, []);
 
-  // per-segment progress derived from overall scroll progress
-  const leadProgress = Math.min(1, Math.max(0, progress / LEAD_END));
-  const highlightProgress = Math.min(
-    1,
-    Math.max(0, (progress - LEAD_END) / (1 - LEAD_END)),
-  );
+  // Divide the scroll range evenly across however many visual lines
+  // exist, then fill each line as a solid block once progress reaches it.
+  const scrollPerLine = 1 / lineCount;
 
-  const leadPercent = leadProgress * 100;
-  const highlightPercent = highlightProgress * 100;
+  function colorForLine(lineIdx: number): string {
+    const lineStart = lineIdx * scrollPerLine;
+    const lineProgress = Math.min(
+      1,
+      Math.max(0, (progress - lineStart) / scrollPerLine),
+    );
+    // Snap to fully filled or fully base — whole line changes together,
+    // not a left-to-right sweep within the line.
+    return lineProgress >= 0.5 ? FILL_COLOR : BASE_COLOR;
+  }
 
   return (
     <section ref={sectionRef} className="relative overflow-hidden px-6 py-6 lg:py-10">
@@ -102,28 +142,22 @@ export default function StatSection() {
         ))}
       </div>
 
-      {/* wrapper div only for scroll measurement — no visual/layout impact */}
-      <div ref={descWrapRef} className="relative mx-auto mt-14 max-w-4xl">
-        <Typography variant="body-1" as="p">
-          <span
-            style={{
-              backgroundImage: `linear-gradient(to right, ${FILL_COLOR} ${leadPercent}%, ${BASE_COLOR} ${leadPercent}%)`,
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              color: "transparent",
-            }}
-          >
-            {DESC_LEAD}
-          </span>
-          <span
-            style={{
-              backgroundImage: `linear-gradient(to right, ${FILL_COLOR} ${highlightPercent}%, ${BASE_COLOR} ${highlightPercent}%)`,
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              color: "transparent",
-            }}
-          >
-            {DESC_HIGHLIGHT}
+      <div className="relative mx-auto mt-14 max-w-4xl">
+        <Typography variant="body-1" as="p" className="relative">
+          <span ref={descWrapRef} className="inline">
+            {words.map((word, i) => (
+              <span
+                key={i}
+                ref={(el) => {
+                  wordRefs.current[i] = el;
+                }}
+                className="transition-colors duration-300 ease-out"
+                style={{ color: colorForLine(lineIndexForWord[i] ?? 0) }}
+              >
+                {word}
+                {i < words.length - 1 ? " " : ""}
+              </span>
+            ))}
           </span>
         </Typography>
       </div>

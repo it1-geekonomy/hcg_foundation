@@ -11,9 +11,11 @@ export default function HopeSection() {
         {images.map((img, i) => (
           <div
             key={i}
-            className={`relative flex-1 min-w-0 lg:flex-none lg:shrink-0 ${img.top} ${img.rotate} animate-float sm:animate-float-sm md:animate-float-md [animation-delay:${img.delay}] [animation-duration:${img.duration}]`}
+            className={`relative flex-1 min-w-0 lg:flex-none lg:shrink-0 ${img.top} animate-[float_2s_ease-in-out_infinite] sm:animate-[float-sm_2s_ease-in-out_infinite] md:animate-[float-md_2s_ease-in-out_infinite]`}
           >
-            <div className="w-full aspect-[3/4] lg:aspect-auto lg:w-[clamp(10rem,13vw,14rem)] lg:h-[clamp(13rem,16vw,17rem)] rounded-md sm:rounded-xl md:rounded-2xl overflow-hidden">
+            <div
+              className={`w-full aspect-[3/4] lg:aspect-auto lg:w-[clamp(10rem,13vw,14rem)] lg:h-[clamp(13rem,16vw,17rem)] rounded-md sm:rounded-xl md:rounded-2xl overflow-hidden ${img.rotate}`}
+            >
               <Image
                 src={img.src}
                 alt={`Family photo ${i + 1}`}
@@ -28,14 +30,16 @@ export default function HopeSection() {
       </div>
 
       <div className="text-center px-2">
-        <Typography variant="heading-2"
+        <Typography
+          variant="heading-2"
           as="h2"
           className="text-[#382E07] font-tiempos-headline font-normal"
         >
           Hope Begins With
         </Typography>
 
-        <Typography variant="heading-2"
+        <Typography
+          variant="heading-2"
           as="p"
           className="mt-1 text-[#382E07] font-tiempos-headline font-normal"
         >
