@@ -208,7 +208,7 @@ export default function DonateSection() {
   );
 
   return (
-    <section className="w-full bg-[#FFF6D8] pb-14 lg:pb-24">
+    <section className="w-full bg-[#FFF6D8] pt-10 pb-10 lg:pb-24">
       <div className="relative w-full">
         {/* Below 768px (<md): fixed top offset to reveal the image above the
             card, with equal 10px inset on the remaining sides. */}

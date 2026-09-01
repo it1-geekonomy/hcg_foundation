@@ -129,7 +129,7 @@ export default function StatSection() {
   }
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden px-6 py-6 lg:py-10">
+    <section ref={sectionRef} className="relative overflow-hidden px-6 pt-6 lg:py-10">
       <div className="relative max-w-full text-center">
         <Typography variant="heading-1" as="h2" className="text-[#382E07]">
           Our Journey of Impact

@@ -34,13 +34,13 @@ export default function CommunitySection() {
   };
 
   return (
-    <section className="w-full px-6 py-10 sm:px-10 md:px-14 md:py-14 lg:px-16 lg:py-16 xl:px-24 2xl:px-32">
+    <section className="w-full px-6 sm:px-10 md:px-14 lg:px-16 lg:py-16 xl:px-24 2xl:px-32">
       <div className="mx-auto max-w-[1400px]">
         {/* Tags left · heading + body right · vertically centered (Figma) */}
         <div className="mb-10 flex flex-col gap-8 md:mb-14 lg:mb-14 lg:flex-row lg:items-center lg:justify-between lg:gap-12 xl:gap-20">
-          <div className="order-2 flex flex-wrap gap-2 sm:flex-col sm:gap-2 md:gap-5 lg:order-1 lg:max-w-[min(100%,32rem)] lg:shrink-0">
+          <div className="order-2 flex flex-col gap-2 md:gap-5 lg:order-1 lg:max-w-[min(100%,32rem)] lg:shrink-0">
             {communityTagRows.map((row, rowIndex) => (
-            <div key={rowIndex} className="contents sm:flex sm:flex-wrap sm:gap-2 md:gap-3">
+              <div key={rowIndex} className="flex flex-wrap gap-2 md:gap-3">
                 {row.map((tag) => (
                   <Typography
                     key={tag}
