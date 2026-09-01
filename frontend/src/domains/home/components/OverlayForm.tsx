@@ -167,7 +167,7 @@ function ImpactItems({ className }: { className: string }) {
             <Typography variant="body-7" as="p" className="font-bold font-manrope text-gray-900">
               {item.title}
             </Typography>
-            <Typography variant="body-6" as="p" className="leading-snug !text-left text-[#9D9590] font-manrope font-light">
+            <Typography variant="body-6" as="p" className="leading-snug !text-left text-[#333131] font-manrope font-normal">
               {item.desc}
             </Typography>
           </div>
@@ -178,7 +178,7 @@ function ImpactItems({ className }: { className: string }) {
 }
 
 function TrustItems({
-  className = "mt-8 grid grid-cols-2 gap-4 border-t border-[#EDE8E0] pt-6 sm:grid-cols-4 lg:gap-x-10",
+  className = "mt-8 grid grid-cols-1 gap-4 border-t border-[#EDE8E0] pt-6 sm:grid-cols-2 md:grid-cols-4 lg:gap-x-10",
 }: {
   className?: string;
 }) {
@@ -191,16 +191,16 @@ function TrustItems({
         >
           <span className="shrink-0">{item.icon}</span>
           <div className="min-w-0">
-            <Typography variant="brand-1" as="p" className="lg:hidden font-semibold font-manrope text-[#1C1C1C]">
+            <Typography variant="brand-1" as="p" className="lg:hidden font-semibold font-manrope text-[#1C1C1C] text-nowrap">
               {item.title}
             </Typography>
             <Typography variant="brand-2" as="p" className="hidden lg:block font-semibold font-manrope text-[#1C1C1C]">
               {item.title}
             </Typography>
-            <Typography variant="brand-1" as="p" className="lg:hidden leading-snug font-light font-manrope text-[#9D9590]">
+            <Typography variant="body-5" as="p" className="lg:hidden leading-snug font-normal font-manrope text-[#333131]">
               {item.desc}
             </Typography>
-            <Typography variant="brand-2" as="p" className="hidden lg:block leading-snug font-light font-manrope text-[#9D9590]">
+            <Typography variant="brand-2" as="p" className="hidden lg:block leading-snug font-normal font-manrope text-[#333131]">
               {item.desc}
             </Typography>
           </div>
@@ -279,8 +279,8 @@ function AmountPicker({
               onChange={(e) => onCustomAmountChange(e.target.value)}
               onKeyDown={onCustomAmountKeyDown}
               onBlur={onCustomAmountBlur}
-              placeholder="Other"
-              className="w-full font-semibold font-manrope text-gray-900 outline-none placeholder:font-normal placeholder:text-gray-400"
+              placeholder="0"
+              className="w-16 min-w-0 font-semibold font-manrope text-gray-900 outline-none placeholder:font-normal placeholder:text-gray-400"
             />
           </div>
         ) : (
@@ -308,10 +308,10 @@ function DonateButton({ className }: { className: string }) {
           ❤️ DONATE NOW →
         </Typography>
       </button>
-      <Typography variant="caption-1" as="p" className="lg:hidden mt-2 font-light font-manrope text-center text-[#B0A99F]">
+      <Typography variant="caption-1" as="p" className="lg:hidden mt-2 font-light font-manrope text-center text-[#333131]">
         🔒 Secure Payment | Powered by Razorpay
       </Typography>
-      <Typography variant="brand-2" as="p" className="hidden lg:block mt-2 font-light font-manrope text-center text-[#B0A99F]">
+      <Typography variant="brand-2" as="p" className="hidden lg:block mt-2 font-light font-manrope text-center text-[#333131]">
         🔒 Secure Payment | Powered by Razorpay
       </Typography>
     </>
@@ -416,7 +416,7 @@ function ModalBelow1024({
             {...amountProps}
             gridClassName="mt-3 grid grid-cols-[repeat(3,max-content)] gap-2"
             pillWidthClassName="w-fit px-4 py-2"
-            inputSpanClassName="col-span-3"
+            inputSpanClassName="w-fit"
           />
 
           <DonateButton className="mt-8 flex w-fit items-center justify-center gap-2 mx-auto rounded-xl bg-[#FDC61D] px-10 py-3 shadow-sm transition hover:bg-[#E9B510] lg:w-full lg:self-auto lg:px-0 lg:py-3.5" />

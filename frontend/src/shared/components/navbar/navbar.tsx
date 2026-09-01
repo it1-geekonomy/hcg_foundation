@@ -77,7 +77,7 @@ export default function Navbar() {
       className={`fixed top-[clamp(0.75rem,2vw,1.5rem)] inset-x-[clamp(1rem,8vw,8rem)] xl:inset-x-[clamp(0.5rem,3vw,4rem)] 2xl:inset-x-[clamp(1rem,10vw,10rem)] z-50 transition-transform duration-300 ease-in-out ${isVisible ? "translate-y-0" : "-translate-y-[150%]"
         }`}
     >
-      <nav className="w-full border border-white/10 bg-white/[0.08] backdrop-blur-[60px] px-[clamp(1rem,2vw,1.5rem)] xl:px-0">
+      <nav className="w-full border border-white/10 bg-black/[0.18] backdrop-blur-[60px] px-[clamp(1rem,2vw,1.5rem)] xl:px-0">
         <div className="flex items-center justify-between h-[clamp(3.5rem,6vw,4.5rem)] xl:ml-8">
           {/* Logo */}
           <Link href="/" className="shrink-0 transition-transform duration-300 hover:scale-105">

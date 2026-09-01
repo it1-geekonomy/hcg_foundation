@@ -24,24 +24,24 @@ export default function SustainableGoalsSection() {
           </Typography>
         </div>
 
-        {/* Below sm: cols-1. sm–md (640–768): cols-2, centered, reordered rows. md+: cols-4. lg: flex row */}
-        <div className="grid grid-cols-1 justify-items-center gap-4 p-4 sm:grid-cols-2 sm:justify-items-center sm:justify-center md:grid-cols-4 md:gap-1.5 md:justify-items-stretch md:p-4 lg:flex lg:shrink-0 lg:items-center lg:gap-0 lg:p-4">
+        {/* Below md (768px): grid-cols-2, full width, px-6, order box1,box2,box4,box3.
+            md+: unchanged (cols-4 grid, then lg: flex row) */}
+        <div className="grid w-full grid-cols-2 justify-items-center gap-4 px-6 py-6 md:w-auto md:grid-cols-4 md:gap-1.5 md:justify-items-stretch md:p-4 lg:flex lg:shrink-0 lg:items-center lg:gap-0 lg:p-4">
           {sustainableGoals.map((goal, idx) => {
-            // Row 1 (sm band): box1, box2 → order-1, order-2
-            // Row 2 (sm band): box4, box3 → order-3, order-4 (box4 first, box3 second)
-            const smOrderClass =
+            // Below 768px order: box1, box2, box4, box3
+            const orderClass =
               idx === 0
-                ? "sm:order-1"
+                ? "order-1"
                 : idx === 1
-                ? "sm:order-2"
-                : idx === 2
-                ? "sm:order-4" // box3 → second in row 2
-                : "sm:order-3"; // box4 → first in row 2
+                  ? "order-2"
+                  : idx === 2
+                    ? "order-4" // box3 → last
+                    : "order-3"; // box4 → third
 
             return (
               <div
                 key={goal.number}
-                className={`relative flex aspect-square w-[200px] flex-col px-1 md:w-full md:order-none lg:w-36 xl:w-44 2xl:w-48 ${smOrderClass}`}
+                className={`relative flex aspect-square w-full flex-col px-1 md:order-none lg:w-36 xl:w-44 2xl:w-48 ${orderClass}`}
                 style={{ backgroundColor: goal.bg }}
               >
                 <Typography
@@ -52,23 +52,17 @@ export default function SustainableGoalsSection() {
                   {goal.number}
                 </Typography>
 
-                {/* This flex-1 spacer always gets the exact same leftover
-                    height on every card, because the number row and the label
-                    box below are both fixed heights now (not just min-heights),
-                    so all four icons land on the same row. */}
                 <div className="flex flex-1 items-center justify-center">
                   <Image
                     src={goal.icon}
                     alt={goal.title}
                     width={80}
                     height={80}
-                    className="h-[clamp(5rem,12vw,5rem)] w-[clamp(5rem,12vw,5rem)] object-contain md:h-[clamp(3rem,6vw,5rem)] md:w-[clamp(3rem,6vw,5rem)]"
+                    className="h-[clamp(5rem,12vw,5rem)] w-[clamp(5rem,12vw,5rem)] object-contain sm:h-[clamp(6rem,14vw,7rem)] sm:w-[clamp(6rem,14vw,7rem)] md:h-[clamp(3rem,6vw,5rem)] md:w-[clamp(3rem,6vw,5rem)]"
                   />
                 </div>
 
-                {/* Fixed height (not min-h) + line-clamp-2 = identical box on
-                    every card whether the label is 1 line or 2. */}
-                <div className="w-full flex h-8 shrink-0 items-center justify-center sm:h-9 lg:mt-3 lg:h-10 xl:h-11">
+                <div className="w-full flex h-8 shrink-0 items-center justify-center pb-3 sm:h-9 md:pb-0 lg:mt-3 lg:h-10 xl:h-11">
                   <Typography
                     variant="caption-1"
                     as="span"
