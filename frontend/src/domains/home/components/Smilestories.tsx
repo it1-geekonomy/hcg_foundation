@@ -265,7 +265,7 @@ export default function SmileStories() {
   const handleCardClick = (link: string) => {
     if (didDragRef.current) return; // it was a drag, not a click - don't navigate
     saveOffset();
-    window.location.href = link;
+    window.location.href = "/#";
   };
 
   return (

@@ -101,7 +101,7 @@ export default function TogetherWeCreateHope() {
         >
           {TOGETHER_CONTENT.heading}
         </Typography>
-        <Typography variant="body-2" as="p" className="max-w-4xl text-[#686868C2] font-normal font-argestadisplay">
+        <Typography variant="body-2" as="p" className="max-w-4xl text-[#2D2300C2] font-normal font-argestadisplay">
           {TOGETHER_CONTENT.description}
         </Typography>
       </div>
@@ -134,7 +134,7 @@ export default function TogetherWeCreateHope() {
                 >
                   {TOGETHER_CONTENT.stat.value}
                 </Typography>
-                <Typography variant="heading-9" as="p" className="text-[#090909]/70 font-medium font-manrope">
+                <Typography variant="heading-9" as="p" className="text-[#090909]/70 !text-left font-medium font-manrope">
                   {TOGETHER_CONTENT.stat.label}
                 </Typography>
               </div>
@@ -165,9 +165,9 @@ export default function TogetherWeCreateHope() {
 
 
             <a href={TOGETHER_CONTENT.content.cta.href}
-              className="mt-2 inline-flex w-fit items-stretch overflow-hidden bg-[#FCCC2D]"
+              className="mt-2 inline-flex w-fit items-stretch overflow-hidden bg-[#FCCC2D] gap-2"
             >
-              <span className="flex items-center px-5 py-2">
+              <span className="flex items-center px-6 py-4">
                 <Typography
                   variant="button-1"
                   as="span"
@@ -178,8 +178,8 @@ export default function TogetherWeCreateHope() {
               </span>
 
               <span className="flex items-center p-2">
-                <span className="flex h-full w-full items-center justify-center bg-black px-1">
-                  <ArrowUpRight className="h-5 w-5 text-[#FCCC2D]" />
+                <span className="flex h-full w-full items-center justify-center bg-black px-3 py-2">
+                  <ArrowUpRight className="h-6 w-6 text-[#FFFFFF]" />
                 </span>
               </span>
             </a>

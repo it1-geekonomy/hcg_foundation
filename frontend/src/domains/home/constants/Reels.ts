@@ -1,14 +1,17 @@
 export interface Reel {
   id: string;
+  videoSrc: string;
 }
 
+const PLACEHOLDER_VIDEO = "/Reels/HCGReel1.mp4";
+
 export const reels: Reel[] = [
-  { id: "reel-1" },
-  { id: "reel-2" },
-  { id: "reel-3" },
-  { id: "reel-4" },
-  { id: "reel-5" },
-  { id: "reel-6" },
+  { id: "reel-1", videoSrc: PLACEHOLDER_VIDEO },
+  { id: "reel-2", videoSrc: PLACEHOLDER_VIDEO },
+  { id: "reel-3", videoSrc: PLACEHOLDER_VIDEO },
+  { id: "reel-4", videoSrc: PLACEHOLDER_VIDEO },
+  { id: "reel-5", videoSrc: PLACEHOLDER_VIDEO },
+  { id: "reel-6", videoSrc: PLACEHOLDER_VIDEO },
 ];
 
 /** Portrait reel ratio — height = width × (16/9) */

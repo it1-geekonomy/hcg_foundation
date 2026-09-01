@@ -99,7 +99,7 @@ export default function DonateSection() {
 
           {isCustom ? (
             <div className="flex w-[88%] mx-auto items-center justify-center gap-1 rounded border border-[#FCCC2D] bg-[#FCCC2D]/15 py-2.5 px-2 backdrop-blur-sm">
-              <Typography variant="body-8" as="span" className="text-white/70 font-manrope">
+              <Typography variant="body-8" as="span" className="text-[#FFFFFF] font-manrope">
                 ₹
               </Typography>
               <input
@@ -146,7 +146,7 @@ export default function DonateSection() {
         </Typography>
 
         <div className="flex items-center gap-2 border-b border-white/30 pb-2 mb-4 lg:mb-8">
-          <Typography variant="body-2" as="span" className="text-[#909299] font-manrope">
+          <Typography variant="body-2" as="span" className="text-[#FFFFFF] font-manrope">
             ₹
           </Typography>
           <input
@@ -160,7 +160,7 @@ export default function DonateSection() {
       </div>
 
       {/* Social proof */}
-      <div className="flex items-center gap-6 sm:gap-4 md:gap-6 mb-10 md:mb-0">
+      <div className="flex items-center gap-8 sm:gap-2 md:gap-8 mb-10 md:mb-0">
         <div className="flex -space-x-2">
           {donorAvatars.map((src, i) => (
             <Image
@@ -174,8 +174,11 @@ export default function DonateSection() {
             />
           ))}
         </div>
-        <Typography variant="brand-2" as="span" className="text-white/90 font-light font-manrope">
-          126 kind donors have contributed this month. Join with them today.❤️
+        <Typography variant="body-7" as="span" className="text-white/90 font-light font-manrope lg:hidden">
+          126 kind donors have contributed this month.Join with them today.❤️
+        </Typography>
+        <Typography variant="brand-2" as="span" className="text-white/90 font-light font-manrope hidden lg:block">
+          126 kind donors have contributed this month.Join with them today.❤️
         </Typography>
       </div>
 
@@ -193,15 +196,12 @@ export default function DonateSection() {
 
       {/* Footer */}
       <div className="flex items-center justify-center gap-1.5">
-        <Lock className="h-3 w-3 text-white/70" />
-        <Typography variant="brand-2" as="span" className="text-white/60 font-light font-manrope">
-          Secure Payment
+        <Lock className="h-4 w-4 text-white/70" />
+        <Typography variant="body-5" as="span" className="text-white/60 font-light font-manrope lg:hidden">
+          Secure Payment • Trusted by Thousands
         </Typography>
-        <Typography variant="brand-2" as="span" className="text-white/60 font-light font-manrope">
-          •
-        </Typography>
-        <Typography variant="brand-2" as="span" className="text-white/60 font-light font-manrope">
-          Trusted by Thousands
+        <Typography variant="brand-2" as="span" className="text-white/60 font-light font-manrope hidden lg:block">
+          Secure Payment • Trusted by Thousands
         </Typography>
       </div>
     </>

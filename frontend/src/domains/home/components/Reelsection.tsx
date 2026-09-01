@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import Typography from "@/lib/Typography";
-import { reels, reelsTheme } from "@/domains/home/constants/Reels";
+import { reels, reelsTheme, type Reel } from "@/domains/home/constants/Reels";
 
 /**
  * Reel carousel — nav bottom-aligned with cards; strip width fits whole cards only.
@@ -90,7 +90,10 @@ export default function ReelsSection() {
   };
 
   return (
-    <section id="homereels" className="w-full bg-[#FFF6D8] px-4 py-10 md:px-6 md:py-14 lg:px-8 lg:py-16">
+    <section
+      id="homereels"
+      className="w-full bg-[#FFF6D8] px-4 py-10 md:px-6 md:py-14 lg:px-8 lg:py-16"
+    >
       <div className="mx-auto flex max-w-[1400px] flex-col items-center gap-8 md:gap-10 lg:gap-12">
         <Typography
           variant="heading-1"
@@ -109,20 +112,20 @@ export default function ReelsSection() {
 
           <div
             ref={scrollerRef}
-            className="shrink-0 snap-x snap-mandatory overflow-x-auto overflow-y-visible scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-            style={{
-              width: stripWidthPx ?? undefined,
-              maxWidth: "100%",
-              WebkitOverflowScrolling: "touch",
-            }}
+            className="[width:var(--strip-w)] max-w-full shrink-0 snap-x snap-mandatory overflow-x-auto overflow-y-visible scroll-smooth [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            style={
+              {
+                "--strip-w": stripWidthPx != null ? `${stripWidthPx}px` : "auto",
+              } as React.CSSProperties
+            }
           >
             <div
               ref={trackRef}
-              className="flex w-max items-start"
-              style={{ gap: reelsTheme.gapPx }}
+              className="flex w-max items-start [gap:var(--track-gap)]"
+              style={{ "--track-gap": `${reelsTheme.gapPx}px` } as React.CSSProperties}
             >
               {reels.map((reel) => (
-                <ReelCard key={reel.id} />
+                <ReelCard key={reel.id} reel={reel} />
               ))}
             </div>
           </div>
@@ -134,25 +137,66 @@ export default function ReelsSection() {
   );
 }
 
-function ReelCard() {
+function ReelCard({ reel }: { reel: Reel }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [muted, setMuted] = useState(true);
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setMuted((prev) => !prev);
+  };
+
   return (
     <article
-      className="reel-card shrink-0 snap-start shadow-lg"
-      style={{ backgroundColor: reelsTheme.cardBg }}
+      className="reel-card relative shrink-0 snap-start overflow-hidden shadow-lg [background-color:var(--card-bg)]"
+      style={{ "--card-bg": reelsTheme.cardBg } as React.CSSProperties}
     >
-      <div className="flex h-full w-full items-center justify-center">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke={reelsTheme.arrowBg}
-          strokeWidth={1.5}
-          className="h-10 w-10 opacity-40 sm:h-12 sm:w-12 lg:h-14 lg:w-14"
-          aria-hidden
-        >
-          <polygon points="5 3 19 12 5 21 5 3" />
-        </svg>
-      </div>
+      <video
+        ref={videoRef}
+        src={reel.videoSrc}
+        className="h-full w-full object-cover"
+        autoPlay
+        muted={muted}
+        loop
+        playsInline
+        preload="metadata"
+      />
+
+      <button
+        type="button"
+        onClick={toggleMute}
+        aria-label={muted ? "Unmute video" : "Mute video"}
+        aria-pressed={!muted}
+        className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70"
+      >
+        <MuteIcon muted={muted} />
+      </button>
     </article>
+  );
+}
+
+function MuteIcon({ muted }: { muted: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className="h-5 w-5"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <polygon points="4 9 8 9 12 5 12 19 8 15 4 15 4 9" fill="currentColor" stroke="none" />
+      {muted ? (
+        <>
+          <line x1="16" y1="9" x2="21" y2="14" />
+          <line x1="21" y1="9" x2="16" y2="14" />
+        </>
+      ) : (
+        <path d="M16 8a5 5 0 0 1 0 8" />
+      )}
+    </svg>
   );
 }
 
@@ -175,12 +219,15 @@ function ReelNavButton({
         onClick();
       }}
       aria-label={direction === "prev" ? "Show previous reels" : "Show more reels"}
-      className={`relative z-10 flex shrink-0 touch-manipulation items-center justify-center rounded-full transition-opacity ${dimmed ? "opacity-35" : "opacity-100"}`}
-      style={{
-        width: size,
-        height: size,
-        backgroundColor: reelsTheme.arrowBg,
-      }}
+      className={`relative z-10 flex shrink-0 touch-manipulation items-center justify-center rounded-full transition-opacity [width:var(--btn-size)] [height:var(--btn-size)] [background-color:var(--btn-bg)] ${
+        dimmed ? "opacity-35" : "opacity-100"
+      }`}
+      style={
+        {
+          "--btn-size": `clamp(28px, 7vw, ${size * 0.85}px)`,
+          "--btn-bg": reelsTheme.arrowBg,
+        } as React.CSSProperties
+      }
     >
       <Chevron dir={direction === "prev" ? "prev" : "next"} color={reelsTheme.arrowColor} />
     </button>
@@ -188,14 +235,20 @@ function ReelNavButton({
 }
 
 function Chevron({ dir, color }: { dir: "prev" | "next"; color: string }) {
+  const iconSize = reelsTheme.controlIconPx;
+
   return (
     <svg
-      width={reelsTheme.controlIconPx}
-      height={reelsTheme.controlIconPx}
+      className="[width:var(--icon-size)] [height:var(--icon-size)] [stroke:var(--icon-color)] [stroke-width:var(--icon-stroke)]"
+      style={
+        {
+          "--icon-size": `clamp(14px, 3.5vw, ${iconSize * 0.85}px)`,
+          "--icon-color": color,
+          "--icon-stroke": reelsTheme.controlStrokePx,
+        } as React.CSSProperties
+      }
       viewBox="0 0 24 24"
       fill="none"
-      stroke={color}
-      strokeWidth={reelsTheme.controlStrokePx}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden
