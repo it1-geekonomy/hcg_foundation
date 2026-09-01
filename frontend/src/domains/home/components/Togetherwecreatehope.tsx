@@ -26,7 +26,7 @@ function TogetherCarousel() {
   }, [active]);
 
   return (
-    <div className="relative w-full overflow-hidden rounded bg-[#141414] aspect-[3/4] sm:aspect-[16/11] md:aspect-[16/11] lg:aspect-square">
+    <div className="relative w-full overflow-hidden rounded bg-[#141414] aspect-[3/4] sm:aspect-[16/11] md:aspect-[16/11] lg:h-[700px] lg:aspect-auto">
       {/* Stacked images cross-fading via opacity */}
       {CAROUSEL_SLIDES.map((s, i) => (
         <Image
@@ -112,12 +112,12 @@ export default function TogetherWeCreateHope() {
         <TogetherCarousel />
 
         {/* Right column */}
-        <div className="flex flex-col gap-[clamp(1rem,2vw,1.5rem)] lg:grid lg:h-full lg:grid-rows-2">
+        <div className="flex flex-col gap-[clamp(1rem,2vw,1.5rem)] lg:grid lg:h-[700px] lg:min-h-0 lg:grid-rows-[minmax(0,2fr)_minmax(0,3fr)]">
           {/* Event stat + event image */}
-          <div className="grid grid-cols-1 gap-[clamp(1rem,2vw,1.5rem)] sm:grid-cols-2 lg:h-full">
+          <div className="grid min-w-0 grid-cols-2 gap-[clamp(0.75rem,2vw,1.5rem)] lg:h-full lg:min-h-0">
             {/* Stat box — calendar icon top-left, Tailwind gradient bg */}
-            <div className="relative flex h-[clamp(220px,60vw,280px)] w-full flex-col items-start justify-end gap-2 overflow-hidden rounded bg-gradient-to-br from-[#E3AE00] to-white p-[clamp(1.25rem,3vw,1.5rem)] sm:aspect-square sm:h-auto lg:aspect-auto lg:h-full">
-              <div className="absolute left-[clamp(1.25rem,3vw,1.5rem)] top-[clamp(1.25rem,3vw,1.5rem)] h-[clamp(3rem,6vw,3.5rem)] w-[clamp(3rem,6vw,3.5rem)]">
+            <div className="relative flex aspect-square h-auto min-w-0 w-full flex-col items-start justify-end gap-2 overflow-hidden rounded bg-gradient-to-br from-[#E3AE00] to-white p-[clamp(0.75rem,3vw,1.5rem)] max-[475px]:justify-start max-[475px]:pt-12 lg:aspect-auto lg:h-full">
+              <div className="absolute left-[clamp(1.25rem,3vw,1.5rem)] top-[clamp(1.25rem,3vw,1.5rem)] h-[clamp(3rem,6vw,3.5rem)] w-[clamp(3rem,6vw,3.5rem)] max-[639px]:h-6 max-[639px]:w-6">
                 <Image
                   src={TOGETHER_CONTENT.calendarIcon}
                   alt=""
@@ -126,7 +126,7 @@ export default function TogetherWeCreateHope() {
                 />
               </div>
 
-              <div className="mt-[clamp(2.5rem,6vw,3.5rem)] mb-[clamp(2rem,5vw,3rem)] flex flex-col gap-1">
+              <div className="relative z-10 mt-auto flex flex-col gap-1 max-[475px]:mt-0">
                 <Typography
                   variant="heading-3"
                   as="p"
@@ -140,7 +140,7 @@ export default function TogetherWeCreateHope() {
               </div>
             </div>
             {/* Event image */}
-            <div className="relative h-[clamp(220px,60vw,280px)] w-full overflow-hidden rounded bg-[#141414] sm:aspect-square sm:h-auto lg:aspect-auto lg:h-full">
+            <div className="relative aspect-square h-auto min-w-0 w-full overflow-hidden rounded bg-[#141414] lg:aspect-auto lg:h-full">
               <Image
                 src={TOGETHER_CONTENT.eventImage}
                 alt="Community event"
@@ -151,7 +151,7 @@ export default function TogetherWeCreateHope() {
           </div>
 
           {/* Content panel — rectangle, fills remaining space */}
-          <div className="flex flex-1 flex-col justify-center gap-4 bg-gradient-to-br from-[#535353] to-[#000000] p-[clamp(1.5rem,4vw,3rem)] rounded">
+          <div className="flex min-h-0 flex-1 flex-col justify-start gap-4 rounded bg-gradient-to-br from-[#535353] to-[#000000] p-[clamp(1.5rem,4vw,3rem)] lg:pb-10">
             <Typography
               variant="heading-2"
               as="h3"
@@ -159,14 +159,14 @@ export default function TogetherWeCreateHope() {
             >
               {TOGETHER_CONTENT.content.heading}
             </Typography>
-            <Typography variant="body-2" as="p" className="text-white/90 font-light mb-[clamp(0rem,4vw,3.5rem)] font-argestadisplay">
+            <Typography variant="body-2" as="p" className="text-white/90 font-light font-argestadisplay">
               {TOGETHER_CONTENT.content.description}
             </Typography>
 
 
             <a
               href={TOGETHER_CONTENT.content.cta.href}
-              className="mt-2 inline-flex h-12 w-fit items-stretch overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D]"
+              className="mt-2 mb-4 inline-flex h-12 w-fit shrink-0 items-stretch overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D] lg:mb-0"
             >
               <span className="flex h-full items-center px-4">
                 <Typography

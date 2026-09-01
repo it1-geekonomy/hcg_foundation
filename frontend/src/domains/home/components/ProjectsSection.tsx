@@ -37,6 +37,10 @@ function MoreDetailsButton({ className = "" }: { className?: string }) {
   )
 }
 
+// Mobile/tablet (below lg) accordion sizing
+const MOBILE_COLLAPSED_HEIGHT = 112;
+const MOBILE_EXPANDED_EXTRA = 200; // space above panel (image peek) + panel padding/margins
+
 export default function VerticalCards() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,62 +51,30 @@ export default function VerticalCards() {
 
   const [activeIndex, setActiveIndex] = useState<number>(0);
 
-  const titleRowRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [anyBtnOverflows, setAnyBtnOverflows] = useState(false);
+  // ----- Mobile / tablet (below lg) accordion state -----
+  const mobileCardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const mobileTimelineRefs = useRef<(gsap.core.Timeline | null)[]>([]);
+  const mobilePanelContentRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const mobileHasMounted = useRef(false);
 
+  const [mobileActiveIndex, setMobileActiveIndex] = useState<number>(0);
+  const [mobileContentHeights, setMobileContentHeights] = useState<number[]>([]);
+
+  // Measure each card's expanded panel content height (badge + title + date + desc + cta)
   useLayoutEffect(() => {
     const checkAll = () => {
-      const rows = titleRowRefs.current;
-      const overflowing = rows.some(
-        (row) => row && row.scrollWidth > row.clientWidth + 1
-      );
-      setAnyBtnOverflows((prev) => (prev === overflowing ? prev : overflowing));
-    };
-
-    const ro = new ResizeObserver(checkAll);
-    titleRowRefs.current.forEach((row) => {
-      if (row) ro.observe(row);
-    });
-
-    const raf = requestAnimationFrame(checkAll);
-    let cancelled = false;
-    if (typeof document !== "undefined" && "fonts" in document) {
-      (document as Document & { fonts: FontFaceSet }).fonts.ready.then(() => {
-        if (!cancelled) checkAll();
+      const blocks = mobilePanelContentRefs.current;
+      const heights = blocks.map((block) => (block ? block.scrollHeight : 0));
+      setMobileContentHeights((prev) => {
+        if (prev.length === heights.length && prev.every((h, i) => h === heights[i])) {
+          return prev;
+        }
+        return heights;
       });
-    }
-    window.addEventListener("resize", checkAll);
-
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", checkAll);
-      ro.disconnect();
-    };
-  }, []);
-
-  const cardContentRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [cardContentHeight, setCardContentHeight] = useState<number | null>(null);
-  const TOP_RESERVE = 190;
-
-  useLayoutEffect(() => {
-    const checkAll = () => {
-      const blocks = cardContentRefs.current;
-      const maxContent = blocks.reduce((max, block) => {
-        if (!block) return max;
-        const prevHeight = block.style.height;
-        block.style.height = "auto";
-        const natural = block.scrollHeight;
-        block.style.height = prevHeight;
-        return Math.max(max, natural);
-      }, 0);
-      if (maxContent > 0) {
-        setCardContentHeight((prev) => (prev === maxContent ? prev : maxContent));
-      }
     };
 
     const ro = new ResizeObserver(checkAll);
-    cardContentRefs.current.forEach((block) => {
+    mobilePanelContentRefs.current.forEach((block) => {
       if (block) ro.observe(block);
     });
 
@@ -148,6 +120,7 @@ export default function VerticalCards() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ----- Desktop (lg+) hover accordion animation — unchanged -----
   useEffect(() => {
     const cards = cardsRef.current.filter((c): c is HTMLDivElement => c !== null);
     const reduceMotion = reduceMotionRef.current;
@@ -229,6 +202,81 @@ export default function VerticalCards() {
     };
   }, [activeIndex]);
 
+  // ----- Mobile / tablet (below lg) click accordion animation -----
+  useEffect(() => {
+    const reduceMotion = reduceMotionRef.current;
+    const cards = mobileCardsRef.current;
+    const skipAnim = !mobileHasMounted.current && mobileContentHeights.length === 0;
+
+    cards.forEach((card, index) => {
+      if (!card) return;
+
+      const tint = card.querySelector<HTMLElement>(".m-card-tint");
+      const image = card.querySelector<HTMLElement>(".m-card-image");
+      const collapsedRow = card.querySelector<HTMLElement>(".m-card-collapsed");
+      const panel = card.querySelector<HTMLElement>(".m-card-panel");
+      const panelBadge = card.querySelector<HTMLElement>(".m-panel-badge");
+      const title = card.querySelector<HTMLElement>(".m-panel-title");
+      const date = card.querySelector<HTMLElement>(".m-panel-date");
+      const desc = card.querySelector<HTMLElement>(".m-panel-desc");
+      const cta = card.querySelector<HTMLElement>(".m-panel-cta");
+      if (!tint || !image || !collapsedRow || !panel || !panelBadge || !title || !date || !desc || !cta)
+        return;
+
+      const isActive = index === mobileActiveIndex;
+      const contentHeight = mobileContentHeights[index] || 0;
+      const targetHeight = isActive ? contentHeight + MOBILE_EXPANDED_EXTRA : MOBILE_COLLAPSED_HEIGHT;
+      const instant = reduceMotion || skipAnim;
+      const d = instant ? 0.001 : 0.6;
+
+      mobileTimelineRefs.current[index]?.kill();
+
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.out", overwrite: "auto" },
+      });
+      mobileTimelineRefs.current[index] = tl;
+
+      tl.to(card, { height: targetHeight, duration: d }, 0)
+        .to(image, { scale: isActive ? 1 : 1.08, duration: instant ? 0.001 : 0.9, ease: "power2.out" }, 0)
+        .to(tint, { opacity: isActive ? 0 : 1, duration: instant ? 0.001 : 0.4 }, 0);
+
+      if (isActive) {
+        tl.to(collapsedRow, { opacity: 0, duration: instant ? 0.001 : 0.15 }, 0);
+
+        const panelStart = instant ? 0.001 : 0.18;
+        tl.fromTo(
+          panel,
+          { opacity: 0, y: 20, scale: 0.98 },
+          { opacity: 1, y: 0, scale: 1, duration: instant ? 0.001 : 0.42 },
+          panelStart
+        )
+          .fromTo(panelBadge, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: instant ? 0.001 : 0.3 }, panelStart + 0.05)
+          .fromTo(title, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: instant ? 0.001 : 0.3 }, panelStart + 0.09)
+          .fromTo(date, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: instant ? 0.001 : 0.28 }, panelStart + 0.14)
+          .fromTo(desc, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: instant ? 0.001 : 0.28 }, panelStart + 0.19)
+          .fromTo(cta, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: instant ? 0.001 : 0.28 }, panelStart + 0.24)
+          .call(() => {
+            panel.style.pointerEvents = "auto";
+          });
+      } else {
+        const panelOut = instant ? 0.001 : 0.2;
+        tl.to(panel, { opacity: 0, y: 12, scale: 0.98, duration: panelOut, ease: "power2.in" }, 0)
+          .set(panel, { pointerEvents: "none" });
+
+        const collapsedStart = instant ? 0.001 : panelOut + 0.03;
+        tl.to(collapsedRow, { opacity: 1, duration: instant ? 0.001 : 0.2 }, collapsedStart);
+      }
+    });
+
+    if (mobileContentHeights.length > 0) {
+      mobileHasMounted.current = true;
+    }
+
+    return () => {
+      mobileTimelineRefs.current.forEach((tl) => tl?.kill());
+    };
+  }, [mobileActiveIndex, mobileContentHeights]);
+
   return (
     <section ref={sectionRef} className="text-black bg-[#FFF6D8] py-10 md:py-10 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
       <div className="max-w-full">
@@ -252,6 +300,7 @@ export default function VerticalCards() {
           </Typography>
         </div>
 
+        {/* Desktop (lg+) — unchanged */}
         <div
           ref={containerRef}
           className="hidden h-[480px] w-full gap-3 overflow-hidden rounded-2xl lg:flex xl:h-[600px]"
@@ -339,65 +388,76 @@ export default function VerticalCards() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-4 lg:hidden">
-          {CARDS.map((card, index) => {
-            const overflows = anyBtnOverflows;
-            return (
-              <div
-                key={card.number}
-                className="group relative flex min-h-[260px] flex-col justify-end overflow-hidden rounded-2xl sm:min-h-[300px]"
-                style={
-                  cardContentHeight
-                    ? { height: `${cardContentHeight + TOP_RESERVE}px` }
-                    : undefined
+        {/* Below lg — vertical accordion, single column, one card open at a time */}
+        <div className="flex flex-col gap-3 lg:hidden">
+          {CARDS.map((card, index) => (
+            <div
+              key={card.number}
+              ref={(el) => {
+                mobileCardsRef.current[index] = el;
+              }}
+              role="button"
+              tabIndex={0}
+              aria-expanded={index === mobileActiveIndex}
+              aria-label={card.title}
+              onClick={() => setMobileActiveIndex(index)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setMobileActiveIndex(index);
                 }
+              }}
+                className={`group relative w-full cursor-pointer overflow-hidden rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${
+                index === mobileActiveIndex ? "min-h-[420px] sm:min-h-[460px]" : "h-[112px]"
+              }`}
+              style={{ willChange: "height" }}
+            >
+              <img
+                src={card.image}
+                alt=""
+                aria-hidden="true"
+                className="m-card-image absolute inset-0 h-full w-full object-cover will-change-transform"
+              />
+
+              <div className="m-card-tint absolute inset-0 bg-[#FFD43B6E]" />
+
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10" />
+
+              {/* Collapsed row: badge + title */}
+              <div className="m-card-collapsed absolute inset-0 z-20 flex items-center gap-3 px-4">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black/70 text-white">
+                  <Typography variant="caption-1" as="span" className="text-white">
+                    {card.number}
+                  </Typography>
+                </div>
+                <Typography variant="heading-7" as="span" className="truncate text-white font-semibold font-manrope">
+                  {card.title}
+                </Typography>
+              </div>
+
+              {/* Expanded panel */}
+              <div
+                className="m-card-panel pointer-events-none absolute inset-x-4 bottom-4 z-30 flex max-h-[calc(100%-2rem)] flex-col overflow-y-auto rounded-2xl bg-[#8D8D8D66] p-4 opacity-0 shadow-2xl backdrop-blur-xl"
+                style={{ transformOrigin: "bottom center" }}
               >
-                <img
-                  src={card.image}
-                  alt=""
-                  aria-hidden="true"
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
-
                 <div
                   ref={(el) => {
-                    cardContentRefs.current[index] = el;
+                    mobilePanelContentRefs.current[index] = el;
                   }}
-                  className="relative z-10 m-3 flex flex-col justify-center rounded-2xl bg-[#8D8D8D66] p-3 backdrop-blur-xl sm:m-4 sm:p-4"
-                  style={
-                    cardContentHeight ? { height: `${cardContentHeight}px` } : undefined
-                  }
                 >
-                  <div className="relative">
-                    <div
-                      ref={(el) => {
-                        titleRowRefs.current[index] = el;
-                      }}
-                      aria-hidden="true"
-                      className="invisible absolute inset-x-0 top-0 flex items-center gap-3 overflow-hidden"
-                    >
-                      <Typography variant="heading-7" as="span" className="whitespace-nowrap text-white font-semibold font-manrope">
-                        {card.title}
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="m-panel-badge flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black/70 text-white">
+                      <Typography variant="caption-1" as="span" className="text-white">
+                        {card.number}
                       </Typography>
-                      <MoreDetailsButton className="shrink-0 px-4 py-2 font-semibold" />
                     </div>
 
-                    <div className="flex items-start gap-3">
-                      <Typography variant="heading-7"
-                        as="h3"
-                        className="min-w-0 flex-1 leading-tight text-white font-bold font-manrope"
-                      >
-                        {card.title}
-                      </Typography>
-                      {!overflows && (
-                        <MoreDetailsButton className="shrink-0 px-4 py-2 font-semibold font-manrope" />
-                      )}
-                    </div>
+                    <Typography variant="heading-7" as="h3" className="m-panel-title min-w-0 text-white font-bold font-manrope">
+                      {card.title}
+                    </Typography>
                   </div>
 
-                  <div className="mt-2 flex items-center gap-1.5 text-white/70 sm:mt-3">
+                  <div className="m-panel-date mb-3 flex items-center gap-2 text-white/90">
                     <div className="relative h-4 w-4">
                       <Image
                         src="/calendar1.png"
@@ -406,18 +466,20 @@ export default function VerticalCards() {
                         className="object-contain"
                       />
                     </div>
-                    <Typography variant="text-2" as="span" className="text-white font-medium font-manrope">
+                    <Typography variant="text-2" as="span" className="text-white font-normal font-manrope">
                       Project Date: {card.date}
                     </Typography>
                   </div>
 
-                  {overflows && (
-                    <MoreDetailsButton className="mt-3 px-4 py-2 font-semibold font-manrope" />
-                  )}
+                  <Typography variant="body-7" as="p" className="m-panel-desc mb-4 text-white font-light font-manrope">
+                    {card.description}
+                  </Typography>
+
+                  <MoreDetailsButton className="m-panel-cta font-semibold font-manrope px-4 py-3" />
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </div>
     </section>

@@ -23,7 +23,7 @@ const C_SIZE: Vec2 = [42, 56];
 const G_SIZE: Vec2 = [45, 59];
 
 const YELLOW_POS: Vec3 = [-30, 4, 0];
-const BLUE_POS: Vec3 = [26, 30, 1];
+const BLUE_POS: Vec3 = [26, 14, 1];
 const PINK_POS: Vec3 = [15, -34, 2];
 
 const HANDS_GROUP_POS: Vec3 = [-95, 5, 0];
