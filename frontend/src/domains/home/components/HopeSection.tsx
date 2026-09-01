@@ -28,15 +28,15 @@ export default function AboutSection() {
             href={ABOUT_CONTENT.cta.href}
             className="mt-2 inline-flex w-fit items-stretch overflow-hidden bg-[#FCCC2D]"
           >
-            <span className="flex items-center px-5 py-2">
-              <Typography variant="button-3" as="span" className="text-[#212121] font-semibold font-manrope">
+            <span className="flex items-center px-4 py-3.5">
+              <Typography variant="button-1" as="span" className="text-[#212121] font-semibold font-manrope">
                 {ABOUT_CONTENT.cta.label}
               </Typography>
             </span>
 
             <span className="flex items-center p-2">
-              <span className="flex h-full w-full items-center justify-center bg-black px-1">
-                <ArrowUpRight className="h-5 w-5 text-[#FCCC2D]" />
+              <span className="flex h-full w-full items-center justify-center bg-black px-2 py-2">
+                <ArrowUpRight className="h-6 w-6 text-[#FCCC2D]" />
               </span>
             </span>
           </a>

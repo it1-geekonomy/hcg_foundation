@@ -10,13 +10,13 @@ import Typography from "@/lib/Typography";
 function ArrowIcon({ className = "" }: { className?: string }) {
   return (
     <svg
-      width="20"
-      height="20"
+      width="22"
+      height="22"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2.5"
-      className={className}
+      strokeWidth="1.5"
+      className={`h-8 w-8 ${className}`}
     >
       <path d="M7 17L17 7M9 7h8v8" />
     </svg>
@@ -31,14 +31,14 @@ function MoreDetailsButton({ className = "" }: { className?: string }) {
   return (
     <Link
       href="/#"
-      className={`inline-flex w-fit shrink-0 items-center justify-center gap-2 bg-[#FFD43B] px-5 py-2.5 uppercase tracking-wider text-neutral-900 transition-colors hover:bg-[#f0c527] ${className}`}
+      className={`inline-flex w-fit shrink-0 items-center justify-center gap-2 bg-[#FFD43B] px-5 py-3.5 uppercase tracking-wider text-neutral-900 transition-colors hover:bg-[#f0c527] ${className}`}
     >
-      <Typography variant="button-3" as="span" className="uppercase text-neutral-900">
+      <Typography variant="button-1" as="span" className="uppercase text-neutral-900">
         More details
       </Typography>
       <ArrowIcon />
     </Link>
-  );
+  )
 }
 
 export default function VerticalCards() {
@@ -322,7 +322,7 @@ export default function VerticalCards() {
 
               {/* Expanded-state glass panel — widened so it overlays further onto the image side (lg+ only) */}
               <div
-                className="card-panel pointer-events-none absolute bottom-5 right-5 top-5 z-30 flex h-[calc(100%-2.5rem)] w-[clamp(26rem,78%,44rem)] flex-col overflow-y-auto rounded-2xl bg-[#8D8D8D66] p-6 opacity-0 shadow-2xl backdrop-blur-xl xl:w-[clamp(24rem,55%,36rem)]" style={{ transformOrigin: "top right" }}
+                className="card-panel pointer-events-none absolute bottom-5 right-5 top-5 z-30 flex h-[calc(100%-2.5rem)] w-[clamp(26rem,78%,44rem)] flex-col overflow-y-auto rounded-2xl bg-[#8D8D8D66] p-6 opacity-0 shadow-2xl backdrop-blur-xl xl:w-[clamp(18rem,48%,30rem)]" style={{ transformOrigin: "top right" }}
               >
                 <div className="panel-badge mb-4 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black/70 text-white">
                   <Typography variant="caption-1" as="span" className="text-white">
@@ -352,7 +352,7 @@ export default function VerticalCards() {
                   {card.description}
                 </Typography>
 
-                <MoreDetailsButton className="panel-cta font-semibold font-manrope" />
+                <MoreDetailsButton className="panel-cta mt-4 font-semibold font-manrope" />
               </div>
             </div>
           ))}

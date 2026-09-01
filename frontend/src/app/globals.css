@@ -53,11 +53,11 @@
 }
 
 @utility font-poppins {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
 }
 
 @utility font-roboto {
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-roboto), 'Roboto', sans-serif;
 }
 
 @utility font-tiempos-text {
@@ -113,6 +113,33 @@
   width: 0;
   height: 0;
   display: none;
+}
+
+/* Reels carousel — explicit W×H (9:16), values match reelsLayout in constants/Reels.ts */
+.reel-card {
+  width: 220px;
+  height: 391px;
+}
+
+@media (min-width: 768px) {
+  .reel-card {
+    width: 260px;
+    height: 462px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .reel-card {
+    width: 288px;
+    height: 512px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .reel-card {
+    width: 300px;
+    height: 533px;
+  }
 }
 
 :root {
