@@ -23,10 +23,6 @@ function ArrowIcon({ className = "" }: { className?: string }) {
   );
 }
 
-/**
- * Shared "more details" pill button so desktop + mobile stay pixel-identical
- * in spacing, type, and interaction states.
- */
 function MoreDetailsButton({ className = "" }: { className?: string }) {
   return (
     <Link
@@ -47,10 +43,10 @@ export default function VerticalCards() {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const reduceMotionRef = useRef(false);
 
-  // First card starts open so the interaction reads immediately on load.
+  const timelineRefs = useRef<(gsap.core.Timeline | null)[]>([]);
+
   const [activeIndex, setActiveIndex] = useState<number>(0);
 
-  // ---- Mobile/tablet grid: does the button fit next to the title? ----
   const titleRowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [anyBtnOverflows, setAnyBtnOverflows] = useState(false);
 
@@ -85,16 +81,8 @@ export default function VerticalCards() {
     };
   }, []);
 
-  // ---- Mobile/tablet grid: equal card height across ALL cards, not just per-row ----
-  // CSS Grid's `items-stretch` only equalizes cards within the same row track, so a
-  // two-line title in row 2 leaves row 1 shorter. We measure each card's content
-  // block (badge + title + date + button) and apply the tallest as a fixed height
-  // to every card, so all four stay visually even regardless of which row they're in.
   const cardContentRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [cardContentHeight, setCardContentHeight] = useState<number | null>(null);
-
-  // Extra space reserved above the content panel so photo is still visible
-  // (accounts for the panel's own margin + a minimum image reveal).
   const TOP_RESERVE = 190;
 
   useLayoutEffect(() => {
@@ -102,7 +90,6 @@ export default function VerticalCards() {
       const blocks = cardContentRefs.current;
       const maxContent = blocks.reduce((max, block) => {
         if (!block) return max;
-        // Measure natural height without our own fixed-height override skewing it.
         const prevHeight = block.style.height;
         block.style.height = "auto";
         const natural = block.scrollHeight;
@@ -182,9 +169,12 @@ export default function VerticalCards() {
       const isActive = index === activeIndex;
       const d = reduceMotion ? 0.001 : 0.65;
 
+      timelineRefs.current[index]?.kill();
+
       const tl = gsap.timeline({
         defaults: { ease: "power3.out", overwrite: "auto", duration: d },
       });
+      timelineRefs.current[index] = tl;
 
       tl.to(
         card,
@@ -216,11 +206,14 @@ export default function VerticalCards() {
           .fromTo(title, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.4 }, panelStart + 0.12)
           .fromTo(date, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.35 }, panelStart + 0.18)
           .fromTo(desc, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.35 }, panelStart + 0.24)
-          .fromTo(cta, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.35 }, panelStart + 0.3);
-        panel.style.pointerEvents = "auto";
+          .fromTo(cta, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.35 }, panelStart + 0.3)
+          .call(() => {
+            panel.style.pointerEvents = "auto";
+          });
       } else {
         const panelOutDuration = reduceMotion ? 0.001 : 0.26;
-        tl.to(panel, { opacity: 0, y: 16, scale: 0.97, duration: panelOutDuration, ease: "power2.in" }, 0);
+        tl.to(panel, { opacity: 0, y: 16, scale: 0.97, duration: panelOutDuration, ease: "power2.in" }, 0)
+          .set(panel, { pointerEvents: "none" });
 
         const collapsedStart = reduceMotion ? 0.001 : panelOutDuration + 0.04;
         tl.to(
@@ -228,15 +221,17 @@ export default function VerticalCards() {
           { opacity: 1, duration: reduceMotion ? 0.001 : 0.25 },
           collapsedStart
         );
-        panel.style.pointerEvents = "none";
       }
     });
+
+    return () => {
+      timelineRefs.current.forEach((tl) => tl?.kill());
+    };
   }, [activeIndex]);
 
   return (
     <section ref={sectionRef} className="text-black bg-[#FFF6D8] py-10 md:py-10 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
       <div className="max-w-full">
-        {/* Heading */}
         <div className="mb-10 flex flex-col gap-4 lg:mb-14 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
           <Typography variant="heading-2"
             as="h2"
@@ -257,7 +252,6 @@ export default function VerticalCards() {
           </Typography>
         </div>
 
-        {/* ===== Desktop / tablet-landscape: hover accordion (>=1024px) ===== */}
         <div
           ref={containerRef}
           className="hidden h-[480px] w-full gap-3 overflow-hidden rounded-2xl lg:flex xl:h-[600px]"
@@ -275,17 +269,9 @@ export default function VerticalCards() {
               aria-label={card.title}
               onMouseEnter={() => setActiveIndex(index)}
               onFocus={() => setActiveIndex(index)}
-              onClick={() => setActiveIndex(index)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setActiveIndex(index);
-                }
-              }}
               className="group relative min-w-0 cursor-pointer overflow-hidden rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-white/70"
               style={{ willChange: "flex-grow, flex-basis" }}
             >
-              {/* Background photo (always present; masked by the tint below when collapsed) */}
               <img
                 src={card.image}
                 alt=""
@@ -293,22 +279,18 @@ export default function VerticalCards() {
                 className="card-image absolute inset-0 h-full w-full object-cover will-change-transform"
               />
 
-              {/* Flat gold wash — fully covers the photo while collapsed, fades away when active */}
               <div
                 className="card-tint absolute inset-0 bg-[#FFD43B6E]"
               />
 
-              {/* Subtle darken over the photo for legibility when expanded */}
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/10" />
 
-              {/* Collapsed-state number badge, top-left */}
               <div className="card-badge-collapsed absolute left-4 top-4 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-white">
                 <Typography variant="caption-1" as="span" className="text-white">
                   {card.number}
                 </Typography>
               </div>
 
-              {/* Collapsed-state vertical title */}
               <div className="card-vertical-label absolute inset-x-0 bottom-6 z-20 flex justify-center">
                 <span
                   className="whitespace-nowrap font-medium text-white"
@@ -320,7 +302,6 @@ export default function VerticalCards() {
                 </span>
               </div>
 
-              {/* Expanded-state glass panel — widened so it overlays further onto the image side (lg+ only) */}
               <div
                 className="card-panel pointer-events-none absolute bottom-5 right-5 top-5 z-30 flex h-[calc(100%-2.5rem)] w-[clamp(26rem,78%,44rem)] flex-col overflow-y-auto rounded-2xl bg-[#8D8D8D66] p-6 opacity-0 shadow-2xl backdrop-blur-xl xl:w-[clamp(18rem,48%,30rem)]" style={{ transformOrigin: "top right" }}
               >
@@ -358,7 +339,6 @@ export default function VerticalCards() {
           ))}
         </div>
 
-        {/* ===== Mobile / tablet-portrait: static grid (<1024px) — unchanged ===== */}
         <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-4 lg:hidden">
           {CARDS.map((card, index) => {
             const overflows = anyBtnOverflows;

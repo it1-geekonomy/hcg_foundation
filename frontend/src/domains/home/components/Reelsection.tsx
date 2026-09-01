@@ -15,6 +15,11 @@ export default function ReelsSection() {
   const [atEnd, setAtEnd] = useState(false);
   const [stripWidthPx, setStripWidthPx] = useState<number | null>(null);
 
+  // Only one reel can be unmuted at a time. null = all muted.
+  // Lifting this up (instead of per-card local state) is what lets
+  // unmuting one card automatically mute whichever was previously unmuted.
+  const [unmutedId, setUnmutedId] = useState<string | null>(null);
+
   const syncEdges = useCallback(() => {
     const el = scrollerRef.current;
     if (!el) return;
@@ -125,7 +130,14 @@ export default function ReelsSection() {
               style={{ "--track-gap": `${reelsTheme.gapPx}px` } as React.CSSProperties}
             >
               {reels.map((reel) => (
-                <ReelCard key={reel.id} reel={reel} />
+                <ReelCard
+                  key={reel.id}
+                  reel={reel}
+                  muted={unmutedId !== reel.id}
+                  onToggleMute={() =>
+                    setUnmutedId((prev) => (prev === reel.id ? null : reel.id))
+                  }
+                />
               ))}
             </div>
           </div>
@@ -137,13 +149,20 @@ export default function ReelsSection() {
   );
 }
 
-function ReelCard({ reel }: { reel: Reel }) {
+function ReelCard({
+  reel,
+  muted,
+  onToggleMute,
+}: {
+  reel: Reel;
+  muted: boolean;
+  onToggleMute: () => void;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [muted, setMuted] = useState(true);
 
-  const toggleMute = (e: React.MouseEvent) => {
+  const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setMuted((prev) => !prev);
+    onToggleMute();
   };
 
   return (
@@ -164,7 +183,7 @@ function ReelCard({ reel }: { reel: Reel }) {
 
       <button
         type="button"
-        onClick={toggleMute}
+        onClick={handleToggle}
         aria-label={muted ? "Unmute video" : "Mute video"}
         aria-pressed={!muted}
         className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70"
