@@ -164,10 +164,11 @@ export default function TogetherWeCreateHope() {
             </Typography>
 
 
-            <a href={TOGETHER_CONTENT.content.cta.href}
-              className="mt-2 inline-flex w-fit items-stretch overflow-hidden bg-[#FCCC2D] gap-2"
+            <a
+              href={TOGETHER_CONTENT.content.cta.href}
+              className="mt-2 inline-flex h-12 w-fit items-stretch overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D]"
             >
-              <span className="flex items-center px-6 py-4">
+              <span className="flex h-full items-center px-4">
                 <Typography
                   variant="button-1"
                   as="span"
@@ -177,10 +178,8 @@ export default function TogetherWeCreateHope() {
                 </Typography>
               </span>
 
-              <span className="flex items-center p-2">
-                <span className="flex h-full w-full items-center justify-center bg-black px-3 py-2">
-                  <ArrowUpRight className="h-6 w-6 text-[#FFFFFF]" />
-                </span>
+              <span className="flex h-full w-12 shrink-0 items-center justify-center border-[3px] border-[#FCCC2D] bg-black">
+                <ArrowUpRight className="h-4 w-4 text-[#FFFFFF]" />
               </span>
             </a>
           </div>

@@ -62,7 +62,7 @@ export function MobileMenuPanel({
         isMenuOpen ? "max-h-[36rem] opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-2"
       }`}
     >
-      <div className="flex flex-col items-start gap-1 px-[clamp(1rem,3vw,1.5rem)] pb-6 pt-3 border-t border-white/10 mt-1 text-left">
+      <div className="flex flex-col items-start gap-1 bg-black/[0.18] px-[clamp(1rem,3vw,1.5rem)] pb-6 pt-3 border-t border-white/10 mt-1 text-left">
         {navLinks.map((link, i) => {
           const isOpen = openDropdown === i;
 
