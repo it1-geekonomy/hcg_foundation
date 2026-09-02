@@ -1,5 +1,8 @@
+"use client";
+
 import { ArrowUpRight } from "lucide-react";
 import { ABOUT_CONTENT } from "@/domains/home/constants/hope";
+import { scrollHomeToHero } from "@/domains/home/utils/heroScrollReset";
 import Typography from "@/lib/Typography";
 
 export default function AboutSection() {
@@ -26,6 +29,10 @@ export default function AboutSection() {
 
           <a
             href={ABOUT_CONTENT.cta.href}
+            onClick={(event) => {
+              event.preventDefault();
+              scrollHomeToHero({ smooth: true });
+            }}
             className="mt-2 inline-flex h-12 w-fit items-stretch overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D]"
           >
             <span className="flex h-full items-center px-4">

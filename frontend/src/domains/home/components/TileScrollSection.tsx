@@ -13,6 +13,10 @@ import {
   HERO_TILE_STEPS,
   HERO_TILE_Y_FRACTIONS,
 } from "@/domains/home/constants/heroTileScroll";
+import {
+  HERO_RESET_EVENT,
+  type HeroResetDetail,
+} from "@/domains/home/utils/heroScrollReset";
 
 // ============================================================================
 // RESPONSIVE LAYOUT
@@ -363,6 +367,7 @@ export default function TileScrollSection() {
 
   const currentStepRef = useRef(0);
   const isAnimatingRef = useRef(false);
+  const isResettingRef = useRef(false);
   const isPinnedRef = useRef(false);
   const navClearanceRef = useRef(getNavbarClearancePx());
   const layoutRef = useRef(layout);
@@ -508,6 +513,8 @@ export default function TileScrollSection() {
   }, [applyStep, scrollToStep]);
 
   const handleScroll = useCallback(() => {
+    if (isResettingRef.current) return;
+
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
     const rect = wrapper.getBoundingClientRect();
@@ -526,6 +533,40 @@ export default function TileScrollSection() {
       applyStep(HERO_TILE_COUNT - 1);
     }
   }, [applyStep]);
+
+  const resetToTop = useCallback(
+    (smooth = true) => {
+      isResettingRef.current = true;
+      isAnimatingRef.current = true;
+      isPinnedRef.current = false;
+
+      applyStep(0, true);
+      setPinMode("before");
+
+      window.scrollTo({ top: 0, left: 0, behavior: smooth ? "smooth" : "auto" });
+      if (!smooth) {
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }
+
+      window.setTimeout(() => {
+        isResettingRef.current = false;
+        isAnimatingRef.current = false;
+        handleScroll();
+      }, smooth ? 900 : 50);
+    },
+    [applyStep, handleScroll]
+  );
+
+  useEffect(() => {
+    const onHeroReset = (event: Event) => {
+      const detail = (event as CustomEvent<HeroResetDetail>).detail;
+      resetToTop(detail?.smooth !== false);
+    };
+
+    window.addEventListener(HERO_RESET_EVENT, onHeroReset);
+    return () => window.removeEventListener(HERO_RESET_EVENT, onHeroReset);
+  }, [resetToTop]);
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true });
