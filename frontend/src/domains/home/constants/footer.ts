@@ -79,9 +79,9 @@ export const FOOTER_CONTACT_INFO = {
 } as const;
 
 export const FOOTER_SOCIAL_LINKS = [
-  { name: "Facebook", href: "#" },
-  { name: "LinkedIn", href: "#" },
-  { name: "Instagram", href: "#" },
+  { name: "Facebook", href: "" },
+  { name: "LinkedIn", href: "" },
+  { name: "Instagram", href: "" },
 ] as const;
 
 export const FOOTER_DEVELOPER = {
