@@ -8,8 +8,7 @@ import StatCard from "./Statcard";
 const DESC_TEXT =
   "Every number represents a life touched, a family supported, and a community strengthened through hope, compassion, and care.";
 
-const BASE_COLOR = "rgba(38,38,38,0.35)"; // unfilled text color
-const FILL_COLOR = "#262626"; // fully filled text color
+const FILL_COLOR = "#000000"; // fully filled text color
 
 export default function StatSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -114,18 +113,15 @@ export default function StatSection() {
   }, []);
 
   // Divide the scroll range evenly across however many visual lines
-  // exist, then fill each line as a solid block once progress reaches it.
+  // exist. Each line ramps smoothly from 0 -> 1 opacity across its own
+  // slice of the scroll range, so one full line finishes filling per
+  // "scroll segment" before the next line starts.
   const scrollPerLine = 1 / lineCount;
 
-  function colorForLine(lineIdx: number): string {
+  function opacityForLine(lineIdx: number): number {
     const lineStart = lineIdx * scrollPerLine;
-    const lineProgress = Math.min(
-      1,
-      Math.max(0, (progress - lineStart) / scrollPerLine),
-    );
-    // Snap to fully filled or fully base — whole line changes together,
-    // not a left-to-right sweep within the line.
-    return lineProgress >= 0.5 ? FILL_COLOR : BASE_COLOR;
+    const raw = (progress - lineStart) / scrollPerLine;
+    return Math.min(1, Math.max(0, raw));
   }
 
   return (
@@ -151,8 +147,8 @@ export default function StatSection() {
                 ref={(el) => {
                   wordRefs.current[i] = el;
                 }}
-                className="transition-colors duration-300 ease-out"
-                style={{ color: colorForLine(lineIndexForWord[i] ?? 0) }}
+                className="transition-opacity duration-150 ease-out"
+                style={{ color: FILL_COLOR, opacity: opacityForLine(lineIndexForWord[i] ?? 0) }}
               >
                 {word}
                 {i < words.length - 1 ? " " : ""}

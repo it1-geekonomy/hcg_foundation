@@ -107,7 +107,7 @@ export default function DonateSection() {
                 inputMode="numeric"
                 autoFocus
                 value={customAmount}
-                onChange={(e) => setCustomAmount(e.target.value)}
+                onChange={(e) => setCustomAmount(e.target.value.replace(/\D/g, ""))}
                 placeholder="0"
                 className="w-full min-w-0 bg-transparent font-semibold text-white placeholder-white/40 outline-none"
               />
@@ -153,7 +153,9 @@ export default function DonateSection() {
             type="text"
             inputMode="numeric"
             value={customAmount}
-            onChange={handleCustomInputChange}
+            onChange={(e) => handleCustomInputChange({
+              target: { value: e.target.value.replace(/\D/g, "") }
+            } as React.ChangeEvent<HTMLInputElement>)}
             className="w-full bg-transparent text-white placeholder-white/40 outline-none"
           />
         </div>
