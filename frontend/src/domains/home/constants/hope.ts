@@ -6,6 +6,6 @@ export const ABOUT_CONTENT = {
   ],
   cta: {
     label: "READ MORE",
-    href: "/#",
+    href: "/",
   },
 } as const;

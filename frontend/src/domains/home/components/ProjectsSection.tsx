@@ -27,7 +27,7 @@ function ArrowIcon({ className = "" }: { className?: string }) {
 function MoreDetailsButton({ className = "" }: { className?: string }) {
   return (
     <Link
-      href="/#"
+      href="/"
       onClick={(event) => {
         event.preventDefault();
         scrollHomeToHero({ smooth: true });

@@ -513,8 +513,6 @@ export default function TileScrollSection() {
   }, [applyStep, scrollToStep]);
 
   const handleScroll = useCallback(() => {
-    if (isResettingRef.current) return;
-
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
     const rect = wrapper.getBoundingClientRect();
@@ -523,14 +521,14 @@ export default function TileScrollSection() {
     if (rect.top > 0) {
       isPinnedRef.current = false;
       setPinMode("before");
-      applyStep(0);
+      if (!isResettingRef.current) applyStep(0);
     } else if (rect.bottom > vh + 1) {
       isPinnedRef.current = true;
       setPinMode("pinned");
     } else {
       isPinnedRef.current = false;
       setPinMode("after");
-      applyStep(HERO_TILE_COUNT - 1);
+      if (!isResettingRef.current) applyStep(HERO_TILE_COUNT - 1);
     }
   }, [applyStep]);
 
@@ -538,10 +536,9 @@ export default function TileScrollSection() {
     (smooth = true) => {
       isResettingRef.current = true;
       isAnimatingRef.current = true;
-      isPinnedRef.current = false;
 
       applyStep(0, true);
-      setPinMode("before");
+      handleScroll();
 
       window.scrollTo({ top: 0, left: 0, behavior: smooth ? "smooth" : "auto" });
       if (!smooth) {
@@ -549,11 +546,13 @@ export default function TileScrollSection() {
         document.body.scrollTop = 0;
       }
 
-      window.setTimeout(() => {
+      const finish = () => {
         isResettingRef.current = false;
         isAnimatingRef.current = false;
         handleScroll();
-      }, smooth ? 900 : 50);
+      };
+
+      window.setTimeout(finish, smooth ? 900 : 50);
     },
     [applyStep, handleScroll]
   );
