@@ -178,7 +178,7 @@ function ImpactItems({ className }: { className: string }) {
 }
 
 function TrustItems({
-  className = "mt-8 grid grid-cols-2 gap-y-4 gap-x-2 border-t border-[#EDE8E0] pt-6 md:grid-cols-4 lg:gap-x-10",
+  className = "mt-8 grid grid-cols-2 gap-y-4 gap-x-2 border-t border-[#EDE8E0] pt-6 max-[474px]:grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:gap-x-10",
 }: {
   className?: string;
 }) {
@@ -187,7 +187,7 @@ function TrustItems({
       {TRUST_ITEMS.map((item) => (
         <div
           key={item.title}
-          className="flex min-w-0 items-start lg:flex-row lg:items-start"
+          className="flex min-w-0 items-start gap-2 lg:flex-row lg:items-start"
         >
           <span className="shrink-0">{item.icon}</span>
           <div className="min-w-0">
