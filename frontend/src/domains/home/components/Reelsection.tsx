@@ -103,7 +103,7 @@ export default function ReelsSection() {
           as="h2"
           className="w-full text-center font-medium font-tiempos-headline text-[#382E07] tracking-widest lg:mb-4"
         >
-          Hope.Care.Impact.
+          Hope. Care. Impact.
         </Typography>
 
         {/* items-end: nav buttons sit on card bottom baseline */}
