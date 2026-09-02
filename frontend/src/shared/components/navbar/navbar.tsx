@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Typography from "@/lib/Typography";
 import { navLinks, navbarContent } from "@/domains/home/constants/navbar";
+import { scrollHomeToHero } from "@/domains/home/utils/heroScrollReset";
 import DesktopDropdown from "./dropdown";
 import { HamburgerButton, MobileMenuPanel } from "./hamburger";
 
@@ -76,6 +77,12 @@ export default function Navbar() {
     document.getElementById("donate-form")?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const handleHomeNav = (event: MouseEvent) => {
+    if (pathname !== "/") return;
+    event.preventDefault();
+    scrollHomeToHero({ smooth: true });
+  };
+
   return (
     <div
       id="site-navbar"
@@ -85,7 +92,7 @@ export default function Navbar() {
       <nav className="w-full border border-white/10 bg-black/[0.18] backdrop-blur-[60px] px-[clamp(1rem,2vw,1.5rem)] xl:px-0">
         <div className="flex items-center justify-between h-[clamp(3.5rem,6vw,4.5rem)] xl:ml-8">
           {/* Logo */}
-          <Link href="/" className="shrink-0 transition-transform duration-300 hover:scale-105">
+          <Link href="/" onClick={handleHomeNav} className="shrink-0 transition-transform duration-300 hover:scale-105">
             <Image
               src={navbarContent.logo.src}
               alt={navbarContent.logo.alt}
@@ -104,6 +111,7 @@ export default function Navbar() {
                   <Link
                     key={i}
                     href={link.href}
+                    onClick={link.href === "/" ? handleHomeNav : undefined}
                     className="group relative flex items-center gap-1 py-1"
                   >
                     <Typography variant={link.href === pathname ? "text-1" : "text-2"}
@@ -178,6 +186,7 @@ export default function Navbar() {
           toggleDropdown={toggleDropdown}
           donateButton={navbarContent.donateButton}
           onDonate={scrollToDonateForm}
+          onHomeNav={handleHomeNav}
         />
       </nav>
     </div>
