@@ -13,6 +13,10 @@ import {
   HERO_TILE_STEPS,
   HERO_TILE_Y_FRACTIONS,
 } from "@/domains/home/constants/heroTileScroll";
+import {
+  HERO_RESET_EVENT,
+  type HeroResetDetail,
+} from "@/domains/home/utils/heroScrollReset";
 
 // ============================================================================
 // RESPONSIVE LAYOUT
@@ -230,6 +234,25 @@ function renderWordLines(
   );
 }
 
+function HeroLocationPin({ size, color = "white" }: { size: number; color?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="shrink-0"
+      aria-hidden
+    >
+      <path
+        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"
+        fill={color}
+      />
+    </svg>
+  );
+}
+
 function StoryTextBlock({
   step,
   active,
@@ -250,6 +273,9 @@ function StoryTextBlock({
     ...extra,
   });
 
+  const textColumnOffset = 4 + layout.accentGap;
+  const locationIconSize = Math.max(10, Math.round(layout.locationSize * 1.1));
+
   return (
     <div
       className="pointer-events-none absolute inset-0 flex flex-col justify-start overflow-hidden font-manrope"
@@ -262,29 +288,27 @@ function StoryTextBlock({
       }}
     >
       <div className="w-full max-w-full">
-        <div className="flex" style={{ gap: layout.accentGap }}>
+        {/* Name + location grouped with accent bar spanning both rows */}
+        <div className="flex items-stretch" style={{ gap: layout.accentGap }}>
           <span
-            className="w-[2px] shrink-0 self-stretch rounded-full"
+            className="w-1 shrink-0 self-stretch rounded-full"
             style={{ backgroundColor: HERO_NAME_ACCENT_COLOR }}
             aria-hidden
           />
           <div className="min-w-0 flex-1">
-            <div style={textStyle(layout.nameSize, 700, "white")}>
+            <div style={textStyle(layout.nameSize, 700, "white", { lineHeight: 1.2 })}>
               {renderWordLines(step.name, active, exiting, direction, layout.wordSpacing)}
             </div>
             <div
-              className="mt-1.5 flex items-start gap-1.5 sm:mt-2"
-              style={textStyle(layout.locationSize, 400, "rgba(255,255,255,0.9)")}
+              className="flex items-center"
+              style={{
+                gap: 5,
+                marginTop: 5,
+                ...textStyle(layout.locationSize, 400, "white"),
+              }}
             >
-              <Image
-                src="/location1.png"
-                alt=""
-                width={12}
-                height={12}
-                className="mt-0.5 h-3 w-3 shrink-0 brightness-0 invert opacity-90"
-                aria-hidden
-              />
-              <span className="leading-snug">
+              <HeroLocationPin size={locationIconSize} />
+              <span className="min-w-0 leading-snug">
                 {renderWordLines(step.location, active, exiting, direction, layout.wordSpacing)}
               </span>
             </div>
@@ -292,19 +316,25 @@ function StoryTextBlock({
         </div>
 
         <div
-          style={textStyle(layout.taglineSize, 700, "white", {
-            marginTop: layout.nameGap,
-            lineHeight: 1.4,
-          })}
+          style={{
+            paddingLeft: textColumnOffset,
+            ...textStyle(layout.taglineSize, 700, "white", {
+              marginTop: layout.nameGap,
+              lineHeight: 1.4,
+            }),
+          }}
         >
           {renderWordLines(step.tagline, active, exiting, direction, layout.wordSpacing)}
         </div>
 
         <div
-          style={textStyle(layout.bodySize, 400, "rgba(255,255,255,0.95)", {
-            marginTop: layout.taglineGap,
-            lineHeight: 1.65,
-          })}
+          style={{
+            paddingLeft: textColumnOffset,
+            ...textStyle(layout.bodySize, 400, "rgba(255,255,255,0.95)", {
+              marginTop: layout.taglineGap,
+              lineHeight: 1.65,
+            }),
+          }}
         >
           {renderWordLines(step.body, active, exiting, direction, layout.wordSpacing)}
         </div>
@@ -337,6 +367,7 @@ export default function TileScrollSection() {
 
   const currentStepRef = useRef(0);
   const isAnimatingRef = useRef(false);
+  const isResettingRef = useRef(false);
   const isPinnedRef = useRef(false);
   const navClearanceRef = useRef(getNavbarClearancePx());
   const layoutRef = useRef(layout);
@@ -490,16 +521,51 @@ export default function TileScrollSection() {
     if (rect.top > 0) {
       isPinnedRef.current = false;
       setPinMode("before");
-      applyStep(0);
+      if (!isResettingRef.current) applyStep(0);
     } else if (rect.bottom > vh + 1) {
       isPinnedRef.current = true;
       setPinMode("pinned");
     } else {
       isPinnedRef.current = false;
       setPinMode("after");
-      applyStep(HERO_TILE_COUNT - 1);
+      if (!isResettingRef.current) applyStep(HERO_TILE_COUNT - 1);
     }
   }, [applyStep]);
+
+  const resetToTop = useCallback(
+    (smooth = true) => {
+      isResettingRef.current = true;
+      isAnimatingRef.current = true;
+
+      applyStep(0, true);
+      handleScroll();
+
+      window.scrollTo({ top: 0, left: 0, behavior: smooth ? "smooth" : "auto" });
+      if (!smooth) {
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }
+
+      const finish = () => {
+        isResettingRef.current = false;
+        isAnimatingRef.current = false;
+        handleScroll();
+      };
+
+      window.setTimeout(finish, smooth ? 900 : 50);
+    },
+    [applyStep, handleScroll]
+  );
+
+  useEffect(() => {
+    const onHeroReset = (event: Event) => {
+      const detail = (event as CustomEvent<HeroResetDetail>).detail;
+      resetToTop(detail?.smooth !== false);
+    };
+
+    window.addEventListener(HERO_RESET_EVENT, onHeroReset);
+    return () => window.removeEventListener(HERO_RESET_EVENT, onHeroReset);
+  }, [resetToTop]);
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true });

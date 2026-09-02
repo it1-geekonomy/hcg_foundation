@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import gsap from "gsap";
 import { CARDS, COLLAPSED_WIDTH } from "@/domains/home/constants/project";
+import { scrollHomeToHero } from "@/domains/home/utils/heroScrollReset";
 import Typography from "@/lib/Typography";
 
 function ArrowIcon({ className = "" }: { className?: string }) {
@@ -26,7 +27,11 @@ function ArrowIcon({ className = "" }: { className?: string }) {
 function MoreDetailsButton({ className = "" }: { className?: string }) {
   return (
     <Link
-      href="/#"
+      href="/"
+      onClick={(event) => {
+        event.preventDefault();
+        scrollHomeToHero({ smooth: true });
+      }}
       className={`inline-flex w-fit shrink-0 items-center justify-center gap-2 bg-[#FFD43B] px-5 py-3.5 uppercase tracking-wider text-neutral-900 transition-colors hover:bg-[#f0c527] ${className}`}
     >
       <Typography variant="button-1" as="span" className="uppercase text-neutral-900">
