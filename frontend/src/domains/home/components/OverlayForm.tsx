@@ -137,15 +137,15 @@ function Heading() {
         className="mt-4 font-serif leading-tight text-black"
       >
         <span className="font-medium font-tiempos-fine tracking-wide">Bring Hope</span>
-        <br />
+        <br className="hidden sm:block" />
         <span className="bg-gradient-to-r from-[#F9BF16] to-[#B98A00] bg-clip-text text-transparent font-medium font-tiempos-fine tracking-wide">
-          Beyond Cancer
+          {" "}Beyond Cancer
         </span>
       </Typography>
       <Typography
         variant="body-9"
         as="p"
-        className="mt-6 max-w-xl leading-relaxed text-gray-500 font-argestadisplay font-normal"
+        className="mt-6 hidden max-w-xl leading-relaxed text-gray-500 font-argestadisplay font-normal sm:block"
       >
         Your contribution helps provide life-saving treatment, emotional
         care, and financial support to cancer patients and their families
@@ -178,7 +178,7 @@ function ImpactItems({ className }: { className: string }) {
 }
 
 function TrustItems({
-  className = "mt-8 grid grid-cols-1 gap-4 border-t border-[#EDE8E0] pt-6 sm:grid-cols-2 md:grid-cols-4 lg:gap-x-10",
+  className = "mt-8 grid grid-cols-2 gap-y-4 gap-x-2 border-t border-[#EDE8E0] pt-6 md:grid-cols-4 lg:gap-x-10",
 }: {
   className?: string;
 }) {
@@ -187,7 +187,7 @@ function TrustItems({
       {TRUST_ITEMS.map((item) => (
         <div
           key={item.title}
-          className="flex min-w-0 items-start gap-2 lg:flex-row lg:items-start lg:gap-2"
+          className="flex min-w-0 items-start lg:flex-row lg:items-start"
         >
           <span className="shrink-0">{item.icon}</span>
           <div className="min-w-0">
@@ -327,7 +327,7 @@ function Modal1024Up({
   ...amountProps
 }: AmountProps & { onClose: () => void }) {
   return (
-    <div className="relative mx-auto my-4 min-h-[700px] w-[calc(100%-2rem)] max-w-[1400px] overflow-hidden bg-[linear-gradient(115deg,_#ffffff_0%,_#ffffff_52%,_#FCE9AE_74%,_#C89100_100%)] shadow-2xl sm:my-6 sm:w-[calc(100%-3rem)] lg:absolute lg:left-12 lg:right-12 lg:top-12 lg:my-0 lg:min-h-[760px] lg:w-auto lg:max-w-none 2xl:left-24 2xl:right-24 2xl:top-24 2xl:min-h-[780px]">
+    <div className="relative mx-auto my-4 min-h-[700px] w-[calc(100%-2rem)] max-w-[1400px] overflow-hidden bg-[linear-gradient(115deg,_#ffffff_0%,_#ffffff_52%,_#FCE9AE_74%,_#C89100_100%)] shadow-2xl sm:my-6 sm:w-[calc(100%-3rem)] lg:absolute lg:left-12 lg:right-12 lg:top-12 lg:my-0 lg:min-h-[760px] lg:w-auto lg:max-w-none 2xl:left-24 2xl:right-24 2xl:top-14 2xl:min-h-[780px]">
       <CloseButton
         onClose={onClose}
         className="absolute right-4 top-4 z-[60] flex h-8 w-8 items-center justify-center bg-black text-[#F9BF16] transition hover:bg-gray-800"
@@ -341,7 +341,7 @@ function Modal1024Up({
           height={1000}
           priority
           sizes="(min-width: 1536px) 900px, (min-width: 1024px) 780px, 0px"
-          className="absolute bottom-0 right-0 h-[600px] w-auto max-w-none object-contain object-bottom 2xl:h-[750px]"
+          className="absolute bottom-0 right-0 h-[750px] w-auto max-w-none object-contain object-bottom lg:scale-[0.82] lg:origin-bottom-right xl:scale-[1.05] 2xl:h-[750px]"
         />
       </div>
 
@@ -357,24 +357,24 @@ function Modal1024Up({
         />
       </div>
 
-      <div className="relative z-30 flex min-h-[700px] w-full flex-col justify-center px-8 py-10 lg:min-h-0 lg:h-full lg:justify-start lg:px-12 lg:py-12 2xl:px-26">
+      <div className="relative z-30 flex min-h-[700px] w-full flex-col justify-center px-8 py-10 lg:min-h-0 lg:h-full lg:justify-start lg:px-12 lg:py-12 2xl:px-14">
         <div className="relative z-40 w-full lg:max-w-3xl">
           <Heading />
 
-          <ImpactItems className="mt-8 grid grid-cols-2 gap-x-10 gap-y-5" />
+          <ImpactItems className="mt-8 grid grid-cols-2 gap-x-10 gap-y-5 lg:grid-cols-1 lg:max-w-[520px] xl:grid-cols-1 2xl:grid-cols-2 2xl:max-w-none" />
 
-          <div className="mt-10">
+          <div className="mt-10 max-w-[520px] 2xl:max-w-[560px]">
             <AmountPicker
               {...amountProps}
-              gridClassName="mt-3 flex flex-nowrap items-stretch gap-2"
-              pillWidthClassName="flex-1 justify-center text-center whitespace-nowrap px-3 py-2"
-              inputSpanClassName="flex-1"
+              gridClassName="mt-3 grid grid-flow-col auto-cols-fr gap-2 lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-3 xl:grid-cols-3 2xl:grid-flow-col 2xl:auto-cols-fr 2xl:grid-cols-none 2xl:gap-2"
+              pillWidthClassName="w-full justify-center text-center px-3 py-2 lg:w-full lg:justify-center lg:text-center lg:px-3 lg:py-2 xl:w-full xl:justify-center xl:text-center xl:px-3 xl:py-2 2xl:w-full 2xl:justify-center 2xl:text-center 2xl:px-3 2xl:py-2"
+              inputSpanClassName="w-full lg:w-full xl:w-full 2xl:w-full"
             />
 
-            <DonateButton className="mx-auto mt-8 flex w-fit items-center justify-center gap-2 rounded-md bg-[#FDC61D] px-10 py-3.5 shadow-sm transition hover:bg-[#E9B510] md:mx-0 lg:w-full" />
+            <DonateButton className="mt-8 flex w-full items-center justify-center gap-2 rounded-md bg-[#FDC61D] px-10 py-3.5 shadow-sm transition hover:bg-[#E9B510] md:mx-0 lg:w-[calc(100%-0.125rem)] xl:w-[calc(100%-0.125rem)] 2xl:w-[calc(100%-0.125rem)]" />
           </div>
 
-          <TrustItems className="mt-8 grid grid-cols-4 gap-x-10 gap-y-4 border-t border-[#EDE8E0] pt-6" />
+          <TrustItems className="mt-8 grid grid-cols-2 gap-x-0 gap-y-4 border-t border-[#EDE8E0] pt-6 lg:grid-cols-1 2xl:grid-cols-2 2xl:gap-x-0 2xl:gap-y-4 2xl:max-w-none" />
         </div>
       </div>
     </div>
@@ -390,13 +390,28 @@ function ModalBelow1024({
   ...amountProps
 }: AmountProps & { onClose: () => void }) {
   return (
-    <div className="relative mx-auto my-4 flex w-[calc(100%-2rem)] max-w-[1400px] flex-col overflow-hidden bg-[linear-gradient(115deg,_#ffffff_0%,_#ffffff_52%,_#FCE9AE_74%)] shadow-2xl sm:my-6 sm:w-[calc(100%-3rem)] lg:absolute lg:left-12 lg:right-12 lg:top-12 lg:mx-0 lg:my-0 lg:min-h-[860px] lg:w-auto lg:max-w-none lg:flex-row lg:items-stretch lg:bg-[linear-gradient(115deg,_#ffffff_0%,_#ffffff_52%,_#FCE9AE_74%,_#C89100_100%)] 2xl:left-16 2xl:right-16 2xl:top-16">
+    <div
+      className="relative mx-auto my-4 flex w-[calc(100%-2rem)] max-w-[1400px] flex-col overflow-hidden bg-[linear-gradient(115deg,_#FFEEBD_0%,_#ffffff_100%)] shadow-2xl sm:bg-[linear-gradient(115deg,_#ffffff_0%,_#ffffff_52%,_#FCE9AE_74%)] sm:my-6 sm:w-[calc(100%-3rem)] lg:absolute lg:left-12 lg:right-12 lg:top-12 lg:mx-0 lg:my-0 lg:min-h-[860px] lg:w-auto lg:max-w-none lg:flex-row lg:items-stretch lg:bg-[linear-gradient(115deg,_#ffffff_0%,_#ffffff_52%,_#FCE9AE_74%,_#C89100_100%)] 2xl:left-16 2xl:right-16 2xl:top-16"
+    >
       <CloseButton
         onClose={onClose}
         className="absolute right-4 top-4 z-10 flex h-6 w-6 items-center justify-center bg-black text-[#F9BF16] transition"
       />
 
-      <div className="pointer-events-none absolute right-0 top-1/2 z-0 h-[clamp(420px,55vw,460px)] w-[60%] -translate-y-1/2 [mask-image:radial-gradient(ellipse_60%_70%_at_60%_40%,black_45%,transparent_100%)] [-webkit-mask-image:radial-gradient(ellipse_60%_70%_at_60%_40%,black_45%,transparent_100%)] lg:hidden">
+      {/* Below 640px only — image stacked on top, content flows below it */}
+      <div className="relative z-0 mx-auto h-[280px] w-[320px] shrink-0 sm:hidden">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_65%_65%_at_50%_45%,_#FFEEBD_0%,_transparent_72%)]" />
+        <Image
+          src="/form640.png"
+          alt="Cancer patient and her daughter embracing, both smiling"
+          fill
+          sizes="320px"
+          className="object-cover object-top [mask-image:radial-gradient(ellipse_75%_60%_at_50%_35%,black_55%,transparent_100%),linear-gradient(to_bottom,black_0%,black_55%,transparent_100%)] [mask-composite:intersect] [-webkit-mask-image:radial-gradient(ellipse_75%_60%_at_50%_35%,black_55%,transparent_100%),linear-gradient(to_bottom,black_0%,black_55%,transparent_100%)] [-webkit-mask-composite:source-in]"
+        />
+      </div>
+
+      {/* 640px–1024px — unchanged from original */}
+      <div className="pointer-events-none absolute right-0 top-1/2 z-0 hidden h-[clamp(420px,55vw,460px)] w-[60%] -translate-y-1/2 [mask-image:radial-gradient(ellipse_60%_70%_at_60%_40%,black_45%,transparent_100%)] [-webkit-mask-image:radial-gradient(ellipse_60%_70%_at_60%_40%,black_45%,transparent_100%)] sm:block lg:hidden">
         <Image
           src="/formimage.png"
           alt="Cancer patient and her daughter embracing, both smiling"
@@ -406,7 +421,7 @@ function ModalBelow1024({
         />
       </div>
 
-      <div className="relative flex w-full min-w-0 flex-col justify-center px-8 py-6 lg:w-1/2 lg:justify-start lg:bg-white lg:px-12 lg:py-8 lg:[mask-image:linear-gradient(to_right,black_0%,black_85%,transparent_100%)] lg:[-webkit-mask-image:linear-gradient(to_right,black_0%,black_85%,transparent_100%)]">
+      <div className="relative flex w-full min-w-0 flex-col justify-center px-8 pb-6 pt-0 sm:py-6 lg:w-1/2 lg:justify-start lg:bg-white lg:px-12 lg:py-8 lg:[mask-image:linear-gradient(to_right,black_0%,black_85%,transparent_100%)] lg:[-webkit-mask-image:linear-gradient(to_right,black_0%,black_85%,transparent_100%)]">
         <Heading />
 
         <ImpactItems className="mt-8 grid grid-cols-1 gap-4" />
@@ -414,7 +429,7 @@ function ModalBelow1024({
         <div className="mt-10 w-full lg:w-fit">
           <AmountPicker
             {...amountProps}
-            gridClassName="mt-3 grid grid-cols-[repeat(3,max-content)] gap-2"
+            gridClassName="mt-3 flex flex-wrap gap-2"
             pillWidthClassName="w-fit px-4 py-2"
             inputSpanClassName="w-fit"
           />
