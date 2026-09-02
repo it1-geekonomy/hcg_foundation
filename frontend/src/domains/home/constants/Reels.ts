@@ -3,7 +3,7 @@ export interface Reel {
   videoSrc: string;
 }
 
-const PLACEHOLDER_VIDEO1 = "/Reels/HCGreel1.mp4";
+const PLACEHOLDER_VIDEO1 = "/Reels/HCGreel11.mp4";
 const PLACEHOLDER_VIDEO2 = "/Reels/HCGreel2.mp4";
 const PLACEHOLDER_VIDEO3 = "/Reels/HCGreel3.mp4";
 const PLACEHOLDER_VIDEO4 = "/Reels/HCGreel4.mp4";
