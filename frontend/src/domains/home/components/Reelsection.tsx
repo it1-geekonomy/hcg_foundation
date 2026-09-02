@@ -4,6 +4,8 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import Typography from "@/lib/Typography";
 import { reels, reelsTheme, type Reel } from "@/domains/home/constants/Reels";
 
+const INSTAGRAM_URL = "https://www.instagram.com/hcg_foundation/";
+
 /**
  * Reel carousel — nav bottom-aligned with cards; strip width fits whole cards only.
  */
@@ -74,25 +76,21 @@ export default function ReelsSection() {
     return () => el.removeEventListener("scroll", syncEdges);
   }, [stripWidthPx, syncEdges]);
 
-  const step = (delta: -1 | 1) => {
+  const step = useCallback((delta: -1 | 1) => {
     const el = scrollerRef.current;
     if (!el) return;
-    const cards = Array.from(el.querySelectorAll<HTMLElement>(".reel-card"));
-    if (!cards.length) return;
 
-    let active = 0;
-    let best = Infinity;
-    for (let i = 0; i < cards.length; i++) {
-      const d = Math.abs(cards[i].offsetLeft - el.scrollLeft);
-      if (d < best) {
-        best = d;
-        active = i;
-      }
-    }
+    const firstCard = el.querySelector<HTMLElement>(".reel-card");
+    if (!firstCard) return;
 
-    const target = cards[Math.max(0, Math.min(cards.length - 1, active + delta))];
-    el.scrollTo({ left: target.offsetLeft, behavior: "smooth" });
-  };
+    const stepPx = firstCard.offsetWidth + reelsTheme.gapPx;
+    const nextLeft = Math.min(
+      el.scrollWidth - el.clientWidth,
+      Math.max(0, el.scrollLeft + delta * stepPx),
+    );
+
+    el.scrollTo({ left: nextLeft, behavior: "smooth" });
+  }, []);
 
   return (
     <section
@@ -165,9 +163,14 @@ function ReelCard({
     onToggleMute();
   };
 
+  const handleCardClick = () => {
+    window.open(INSTAGRAM_URL, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <article
-      className="reel-card relative shrink-0 snap-start overflow-hidden shadow-lg [background-color:var(--card-bg)]"
+      onClick={handleCardClick}
+      className="reel-card relative shrink-0 cursor-pointer snap-start overflow-hidden shadow-lg [background-color:var(--card-bg)]"
       style={{ "--card-bg": reelsTheme.cardBg } as React.CSSProperties}
     >
       <video
@@ -233,12 +236,13 @@ function ReelNavButton({
   return (
     <button
       type="button"
+      disabled={dimmed}
       onClick={(e) => {
         e.stopPropagation();
         onClick();
       }}
       aria-label={direction === "prev" ? "Show previous reels" : "Show more reels"}
-      className={`relative z-10 flex shrink-0 touch-manipulation items-center justify-center rounded-full transition-opacity [width:var(--btn-size)] [height:var(--btn-size)] [background-color:var(--btn-bg)] ${
+      className={`relative z-10 flex shrink-0 touch-manipulation items-center justify-center rounded-full transition-opacity disabled:cursor-not-allowed [width:var(--btn-size)] [height:var(--btn-size)] [background-color:var(--btn-bg)] ${
         dimmed ? "opacity-35" : "opacity-100"
       }`}
       style={
