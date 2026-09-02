@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -77,7 +77,7 @@ export default function Navbar() {
     document.getElementById("donate-form")?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleHomeNav = (event: MouseEvent) => {
+  const handleHomeNav = (event: ReactMouseEvent) => {
     if (pathname !== "/") return;
     event.preventDefault();
     scrollHomeToHero({ smooth: true });
