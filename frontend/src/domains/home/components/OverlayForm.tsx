@@ -361,7 +361,7 @@ function Modal1024Up({
         <div className="relative z-40 w-full lg:max-w-3xl">
           <Heading />
 
-          <ImpactItems className="mt-8 grid grid-cols-2 gap-x-10 gap-y-5 lg:grid-cols-1 lg:max-w-[520px] xl:grid-cols-1 2xl:grid-cols-2 2xl:max-w-none" />
+          <ImpactItems className="mt-8 grid grid-cols-2 gap-x-10 gap-y-5 lg:grid-cols-2 lg:max-w-[520px] xl:grid-cols-2 2xl:grid-cols-2 2xl:max-w-none" />
 
           <div className="mt-10 max-w-[520px] 2xl:max-w-[560px]">
             <AmountPicker
@@ -374,7 +374,7 @@ function Modal1024Up({
             <DonateButton className="mt-8 flex w-full items-center justify-center gap-2 rounded-md bg-[#FDC61D] px-10 py-3.5 shadow-sm transition hover:bg-[#E9B510] md:mx-0 lg:w-[calc(100%-0.125rem)] xl:w-[calc(100%-0.125rem)] 2xl:w-[calc(100%-0.125rem)]" />
           </div>
 
-          <TrustItems className="mt-8 grid grid-cols-2 gap-x-0 gap-y-4 border-t border-[#EDE8E0] pt-6 lg:grid-cols-1 2xl:grid-cols-2 2xl:gap-x-0 2xl:gap-y-4 2xl:max-w-none" />
+          <TrustItems className="mt-8 grid grid-cols-2 gap-x-0 gap-y-4 border-t border-[#EDE8E0] pt-6 lg:grid-cols-1 lg:max-w-[460px] 2xl:grid-cols-2 2xl:gap-x-0 2xl:gap-y-4 2xl:max-w-none" />
         </div>
       </div>
     </div>
