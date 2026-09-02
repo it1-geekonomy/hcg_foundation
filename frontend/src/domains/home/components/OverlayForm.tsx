@@ -276,7 +276,7 @@ function AmountPicker({
               type="text"
               inputMode="numeric"
               value={customAmount}
-              onChange={(e) => onCustomAmountChange(e.target.value)}
+              onChange={(e) => onCustomAmountChange(e.target.value.replace(/\D/g, ""))}
               onKeyDown={onCustomAmountKeyDown}
               onBlur={onCustomAmountBlur}
               placeholder="0"
