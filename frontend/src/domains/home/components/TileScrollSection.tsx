@@ -167,6 +167,11 @@ function getNavbarClearancePx(): number {
 
 const XL_BREAKPOINT_PX = 1280;
 
+function isDonationOverlayOpen(): boolean {
+  return typeof document !== "undefined" &&
+    document.body.dataset.donationOverlayOpen === "true";
+}
+
 function getTileTranslateY(
   step: number,
   vh: number,
@@ -417,6 +422,7 @@ export default function TileScrollSection() {
 
   useEffect(() => {
     const onWheel = (e: WheelEvent) => {
+      if (isDonationOverlayOpen()) return;
       if (!isPinnedRef.current) return;
       if (isAnimatingRef.current) {
         e.preventDefault();
@@ -453,6 +459,7 @@ export default function TileScrollSection() {
     };
 
     const advanceFromTouch = (e: TouchEvent, delta: number) => {
+      if (isDonationOverlayOpen()) return false;
       if (!isPinnedRef.current) return false;
       if (isAnimatingRef.current) {
         e.preventDefault();
@@ -477,6 +484,7 @@ export default function TileScrollSection() {
     };
 
     const onTouchMove = (e: TouchEvent) => {
+      if (isDonationOverlayOpen()) return;
       if (!isPinnedRef.current) return;
 
       const currentY = e.touches[0].clientY;
@@ -496,6 +504,7 @@ export default function TileScrollSection() {
     };
 
     const onTouchEnd = (e: TouchEvent) => {
+      if (isDonationOverlayOpen()) return;
       if (!isPinnedRef.current || isAnimatingRef.current) return;
       const diff = touchStartY - e.changedTouches[0].clientY;
       advanceFromTouch(e, diff);
@@ -513,6 +522,7 @@ export default function TileScrollSection() {
   }, [applyStep, scrollToStep]);
 
   const handleScroll = useCallback(() => {
+    if (isDonationOverlayOpen()) return;
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
     const rect = wrapper.getBoundingClientRect();
