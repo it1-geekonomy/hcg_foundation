@@ -22,6 +22,7 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     const scrollY = window.scrollY;
     const { body } = document;
+    body.dataset.donationOverlayOpen = "true";
     const original = {
       position: body.style.position,
       top: body.style.top,
@@ -35,6 +36,7 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
     body.style.overflow = "hidden";
 
     return () => {
+      delete body.dataset.donationOverlayOpen;
       Object.assign(body.style, original);
       window.scrollTo(0, scrollY);
     };
