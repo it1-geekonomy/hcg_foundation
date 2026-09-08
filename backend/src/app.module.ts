@@ -8,13 +8,23 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import configuration from './config/configuration';
 import { DatabaseModule } from './database/database.module';
 import {
-  AboutModule,
-  AdminModule,
-  ContactModule,
-  DonationModule,
-  HomeModule,
-  LegalModule,
-  ResourcesModule,
+  AnnualReportsModule,
+  ArticlesModule,
+  AuthModule,
+  AwardsModule,
+  BlogsModule,
+  DonorsModule,
+  EventsModule,
+  GalleryModule,
+  LeadsContactModule,
+  LegalPagesModule,
+  NewslettersModule,
+  PatientStoriesModule,
+  ProjectsModule,
+  PublicationsModule,
+  TeamsModule,
+  TrusteesModule,
+  UsersModule,
 } from './modules';
 
 @Module({
@@ -26,14 +36,24 @@ import {
     }),
     DatabaseModule,
 
-    // Each domain module owns its table(s) — independent, no FKs
-    AboutModule,
-    ResourcesModule,
-    HomeModule,
-    DonationModule,
-    ContactModule,
-    LegalModule,
-    AdminModule,
+    // One module per table — independent, no FKs / no page wrappers
+    TeamsModule,
+    TrusteesModule,
+    AwardsModule,
+    AnnualReportsModule,
+    PublicationsModule,
+    NewslettersModule,
+    GalleryModule,
+    ArticlesModule,
+    BlogsModule,
+    ProjectsModule,
+    EventsModule,
+    PatientStoriesModule,
+    DonorsModule,
+    LeadsContactModule,
+    LegalPagesModule,
+    UsersModule,
+    AuthModule,
 
     ChatbotModule,
   ],
