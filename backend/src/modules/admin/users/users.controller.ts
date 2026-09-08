@@ -14,6 +14,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiNoContentResponse,
@@ -28,6 +29,7 @@ import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 
 @ApiTags('Admin · Users')
+@ApiBearerAuth()
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
 export class UsersController {

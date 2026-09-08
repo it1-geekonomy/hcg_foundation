@@ -16,7 +16,9 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
+import { Public } from '../../../common/decorators/public.decorator';
 import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
 import { CreateDonorDto } from './dto/create-donor.dto';
 import { UpdateDonorDto } from './dto/update-donor.dto';
@@ -28,22 +30,25 @@ import { DonorsService } from './donors.service';
 export class DonorsController {
   constructor(private readonly service: DonorsService) {}
 
+  @Public()
   @Post()
-  @ApiOperation({ summary: 'Create Donor' })
+  @ApiOperation({ summary: 'Submit donor (public form)' })
   @ApiCreatedResponse({ type: Donor })
   create(@Body() dto: CreateDonorDto) {
     return this.service.create(dto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'List donors' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List donors (super-admin)' })
   @ApiOkResponse({ description: 'Paginated list' })
   findAll(@Query() query: PaginationQueryDto) {
     return this.service.findAll(query);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get Donor by id' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get Donor by id (super-admin)' })
   @ApiOkResponse({ type: Donor })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.findOne(id);

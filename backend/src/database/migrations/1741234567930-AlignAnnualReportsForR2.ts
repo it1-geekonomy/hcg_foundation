@@ -1,71 +1,84 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableIndex,
+} from 'typeorm';
+import {
+  idColumn,
+  seoColumns,
+  timestampColumns,
+} from '../migration.helpers';
 
-export class AlignAnnualReportsForR21741234567930 implements MigrationInterface {
+export class AlignAnnualReportsForR21741234567930
+  implements MigrationInterface
+{
   name = 'AlignAnnualReportsForR21741234567930';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`);
 
-    await queryRunner.query(`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'content_status') THEN
-          CREATE TYPE content_status AS ENUM ('draft', 'published', 'archived');
-        END IF;
-      END
-      $$;
-    `);
+    if (await queryRunner.hasTable('annual_reports')) return;
 
-    await queryRunner.query(`
-      CREATE TABLE IF NOT EXISTS annual_reports (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        title VARCHAR(255) NOT NULL,
-        slug VARCHAR(255) NOT NULL UNIQUE,
-        report_year VARCHAR(9),
-        annual_report_banner TEXT,
-        annual_report_file TEXT,
-        meta_title VARCHAR(255),
-        meta_description TEXT,
-        schema_code TEXT,
-        status content_status NOT NULL DEFAULT 'draft',
-        created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    await queryRunner.createTable(
+      new Table({
+        name: 'annual_reports',
+        columns: [
+          idColumn(),
+          {
+            name: 'title',
+            type: 'varchar',
+            length: '255',
+            isNullable: false,
+          },
+          {
+            name: 'slug',
+            type: 'varchar',
+            length: '255',
+            isNullable: false,
+            isUnique: true,
+          },
+          {
+            name: 'report_year',
+            type: 'varchar',
+            length: '9',
+            isNullable: true,
+          },
+          {
+            name: 'annual_report_banner',
+            type: 'text',
+            isNullable: true,
+          },
+          {
+            name: 'annual_report_file',
+            type: 'text',
+            isNullable: true,
+          },
+          ...seoColumns(),
+          {
+            name: 'status',
+            type: 'enum',
+            enum: ['draft', 'published', 'archived'],
+            enumName: 'content_status',
+            isNullable: false,
+            default: `'draft'`,
+          },
+          ...timestampColumns(),
+        ],
+      }),
+      true,
+    );
 
-    // If an older scaffold table exists, add missing R2/SEO columns safely
-    await queryRunner.query(`
-      ALTER TABLE annual_reports
-        ADD COLUMN IF NOT EXISTS slug VARCHAR(255),
-        ADD COLUMN IF NOT EXISTS report_year VARCHAR(9),
-        ADD COLUMN IF NOT EXISTS annual_report_banner TEXT,
-        ADD COLUMN IF NOT EXISTS annual_report_file TEXT,
-        ADD COLUMN IF NOT EXISTS meta_title VARCHAR(255),
-        ADD COLUMN IF NOT EXISTS meta_description TEXT,
-        ADD COLUMN IF NOT EXISTS schema_code TEXT
-    `);
-
-    await queryRunner.query(`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (
-          SELECT 1 FROM information_schema.columns
-          WHERE table_name = 'annual_reports' AND column_name = 'status'
-        ) THEN
-          ALTER TABLE annual_reports
-            ADD COLUMN status content_status NOT NULL DEFAULT 'draft';
-        END IF;
-      END
-      $$;
-    `);
-
-    await queryRunner.query(`
-      CREATE INDEX IF NOT EXISTS idx_annual_reports_status ON annual_reports(status)
-    `);
+    await queryRunner.createIndex(
+      'annual_reports',
+      new TableIndex({
+        name: 'idx_annual_reports_status',
+        columnNames: ['status'],
+      }),
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP INDEX IF EXISTS idx_annual_reports_status`);
-    await queryRunner.query(`DROP TABLE IF EXISTS annual_reports`);
+    await queryRunner.dropTable('annual_reports', true);
   }
 }

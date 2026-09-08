@@ -1,4 +1,14 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableIndex,
+} from 'typeorm';
+import {
+  idColumn,
+  seoColumns,
+  timestampColumns,
+} from '../migration.helpers';
 
 export class CreateTeamsAndContentStatus1741234567890
   implements MigrationInterface
@@ -8,41 +18,66 @@ export class CreateTeamsAndContentStatus1741234567890
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`);
 
-    await queryRunner.query(`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'content_status') THEN
-          CREATE TYPE content_status AS ENUM ('draft', 'published', 'archived');
-        END IF;
-      END
-      $$;
-    `);
+    if (await queryRunner.hasTable('teams')) return;
 
-    await queryRunner.query(`
-      CREATE TABLE IF NOT EXISTS teams (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        title VARCHAR(255) NOT NULL,
-        designation VARCHAR(255),
-        team_image TEXT,
-        content TEXT,
-        short_description TEXT,
-        status content_status NOT NULL DEFAULT 'draft',
-        meta_title VARCHAR(255),
-        meta_description TEXT,
-        schema_code TEXT,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    await queryRunner.createTable(
+      new Table({
+        name: 'teams',
+        columns: [
+          idColumn(),
+          {
+            name: 'title',
+            type: 'varchar',
+            length: '255',
+            isNullable: false,
+          },
+          {
+            name: 'designation',
+            type: 'varchar',
+            length: '255',
+            isNullable: true,
+          },
+          {
+            name: 'team_image',
+            type: 'text',
+            isNullable: true,
+          },
+          {
+            name: 'content',
+            type: 'text',
+            isNullable: true,
+          },
+          {
+            name: 'short_description',
+            type: 'text',
+            isNullable: true,
+          },
+          {
+            name: 'status',
+            type: 'enum',
+            enum: ['draft', 'published', 'archived'],
+            enumName: 'content_status',
+            isNullable: false,
+            default: `'draft'`,
+          },
+          ...seoColumns(),
+          ...timestampColumns(),
+        ],
+      }),
+      true,
+    );
 
-    await queryRunner.query(`
-      CREATE INDEX IF NOT EXISTS idx_teams_status ON teams(status)
-    `);
+    await queryRunner.createIndex(
+      'teams',
+      new TableIndex({
+        name: 'idx_teams_status',
+        columnNames: ['status'],
+      }),
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP INDEX IF EXISTS idx_teams_status`);
-    await queryRunner.query(`DROP TABLE IF EXISTS teams`);
-    await queryRunner.query(`DROP TYPE IF EXISTS content_status`);
+    await queryRunner.dropTable('teams', true);
+    await queryRunner.query(`DROP TYPE IF EXISTS "content_status"`);
   }
 }

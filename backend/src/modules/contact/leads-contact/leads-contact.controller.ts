@@ -16,7 +16,9 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
+import { Public } from '../../../common/decorators/public.decorator';
 import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
 import { CreateLeadContactDto } from './dto/create-lead-contact.dto';
 import { UpdateLeadContactDto } from './dto/update-lead-contact.dto';
@@ -28,22 +30,25 @@ import { LeadsContactService } from './leads-contact.service';
 export class LeadsContactController {
   constructor(private readonly service: LeadsContactService) {}
 
+  @Public()
   @Post()
-  @ApiOperation({ summary: 'Create LeadContact' })
+  @ApiOperation({ summary: 'Submit contact lead (public form)' })
   @ApiCreatedResponse({ type: LeadContact })
   create(@Body() dto: CreateLeadContactDto) {
     return this.service.create(dto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'List leads_contact' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List leads (super-admin)' })
   @ApiOkResponse({ description: 'Paginated list' })
   findAll(@Query() query: PaginationQueryDto) {
     return this.service.findAll(query);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get LeadContact by id' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get LeadContact by id (super-admin)' })
   @ApiOkResponse({ type: LeadContact })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.findOne(id);

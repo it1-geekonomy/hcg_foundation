@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ChatbotModule } from './chatbot/chatbot.module';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import configuration from './config/configuration';
 import { DatabaseModule } from './database/database.module';
 import {
@@ -24,7 +26,7 @@ import {
     }),
     DatabaseModule,
 
-    // ERD page domains — all tables independent (no FKs)
+    // Each domain module owns its table(s) — independent, no FKs
     AboutModule,
     ResourcesModule,
     HomeModule,
@@ -36,6 +38,12 @@ import {
     ChatbotModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}

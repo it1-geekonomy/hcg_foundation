@@ -1,4 +1,10 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableIndex,
+} from 'typeorm';
+import { idColumn, timestampColumns } from '../migration.helpers';
 
 export class CreateUsersTable1741234567910 implements MigrationInterface {
   name = 'CreateUsersTable1741234567910';
@@ -6,31 +12,73 @@ export class CreateUsersTable1741234567910 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`);
 
-    await queryRunner.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        full_name VARCHAR(255) NOT NULL,
-        slug VARCHAR(255) UNIQUE,
-        email VARCHAR(255) NOT NULL UNIQUE,
-        username VARCHAR(255) NOT NULL UNIQUE,
-        password_hash TEXT NOT NULL,
-        reset_string TEXT,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    if (await queryRunner.hasTable('users')) return;
 
-    await queryRunner.query(`
-      CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)
-    `);
-    await queryRunner.query(`
-      CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)
-    `);
+    await queryRunner.createTable(
+      new Table({
+        name: 'users',
+        columns: [
+          idColumn(),
+          {
+            name: 'full_name',
+            type: 'varchar',
+            length: '255',
+            isNullable: false,
+          },
+          {
+            name: 'slug',
+            type: 'varchar',
+            length: '255',
+            isNullable: true,
+            isUnique: true,
+          },
+          {
+            name: 'email',
+            type: 'varchar',
+            length: '255',
+            isNullable: false,
+            isUnique: true,
+          },
+          {
+            name: 'username',
+            type: 'varchar',
+            length: '255',
+            isNullable: false,
+            isUnique: true,
+          },
+          {
+            name: 'password_hash',
+            type: 'text',
+            isNullable: false,
+          },
+          {
+            name: 'reset_string',
+            type: 'text',
+            isNullable: true,
+          },
+          ...timestampColumns(),
+        ],
+      }),
+      true,
+    );
+
+    await queryRunner.createIndex(
+      'users',
+      new TableIndex({
+        name: 'idx_users_email',
+        columnNames: ['email'],
+      }),
+    );
+    await queryRunner.createIndex(
+      'users',
+      new TableIndex({
+        name: 'idx_users_username',
+        columnNames: ['username'],
+      }),
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP INDEX IF EXISTS idx_users_username`);
-    await queryRunner.query(`DROP INDEX IF EXISTS idx_users_email`);
-    await queryRunner.query(`DROP TABLE IF EXISTS users`);
+    await queryRunner.dropTable('users', true);
   }
 }

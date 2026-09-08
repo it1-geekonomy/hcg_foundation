@@ -2,11 +2,10 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   HttpCode,
   HttpStatus,
   Post,
-  UnauthorizedException,
+  Req,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -16,6 +15,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Public } from '../../../common/decorators/public.decorator';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 
@@ -24,12 +24,11 @@ import { LoginDto } from './dto/login.dto';
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Admin login (email or username + password)',
-    description:
-      'Use the same email/username and plain password from POST /api/users.',
+    summary: 'Super-admin login (email or username + password)',
   })
   @ApiBody({
     type: LoginDto,
@@ -66,16 +65,31 @@ export class AuthController {
 
   @Get('me')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Current authenticated user' })
-  me(@Headers('authorization') authorization?: string) {
-    const token = this.extractBearer(authorization);
-    return this.auth.me(token);
-  }
-
-  private extractBearer(authorization?: string): string {
-    if (!authorization?.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Missing bearer token');
+  @ApiOperation({ summary: 'Current authenticated super-admin' })
+  me(
+    @Req()
+    req: {
+      user?: {
+        sub: string;
+        email: string;
+        username: string;
+        fullName: string;
+      };
+      headers: { authorization?: string };
+    },
+  ) {
+    if (req.user) {
+      return {
+        id: req.user.sub,
+        email: req.user.email,
+        username: req.user.username,
+        fullName: req.user.fullName,
+      };
     }
-    return authorization.slice(7).trim();
+    const header = req.headers.authorization;
+    const token = header?.startsWith('Bearer ')
+      ? header.slice(7).trim()
+      : '';
+    return this.auth.me(token);
   }
 }
