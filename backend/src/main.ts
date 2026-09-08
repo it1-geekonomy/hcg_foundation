@@ -2,11 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { GlobalHttpExceptionFilter } from './common/filters/http-exception.filter';
+import { ResponseTransformInterceptor } from './common/interceptors/response-transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Global validation for incoming DTOs
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -14,14 +15,17 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+  app.useGlobalFilters(new GlobalHttpExceptionFilter());
+  app.useGlobalInterceptors(new ResponseTransformInterceptor());
 
   app.enableCors();
   app.setGlobalPrefix('api');
 
-  // Swagger setup
   const config = new DocumentBuilder()
-    .setTitle('NestJS Backend API')
-    .setDescription('API documentation for the backend service')
+    .setTitle('HCG Foundation API')
+    .setDescription(
+      'CMS + public API for HCG Foundation. Domains map 1:1 to site pages. All tables are independent (no foreign keys).',
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .build();

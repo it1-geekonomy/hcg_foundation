@@ -1,12 +1,6 @@
 /**
- * Tell the ingestion pipeline which of your CMS tables hold text worth
- * indexing, and which columns contain the actual content.
- *
- * Add one entry per table. `idColumn` is normally your primary key.
- * `textColumns` are every column whose value should become chatbot knowledge
- * (title, description, body, etc.) — they get concatenated per row before chunking.
- *
- * EDIT THIS to match your real CMS schema.
+ * Tell the ingestion pipeline which CMS tables hold text worth indexing.
+ * Aligned to ERD table names (independent tables, no FKs).
  */
 export interface SourceTableConfig {
   table: string;
@@ -16,9 +10,9 @@ export interface SourceTableConfig {
 
 export const SOURCE_TABLES: SourceTableConfig[] = [
   {
-    table: 'programs',
+    table: 'projects',
     idColumn: 'id',
-    textColumns: ['title', 'description'],
+    textColumns: ['title', 'summary', 'description'],
   },
   {
     table: 'events',
@@ -26,14 +20,33 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
     textColumns: ['title', 'description', 'location'],
   },
   {
-    table: 'faqs',
+    table: 'patient_stories',
     idColumn: 'id',
-    textColumns: ['question', 'answer'],
+    textColumns: ['patient_name', 'tagline', 'story', 'location'],
   },
   {
-    table: 'pages',
+    table: 'articles',
     idColumn: 'id',
-    textColumns: ['title', 'content'],
+    textColumns: ['title', 'excerpt', 'content'],
   },
-  // Add more tables here as needed, e.g. 'team_members', 'testimonials', 'news_posts'...
+  {
+    table: 'blogs',
+    idColumn: 'id',
+    textColumns: ['title', 'excerpt', 'content', 'author_name'],
+  },
+  {
+    table: 'publications',
+    idColumn: 'id',
+    textColumns: ['title', 'description'],
+  },
+  {
+    table: 'teams',
+    idColumn: 'id',
+    textColumns: ['title', 'designation', 'short_description', 'content'],
+  },
+  {
+    table: 'trustees',
+    idColumn: 'id',
+    textColumns: ['name', 'designation', 'bio'],
+  },
 ];

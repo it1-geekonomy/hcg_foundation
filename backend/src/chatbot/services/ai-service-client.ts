@@ -8,7 +8,7 @@ export class AiServiceClient {
 
   constructor(private readonly configService: ConfigService) {
     this.baseUrl = this.configService.get<string>('AI_SERVICE_URL', 'http://localhost:8001');
-    this.apiKey = this.configService.get<string>('AI_SERVICE_INTERNAL_KEY');
+    this.apiKey = this.configService.get<string>('AI_SERVICE_INTERNAL_KEY', '');
   }
 
   async syncEvent(payload: {
