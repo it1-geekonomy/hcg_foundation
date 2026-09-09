@@ -116,7 +116,15 @@ pnpm run migration:run
 
 For local bootstrap only you may set `DB_SYNCHRONIZE=true` once — keep it `false` in shared/prod environments.
 
-### 5. Run
+### 5. Seed super-admin
+
+```bash
+pnpm seed
+```
+
+Defaults (override via `SEED_ADMIN_*` in `.env`): `admin@hcgfoundation.org` / `admin` / `Admin@12345`. Idempotent — skips if that user already exists.
+
+### 6. Run
 
 ```bash
 pnpm run start:dev
