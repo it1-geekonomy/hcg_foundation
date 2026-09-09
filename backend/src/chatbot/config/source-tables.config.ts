@@ -22,7 +22,7 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
   {
     table: 'patient_stories',
     idColumn: 'id',
-    textColumns: ['patient_name', 'tagline', 'story', 'location'],
+    textColumns: ['title', 'short_description', 'content', 'donation_state'],
   },
   {
     table: 'articles',

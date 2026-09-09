@@ -6,6 +6,7 @@ import {
   buildPaginatedResult,
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
+import { ContentStatus } from '../../common/enums/content-status.enum';
 import { CreatePatientStoryDto } from './dto/create-patient-story.dto';
 import { UpdatePatientStoryDto } from './dto/update-patient-story.dto';
 import { PatientStory } from './entities/patient-story.entity';
@@ -18,7 +19,10 @@ export class PatientStoriesService {
   ) {}
 
   async create(dto: CreatePatientStoryDto): Promise<PatientStory> {
-    const entity = this.repo.create(dto);
+    const entity = this.repo.create({
+      ...dto,
+      status: dto.status ?? ContentStatus.DRAFT,
+    });
     return this.repo.save(entity);
   }
 
@@ -30,12 +34,18 @@ export class PatientStoriesService {
 
     const qb = this.repo
       .createQueryBuilder('entity')
-      .orderBy('entity.createdAt', 'DESC');
+      .orderBy('entity.storyDate', 'DESC', 'NULLS LAST')
+      .addOrderBy('entity.createdAt', 'DESC');
+
+    if (query.status) {
+      qb.andWhere('entity.status = :status', { status: query.status });
+    }
 
     if (query.search) {
-      qb.andWhere('(entity.patientName ILIKE :search OR entity.location ILIKE :search OR entity.tagline ILIKE :search)', {
-        search: `%${query.search}%`,
-      });
+      qb.andWhere(
+        '(entity.title ILIKE :search OR entity.slug ILIKE :search OR entity.donationState ILIKE :search OR entity.shortDescription ILIKE :search)',
+        { search: `%${query.search}%` },
+      );
     }
 
     const [data, total] = await qb
@@ -54,7 +64,18 @@ export class PatientStoriesService {
     return entity;
   }
 
-  async update(id: string, dto: UpdatePatientStoryDto): Promise<PatientStory> {
+  async findBySlug(slug: string): Promise<PatientStory> {
+    const entity = await this.repo.findOne({ where: { slug } });
+    if (!entity) {
+      throw new NotFoundException(`PatientStory slug "${slug}" not found`);
+    }
+    return entity;
+  }
+
+  async update(
+    id: string,
+    dto: UpdatePatientStoryDto,
+  ): Promise<PatientStory> {
     const entity = await this.findOne(id);
     Object.assign(entity, dto);
     return this.repo.save(entity);

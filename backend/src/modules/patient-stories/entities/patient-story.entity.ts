@@ -1,33 +1,42 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 import { SeoContentEntity } from '../../../common/entities/seo-content.entity';
+import { ContentStatus } from '../../../common/enums/content-status.enum';
 
 /**
- * Independent table — no FK relations (ERD constraint).
+ * Patient stories — independent table, no FKs.
  */
 @Entity('patient_stories')
 export class PatientStory extends SeoContentEntity {
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  title: string;
 
-  @Column({ name: 'patient_name', type: 'varchar', nullable: false })
-  patientName: string;
+  @Index('idx_patient_stories_slug', { unique: true })
+  @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
+  slug: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  location?: string;
+  @Column({ name: 'patient_image', type: 'text', nullable: true })
+  patientImage?: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
-  tagline?: string;
+  @Index('idx_patient_stories_date')
+  @Column({ name: 'story_date', type: 'date', nullable: true })
+  storyDate?: string | null;
+
+  @Column({ name: 'donation_state', type: 'varchar', length: 250, nullable: true })
+  donationState?: string | null;
 
   @Column({ type: 'text', nullable: true })
-  story?: string;
+  content?: string | null;
 
-  @Column({ name: 'image_url', type: 'varchar', nullable: true })
-  imageUrl?: string;
+  @Column({ name: 'short_description', type: 'text', nullable: true })
+  shortDescription?: string | null;
 
-  @Column({ name: 'display_order', type: 'int', nullable: true, default: 0 })
-  displayOrder?: number;
-
-  @Column({ name: 'is_featured', type: 'boolean', nullable: false, default: false })
-  isFeatured: boolean;
-
-  @Column({ name: 'is_published', type: 'boolean', nullable: false, default: false })
-  isPublished: boolean;
+  @Index('idx_patient_stories_status')
+  @Column({
+    type: 'enum',
+    enum: ContentStatus,
+    enumName: 'content_status',
+    nullable: false,
+    default: ContentStatus.DRAFT,
+  })
+  status: ContentStatus;
 }

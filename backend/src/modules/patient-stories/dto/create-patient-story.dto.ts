@@ -1,55 +1,62 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 import { SeoFieldsDto } from '../../../common/dto/seo-fields.dto';
-import { Type } from 'class-transformer';
-import {
-  IsBoolean,
-  IsDateString,
-  IsEmail,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { ContentStatus } from '../../../common/enums/content-status.enum';
 
 export class CreatePatientStoryDto extends SeoFieldsDto {
-  @ApiProperty({ description: 'patientName' })
+  @ApiProperty({ example: 'Aarav’s recovery story' })
   @IsString()
-  patientName: string;
+  @MaxLength(255)
+  title: string;
 
-  @ApiPropertyOptional({ description: 'location' })
-  @IsOptional()
+  @ApiProperty({ example: 'aaravs-recovery-story' })
   @IsString()
-  location?: string;
+  @MaxLength(255)
+  slug: string;
 
-  @ApiPropertyOptional({ description: 'tagline' })
-  @IsOptional()
-  @IsString()
-  tagline?: string;
-
-  @ApiPropertyOptional({ description: 'story' })
-  @IsOptional()
-  @IsString()
-  story?: string;
-
-  @ApiPropertyOptional({ description: 'imageUrl' })
+  @ApiPropertyOptional({
+    example: 'https://cdn.example.com/patients/aarav.jpg',
+    description: 'Patient image URL',
+  })
   @IsOptional()
   @IsString()
-  imageUrl?: string;
+  patientImage?: string;
 
-  @ApiPropertyOptional({ description: 'displayOrder' })
+  @ApiPropertyOptional({
+    example: '2024-06-15',
+    description: 'Story date (YYYY-MM-DD)',
+  })
   @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  displayOrder?: number;
+  @IsString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'storyDate must be YYYY-MM-DD',
+  })
+  storyDate?: string;
 
-  @ApiPropertyOptional({ description: 'isFeatured' })
+  @ApiPropertyOptional({
+    example: 'Karnataka',
+    description: 'Donation / support state',
+  })
   @IsOptional()
-  @IsBoolean()
-  @Type(() => Boolean)
-  isFeatured?: boolean;
+  @IsString()
+  @MaxLength(250)
+  donationState?: string;
 
-  @ApiPropertyOptional({ description: 'isPublished' })
+  @ApiPropertyOptional({ description: 'Full story body (HTML / rich text)' })
   @IsOptional()
-  @IsBoolean()
-  @Type(() => Boolean)
-  isPublished?: boolean;
+  @IsString()
+  content?: string;
+
+  @ApiPropertyOptional({ description: 'Short blurb for cards' })
+  @IsOptional()
+  @IsString()
+  shortDescription?: string;
+
+  @ApiPropertyOptional({
+    enum: ContentStatus,
+    default: ContentStatus.DRAFT,
+  })
+  @IsOptional()
+  @IsEnum(ContentStatus)
+  status?: ContentStatus;
 }

@@ -12,7 +12,9 @@ import {
   Query,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -23,34 +25,46 @@ import { UpdatePatientStoryDto } from './dto/update-patient-story.dto';
 import { PatientStory } from './entities/patient-story.entity';
 import { PatientStoriesService } from './patient-stories.service';
 
-@ApiTags('Home · Patient Stories')
+@ApiTags('Patient Stories')
 @Controller('patient-stories')
 export class PatientStoriesController {
   constructor(private readonly service: PatientStoriesService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create PatientStory' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create patient story (super-admin)' })
   @ApiCreatedResponse({ type: PatientStory })
   create(@Body() dto: CreatePatientStoryDto) {
     return this.service.create(dto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'List patient_stories' })
+  @ApiOperation({
+    summary: 'List patient stories',
+    description: 'Supports pagination, search, and status filter',
+  })
   @ApiOkResponse({ description: 'Paginated list' })
   findAll(@Query() query: PaginationQueryDto) {
     return this.service.findAll(query);
   }
 
+  @Get('slug/:slug')
+  @ApiOperation({ summary: 'Get patient story by slug' })
+  @ApiOkResponse({ type: PatientStory })
+  findBySlug(@Param('slug') slug: string) {
+    return this.service.findBySlug(slug);
+  }
+
   @Get(':id')
-  @ApiOperation({ summary: 'Get PatientStory by id' })
+  @ApiOperation({ summary: 'Get patient story by id' })
   @ApiOkResponse({ type: PatientStory })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.findOne(id);
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update PatientStory' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update patient story (super-admin)' })
   @ApiOkResponse({ type: PatientStory })
   update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -61,7 +75,9 @@ export class PatientStoriesController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete PatientStory' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete patient story (super-admin)' })
+  @ApiNoContentResponse()
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.remove(id);
   }
