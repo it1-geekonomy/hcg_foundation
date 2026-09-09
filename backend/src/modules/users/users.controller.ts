@@ -39,7 +39,7 @@ export class UsersController {
   @ApiOperation({
     summary: 'Create admin user',
     description:
-      'Send plain `password` only. Server stores a hash. Do not send passwordHash, role, or isActive.',
+      'Send plain `password` only. Server stores a hash. Do not send passwordHash, slug, role, or isActive.',
   })
   @ApiBody({
     type: CreateUserDto,
@@ -48,16 +48,6 @@ export class UsersController {
         summary: 'Create user',
         value: {
           fullName: 'Kishan',
-          email: 'kishan10@gmail.com',
-          username: 'kishan10',
-          password: 'password@123',
-        },
-      },
-      withSlug: {
-        summary: 'Create user with slug',
-        value: {
-          fullName: 'Kishan',
-          slug: 'kishan-10',
           email: 'kishan10@gmail.com',
           username: 'kishan10',
           password: 'password@123',

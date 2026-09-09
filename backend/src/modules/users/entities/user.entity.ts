@@ -1,12 +1,12 @@
 import { Exclude } from 'class-transformer';
-import { ApiHideProperty, ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Column, Entity, Index } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 
 /**
  * Internal / admin users.
  * Independent table — no FK relations (ERD constraint).
- * No SEO fields (admin only).
+ * No SEO / public slug — slug column auto-filled for DB uniqueness only.
  */
 @Entity('users')
 export class User extends BaseEntity {
@@ -14,7 +14,8 @@ export class User extends BaseEntity {
   @Column({ name: 'full_name', type: 'varchar', length: 255, nullable: false })
   fullName: string;
 
-  @ApiPropertyOptional({ example: 'kishan-10' })
+  @ApiHideProperty()
+  @Exclude()
   @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
   slug?: string | null;
 
