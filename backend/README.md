@@ -1,91 +1,166 @@
-# NestJS Backend
+# NestJS Backend — HCG Foundation
 
-NestJS + TypeScript backend with PostgreSQL (Docker), TypeORM migrations, and Swagger API docs.
+NestJS + TypeScript + PostgreSQL (Docker) + TypeORM migrations + Swagger.
 
 ## Stack
 
 - **NestJS** (TypeScript)
 - **PostgreSQL** via Docker
-- **TypeORM** (with migrations)
-- **Swagger** (`@nestjs/swagger`) at `/api/docs`
+- **TypeORM** (migrations; `synchronize` off by default)
+- **Swagger** at `/api/docs`
 
-## Project structure
+## Architecture
+
+Domain modules map **1:1 to site pages** from the ERD.
+
+> **ERD rule:** no foreign keys — every table is independent.
 
 ```
 src/
+  common/                         # shared cross-cutting concerns
+    constants/
+    decorators/
+    dto/                          # PaginationQueryDto
+    entities/                     # BaseEntity (uuid + timestamps)
+    filters/                      # GlobalHttpExceptionFilter
+    guards/
+    interceptors/                 # ResponseTransformInterceptor
+    interfaces/
+
+  config/
+    configuration.ts
+
   database/
-    database.module.ts   # TypeORM connection module (used by Nest)
-    data-source.ts        # TypeORM CLI data source (used for migrations)
-    migrations/            # Migration files
-      README.md
-    README.md
+    database.module.ts
+    data-source.ts                # TypeORM CLI
+    migrations/
+
+  modules/
+    about/                        # ABOUT US PAGE
+      about.module.ts
+      teams/
+      trustees/
+      awards/
+
+    resources/                    # RESOURCES PAGE
+      resources.module.ts
+      annual-reports/
+      publications/
+      newsletters/
+      gallery/
+      articles/
+      blogs/
+
+    home/                         # HOME PAGE
+      home.module.ts
+      projects/
+      events/
+      patient-stories/
+
+    donation/                     # DONATION PAGE
+      donation.module.ts
+      donors/
+
+    contact/                      # CONTACT US PAGE
+      contact.module.ts
+      leads-contact/
+
+    admin/                        # INTERNAL / ADMIN
+      admin.module.ts
+      users/                      # admins
+
+  chatbot/                        # AI ingestion / Q&A (existing)
   app.module.ts
-  app.controller.ts
-  app.service.ts
-  main.ts                  # App bootstrap + Swagger setup
-docker-compose.yml
-Dockerfile
-.env.example
+  main.ts
+```
+
+Each feature folder follows the same Nest pattern:
+
+```
+feature/
+  entities/*.entity.ts
+  dto/create-*.dto.ts
+  dto/update-*.dto.ts
+  feature.controller.ts
+  feature.service.ts
+  feature.module.ts
 ```
 
 ## Getting started
 
-### 1. Install dependencies
+### 1. Install
 
 ```bash
 pnpm install
 ```
 
-### 2. Configure environment
+### 2. Env
 
 ```bash
 cp .env.example .env
 ```
 
-Adjust values if needed (defaults work with the provided `docker-compose.yml`).
-
-### 3. Start Postgres
+### 3. Postgres
 
 ```bash
-docker run -d --name hcg_postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=hcg_db -p 5432:5432 -v pgdata:/var/lib/postgresql/data postgres:16-alpine
+docker run -d --name hcg_postgres  -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=hcg_db -p 5432:5432 -v pgdata:/var/lib/postgresql/data postgres:16-alpine
 ```
 
-### 4. Run migrations
+### 4. Migrations
 
 ```bash
+# After entities exist / change:
+pnpm run migration:generate -- src/database/migrations/InitSchema
 pnpm run migration:run
 ```
 
-### 5. Start the app
+For local bootstrap only you may set `DB_SYNCHRONIZE=true` once — keep it `false` in shared/prod environments.
+
+### 5. Seed super-admin
+
+```bash
+pnpm seed
+```
+
+Defaults (override via `SEED_ADMIN_*` in `.env`): `admin@hcgfoundation.org` / `admin` / `Admin@12345`. Idempotent — skips if that user already exists.
+
+### 6. Run
 
 ```bash
 pnpm run start:dev
 ```
 
-- API base URL: `http://localhost:3000/api`
-- Swagger docs: `http://localhost:6060/api/docs`
-- Health check: `http://localhost:3000/api/health`
+- API: `http://localhost:6060/api`
+- Swagger: `http://localhost:6060/api/docs`
+- Health: `http://localhost:6060/api` (root controller)
 
-## Running everything with Docker
+## API surface (scaffold)
 
-To run both the app and Postgres in containers:
+| Domain | Route prefix | Table |
+|--------|--------------|-------|
+| About | `/api/teams` | `teams` |
+| About | `/api/trustees` | `trustees` |
+| About | `/api/awards` | `awards` |
+| Resources | `/api/annual-reports` | `annual_reports` |
+| Resources | `/api/publications` | `publications` |
+| Resources | `/api/newsletters` | `newsletters` |
+| Resources | `/api/gallery` | `gallery` |
+| Resources | `/api/articles` | `articles` |
+| Resources | `/api/blogs` | `blogs` |
+| Home | `/api/projects` | `projects` |
+| Home | `/api/events` | `events` |
+| Home | `/api/patient-stories` | `patient_stories` |
+| Donation | `/api/donors` | `donors` |
+| Contact | `/api/leads-contact` | `leads_contact` |
+| Admin | `/api/users` | `users` |
 
-```bash
-docker compose up -d --build
-```
+CRUD: `POST /` · `GET /` (paginated) · `GET /:id` · `PATCH /:id` · `DELETE /:id`
 
-The `app` service waits for Postgres to be healthy, runs pending migrations, then starts the server.
+## Adding a new independent table
 
-## Migrations
+1. Create a feature folder under the correct page domain.
+2. Add entity (extend `BaseEntity`), DTOs, service, controller, module.
+3. Import the feature module into the domain `*.module.ts`.
+4. Generate + run a migration.
 
-See `src/database/migrations/README.md` for the full migration workflow (generate, run, revert).
-
-## Adding a new module/resource
-
-Use the Nest CLI (installed as a dev dependency) to scaffold new resources, e.g.:
-
-```bash
-npx nest g resource users
-```
-
-Then move/adjust generated files to fit the project structure, and add a corresponding entity + migration.
+Do **not** add TypeORM `@ManyToOne` / `@JoinColumn` relations — keep tables independent per ERD.
