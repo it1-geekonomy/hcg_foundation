@@ -1,5 +1,6 @@
 import { Body, Controller, Post, Param } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Public } from '../common/decorators/public.decorator';
 import { IngestionService } from './services/ingestion.service';
 import { ChatService } from './services/chat.service';
 import { AskQuestionDto } from './dto/ask-question.dto';
@@ -13,19 +14,22 @@ export class ChatbotController {
   ) {}
 
   @Post('reindex')
+  @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Rebuild the chatbot knowledge base from all configured CMS tables',
+    summary: 'Rebuild chatbot knowledge base (super-admin)',
   })
   async reindexAll() {
     return this.ingestionService.reindexAll();
   }
 
   @Post('reindex/:table')
-  @ApiOperation({ summary: 'Rebuild the chatbot knowledge base for a single CMS table' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Rebuild chatbot KB for one table (super-admin)' })
   async reindexTable(@Param('table') table: string) {
     return this.ingestionService.reindexTable(table);
   }
 
+  @Public()
   @Post('chat')
   @ApiOperation({ summary: 'Ask the NGO chatbot a question' })
   async chat(@Body() dto: AskQuestionDto) {

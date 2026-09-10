@@ -1,29 +1,100 @@
+import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,
   Users,
   HeartHandshake,
   Megaphone,
+  UserRound,
+  UserCog,
+  Settings,
+  FileText,
+  Shield,
+  ScrollText,
 } from "lucide-react";
 
-export const adminMenu = [
+export type AdminMenuItem = {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+};
+
+export type AdminMenuGroup = {
+  label: string;
+  items: AdminMenuItem[];
+};
+
+export const adminMenuGroups: AdminMenuGroup[] = [
   {
-    label: "Dashboard",
-    href: "/admin/dashboard",
-    icon: LayoutDashboard,
+    label: "Overview",
+    items: [
+      {
+        label: "Dashboard",
+        href: "/admin/dashboard",
+        icon: LayoutDashboard,
+      },
+    ],
   },
   {
-    label: "Patients",
-    href: "/admin/patients",
-    icon: Users,
+    label: "Content",
+    items: [
+      {
+        label: "Teams",
+        href: "/admin/team",
+        icon: UserRound,
+      },
+      {
+        label: "Annual Reports",
+        href: "/admin/annual-reports",
+        icon: FileText,
+      },
+      {
+        label: "Privacy Policy",
+        href: "/admin/privacy-policy",
+        icon: Shield,
+      },
+      {
+        label: "Terms & Conditions",
+        href: "/admin/terms",
+        icon: ScrollText,
+      },
+      {
+        label: "Campaigns",
+        href: "/admin/campaigns",
+        icon: Megaphone,
+      },
+    ],
   },
   {
-    label: "Donations",
-    href: "/admin/donations",
-    icon: HeartHandshake,
+    label: "People",
+    items: [
+      {
+        label: "Users",
+        href: "/admin/users",
+        icon: UserCog,
+      },
+      {
+        label: "Patients",
+        href: "/admin/patients",
+        icon: Users,
+      },
+      {
+        label: "Donations",
+        href: "/admin/donations",
+        icon: HeartHandshake,
+      },
+    ],
   },
   {
-    label: "Campaigns",
-    href: "/admin/campaigns",
-    icon: Megaphone,
+    label: "System",
+    items: [
+      {
+        label: "Settings",
+        href: "/admin/settings/general",
+        icon: Settings,
+      },
+    ],
   },
 ];
+
+/** Flat list kept for any callers that still expect it */
+export const adminMenu = adminMenuGroups.flatMap((group) => group.items);

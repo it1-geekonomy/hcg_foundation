@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     db_port: int = 5432
     db_username: str = "postgres"
     db_password: str = "postgres"
-    db_name: str = "nestjs_db"
+    db_name: str = "hcg_db"
 
     openai_api_key: str
     embedding_model: str = "text-embedding-3-small"
