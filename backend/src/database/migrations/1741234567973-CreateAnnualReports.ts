@@ -1,8 +1,8 @@
 import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 import { idColumn, seoColumns, timestampColumns } from '../migration.helpers';
 
-export class CreateAnnualReports1741234567980 implements MigrationInterface {
-  name = 'CreateAnnualReports1741234567980';
+export class CreateAnnualReports1741234567973 implements MigrationInterface {
+  name = 'CreateAnnualReports1741234567973';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
