@@ -11,8 +11,8 @@ import {
   statusIndex,
 } from '../migration.helpers';
 
-export class CreateNews1741234567980 implements MigrationInterface {
-  name = 'CreateNews1741234567980';
+export class CreateNews1741234567975 implements MigrationInterface {
+  name = 'CreateNews1741234567975';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`);

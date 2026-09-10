@@ -11,8 +11,8 @@ import {
   statusIndex,
 } from '../migration.helpers';
 
-export class CreatePatientStories1741234567990 implements MigrationInterface {
-  name = 'CreatePatientStories1741234567990';
+export class CreatePatientStories1741234567976 implements MigrationInterface {
+  name = 'CreatePatientStories1741234567976';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`);
