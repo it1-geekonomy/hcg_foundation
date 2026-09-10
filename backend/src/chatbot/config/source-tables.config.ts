@@ -17,7 +17,7 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
   {
     table: 'events',
     idColumn: 'id',
-    textColumns: ['title', 'description', 'location'],
+    textColumns: ['title', 'short_description', 'content', 'event_location'],
   },
   {
     table: 'patient_stories',
