@@ -18,7 +18,6 @@ import { VerifyDonationDto } from './dto/verify-donation.dto';
 import { Donor } from './entities/donor.entity';
 
 export type DonationCheckout = {
-  donorId: string;
   orderId: string;
   amount: string;
   amountPaise: number;
@@ -42,71 +41,50 @@ export class DonorsService {
   async createOrder(dto: CreateDonationDto): Promise<DonationCheckout> {
     const amount = dto.amount.toFixed(2);
     const amountPaise = Math.round(dto.amount * 100);
-
-    const donor = await this.repo.save(
-      this.repo.create({
-        fullName: dto.fullName.trim(),
-        phone: dto.phone,
-        email: dto.email.toLowerCase().trim(),
-        city: dto.city?.trim() || null,
-        pan: dto.pan?.trim() || null,
-        message: dto.message?.trim() || null,
-        amount,
-        currency: 'INR',
-        status: DonationStatus.PENDING,
-      }),
-    );
+    const fullName = dto.fullName.trim();
+    const phone = dto.phone;
+    const email = dto.email.toLowerCase().trim();
+    const city = dto.city?.trim() || '';
+    const pan = dto.pan?.trim() || '';
+    const message = dto.message?.trim() || '';
 
     try {
       const order = await this.razorpay.createOrder({
         amountPaise,
         currency: 'INR',
-        receipt: `hcg_${donor.id.replace(/-/g, '').slice(0, 20)}`,
+        receipt: `hcg_${Date.now().toString(36)}`.slice(0, 40),
         notes: {
-          donorId: donor.id,
-          fullName: donor.fullName,
+          fullName: this.note(fullName),
+          phone: this.note(phone, 20),
+          email: this.note(email),
+          city: this.note(city),
+          pan: this.note(pan, 20),
+          message: this.note(message),
+          amount,
         },
       });
-      donor.razorpayOrderId = order.id;
-      await this.repo.save(donor);
+
+      return {
+        orderId: order.id,
+        amount,
+        amountPaise,
+        currency: 'INR',
+        keyId: this.razorpay.getKeyId(),
+        name: fullName,
+        email,
+        phone,
+      };
     } catch (err) {
-      donor.status = DonationStatus.FAILED;
-      await this.repo.save(donor);
       this.logger.error(
-        `Razorpay order failed for donor ${donor.id}: ${err instanceof Error ? err.message : 'unknown error'}`,
+        `Razorpay order failed: ${err instanceof Error ? err.message : 'unknown error'}`,
       );
       throw new BadRequestException(
         'Could not start payment. Please try again.',
       );
     }
-
-    return {
-      donorId: donor.id,
-      orderId: donor.razorpayOrderId as string,
-      amount: donor.amount,
-      amountPaise,
-      currency: donor.currency,
-      keyId: this.razorpay.getKeyId(),
-      name: donor.fullName,
-      email: donor.email as string,
-      phone: donor.phone as string,
-    };
   }
 
   async verifyPayment(dto: VerifyDonationDto): Promise<Donor> {
-    const donor = await this.repo.findOne({
-      where: { razorpayOrderId: dto.razorpayOrderId },
-    });
-    if (!donor) {
-      throw new NotFoundException(
-        `Donation not found for Razorpay order "${dto.razorpayOrderId}".`,
-      );
-    }
-
-    if (donor.status === DonationStatus.PAID) {
-      return donor;
-    }
-
     const valid = this.razorpay.verifyPaymentSignature(
       dto.razorpayOrderId,
       dto.razorpayPaymentId,
@@ -118,8 +96,45 @@ export class DonorsService {
       );
     }
 
-    donor.status = DonationStatus.PAID;
-    donor.razorpayPaymentId = dto.razorpayPaymentId;
+    const existing = await this.repo.findOne({
+      where: { razorpayOrderId: dto.razorpayOrderId },
+    });
+    if (existing?.status === DonationStatus.PAID) {
+      return existing;
+    }
+
+    if (existing) {
+      existing.status = DonationStatus.PAID;
+      existing.razorpayPaymentId = dto.razorpayPaymentId;
+      existing.receiptNumber =
+        existing.receiptNumber || this.buildReceiptNumber(existing.id);
+      const saved = await this.repo.save(existing);
+      this.logger.log(
+        `Donation paid. donor=${saved.id} receipt=${saved.receiptNumber}`,
+      );
+      return saved;
+    }
+
+    const order = await this.razorpay.fetchOrder(dto.razorpayOrderId);
+    const notes = order.notes ?? {};
+    const amount =
+      notes.amount || (Number(order.amount) / 100).toFixed(2);
+
+    const donor = await this.repo.save(
+      this.repo.create({
+        fullName: notes.fullName?.trim() || 'Donor',
+        phone: notes.phone || null,
+        email: notes.email?.toLowerCase().trim() || null,
+        city: notes.city?.trim() || null,
+        pan: notes.pan?.trim() || null,
+        message: notes.message?.trim() || null,
+        amount,
+        currency: order.currency || 'INR',
+        status: DonationStatus.PAID,
+        razorpayOrderId: dto.razorpayOrderId,
+        razorpayPaymentId: dto.razorpayPaymentId,
+      }),
+    );
     donor.receiptNumber = this.buildReceiptNumber(donor.id);
     const saved = await this.repo.save(donor);
     this.logger.log(
@@ -136,13 +151,13 @@ export class DonorsService {
       .createQueryBuilder('donor')
       .orderBy('donor.createdAt', 'DESC');
 
-    if (query.status) {
-      qb.andWhere('donor.status = :status', { status: query.status });
-    }
+    qb.andWhere('donor.status = :status', {
+      status: query.status ?? DonationStatus.PAID,
+    });
 
     if (query.search) {
       qb.andWhere(
-        '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search)',
+        '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search OR donor.city ILIKE :search)',
         { search: `%${query.search}%` },
       );
     }
@@ -163,6 +178,10 @@ export class DonorsService {
       );
     }
     return entity;
+  }
+
+  private note(value: string, max = 256): string {
+    return value.slice(0, max);
   }
 
   private buildReceiptNumber(id: string): string {

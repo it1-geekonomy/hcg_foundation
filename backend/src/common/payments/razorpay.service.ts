@@ -49,6 +49,23 @@ export class RazorpayService {
     };
   }
 
+  async fetchOrder(orderId: string): Promise<{
+    id: string;
+    amount: number;
+    currency: string;
+    notes: Record<string, string>;
+  }> {
+    this.assertConfigured();
+    const order = await this.client.orders.fetch(orderId);
+    const notes = (order.notes ?? {}) as Record<string, string>;
+    return {
+      id: String(order.id),
+      amount: Number(order.amount),
+      currency: String(order.currency),
+      notes,
+    };
+  }
+
   verifyPaymentSignature(
     orderId: string,
     paymentId: string,
