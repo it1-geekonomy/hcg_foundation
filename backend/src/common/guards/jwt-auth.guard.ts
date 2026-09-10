@@ -48,7 +48,9 @@ export class JwtAuthGuard implements CanActivate {
         this.matches(path, '/auth/me') ||
         this.matches(path, '/leads-contact') ||
         this.matches(path, '/donors') ||
-        this.matches(path, '/chatbot/reindex'));
+        this.matches(path, '/chatbot/reindex') ||
+        (this.matches(path, '/events') &&
+          !this.matches(path, '/events/published')));
 
     const needsAuth = method !== 'GET' || adminOnlyGet;
 
@@ -57,12 +59,38 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     const header = req.headers.authorization || req.headers.Authorization;
-    if (!header?.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Missing bearer token');
+
+    if (!header?.trim()) {
+      throw new UnauthorizedException(
+        'Unauthorized. Send an Authorization header as: Bearer <access_token>.',
+      );
     }
 
-    const payload = this.auth.verifyToken(header.slice(7).trim());
-    req.user = payload;
+    const bearerMatch = header.match(/^Bearer(?:\s+(.*))?$/i);
+    if (!bearerMatch) {
+      throw new UnauthorizedException(
+        'Unauthorized. Use Bearer authentication',
+      );
+    }
+
+    const token = (bearerMatch[1] ?? '').trim();
+    if (!token) {
+      throw new UnauthorizedException(
+        'Unauthorized. Bearer token is empty. Log in at POST /api/auth/login.',
+      );
+    }
+
+    try {
+      req.user = this.auth.verifyToken(token);
+    } catch (err) {
+      if (err instanceof UnauthorizedException) {
+        throw err;
+      }
+      throw new UnauthorizedException(
+        'Unauthorized. Token could not be verified. Please log in again.',
+      );
+    }
+
     return true;
   }
 
