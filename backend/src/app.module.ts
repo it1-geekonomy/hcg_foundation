@@ -9,6 +9,7 @@ import configuration from './config/configuration';
 import { StorageModule } from './common/storage/storage.module';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { DonorsModule } from './modules/donors/donors.module';
 import { EventsModule } from './modules/events/events.module';
 import { UsersModule } from './modules/users/users.module';
 
@@ -22,6 +23,7 @@ import { UsersModule } from './modules/users/users.module';
     DatabaseModule,
     StorageModule,
     EventsModule,
+    DonorsModule,
     UsersModule,
     AuthModule,
 
