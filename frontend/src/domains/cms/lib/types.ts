@@ -36,7 +36,6 @@ export type UpdateTeamPayload = Partial<CreateTeamPayload>;
 export type AdminUser = {
   id: string;
   fullName: string;
-  slug?: string | null;
   email: string;
   username: string;
   createdAt: string;
@@ -45,7 +44,6 @@ export type AdminUser = {
 
 export type CreateUserPayload = {
   fullName: string;
-  slug?: string;
   email: string;
   username: string;
   password: string;
@@ -92,6 +90,33 @@ export type CreateLegalPagePayload = SeoFields & {
 };
 
 export type UpdateLegalPagePayload = Partial<CreateLegalPagePayload>;
+
+export type PatientStory = SeoFields & {
+  id: string;
+  title: string;
+  slug: string;
+  patientImage?: string | null;
+  storyDate?: string | null;
+  donationState?: string | null;
+  content?: string | null;
+  shortDescription?: string | null;
+  status: ContentStatus;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreatePatientStoryPayload = SeoFields & {
+  title: string;
+  slug: string;
+  patientImage?: string;
+  storyDate?: string;
+  donationState?: string;
+  content?: string;
+  shortDescription?: string;
+  status?: ContentStatus;
+};
+
+export type UpdatePatientStoryPayload = Partial<CreatePatientStoryPayload>;
 
 export type Paginated<T> = {
   data: T[];

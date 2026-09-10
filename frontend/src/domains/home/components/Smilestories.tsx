@@ -1,17 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { Calendar } from "lucide-react";
 import Typography from "@/lib/Typography";
+import { publicPatientStoriesApi } from "@/domains/cms/lib/api";
 import {
   AUTO_SCROLL_SPEED,
   DRAG_THRESHOLD,
-  loopedStories,
+  formatStoryDate,
+  loopStories,
   RESUME_DELAY,
   SAVE_INTERVAL,
   STORAGE_KEY,
+  stories as fallbackStories,
   wrap,
+  type SmileStory,
 } from "@/domains/home/constants/smile";
 
 function StoryCard({
@@ -33,6 +37,7 @@ function StoryCard({
           fill
           sizes="(max-width: 639px) clamp(240px, 65vw, 320px), (max-width: 767px) clamp(280px, 52vw - 34px, 360px), (max-width: 1023px) clamp(320px, 52vw - 42px, 400px), (max-width: 1279px) clamp(340px, 32vw - 20px, 430px), clamp(280px, 24vw - 6px, 460px)"
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          unoptimized
         />
       </div>
 
@@ -69,6 +74,8 @@ export default function SmileStories() {
   const trackRef = useRef<HTMLDivElement>(null);
 
   const [hasEntered, setHasEntered] = useState(false);
+  const [items, setItems] = useState<SmileStory[]>(fallbackStories);
+  const loopedStories = useMemo(() => loopStories(items), [items]);
 
   const offsetRef = useRef(0); // kept wrapped inside [0, oneSetWidth)
   const oneSetWidthRef = useRef(0);
@@ -84,6 +91,29 @@ export default function SmileStories() {
   const lastTsRef = useRef<number | null>(null);
   const lastSaveTsRef = useRef(0);
   const pointerIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await publicPatientStoriesApi.listPublished({ limit: 24 });
+        const mapped: SmileStory[] = (res.data ?? [])
+          .filter((s) => Boolean(s.patientImage))
+          .map((s) => ({
+            name: s.title,
+            date: formatStoryDate(s.storyDate) || "—",
+            image: s.patientImage as string,
+            link: `/journey-of-hope/patient-stories/${s.slug}`,
+          }));
+        if (!cancelled && mapped.length > 0) setItems(mapped);
+      } catch {
+        // keep static fallback
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const applyTransform = () => {
     if (!trackRef.current) return;
@@ -161,7 +191,7 @@ export default function SmileStories() {
       window.removeEventListener("resize", measure);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasEntered]);
+  }, [hasEntered, loopedStories.length]);
 
   useEffect(() => {
     if (!hasEntered) return;
@@ -265,7 +295,7 @@ export default function SmileStories() {
   const handleCardClick = (link: string) => {
     if (didDragRef.current) return; // it was a drag, not a click - don't navigate
     saveOffset();
-    window.location.href = "/";
+    window.location.href = link;
   };
 
   return (

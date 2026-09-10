@@ -3,16 +3,19 @@ import type {
   AnnualReport,
   AnnualReportFields,
   CreateLegalPagePayload,
+  CreatePatientStoryPayload,
   CreateTeamPayload,
   CreateUserPayload,
   LegalPage,
   LegalPageType,
   Paginated,
+  PatientStory,
   Team,
   AdminUser,
   ContentStatus,
   TeamMemberType,
   UpdateLegalPagePayload,
+  UpdatePatientStoryPayload,
   UpdateTeamPayload,
 } from "./types";
 
@@ -218,6 +221,32 @@ export const cmsApi = {
 
   deleteLegalPage: (id: string) =>
     request<void>(`/legal-pages/${id}`, { method: "DELETE" }),
+
+  listPatientStories: (params?: ListQuery) =>
+    request<Paginated<PatientStory>>(
+      `/patient-stories${toQuery({ page: 1, limit: 10, ...params })}`
+    ),
+
+  getPatientStory: (id: string) =>
+    request<ApiEnvelope<PatientStory>>(`/patient-stories/${id}`),
+
+  getPatientStoryBySlug: (slug: string) =>
+    request<ApiEnvelope<PatientStory>>(`/patient-stories/slug/${slug}`),
+
+  createPatientStory: (payload: CreatePatientStoryPayload) =>
+    request<ApiEnvelope<PatientStory>>("/patient-stories", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  updatePatientStory: (id: string, payload: UpdatePatientStoryPayload) =>
+    request<ApiEnvelope<PatientStory>>(`/patient-stories/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  deletePatientStory: (id: string) =>
+    request<void>(`/patient-stories/${id}`, { method: "DELETE" }),
 };
 
 /** Public site: published people, optionally by trustee/team */
@@ -228,4 +257,20 @@ export const publicTeamsApi = {
     ),
 
   getById: (id: string) => request<ApiEnvelope<Team>>(`/teams/${id}`),
+};
+
+/** Public site: published patient stories */
+export const publicPatientStoriesApi = {
+  listPublished: (params?: Omit<ListQuery, "status">) =>
+    request<Paginated<PatientStory>>(
+      `/patient-stories${toQuery({
+        page: 1,
+        limit: 50,
+        ...params,
+        status: "published",
+      })}`
+    ),
+
+  getBySlug: (slug: string) =>
+    request<ApiEnvelope<PatientStory>>(`/patient-stories/slug/${slug}`),
 };

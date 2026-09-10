@@ -73,7 +73,7 @@ export const adminMenuGroups: AdminMenuGroup[] = [
         icon: UserCog,
       },
       {
-        label: "Patients",
+        label: "Patient Stories",
         href: "/admin/patients",
         icon: Users,
       },
