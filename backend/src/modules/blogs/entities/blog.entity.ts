@@ -24,7 +24,12 @@ export class Blog extends SeoContentEntity {
   @Column({ name: 'author_name', type: 'varchar', length: 255, nullable: true })
   authorName?: string | null;
 
-  @Column({ name: 'author_designation', type: 'varchar', length: 255, nullable: true })
+  @Column({
+    name: 'author_designation',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   authorDesignation?: string | null;
 
   @Column({ type: 'text', nullable: true })

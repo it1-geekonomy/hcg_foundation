@@ -8,7 +8,14 @@ const IMAGE_TYPES = new Set([
   'image/gif',
 ]);
 
+const DOCUMENT_TYPES = new Set([
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+]);
+
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_DOCUMENT_BYTES = 25 * 1024 * 1024;
 
 export type CdnFile = {
   originalname: string;
@@ -28,7 +35,7 @@ export class CdnService {
   constructor(private readonly r2: R2StorageService) {}
 
   async upload(file: CdnFile, folder: string): Promise<string> {
-    this.assertImage(file);
+    this.assertValidFile(file);
     const uploaded = await this.r2.upload({
       folder,
       fileName: file.originalname,
@@ -60,17 +67,23 @@ export class CdnService {
     return nextUrl;
   }
 
-  private assertImage(file: CdnFile) {
+  private assertValidFile(file: CdnFile) {
     if (!file?.buffer?.length) {
       throw new BadRequestException('Uploaded file is empty.');
     }
-    if (!IMAGE_TYPES.has(file.mimetype)) {
+    const isImage = IMAGE_TYPES.has(file.mimetype);
+    const isDocument = DOCUMENT_TYPES.has(file.mimetype);
+
+    if (!isImage && !isDocument) {
       throw new BadRequestException(
-        'Only JPEG, PNG, WebP, or GIF images are allowed.',
+        'Only JPEG, PNG, WebP, GIF images or PDF documents are allowed.',
       );
     }
-    if (file.size > MAX_IMAGE_BYTES) {
+    if (isImage && file.size > MAX_IMAGE_BYTES) {
       throw new BadRequestException('Image must be 5MB or smaller.');
+    }
+    if (isDocument && file.size > MAX_DOCUMENT_BYTES) {
+      throw new BadRequestException('Document must be 25MB or smaller.');
     }
   }
 }

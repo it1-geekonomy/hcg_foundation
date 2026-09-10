@@ -8,7 +8,9 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import configuration from './config/configuration';
 import { StorageModule } from './common/storage/storage.module';
 import { DatabaseModule } from './database/database.module';
+import { AnnualReportsModule } from './modules/annual-reports/annual-reports.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { BlogsModule } from './modules/blogs/blogs.module';
 import { DonorsModule } from './modules/donors/donors.module';
 import { EventsModule } from './modules/events/events.module';
 import { UsersModule } from './modules/users/users.module';
@@ -23,6 +25,8 @@ import { UsersModule } from './modules/users/users.module';
     DatabaseModule,
     StorageModule,
     EventsModule,
+    AnnualReportsModule,
+    BlogsModule,
     DonorsModule,
     UsersModule,
     AuthModule,
