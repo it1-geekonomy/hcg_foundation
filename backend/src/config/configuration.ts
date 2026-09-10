@@ -29,4 +29,8 @@ export default () => ({
     publicUrl: process.env.R2_PUBLIC_URL ?? '',
     region: process.env.R2_REGION ?? 'auto',
   },
+  razorpay: {
+    keyId: process.env.RAZORPAY_KEY_ID ?? '',
+    keySecret: process.env.RAZORPAY_KEY_SECRET ?? '',
+  },
 });
