@@ -90,16 +90,17 @@ export class R2StorageService {
     };
   }
 
-  async deleteByPublicUrl(url?: string | null): Promise<void> {
-    if (!url || !this.publicUrl || !url.startsWith(this.publicUrl)) return;
+  async deleteByPublicUrl(url?: string | null): Promise<boolean> {
+    if (!url || !this.publicUrl || !url.startsWith(this.publicUrl)) return false;
     this.assertConfigured();
     const key = url.slice(this.publicUrl.length + 1);
-    if (!key) return;
+    if (!key) return false;
     await this.client.send(
       new DeleteObjectCommand({
         Bucket: this.bucket,
         Key: key,
       }),
     );
+    return true;
   }
 }

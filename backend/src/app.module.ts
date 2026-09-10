@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import configuration from './config/configuration';
+import { StorageModule } from './common/storage/storage.module';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { EventsModule } from './modules/events/events.module';
@@ -19,6 +20,7 @@ import { UsersModule } from './modules/users/users.module';
       load: [configuration],
     }),
     DatabaseModule,
+    StorageModule,
     EventsModule,
     UsersModule,
     AuthModule,

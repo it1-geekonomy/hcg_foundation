@@ -15,22 +15,6 @@ export class CreateEventDto extends SeoFieldsDto {
   slug: string;
 
   @ApiPropertyOptional({
-    example: 'https://cdn.example.com/events/walk-banner.jpg',
-    description: 'Desktop event banner URL',
-  })
-  @IsOptional()
-  @IsString()
-  eventBanner?: string;
-
-  @ApiPropertyOptional({
-    example: 'https://cdn.example.com/events/walk-banner-mobile.jpg',
-    description: 'Mobile event banner URL',
-  })
-  @IsOptional()
-  @IsString()
-  eventMobileBanner?: string;
-
-  @ApiPropertyOptional({
     example: '2026-10-12',
     description: 'Event date (YYYY-MM-DD)',
   })
