@@ -35,7 +35,7 @@ export class DonorsController {
   @ApiOperation({
     summary: 'Start donation (website Donate Now)',
     description:
-      'Creates a pending donor row and a Razorpay order. Frontend opens Razorpay Checkout with `keyId` + `orderId`, then calls POST /donors/verify.',
+      'Creates a Razorpay order only. Donor details are stored on the order until payment succeeds. Frontend opens Checkout with `keyId` + `orderId`, then calls POST /donors/verify.',
   })
   @ApiCreatedResponse({ description: 'Razorpay checkout payload' })
   async createOrder(@Body() dto: CreateDonationDto) {
@@ -53,7 +53,7 @@ export class DonorsController {
   @ApiOperation({
     summary: 'Verify Razorpay payment (website)',
     description:
-      'Call from the Razorpay Checkout success handler. Confirms the signature and marks the donation paid.',
+      'Call from the Razorpay Checkout success handler. Confirms the signature and inserts the donor row as paid.',
   })
   @ApiOkResponse({ type: Donor })
   async verify(@Body() dto: VerifyDonationDto) {
@@ -69,7 +69,8 @@ export class DonorsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'List donors (CMS)',
-    description: 'All donation statuses. Optional status/search filters.',
+    description:
+      'Successful payments only by default. Pass status=pending for old abandoned rows.',
   })
   @ApiOkResponse({ description: 'Paginated CMS list' })
   @ApiUnauthorizedResponse({

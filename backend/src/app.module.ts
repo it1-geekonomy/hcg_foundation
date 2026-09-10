@@ -13,6 +13,8 @@ import { DonorsModule } from './modules/donors/donors.module';
 import { EventsModule } from './modules/events/events.module';
 import { LeadsContactModule } from './modules/leads-contact/leads-contact.module';
 import { LeadsInternshipModule } from './modules/leads-internship/leads-internship.module';
+import { NewsModule } from './modules/news/news.module';
+import { PatientStoriesModule } from './modules/patient-stories/patient-stories.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -25,6 +27,8 @@ import { UsersModule } from './modules/users/users.module';
     DatabaseModule,
     StorageModule,
     EventsModule,
+    NewsModule,
+    PatientStoriesModule,
     DonorsModule,
     LeadsContactModule,
     LeadsInternshipModule,

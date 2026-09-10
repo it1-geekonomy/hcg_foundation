@@ -26,7 +26,11 @@ export class ListDonorsQueryDto {
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ enum: DonationStatus })
+  @ApiPropertyOptional({
+    enum: DonationStatus,
+    default: DonationStatus.PAID,
+    description: 'Defaults to paid. Abandoned checkouts are not stored.',
+  })
   @IsOptional()
   @IsEnum(DonationStatus)
   status?: DonationStatus;
