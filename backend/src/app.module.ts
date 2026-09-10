@@ -9,6 +9,7 @@ import configuration from './config/configuration';
 import { StorageModule } from './common/storage/storage.module';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { DonorsModule } from './modules/donors/donors.module';
 import { EventsModule } from './modules/events/events.module';
 import { NewsModule } from './modules/news/news.module';
 import { PatientStoriesModule } from './modules/patient-stories/patient-stories.module';
@@ -26,6 +27,7 @@ import { UsersModule } from './modules/users/users.module';
     EventsModule,
     NewsModule,
     PatientStoriesModule,
+    DonorsModule,
     UsersModule,
     AuthModule,
 
