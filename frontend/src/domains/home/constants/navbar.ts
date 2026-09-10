@@ -3,12 +3,7 @@ export const navLinks = [
   { label: "Home", href: "/", hasDropdown: false },
   {
     label: "About Us",
-    href: "/about",
-    hasDropdown: true,
-    dropdownItems: [
-      { label: "Our Story", href: "/about/our-story" },
-      { label: "Our Team", href: "/about/our-team" },
-    ],
+    href: "/about-us",
   },
   {
     label: "What We Do",
