@@ -11,7 +11,6 @@ import { User } from '../../modules/users/entities/user.entity';
  *   SEED_ADMIN_EMAIL
  *   SEED_ADMIN_USERNAME
  *   SEED_ADMIN_PASSWORD
- *   SEED_ADMIN_SLUG
  */
 async function seed() {
   const fullName = process.env.SEED_ADMIN_FULL_NAME ?? 'HCG Admin';
@@ -22,9 +21,6 @@ async function seed() {
     .trim()
     .toLowerCase();
   const password = process.env.SEED_ADMIN_PASSWORD ?? 'Admin@12345';
-  const slug =
-    process.env.SEED_ADMIN_SLUG?.trim() ||
-    `${username.replace(/[^a-z0-9]+/g, '-')}-seed`;
 
   await AppDataSource.initialize();
   const repo = AppDataSource.getRepository(User);
@@ -49,7 +45,6 @@ async function seed() {
     fullName,
     email,
     username,
-    slug,
     passwordHash,
   });
 

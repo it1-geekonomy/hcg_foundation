@@ -36,7 +36,6 @@ export type UpdateTeamPayload = Partial<CreateTeamPayload>;
 export type AdminUser = {
   id: string;
   fullName: string;
-  slug?: string | null;
   email: string;
   username: string;
   createdAt: string;
@@ -45,7 +44,6 @@ export type AdminUser = {
 
 export type CreateUserPayload = {
   fullName: string;
-  slug?: string;
   email: string;
   username: string;
   password: string;

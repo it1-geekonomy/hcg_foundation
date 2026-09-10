@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { instanceToPlain } from 'class-transformer';
-import { createHash, randomBytes, scryptSync, timingSafeEqual } from 'crypto';
+import { randomBytes, scryptSync, timingSafeEqual } from 'crypto';
 import { Repository } from 'typeorm';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 import {
@@ -29,12 +29,10 @@ export class UsersService {
     await this.assertUniqueFields({
       email: dto.email,
       username: dto.username,
-      slug: dto.slug,
     });
 
     const entity = this.repo.create({
       fullName: dto.fullName,
-      slug: dto.slug ?? this.slugify(dto.username),
       email: dto.email.toLowerCase(),
       username: dto.username.toLowerCase(),
       passwordHash: this.hashPassword(dto.password),
@@ -53,7 +51,7 @@ export class UsersService {
 
     if (query.search) {
       qb.andWhere(
-        '(user.fullName ILIKE :search OR user.email ILIKE :search OR user.username ILIKE :search OR user.slug ILIKE :search)',
+        '(user.fullName ILIKE :search OR user.email ILIKE :search OR user.username ILIKE :search)',
         { search: `%${query.search}%` },
       );
     }
@@ -96,16 +94,13 @@ export class UsersService {
       {
         email: dto.email,
         username: dto.username,
-        slug: dto.slug,
       },
       id,
     );
 
     if (dto.fullName !== undefined) entity.fullName = dto.fullName;
-    if (dto.slug !== undefined) entity.slug = dto.slug;
     if (dto.email !== undefined) entity.email = dto.email.toLowerCase();
     if (dto.username !== undefined) entity.username = dto.username.toLowerCase();
-    if (dto.resetString !== undefined) entity.resetString = dto.resetString;
     if (dto.password) entity.passwordHash = this.hashPassword(dto.password);
 
     return this.toSafe(await this.repo.save(entity));
@@ -131,7 +126,7 @@ export class UsersService {
   }
 
   private async assertUniqueFields(
-    fields: { email?: string; username?: string; slug?: string },
+    fields: { email?: string; username?: string },
     excludeId?: string,
   ) {
     const checks: Array<{ column: keyof User; value?: string; label: string }> =
@@ -142,7 +137,6 @@ export class UsersService {
           value: fields.username?.toLowerCase(),
           label: 'username',
         },
-        { column: 'slug', value: fields.slug, label: 'slug' },
       ];
 
     for (const check of checks) {
@@ -169,18 +163,5 @@ export class UsersService {
     const prev = Buffer.from(hash, 'hex');
     if (next.length !== prev.length) return false;
     return timingSafeEqual(next, prev);
-  }
-
-  private slugify(value: string): string {
-    const base = value
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-    const suffix = createHash('sha1')
-      .update(`${value}-${Date.now()}`)
-      .digest('hex')
-      .slice(0, 6);
-    return `${base || 'user'}-${suffix}`;
   }
 }

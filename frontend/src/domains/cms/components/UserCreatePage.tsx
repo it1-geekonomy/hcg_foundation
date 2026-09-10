@@ -11,7 +11,6 @@ import { CmsFormField } from "./CmsFormField";
 
 const emptyForm = {
   fullName: "",
-  slug: "",
   email: "",
   username: "",
   password: "",
@@ -30,7 +29,6 @@ export default function UserCreatePage() {
     try {
       await cmsApi.createUser({
         fullName: form.fullName.trim(),
-        slug: form.slug.trim() || undefined,
         email: form.email.trim(),
         username: form.username.trim(),
         password: form.password,
@@ -77,15 +75,6 @@ export default function UserCreatePage() {
             placeholder="Admin User"
             value={form.fullName}
             onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-          />
-        </CmsFormField>
-
-        <CmsFormField label="Slug" htmlFor="slug" hint="Optional unique slug">
-          <Input
-            id="slug"
-            placeholder="admin-user"
-            value={form.slug}
-            onChange={(e) => setForm({ ...form, slug: e.target.value })}
           />
         </CmsFormField>
 

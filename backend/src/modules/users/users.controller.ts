@@ -53,16 +53,6 @@ export class UsersController {
           password: 'password@123',
         },
       },
-      withSlug: {
-        summary: 'Create user with slug',
-        value: {
-          fullName: 'Kishan',
-          slug: 'kishan-10',
-          email: 'kishan10@gmail.com',
-          username: 'kishan10',
-          password: 'password@123',
-        },
-      },
     },
   })
   @ApiCreatedResponse({ type: User })
