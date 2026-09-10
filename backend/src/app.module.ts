@@ -9,10 +9,6 @@ import configuration from './config/configuration';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { EventsModule } from './modules/events/events.module';
-import { PatientStoriesModule } from './modules/patient-stories/patient-stories.module';
-import { ProjectsModule } from './modules/projects/projects.module';
-import { TeamsModule } from './modules/teams/teams.module';
-import { TrusteesModule } from './modules/trustees/trustees.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -23,12 +19,7 @@ import { UsersModule } from './modules/users/users.module';
       load: [configuration],
     }),
     DatabaseModule,
-
-    TeamsModule,
-    TrusteesModule,
-    ProjectsModule,
     EventsModule,
-    PatientStoriesModule,
     UsersModule,
     AuthModule,
 
