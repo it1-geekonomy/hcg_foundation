@@ -1,8 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
+import { CdnService } from './cdn.service';
 import { R2StorageService } from './r2-storage.service';
 
+@Global()
 @Module({
-  providers: [R2StorageService],
-  exports: [R2StorageService],
+  providers: [R2StorageService, CdnService],
+  exports: [R2StorageService, CdnService],
 })
 export class StorageModule {}
