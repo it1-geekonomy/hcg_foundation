@@ -11,6 +11,8 @@ import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { DonorsModule } from './modules/donors/donors.module';
 import { EventsModule } from './modules/events/events.module';
+import { LeadsContactModule } from './modules/leads-contact/leads-contact.module';
+import { LeadsInternshipModule } from './modules/leads-internship/leads-internship.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -24,6 +26,8 @@ import { UsersModule } from './modules/users/users.module';
     StorageModule,
     EventsModule,
     DonorsModule,
+    LeadsContactModule,
+    LeadsInternshipModule,
     UsersModule,
     AuthModule,
 
