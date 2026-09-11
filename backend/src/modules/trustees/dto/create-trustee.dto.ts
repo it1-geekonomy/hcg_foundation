@@ -6,9 +6,9 @@ import { ContentStatus } from '../../../common/enums/content-status.enum';
 export class CreateTrusteeDto extends SeoFieldsDto {
   @ApiProperty({ example: 'Mrs. Jane Doe' })
   @IsString()
-  @IsNotEmpty()
   @MaxLength(255)
   title: string;
+
 
   @ApiPropertyOptional({ example: 'Board Member' })
   @IsOptional()
