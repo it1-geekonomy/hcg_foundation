@@ -152,6 +152,8 @@ pnpm run start:dev
 | Home | `/api/patient-stories` | `patient_stories` |
 | Donation | `/api/donors` | `donors` |
 | Contact | `/api/leads-contact` | `leads_contact` |
+| Get Involved | `/api/fundraising-campaigns` | `fundraising_campaigns` |
+| Get Involved | `/api/partnership-inquiries` | `partnership_inquiries` |
 | Admin | `/api/users` | `users` |
 
 CRUD: `POST /` · `GET /` (paginated) · `GET /:id` · `PATCH /:id` · `DELETE /:id`
