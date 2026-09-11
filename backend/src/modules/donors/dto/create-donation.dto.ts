@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsEmail,
   IsNumber,
   IsOptional,
@@ -22,8 +23,8 @@ export class CreateDonationDto {
     typeof value === 'string' ? value.replace(/[\s-]/g, '') : value,
   )
   @IsString()
-  @Matches(/^[+]?\d{10,15}$/, {
-    message: 'phone must be 10–15 digits',
+  @Matches(/^[+]?\d{8,15}$/, {
+    message: 'phone must be 8–15 digits',
   })
   phone!: string;
 
@@ -37,6 +38,24 @@ export class CreateDonationDto {
   @IsString()
   @MaxLength(255)
   city?: string;
+
+  @ApiPropertyOptional({ example: 'United States' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  country?: string;
+
+  @ApiPropertyOptional({
+    example: true,
+    description: 'True if the donor is paying from outside India',
+  })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === '') return undefined;
+    return value === true || value === 'true';
+  })
+  @IsBoolean()
+  isInternational?: boolean;
 
   @ApiPropertyOptional({
     example: 'ABCDE1234F',
