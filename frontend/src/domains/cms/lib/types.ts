@@ -91,6 +91,28 @@ export type CreateLegalPagePayload = SeoFields & {
 
 export type UpdateLegalPagePayload = Partial<CreateLegalPagePayload>;
 
+export type DonationStatus = "pending" | "paid" | "failed" | "refunded";
+
+export type Donor = {
+  id: string;
+  fullName: string;
+  phone?: string | null;
+  email?: string | null;
+  city?: string | null;
+  country?: string | null;
+  isInternational: boolean;
+  pan?: string | null;
+  message?: string | null;
+  amount: string;
+  currency: string;
+  receiptNumber?: string | null;
+  razorpayPaymentId?: string | null;
+  razorpayOrderId?: string | null;
+  status: DonationStatus;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Paginated<T> = {
   data: T[];
   meta: {

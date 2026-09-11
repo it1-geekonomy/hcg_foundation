@@ -15,4 +15,6 @@ export { default as LegalPageViewPage } from "./LegalPageViewPage";
 export { default as LegalPageEditPage } from "./LegalPageEditPage";
 export { default as UsersListPage } from "./UsersListPage";
 export { default as UserCreatePage } from "./UserCreatePage";
+export { default as DonorsListPage } from "./DonorsListPage";
+export { default as DonorsViewPage } from "./DonorsViewPage";
 export { default as CmsRichTextEditor } from "./CmsRichTextEditor";
