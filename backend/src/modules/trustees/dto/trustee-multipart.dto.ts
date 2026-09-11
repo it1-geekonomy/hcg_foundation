@@ -1,14 +1,14 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 
 /** Swagger-only shape so file pickers appear on multipart endpoints. */
 export class CreateTrusteeMultipartDto {
-  @ApiPropertyOptional()
-  title?: string;
+  @ApiProperty({ example: 'Mrs. Jane Doe' })
+  title: string;
 
-  @ApiPropertyOptional()
-  slug?: string;
+  @ApiProperty({ example: 'mrs-jane-doe' })
+  slug: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'Board Member' })
   designation?: string;
 
   @ApiPropertyOptional({
@@ -18,13 +18,17 @@ export class CreateTrusteeMultipartDto {
   })
   trusteeImage?: unknown;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    example: '<p>Mrs. Jane Doe has been a dedicated board member since 2015...</p>',
+  })
   content?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    example: 'Philanthropist with 15+ years of experience in healthcare initiatives',
+  })
   shortDescription?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ enum: ['draft', 'published', 'archived'], example: 'draft' })
   status?: string;
 
   @ApiPropertyOptional()
@@ -37,4 +41,6 @@ export class CreateTrusteeMultipartDto {
   schemaCode?: string;
 }
 
-export class UpdateTrusteeMultipartDto extends CreateTrusteeMultipartDto {}
+export class UpdateTrusteeMultipartDto extends PartialType(
+  CreateTrusteeMultipartDto,
+) {}

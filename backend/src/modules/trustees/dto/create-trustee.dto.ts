@@ -22,23 +22,33 @@ export class CreateTrusteeDto extends SeoFieldsDto {
   @MaxLength(255)
   designation?: string;
 
-  @ApiPropertyOptional({ description: 'Trustee image URL' })
+  @ApiPropertyOptional({
+    example: 'https://cdn.example.com/trustees/mrs-jane-doe.jpg',
+    description: 'Trustee image URL',
+  })
   @IsOptional()
   @IsString()
   trusteeImage?: string;
 
-  @ApiPropertyOptional({ description: 'Full bio/content (HTML / rich text)' })
+  @ApiPropertyOptional({
+    example: '<p>Mrs. Jane Doe has been a dedicated board member since 2015...</p>',
+    description: 'Full bio/content (HTML / rich text)',
+  })
   @IsOptional()
   @IsString()
   content?: string;
 
-  @ApiPropertyOptional({ description: 'Short blurb for cards' })
+  @ApiPropertyOptional({
+    example: 'Philanthropist with 15+ years of experience in healthcare initiatives',
+    description: 'Short blurb for cards',
+  })
   @IsOptional()
   @IsString()
   shortDescription?: string;
 
   @ApiPropertyOptional({
     enum: ContentStatus,
+    example: 'draft',
     default: ContentStatus.DRAFT,
   })
   @IsOptional()

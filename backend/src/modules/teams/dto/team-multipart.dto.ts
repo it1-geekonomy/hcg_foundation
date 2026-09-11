@@ -1,14 +1,14 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 
 /** Swagger-only shape so file pickers appear on multipart endpoints. */
 export class CreateTeamMultipartDto {
-  @ApiPropertyOptional()
-  title?: string;
+  @ApiProperty({ example: 'Dr. John Smith' })
+  title: string;
 
-  @ApiPropertyOptional()
-  slug?: string;
+  @ApiProperty({ example: 'dr-john-smith' })
+  slug: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ example: 'Senior Oncologist' })
   designation?: string;
 
   @ApiPropertyOptional({
@@ -18,13 +18,17 @@ export class CreateTeamMultipartDto {
   })
   teamImage?: unknown;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    example: '<p>Dr. John Smith has over 20 years of experience in oncology...</p>',
+  })
   content?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    example: 'Senior oncologist specializing in breast cancer treatment',
+  })
   shortDescription?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ enum: ['draft', 'published', 'archived'], example: 'draft' })
   status?: string;
 
   @ApiPropertyOptional()
@@ -37,4 +41,6 @@ export class CreateTeamMultipartDto {
   schemaCode?: string;
 }
 
-export class UpdateTeamMultipartDto extends CreateTeamMultipartDto {}
+export class UpdateTeamMultipartDto extends PartialType(
+  CreateTeamMultipartDto,
+) {}

@@ -22,23 +22,33 @@ export class CreateTeamDto extends SeoFieldsDto {
   @MaxLength(255)
   designation?: string;
 
-  @ApiPropertyOptional({ description: 'Team member image URL' })
+  @ApiPropertyOptional({
+    example: 'https://cdn.example.com/teams/dr-john-smith.jpg',
+    description: 'Team member image URL',
+  })
   @IsOptional()
   @IsString()
   teamImage?: string;
 
-  @ApiPropertyOptional({ description: 'Full bio/content (HTML / rich text)' })
+  @ApiPropertyOptional({
+    example: '<p>Dr. John Smith has over 20 years of experience in oncology...</p>',
+    description: 'Full bio/content (HTML / rich text)',
+  })
   @IsOptional()
   @IsString()
   content?: string;
 
-  @ApiPropertyOptional({ description: 'Short blurb for cards' })
+  @ApiPropertyOptional({
+    example: 'Senior oncologist specializing in breast cancer treatment',
+    description: 'Short blurb for cards',
+  })
   @IsOptional()
   @IsString()
   shortDescription?: string;
 
   @ApiPropertyOptional({
     enum: ContentStatus,
+    example: 'draft',
     default: ContentStatus.DRAFT,
   })
   @IsOptional()
