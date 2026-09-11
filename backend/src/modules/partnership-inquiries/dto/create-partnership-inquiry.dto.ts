@@ -3,13 +3,11 @@ import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
-  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
-import { InquiryStatus } from '../../../common/enums/inquiry-status.enum';
 
 export class CreatePartnershipInquiryDto {
   @ApiProperty({ example: 'Vikram Mehta', description: 'Full name of the contact person' })
@@ -51,13 +49,4 @@ export class CreatePartnershipInquiryDto {
   @IsBoolean()
   @Type(() => Boolean)
   termsAccepted: boolean;
-
-  @ApiPropertyOptional({
-    enum: InquiryStatus,
-    default: InquiryStatus.PENDING,
-    description: 'Inquiry status',
-  })
-  @IsOptional()
-  @IsEnum(InquiryStatus)
-  status?: InquiryStatus;
 }

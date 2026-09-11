@@ -23,7 +23,7 @@ export class FundraisingCampaignsService {
   ): Promise<FundraisingCampaign> {
     const entity = this.repo.create({
       ...dto,
-      status: dto.status ?? CampaignStatus.PENDING,
+      status: CampaignStatus.PENDING,
     });
     return await this.repo.save(entity);
   }
