@@ -27,7 +27,7 @@ export default function MissionHighlight({
 }: MissionHighlightProps) {
   return (
     <section
-      className={`w-full overflow-x-hidden bg-[#FFF8E2] pt-8 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40 ${className}`}
+      className={`w-full overflow-x-hidden bg-[#FFF8E2] pt-8 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-20 lg:px-6 xl:px-6 2xl:px-40 ${className}`}
     >
       <div className="grid w-full grid-cols-1 items-center gap-6 lg:grid-cols-2 lg:items-stretch lg:gap-4 xl:gap-20">
         {/* Left: label, heading, paragraphs */}

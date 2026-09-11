@@ -6,14 +6,13 @@ export const navLinks = [
     href: "/about-us",
   },
   {
-    label: "What We Do",
-    href: "/what-we-do",
-    hasDropdown: true,
+    label: "Our Programs",
+    href: "/our-programs",
+     hasDropdown: true,
     dropdownItems: [
-      { label: "Patient Aid", href: "/what-we-do/patient-aid" },
-      { label: "Awareness & Prevention", href: "/what-we-do/awareness-and-prevention" },
-      { label: "Pink Hope Patient Support Group", href: "/what-we-do/pink-hope-patient-support" },
-      { label: "Swasthi Art Gallery", href: "/what-we-do/swasthi-art-gallery" },
+      { label: "Financial Support for Pediatric Patients", href: "/our-programs/financial-support-for-pediatric-patients" },
+      { label: "Awareness & Screening Camps", href: "/our-programs/awareness-and-screening-camps" },
+      { label: "Swasthi Gallery", href: "/our-programs/swasthi-gallery" },
     ],
   },
   {
@@ -21,8 +20,9 @@ export const navLinks = [
     href: "/getinvolved",
     hasDropdown: true,
     dropdownItems: [
-      { label: "Internship Program", href: "/getinvolved/internship-program" },
-      { label: "Partnership", href: "/getinvolved/partnership" },
+      { label: "CSR Partner", href: "/getinvolved/CSR-partner" },
+      { label: "Granst & Philanthrophy", href: "/getinvolved/granst-and-philanthrophy" },
+      { label: "Participate", href: "/getinvolved/participate" },
     ],
   },
   {
@@ -30,15 +30,15 @@ export const navLinks = [
     href: "/resources",
     hasDropdown: true,
     dropdownItems: [
+      { label: "Transparency & Knowledge Hub", href: "/resources/transparency-and-knowledge-hub" },
       { label: "Events", href: "/resources/events" },
-      { label: "Projects", href: "/resources/projects" },
     ],
   },
   { label: "Journey of Hope", 
     href: "/journey-of-hope", hasDropdown: true,
     dropdownItems: [
+      { label: "Testimonials", href: "/journey-of-hope/testimonials" },
       { label: "Patient Stories", href: "/journey-of-hope/patient-stories" },
-      { label: "Patient Testimonials", href: "/journey-of-hope/patient-testimonials" },
     ],
    },
 ];
