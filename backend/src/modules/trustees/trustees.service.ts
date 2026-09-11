@@ -12,6 +12,10 @@ import {
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
 import { CreateTrusteeDto } from './dto/create-trustee.dto';
 import { UpdateTrusteeDto } from './dto/update-trustee.dto';
 import { Trustee } from './entities/trustee.entity';
@@ -57,6 +61,7 @@ export class TrusteesService {
     const qb = this.repo
       .createQueryBuilder('entity')
       .orderBy('entity.createdAt', 'DESC');
+    applyDeletedFilter(qb, query.includeDeleted);
 
     if (query.status) {
       qb.andWhere('entity.status = :status', { status: query.status });
@@ -80,7 +85,11 @@ export class TrusteesService {
   async findPublished(
     query: PaginationQueryDto,
   ): Promise<PaginatedResult<Trustee>> {
-    return this.findAll({ ...query, status: ContentStatus.PUBLISHED });
+    return this.findAll({
+      ...query,
+      status: ContentStatus.PUBLISHED,
+      includeDeleted: false,
+    });
   }
 
   async findOne(id: string): Promise<Trustee> {
@@ -111,7 +120,10 @@ export class TrusteesService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    await this.cdn.delete(entity.trusteeImage);
-    await this.repo.remove(entity);
+    await this.repo.softRemove(entity);
+  }
+
+  async restore(id: string): Promise<Trustee> {
+    return restoreSoftDeleted(this.repo, id, 'Trustee');
   }
 }

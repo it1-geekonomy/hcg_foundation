@@ -12,6 +12,10 @@ import {
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
 import { CreatePatientStoryDto } from './dto/create-patient-story.dto';
 import { UpdatePatientStoryDto } from './dto/update-patient-story.dto';
 import { PatientStory } from './entities/patient-story.entity';
@@ -63,6 +67,7 @@ export class PatientStoriesService {
       .createQueryBuilder('entity')
       .orderBy('entity.storyDate', 'DESC', 'NULLS LAST')
       .addOrderBy('entity.createdAt', 'DESC');
+    applyDeletedFilter(qb, query.includeDeleted);
 
     if (query.status) {
       qb.andWhere('entity.status = :status', { status: query.status });
@@ -86,7 +91,11 @@ export class PatientStoriesService {
   async findPublished(
     query: PaginationQueryDto,
   ): Promise<PaginatedResult<PatientStory>> {
-    return this.findAll({ ...query, status: ContentStatus.PUBLISHED });
+    return this.findAll({
+      ...query,
+      status: ContentStatus.PUBLISHED,
+      includeDeleted: false,
+    });
   }
 
   async findOne(id: string): Promise<PatientStory> {
@@ -128,8 +137,11 @@ export class PatientStoriesService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    await this.cdn.delete(entity.patientImage);
-    await this.repo.remove(entity);
+    await this.repo.softRemove(entity);
+  }
+
+  async restore(id: string): Promise<PatientStory> {
+    return restoreSoftDeleted(this.repo, id, 'Patient story');
   }
 
   private async saveOrThrow(

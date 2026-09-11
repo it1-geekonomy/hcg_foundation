@@ -102,9 +102,22 @@ export class UsersController {
     return this.service.update(id, dto);
   }
 
+  @Post(':id/restore')
+  @ApiOperation({
+    summary: 'Restore soft-deleted user',
+    description: 'Clears deletedAt so the user can log in again.',
+  })
+  @ApiOkResponse({ type: User })
+  restore(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.restore(id);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete user by id' })
+  @ApiOperation({
+    summary: 'Soft-delete user by id',
+    description: 'Sets deletedAt. The user can no longer log in. Email/username can be reused.',
+  })
   @ApiNoContentResponse()
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.service.remove(id);

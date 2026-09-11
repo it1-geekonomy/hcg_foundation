@@ -6,6 +6,10 @@ import {
   buildPaginatedResult,
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
 import { CreatePartnershipInquiryDto } from './dto/create-partnership-inquiry.dto';
 import { ListPartnershipInquiriesQueryDto } from './dto/list-partnership-inquiries-query.dto';
 import { UpdatePartnershipInquiryDto } from './dto/update-partnership-inquiry.dto';
@@ -35,6 +39,7 @@ export class PartnershipInquiriesService {
     const qb = this.repo
       .createQueryBuilder('inquiry')
       .orderBy('inquiry.createdAt', 'DESC');
+    applyDeletedFilter(qb, query.includeDeleted);
 
     if (query.status) {
       qb.andWhere('inquiry.status = :status', { status: query.status });
@@ -76,6 +81,10 @@ export class PartnershipInquiriesService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    await this.repo.remove(entity);
+    await this.repo.softRemove(entity);
+  }
+
+  async restore(id: string): Promise<PartnershipInquiry> {
+    return restoreSoftDeleted(this.repo, id, 'Partnership inquiry');
   }
 }

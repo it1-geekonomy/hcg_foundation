@@ -185,10 +185,32 @@ export class ProjectsController {
     };
   }
 
+  @Post(':id/restore')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Restore soft-deleted project (CMS / super-admin)',
+    description: 'Clears deletedAt so the project shows again in CMS and on the website if published.',
+  })
+  @ApiOkResponse({ type: Project })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async restore(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.restore(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Project restored successfully',
+      data,
+    };
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete project (CMS / super-admin)' })
+  @ApiOperation({
+    summary: 'Soft-delete project (CMS / super-admin)',
+    description: 'Sets deletedAt. Hidden from CMS lists and the website.',
+  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })

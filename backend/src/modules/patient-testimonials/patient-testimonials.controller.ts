@@ -187,10 +187,32 @@ export class PatientTestimonialsController {
     };
   }
 
+  @Post(':id/restore')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Restore soft-deleted patient testimonial (CMS / super-admin)',
+    description: 'Clears deletedAt so the testimonial shows again in CMS and on the website if published.',
+  })
+  @ApiOkResponse({ type: PatientTestimonial })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async restore(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.restore(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Patient testimonial restored successfully',
+      data,
+    };
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete patient testimonial (CMS / super-admin)' })
+  @ApiOperation({
+    summary: 'Soft-delete patient testimonial (CMS / super-admin)',
+    description: 'Sets deletedAt. Hidden from CMS lists and the website.',
+  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })

@@ -12,6 +12,10 @@ import {
   buildPaginatedResult,
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -48,6 +52,7 @@ export class UsersService {
     const qb = this.repo
       .createQueryBuilder('user')
       .orderBy('user.createdAt', 'DESC');
+    applyDeletedFilter(qb, query.includeDeleted);
 
     if (query.search) {
       qb.andWhere(
@@ -107,10 +112,12 @@ export class UsersService {
   }
 
   async remove(id: string): Promise<void> {
-    const result = await this.repo.delete(id);
-    if (!result.affected) {
-      throw new NotFoundException(`User ${id} not found`);
-    }
+    const entity = await this.findEntity(id);
+    await this.repo.softRemove(entity);
+  }
+
+  async restore(id: string): Promise<SafeUser> {
+    return this.toSafe(await restoreSoftDeleted(this.repo, id, 'User'));
   }
 
   private async findEntity(id: string): Promise<User> {

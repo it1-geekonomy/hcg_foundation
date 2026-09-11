@@ -6,6 +6,10 @@ import {
   buildPaginatedResult,
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
 import { CreateFundraisingCampaignDto } from './dto/create-fundraising-campaign.dto';
 import { ListFundraisingCampaignsQueryDto } from './dto/list-fundraising-campaigns-query.dto';
 import { UpdateFundraisingCampaignDto } from './dto/update-fundraising-campaign.dto';
@@ -37,6 +41,7 @@ export class FundraisingCampaignsService {
     const qb = this.repo
       .createQueryBuilder('campaign')
       .orderBy('campaign.createdAt', 'DESC');
+    applyDeletedFilter(qb, query.includeDeleted);
 
     if (query.status) {
       qb.andWhere('campaign.status = :status', { status: query.status });
@@ -78,6 +83,10 @@ export class FundraisingCampaignsService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    await this.repo.remove(entity);
+    await this.repo.softRemove(entity);
+  }
+
+  async restore(id: string): Promise<FundraisingCampaign> {
+    return restoreSoftDeleted(this.repo, id, 'Fundraising campaign');
   }
 }

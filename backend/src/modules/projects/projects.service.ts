@@ -12,6 +12,10 @@ import {
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { Project } from './entities/project.entity';
@@ -65,6 +69,7 @@ export class ProjectsService {
       .createQueryBuilder('entity')
       .orderBy('entity.projectDate', 'DESC', 'NULLS LAST')
       .addOrderBy('entity.createdAt', 'DESC');
+    applyDeletedFilter(qb, query.includeDeleted);
 
     if (query.status) {
       qb.andWhere('entity.status = :status', { status: query.status });
@@ -88,7 +93,11 @@ export class ProjectsService {
   async findPublished(
     query: PaginationQueryDto,
   ): Promise<PaginatedResult<Project>> {
-    return this.findAll({ ...query, status: ContentStatus.PUBLISHED });
+    return this.findAll({
+      ...query,
+      status: ContentStatus.PUBLISHED,
+      includeDeleted: false,
+    });
   }
 
   async findOne(id: string): Promise<Project> {
@@ -135,9 +144,11 @@ export class ProjectsService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    await this.cdn.delete(entity.projectBanner);
-    await this.cdn.delete(entity.projectMobileBanner);
-    await this.repo.remove(entity);
+    await this.repo.softRemove(entity);
+  }
+
+  async restore(id: string): Promise<Project> {
+    return restoreSoftDeleted(this.repo, id, 'Project');
   }
 
   private async saveOrThrow(

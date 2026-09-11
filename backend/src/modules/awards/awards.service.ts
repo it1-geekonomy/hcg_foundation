@@ -13,6 +13,10 @@ import {
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
 import { CreateAwardDto } from './dto/create-award.dto';
 import { UpdateAwardDto } from './dto/update-award.dto';
 import { Award } from './entities/award.entity';
@@ -67,6 +71,7 @@ export class AwardsService {
       .createQueryBuilder('entity')
       .orderBy('entity.displayOrder', 'ASC')
       .addOrderBy('entity.createdAt', 'DESC');
+    applyDeletedFilter(qb, query.includeDeleted);
 
     if (query.status) {
       qb.andWhere('entity.status = :status', { status: query.status });
@@ -90,7 +95,11 @@ export class AwardsService {
   async findPublished(
     query: PaginationQueryDto,
   ): Promise<PaginatedResult<Award>> {
-    return this.findAll({ ...query, status: ContentStatus.PUBLISHED });
+    return this.findAll({
+      ...query,
+      status: ContentStatus.PUBLISHED,
+      includeDeleted: false,
+    });
   }
 
   async findOne(id: string): Promise<Award> {
@@ -119,8 +128,11 @@ export class AwardsService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    await this.cdn.delete(entity.awardImageUrl);
-    await this.repo.remove(entity);
+    await this.repo.softRemove(entity);
+  }
+
+  async restore(id: string): Promise<Award> {
+    return restoreSoftDeleted(this.repo, id, 'Award');
   }
 
   private async saveOrThrow(entity: Award): Promise<Award> {

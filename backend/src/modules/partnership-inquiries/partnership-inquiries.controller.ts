@@ -117,11 +117,31 @@ export class PartnershipInquiriesController {
     };
   }
 
+  @Post(':id/restore')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Restore soft-deleted partnership inquiry (CMS / Admin)',
+    description: 'Clears deletedAt so the inquiry shows again in CMS.',
+  })
+  @ApiOkResponse({ type: PartnershipInquiry })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async restore(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.restore(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Partnership inquiry restored successfully',
+      data,
+    };
+  }
+
   @Delete(':id')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Delete partnership inquiry (CMS / Admin)',
-    description: 'Permanently remove an inquiry record. Requires Bearer token.',
+    summary: 'Soft-delete partnership inquiry (CMS / Admin)',
+    description:
+      'Sets deletedAt. The row stays in the database and is hidden from list/get. Requires Bearer token.',
   })
   @ApiOkResponse({ description: 'Inquiry deleted successfully' })
   @ApiUnauthorizedResponse({

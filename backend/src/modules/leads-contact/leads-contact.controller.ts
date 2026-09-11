@@ -104,10 +104,32 @@ export class LeadsContactController {
     };
   }
 
+  @Post(':id/restore')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Restore soft-deleted contact lead (CMS)',
+    description: 'Clears deletedAt so the lead shows again in the CMS inbox.',
+  })
+  @ApiOkResponse({ type: LeadsContact })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async restore(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.restore(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Contact lead restored successfully',
+      data,
+    };
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete contact lead (CMS)' })
+  @ApiOperation({
+    summary: 'Soft-delete contact lead (CMS)',
+    description: 'Sets deletedAt. Hidden from the CMS inbox.',
+  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })

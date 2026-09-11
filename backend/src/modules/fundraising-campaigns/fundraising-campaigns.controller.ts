@@ -117,11 +117,31 @@ export class FundraisingCampaignsController {
     };
   }
 
+  @Post(':id/restore')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Restore soft-deleted fundraising campaign (CMS / Admin)',
+    description: 'Clears deletedAt so the application shows again in CMS.',
+  })
+  @ApiOkResponse({ type: FundraisingCampaign })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async restore(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.restore(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Fundraising campaign restored successfully',
+      data,
+    };
+  }
+
   @Delete(':id')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Delete fundraising campaign (CMS / Admin)',
-    description: 'Permanently remove a campaign application. Requires Bearer token.',
+    summary: 'Soft-delete fundraising campaign (CMS / Admin)',
+    description:
+      'Sets deletedAt. The row stays in the database and is hidden from list/get. Requires Bearer token.',
   })
   @ApiOkResponse({ description: 'Campaign application deleted successfully' })
   @ApiUnauthorizedResponse({

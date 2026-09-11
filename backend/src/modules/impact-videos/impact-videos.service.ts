@@ -12,6 +12,10 @@ import {
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
 import { CreateImpactVideoDto } from './dto/create-impact-video.dto';
 import { UpdateImpactVideoDto } from './dto/update-impact-video.dto';
 import { ImpactVideo } from './entities/impact-video.entity';
@@ -77,6 +81,7 @@ export class ImpactVideosService {
       .createQueryBuilder('entity')
       .orderBy('entity.displayOrder', 'ASC')
       .addOrderBy('entity.createdAt', 'DESC');
+    applyDeletedFilter(qb, query.includeDeleted);
 
     if (query.status) {
       qb.andWhere('entity.status = :status', { status: query.status });
@@ -93,7 +98,11 @@ export class ImpactVideosService {
   async findPublished(
     query: PaginationQueryDto,
   ): Promise<PaginatedResult<ImpactVideo>> {
-    return this.findAll({ ...query, status: ContentStatus.PUBLISHED });
+    return this.findAll({
+      ...query,
+      status: ContentStatus.PUBLISHED,
+      includeDeleted: false,
+    });
   }
 
   async findOne(id: string): Promise<ImpactVideo> {
@@ -141,8 +150,11 @@ export class ImpactVideosService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    await this.cdn.delete(entity.videoUrl);
-    await this.repo.remove(entity);
+    await this.repo.softRemove(entity);
+  }
+
+  async restore(id: string): Promise<ImpactVideo> {
+    return restoreSoftDeleted(this.repo, id, 'Impact video');
   }
 
   private validateVideoFile(file: CdnFile): void {
