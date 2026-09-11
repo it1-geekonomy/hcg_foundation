@@ -11,7 +11,7 @@ export class CreateTeamMultipartDto {
   @ApiPropertyOptional({
     type: 'string',
     format: 'binary',
-    description: 'Team member image (JPEG, PNG, WebP, GIF, max 5MB)',
+    description: 'Team member image (WebP or AVIF, max 5MB)',
   })
   teamImage?: unknown;
 

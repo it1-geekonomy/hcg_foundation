@@ -11,7 +11,7 @@ export class CreateTrusteeMultipartDto {
   @ApiPropertyOptional({
     type: 'string',
     format: 'binary',
-    description: 'Trustee image (JPEG, PNG, WebP, GIF, max 5MB)',
+    description: 'Trustee image (WebP or AVIF, max 5MB)',
   })
   trusteeImage?: unknown;
 
