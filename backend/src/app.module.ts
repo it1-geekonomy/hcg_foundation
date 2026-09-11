@@ -17,6 +17,8 @@ import { LeadsContactModule } from './modules/leads-contact/leads-contact.module
 import { LeadsInternshipModule } from './modules/leads-internship/leads-internship.module';
 import { NewsModule } from './modules/news/news.module';
 import { PatientStoriesModule } from './modules/patient-stories/patient-stories.module';
+import { TeamsModule } from './modules/teams/teams.module';
+import { TrusteesModule } from './modules/trustees/trustees.module';
 import { FundraisingCampaignsModule } from './modules/fundraising-campaigns/fundraising-campaigns.module';
 import { PartnershipInquiriesModule } from './modules/partnership-inquiries/partnership-inquiries.module';
 import { UsersModule } from './modules/users/users.module';
@@ -38,6 +40,8 @@ import { UsersModule } from './modules/users/users.module';
     DonorsModule,
     LeadsContactModule,
     LeadsInternshipModule,
+    TeamsModule,
+    TrusteesModule,
     FundraisingCampaignsModule,
     PartnershipInquiriesModule,
     UsersModule,
