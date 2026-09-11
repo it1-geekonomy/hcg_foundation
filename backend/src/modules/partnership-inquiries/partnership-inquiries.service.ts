@@ -21,7 +21,7 @@ export class PartnershipInquiriesService {
   async create(dto: CreatePartnershipInquiryDto): Promise<PartnershipInquiry> {
     const entity = this.repo.create({
       ...dto,
-      status: dto.status ?? InquiryStatus.PENDING,
+      status: InquiryStatus.PENDING,
     });
     return await this.repo.save(entity);
   }

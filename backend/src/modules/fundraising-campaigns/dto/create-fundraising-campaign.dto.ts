@@ -3,13 +3,11 @@ import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
-  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
 } from 'class-validator';
-import { CampaignStatus } from '../../../common/enums/campaign-status.enum';
 
 export class CreateFundraisingCampaignDto {
   @ApiProperty({ example: 'Ananya Sharma', description: 'Full name of applicant' })
@@ -62,13 +60,4 @@ export class CreateFundraisingCampaignDto {
   @IsBoolean()
   @Type(() => Boolean)
   termsAccepted: boolean;
-
-  @ApiPropertyOptional({
-    enum: CampaignStatus,
-    default: CampaignStatus.PENDING,
-    description: 'Campaign status',
-  })
-  @IsOptional()
-  @IsEnum(CampaignStatus)
-  status?: CampaignStatus;
 }
