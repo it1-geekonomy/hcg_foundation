@@ -13,6 +13,10 @@ import { AuthModule } from './modules/auth/auth.module';
 import { BlogsModule } from './modules/blogs/blogs.module';
 import { DonorsModule } from './modules/donors/donors.module';
 import { EventsModule } from './modules/events/events.module';
+import { LeadsContactModule } from './modules/leads-contact/leads-contact.module';
+import { LeadsInternshipModule } from './modules/leads-internship/leads-internship.module';
+import { NewsModule } from './modules/news/news.module';
+import { PatientStoriesModule } from './modules/patient-stories/patient-stories.module';
 import { FundraisingCampaignsModule } from './modules/fundraising-campaigns/fundraising-campaigns.module';
 import { PartnershipInquiriesModule } from './modules/partnership-inquiries/partnership-inquiries.module';
 import { UsersModule } from './modules/users/users.module';
@@ -29,7 +33,11 @@ import { UsersModule } from './modules/users/users.module';
     EventsModule,
     AnnualReportsModule,
     BlogsModule,
+    NewsModule,
+    PatientStoriesModule,
     DonorsModule,
+    LeadsContactModule,
+    LeadsInternshipModule,
     FundraisingCampaignsModule,
     PartnershipInquiriesModule,
     UsersModule,
