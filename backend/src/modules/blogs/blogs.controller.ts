@@ -176,10 +176,32 @@ export class BlogsController {
     };
   }
 
+  @Post(':id/restore')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Restore soft-deleted blog (CMS / super-admin)',
+    description: 'Clears deletedAt so the blog shows again in CMS and on the website if published.',
+  })
+  @ApiOkResponse({ type: Blog })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async restore(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.restore(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Blog restored successfully',
+      data,
+    };
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete blog (CMS / super-admin)' })
+  @ApiOperation({
+    summary: 'Soft-delete blog (CMS / super-admin)',
+    description: 'Sets deletedAt. Hidden from CMS lists and the website.',
+  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })

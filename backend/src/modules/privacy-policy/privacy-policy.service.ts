@@ -11,6 +11,10 @@ import {
   buildPaginatedResult,
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
 import { CreatePrivacyPolicyDto } from './dto/create-privacy-policy.dto';
 import { UpdatePrivacyPolicyDto } from './dto/update-privacy-policy.dto';
 import { PrivacyPolicy } from './entities/privacy-policy.entity';
@@ -39,6 +43,7 @@ export class PrivacyPolicyService {
     const qb = this.repo
       .createQueryBuilder('entity')
       .orderBy('entity.createdAt', 'DESC');
+    applyDeletedFilter(qb, query.includeDeleted);
 
     if (query.status) {
       qb.andWhere('entity.status = :status', { status: query.status });
@@ -62,7 +67,11 @@ export class PrivacyPolicyService {
   async findPublished(
     query: PaginationQueryDto,
   ): Promise<PaginatedResult<PrivacyPolicy>> {
-    return this.findAll({ ...query, status: ContentStatus.PUBLISHED });
+    return this.findAll({
+      ...query,
+      status: ContentStatus.PUBLISHED,
+      includeDeleted: false,
+    });
   }
 
   async findOne(id: string): Promise<PrivacyPolicy> {
@@ -86,7 +95,11 @@ export class PrivacyPolicyService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    await this.repo.remove(entity);
+    await this.repo.softRemove(entity);
+  }
+
+  async restore(id: string): Promise<PrivacyPolicy> {
+    return restoreSoftDeleted(this.repo, id, 'Privacy policy');
   }
 
   private async saveOrThrow(entity: PrivacyPolicy): Promise<PrivacyPolicy> {

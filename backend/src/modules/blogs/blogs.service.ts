@@ -12,6 +12,10 @@ import {
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { Blog } from './entities/blog.entity';
@@ -66,6 +70,7 @@ export class BlogsService {
       .createQueryBuilder('entity')
       .orderBy('entity.blogDate', 'DESC', 'NULLS LAST')
       .addOrderBy('entity.createdAt', 'DESC');
+    applyDeletedFilter(qb, query.includeDeleted);
 
     if (query.status) {
       qb.andWhere('entity.status = :status', { status: query.status });
@@ -89,7 +94,11 @@ export class BlogsService {
   async findPublished(
     query: PaginationQueryDto,
   ): Promise<PaginatedResult<Blog>> {
-    return this.findAll({ ...query, status: ContentStatus.PUBLISHED });
+    return this.findAll({
+      ...query,
+      status: ContentStatus.PUBLISHED,
+      includeDeleted: false,
+    });
   }
 
   async findOne(id: string): Promise<Blog> {
@@ -147,9 +156,11 @@ export class BlogsService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    await this.cdn.delete(entity.blogBanner);
-    await this.cdn.delete(entity.blogMobileBanner);
-    await this.repo.remove(entity);
+    await this.repo.softRemove(entity);
+  }
+
+  async restore(id: string): Promise<Blog> {
+    return restoreSoftDeleted(this.repo, id, 'Blog');
   }
 
   private async saveOrThrow(entity: Blog, slug?: string): Promise<Blog> {

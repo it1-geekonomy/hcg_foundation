@@ -126,10 +126,32 @@ export class HomeBannersController {
     };
   }
 
+  @Post(':id/restore')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Restore soft-deleted home banner (CMS / super-admin)',
+    description: 'Clears deletedAt so the banner shows again in CMS and on the website if active.',
+  })
+  @ApiOkResponse({ type: HomeBanner })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async restore(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.restore(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Home banner restored successfully',
+      data,
+    };
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete home banner (CMS / super-admin)' })
+  @ApiOperation({
+    summary: 'Soft-delete home banner (CMS / super-admin)',
+    description: 'Sets deletedAt. Hidden from CMS lists and the website.',
+  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })

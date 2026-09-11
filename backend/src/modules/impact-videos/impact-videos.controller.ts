@@ -161,10 +161,32 @@ export class ImpactVideosController {
     };
   }
 
+  @Post(':id/restore')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Restore soft-deleted impact video (CMS / super-admin)',
+    description: 'Clears deletedAt so the video shows again in CMS and on the website if published.',
+  })
+  @ApiOkResponse({ type: ImpactVideo })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async restore(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.restore(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Impact video restored successfully',
+      data,
+    };
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete impact video (CMS / super-admin)' })
+  @ApiOperation({
+    summary: 'Soft-delete impact video (CMS / super-admin)',
+    description: 'Sets deletedAt. Hidden from CMS lists and the website. CDN file is kept.',
+  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })

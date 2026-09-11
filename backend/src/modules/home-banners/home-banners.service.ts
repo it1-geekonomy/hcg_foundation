@@ -9,6 +9,10 @@ import {
   buildPaginatedResult,
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
 import { CreateHomeBannerDto } from './dto/create-home-banner.dto';
 import { UpdateHomeBannerDto } from './dto/update-home-banner.dto';
 import { HomeBanner } from './entities/home-banner.entity';
@@ -33,6 +37,7 @@ export class HomeBannersService {
       .createQueryBuilder('entity')
       .orderBy('entity.displayOrder', 'ASC')
       .addOrderBy('entity.createdAt', 'DESC');
+    applyDeletedFilter(qb, query.includeDeleted);
 
     const [data, total] = await qb
       .skip((page - 1) * limit)
@@ -70,6 +75,10 @@ export class HomeBannersService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    await this.repo.remove(entity);
+    await this.repo.softRemove(entity);
+  }
+
+  async restore(id: string): Promise<HomeBanner> {
+    return restoreSoftDeleted(this.repo, id, 'Home banner');
   }
 }

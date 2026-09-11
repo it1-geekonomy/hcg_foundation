@@ -6,6 +6,10 @@ import {
   buildPaginatedResult,
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
 import { CreateLeadsContactDto } from './dto/create-leads-contact.dto';
 import { UpdateLeadsContactDto } from './dto/update-leads-contact.dto';
 import { LeadsContact } from './entities/leads-contact.entity';
@@ -29,6 +33,7 @@ export class LeadsContactService {
     const qb = this.repo
       .createQueryBuilder('entity')
       .orderBy('entity.createdAt', 'DESC');
+    applyDeletedFilter(qb, query.includeDeleted);
 
     if (query.search) {
       qb.andWhere(
@@ -63,6 +68,10 @@ export class LeadsContactService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    await this.repo.remove(entity);
+    await this.repo.softRemove(entity);
+  }
+
+  async restore(id: string): Promise<LeadsContact> {
+    return restoreSoftDeleted(this.repo, id, 'Contact lead');
   }
 }

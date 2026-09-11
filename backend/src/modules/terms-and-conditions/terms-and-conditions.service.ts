@@ -10,6 +10,10 @@ import {
   buildPaginatedResult,
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
 import { CreateTermsAndConditionDto } from './dto/create-terms-and-condition.dto';
 import { UpdateTermsAndConditionDto } from './dto/update-terms-and-condition.dto';
 import { TermsAndCondition } from './entities/terms-and-condition.entity';
@@ -38,6 +42,7 @@ export class TermsAndConditionsService {
     const qb = this.repo
       .createQueryBuilder('entity')
       .orderBy('entity.createdAt', 'DESC');
+    applyDeletedFilter(qb, query.includeDeleted);
 
     if (query.status) {
       qb.andWhere('entity.status = :status', { status: query.status });
@@ -86,6 +91,10 @@ export class TermsAndConditionsService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    await this.repo.remove(entity);
+    await this.repo.softRemove(entity);
+  }
+
+  async restore(id: string): Promise<TermsAndCondition> {
+    return restoreSoftDeleted(this.repo, id, 'Terms and conditions');
   }
 }

@@ -158,10 +158,32 @@ export class TeamsController {
     };
   }
 
+  @Post(':id/restore')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Restore soft-deleted team member (CMS / super-admin)',
+    description: 'Clears deletedAt so the member shows again in CMS and on the website if published.',
+  })
+  @ApiOkResponse({ type: Team })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async restore(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.restore(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Team member restored successfully',
+      data,
+    };
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete team member (CMS / super-admin)' })
+  @ApiOperation({
+    summary: 'Soft-delete team member (CMS / super-admin)',
+    description: 'Sets deletedAt. Hidden from CMS lists and the website.',
+  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })

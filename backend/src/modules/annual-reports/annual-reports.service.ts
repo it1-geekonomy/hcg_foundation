@@ -11,6 +11,10 @@ import {
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
 import { AnnualReportsQueryDto } from './dto/annual-reports-query.dto';
 import { CreateAnnualReportDto } from './dto/create-annual-report.dto';
 import { UpdateAnnualReportDto } from './dto/update-annual-report.dto';
@@ -79,6 +83,7 @@ export class AnnualReportsService {
       .createQueryBuilder('entity')
       .orderBy('entity.reportYear', 'DESC', 'NULLS LAST')
       .addOrderBy('entity.createdAt', 'DESC');
+    applyDeletedFilter(qb, query.includeDeleted);
 
     if (query.status) {
       qb.andWhere('entity.status = :status', { status: query.status });
@@ -108,7 +113,11 @@ export class AnnualReportsService {
   async findPublished(
     query: AnnualReportsQueryDto,
   ): Promise<PaginatedResult<AnnualReport>> {
-    return this.findAll({ ...query, status: ContentStatus.PUBLISHED });
+    return this.findAll({
+      ...query,
+      status: ContentStatus.PUBLISHED,
+      includeDeleted: false,
+    });
   }
 
   async findOne(id: string): Promise<AnnualReport> {
@@ -176,10 +185,11 @@ export class AnnualReportsService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    await this.cdn.delete(entity.annualReportBanner);
-    await this.cdn.delete(entity.annualReportMobileBanner);
-    await this.cdn.delete(entity.annualReportFile);
-    await this.repo.remove(entity);
+    await this.repo.softRemove(entity);
+  }
+
+  async restore(id: string): Promise<AnnualReport> {
+    return restoreSoftDeleted(this.repo, id, 'Annual report');
   }
 
   private async saveOrThrow(
