@@ -8,6 +8,8 @@ import { Button } from "@/shared/ui/button";
 import TeamMemberCard from "@/domains/about/components/TeamMemberCard";
 import { cmsApi } from "@/domains/cms/lib/api";
 import type { Team } from "@/domains/cms/lib/types";
+import { cmsToast } from "@/domains/cms/lib/toast";
+import CmsHtmlContent from "./CmsHtmlContent";
 
 function plainText(value?: string | null) {
   if (!value) return "";
@@ -38,7 +40,10 @@ export default function TeamViewPage() {
         if (!cancelled) setTeam(res.data);
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load");
+          const message =
+            err instanceof Error ? err.message : "Failed to load";
+          setError(message);
+          cmsToast.error(message);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -54,10 +59,13 @@ export default function TeamViewPage() {
     if (!team || !window.confirm(`Delete “${team.title}”?`)) return;
     setDeleting(true);
     try {
-      await cmsApi.deleteTeam(team.id);
+      const res = await cmsApi.deleteTeam(team.id);
+      cmsToast.success(res?.message || "Team member deleted successfully");
       router.replace("/admin/team");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete");
+      cmsToast.error(
+        err instanceof Error ? err.message : "Failed to delete"
+      );
       setDeleting(false);
     }
   };
@@ -189,10 +197,7 @@ export default function TeamViewPage() {
               Content
             </h3>
             {team.content ? (
-              <div
-                className="prose prose-sm max-w-none font-manrope text-[#212121] prose-headings:text-[#212121] prose-p:text-[#444]"
-                dangerouslySetInnerHTML={{ __html: team.content }}
-              />
+              <CmsHtmlContent html={team.content} className="text-sm" />
             ) : (
               <p className="font-manrope text-sm text-muted-foreground">
                 No content yet — add it in Edit (TinyMCE).

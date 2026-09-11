@@ -6,10 +6,10 @@ import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 import type {
   ContentStatus,
-  CreateTeamPayload,
   Team,
-  TeamMemberType,
+  TeamFields,
 } from "@/domains/cms/lib/types";
+import CmsImagePicker from "./CmsImagePicker";
 import { CmsFormField } from "./CmsFormField";
 import { SeoFieldsSection } from "./SeoFieldsSection";
 
@@ -25,61 +25,122 @@ const CmsRichTextEditor = dynamic(() => import("./CmsRichTextEditor"), {
 export type TeamFormValues = {
   title: string;
   designation: string;
-  teamImage: string;
   shortDescription: string;
   content: string;
-  memberType: TeamMemberType;
   status: ContentStatus;
   metaTitle: string;
   metaDescription: string;
   schemaCode: string;
+  teamImageFile: File | null;
+  teamImageUrl: string | null;
 };
 
 export const emptyTeamForm = (): TeamFormValues => ({
   title: "",
   designation: "",
-  teamImage: "",
   shortDescription: "",
   content: "",
-  memberType: "trustee",
   status: "draft",
   metaTitle: "",
   metaDescription: "",
   schemaCode: "",
+  teamImageFile: null,
+  teamImageUrl: null,
 });
 
 export function teamToFormValues(team: Team): TeamFormValues {
   return {
     title: team.title ?? "",
     designation: team.designation ?? "",
-    teamImage: team.teamImage ?? "",
     shortDescription: team.shortDescription ?? "",
     content: team.content ?? "",
-    memberType: team.memberType ?? "trustee",
     status: team.status ?? "draft",
     metaTitle: team.metaTitle ?? "",
     metaDescription: team.metaDescription ?? "",
     schemaCode: team.schemaCode ?? "",
+    teamImageFile: null,
+    teamImageUrl: team.teamImage ?? null,
   };
 }
 
-export function formValuesToPayload(form: TeamFormValues): CreateTeamPayload {
-  const hasContent = form.content
-    .replace(/<[^>]+>/g, "")
+export function formValuesToFields(form: TeamFormValues): TeamFields {
+  const plainContent = form.content
+    .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 
   return {
     title: form.title.trim(),
     designation: form.designation.trim() || undefined,
-    teamImage: form.teamImage.trim() || undefined,
     shortDescription: form.shortDescription.trim() || undefined,
-    content: hasContent ? form.content : undefined,
-    memberType: form.memberType,
+    content: plainContent ? form.content : undefined,
     status: form.status,
     metaTitle: form.metaTitle.trim() || undefined,
     metaDescription: form.metaDescription.trim() || undefined,
     schemaCode: form.schemaCode.trim() || undefined,
+  };
+}
+
+function norm(value?: string | null) {
+  return (value ?? "").trim();
+}
+
+/** Collapse TinyMCE / HTML noise so equivalent content isn't treated as dirty. */
+function normHtml(value?: string | null) {
+  return (value ?? "")
+    .replace(/\r\n/g, "\n")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\u00a0/g, " ")
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/\s+/g, " ")
+    .replace(/>\s+</g, "><")
+    .replace(/<p>\s*<\/p>/gi, "")
+    .replace(/<br\s*\/?>/gi, "<br>")
+    .trim();
+}
+
+function valuesEqual(key: keyof TeamFields, a?: string, b?: string) {
+  if (key === "content") return normHtml(a) === normHtml(b);
+  return norm(a) === norm(b);
+}
+
+/** Diff edit form vs loaded snapshot — only changed keys for PATCH. */
+export function getTeamPatch(
+  initial: TeamFormValues,
+  current: TeamFormValues
+): {
+  fields: Partial<TeamFields>;
+  file: File | null;
+  hasChanges: boolean;
+} {
+  const prev = formValuesToFields(initial);
+  const next = formValuesToFields(current);
+  const fields: Partial<TeamFields> = {};
+
+  const keys: (keyof TeamFields)[] = [
+    "title",
+    "designation",
+    "content",
+    "shortDescription",
+    "status",
+    "metaTitle",
+    "metaDescription",
+    "schemaCode",
+  ];
+
+  for (const key of keys) {
+    const before = prev[key] as string | undefined;
+    const after = next[key] as string | undefined;
+    if (valuesEqual(key, before, after)) continue;
+    fields[key] = (after === undefined ? "" : after) as never;
+  }
+
+  const file = current.teamImageFile;
+  return {
+    fields,
+    file,
+    hasChanges: Object.keys(fields).length > 0 || !!file,
   };
 }
 
@@ -109,32 +170,11 @@ export default function TeamForm({
       ) : null}
 
       <div className="space-y-4 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-        <CmsFormField
-          label="Member type"
-          htmlFor="memberType"
-          hint="Same fields — choose trustee or team for the Our Team page sections"
-        >
-          <select
-            id="memberType"
-            className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            value={value.memberType}
-            onChange={(e) =>
-              onChange({
-                ...value,
-                memberType: e.target.value as TeamMemberType,
-              })
-            }
-          >
-            <option value="trustee">Trustee</option>
-            <option value="team">Team</option>
-          </select>
-        </CmsFormField>
-
         <CmsFormField label="Title / Name" htmlFor="title">
           <Input
             id="title"
             required
-            placeholder="Dr. B.S. Ajaikumar"
+            placeholder="Dr. John Smith"
             value={value.title}
             onChange={(e) => onChange({ ...value, title: e.target.value })}
           />
@@ -143,7 +183,7 @@ export default function TeamForm({
         <CmsFormField label="Designation" htmlFor="designation">
           <Input
             id="designation"
-            placeholder="Founder and Managing Trustee"
+            placeholder="Senior Oncologist"
             value={value.designation}
             onChange={(e) =>
               onChange({ ...value, designation: e.target.value })
@@ -151,19 +191,29 @@ export default function TeamForm({
           />
         </CmsFormField>
 
-        <CmsFormField label="Team Image URL" htmlFor="teamImage">
-          <Input
-            id="teamImage"
-            placeholder="https://..."
-            value={value.teamImage}
-            onChange={(e) => onChange({ ...value, teamImage: e.target.value })}
+        <CmsFormField
+          label="Team image"
+          htmlFor="teamImage"
+          hint="WebP or AVIF"
+        >
+          <CmsImagePicker
+            label="team image"
+            value={{ file: value.teamImageFile, url: value.teamImageUrl }}
+            onChange={({ file, url }) =>
+              onChange({
+                ...value,
+                teamImageFile: file,
+                teamImageUrl: url,
+              })
+            }
+            disabled={saving}
           />
         </CmsFormField>
 
         <CmsFormField label="Short Description" htmlFor="shortDescription">
           <Textarea
             id="shortDescription"
-            placeholder="Short blurb"
+            placeholder="Short blurb for cards"
             value={value.shortDescription}
             onChange={(e) =>
               onChange({ ...value, shortDescription: e.target.value })
