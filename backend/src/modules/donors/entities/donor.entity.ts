@@ -26,6 +26,15 @@ export class Donor extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   city?: string | null;
 
+  @ApiPropertyOptional({ example: 'United States' })
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  country?: string | null;
+
+  @ApiProperty({ example: false })
+  @Index('idx_donors_is_international')
+  @Column({ name: 'is_international', type: 'boolean', default: false })
+  isInternational!: boolean;
+
   @ApiPropertyOptional({ example: 'ABCDE1234F' })
   @Column({ type: 'varchar', length: 20, nullable: true })
   pan?: string | null;

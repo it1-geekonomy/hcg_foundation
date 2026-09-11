@@ -26,6 +26,7 @@ export type DonationCheckout = {
   name: string;
   email: string;
   phone: string;
+  isInternational: boolean;
 };
 
 @Injectable()
@@ -45,6 +46,11 @@ export class DonorsService {
     const phone = dto.phone;
     const email = dto.email.toLowerCase().trim();
     const city = dto.city?.trim() || '';
+    const country = dto.country?.trim() || 'India';
+    const isInternational = this.resolveInternational(
+      country,
+      dto.isInternational,
+    );
     const pan = dto.pan?.trim() || '';
     const message = dto.message?.trim() || '';
 
@@ -58,6 +64,8 @@ export class DonorsService {
           phone: this.note(phone, 20),
           email: this.note(email),
           city: this.note(city),
+          country: this.note(country, 100),
+          international: isInternational ? 'true' : 'false',
           pan: this.note(pan, 20),
           message: this.note(message),
           amount,
@@ -73,6 +81,7 @@ export class DonorsService {
         name: fullName,
         email,
         phone,
+        isInternational,
       };
     } catch (err) {
       this.logger.error(
@@ -117,6 +126,7 @@ export class DonorsService {
 
     const order = await this.razorpay.fetchOrder(dto.razorpayOrderId);
     const notes = order.notes ?? {};
+    const country = notes.country?.trim() || 'India';
     const amount =
       notes.amount || (Number(order.amount) / 100).toFixed(2);
 
@@ -126,6 +136,8 @@ export class DonorsService {
         phone: notes.phone || null,
         email: notes.email?.toLowerCase().trim() || null,
         city: notes.city?.trim() || null,
+        country,
+        isInternational: notes.international === 'true',
         pan: notes.pan?.trim() || null,
         message: notes.message?.trim() || null,
         amount,
@@ -157,7 +169,7 @@ export class DonorsService {
 
     if (query.search) {
       qb.andWhere(
-        '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search OR donor.city ILIKE :search)',
+        '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search OR donor.country ILIKE :search OR donor.city ILIKE :search)',
         { search: `%${query.search}%` },
       );
     }
@@ -182,6 +194,15 @@ export class DonorsService {
 
   private note(value: string, max = 256): string {
     return value.slice(0, max);
+  }
+
+  private resolveInternational(
+    country: string | null,
+    flagged?: boolean,
+  ): boolean {
+    if (flagged) return true;
+    if (!country) return false;
+    return !/^india$/i.test(country);
   }
 
   private buildReceiptNumber(id: string): string {

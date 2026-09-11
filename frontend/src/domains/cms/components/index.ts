@@ -19,4 +19,6 @@ export { default as PatientStoryViewPage } from "./PatientStoryViewPage";
 export { default as PatientStoryEditPage } from "./PatientStoryEditPage";
 export { default as UsersListPage } from "./UsersListPage";
 export { default as UserCreatePage } from "./UserCreatePage";
+export { default as DonorsListPage } from "./DonorsListPage";
+export { default as DonorsViewPage } from "./DonorsViewPage";
 export { default as CmsRichTextEditor } from "./CmsRichTextEditor";

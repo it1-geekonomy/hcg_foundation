@@ -13,6 +13,8 @@ import type {
   Team,
   AdminUser,
   ContentStatus,
+  DonationStatus,
+  Donor,
   TeamMemberType,
   UpdateLegalPagePayload,
   UpdatePatientStoryPayload,
@@ -27,7 +29,7 @@ export type ListQuery = {
   page?: number;
   limit?: number;
   search?: string;
-  status?: ContentStatus;
+  status?: ContentStatus | DonationStatus;
   memberType?: TeamMemberType;
   pageType?: LegalPageType;
 };
