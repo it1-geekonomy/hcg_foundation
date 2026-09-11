@@ -24,6 +24,8 @@ import { ProjectsModule } from './modules/projects/projects.module';
 import { FundraisingCampaignsModule } from './modules/fundraising-campaigns/fundraising-campaigns.module';
 import { PartnershipInquiriesModule } from './modules/partnership-inquiries/partnership-inquiries.module';
 import { UsersModule } from './modules/users/users.module';
+import { HomeBannersModule } from './modules/home-banners/home-banners.module';
+import { TermsAndConditionsModule } from './modules/terms-and-conditions/terms-and-conditions.module';
 import { ImpactVideosModule } from './modules/impact-videos/impact-videos.module';
 
 @Module({
@@ -33,6 +35,7 @@ import { ImpactVideosModule } from './modules/impact-videos/impact-videos.module
       envFilePath: '.env',
       load: [configuration],
     }),
+    AuthModule,
     DatabaseModule,
     StorageModule,
     EventsModule,
@@ -52,7 +55,8 @@ import { ImpactVideosModule } from './modules/impact-videos/impact-videos.module
     ImpactVideosModule,
     AuthModule,
     PrivacyPolicyModule,
-
+    HomeBannersModule,
+    TermsAndConditionsModule,
     ChatbotModule,
   ],
   controllers: [AppController],
