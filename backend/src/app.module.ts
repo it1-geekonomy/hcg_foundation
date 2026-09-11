@@ -24,6 +24,8 @@ import { ProjectsModule } from './modules/projects/projects.module';
 import { FundraisingCampaignsModule } from './modules/fundraising-campaigns/fundraising-campaigns.module';
 import { PartnershipInquiriesModule } from './modules/partnership-inquiries/partnership-inquiries.module';
 import { UsersModule } from './modules/users/users.module';
+import { HomeBannersModule } from './modules/home-banners/home-banners.module';
+import { TermsAndConditionsModule } from './modules/terms-and-conditions/terms-and-conditions.module';
 
 @Module({
   imports: [
@@ -32,6 +34,7 @@ import { UsersModule } from './modules/users/users.module';
       envFilePath: '.env',
       load: [configuration],
     }),
+    AuthModule,
     DatabaseModule,
     StorageModule,
     EventsModule,
@@ -48,9 +51,9 @@ import { UsersModule } from './modules/users/users.module';
     FundraisingCampaignsModule,
     PartnershipInquiriesModule,
     UsersModule,
-    AuthModule,
     PrivacyPolicyModule,
-
+    HomeBannersModule,
+    TermsAndConditionsModule,
     ChatbotModule,
   ],
   controllers: [AppController],
