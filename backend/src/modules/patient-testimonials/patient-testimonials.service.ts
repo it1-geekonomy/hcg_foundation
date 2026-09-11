@@ -58,7 +58,7 @@ export class PatientTestimonialsService {
         patientTestimonialFile,
         status: dto.status ?? ContentStatus.DRAFT,
       });
-      return await this.saveOrThrow(entity, dto.slug);
+      return await this.saveOrThrow(entity);
     } catch (err) {
       await this.cdn.delete(patientTestimonialBanner);
       await this.cdn.delete(patientTestimonialMobileBanner);
@@ -83,7 +83,7 @@ export class PatientTestimonialsService {
 
     if (query.search) {
       qb.andWhere(
-        '(entity.title ILIKE :search OR entity.slug ILIKE :search OR entity.shortDescription ILIKE :search)',
+        '(entity.title ILIKE :search OR entity.shortDescription ILIKE :search)',
         { search: `%${query.search}%` },
       );
     }
@@ -112,17 +112,6 @@ export class PatientTestimonialsService {
     return entity;
   }
 
-  async findPublishedBySlug(slug: string): Promise<PatientTestimonial> {
-    const entity = await this.repo.findOne({
-      where: { slug, status: ContentStatus.PUBLISHED },
-    });
-    if (!entity) {
-      throw new NotFoundException(
-        `Published patient testimonial not found for slug "${slug}".`,
-      );
-    }
-    return entity;
-  }
 
   async update(
     id: string,
@@ -146,7 +135,7 @@ export class PatientTestimonialsService {
       files?.patientTestimonialFile,
       'patient-testimonials',
     );
-    return this.saveOrThrow(entity, dto.slug ?? entity.slug);
+    return this.saveOrThrow(entity);
   }
 
   async remove(id: string): Promise<void> {
@@ -159,18 +148,10 @@ export class PatientTestimonialsService {
 
   private async saveOrThrow(
     entity: PatientTestimonial,
-    slug?: string,
   ): Promise<PatientTestimonial> {
     try {
       return await this.repo.save(entity);
     } catch (err) {
-      if (this.isUniqueViolation(err)) {
-        throw new ConflictException(
-          slug
-            ? `A patient testimonial with slug ${slug} already exists. Choose a different slug.`
-            : 'A patient testimonial with this slug already exists. Choose a different slug.',
-        );
-      }
       throw err;
     }
   }
