@@ -6,7 +6,7 @@ export class CreateAwardMultipartDto extends CreateAwardDto {
   @ApiPropertyOptional({
     type: 'string',
     format: 'binary',
-    description: 'Award image (JPEG, PNG, WebP, GIF, max 5MB)',
+    description: 'Award image (WebP or AVIF, max 5MB)',
   })
   awardImage?: unknown;
 }

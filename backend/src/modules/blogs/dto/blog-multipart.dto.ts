@@ -9,14 +9,14 @@ export class CreateBlogMultipartDto extends OmitType(CreateBlogDto, [
   @ApiPropertyOptional({
     type: 'string',
     format: 'binary',
-    description: 'Desktop / web banner (JPEG, PNG, WebP, GIF, max 5MB)',
+    description: 'Desktop / web banner (WebP or AVIF, max 5MB)',
   })
   blogBanner?: unknown;
 
   @ApiPropertyOptional({
     type: 'string',
     format: 'binary',
-    description: 'Mobile banner (JPEG, PNG, WebP, GIF, max 5MB)',
+    description: 'Mobile banner (WebP or AVIF, max 5MB)',
   })
   blogMobileBanner?: unknown;
 }

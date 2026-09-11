@@ -6,7 +6,7 @@ export class CreatePatientStoryMultipartDto extends CreatePatientStoryDto {
   @ApiPropertyOptional({
     type: 'string',
     format: 'binary',
-    description: 'Patient image (JPEG, PNG, WebP, GIF, max 5MB)',
+    description: 'Patient image (WebP or AVIF, max 5MB)',
   })
   patientImage?: unknown;
 }

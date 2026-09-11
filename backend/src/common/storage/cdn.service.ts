@@ -2,10 +2,8 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { R2StorageService } from './r2-storage.service';
 
 const IMAGE_TYPES = new Set([
-  'image/jpeg',
-  'image/png',
   'image/webp',
-  'image/gif',
+  'image/avif',
 ]);
 
 const DOCUMENT_TYPES = new Set([
@@ -81,7 +79,7 @@ export class CdnService {
 
     if (!isImage && !isDocument && !isVideo) {
       throw new BadRequestException(
-        'Only JPEG, PNG, WebP, GIF images, PDF documents, or MP4/WebM videos are allowed.',
+        'Only WebP or AVIF images, PDF documents, or MP4/WebM videos are allowed.',
       );
     }
     if (isImage && file.size > MAX_IMAGE_BYTES) {

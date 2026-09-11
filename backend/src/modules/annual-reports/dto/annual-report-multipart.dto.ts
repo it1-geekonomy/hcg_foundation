@@ -13,14 +13,14 @@ export class CreateAnnualReportMultipartDto extends OmitType(
   @ApiPropertyOptional({
     type: 'string',
     format: 'binary',
-    description: 'Desktop / web banner image (JPEG, PNG, WebP, GIF, max 5MB)',
+    description: 'Desktop / web banner image (WebP or AVIF, max 5MB)',
   })
   annualReportBanner?: unknown;
 
   @ApiPropertyOptional({
     type: 'string',
     format: 'binary',
-    description: 'Mobile banner image (JPEG, PNG, WebP, GIF, max 5MB)',
+    description: 'Mobile banner image (WebP or AVIF, max 5MB)',
   })
   annualReportMobileBanner?: unknown;
 

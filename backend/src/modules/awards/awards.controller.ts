@@ -50,7 +50,7 @@ export class AwardsController {
   @ApiOperation({
     summary: 'Create award (CMS / super-admin)',
     description:
-      'Send multipart form fields with optional `awardImage` (JPEG, PNG, WebP, GIF, max 5MB) or direct `awardImageUrl`. Uploaded images are stored on Cloudflare R2 CDN.',
+      'Send multipart form fields with optional `awardImage` (WebP or AVIF, max 5MB) or direct `awardImageUrl`. Uploaded images are stored on Cloudflare R2 CDN.',
   })
   @ApiCreatedResponse({ type: Award })
   @ApiUnauthorizedResponse({
