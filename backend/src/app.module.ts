@@ -3,14 +3,32 @@ import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { PrivacyPolicyModule } from './modules/privacy-policy/privacy-policy.module';
+import { AwardsModule } from './modules/awards/awards.module';
+import { RecentlyDeletedModule } from './modules/recently-deleted/recently-deleted.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import configuration from './config/configuration';
 import { StorageModule } from './common/storage/storage.module';
 import { DatabaseModule } from './database/database.module';
+import { AnnualReportsModule } from './modules/annual-reports/annual-reports.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { BlogsModule } from './modules/blogs/blogs.module';
+import { DonorsModule } from './modules/donors/donors.module';
 import { EventsModule } from './modules/events/events.module';
+import { LeadsContactModule } from './modules/leads-contact/leads-contact.module';
+import { LeadsInternshipModule } from './modules/leads-internship/leads-internship.module';
+import { PatientStoriesModule } from './modules/patient-stories/patient-stories.module';
+import { TeamsModule } from './modules/teams/teams.module';
+import { TrusteesModule } from './modules/trustees/trustees.module';
+import { PatientTestimonialsModule } from './modules/patient-testimonials/patient-testimonials.module';
+import { ProjectsModule } from './modules/projects/projects.module';
+import { FundraisingCampaignsModule } from './modules/fundraising-campaigns/fundraising-campaigns.module';
+import { PartnershipInquiriesModule } from './modules/partnership-inquiries/partnership-inquiries.module';
 import { UsersModule } from './modules/users/users.module';
+import { HomeBannersModule } from './modules/home-banners/home-banners.module';
+import { TermsAndConditionsModule } from './modules/terms-and-conditions/terms-and-conditions.module';
+import { ImpactVideosModule } from './modules/impact-videos/impact-videos.module';
 
 @Module({
   imports: [
@@ -19,11 +37,30 @@ import { UsersModule } from './modules/users/users.module';
       envFilePath: '.env',
       load: [configuration],
     }),
+    AuthModule,
     DatabaseModule,
     StorageModule,
     EventsModule,
+    AnnualReportsModule,
+    BlogsModule,
+    PatientStoriesModule,
+    PatientTestimonialsModule,
+    ProjectsModule,
+    DonorsModule,
+    LeadsContactModule,
+    LeadsInternshipModule,
+    TeamsModule,
+    TrusteesModule,
+    FundraisingCampaignsModule,
+    PartnershipInquiriesModule,
     UsersModule,
+    ImpactVideosModule,
     AuthModule,
+    PrivacyPolicyModule,
+    HomeBannersModule,
+    TermsAndConditionsModule,
+    AwardsModule,
+    RecentlyDeletedModule,
 
     ChatbotModule,
   ],
@@ -36,4 +73,4 @@ import { UsersModule } from './modules/users/users.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

@@ -95,6 +95,29 @@ export class EventsController {
     };
   }
 
+  @Get('deleted')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List recently deleted events (CMS trash)',
+    description:
+      'Soft-deleted events only, newest first. Restore with POST /events/:id/restore.',
+  })
+  @ApiOkResponse({ description: 'Paginated trash list' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async findDeleted(@Query() query: PaginationQueryDto) {
+    const result = await this.service.findDeleted(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message:
+        result.meta.total === 0
+          ? 'No deleted events found'
+          : 'Deleted events fetched successfully',
+      ...result,
+    };
+  }
+
   @Public()
   @Get('published')
   @ApiOperation({
@@ -177,10 +200,32 @@ export class EventsController {
     };
   }
 
+  @Post(':id/restore')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Restore soft-deleted event (CMS / super-admin)',
+    description: 'Clears deletedAt so the event shows again in CMS and on the website if published.',
+  })
+  @ApiOkResponse({ type: Event })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async restore(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.restore(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Event restored successfully',
+      data,
+    };
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete event (CMS / super-admin)' })
+  @ApiOperation({
+    summary: 'Soft-delete event (CMS / super-admin)',
+    description: 'Sets deletedAt. Hidden from CMS lists and the website.',
+  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })

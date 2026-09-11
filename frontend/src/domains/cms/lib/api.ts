@@ -3,17 +3,18 @@ import type {
   AnnualReport,
   AnnualReportFields,
   CreateLegalPagePayload,
-  CreateTeamPayload,
   CreateUserPayload,
   LegalPage,
   LegalPageType,
   Paginated,
   Team,
+  TeamFields,
   AdminUser,
   ContentStatus,
+  DonationStatus,
+  Donor,
   TeamMemberType,
   UpdateLegalPagePayload,
-  UpdateTeamPayload,
 } from "./types";
 
 const API_BASE =
@@ -24,9 +25,11 @@ export type ListQuery = {
   page?: number;
   limit?: number;
   search?: string;
-  status?: ContentStatus;
+  status?: ContentStatus | DonationStatus;
   memberType?: TeamMemberType;
   pageType?: LegalPageType;
+  includeDeleted?: boolean;
+  onlyDeleted?: boolean;
 };
 
 function toQuery(params?: ListQuery) {
@@ -37,6 +40,8 @@ function toQuery(params?: ListQuery) {
   if (params?.status) q.set("status", params.status);
   if (params?.memberType) q.set("memberType", params.memberType);
   if (params?.pageType) q.set("pageType", params.pageType);
+  if (params?.includeDeleted === true) q.set("includeDeleted", "true");
+  if (params?.onlyDeleted === true) q.set("onlyDeleted", "true");
   const s = q.toString();
   return s ? `?${s}` : "";
 }
@@ -126,26 +131,102 @@ function annualReportFormData(
   return fd;
 }
 
+function teamFormData(
+  fields: TeamFields,
+  image?: { file?: File | null; url?: string | null }
+) {
+  const fd = new FormData();
+  fd.append("title", fields.title.trim());
+  if (fields.designation?.trim()) {
+    fd.append("designation", fields.designation.trim());
+  }
+  if (fields.content?.trim()) {
+    fd.append("content", fields.content);
+  }
+  if (fields.shortDescription?.trim()) {
+    fd.append("shortDescription", fields.shortDescription.trim());
+  }
+  fd.append("status", fields.status ?? "draft");
+  if (fields.metaTitle?.trim()) {
+    fd.append("metaTitle", fields.metaTitle.trim());
+  }
+  if (fields.metaDescription?.trim()) {
+    fd.append("metaDescription", fields.metaDescription.trim());
+  }
+  if (fields.schemaCode?.trim()) {
+    fd.append("schemaCode", fields.schemaCode.trim());
+  }
+  if (image?.file instanceof File) {
+    fd.append("teamImage", image.file, image.file.name);
+  }
+  return fd;
+}
+
+/** PATCH — only append keys that were provided (partial update). */
+function teamPatchFormData(
+  fields: Partial<TeamFields>,
+  teamImageFile?: File | null
+) {
+  const fd = new FormData();
+  const append = (key: keyof TeamFields, value?: string | null) => {
+    if (value === undefined) return;
+    fd.append(key, value ?? "");
+  };
+  append("title", fields.title);
+  append("designation", fields.designation);
+  append("content", fields.content);
+  append("shortDescription", fields.shortDescription);
+  append("status", fields.status);
+  append("metaTitle", fields.metaTitle);
+  append("metaDescription", fields.metaDescription);
+  append("schemaCode", fields.schemaCode);
+  if (teamImageFile instanceof File) {
+    fd.append("teamImage", teamImageFile, teamImageFile.name);
+  }
+  return fd;
+}
+
 export const cmsApi = {
   listTeams: (params?: ListQuery) =>
-    request<Paginated<Team>>(`/teams${toQuery({ page: 1, limit: 10, ...params })}`),
+    request<Paginated<Team>>(`/teams${toQuery({ page: 1, limit: 20, ...params })}`),
+
+  listDeletedTeams: (params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">) =>
+    request<Paginated<Team>>(
+      `/teams/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
 
   getTeam: (id: string) => request<ApiEnvelope<Team>>(`/teams/${id}`),
 
-  createTeam: (payload: CreateTeamPayload) =>
-    request<ApiEnvelope<Team>>("/teams", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
+  createTeam: (
+    fields: TeamFields,
+    image?: { file?: File | null; url?: string | null }
+  ) =>
+    requestFormData<ApiEnvelope<Team>>(
+      "/teams",
+      "POST",
+      teamFormData(fields, image)
+    ),
 
-  updateTeam: (id: string, payload: UpdateTeamPayload) =>
-    request<ApiEnvelope<Team>>(`/teams/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(payload),
-    }),
+  updateTeam: (
+    id: string,
+    fields: Partial<TeamFields>,
+    teamImageFile?: File | null
+  ) =>
+    requestFormData<ApiEnvelope<Team>>(
+      `/teams/${id}`,
+      "PATCH",
+      teamPatchFormData(fields, teamImageFile)
+    ),
 
   deleteTeam: (id: string) =>
-    request<void>(`/teams/${id}`, { method: "DELETE" }),
+    request<{ message?: string; statusCode?: number }>(`/teams/${id}`, {
+      method: "DELETE",
+    }),
+
+  restoreTeam: (id: string) =>
+    request<ApiEnvelope<Team>>(`/teams/${id}/restore`, {
+      method: "POST",
+    }),
 
   listUsers: (params?: ListQuery) =>
     request<Paginated<AdminUser>>(
@@ -218,13 +299,20 @@ export const cmsApi = {
 
   deleteLegalPage: (id: string) =>
     request<void>(`/legal-pages/${id}`, { method: "DELETE" }),
+
+  listDonors: (params?: ListQuery) =>
+    request<Paginated<Donor>>(
+      `/donors${toQuery({ page: 1, limit: 10, ...params })}`
+    ),
+
+  getDonor: (id: string) => request<ApiEnvelope<Donor>>(`/donors/${id}`),
 };
 
-/** Public site: published people, optionally by trustee/team */
+/** Public site: published people */
 export const publicTeamsApi = {
   listPublished: (params?: Omit<ListQuery, "status">) =>
     request<Paginated<Team>>(
-      `/teams${toQuery({ page: 1, limit: 50, ...params, status: "published" })}`
+      `/teams/published${toQuery({ page: 1, limit: 50, ...params })}`
     ),
 
   getById: (id: string) => request<ApiEnvelope<Team>>(`/teams/${id}`),

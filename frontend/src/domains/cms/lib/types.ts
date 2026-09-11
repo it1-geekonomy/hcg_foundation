@@ -15,23 +15,29 @@ export type Team = SeoFields & {
   teamImage?: string | null;
   content?: string | null;
   shortDescription?: string | null;
-  memberType: TeamMemberType;
+  /** Legacy; backend teams table no longer stores this */
+  memberType?: TeamMemberType;
   status: ContentStatus;
+  deletedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
 
-export type CreateTeamPayload = SeoFields & {
+/** Text fields for POST/PATCH /teams (multipart). Image is a file, not a URL. */
+export type TeamFields = SeoFields & {
   title: string;
   designation?: string;
-  teamImage?: string;
   content?: string;
   shortDescription?: string;
-  memberType: TeamMemberType;
   status?: ContentStatus;
+  metaTitle?: string;
+  metaDescription?: string;
+  schemaCode?: string;
 };
 
-export type UpdateTeamPayload = Partial<CreateTeamPayload>;
+export type CreateTeamPayload = TeamFields;
+export type UpdateTeamPayload = Partial<TeamFields>;
+
 
 export type AdminUser = {
   id: string;
@@ -91,6 +97,28 @@ export type CreateLegalPagePayload = SeoFields & {
 
 export type UpdateLegalPagePayload = Partial<CreateLegalPagePayload>;
 
+export type DonationStatus = "pending" | "paid" | "failed" | "refunded";
+
+export type Donor = {
+  id: string;
+  fullName: string;
+  phone?: string | null;
+  email?: string | null;
+  city?: string | null;
+  country?: string | null;
+  isInternational: boolean;
+  pan?: string | null;
+  message?: string | null;
+  amount: string;
+  currency: string;
+  receiptNumber?: string | null;
+  razorpayPaymentId?: string | null;
+  razorpayOrderId?: string | null;
+  status: DonationStatus;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Paginated<T> = {
   data: T[];
   meta: {
@@ -103,4 +131,6 @@ export type Paginated<T> = {
 
 export type ApiEnvelope<T> = {
   data: T;
+  message?: string;
+  statusCode?: number;
 };

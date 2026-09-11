@@ -12,6 +12,10 @@ import {
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { Event } from './entities/event.entity';
@@ -65,6 +69,7 @@ export class EventsService {
       .createQueryBuilder('entity')
       .orderBy('entity.eventDate', 'DESC', 'NULLS LAST')
       .addOrderBy('entity.createdAt', 'DESC');
+    applyDeletedFilter(qb, query);
 
     if (query.status) {
       qb.andWhere('entity.status = :status', { status: query.status });
@@ -85,10 +90,18 @@ export class EventsService {
     return buildPaginatedResult(data, total, page, limit);
   }
 
+  async findDeleted(query: PaginationQueryDto): Promise<PaginatedResult<Event>> {
+    return this.findAll({ ...query, includeDeleted: true, onlyDeleted: true });
+  }
+
   async findPublished(
     query: PaginationQueryDto,
   ): Promise<PaginatedResult<Event>> {
-    return this.findAll({ ...query, status: ContentStatus.PUBLISHED });
+    return this.findAll({
+      ...query,
+      status: ContentStatus.PUBLISHED,
+      includeDeleted: false,
+    });
   }
 
   async findOne(id: string): Promise<Event> {
@@ -135,9 +148,11 @@ export class EventsService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    await this.cdn.delete(entity.eventBanner);
-    await this.cdn.delete(entity.eventMobileBanner);
-    await this.repo.remove(entity);
+    await this.repo.softRemove(entity);
+  }
+
+  async restore(id: string): Promise<Event> {
+    return restoreSoftDeleted(this.repo, id, 'Event');
   }
 
   private async saveOrThrow(entity: Event, slug?: string): Promise<Event> {

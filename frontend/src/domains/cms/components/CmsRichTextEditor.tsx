@@ -27,7 +27,10 @@ export default function CmsRichTextEditor({
         licenseKey="gpl"
         tinymceScriptSrc="https://cdn.jsdelivr.net/npm/tinymce@8/tinymce.min.js"
         value={value}
-        onEditorChange={(content) => onChange(content)}
+        onEditorChange={(content) => {
+          if (content === value) return;
+          onChange(content);
+        }}
         init={{
           height,
           menubar: false,
@@ -61,7 +64,9 @@ export default function CmsRichTextEditor({
             "bullist numlist outdent indent | link image media table | " +
             "removeformat code fullscreen | help",
           content_style:
-            "body { font-family: Manrope, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #212121; }",
+            "body { font-family: Manrope, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #212121; }" +
+            " body * { color: #212121 !important; }" +
+            " a { color: #9A7B00 !important; }",
           skin: "oxide",
           content_css: "default",
         }}

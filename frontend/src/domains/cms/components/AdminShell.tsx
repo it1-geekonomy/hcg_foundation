@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import AdminSidebar from "@/domains/cms/components/AdminSidebar";
+import CmsToaster from "@/domains/cms/components/CmsToaster";
 import { adminMenu } from "@/navigation/admin-menu.config";
 
 function titleFromPath(pathname: string) {
@@ -68,6 +69,8 @@ export default function AdminShell({
           <div className="mx-auto w-full max-w-6xl">{children}</div>
         </main>
       </div>
+
+      <CmsToaster />
     </div>
   );
 }

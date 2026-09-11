@@ -2,13 +2,22 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { R2StorageService } from './r2-storage.service';
 
 const IMAGE_TYPES = new Set([
-  'image/jpeg',
-  'image/png',
   'image/webp',
-  'image/gif',
+  'image/avif',
+]);
+
+const DOCUMENT_TYPES = new Set([
+  'application/pdf',
+]);
+
+const VIDEO_TYPES = new Set([
+  'video/mp4',
+  'video/webm',
 ]);
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_DOCUMENT_BYTES = 25 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
 
 export type CdnFile = {
   originalname: string;
@@ -25,10 +34,10 @@ export type CdnFile = {
 export class CdnService {
   private readonly logger = new Logger(CdnService.name);
 
-  constructor(private readonly r2: R2StorageService) {}
+  constructor(private readonly r2: R2StorageService) { }
 
   async upload(file: CdnFile, folder: string): Promise<string> {
-    this.assertImage(file);
+    this.assertValidFile(file);
     const uploaded = await this.r2.upload({
       folder,
       fileName: file.originalname,
@@ -60,17 +69,27 @@ export class CdnService {
     return nextUrl;
   }
 
-  private assertImage(file: CdnFile) {
+  private assertValidFile(file: CdnFile) {
     if (!file?.buffer?.length) {
       throw new BadRequestException('Uploaded file is empty.');
     }
-    if (!IMAGE_TYPES.has(file.mimetype)) {
+    const isImage = IMAGE_TYPES.has(file.mimetype);
+    const isDocument = DOCUMENT_TYPES.has(file.mimetype);
+    const isVideo = VIDEO_TYPES.has(file.mimetype);
+
+    if (!isImage && !isDocument && !isVideo) {
       throw new BadRequestException(
-        'Only JPEG, PNG, WebP, or GIF images are allowed.',
+        'Only WebP or AVIF images, PDF documents, or MP4/WebM videos are allowed.',
       );
     }
-    if (file.size > MAX_IMAGE_BYTES) {
+    if (isImage && file.size > MAX_IMAGE_BYTES) {
       throw new BadRequestException('Image must be 5MB or smaller.');
+    }
+    if (isDocument && file.size > MAX_DOCUMENT_BYTES) {
+      throw new BadRequestException('Document must be 25MB or smaller.');
+    }
+    if (isVideo && file.size > MAX_VIDEO_BYTES) {
+      throw new BadRequestException('Video must be 50MB or smaller.');
     }
   }
 }
