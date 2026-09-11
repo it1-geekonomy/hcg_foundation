@@ -10,12 +10,16 @@ const IMAGE_TYPES = new Set([
 
 const DOCUMENT_TYPES = new Set([
   'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+]);
+
+const VIDEO_TYPES = new Set([
+  'video/mp4',
+  'video/webm',
 ]);
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_DOCUMENT_BYTES = 25 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
 
 export type CdnFile = {
   originalname: string;
@@ -32,7 +36,7 @@ export type CdnFile = {
 export class CdnService {
   private readonly logger = new Logger(CdnService.name);
 
-  constructor(private readonly r2: R2StorageService) {}
+  constructor(private readonly r2: R2StorageService) { }
 
   async upload(file: CdnFile, folder: string): Promise<string> {
     this.assertValidFile(file);
@@ -73,10 +77,11 @@ export class CdnService {
     }
     const isImage = IMAGE_TYPES.has(file.mimetype);
     const isDocument = DOCUMENT_TYPES.has(file.mimetype);
+    const isVideo = VIDEO_TYPES.has(file.mimetype);
 
-    if (!isImage && !isDocument) {
+    if (!isImage && !isDocument && !isVideo) {
       throw new BadRequestException(
-        'Only JPEG, PNG, WebP, GIF images or PDF documents are allowed.',
+        'Only JPEG, PNG, WebP, GIF images, PDF documents, or MP4/WebM videos are allowed.',
       );
     }
     if (isImage && file.size > MAX_IMAGE_BYTES) {
@@ -84,6 +89,9 @@ export class CdnService {
     }
     if (isDocument && file.size > MAX_DOCUMENT_BYTES) {
       throw new BadRequestException('Document must be 25MB or smaller.');
+    }
+    if (isVideo && file.size > MAX_VIDEO_BYTES) {
+      throw new BadRequestException('Video must be 50MB or smaller.');
     }
   }
 }
