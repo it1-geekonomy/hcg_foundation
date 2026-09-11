@@ -19,6 +19,10 @@ import { NewsModule } from './modules/news/news.module';
 import { PatientStoriesModule } from './modules/patient-stories/patient-stories.module';
 import { TeamsModule } from './modules/teams/teams.module';
 import { TrusteesModule } from './modules/trustees/trustees.module';
+import { PatientTestimonialsModule } from './modules/patient-testimonials/patient-testimonials.module';
+import { ProjectsModule } from './modules/projects/projects.module';
+import { FundraisingCampaignsModule } from './modules/fundraising-campaigns/fundraising-campaigns.module';
+import { PartnershipInquiriesModule } from './modules/partnership-inquiries/partnership-inquiries.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -35,11 +39,15 @@ import { UsersModule } from './modules/users/users.module';
     BlogsModule,
     NewsModule,
     PatientStoriesModule,
+    PatientTestimonialsModule,
+    ProjectsModule,
     DonorsModule,
     LeadsContactModule,
     LeadsInternshipModule,
     TeamsModule,
     TrusteesModule,
+    FundraisingCampaignsModule,
+    PartnershipInquiriesModule,
     UsersModule,
     AuthModule,
 
@@ -54,4 +62,4 @@ import { UsersModule } from './modules/users/users.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

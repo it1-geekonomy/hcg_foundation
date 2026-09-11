@@ -250,7 +250,7 @@ export default function DonateSection() {
   );
 
   return (
-    <section className="w-full bg-[#FFF6D8] pt-10 pb-10 lg:pb-24">
+    <section className="w-full bg-[#FFF6D8]">
       <Script
         src="https://checkout.razorpay.com/v1/checkout.js"
         strategy="afterInteractive"
