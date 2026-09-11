@@ -3,6 +3,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { PrivacyPolicyModule } from './modules/privacy-policy/privacy-policy.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import configuration from './config/configuration';
@@ -15,7 +16,6 @@ import { DonorsModule } from './modules/donors/donors.module';
 import { EventsModule } from './modules/events/events.module';
 import { LeadsContactModule } from './modules/leads-contact/leads-contact.module';
 import { LeadsInternshipModule } from './modules/leads-internship/leads-internship.module';
-import { NewsModule } from './modules/news/news.module';
 import { PatientStoriesModule } from './modules/patient-stories/patient-stories.module';
 import { TeamsModule } from './modules/teams/teams.module';
 import { TrusteesModule } from './modules/trustees/trustees.module';
@@ -37,7 +37,6 @@ import { UsersModule } from './modules/users/users.module';
     EventsModule,
     AnnualReportsModule,
     BlogsModule,
-    NewsModule,
     PatientStoriesModule,
     PatientTestimonialsModule,
     ProjectsModule,
@@ -50,6 +49,7 @@ import { UsersModule } from './modules/users/users.module';
     PartnershipInquiriesModule,
     UsersModule,
     AuthModule,
+    PrivacyPolicyModule,
 
     ChatbotModule,
   ],
