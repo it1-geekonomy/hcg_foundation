@@ -6,7 +6,6 @@ import { ContentStatus } from '../../../common/enums/content-status.enum';
 export class CreateTeamDto extends SeoFieldsDto {
   @ApiProperty({ example: 'Dr. John Smith' })
   @IsString()
-  @IsNotEmpty()
   @MaxLength(255)
   title: string;
 
