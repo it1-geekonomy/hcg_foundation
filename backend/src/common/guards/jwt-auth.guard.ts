@@ -71,7 +71,15 @@ export class JwtAuthGuard implements CanActivate {
         (this.matches(path, '/teams') &&
           !this.matches(path, '/teams/published')) ||
         (this.matches(path, '/trustees') &&
-          !this.matches(path, '/trustees/published')));
+          !this.matches(path, '/trustees/published')) ||
+        (this.matches(path, '/awards') &&
+          !this.matches(path, '/awards/published')) ||
+        (this.matches(path, '/impact-videos') &&
+          !this.matches(path, '/impact-videos/published')) ||
+        (this.matches(path, '/home-banners') &&
+          !this.matches(path, '/home-banners/published')) ||
+        (this.matches(path, '/terms-and-conditions') &&
+          !this.matches(path, '/terms-and-conditions/published')));
 
     const needsAuth = method !== 'GET' || adminOnlyGet;
 
