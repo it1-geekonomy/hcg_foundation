@@ -26,6 +26,7 @@ import { PartnershipInquiriesModule } from './modules/partnership-inquiries/part
 import { UsersModule } from './modules/users/users.module';
 import { HomeBannersModule } from './modules/home-banners/home-banners.module';
 import { TermsAndConditionsModule } from './modules/terms-and-conditions/terms-and-conditions.module';
+import { ImpactVideosModule } from './modules/impact-videos/impact-videos.module';
 
 @Module({
   imports: [
@@ -51,6 +52,8 @@ import { TermsAndConditionsModule } from './modules/terms-and-conditions/terms-a
     FundraisingCampaignsModule,
     PartnershipInquiriesModule,
     UsersModule,
+    ImpactVideosModule,
+    AuthModule,
     PrivacyPolicyModule,
     HomeBannersModule,
     TermsAndConditionsModule,
