@@ -52,7 +52,7 @@ export class UsersService {
     const qb = this.repo
       .createQueryBuilder('user')
       .orderBy('user.createdAt', 'DESC');
-    applyDeletedFilter(qb, query.includeDeleted);
+    applyDeletedFilter(qb, query, 'user');
 
     if (query.search) {
       qb.andWhere(
@@ -72,6 +72,10 @@ export class UsersService {
       page,
       limit,
     );
+  }
+
+  async findDeleted(query: PaginationQueryDto): Promise<PaginatedResult<SafeUser>> {
+    return this.findAll({ ...query, includeDeleted: true, onlyDeleted: true });
   }
 
   async findOne(id: string): Promise<SafeUser> {

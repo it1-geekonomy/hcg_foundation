@@ -96,6 +96,29 @@ export class PatientStoriesController {
     };
   }
 
+  @Get('deleted')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List recently deleted patient stories (CMS trash)',
+    description:
+      'Soft-deleted stories only, newest first. Restore with POST /patient-stories/:id/restore.',
+  })
+  @ApiOkResponse({ description: 'Paginated trash list' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async findDeleted(@Query() query: PaginationQueryDto) {
+    const result = await this.service.findDeleted(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message:
+        result.meta.total === 0
+          ? 'No deleted patient stories found'
+          : 'Deleted patient stories fetched successfully',
+      ...result,
+    };
+  }
+
   @Public()
   @Get('published')
   @ApiOperation({

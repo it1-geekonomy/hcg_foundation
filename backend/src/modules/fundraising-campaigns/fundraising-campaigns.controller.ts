@@ -75,6 +75,29 @@ export class FundraisingCampaignsController {
     };
   }
 
+  @Get('deleted')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List recently deleted fundraising campaigns (CMS trash)',
+    description:
+      'Soft-deleted applications only, newest first. Restore with POST /fundraising-campaigns/:id/restore.',
+  })
+  @ApiOkResponse({ description: 'Paginated trash list' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async findDeleted(@Query() query: ListFundraisingCampaignsQueryDto) {
+    const result = await this.service.findDeleted(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message:
+        result.meta.total === 0
+          ? 'No deleted fundraising campaigns found'
+          : 'Deleted fundraising campaigns fetched successfully',
+      ...result,
+    };
+  }
+
   @Get(':id')
   @ApiBearerAuth()
   @ApiOperation({

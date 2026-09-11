@@ -48,4 +48,13 @@ export class PaginationQueryDto {
   @Transform(({ value }) => value === true || value === 'true')
   @IsBoolean()
   includeDeleted?: boolean;
+
+  @ApiPropertyOptional({
+    description:
+      'CMS only. When true, list only soft-deleted rows (Recently Deleted / trash), newest first.',
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  onlyDeleted?: boolean;
 }

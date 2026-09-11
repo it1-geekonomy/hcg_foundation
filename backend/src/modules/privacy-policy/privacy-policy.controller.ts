@@ -73,6 +73,29 @@ export class PrivacyPolicyController {
     };
   }
 
+  @Get('deleted')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List recently deleted privacy policies (CMS trash)',
+    description:
+      'Soft-deleted policies only, newest first. Restore with POST /privacy-policy/:id/restore.',
+  })
+  @ApiOkResponse({ description: 'Paginated trash list' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async findDeleted(@Query() query: PaginationQueryDto) {
+    const result = await this.service.findDeleted(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message:
+        result.meta.total === 0
+          ? 'No deleted privacy policies found'
+          : 'Deleted privacy policies fetched successfully',
+      ...result,
+    };
+  }
+
   @Public()
   @Get('published')
   @ApiOperation({

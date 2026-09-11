@@ -66,6 +66,17 @@ export class UsersController {
     return this.service.findAll(query);
   }
 
+  @Get('deleted')
+  @ApiOperation({
+    summary: 'List recently deleted users (CMS trash)',
+    description:
+      'Soft-deleted users only, newest first. Restore with POST /users/:id/restore.',
+  })
+  @ApiOkResponse({ description: 'Paginated trash list' })
+  findDeleted(@Query() query: PaginationQueryDto) {
+    return this.service.findDeleted(query);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get user by id' })
   @ApiOkResponse({ type: User })

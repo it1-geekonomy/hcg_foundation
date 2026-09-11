@@ -70,7 +70,7 @@ export class BlogsService {
       .createQueryBuilder('entity')
       .orderBy('entity.blogDate', 'DESC', 'NULLS LAST')
       .addOrderBy('entity.createdAt', 'DESC');
-    applyDeletedFilter(qb, query.includeDeleted);
+    applyDeletedFilter(qb, query);
 
     if (query.status) {
       qb.andWhere('entity.status = :status', { status: query.status });
@@ -89,6 +89,10 @@ export class BlogsService {
       .getManyAndCount();
 
     return buildPaginatedResult(data, total, page, limit);
+  }
+
+  async findDeleted(query: PaginationQueryDto): Promise<PaginatedResult<Blog>> {
+    return this.findAll({ ...query, includeDeleted: true, onlyDeleted: true });
   }
 
   async findPublished(

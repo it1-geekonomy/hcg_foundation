@@ -41,7 +41,7 @@ export class FundraisingCampaignsService {
     const qb = this.repo
       .createQueryBuilder('campaign')
       .orderBy('campaign.createdAt', 'DESC');
-    applyDeletedFilter(qb, query.includeDeleted);
+    applyDeletedFilter(qb, query, 'campaign');
 
     if (query.status) {
       qb.andWhere('campaign.status = :status', { status: query.status });
@@ -60,6 +60,12 @@ export class FundraisingCampaignsService {
       .getManyAndCount();
 
     return buildPaginatedResult(data, total, page, limit);
+  }
+
+  async findDeleted(
+    query: ListFundraisingCampaignsQueryDto,
+  ): Promise<PaginatedResult<FundraisingCampaign>> {
+    return this.findAll({ ...query, includeDeleted: true, onlyDeleted: true });
   }
 
   async findOne(id: string): Promise<FundraisingCampaign> {

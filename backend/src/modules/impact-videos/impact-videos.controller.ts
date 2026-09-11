@@ -95,6 +95,29 @@ export class ImpactVideosController {
     };
   }
 
+  @Get('deleted')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List recently deleted impact videos (CMS trash)',
+    description:
+      'Soft-deleted videos only, newest first. Restore with POST /impact-videos/:id/restore.',
+  })
+  @ApiOkResponse({ description: 'Paginated trash list' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async findDeleted(@Query() query: PaginationQueryDto) {
+    const result = await this.service.findDeleted(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message:
+        result.meta.total === 0
+          ? 'No deleted impact videos found'
+          : 'Deleted impact videos fetched successfully',
+      ...result,
+    };
+  }
+
   @Public()
   @Get('published')
   @ApiOperation({

@@ -10,10 +10,18 @@ type SoftDeletable = ObjectLiteral & { id: string; deletedAt?: Date | null };
 
 export function applyDeletedFilter<T extends ObjectLiteral>(
   qb: SelectQueryBuilder<T>,
-  includeDeleted?: boolean,
+  query?: { includeDeleted?: boolean; onlyDeleted?: boolean },
+  alias = 'entity',
 ): SelectQueryBuilder<T> {
+  const onlyDeleted = Boolean(query?.onlyDeleted);
+  const includeDeleted = Boolean(query?.includeDeleted) || onlyDeleted;
+
   if (includeDeleted) {
     qb.withDeleted();
+  }
+  if (onlyDeleted) {
+    qb.andWhere(`${alias}.deletedAt IS NOT NULL`);
+    qb.orderBy(`${alias}.deletedAt`, 'DESC');
   }
   return qb;
 }
