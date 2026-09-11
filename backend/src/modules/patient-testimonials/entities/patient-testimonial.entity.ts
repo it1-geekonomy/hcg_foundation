@@ -10,10 +10,6 @@ export class PatientTestimonial extends SeoContentEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
   title?: string;
 
-  @Index('idx_patient_testimonials_slug', { unique: true })
-  @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
-  slug?: string;
-
   @Column({ name: 'patient_testimonial_banner', type: 'text', nullable: true })
   patientTestimonialBanner?: string | null;
 

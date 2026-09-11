@@ -119,23 +119,6 @@ export class PatientTestimonialsController {
     };
   }
 
-  @Public()
-  @Get('published/slug/:slug')
-  @ApiOperation({
-    summary: 'Get published patient testimonial by slug (website)',
-    description:
-      'Public detail page. Use slug in the URL, e.g. /resources/patient-testimonials/my-journey-to-recovery',
-  })
-  @ApiOkResponse({ type: PatientTestimonial })
-  async findPublishedBySlug(@Param('slug') slug: string) {
-    const data = await this.service.findPublishedBySlug(slug);
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Published patient testimonial fetched successfully',
-      data,
-    };
-  }
-
   @Get(':id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get patient testimonial by id (CMS, any status)' })
