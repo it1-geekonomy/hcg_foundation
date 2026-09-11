@@ -24,6 +24,7 @@ import { ProjectsModule } from './modules/projects/projects.module';
 import { FundraisingCampaignsModule } from './modules/fundraising-campaigns/fundraising-campaigns.module';
 import { PartnershipInquiriesModule } from './modules/partnership-inquiries/partnership-inquiries.module';
 import { UsersModule } from './modules/users/users.module';
+import { ImpactVideosModule } from './modules/impact-videos/impact-videos.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { UsersModule } from './modules/users/users.module';
     FundraisingCampaignsModule,
     PartnershipInquiriesModule,
     UsersModule,
+    ImpactVideosModule,
     AuthModule,
 
     ChatbotModule,
