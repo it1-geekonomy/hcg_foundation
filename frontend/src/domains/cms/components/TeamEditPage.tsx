@@ -5,9 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { cmsApi } from "@/domains/cms/lib/api";
+import { cmsToast } from "@/domains/cms/lib/toast";
 import TeamForm, {
   emptyTeamForm,
-  formValuesToPayload,
+  getTeamPatch,
   teamToFormValues,
   type TeamFormValues,
 } from "./TeamForm";
@@ -16,9 +17,9 @@ export default function TeamEditPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [form, setForm] = useState<TeamFormValues>(emptyTeamForm);
+  const [initial, setInitial] = useState<TeamFormValues>(emptyTeamForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -26,13 +27,18 @@ export default function TeamEditPage() {
 
     (async () => {
       setLoading(true);
-      setError(null);
       try {
         const res = await cmsApi.getTeam(id);
-        if (!cancelled) setForm(teamToFormValues(res.data));
+        if (!cancelled) {
+          const values = teamToFormValues(res.data);
+          setForm(values);
+          setInitial({ ...values });
+        }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load");
+          cmsToast.error(
+            err instanceof Error ? err.message : "Failed to load"
+          );
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -46,14 +52,25 @@ export default function TeamEditPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id) return;
+    if (!id || saving) return;
+
+    const patch = getTeamPatch(initial, form);
+    if (!patch.hasChanges) {
+      cmsToast.info("No changes found");
+      return;
+    }
+
     setSaving(true);
-    setError(null);
     try {
-      await cmsApi.updateTeam(id, formValuesToPayload(form));
+      const res = await cmsApi.updateTeam(id, patch.fields, patch.file);
+      cmsToast.success(
+        res.message || "Team member updated successfully"
+      );
       router.push(`/admin/team/${id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update");
+      cmsToast.error(
+        err instanceof Error ? err.message : "Failed to update"
+      );
       setSaving(false);
     }
   };
@@ -77,10 +94,10 @@ export default function TeamEditPage() {
           Back to view
         </Link>
         <h1 className="font-manrope text-2xl font-semibold text-[#212121]">
-          Edit trustee
+          Edit team member
         </h1>
         <p className="mt-1 font-manrope text-sm text-muted-foreground">
-          Update profile, content, and SEO — then save.
+          Save sends only what you changed.
         </p>
       </div>
 
@@ -90,7 +107,6 @@ export default function TeamEditPage() {
         onSubmit={onSubmit}
         submitLabel="Save changes"
         saving={saving}
-        error={error}
       />
     </div>
   );
