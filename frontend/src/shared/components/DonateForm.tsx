@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Script from "next/script";
 import { Lock } from "lucide-react";
 import Typography from "@/lib/Typography";
+import DonateDetailsModal from "@/shared/components/DonateDetailsModal";
 import {
   donateTheme,
   donateAmountOptions,
@@ -13,12 +15,26 @@ import {
   donorAvatars,
 } from "@/domains/home/constants/donate";
 
+function parseSelectedAmount(
+  selectedAmount: string,
+  customAmount: string,
+  isCustom: boolean
+) {
+  const raw =
+    isCustom || !selectedAmount
+      ? customAmount
+      : selectedAmount.replace(/[^\d]/g, "");
+  return Number(raw);
+}
+
 export default function DonateSection() {
   const [selectedAmount, setSelectedAmount] = useState<string>(
     donateAmountOptions[donateAmountOptions.length - 1]
   );
   const [isCustom, setIsCustom] = useState(false);
   const [customAmount, setCustomAmount] = useState("");
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [amountError, setAmountError] = useState<string | null>(null);
 
   const pickPreset = (amount: string) => {
     setSelectedAmount(amount);
@@ -34,6 +50,22 @@ export default function DonateSection() {
     setCustomAmount(e.target.value);
     setIsCustom(true);
     setSelectedAmount("");
+    setAmountError(null);
+  };
+
+  const donationAmount = parseSelectedAmount(
+    selectedAmount,
+    customAmount,
+    isCustom
+  );
+
+  const openDetailsForm = () => {
+    if (!donationAmount || donationAmount < 1) {
+      setAmountError("Please choose or enter an amount.");
+      return;
+    }
+    setAmountError(null);
+    setDetailsOpen(true);
   };
 
   const cardContent = (
@@ -84,7 +116,10 @@ export default function DonateSection() {
               <button
                 key={amount}
                 type="button"
-                onClick={() => pickPreset(amount)}
+                onClick={() => {
+                  pickPreset(amount);
+                  setAmountError(null);
+                }}
                 className={`w-[88%] mx-auto rounded border py-2.5 font-semibold transition-colors ${active
                   ? "bg-[#FCCC2D] border-[#FCCC2D] text-[#3A2E00]"
                   : "bg-transparent border-white/35 text-white"
@@ -162,8 +197,8 @@ export default function DonateSection() {
       </div>
 
       {/* Social proof */}
-      <div className="flex items-center gap-10 sm:gap-4 md:gap-8 mb-10 md:mb-0">
-        <div className="flex -space-x-2">
+      <div className="mb-10 flex min-w-0 items-start gap-3 md:mb-0">
+        <div className="flex shrink-0 -space-x-2 pt-0.5">
           {donorAvatars.map((src, i) => (
             <Image
               key={src}
@@ -176,18 +211,23 @@ export default function DonateSection() {
             />
           ))}
         </div>
-        <Typography variant="body-5" as="span" className="text-white/90 font-light font-manrope lg:hidden">
-          126 kind donors have contributed this month.Join with them today.❤️
-        </Typography>
-        <Typography variant="brand-2" as="span" className="text-white/90 font-light font-manrope hidden lg:block">
-          126 kind donors have contributed this month.Join with them today.❤️
+        <Typography
+          variant="body-8"
+          as="p"
+          className="min-w-0 flex-1 font-manrope text-[11px] font-light leading-snug text-white/90 sm:text-sm"
+        >
+          126 kind donors have contributed this month. Join with them today.❤️
         </Typography>
       </div>
 
       {/* CTA */}
-      <div className="flex justify-center mb-4 md:mb-0">
+      <div className="flex flex-col items-center mb-4 md:mb-0">
+        {amountError ? (
+          <p className="mb-2 font-manrope text-sm text-[#FFE08A]">{amountError}</p>
+        ) : null}
         <button
           type="button"
+          onClick={openDetailsForm}
           className="rounded py-3 font-bold bg-[#FCCC2D] w-[300px] md:w-full font-manrope"
         >
           <Typography variant="button-1" as="span">
@@ -211,6 +251,21 @@ export default function DonateSection() {
 
   return (
     <section className="w-full bg-[#FFF6D8] pt-10 pb-10 lg:pb-24">
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="afterInteractive"
+      />
+      {detailsOpen ? (
+        <DonateDetailsModal
+          amount={donationAmount}
+          onClose={() => setDetailsOpen(false)}
+          onAmountChange={(next) => {
+            setIsCustom(true);
+            setCustomAmount(String(next));
+            setSelectedAmount("");
+          }}
+        />
+      ) : null}
       <div className="relative w-full">
         {/* Below 768px (<md): fixed top offset to reveal the image above the
             card, with equal 10px inset on the remaining sides. */}

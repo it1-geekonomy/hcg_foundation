@@ -11,6 +11,8 @@ import type {
   Team,
   AdminUser,
   ContentStatus,
+  DonationStatus,
+  Donor,
   TeamMemberType,
   UpdateLegalPagePayload,
   UpdateTeamPayload,
@@ -24,7 +26,7 @@ export type ListQuery = {
   page?: number;
   limit?: number;
   search?: string;
-  status?: ContentStatus;
+  status?: ContentStatus | DonationStatus;
   memberType?: TeamMemberType;
   pageType?: LegalPageType;
 };
@@ -218,6 +220,13 @@ export const cmsApi = {
 
   deleteLegalPage: (id: string) =>
     request<void>(`/legal-pages/${id}`, { method: "DELETE" }),
+
+  listDonors: (params?: ListQuery) =>
+    request<Paginated<Donor>>(
+      `/donors${toQuery({ page: 1, limit: 10, ...params })}`
+    ),
+
+  getDonor: (id: string) => request<ApiEnvelope<Donor>>(`/donors/${id}`),
 };
 
 /** Public site: published people, optionally by trustee/team */
