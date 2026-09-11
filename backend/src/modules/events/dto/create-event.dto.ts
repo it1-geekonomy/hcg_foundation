@@ -1,47 +1,62 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 import { SeoFieldsDto } from '../../../common/dto/seo-fields.dto';
-import { Type } from 'class-transformer';
-import {
-  IsBoolean,
-  IsDateString,
-  IsEmail,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { ContentStatus } from '../../../common/enums/content-status.enum';
 
 export class CreateEventDto extends SeoFieldsDto {
-  @ApiProperty({ description: 'title' })
+  @ApiProperty({ example: 'Pink Hope Awareness Walk' })
   @IsString()
+  @MaxLength(255)
   title: string;
 
-  @ApiProperty({ description: 'slug' })
+  @ApiProperty({ example: 'pink-hope-awareness-walk' })
   @IsString()
+  @MaxLength(255)
   slug: string;
 
-  @ApiPropertyOptional({ description: 'description' })
+  @ApiPropertyOptional({
+    example: '2026-10-12',
+    description: 'Event date (YYYY-MM-DD)',
+  })
   @IsOptional()
   @IsString()
-  description?: string;
-
-  @ApiPropertyOptional({ description: 'location' })
-  @IsOptional()
-  @IsString()
-  location?: string;
-
-  @ApiPropertyOptional({ description: 'eventDate' })
-  @IsOptional()
-  @IsDateString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'eventDate must be YYYY-MM-DD',
+  })
   eventDate?: string;
 
-  @ApiPropertyOptional({ description: 'imageUrl' })
+  @ApiPropertyOptional({ example: 'HCG Hospital, Bengaluru' })
   @IsOptional()
   @IsString()
-  imageUrl?: string;
+  @MaxLength(255)
+  eventLocation?: string;
 
-  @ApiPropertyOptional({ description: 'isPublished' })
+  @ApiPropertyOptional({
+    example: '09:30',
+    description: 'Event time (HH:MM or HH:MM:SS)',
+  })
   @IsOptional()
-  @IsBoolean()
-  @Type(() => Boolean)
-  isPublished?: boolean;
+  @IsString()
+  @Matches(/^\d{2}:\d{2}(:\d{2})?$/, {
+    message: 'eventTime must be HH:MM or HH:MM:SS',
+  })
+  eventTime?: string;
+
+  @ApiPropertyOptional({ description: 'Full event body (HTML / rich text)' })
+  @IsOptional()
+  @IsString()
+  content?: string;
+
+  @ApiPropertyOptional({ description: 'Short blurb for cards' })
+  @IsOptional()
+  @IsString()
+  shortDescription?: string;
+
+  @ApiPropertyOptional({
+    enum: ContentStatus,
+    default: ContentStatus.DRAFT,
+  })
+  @IsOptional()
+  @IsEnum(ContentStatus)
+  status?: ContentStatus;
 }

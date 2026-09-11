@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { instanceToPlain } from 'class-transformer';
-import { createHash, randomBytes, scryptSync, timingSafeEqual } from 'crypto';
+import { randomBytes, scryptSync, timingSafeEqual } from 'crypto';
 import { Repository } from 'typeorm';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 import {
@@ -33,7 +33,6 @@ export class UsersService {
 
     const entity = this.repo.create({
       fullName: dto.fullName,
-      slug: this.slugify(dto.username),
       email: dto.email.toLowerCase(),
       username: dto.username.toLowerCase(),
       passwordHash: this.hashPassword(dto.password),
@@ -102,7 +101,6 @@ export class UsersService {
     if (dto.fullName !== undefined) entity.fullName = dto.fullName;
     if (dto.email !== undefined) entity.email = dto.email.toLowerCase();
     if (dto.username !== undefined) entity.username = dto.username.toLowerCase();
-    if (dto.resetString !== undefined) entity.resetString = dto.resetString;
     if (dto.password) entity.passwordHash = this.hashPassword(dto.password);
 
     return this.toSafe(await this.repo.save(entity));
@@ -165,18 +163,5 @@ export class UsersService {
     const prev = Buffer.from(hash, 'hex');
     if (next.length !== prev.length) return false;
     return timingSafeEqual(next, prev);
-  }
-
-  private slugify(value: string): string {
-    const base = value
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-    const suffix = createHash('sha1')
-      .update(`${value}-${Date.now()}`)
-      .digest('hex')
-      .slice(0, 6);
-    return `${base || 'user'}-${suffix}`;
   }
 }

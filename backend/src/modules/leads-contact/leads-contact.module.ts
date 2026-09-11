@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LeadsContactController } from './leads-contact.controller';
 import { LeadsContactService } from './leads-contact.service';
-import { LeadContact } from './entities/lead-contact.entity';
+import { LeadsContact } from './entities/leads-contact.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([LeadContact])],
+  imports: [TypeOrmModule.forFeature([LeadsContact])],
   controllers: [LeadsContactController],
   providers: [LeadsContactService],
   exports: [LeadsContactService, TypeOrmModule],

@@ -1,27 +1,35 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 import { SeoContentEntity } from '../../../common/entities/seo-content.entity';
+import { ContentStatus } from '../../../common/enums/content-status.enum';
 
-/**
- * Independent table — no FK relations (ERD constraint).
- */
 @Entity('trustees')
+@Index('idx_trustees_status', ['status'])
 export class Trustee extends SeoContentEntity {
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  title: string;
 
-  @Column({ type: 'varchar', nullable: false })
-  name: string;
+  @Index()
+  @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
+  slug: string;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   designation?: string;
 
+  @Column({ name: 'trustee_image', type: 'text', nullable: true })
+  trusteeImage?: string;
+
   @Column({ type: 'text', nullable: true })
-  bio?: string;
+  content?: string;
 
-  @Column({ name: 'image_url', type: 'varchar', nullable: true })
-  imageUrl?: string;
+  @Column({ name: 'short_description', type: 'text', nullable: true })
+  shortDescription?: string;
 
-  @Column({ name: 'display_order', type: 'int', nullable: true, default: 0 })
-  displayOrder?: number;
-
-  @Column({ name: 'is_active', type: 'boolean', nullable: false, default: true })
-  isActive: boolean;
+  @Column({
+    type: 'enum',
+    enumName: 'content_status',
+    enum: ContentStatus,
+    nullable: false,
+    default: ContentStatus.DRAFT,
+  })
+  status: ContentStatus;
 }

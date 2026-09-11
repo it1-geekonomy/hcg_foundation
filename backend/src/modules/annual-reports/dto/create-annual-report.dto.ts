@@ -14,11 +14,37 @@ export class CreateAnnualReportDto extends SeoFieldsDto {
   @MaxLength(255)
   slug: string;
 
-  @ApiPropertyOptional({ example: '2024-25', description: 'Report year label' })
+  @ApiPropertyOptional({
+    example: '2024-2025',
+    description:
+      'Reporting financial or calendar year (max 9 chars, e.g. 2024-25 or 2024-2025)',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(9)
   reportYear?: string;
+
+  @ApiPropertyOptional({
+    description: 'Direct CDN/public URL of desktop banner if already uploaded',
+  })
+  @IsOptional()
+  @IsString()
+  annualReportBanner?: string;
+
+  @ApiPropertyOptional({
+    description: 'Direct CDN/public URL of mobile banner if already uploaded',
+  })
+  @IsOptional()
+  @IsString()
+  annualReportMobileBanner?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Direct CDN/public URL of PDF or report file if already uploaded',
+  })
+  @IsOptional()
+  @IsString()
+  annualReportFile?: string;
 
   @ApiPropertyOptional({
     enum: ContentStatus,

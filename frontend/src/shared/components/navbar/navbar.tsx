@@ -106,21 +106,29 @@ export default function Navbar() {
           {/* Nav Links — desktop (xl and up) */}
           <div ref={desktopNavRef} className="hidden xl:flex items-center gap-[clamp(1.75rem,2vw,2rem)]">
             {navLinks.map((link, i) => {
+              const isChildActive = Boolean(
+                link.hasDropdown &&
+                  link.dropdownItems?.some((item) => item.href === pathname)
+              );
+              const isActive = link.href === pathname || isChildActive;
+
               if (!link.hasDropdown) {
                 return (
                   <Link
                     key={i}
                     href={link.href}
                     onClick={link.href === "/" ? handleHomeNav : undefined}
-                    className="group relative flex items-center gap-1 py-1"
+                    className="relative flex items-center gap-1 py-1"
                   >
-                    <Typography variant={link.href === pathname ? "text-1" : "text-2"}
+                    <Typography
+                      variant="text-2"
                       as="span"
-                      className="text-white font-manrope transition-colors duration-300 group-hover:text-[#FED034]"
+                      className={`font-manrope text-white transition-colors duration-300 ${
+                        isActive ? "font-bold" : "font-medium"
+                      }`}
                     >
                       {link.label}
                     </Typography>
-                    <span className="absolute -bottom-1 left-0 h-[2px] w-full origin-left scale-x-0 bg-[#FED034] transition-transform duration-300 ease-out group-hover:scale-x-100" />
                   </Link>
                 );
               }
@@ -129,6 +137,7 @@ export default function Navbar() {
                 <DesktopDropdown
                   key={i}
                   link={link}
+                  isActive={isActive}
                   isOpen={openDesktopDropdown === i}
                   onToggle={() => toggleDesktopDropdown(i)}
                   onMouseEnter={() => handleDesktopEnter(i)}

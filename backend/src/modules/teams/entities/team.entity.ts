@@ -1,46 +1,33 @@
 import { Column, Entity, Index } from 'typeorm';
 import { SeoContentEntity } from '../../../common/entities/seo-content.entity';
 import { ContentStatus } from '../../../common/enums/content-status.enum';
-import { TeamMemberType } from '../../../common/enums/team-member-type.enum';
 
-/**
- * About Us people cards — same fields for trustees and team.
- * Differentiated by `memberType` enum (no separate trustees table needed for CMS).
- * Independent table — no FK relations (ERD constraint).
- */
 @Entity('teams')
+@Index('idx_teams_status', ['status'])
 export class Team extends SeoContentEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
   title: string;
 
+  @Index()
+  @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
+  slug: string;
+
   @Column({ type: 'varchar', length: 255, nullable: true })
-  designation?: string | null;
+  designation?: string;
 
   @Column({ name: 'team_image', type: 'text', nullable: true })
-  teamImage?: string | null;
+  teamImage?: string;
 
   @Column({ type: 'text', nullable: true })
-  content?: string | null;
+  content?: string;
 
   @Column({ name: 'short_description', type: 'text', nullable: true })
-  shortDescription?: string | null;
+  shortDescription?: string;
 
-  @Index('idx_teams_member_type')
-  @Column({
-    name: 'member_type',
-    type: 'enum',
-    enum: TeamMemberType,
-    enumName: 'team_member_type',
-    nullable: false,
-    default: TeamMemberType.TRUSTEE,
-  })
-  memberType: TeamMemberType;
-
-  @Index('idx_teams_status')
   @Column({
     type: 'enum',
-    enum: ContentStatus,
     enumName: 'content_status',
+    enum: ContentStatus,
     nullable: false,
     default: ContentStatus.DRAFT,
   })

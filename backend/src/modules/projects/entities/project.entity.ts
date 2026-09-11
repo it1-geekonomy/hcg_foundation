@@ -1,33 +1,42 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 import { SeoContentEntity } from '../../../common/entities/seo-content.entity';
+import { ContentStatus } from '../../../common/enums/content-status.enum';
 
 /**
- * Independent table — no FK relations (ERD constraint).
+ * Projects — independent table, no FKs.
  */
 @Entity('projects')
 export class Project extends SeoContentEntity {
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  title?: string;
 
-  @Column({ type: 'varchar', nullable: false })
-  title: string;
+  @Index('idx_projects_slug', { unique: true })
+  @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
+  slug?: string;
 
-  @Column({ type: 'varchar', nullable: false })
-  slug: string;
+  @Column({ name: 'project_banner', type: 'text', nullable: true })
+  projectBanner?: string | null;
+
+  @Column({ name: 'project_mobile_banner', type: 'text', nullable: true })
+  projectMobileBanner?: string | null;
+
+  @Index('idx_projects_date')
+  @Column({ name: 'project_date', type: 'date', nullable: true })
+  projectDate?: string | null;
 
   @Column({ type: 'text', nullable: true })
-  summary?: string;
+  content?: string | null;
 
-  @Column({ type: 'text', nullable: true })
-  description?: string;
+  @Column({ name: 'short_description', type: 'text', nullable: true })
+  shortDescription?: string | null;
 
-  @Column({ name: 'image_url', type: 'varchar', nullable: true })
-  imageUrl?: string;
-
-  @Column({ name: 'display_order', type: 'int', nullable: true, default: 0 })
-  displayOrder?: number;
-
-  @Column({ name: 'is_featured', type: 'boolean', nullable: false, default: false })
-  isFeatured: boolean;
-
-  @Column({ name: 'is_active', type: 'boolean', nullable: false, default: true })
-  isActive: boolean;
+  @Index('idx_projects_status')
+  @Column({
+    type: 'enum',
+    enum: ContentStatus,
+    enumName: 'content_status',
+    nullable: false,
+    default: ContentStatus.DRAFT,
+  })
+  status?: ContentStatus;
 }

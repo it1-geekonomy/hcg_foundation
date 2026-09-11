@@ -4,26 +4,18 @@ import { SeoFieldsDto } from '../../../common/dto/seo-fields.dto';
 import { ContentStatus } from '../../../common/enums/content-status.enum';
 
 export class CreatePatientStoryDto extends SeoFieldsDto {
-  @ApiProperty({ example: 'Aarav’s recovery story' })
+  @ApiProperty({ example: 'John Doe Recovery Journey' })
   @IsString()
   @MaxLength(255)
   title: string;
 
-  @ApiProperty({ example: 'aaravs-recovery-story' })
+  @ApiProperty({ example: 'john-doe-recovery-journey' })
   @IsString()
   @MaxLength(255)
   slug: string;
 
   @ApiPropertyOptional({
-    example: 'https://cdn.example.com/patients/aarav.jpg',
-    description: 'Patient image URL',
-  })
-  @IsOptional()
-  @IsString()
-  patientImage?: string;
-
-  @ApiPropertyOptional({
-    example: '2024-06-15',
+    example: '2026-10-12',
     description: 'Story date (YYYY-MM-DD)',
   })
   @IsOptional()
@@ -33,10 +25,7 @@ export class CreatePatientStoryDto extends SeoFieldsDto {
   })
   storyDate?: string;
 
-  @ApiPropertyOptional({
-    example: 'Karnataka',
-    description: 'Donation / support state',
-  })
+  @ApiPropertyOptional({ example: 'Karnataka' })
   @IsOptional()
   @IsString()
   @MaxLength(250)

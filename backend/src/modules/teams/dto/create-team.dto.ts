@@ -1,57 +1,41 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 import { SeoFieldsDto } from '../../../common/dto/seo-fields.dto';
-import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ContentStatus } from '../../../common/enums/content-status.enum';
-import { TeamMemberType } from '../../../common/enums/team-member-type.enum';
 
 export class CreateTeamDto extends SeoFieldsDto {
-  @ApiProperty({
-    example: 'Dr. Aman',
-    description: 'Display name shown on the card',
-  })
+  @ApiProperty({ example: 'Dr. John Smith' })
   @IsString()
+  @IsNotEmpty()
   @MaxLength(255)
   title: string;
 
-  @ApiPropertyOptional({
-    example: 'Founder and Managing Trustee',
-    description: 'Role / designation under the name',
-  })
+  @ApiProperty({ example: 'dr-john-smith' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  slug: string;
+
+  @ApiPropertyOptional({ example: 'Senior Oncologist' })
   @IsOptional()
   @IsString()
   @MaxLength(255)
   designation?: string;
 
-  @ApiPropertyOptional({
-    example: 'https://cdn.example.com/teams/ajaikumar.jpg',
-    description: 'Portrait image URL',
-  })
+  @ApiPropertyOptional({ description: 'Team member image URL' })
   @IsOptional()
   @IsString()
   teamImage?: string;
 
-  @ApiPropertyOptional({
-    description: 'Full biography / detail content',
-  })
+  @ApiPropertyOptional({ description: 'Full bio/content (HTML / rich text)' })
   @IsOptional()
   @IsString()
   content?: string;
 
-  @ApiPropertyOptional({
-    description: 'Short blurb for cards / previews',
-  })
+  @ApiPropertyOptional({ description: 'Short blurb for cards' })
   @IsOptional()
   @IsString()
   shortDescription?: string;
-
-  @ApiProperty({
-    enum: TeamMemberType,
-    default: TeamMemberType.TRUSTEE,
-    description: 'Whether this person is a trustee or a team member',
-    example: TeamMemberType.TRUSTEE,
-  })
-  @IsEnum(TeamMemberType)
-  memberType: TeamMemberType;
 
   @ApiPropertyOptional({
     enum: ContentStatus,

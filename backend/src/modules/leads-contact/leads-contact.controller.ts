@@ -12,62 +12,110 @@ import {
   Query,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
-  ApiBearerAuth,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Public } from '../../common/decorators/public.decorator';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
-import { CreateLeadContactDto } from './dto/create-lead-contact.dto';
-import { UpdateLeadContactDto } from './dto/update-lead-contact.dto';
-import { LeadContact } from './entities/lead-contact.entity';
+import { CreateLeadsContactDto } from './dto/create-leads-contact.dto';
+import { UpdateLeadsContactDto } from './dto/update-leads-contact.dto';
+import { LeadsContact } from './entities/leads-contact.entity';
 import { LeadsContactService } from './leads-contact.service';
 
-@ApiTags('Contact · Leads')
+@ApiTags('Leads Contact')
 @Controller('leads-contact')
 export class LeadsContactController {
   constructor(private readonly service: LeadsContactService) {}
 
   @Public()
   @Post()
-  @ApiOperation({ summary: 'Submit contact lead (public form)' })
-  @ApiCreatedResponse({ type: LeadContact })
-  create(@Body() dto: CreateLeadContactDto) {
-    return this.service.create(dto);
+  @ApiOperation({
+    summary: 'Submit contact lead (website)',
+    description: 'Public endpoint for website contact form submissions.',
+  })
+  @ApiCreatedResponse({ type: LeadsContact })
+  async create(@Body() dto: CreateLeadsContactDto) {
+    const data = await this.service.create(dto);
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Contact lead submitted successfully',
+      data,
+    };
   }
 
   @Get()
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'List leads (super-admin)' })
-  @ApiOkResponse({ description: 'Paginated list' })
-  findAll(@Query() query: PaginationQueryDto) {
-    return this.service.findAll(query);
+  @ApiOperation({
+    summary: 'List all contact leads (CMS)',
+    description: 'Returns all contact leads. Requires Bearer token.',
+  })
+  @ApiOkResponse({ description: 'Paginated CMS list' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async findAll(@Query() query: PaginationQueryDto) {
+    const result = await this.service.findAll(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message:
+        result.meta.total === 0
+          ? 'No contact leads found'
+          : 'Contact leads fetched successfully',
+      ...result,
+    };
   }
 
   @Get(':id')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get LeadContact by id (super-admin)' })
-  @ApiOkResponse({ type: LeadContact })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.findOne(id);
+  @ApiOperation({ summary: 'Get contact lead by id (CMS)' })
+  @ApiOkResponse({ type: LeadsContact })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.findOne(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Contact lead fetched successfully',
+      data,
+    };
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update LeadContact' })
-  @ApiOkResponse({ type: LeadContact })
-  update(
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update contact lead (CMS)' })
+  @ApiOkResponse({ type: LeadsContact })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async update(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: UpdateLeadContactDto,
+    @Body() dto: UpdateLeadsContactDto,
   ) {
-    return this.service.update(id, dto);
+    const data = await this.service.update(id, dto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Contact lead updated successfully',
+      data,
+    };
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete LeadContact' })
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.remove(id);
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete contact lead (CMS)' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    await this.service.remove(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Contact lead deleted successfully',
+    };
   }
 }

@@ -6,25 +6,23 @@ import {
   buildPaginatedResult,
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
-import { CreateLeadContactDto } from './dto/create-lead-contact.dto';
-import { UpdateLeadContactDto } from './dto/update-lead-contact.dto';
-import { LeadContact } from './entities/lead-contact.entity';
+import { CreateLeadsContactDto } from './dto/create-leads-contact.dto';
+import { UpdateLeadsContactDto } from './dto/update-leads-contact.dto';
+import { LeadsContact } from './entities/leads-contact.entity';
 
 @Injectable()
 export class LeadsContactService {
   constructor(
-    @InjectRepository(LeadContact)
-    private readonly repo: Repository<LeadContact>,
+    @InjectRepository(LeadsContact)
+    private readonly repo: Repository<LeadsContact>,
   ) {}
 
-  async create(dto: CreateLeadContactDto): Promise<LeadContact> {
+  async create(dto: CreateLeadsContactDto): Promise<LeadsContact> {
     const entity = this.repo.create(dto);
-    return this.repo.save(entity);
+    return await this.repo.save(entity);
   }
 
-  async findAll(
-    query: PaginationQueryDto,
-  ): Promise<PaginatedResult<LeadContact>> {
+  async findAll(query: PaginationQueryDto): Promise<PaginatedResult<LeadsContact>> {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
 
@@ -33,9 +31,10 @@ export class LeadsContactService {
       .orderBy('entity.createdAt', 'DESC');
 
     if (query.search) {
-      qb.andWhere('(entity.fullName ILIKE :search OR entity.email ILIKE :search OR entity.phone ILIKE :search)', {
-        search: `%${query.search}%`,
-      });
+      qb.andWhere(
+        '(entity.fullName ILIKE :search OR entity.email ILIKE :search OR entity.phone ILIKE :search OR entity.message ILIKE :search)',
+        { search: `%${query.search}%` },
+      );
     }
 
     const [data, total] = await qb
@@ -46,18 +45,20 @@ export class LeadsContactService {
     return buildPaginatedResult(data, total, page, limit);
   }
 
-  async findOne(id: string): Promise<LeadContact> {
+  async findOne(id: string): Promise<LeadsContact> {
     const entity = await this.repo.findOne({ where: { id } });
     if (!entity) {
-      throw new NotFoundException(`LeadContact ${id} not found`);
+      throw new NotFoundException(
+        `Contact lead not found for id "${id}". Check the id and try again.`,
+      );
     }
     return entity;
   }
 
-  async update(id: string, dto: UpdateLeadContactDto): Promise<LeadContact> {
+  async update(id: string, dto: UpdateLeadsContactDto): Promise<LeadsContact> {
     const entity = await this.findOne(id);
     Object.assign(entity, dto);
-    return this.repo.save(entity);
+    return await this.repo.save(entity);
   }
 
   async remove(id: string): Promise<void> {

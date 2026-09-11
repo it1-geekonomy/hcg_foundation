@@ -1,30 +1,56 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
+import { ContentStatus } from '../../common/enums/content-status.enum';
 import {
   buildPaginatedResult,
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
+import { CdnFile, CdnService } from '../../common/storage/cdn.service';
 import { CreateTrusteeDto } from './dto/create-trustee.dto';
 import { UpdateTrusteeDto } from './dto/update-trustee.dto';
 import { Trustee } from './entities/trustee.entity';
+
+export type TrusteeFiles = {
+  trusteeImage?: CdnFile;
+};
+
+export type TrusteeUploadedFiles = {
+  trusteeImage?: CdnFile[];
+};
 
 @Injectable()
 export class TrusteesService {
   constructor(
     @InjectRepository(Trustee)
     private readonly repo: Repository<Trustee>,
+    private readonly cdn: CdnService,
   ) {}
 
-  async create(dto: CreateTrusteeDto): Promise<Trustee> {
-    const entity = this.repo.create(dto);
-    return this.repo.save(entity);
+  async create(dto: CreateTrusteeDto, files?: TrusteeFiles): Promise<Trustee> {
+    const trusteeImage = files?.trusteeImage
+      ? await this.cdn.upload(files.trusteeImage, 'trustees')
+      : undefined;
+
+    try {
+      const entity = this.repo.create({
+        ...dto,
+        trusteeImage,
+        status: dto.status ?? ContentStatus.DRAFT,
+      });
+      return await this.saveOrThrow(entity, dto.slug);
+    } catch (err) {
+      await this.cdn.delete(trusteeImage);
+      throw err;
+    }
   }
 
-  async findAll(
-    query: PaginationQueryDto,
-  ): Promise<PaginatedResult<Trustee>> {
+  async findAll(query: PaginationQueryDto): Promise<PaginatedResult<Trustee>> {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
 
@@ -32,10 +58,15 @@ export class TrusteesService {
       .createQueryBuilder('entity')
       .orderBy('entity.createdAt', 'DESC');
 
+    if (query.status) {
+      qb.andWhere('entity.status = :status', { status: query.status });
+    }
+
     if (query.search) {
-      qb.andWhere('(entity.name ILIKE :search OR entity.designation ILIKE :search OR entity.bio ILIKE :search)', {
-        search: `%${query.search}%`,
-      });
+      qb.andWhere(
+        '(entity.title ILIKE :search OR entity.slug ILIKE :search OR entity.designation ILIKE :search OR entity.shortDescription ILIKE :search)',
+        { search: `%${query.search}%` },
+      );
     }
 
     const [data, total] = await qb
@@ -46,22 +77,78 @@ export class TrusteesService {
     return buildPaginatedResult(data, total, page, limit);
   }
 
+  async findPublished(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResult<Trustee>> {
+    return this.findAll({ ...query, status: ContentStatus.PUBLISHED });
+  }
+
   async findOne(id: string): Promise<Trustee> {
     const entity = await this.repo.findOne({ where: { id } });
     if (!entity) {
-      throw new NotFoundException(`Trustee ${id} not found`);
+      throw new NotFoundException(
+        `Trustee not found for id "${id}". Check the id and try again.`,
+      );
     }
     return entity;
   }
 
-  async update(id: string, dto: UpdateTrusteeDto): Promise<Trustee> {
+  async findPublishedBySlug(slug: string): Promise<Trustee> {
+    const entity = await this.repo.findOne({
+      where: { slug, status: ContentStatus.PUBLISHED },
+    });
+    if (!entity) {
+      throw new NotFoundException(
+        `Published trustee not found for slug "${slug}".`,
+      );
+    }
+    return entity;
+  }
+
+  async update(
+    id: string,
+    dto: UpdateTrusteeDto,
+    files?: TrusteeFiles,
+  ): Promise<Trustee> {
     const entity = await this.findOne(id);
     Object.assign(entity, dto);
-    return this.repo.save(entity);
+    const newTrusteeImage = await this.cdn.replace(
+      entity.trusteeImage,
+      files?.trusteeImage,
+      'trustees',
+    );
+    entity.trusteeImage = newTrusteeImage ?? undefined;
+    return this.saveOrThrow(entity, dto.slug ?? entity.slug);
   }
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
+    await this.cdn.delete(entity.trusteeImage);
     await this.repo.remove(entity);
+  }
+
+  private async saveOrThrow(entity: Trustee, slug?: string): Promise<Trustee> {
+    try {
+      return await this.repo.save(entity);
+    } catch (err) {
+      if (this.isUniqueViolation(err)) {
+        throw new ConflictException(
+          slug
+            ? `A trustee with slug ${slug} already exists. Choose a different slug.`
+            : 'A trustee with this slug already exists. Choose a different slug.',
+        );
+      }
+      throw err;
+    }
+  }
+
+  private isUniqueViolation(err: unknown): boolean {
+    return (
+      err instanceof QueryFailedError &&
+      typeof err === 'object' &&
+      err !== null &&
+      'code' in err &&
+      (err as { code?: string }).code === '23505'
+    );
   }
 }

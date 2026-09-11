@@ -3,16 +3,16 @@ import { SeoContentEntity } from '../../../common/entities/seo-content.entity';
 import { ContentStatus } from '../../../common/enums/content-status.enum';
 
 /**
- * Patient stories — independent table, no FKs.
+ * Patient Stories — independent table, no FKs.
  */
 @Entity('patient_stories')
 export class PatientStory extends SeoContentEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
-  title: string;
+  title?: string;
 
   @Index('idx_patient_stories_slug', { unique: true })
   @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
-  slug: string;
+  slug?: string;
 
   @Column({ name: 'patient_image', type: 'text', nullable: true })
   patientImage?: string | null;
@@ -38,5 +38,5 @@ export class PatientStory extends SeoContentEntity {
     nullable: false,
     default: ContentStatus.DRAFT,
   })
-  status: ContentStatus;
+  status?: ContentStatus;
 }

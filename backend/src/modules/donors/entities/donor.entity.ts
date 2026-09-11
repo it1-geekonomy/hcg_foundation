@@ -1,33 +1,79 @@
-import { Column, Entity } from 'typeorm';
-import { SeoContentEntity } from '../../../common/entities/seo-content.entity';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Column, Entity, Index } from 'typeorm';
+import { BaseEntity } from '../../../common/entities/base.entity';
+import { DonationStatus } from '../../../common/enums/donation-status.enum';
 
 /**
- * Independent table — no FK relations (ERD constraint).
+ * Donors — independent table, no FKs, no SEO.
  */
 @Entity('donors')
-export class Donor extends SeoContentEntity {
+export class Donor extends BaseEntity {
+  @ApiProperty({ example: 'Anita Sharma' })
+  @Column({ name: 'full_name', type: 'varchar', length: 255, nullable: false })
+  fullName!: string;
 
-  @Column({ name: 'full_name', type: 'varchar', nullable: false })
-  fullName: string;
+  @ApiPropertyOptional({ example: '9876543210' })
+  @Index('idx_donors_phone')
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  phone?: string | null;
 
-  @Column({ type: 'varchar', nullable: false })
-  email: string;
+  @ApiPropertyOptional({ example: 'anita@example.com' })
+  @Index('idx_donors_email')
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  email?: string | null;
 
-  @Column({ type: 'varchar', nullable: true })
-  phone?: string;
+  @ApiPropertyOptional({ example: 'Bengaluru' })
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  city?: string | null;
 
-  @Column({ type: 'int', nullable: false })
-  amount: number;
+  @ApiPropertyOptional({ example: 'ABCDE1234F' })
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  pan?: string | null;
 
-  @Column({ type: 'varchar', nullable: true, default: 'INR' })
-  currency?: string;
-
-  @Column({ name: 'payment_status', type: 'varchar', nullable: true, default: 'pending' })
-  paymentStatus?: string;
-
-  @Column({ name: 'payment_reference', type: 'varchar', nullable: true })
-  paymentReference?: string;
-
+  @ApiPropertyOptional()
   @Column({ type: 'text', nullable: true })
-  message?: string;
+  message?: string | null;
+
+  @ApiProperty({ example: '5000.00' })
+  @Column({ type: 'numeric', precision: 12, scale: 2, nullable: false })
+  amount!: string;
+
+  @ApiProperty({ example: 'INR' })
+  @Column({ type: 'varchar', length: 10, nullable: false, default: 'INR' })
+  currency!: string;
+
+  @ApiPropertyOptional({ example: 'HCG-RCP-1001' })
+  @Column({ name: 'receipt_number', type: 'varchar', length: 50, nullable: true })
+  receiptNumber?: string | null;
+
+  @ApiPropertyOptional()
+  @Index('idx_donors_razorpay_payment_id')
+  @Column({
+    name: 'razorpay_payment_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  razorpayPaymentId?: string | null;
+
+  @ApiPropertyOptional()
+  @Index('idx_donors_razorpay_order_id')
+  @Column({
+    name: 'razorpay_order_id',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  razorpayOrderId?: string | null;
+
+  @ApiProperty({ enum: DonationStatus, default: DonationStatus.PENDING })
+  @Index('idx_donors_status')
+  @Column({
+    type: 'enum',
+    enum: DonationStatus,
+    enumName: 'donation_status',
+    nullable: false,
+    default: DonationStatus.PENDING,
+  })
+  status!: DonationStatus;
 }

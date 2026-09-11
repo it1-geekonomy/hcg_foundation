@@ -1,4 +1,4 @@
-import { ApiPropertyOptional, PartialType, OmitType } from '@nestjs/swagger';
+import { ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger';
 import { IsOptional, IsString, MinLength } from 'class-validator';
 import { CreateUserDto } from './create-user.dto';
 
@@ -13,11 +13,4 @@ export class UpdateUserDto extends PartialType(
   @IsString()
   @MinLength(8)
   password?: string;
-
-  @ApiPropertyOptional({
-    description: 'Password-reset token / string',
-  })
-  @IsOptional()
-  @IsString()
-  resetString?: string;
 }

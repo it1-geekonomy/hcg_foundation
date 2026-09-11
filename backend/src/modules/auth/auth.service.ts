@@ -68,14 +68,18 @@ export class AuthService {
   verifyToken(token: string): TokenPayload {
     const [body, sig] = token.split('.');
     if (!body || !sig) {
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException(
+        'Unauthorized. Token is malformed. Log in at POST /api/auth/login.',
+      );
     }
 
     const expected = this.sign(body);
     const a = Buffer.from(sig);
     const b = Buffer.from(expected);
     if (a.length !== b.length || !timingSafeEqual(a, b)) {
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException(
+        'Unauthorized. Token is invalid or has been tampered with.',
+      );
     }
 
     let payload: TokenPayload;
@@ -84,11 +88,21 @@ export class AuthService {
         Buffer.from(body, 'base64url').toString('utf8'),
       ) as TokenPayload;
     } catch {
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException(
+        'Unauthorized. Token payload could not be read. Please log in again.',
+      );
     }
 
-    if (!payload?.sub || !payload.exp || payload.exp < Math.floor(Date.now() / 1000)) {
-      throw new UnauthorizedException('Token expired');
+    if (!payload?.sub || !payload.exp) {
+      throw new UnauthorizedException(
+        'Unauthorized. Token is missing required claims. Please log in again.',
+      );
+    }
+
+    if (payload.exp < Math.floor(Date.now() / 1000)) {
+      throw new UnauthorizedException(
+        'Unauthorized. Token has expired. Please log in again.',
+      );
     }
 
     return payload;

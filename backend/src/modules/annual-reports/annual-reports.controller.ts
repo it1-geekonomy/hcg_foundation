@@ -15,137 +15,194 @@ import {
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { memoryStorage } from 'multer';
-import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
+import { Public } from '../../common/decorators/public.decorator';
+import {
+  AnnualReportFiles,
+  AnnualReportUploadedFiles,
+  AnnualReportsService,
+} from './annual-reports.service';
+import {
+  CreateAnnualReportMultipartDto,
+  UpdateAnnualReportMultipartDto,
+} from './dto/annual-report-multipart.dto';
+import { AnnualReportsQueryDto } from './dto/annual-reports-query.dto';
 import { CreateAnnualReportDto } from './dto/create-annual-report.dto';
 import { UpdateAnnualReportDto } from './dto/update-annual-report.dto';
 import { AnnualReport } from './entities/annual-report.entity';
-import { AnnualReportsService } from './annual-reports.service';
 
-const reportUploadFields = FileFieldsInterceptor(
-  [
-    { name: 'banner', maxCount: 1 },
-    { name: 'file', maxCount: 1 },
-  ],
-  {
-    storage: memoryStorage(),
-    limits: { fileSize: 25 * 1024 * 1024 },
-  },
-);
-
-@ApiTags('Resources · Annual Reports')
+@ApiTags('Annual Reports')
 @Controller('annual-reports')
 export class AnnualReportsController {
   constructor(private readonly service: AnnualReportsService) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Create AnnualReport (banner + file uploaded to R2 CDN)',
-  })
+  @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      required: ['title', 'slug'],
-      properties: {
-        title: { type: 'string' },
-        slug: { type: 'string' },
-        reportYear: { type: 'string', example: '2024-25' },
-        status: { type: 'string', enum: ['draft', 'published', 'archived'] },
-        metaTitle: { type: 'string' },
-        metaDescription: { type: 'string' },
-        schemaCode: { type: 'string' },
-        banner: { type: 'string', format: 'binary' },
-        file: { type: 'string', format: 'binary' },
-      },
-    },
+  @ApiBody({ type: CreateAnnualReportMultipartDto })
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'annualReportBanner', maxCount: 1 },
+      { name: 'annualReportMobileBanner', maxCount: 1 },
+      { name: 'annualReportFile', maxCount: 1 },
+    ]),
+  )
+  @ApiOperation({
+    summary: 'Create annual report (CMS / super-admin)',
+    description:
+      'Send multipart form fields plus optional files: `annualReportBanner`, `annualReportMobileBanner`, and `annualReportFile` (PDF). CDN URLs are stored on the row.',
   })
   @ApiCreatedResponse({ type: AnnualReport })
-  @UseInterceptors(reportUploadFields)
-  create(
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async create(
     @Body() dto: CreateAnnualReportDto,
     @UploadedFiles()
-    files: {
-      banner?: Express.Multer.File[];
-      file?: Express.Multer.File[];
-    },
+    files?: AnnualReportUploadedFiles,
   ) {
-    return this.service.create(dto, {
-      banner: files?.banner?.[0],
-      file: files?.file?.[0],
-    });
+    const data = await this.service.create(dto, this.toFiles(files));
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Annual report created successfully',
+      data,
+    };
   }
 
   @Get()
-  @ApiOperation({ summary: 'List annual_reports (R2 URLs in response)' })
-  @ApiOkResponse({ description: 'Paginated list' })
-  findAll(@Query() query: PaginationQueryDto) {
-    return this.service.findAll(query);
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List all annual reports (CMS)',
+    description:
+      'Returns draft, published, and archived. Optional status/search/reportYear filters. Requires Bearer token.',
+  })
+  @ApiOkResponse({ description: 'Paginated CMS list' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async findAll(@Query() query: AnnualReportsQueryDto) {
+    const result = await this.service.findAll(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message:
+        result.meta.total === 0
+          ? 'No annual reports found'
+          : 'Annual reports fetched successfully',
+      ...result,
+    };
   }
 
-  @Get('slug/:slug')
-  @ApiOperation({ summary: 'Get AnnualReport by slug' })
+  @Public()
+  @Get('published')
+  @ApiOperation({
+    summary: 'List published annual reports (website)',
+    description:
+      'Public. Only status=published. Optional search and reportYear filter. No token required.',
+  })
+  @ApiOkResponse({ description: 'Paginated published list' })
+  async findPublished(@Query() query: AnnualReportsQueryDto) {
+    const result = await this.service.findPublished(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message:
+        result.meta.total === 0
+          ? 'No published annual reports found'
+          : 'Published annual reports fetched successfully',
+      ...result,
+    };
+  }
+
+  @Public()
+  @Get('published/slug/:slug')
+  @ApiOperation({
+    summary: 'Get published annual report by slug (website)',
+    description: 'Public detail page. Use slug in URL.',
+  })
   @ApiOkResponse({ type: AnnualReport })
-  findBySlug(@Param('slug') slug: string) {
-    return this.service.findBySlug(slug);
+  async findPublishedBySlug(@Param('slug') slug: string) {
+    const data = await this.service.findPublishedBySlug(slug);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Published annual report fetched successfully',
+      data,
+    };
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get AnnualReport by id' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get annual report by id (CMS, any status)' })
   @ApiOkResponse({ type: AnnualReport })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.findOne(id);
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.findOne(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Annual report fetched successfully',
+      data,
+    };
   }
 
   @Patch(':id')
-  @ApiOperation({
-    summary: 'Update AnnualReport (optional new banner/file → R2)',
-  })
+  @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string' },
-        slug: { type: 'string' },
-        reportYear: { type: 'string' },
-        status: { type: 'string', enum: ['draft', 'published', 'archived'] },
-        metaTitle: { type: 'string' },
-        metaDescription: { type: 'string' },
-        schemaCode: { type: 'string' },
-        banner: { type: 'string', format: 'binary' },
-        file: { type: 'string', format: 'binary' },
-      },
-    },
+  @ApiBody({ type: UpdateAnnualReportMultipartDto })
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'annualReportBanner', maxCount: 1 },
+      { name: 'annualReportMobileBanner', maxCount: 1 },
+      { name: 'annualReportFile', maxCount: 1 },
+    ]),
+  )
+  @ApiOperation({
+    summary: 'Update annual report (CMS / super-admin)',
+    description:
+      'Optional new banner images or annual report file replace the previous CDN objects.',
   })
   @ApiOkResponse({ type: AnnualReport })
-  @UseInterceptors(reportUploadFields)
-  update(
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAnnualReportDto,
     @UploadedFiles()
-    files: {
-      banner?: Express.Multer.File[];
-      file?: Express.Multer.File[];
-    },
+    files?: AnnualReportUploadedFiles,
   ) {
-    return this.service.update(id, dto, {
-      banner: files?.banner?.[0],
-      file: files?.file?.[0],
-    });
+    const data = await this.service.update(id, dto, this.toFiles(files));
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Annual report updated successfully',
+      data,
+    };
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete AnnualReport and R2 objects' })
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.remove(id);
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete annual report (CMS / super-admin)' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    await this.service.remove(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Annual report deleted successfully',
+    };
+  }
+
+  private toFiles(files?: AnnualReportUploadedFiles): AnnualReportFiles {
+    return {
+      annualReportBanner: files?.annualReportBanner?.[0],
+      annualReportMobileBanner: files?.annualReportMobileBanner?.[0],
+      annualReportFile: files?.annualReportFile?.[0],
+    };
   }
 }

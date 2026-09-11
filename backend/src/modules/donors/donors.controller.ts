@@ -1,73 +1,103 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
-  Patch,
   Post,
   Query,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
-  ApiBearerAuth,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { ApiTagsConst } from '../../common/constants/api-tags';
 import { Public } from '../../common/decorators/public.decorator';
-import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
-import { CreateDonorDto } from './dto/create-donor.dto';
-import { UpdateDonorDto } from './dto/update-donor.dto';
+import { CreateDonationDto } from './dto/create-donation.dto';
+import { ListDonorsQueryDto } from './dto/list-donors-query.dto';
+import { VerifyDonationDto } from './dto/verify-donation.dto';
 import { Donor } from './entities/donor.entity';
 import { DonorsService } from './donors.service';
 
-@ApiTags('Donation · Donors')
+@ApiTags(ApiTagsConst.DONATION)
 @Controller('donors')
 export class DonorsController {
   constructor(private readonly service: DonorsService) {}
 
   @Public()
-  @Post()
-  @ApiOperation({ summary: 'Submit donor (public form)' })
-  @ApiCreatedResponse({ type: Donor })
-  create(@Body() dto: CreateDonorDto) {
-    return this.service.create(dto);
+  @Post('orders')
+  @ApiOperation({
+    summary: 'Start donation (website Donate Now)',
+    description:
+      'Creates a Razorpay order only. Donor details are stored on the order until payment succeeds. Frontend opens Checkout with `keyId` + `orderId`, then calls POST /donors/verify.',
+  })
+  @ApiCreatedResponse({ description: 'Razorpay checkout payload' })
+  async createOrder(@Body() dto: CreateDonationDto) {
+    const data = await this.service.createOrder(dto);
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Donation order created successfully',
+      data,
+    };
+  }
+
+  @Public()
+  @Post('verify')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Verify Razorpay payment (website)',
+    description:
+      'Call from the Razorpay Checkout success handler. Confirms the signature and inserts the donor row as paid.',
+  })
+  @ApiOkResponse({ type: Donor })
+  async verify(@Body() dto: VerifyDonationDto) {
+    const data = await this.service.verifyPayment(dto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Payment verified successfully',
+      data,
+    };
   }
 
   @Get()
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'List donors (super-admin)' })
-  @ApiOkResponse({ description: 'Paginated list' })
-  findAll(@Query() query: PaginationQueryDto) {
-    return this.service.findAll(query);
+  @ApiOperation({
+    summary: 'List donors (CMS)',
+    description:
+      'Successful payments only by default. Pass status=pending for old abandoned rows.',
+  })
+  @ApiOkResponse({ description: 'Paginated CMS list' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async findAll(@Query() query: ListDonorsQueryDto) {
+    const result = await this.service.findAll(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message:
+        result.meta.total === 0
+          ? 'No donors found'
+          : 'Donors fetched successfully',
+      ...result,
+    };
   }
 
   @Get(':id')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get Donor by id (super-admin)' })
+  @ApiOperation({ summary: 'Get donor by id (CMS)' })
   @ApiOkResponse({ type: Donor })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.findOne(id);
-  }
-
-  @Patch(':id')
-  @ApiOperation({ summary: 'Update Donor' })
-  @ApiOkResponse({ type: Donor })
-  update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: UpdateDonorDto,
-  ) {
-    return this.service.update(id, dto);
-  }
-
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete Donor' })
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.remove(id);
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.findOne(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Donor fetched successfully',
+      data,
+    };
   }
 }

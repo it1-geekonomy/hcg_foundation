@@ -1,52 +1,79 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { SeoFieldsDto } from '../../../common/dto/seo-fields.dto';
-import { Type } from 'class-transformer';
 import {
-  IsBoolean,
-  IsDateString,
-  IsEmail,
-  IsNumber,
+  IsEnum,
   IsOptional,
   IsString,
+  Matches,
+  MaxLength,
 } from 'class-validator';
+import { SeoFieldsDto } from '../../../common/dto/seo-fields.dto';
+import { ContentStatus } from '../../../common/enums/content-status.enum';
 
 export class CreateBlogDto extends SeoFieldsDto {
-  @ApiProperty({ description: 'title' })
+  @ApiProperty({ example: 'Advancements in Cancer Immunotherapy' })
   @IsString()
+  @MaxLength(255)
   title: string;
 
-  @ApiProperty({ description: 'slug' })
+  @ApiProperty({ example: 'advancements-in-cancer-immunotherapy' })
   @IsString()
+  @MaxLength(255)
   slug: string;
 
-  @ApiPropertyOptional({ description: 'excerpt' })
+  @ApiPropertyOptional({
+    example: '2026-08-15',
+    description: 'Publication date (YYYY-MM-DD)',
+  })
   @IsOptional()
   @IsString()
-  excerpt?: string;
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'blogDate must be YYYY-MM-DD',
+  })
+  blogDate?: string;
 
-  @ApiPropertyOptional({ description: 'content' })
+  @ApiPropertyOptional({ example: 'Dr. Ramesh S' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  authorName?: string;
+
+  @ApiPropertyOptional({ example: 'Senior Oncologist & Trustee' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  authorDesignation?: string;
+
+  @ApiPropertyOptional({
+    description: 'Full blog article content (HTML or markdown)',
+  })
   @IsOptional()
   @IsString()
   content?: string;
 
-  @ApiPropertyOptional({ description: 'authorName' })
+  @ApiPropertyOptional({ description: 'Summary blurb for preview cards' })
   @IsOptional()
   @IsString()
-  authorName?: string;
+  shortDescription?: string;
 
-  @ApiPropertyOptional({ description: 'coverImageUrl' })
+  @ApiPropertyOptional({
+    description: 'Direct CDN URL of desktop banner if already uploaded',
+  })
   @IsOptional()
   @IsString()
-  coverImageUrl?: string;
+  blogBanner?: string;
 
-  @ApiPropertyOptional({ description: 'publishedAt' })
+  @ApiPropertyOptional({
+    description: 'Direct CDN URL of mobile banner if already uploaded',
+  })
   @IsOptional()
-  @IsDateString()
-  publishedAt?: string;
+  @IsString()
+  blogMobileBanner?: string;
 
-  @ApiPropertyOptional({ description: 'isPublished' })
+  @ApiPropertyOptional({
+    enum: ContentStatus,
+    default: ContentStatus.DRAFT,
+  })
   @IsOptional()
-  @IsBoolean()
-  @Type(() => Boolean)
-  isPublished?: boolean;
+  @IsEnum(ContentStatus)
+  status?: ContentStatus;
 }

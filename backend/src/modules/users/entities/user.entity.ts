@@ -14,11 +14,6 @@ export class User extends BaseEntity {
   @Column({ name: 'full_name', type: 'varchar', length: 255, nullable: false })
   fullName: string;
 
-  @ApiHideProperty()
-  @Exclude()
-  @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
-  slug?: string | null;
-
   @ApiProperty({ example: 'kishan10@gmail.com' })
   @Index('idx_users_email')
   @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
@@ -33,9 +28,4 @@ export class User extends BaseEntity {
   @Exclude()
   @Column({ name: 'password_hash', type: 'text', nullable: false })
   passwordHash: string;
-
-  @ApiHideProperty()
-  @Exclude()
-  @Column({ name: 'reset_string', type: 'text', nullable: true })
-  resetString?: string | null;
 }

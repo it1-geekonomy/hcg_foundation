@@ -1,44 +1,47 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 import { SeoFieldsDto } from '../../../common/dto/seo-fields.dto';
-import { Type } from 'class-transformer';
-import {
-  IsBoolean,
-  IsDateString,
-  IsEmail,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { ContentStatus } from '../../../common/enums/content-status.enum';
 
 export class CreateTrusteeDto extends SeoFieldsDto {
-  @ApiProperty({ description: 'name' })
+  @ApiProperty({ example: 'Mrs. Jane Doe' })
   @IsString()
-  name: string;
+  @IsNotEmpty()
+  @MaxLength(255)
+  title: string;
 
-  @ApiPropertyOptional({ description: 'designation' })
+  @ApiProperty({ example: 'mrs-jane-doe' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  slug: string;
+
+  @ApiPropertyOptional({ example: 'Board Member' })
   @IsOptional()
   @IsString()
+  @MaxLength(255)
   designation?: string;
 
-  @ApiPropertyOptional({ description: 'bio' })
+  @ApiPropertyOptional({ description: 'Trustee image URL' })
   @IsOptional()
   @IsString()
-  bio?: string;
+  trusteeImage?: string;
 
-  @ApiPropertyOptional({ description: 'imageUrl' })
+  @ApiPropertyOptional({ description: 'Full bio/content (HTML / rich text)' })
   @IsOptional()
   @IsString()
-  imageUrl?: string;
+  content?: string;
 
-  @ApiPropertyOptional({ description: 'displayOrder' })
+  @ApiPropertyOptional({ description: 'Short blurb for cards' })
   @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  displayOrder?: number;
+  @IsString()
+  shortDescription?: string;
 
-  @ApiPropertyOptional({ description: 'isActive' })
+  @ApiPropertyOptional({
+    enum: ContentStatus,
+    default: ContentStatus.DRAFT,
+  })
   @IsOptional()
-  @IsBoolean()
-  @Type(() => Boolean)
-  isActive?: boolean;
+  @IsEnum(ContentStatus)
+  status?: ContentStatus;
 }
