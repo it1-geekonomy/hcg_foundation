@@ -1,0 +1,47 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { SeoFieldsDto } from '../../../common/dto/seo-fields.dto';
+import { ContentStatus } from '../../../common/enums/content-status.enum';
+
+export class CreateTeamDto extends SeoFieldsDto {
+  @ApiProperty({ example: 'Dr. John Smith' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  title: string;
+
+  @ApiProperty({ example: 'dr-john-smith' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  slug: string;
+
+  @ApiPropertyOptional({ example: 'Senior Oncologist' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  designation?: string;
+
+  @ApiPropertyOptional({ description: 'Team member image URL' })
+  @IsOptional()
+  @IsString()
+  teamImage?: string;
+
+  @ApiPropertyOptional({ description: 'Full bio/content (HTML / rich text)' })
+  @IsOptional()
+  @IsString()
+  content?: string;
+
+  @ApiPropertyOptional({ description: 'Short blurb for cards' })
+  @IsOptional()
+  @IsString()
+  shortDescription?: string;
+
+  @ApiPropertyOptional({
+    enum: ContentStatus,
+    default: ContentStatus.DRAFT,
+  })
+  @IsOptional()
+  @IsEnum(ContentStatus)
+  status?: ContentStatus;
+}
