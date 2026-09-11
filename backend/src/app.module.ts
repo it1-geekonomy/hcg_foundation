@@ -19,6 +19,8 @@ import { NewsModule } from './modules/news/news.module';
 import { PatientStoriesModule } from './modules/patient-stories/patient-stories.module';
 import { TeamsModule } from './modules/teams/teams.module';
 import { TrusteesModule } from './modules/trustees/trustees.module';
+import { FundraisingCampaignsModule } from './modules/fundraising-campaigns/fundraising-campaigns.module';
+import { PartnershipInquiriesModule } from './modules/partnership-inquiries/partnership-inquiries.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -40,6 +42,8 @@ import { UsersModule } from './modules/users/users.module';
     LeadsInternshipModule,
     TeamsModule,
     TrusteesModule,
+    FundraisingCampaignsModule,
+    PartnershipInquiriesModule,
     UsersModule,
     AuthModule,
 
