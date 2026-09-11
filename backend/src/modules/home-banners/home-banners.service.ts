@@ -37,7 +37,7 @@ export class HomeBannersService {
       .createQueryBuilder('entity')
       .orderBy('entity.displayOrder', 'ASC')
       .addOrderBy('entity.createdAt', 'DESC');
-    applyDeletedFilter(qb, query.includeDeleted);
+    applyDeletedFilter(qb, query);
 
     const [data, total] = await qb
       .skip((page - 1) * limit)
@@ -45,6 +45,12 @@ export class HomeBannersService {
       .getManyAndCount();
 
     return buildPaginatedResult(data, total, page, limit);
+  }
+
+  async findDeleted(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResult<HomeBanner>> {
+    return this.findAll({ ...query, includeDeleted: true, onlyDeleted: true });
   }
 
   async findActive(): Promise<HomeBanner[]> {

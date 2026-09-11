@@ -69,7 +69,7 @@ export class ProjectsService {
       .createQueryBuilder('entity')
       .orderBy('entity.projectDate', 'DESC', 'NULLS LAST')
       .addOrderBy('entity.createdAt', 'DESC');
-    applyDeletedFilter(qb, query.includeDeleted);
+    applyDeletedFilter(qb, query);
 
     if (query.status) {
       qb.andWhere('entity.status = :status', { status: query.status });
@@ -88,6 +88,12 @@ export class ProjectsService {
       .getManyAndCount();
 
     return buildPaginatedResult(data, total, page, limit);
+  }
+
+  async findDeleted(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResult<Project>> {
+    return this.findAll({ ...query, includeDeleted: true, onlyDeleted: true });
   }
 
   async findPublished(

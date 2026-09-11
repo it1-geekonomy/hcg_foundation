@@ -73,6 +73,29 @@ export class HomeBannersController {
     };
   }
 
+  @Get('deleted')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List recently deleted home banners (CMS trash)',
+    description:
+      'Soft-deleted banners only, newest first. Restore with POST /home-banners/:id/restore.',
+  })
+  @ApiOkResponse({ description: 'Paginated trash list' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async findDeleted(@Query() query: PaginationQueryDto) {
+    const result = await this.service.findDeleted(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message:
+        result.meta.total === 0
+          ? 'No deleted home banners found'
+          : 'Deleted home banners fetched successfully',
+      ...result,
+    };
+  }
+
   @Public()
   @Get('active')
   @ApiOperation({

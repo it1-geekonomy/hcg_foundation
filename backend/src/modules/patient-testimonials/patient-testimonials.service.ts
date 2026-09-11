@@ -80,7 +80,7 @@ export class PatientTestimonialsService {
     const qb = this.repo
       .createQueryBuilder('entity')
       .orderBy('entity.createdAt', 'DESC');
-    applyDeletedFilter(qb, query.includeDeleted);
+    applyDeletedFilter(qb, query);
 
     if (query.status) {
       qb.andWhere('entity.status = :status', { status: query.status });
@@ -99,6 +99,12 @@ export class PatientTestimonialsService {
       .getManyAndCount();
 
     return buildPaginatedResult(data, total, page, limit);
+  }
+
+  async findDeleted(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResult<PatientTestimonial>> {
+    return this.findAll({ ...query, includeDeleted: true, onlyDeleted: true });
   }
 
   async findPublished(

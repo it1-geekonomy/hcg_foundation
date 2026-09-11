@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrivacyPolicyModule } from './modules/privacy-policy/privacy-policy.module';
 import { AwardsModule } from './modules/awards/awards.module';
+import { RecentlyDeletedModule } from './modules/recently-deleted/recently-deleted.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import configuration from './config/configuration';
@@ -59,6 +60,7 @@ import { ImpactVideosModule } from './modules/impact-videos/impact-videos.module
     HomeBannersModule,
     TermsAndConditionsModule,
     AwardsModule,
+    RecentlyDeletedModule,
 
     ChatbotModule,
   ],

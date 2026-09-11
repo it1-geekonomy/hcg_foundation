@@ -39,7 +39,7 @@ export class PartnershipInquiriesService {
     const qb = this.repo
       .createQueryBuilder('inquiry')
       .orderBy('inquiry.createdAt', 'DESC');
-    applyDeletedFilter(qb, query.includeDeleted);
+    applyDeletedFilter(qb, query, 'inquiry');
 
     if (query.status) {
       qb.andWhere('inquiry.status = :status', { status: query.status });
@@ -58,6 +58,12 @@ export class PartnershipInquiriesService {
       .getManyAndCount();
 
     return buildPaginatedResult(data, total, page, limit);
+  }
+
+  async findDeleted(
+    query: ListPartnershipInquiriesQueryDto,
+  ): Promise<PaginatedResult<PartnershipInquiry>> {
+    return this.findAll({ ...query, includeDeleted: true, onlyDeleted: true });
   }
 
   async findOne(id: string): Promise<PartnershipInquiry> {

@@ -50,4 +50,13 @@ export class ListFundraisingCampaignsQueryDto {
   @Transform(({ value }) => value === true || value === 'true')
   @IsBoolean()
   includeDeleted?: boolean;
+
+  @ApiPropertyOptional({
+    description:
+      'CMS only. When true, list only soft-deleted rows (Recently Deleted), newest first.',
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  onlyDeleted?: boolean;
 }

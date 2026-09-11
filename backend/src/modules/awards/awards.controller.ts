@@ -92,6 +92,29 @@ export class AwardsController {
     };
   }
 
+  @Get('deleted')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List recently deleted awards (CMS trash)',
+    description:
+      'Soft-deleted awards only, newest first. Restore with POST /awards/:id/restore.',
+  })
+  @ApiOkResponse({ description: 'Paginated trash list' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async findDeleted(@Query() query: PaginationQueryDto) {
+    const result = await this.service.findDeleted(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message:
+        result.meta.total === 0
+          ? 'No deleted awards found'
+          : 'Deleted awards fetched successfully',
+      ...result,
+    };
+  }
+
   @Public()
   @Get('published')
   @ApiOperation({

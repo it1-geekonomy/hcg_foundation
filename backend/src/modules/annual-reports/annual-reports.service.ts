@@ -83,7 +83,7 @@ export class AnnualReportsService {
       .createQueryBuilder('entity')
       .orderBy('entity.reportYear', 'DESC', 'NULLS LAST')
       .addOrderBy('entity.createdAt', 'DESC');
-    applyDeletedFilter(qb, query.includeDeleted);
+    applyDeletedFilter(qb, query);
 
     if (query.status) {
       qb.andWhere('entity.status = :status', { status: query.status });
@@ -108,6 +108,12 @@ export class AnnualReportsService {
       .getManyAndCount();
 
     return buildPaginatedResult(data, total, page, limit);
+  }
+
+  async findDeleted(
+    query: AnnualReportsQueryDto,
+  ): Promise<PaginatedResult<AnnualReport>> {
+    return this.findAll({ ...query, includeDeleted: true, onlyDeleted: true });
   }
 
   async findPublished(

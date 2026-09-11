@@ -100,6 +100,29 @@ export class PatientTestimonialsController {
     };
   }
 
+  @Get('deleted')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List recently deleted patient testimonials (CMS trash)',
+    description:
+      'Soft-deleted testimonials only, newest first. Restore with POST /patient-testimonials/:id/restore.',
+  })
+  @ApiOkResponse({ description: 'Paginated trash list' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async findDeleted(@Query() query: PaginationQueryDto) {
+    const result = await this.service.findDeleted(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message:
+        result.meta.total === 0
+          ? 'No deleted patient testimonials found'
+          : 'Deleted patient testimonials fetched successfully',
+      ...result,
+    };
+  }
+
   @Public()
   @Get('published')
   @ApiOperation({

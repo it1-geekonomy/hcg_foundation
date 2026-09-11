@@ -33,7 +33,7 @@ export class LeadsContactService {
     const qb = this.repo
       .createQueryBuilder('entity')
       .orderBy('entity.createdAt', 'DESC');
-    applyDeletedFilter(qb, query.includeDeleted);
+    applyDeletedFilter(qb, query);
 
     if (query.search) {
       qb.andWhere(
@@ -48,6 +48,12 @@ export class LeadsContactService {
       .getManyAndCount();
 
     return buildPaginatedResult(data, total, page, limit);
+  }
+
+  async findDeleted(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResult<LeadsContact>> {
+    return this.findAll({ ...query, includeDeleted: true, onlyDeleted: true });
   }
 
   async findOne(id: string): Promise<LeadsContact> {

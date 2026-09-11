@@ -69,7 +69,7 @@ export class EventsService {
       .createQueryBuilder('entity')
       .orderBy('entity.eventDate', 'DESC', 'NULLS LAST')
       .addOrderBy('entity.createdAt', 'DESC');
-    applyDeletedFilter(qb, query.includeDeleted);
+    applyDeletedFilter(qb, query);
 
     if (query.status) {
       qb.andWhere('entity.status = :status', { status: query.status });
@@ -88,6 +88,10 @@ export class EventsService {
       .getManyAndCount();
 
     return buildPaginatedResult(data, total, page, limit);
+  }
+
+  async findDeleted(query: PaginationQueryDto): Promise<PaginatedResult<Event>> {
+    return this.findAll({ ...query, includeDeleted: true, onlyDeleted: true });
   }
 
   async findPublished(

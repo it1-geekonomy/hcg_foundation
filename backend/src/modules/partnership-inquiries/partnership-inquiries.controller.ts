@@ -75,6 +75,29 @@ export class PartnershipInquiriesController {
     };
   }
 
+  @Get('deleted')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List recently deleted partnership inquiries (CMS trash)',
+    description:
+      'Soft-deleted inquiries only, newest first. Restore with POST /partnership-inquiries/:id/restore.',
+  })
+  @ApiOkResponse({ description: 'Paginated trash list' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async findDeleted(@Query() query: ListPartnershipInquiriesQueryDto) {
+    const result = await this.service.findDeleted(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message:
+        result.meta.total === 0
+          ? 'No deleted partnership inquiries found'
+          : 'Deleted partnership inquiries fetched successfully',
+      ...result,
+    };
+  }
+
   @Get(':id')
   @ApiBearerAuth()
   @ApiOperation({

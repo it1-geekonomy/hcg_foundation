@@ -69,6 +69,29 @@ export class LeadsInternshipController {
     };
   }
 
+  @Get('deleted')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'List recently deleted internship leads (CMS trash)',
+    description:
+      'Soft-deleted leads only, newest first. Restore with POST /leads-internship/:id/restore.',
+  })
+  @ApiOkResponse({ description: 'Paginated trash list' })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async findDeleted(@Query() query: PaginationQueryDto) {
+    const result = await this.service.findDeleted(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message:
+        result.meta.total === 0
+          ? 'No deleted internship leads found'
+          : 'Deleted internship leads fetched successfully',
+      ...result,
+    };
+  }
+
   @Get(':id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get internship lead by id (CMS)' })
