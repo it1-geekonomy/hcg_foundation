@@ -117,23 +117,6 @@ export class TrusteesController {
     };
   }
 
-  @Public()
-  @Get('published/slug/:slug')
-  @ApiOperation({
-    summary: 'Get published trustee by slug (website)',
-    description:
-      'Public detail page. Use slug in the URL, e.g. /about-us/trustees/mrs-jane-doe',
-  })
-  @ApiOkResponse({ type: Trustee })
-  async findPublishedBySlug(@Param('slug') slug: string) {
-    const data = await this.service.findPublishedBySlug(slug);
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Published trustee fetched successfully',
-      data,
-    };
-  }
-
   @Get(':id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get trustee by id (CMS, any status)' })

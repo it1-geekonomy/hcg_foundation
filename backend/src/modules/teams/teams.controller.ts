@@ -113,23 +113,6 @@ export class TeamsController {
     };
   }
 
-  @Public()
-  @Get('published/slug/:slug')
-  @ApiOperation({
-    summary: 'Get published team member by slug (website)',
-    description:
-      'Public detail page. Use slug in the URL, e.g. /about-us/team/dr-john-smith',
-  })
-  @ApiOkResponse({ type: Team })
-  async findPublishedBySlug(@Param('slug') slug: string) {
-    const data = await this.service.findPublishedBySlug(slug);
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Published team member fetched successfully',
-      data,
-    };
-  }
-
   @Get(':id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get team member by id (CMS, any status)' })

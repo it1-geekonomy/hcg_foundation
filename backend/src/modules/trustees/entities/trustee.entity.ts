@@ -8,10 +8,6 @@ export class Trustee extends SeoContentEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
   title: string;
 
-  @Index()
-  @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
-  slug: string;
-
   @Column({ type: 'varchar', length: 255, nullable: true })
   designation?: string;
 
