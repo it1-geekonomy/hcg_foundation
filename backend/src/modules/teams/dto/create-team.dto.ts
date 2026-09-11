@@ -10,12 +10,6 @@ export class CreateTeamDto extends SeoFieldsDto {
   @MaxLength(255)
   title: string;
 
-  @ApiProperty({ example: 'dr-john-smith' })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  slug: string;
-
   @ApiPropertyOptional({ example: 'Senior Oncologist' })
   @IsOptional()
   @IsString()

@@ -10,12 +10,6 @@ export class CreateTrusteeDto extends SeoFieldsDto {
   @MaxLength(255)
   title: string;
 
-  @ApiProperty({ example: 'mrs-jane-doe' })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(255)
-  slug: string;
-
   @ApiPropertyOptional({ example: 'Board Member' })
   @IsOptional()
   @IsString()

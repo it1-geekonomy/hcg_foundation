@@ -43,7 +43,7 @@ export class TrusteesService {
         trusteeImage,
         status: dto.status ?? ContentStatus.DRAFT,
       });
-      return await this.saveOrThrow(entity, dto.slug);
+      return await this.repo.save(entity);
     } catch (err) {
       await this.cdn.delete(trusteeImage);
       throw err;
@@ -64,7 +64,7 @@ export class TrusteesService {
 
     if (query.search) {
       qb.andWhere(
-        '(entity.title ILIKE :search OR entity.slug ILIKE :search OR entity.designation ILIKE :search OR entity.shortDescription ILIKE :search)',
+        '(entity.title ILIKE :search OR entity.designation ILIKE :search OR entity.shortDescription ILIKE :search)',
         { search: `%${query.search}%` },
       );
     }
@@ -93,18 +93,6 @@ export class TrusteesService {
     return entity;
   }
 
-  async findPublishedBySlug(slug: string): Promise<Trustee> {
-    const entity = await this.repo.findOne({
-      where: { slug, status: ContentStatus.PUBLISHED },
-    });
-    if (!entity) {
-      throw new NotFoundException(
-        `Published trustee not found for slug "${slug}".`,
-      );
-    }
-    return entity;
-  }
-
   async update(
     id: string,
     dto: UpdateTrusteeDto,
@@ -118,37 +106,12 @@ export class TrusteesService {
       'trustees',
     );
     entity.trusteeImage = newTrusteeImage ?? undefined;
-    return this.saveOrThrow(entity, dto.slug ?? entity.slug);
+    return await this.repo.save(entity);
   }
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
     await this.cdn.delete(entity.trusteeImage);
     await this.repo.remove(entity);
-  }
-
-  private async saveOrThrow(entity: Trustee, slug?: string): Promise<Trustee> {
-    try {
-      return await this.repo.save(entity);
-    } catch (err) {
-      if (this.isUniqueViolation(err)) {
-        throw new ConflictException(
-          slug
-            ? `A trustee with slug ${slug} already exists. Choose a different slug.`
-            : 'A trustee with this slug already exists. Choose a different slug.',
-        );
-      }
-      throw err;
-    }
-  }
-
-  private isUniqueViolation(err: unknown): boolean {
-    return (
-      err instanceof QueryFailedError &&
-      typeof err === 'object' &&
-      err !== null &&
-      'code' in err &&
-      (err as { code?: string }).code === '23505'
-    );
   }
 }
