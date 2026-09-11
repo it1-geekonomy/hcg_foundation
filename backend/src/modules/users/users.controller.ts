@@ -17,7 +17,6 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
-  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -113,13 +112,17 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Soft-delete user by id',
     description: 'Sets deletedAt. The user can no longer log in. Email/username can be reused.',
   })
-  @ApiNoContentResponse()
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.remove(id);
+  @ApiOkResponse({ description: 'User deleted successfully' })
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    await this.service.remove(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'User deleted successfully',
+    };
   }
 }
