@@ -38,7 +38,7 @@ export default function LegalPageViewPage({
       setLoading(true);
       setError(null);
       try {
-        const res = await cmsApi.getLegalPage(section.pageType, id);
+        const res = await cmsApi.getLegalPage(section.apiPath, id);
         if (!cancelled) setPage(res.data);
       } catch (err) {
         if (!cancelled) {
@@ -55,7 +55,7 @@ export default function LegalPageViewPage({
     return () => {
       cancelled = true;
     };
-  }, [id, section.pageType]);
+  }, [id, section.apiPath]);
 
   const onDelete = async () => {
     if (!page) return;
@@ -68,7 +68,7 @@ export default function LegalPageViewPage({
     if (!ok) return;
     setBusy(true);
     try {
-      const res = await cmsApi.deleteLegalPage(section.pageType, page.id);
+      const res = await cmsApi.deleteLegalPage(section.apiPath, page.id);
       cmsToast.success(
         res?.message || `${section.label} deleted successfully`
       );
@@ -85,13 +85,13 @@ export default function LegalPageViewPage({
     if (!page) return;
     const ok = await cmsConfirm({
       title: `Restore ${section.singular}?`,
-      description: `“${page.title}” will be restored and show again in All entries.`,
+      description: `“${page.title}” will be restored and show again in ${section.activeListLabel}.`,
       confirmLabel: "Restore",
     });
     if (!ok) return;
     setBusy(true);
     try {
-      const res = await cmsApi.restoreLegalPage(section.pageType, page.id);
+      const res = await cmsApi.restoreLegalPage(section.apiPath, page.id);
       cmsToast.success(
         res.message || `${section.label} restored successfully`
       );

@@ -72,12 +72,12 @@ export default function LegalPagesListPage({
     try {
       const res =
         tab === "deleted"
-          ? await cmsApi.listDeletedLegalPages(section.pageType, {
+          ? await cmsApi.listDeletedLegalPages(section.apiPath, {
               page,
               limit: PAGE_SIZE,
               search: search || undefined,
             })
-          : await cmsApi.listLegalPages(section.pageType, {
+          : await cmsApi.listLegalPages(section.apiPath, {
               page,
               limit: PAGE_SIZE,
               search: search || undefined,
@@ -93,7 +93,7 @@ export default function LegalPagesListPage({
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter, tab, section.pageType, section.label]);
+  }, [page, search, statusFilter, tab, section.apiPath, section.label]);
 
   useEffect(() => {
     void load();
@@ -116,7 +116,7 @@ export default function LegalPagesListPage({
     });
     if (!ok) return;
     try {
-      const res = await cmsApi.deleteLegalPage(section.pageType, id);
+      const res = await cmsApi.deleteLegalPage(section.apiPath, id);
       cmsToast.success(
         res?.message || `${section.label} deleted successfully`
       );
@@ -131,13 +131,13 @@ export default function LegalPagesListPage({
   const onRestore = async (id: string, title: string) => {
     const ok = await cmsConfirm({
       title: `Restore ${section.singular}?`,
-      description: `“${title}” will be restored and show again in All entries.`,
+      description: `“${title}” will be restored and show again in ${section.activeListLabel}.`,
       confirmLabel: "Restore",
     });
     if (!ok) return;
     setRestoringId(id);
     try {
-      const res = await cmsApi.restoreLegalPage(section.pageType, id);
+      const res = await cmsApi.restoreLegalPage(section.apiPath, id);
       cmsToast.success(
         res.message || `${section.label} restored successfully`
       );
@@ -185,7 +185,7 @@ export default function LegalPagesListPage({
               : "text-[#5C5C5C] hover:text-[#212121]"
           }`}
         >
-          All entries
+          {section.activeListLabel}
         </button>
         <button
           type="button"

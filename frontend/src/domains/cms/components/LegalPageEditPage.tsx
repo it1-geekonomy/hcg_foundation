@@ -34,7 +34,7 @@ export default function LegalPageEditPage({
       setLoading(true);
       setError(null);
       try {
-        const res = await cmsApi.getLegalPage(section.pageType, id);
+        const res = await cmsApi.getLegalPage(section.apiPath, id);
         if (!cancelled) setForm(legalPageToFormValues(res.data));
       } catch (err) {
         if (!cancelled) {
@@ -51,7 +51,7 @@ export default function LegalPageEditPage({
     return () => {
       cancelled = true;
     };
-  }, [id, section.pageType]);
+  }, [id, section.apiPath]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +60,7 @@ export default function LegalPageEditPage({
     setError(null);
     try {
       const res = await cmsApi.updateLegalPage(
-        section.pageType,
+        section.apiPath,
         id,
         formValuesToPayload(form)
       );
