@@ -7,7 +7,6 @@ import type {
   ContentStatus,
   CreateLegalPagePayload,
   LegalPage,
-  LegalPageType,
 } from "@/domains/cms/lib/types";
 import { CmsFormField } from "./CmsFormField";
 import { SeoFieldsSection } from "./SeoFieldsSection";
@@ -23,7 +22,6 @@ const CmsRichTextEditor = dynamic(() => import("./CmsRichTextEditor"), {
 
 export type LegalPageFormValues = {
   title: string;
-  slug: string;
   content: string;
   status: ContentStatus;
   metaTitle: string;
@@ -32,11 +30,10 @@ export type LegalPageFormValues = {
 };
 
 export function emptyLegalPageForm(
-  defaults?: Partial<Pick<LegalPageFormValues, "title" | "slug">>
+  defaults?: Partial<Pick<LegalPageFormValues, "title">>
 ): LegalPageFormValues {
   return {
     title: defaults?.title ?? "",
-    slug: defaults?.slug ?? "",
     content: "",
     status: "draft",
     metaTitle: "",
@@ -45,19 +42,9 @@ export function emptyLegalPageForm(
   };
 }
 
-export function slugifyTitle(title: string) {
-  return title
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 255);
-}
-
 export function legalPageToFormValues(page: LegalPage): LegalPageFormValues {
   return {
     title: page.title ?? "",
-    slug: page.slug ?? "",
     content: page.content ?? "",
     status: page.status ?? "draft",
     metaTitle: page.metaTitle ?? "",
@@ -67,19 +54,13 @@ export function legalPageToFormValues(page: LegalPage): LegalPageFormValues {
 }
 
 export function formValuesToPayload(
-  form: LegalPageFormValues,
-  pageType: LegalPageType
+  form: LegalPageFormValues
 ): CreateLegalPagePayload {
-  const hasContent = form.content
-    .replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .trim();
+  const content = form.content.trim() ? form.content : "";
 
   return {
     title: form.title.trim(),
-    slug: form.slug.trim() || slugifyTitle(form.title),
-    content: hasContent ? form.content : undefined,
-    pageType,
+    content,
     status: form.status,
     metaTitle: form.metaTitle.trim() || undefined,
     metaDescription: form.metaDescription.trim() || undefined,
@@ -94,8 +75,6 @@ type LegalPageFormProps = {
   submitLabel: string;
   saving?: boolean;
   error?: string | null;
-  slugLocked?: boolean;
-  onSlugManualEdit?: () => void;
 };
 
 export default function LegalPageForm({
@@ -105,9 +84,14 @@ export default function LegalPageForm({
   submitLabel,
   saving,
   error,
-  slugLocked,
-  onSlugManualEdit,
 }: LegalPageFormProps) {
+  const hasContent = Boolean(
+    value.content
+      .replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .trim()
+  );
+
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-3xl space-y-5">
       {error ? (
@@ -122,26 +106,7 @@ export default function LegalPageForm({
             id="title"
             required
             value={value.title}
-            onChange={(e) => {
-              const title = e.target.value;
-              onChange({
-                ...value,
-                title,
-                slug: slugLocked ? value.slug : slugifyTitle(title),
-              });
-            }}
-          />
-        </CmsFormField>
-
-        <CmsFormField label="Slug" htmlFor="slug">
-          <Input
-            id="slug"
-            required
-            value={value.slug}
-            onChange={(e) => {
-              onSlugManualEdit?.();
-              onChange({ ...value, slug: e.target.value });
-            }}
+            onChange={(e) => onChange({ ...value, title: e.target.value })}
           />
         </CmsFormField>
 
@@ -184,7 +149,7 @@ export default function LegalPageForm({
 
       <Button
         type="submit"
-        disabled={saving || !value.title.trim() || !value.slug.trim()}
+        disabled={saving || !value.title.trim() || !hasContent}
         className="h-11 w-full bg-[#C45A7A] text-white hover:bg-[#b04e6c] sm:w-auto sm:min-w-[200px]"
       >
         {saving ? "Saving…" : submitLabel}

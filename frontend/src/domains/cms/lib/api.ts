@@ -16,6 +16,7 @@ import type {
   TeamMemberType,
   UpdateLegalPagePayload,
 } from "./types";
+import { legalApiPath } from "./legal-sections";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ||
@@ -319,31 +320,63 @@ export const cmsApi = {
       method: "POST",
     }),
 
-  listLegalPages: (params?: ListQuery) =>
+  listLegalPages: (
+    pageType: LegalPageType,
+    params?: Omit<ListQuery, "pageType" | "onlyDeleted" | "includeDeleted">
+  ) =>
     request<Paginated<LegalPage>>(
-      `/legal-pages${toQuery({ page: 1, limit: 10, ...params })}`
+      `${legalApiPath(pageType)}${toQuery({ page: 1, limit: 20, ...params })}`
     ),
 
-  getLegalPage: (id: string) =>
-    request<ApiEnvelope<LegalPage>>(`/legal-pages/${id}`),
+  listDeletedLegalPages: (
+    pageType: LegalPageType,
+    params?: Omit<ListQuery, "pageType" | "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<LegalPage>>(
+      `${legalApiPath(pageType)}/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
 
-  getPublishedLegalPage: (pageType: LegalPageType) =>
-    request<ApiEnvelope<LegalPage>>(`/legal-pages/published/${pageType}`),
+  getLegalPage: (pageType: LegalPageType, id: string) =>
+    request<ApiEnvelope<LegalPage>>(`${legalApiPath(pageType)}/${id}`),
 
-  createLegalPage: (payload: CreateLegalPagePayload) =>
-    request<ApiEnvelope<LegalPage>>("/legal-pages", {
+  getPublishedLegalPages: (
+    pageType: LegalPageType,
+    params?: Omit<ListQuery, "pageType" | "status">
+  ) =>
+    request<Paginated<LegalPage>>(
+      `${legalApiPath(pageType)}/published${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  createLegalPage: (
+    pageType: LegalPageType,
+    payload: CreateLegalPagePayload
+  ) =>
+    request<ApiEnvelope<LegalPage>>(legalApiPath(pageType), {
       method: "POST",
       body: JSON.stringify(payload),
     }),
 
-  updateLegalPage: (id: string, payload: UpdateLegalPagePayload) =>
-    request<ApiEnvelope<LegalPage>>(`/legal-pages/${id}`, {
+  updateLegalPage: (
+    pageType: LegalPageType,
+    id: string,
+    payload: UpdateLegalPagePayload
+  ) =>
+    request<ApiEnvelope<LegalPage>>(`${legalApiPath(pageType)}/${id}`, {
       method: "PATCH",
       body: JSON.stringify(payload),
     }),
 
-  deleteLegalPage: (id: string) =>
-    request<void>(`/legal-pages/${id}`, { method: "DELETE" }),
+  deleteLegalPage: (pageType: LegalPageType, id: string) =>
+    request<{ message?: string; statusCode?: number }>(
+      `${legalApiPath(pageType)}/${id}`,
+      { method: "DELETE" }
+    ),
+
+  restoreLegalPage: (pageType: LegalPageType, id: string) =>
+    request<ApiEnvelope<LegalPage>>(
+      `${legalApiPath(pageType)}/${id}/restore`,
+      { method: "POST" }
+    ),
 
   listDonors: (params?: ListQuery) =>
     request<Paginated<Donor>>(

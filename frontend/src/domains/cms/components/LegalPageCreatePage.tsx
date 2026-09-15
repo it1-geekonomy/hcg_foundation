@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { cmsApi } from "@/domains/cms/lib/api";
 import type { LegalSectionConfig } from "@/domains/cms/lib/legal-sections";
+import { cmsToast } from "@/domains/cms/lib/toast";
 import LegalPageForm, {
   emptyLegalPageForm,
   formValuesToPayload,
@@ -19,12 +20,8 @@ export default function LegalPageCreatePage({
 }) {
   const router = useRouter();
   const [form, setForm] = useState<LegalPageFormValues>(() =>
-    emptyLegalPageForm({
-      title: section.defaultTitle,
-      slug: section.defaultSlug,
-    })
+    emptyLegalPageForm({ title: section.defaultTitle })
   );
-  const [slugLocked, setSlugLocked] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,11 +31,18 @@ export default function LegalPageCreatePage({
     setError(null);
     try {
       const res = await cmsApi.createLegalPage(
-        formValuesToPayload(form, section.pageType)
+        section.pageType,
+        formValuesToPayload(form)
+      );
+      cmsToast.success(
+        res.message || `${section.label} created successfully`
       );
       router.push(`${section.basePath}/${res.data.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create");
+      const message =
+        err instanceof Error ? err.message : "Failed to create";
+      setError(message);
+      cmsToast.error(message);
       setSaving(false);
     }
   };
@@ -69,8 +73,6 @@ export default function LegalPageCreatePage({
         submitLabel={`Create ${section.singular}`}
         saving={saving}
         error={error}
-        slugLocked={slugLocked}
-        onSlugManualEdit={() => setSlugLocked(true)}
       />
     </div>
   );
