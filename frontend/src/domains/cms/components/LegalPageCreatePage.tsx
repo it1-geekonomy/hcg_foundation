@@ -31,7 +31,7 @@ export default function LegalPageCreatePage({
     setError(null);
     try {
       const res = await cmsApi.createLegalPage(
-        section.pageType,
+        section.apiPath,
         formValuesToPayload(form)
       );
       cmsToast.success(

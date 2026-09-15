@@ -2,6 +2,8 @@ import type {
   ApiEnvelope,
   AnnualReport,
   AnnualReportFields,
+  Award,
+  AwardFields,
   CreateLegalPagePayload,
   CreateUserPayload,
   LegalPage,
@@ -16,11 +18,12 @@ import type {
   TeamMemberType,
   UpdateLegalPagePayload,
 } from "./types";
-import { legalApiPath } from "./legal-sections";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ||
   "http://localhost:6060/api";
+
+export type LegalApiPath = "/privacy-policy" | "/terms-and-conditions";
 
 export type ListQuery = {
   page?: number;
@@ -209,6 +212,43 @@ function teamPatchFormData(
   return fd;
 }
 
+function awardFormData(fields: AwardFields, awardImageFile?: File | null) {
+  const fd = new FormData();
+  fd.append("title", fields.title.trim());
+  if (fields.year?.trim()) fd.append("year", fields.year.trim());
+  if (fields.description?.trim()) {
+    fd.append("description", fields.description.trim());
+  }
+  if (fields.displayOrder?.trim()) {
+    fd.append("displayOrder", fields.displayOrder.trim());
+  }
+  if (fields.status) fd.append("status", fields.status);
+  if (awardImageFile instanceof File) {
+    fd.append("awardImage", awardImageFile, awardImageFile.name);
+  }
+  return fd;
+}
+
+function awardPatchFormData(
+  fields: Partial<AwardFields>,
+  awardImageFile?: File | null
+) {
+  const fd = new FormData();
+  const append = (key: string, value?: string | null) => {
+    if (value === undefined) return;
+    fd.append(key, value ?? "");
+  };
+  append("title", fields.title);
+  append("year", fields.year);
+  append("description", fields.description);
+  append("displayOrder", fields.displayOrder);
+  append("status", fields.status);
+  if (awardImageFile instanceof File) {
+    fd.append("awardImage", awardImageFile, awardImageFile.name);
+  }
+  return fd;
+}
+
 export const cmsApi = {
   listTeams: (params?: ListQuery) =>
     request<Paginated<Team>>(`/teams${toQuery({ page: 1, limit: 20, ...params })}`),
@@ -248,6 +288,63 @@ export const cmsApi = {
 
   restoreTeam: (id: string) =>
     request<ApiEnvelope<Team>>(`/teams/${id}/restore`, {
+      method: "POST",
+    }),
+
+  listAwards: (params?: ListQuery) =>
+    request<Paginated<Award>>(
+      `/awards${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedAwards: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<Award>>(
+      `/awards/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getAward: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<Award>>(`/awards/${id}`);
+    } catch (err) {
+      const deleted = await request<Paginated<Award>>(
+        `/awards/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  createAward: (fields: AwardFields, awardImageFile?: File | null) =>
+    requestFormData<ApiEnvelope<Award>>(
+      "/awards",
+      "POST",
+      awardFormData(fields, awardImageFile)
+    ),
+
+  updateAward: (
+    id: string,
+    fields: Partial<AwardFields>,
+    awardImageFile?: File | null
+  ) =>
+    requestFormData<ApiEnvelope<Award>>(
+      `/awards/${id}`,
+      "PATCH",
+      awardPatchFormData(fields, awardImageFile)
+    ),
+
+  deleteAward: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(`/awards/${id}`, {
+      method: "DELETE",
+    }),
+
+  restoreAward: (id: string) =>
+    request<ApiEnvelope<Award>>(`/awards/${id}/restore`, {
       method: "POST",
     }),
 
@@ -321,62 +418,75 @@ export const cmsApi = {
     }),
 
   listLegalPages: (
-    pageType: LegalPageType,
+    apiPath: LegalApiPath,
     params?: Omit<ListQuery, "pageType" | "onlyDeleted" | "includeDeleted">
   ) =>
     request<Paginated<LegalPage>>(
-      `${legalApiPath(pageType)}${toQuery({ page: 1, limit: 20, ...params })}`
+      `${apiPath}${toQuery({ page: 1, limit: 20, ...params })}`
     ),
 
   listDeletedLegalPages: (
-    pageType: LegalPageType,
-    params?: Omit<ListQuery, "pageType" | "onlyDeleted" | "includeDeleted" | "status">
+    apiPath: LegalApiPath,
+    params?: Omit<
+      ListQuery,
+      "pageType" | "onlyDeleted" | "includeDeleted" | "status"
+    >
   ) =>
     request<Paginated<LegalPage>>(
-      `${legalApiPath(pageType)}/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+      `${apiPath}/deleted${toQuery({ page: 1, limit: 20, ...params })}`
     ),
 
-  getLegalPage: (pageType: LegalPageType, id: string) =>
-    request<ApiEnvelope<LegalPage>>(`${legalApiPath(pageType)}/${id}`),
+  getLegalPage: async (apiPath: LegalApiPath, id: string) => {
+    try {
+      return await request<ApiEnvelope<LegalPage>>(`${apiPath}/${id}`);
+    } catch (err) {
+      // Soft-deleted rows are hidden from GET :id — resolve via trash list (frontend-only)
+      const deleted = await request<Paginated<LegalPage>>(
+        `${apiPath}/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
 
   getPublishedLegalPages: (
-    pageType: LegalPageType,
+    apiPath: LegalApiPath,
     params?: Omit<ListQuery, "pageType" | "status">
   ) =>
     request<Paginated<LegalPage>>(
-      `${legalApiPath(pageType)}/published${toQuery({ page: 1, limit: 20, ...params })}`
+      `${apiPath}/published${toQuery({ page: 1, limit: 20, ...params })}`
     ),
 
-  createLegalPage: (
-    pageType: LegalPageType,
-    payload: CreateLegalPagePayload
-  ) =>
-    request<ApiEnvelope<LegalPage>>(legalApiPath(pageType), {
+  createLegalPage: (apiPath: LegalApiPath, payload: CreateLegalPagePayload) =>
+    request<ApiEnvelope<LegalPage>>(apiPath, {
       method: "POST",
       body: JSON.stringify(payload),
     }),
 
   updateLegalPage: (
-    pageType: LegalPageType,
+    apiPath: LegalApiPath,
     id: string,
     payload: UpdateLegalPagePayload
   ) =>
-    request<ApiEnvelope<LegalPage>>(`${legalApiPath(pageType)}/${id}`, {
+    request<ApiEnvelope<LegalPage>>(`${apiPath}/${id}`, {
       method: "PATCH",
       body: JSON.stringify(payload),
     }),
 
-  deleteLegalPage: (pageType: LegalPageType, id: string) =>
-    request<{ message?: string; statusCode?: number }>(
-      `${legalApiPath(pageType)}/${id}`,
-      { method: "DELETE" }
-    ),
+  deleteLegalPage: (apiPath: LegalApiPath, id: string) =>
+    request<{ message?: string; statusCode?: number }>(`${apiPath}/${id}`, {
+      method: "DELETE",
+    }),
 
-  restoreLegalPage: (pageType: LegalPageType, id: string) =>
-    request<ApiEnvelope<LegalPage>>(
-      `${legalApiPath(pageType)}/${id}/restore`,
-      { method: "POST" }
-    ),
+  restoreLegalPage: (apiPath: LegalApiPath, id: string) =>
+    request<ApiEnvelope<LegalPage>>(`${apiPath}/${id}/restore`, {
+      method: "POST",
+    }),
 
   listDonors: (params?: ListQuery) =>
     request<Paginated<Donor>>(

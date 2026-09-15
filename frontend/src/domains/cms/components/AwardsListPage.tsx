@@ -22,9 +22,8 @@ import {
 } from "@/shared/ui/table";
 import { cmsApi } from "@/domains/cms/lib/api";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
-import type { LegalSectionConfig } from "@/domains/cms/lib/legal-sections";
 import { cmsToast } from "@/domains/cms/lib/toast";
-import type { ContentStatus, LegalPage } from "@/domains/cms/lib/types";
+import type { Award, ContentStatus } from "@/domains/cms/lib/types";
 import { CmsPagination, type PaginationMeta } from "./CmsPagination";
 
 const PAGE_SIZE = 20;
@@ -51,13 +50,9 @@ function formatDeletedAt(value?: string | null) {
   });
 }
 
-export default function LegalPagesListPage({
-  section,
-}: {
-  section: LegalSectionConfig;
-}) {
+export default function AwardsListPage() {
   const [tab, setTab] = useState<ListTab>("active");
-  const [pages, setPages] = useState<LegalPage[]>([]);
+  const [awards, setAwards] = useState<Award[]>([]);
   const [meta, setMeta] = useState<PaginationMeta>(emptyMeta);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -72,28 +67,28 @@ export default function LegalPagesListPage({
     try {
       const res =
         tab === "deleted"
-          ? await cmsApi.listDeletedLegalPages(section.apiPath, {
+          ? await cmsApi.listDeletedAwards({
               page,
               limit: PAGE_SIZE,
               search: search || undefined,
             })
-          : await cmsApi.listLegalPages(section.apiPath, {
+          : await cmsApi.listAwards({
               page,
               limit: PAGE_SIZE,
               search: search || undefined,
               status: statusFilter || undefined,
             });
-      setPages(res.data ?? []);
+      setAwards(res.data ?? []);
       setMeta(res.meta ?? emptyMeta);
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : `Failed to load ${section.label}`;
+        err instanceof Error ? err.message : "Failed to load awards";
       setError(message);
       cmsToast.error(message);
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter, tab, section.apiPath, section.label]);
+  }, [page, search, statusFilter, tab]);
 
   useEffect(() => {
     void load();
@@ -116,10 +111,8 @@ export default function LegalPagesListPage({
     });
     if (!ok) return;
     try {
-      const res = await cmsApi.deleteLegalPage(section.apiPath, id);
-      cmsToast.success(
-        res?.message || `${section.label} deleted successfully`
-      );
+      const res = await cmsApi.deleteAward(id);
+      cmsToast.success(res?.message || "Award deleted successfully");
       await load();
     } catch (err) {
       cmsToast.error(
@@ -130,17 +123,15 @@ export default function LegalPagesListPage({
 
   const onRestore = async (id: string, title: string) => {
     const ok = await cmsConfirm({
-      title: `Restore ${section.singular}?`,
-      description: `“${title}” will be restored and show again in ${section.activeListLabel}.`,
+      title: "Restore award?",
+      description: `“${title}” will be restored and show again in All awards.`,
       confirmLabel: "Restore",
     });
     if (!ok) return;
     setRestoringId(id);
     try {
-      const res = await cmsApi.restoreLegalPage(section.apiPath, id);
-      cmsToast.success(
-        res.message || `${section.label} restored successfully`
-      );
+      const res = await cmsApi.restoreAward(id);
+      cmsToast.success(res.message || "Award restored successfully");
       await load();
     } catch (err) {
       cmsToast.error(
@@ -155,23 +146,16 @@ export default function LegalPagesListPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <p className="max-w-xl font-manrope text-sm text-muted-foreground">
-          Manage {section.label.toLowerCase()}. Soft-deleted items stay in
-          Recently Deleted until you restore them. Published versions show on{" "}
-          <Link
-            href={section.publicPath}
-            target="_blank"
-            className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
-          >
-            {section.publicPath}
-          </Link>
-          .
+          Manage awards. Soft-deleted items stay in Recently Deleted until you
+          restore them.
         </p>
+
         <Link
-          href={`${section.basePath}/new`}
+          href="/admin/awards/new"
           className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[#C45A7A] px-4 font-manrope text-sm font-semibold text-white transition hover:bg-[#b04e6c]"
         >
           <Plus className="size-4" />
-          Add {section.singular}
+          Add award
         </Link>
       </div>
 
@@ -185,7 +169,7 @@ export default function LegalPagesListPage({
               : "text-[#5C5C5C] hover:text-[#212121]"
           }`}
         >
-          {section.activeListLabel}
+          All awards
         </button>
         <button
           type="button"
@@ -209,18 +193,18 @@ export default function LegalPagesListPage({
       <Card>
         <CardHeader>
           <CardTitle>
-            {tab === "deleted" ? "Recently deleted" : section.label}
+            {tab === "deleted" ? "Recently deleted" : "All awards"}
           </CardTitle>
           <CardDescription>
             {loading
               ? "Loading…"
-              : `${meta.total} ${tab === "deleted" ? "deleted" : "total"} · page ${meta.page} of ${meta.totalPages}`}
+              : `${meta.total} total · page ${meta.page} of ${meta.totalPages}`}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex flex-col gap-2 sm:flex-row">
             <Input
-              placeholder="Search title / content…"
+              placeholder="Search title / description…"
               value={search}
               onChange={(e) => {
                 setPage(1);
@@ -248,25 +232,28 @@ export default function LegalPagesListPage({
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-14">Image</TableHead>
                 <TableHead>Title</TableHead>
-                <TableHead>
-                  {tab === "deleted" ? "Deleted" : "Status"}
-                </TableHead>
-                <TableHead>Updated</TableHead>
-                <TableHead className="w-36 text-right">Actions</TableHead>
+                <TableHead>Year</TableHead>
+                {tab === "deleted" ? (
+                  <TableHead>Deleted at</TableHead>
+                ) : (
+                  <TableHead>Status</TableHead>
+                )}
+                <TableHead className="w-40 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {pages.length === 0 ? (
+              {awards.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-muted-foreground">
+                  <TableCell colSpan={5} className="text-muted-foreground">
                     {tab === "deleted" ? (
-                      "No deleted entries."
+                      "No deleted awards."
                     ) : (
                       <>
-                        No entries yet.{" "}
+                        No awards yet.{" "}
                         <Link
-                          href={`${section.basePath}/new`}
+                          href="/admin/awards/new"
                           className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
                         >
                           Create one
@@ -276,33 +263,41 @@ export default function LegalPagesListPage({
                   </TableCell>
                 </TableRow>
               ) : (
-                pages.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.title}</TableCell>
+                awards.map((award) => (
+                  <TableRow key={award.id}>
+                    <TableCell>
+                      {award.awardImageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={award.awardImageUrl}
+                          alt=""
+                          className="size-10 rounded-lg object-contain ring-1 ring-black/5"
+                        />
+                      ) : (
+                        <div className="size-10 rounded-lg bg-[#F0EEE9] ring-1 ring-black/5" />
+                      )}
+                    </TableCell>
+                    <TableCell className="font-medium">{award.title}</TableCell>
+                    <TableCell>{award.year ?? "—"}</TableCell>
                     <TableCell>
                       {tab === "deleted" ? (
                         <span className="font-manrope text-xs text-[#5C5C5C]">
-                          {formatDeletedAt(item.deletedAt)}
+                          {formatDeletedAt(award.deletedAt)}
                         </span>
                       ) : (
                         <span className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-xs text-[#5C5C5C]">
-                          {item.status}
+                          {award.status}
                         </span>
                       )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {item.updatedAt
-                        ? new Date(item.updatedAt).toLocaleDateString()
-                        : "—"}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-0.5">
                         {tab === "deleted" ? (
                           <>
                             <Link
-                              href={`${section.basePath}/${item.id}`}
+                              href={`/admin/awards/${award.id}`}
                               className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
-                              aria-label={`View ${item.title}`}
+                              aria-label={`View ${award.title}`}
                             >
                               <Eye className="size-4" />
                             </Link>
@@ -310,14 +305,14 @@ export default function LegalPagesListPage({
                               type="button"
                               variant="outline"
                               className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-manrope text-xs font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
-                              disabled={restoringId === item.id}
-                              aria-label={`Restore ${item.title}`}
+                              disabled={restoringId === award.id}
+                              aria-label={`Restore ${award.title}`}
                               onClick={() =>
-                                void onRestore(item.id, item.title)
+                                void onRestore(award.id, award.title)
                               }
                             >
                               <RotateCcw className="size-3.5" />
-                              {restoringId === item.id
+                              {restoringId === award.id
                                 ? "Restoring…"
                                 : "Restore"}
                             </Button>
@@ -325,16 +320,16 @@ export default function LegalPagesListPage({
                         ) : (
                           <>
                             <Link
-                              href={`${section.basePath}/${item.id}`}
+                              href={`/admin/awards/${award.id}`}
                               className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
-                              aria-label={`View ${item.title}`}
+                              aria-label={`View ${award.title}`}
                             >
                               <Eye className="size-4" />
                             </Link>
                             <Link
-                              href={`${section.basePath}/${item.id}/edit`}
+                              href={`/admin/awards/${award.id}/edit`}
                               className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
-                              aria-label={`Edit ${item.title}`}
+                              aria-label={`Edit ${award.title}`}
                             >
                               <Pencil className="size-4" />
                             </Link>
@@ -342,9 +337,9 @@ export default function LegalPagesListPage({
                               type="button"
                               variant="ghost"
                               size="icon-sm"
-                              aria-label={`Delete ${item.title}`}
+                              aria-label={`Delete ${award.title}`}
                               onClick={() =>
-                                void onDelete(item.id, item.title)
+                                void onDelete(award.id, award.title)
                               }
                             >
                               <Trash2 className="size-4 text-destructive" />

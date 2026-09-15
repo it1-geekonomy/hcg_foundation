@@ -6,6 +6,7 @@ export type LegalSectionConfig = {
   basePath: string;
   label: string;
   singular: string;
+  activeListLabel: string;
   publicPath: string;
   defaultTitle: string;
 };
@@ -16,6 +17,7 @@ export const PRIVACY_SECTION: LegalSectionConfig = {
   basePath: "/admin/privacy-policy",
   label: "Privacy Policy",
   singular: "privacy policy",
+  activeListLabel: "All policies",
   publicPath: "/privacy",
   defaultTitle: "Privacy Policy",
 };
@@ -26,12 +28,7 @@ export const TERMS_SECTION: LegalSectionConfig = {
   basePath: "/admin/terms",
   label: "Terms & Conditions",
   singular: "terms & conditions",
+  activeListLabel: "All terms",
   publicPath: "/terms",
   defaultTitle: "Terms & Conditions",
 };
-
-export function legalApiPath(pageType: LegalPageType) {
-  return pageType === "privacy_policy"
-    ? "/privacy-policy"
-    : "/terms-and-conditions";
-}

@@ -5,26 +5,21 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { cmsApi } from "@/domains/cms/lib/api";
-import type { LegalSectionConfig } from "@/domains/cms/lib/legal-sections";
 import { cmsToast } from "@/domains/cms/lib/toast";
-import LegalPageForm, {
-  emptyLegalPageForm,
-  formValuesToPayload,
-  legalPageToFormValues,
-  type LegalPageFormValues,
-} from "./LegalPageForm";
+import AwardForm, {
+  awardToFormValues,
+  emptyAwardForm,
+  getAwardPatch,
+  type AwardFormValues,
+} from "./AwardForm";
 
-export default function LegalPageEditPage({
-  section,
-}: {
-  section: LegalSectionConfig;
-}) {
+export default function AwardEditPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [form, setForm] = useState<LegalPageFormValues>(emptyLegalPageForm);
+  const [form, setForm] = useState<AwardFormValues>(emptyAwardForm);
+  const [initial, setInitial] = useState<AwardFormValues>(emptyAwardForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -32,16 +27,18 @@ export default function LegalPageEditPage({
 
     (async () => {
       setLoading(true);
-      setError(null);
       try {
-        const res = await cmsApi.getLegalPage(section.apiPath, id);
-        if (!cancelled) setForm(legalPageToFormValues(res.data));
+        const res = await cmsApi.getAward(id);
+        if (!cancelled) {
+          const values = awardToFormValues(res.data);
+          setForm(values);
+          setInitial({ ...values });
+        }
       } catch (err) {
         if (!cancelled) {
-          const message =
-            err instanceof Error ? err.message : "Failed to load";
-          setError(message);
-          cmsToast.error(message);
+          cmsToast.error(
+            err instanceof Error ? err.message : "Failed to load"
+          );
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -51,28 +48,27 @@ export default function LegalPageEditPage({
     return () => {
       cancelled = true;
     };
-  }, [id, section.apiPath]);
+  }, [id]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id) return;
+    if (!id || saving) return;
+
+    const patch = getAwardPatch(initial, form);
+    if (!patch.hasChanges) {
+      cmsToast.info("No changes found");
+      return;
+    }
+
     setSaving(true);
-    setError(null);
     try {
-      const res = await cmsApi.updateLegalPage(
-        section.apiPath,
-        id,
-        formValuesToPayload(form)
-      );
-      cmsToast.success(
-        res.message || `${section.label} updated successfully`
-      );
-      router.push(`${section.basePath}/${id}`);
+      const res = await cmsApi.updateAward(id, patch.fields, patch.file);
+      cmsToast.success(res.message || "Award updated successfully");
+      router.push(`/admin/awards/${id}`);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to update";
-      setError(message);
-      cmsToast.error(message);
+      cmsToast.error(
+        err instanceof Error ? err.message : "Failed to update"
+      );
       setSaving(false);
     }
   };
@@ -89,24 +85,26 @@ export default function LegalPageEditPage({
     <div className="space-y-6">
       <div>
         <Link
-          href={`${section.basePath}/${id}`}
+          href={`/admin/awards/${id}`}
           className="mb-3 inline-flex items-center gap-1.5 font-manrope text-sm text-[#5C5C5C] transition hover:text-[#212121]"
         >
           <ArrowLeft className="size-3.5" />
           Back to view
         </Link>
         <h1 className="font-manrope text-2xl font-semibold text-[#212121]">
-          Edit {section.singular}
+          Edit award
         </h1>
+        <p className="mt-1 font-manrope text-sm text-muted-foreground">
+          Save sends only what you changed.
+        </p>
       </div>
 
-      <LegalPageForm
+      <AwardForm
         value={form}
         onChange={setForm}
         onSubmit={onSubmit}
         submitLabel="Save changes"
         saving={saving}
-        error={error}
       />
     </div>
   );
