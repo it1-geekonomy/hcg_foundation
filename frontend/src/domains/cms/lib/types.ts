@@ -61,8 +61,10 @@ export type AnnualReport = SeoFields & {
   slug: string;
   reportYear?: string | null;
   annualReportBanner?: string | null;
+  annualReportMobileBanner?: string | null;
   annualReportFile?: string | null;
   status: ContentStatus;
+  deletedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };

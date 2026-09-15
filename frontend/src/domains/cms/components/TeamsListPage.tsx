@@ -23,6 +23,7 @@ import {
 import { cmsApi } from "@/domains/cms/lib/api";
 import type { ContentStatus, Team } from "@/domains/cms/lib/types";
 import { cmsToast } from "@/domains/cms/lib/toast";
+import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import { CmsPagination, type PaginationMeta } from "./CmsPagination";
 
 const PAGE_SIZE = 20;
@@ -102,7 +103,13 @@ export default function TeamsListPage() {
   };
 
   const onDelete = async (id: string, title: string) => {
-    if (!window.confirm(`Move “${title}” to Recently Deleted?`)) return;
+    const ok = await cmsConfirm({
+      title: "Move to Recently Deleted?",
+      description: `“${title}” will be soft-deleted. You can restore it later from Recently Deleted.`,
+      confirmLabel: "Move to deleted",
+      tone: "danger",
+    });
+    if (!ok) return;
     try {
       const res = await cmsApi.deleteTeam(id);
       cmsToast.success(res?.message || "Team member deleted successfully");
@@ -115,7 +122,12 @@ export default function TeamsListPage() {
   };
 
   const onRestore = async (id: string, title: string) => {
-    if (!window.confirm(`Restore “${title}”?`)) return;
+    const ok = await cmsConfirm({
+      title: "Restore team member?",
+      description: `“${title}” will be restored and show again in All members.`,
+      confirmLabel: "Restore",
+    });
+    if (!ok) return;
     setRestoringId(id);
     try {
       const res = await cmsApi.restoreTeam(id);
@@ -284,9 +296,9 @@ export default function TeamsListPage() {
                           <Button
                             type="button"
                             variant="outline"
-                            className="h-8 gap-1.5 px-2.5"
+                            className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-manrope text-xs font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
                             disabled={restoringId === team.id}
-                            title="Restore"
+                            aria-label={`Restore ${team.title}`}
                             onClick={() => void onRestore(team.id, team.title)}
                           >
                             <RotateCcw className="size-3.5" />

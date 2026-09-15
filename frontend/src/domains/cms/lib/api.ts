@@ -115,19 +115,41 @@ async function requestFormData<T>(
 
 function annualReportFormData(
   fields: AnnualReportFields,
-  files?: { banner?: File | null; file?: File | null }
+  files?: {
+    banner?: File | null;
+    mobileBanner?: File | null;
+    file?: File | null;
+  }
 ) {
   const fd = new FormData();
-  fd.append("title", fields.title);
-  fd.append("slug", fields.slug);
-  if (fields.reportYear?.trim()) fd.append("reportYear", fields.reportYear.trim());
+  fd.append("title", fields.title.trim());
+  fd.append("slug", fields.slug.trim());
+  if (fields.reportYear?.trim()) {
+    fd.append("reportYear", fields.reportYear.trim());
+  }
   if (fields.status) fd.append("status", fields.status);
-  if (fields.metaTitle?.trim()) fd.append("metaTitle", fields.metaTitle.trim());
-  if (fields.metaDescription?.trim())
+  if (fields.metaTitle?.trim()) {
+    fd.append("metaTitle", fields.metaTitle.trim());
+  }
+  if (fields.metaDescription?.trim()) {
     fd.append("metaDescription", fields.metaDescription.trim());
-  if (fields.schemaCode?.trim()) fd.append("schemaCode", fields.schemaCode.trim());
-  if (files?.banner) fd.append("banner", files.banner);
-  if (files?.file) fd.append("file", files.file);
+  }
+  if (fields.schemaCode?.trim()) {
+    fd.append("schemaCode", fields.schemaCode.trim());
+  }
+  if (files?.banner instanceof File) {
+    fd.append("annualReportBanner", files.banner, files.banner.name);
+  }
+  if (files?.mobileBanner instanceof File) {
+    fd.append(
+      "annualReportMobileBanner",
+      files.mobileBanner,
+      files.mobileBanner.name
+    );
+  }
+  if (files?.file instanceof File) {
+    fd.append("annualReportFile", files.file, files.file.name);
+  }
   return fd;
 }
 
@@ -244,7 +266,14 @@ export const cmsApi = {
 
   listAnnualReports: (params?: ListQuery) =>
     request<Paginated<AnnualReport>>(
-      `/annual-reports${toQuery({ page: 1, limit: 10, ...params })}`
+      `/annual-reports${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedAnnualReports: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<AnnualReport>>(
+      `/annual-reports/deleted${toQuery({ page: 1, limit: 20, ...params })}`
     ),
 
   getAnnualReport: (id: string) =>
@@ -252,7 +281,11 @@ export const cmsApi = {
 
   createAnnualReport: (
     fields: AnnualReportFields,
-    files?: { banner?: File | null; file?: File | null }
+    files?: {
+      banner?: File | null;
+      mobileBanner?: File | null;
+      file?: File | null;
+    }
   ) =>
     requestFormData<ApiEnvelope<AnnualReport>>(
       "/annual-reports",
@@ -263,7 +296,11 @@ export const cmsApi = {
   updateAnnualReport: (
     id: string,
     fields: AnnualReportFields,
-    files?: { banner?: File | null; file?: File | null }
+    files?: {
+      banner?: File | null;
+      mobileBanner?: File | null;
+      file?: File | null;
+    }
   ) =>
     requestFormData<ApiEnvelope<AnnualReport>>(
       `/annual-reports/${id}`,
@@ -272,7 +309,15 @@ export const cmsApi = {
     ),
 
   deleteAnnualReport: (id: string) =>
-    request<void>(`/annual-reports/${id}`, { method: "DELETE" }),
+    request<{ message?: string; statusCode?: number }>(
+      `/annual-reports/${id}`,
+      { method: "DELETE" }
+    ),
+
+  restoreAnnualReport: (id: string) =>
+    request<ApiEnvelope<AnnualReport>>(`/annual-reports/${id}/restore`, {
+      method: "POST",
+    }),
 
   listLegalPages: (params?: ListQuery) =>
     request<Paginated<LegalPage>>(

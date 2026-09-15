@@ -14,8 +14,12 @@ type Props = {
  * Compact cover card — full image visible (object-contain), not cropped giant posters.
  */
 export default function AnnualReportCoverTile({ report, onDelete }: Props) {
-  const hasPdf = Boolean(report.annualReportFile);
-  const hasBanner = Boolean(report.annualReportBanner);
+  const hasPdf = Boolean(
+    report.annualReportFile && report.annualReportFile.trim()
+  );
+  const hasBanner = Boolean(
+    report.annualReportBanner && report.annualReportBanner.trim()
+  );
   const year = report.reportYear?.trim();
 
   return (
