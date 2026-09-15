@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
+import { Eye, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import {
@@ -21,11 +21,15 @@ import {
   TableRow,
 } from "@/shared/ui/table";
 import { cmsApi } from "@/domains/cms/lib/api";
+import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import type { LegalSectionConfig } from "@/domains/cms/lib/legal-sections";
+import { cmsToast } from "@/domains/cms/lib/toast";
 import type { ContentStatus, LegalPage } from "@/domains/cms/lib/types";
 import { CmsPagination, type PaginationMeta } from "./CmsPagination";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
+
+type ListTab = "active" | "deleted";
 
 const emptyMeta: PaginationMeta = {
   total: 0,
@@ -34,11 +38,25 @@ const emptyMeta: PaginationMeta = {
   totalPages: 1,
 };
 
+function formatDeletedAt(value?: string | null) {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export default function LegalPagesListPage({
   section,
 }: {
   section: LegalSectionConfig;
 }) {
+  const [tab, setTab] = useState<ListTab>("active");
   const [pages, setPages] = useState<LegalPage[]>([]);
   const [meta, setMeta] = useState<PaginationMeta>(emptyMeta);
   const [page, setPage] = useState(1);
@@ -46,39 +64,90 @@ export default function LegalPagesListPage({
   const [statusFilter, setStatusFilter] = useState<ContentStatus | "">("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [restoringId, setRestoringId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await cmsApi.listLegalPages({
-        page,
-        limit: PAGE_SIZE,
-        search: search || undefined,
-        status: statusFilter || undefined,
-        pageType: section.pageType,
-      });
+      const res =
+        tab === "deleted"
+          ? await cmsApi.listDeletedLegalPages(section.pageType, {
+              page,
+              limit: PAGE_SIZE,
+              search: search || undefined,
+            })
+          : await cmsApi.listLegalPages(section.pageType, {
+              page,
+              limit: PAGE_SIZE,
+              search: search || undefined,
+              status: statusFilter || undefined,
+            });
       setPages(res.data ?? []);
       setMeta(res.meta ?? emptyMeta);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load");
+      const message =
+        err instanceof Error ? err.message : `Failed to load ${section.label}`;
+      setError(message);
+      cmsToast.error(message);
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter, section.pageType]);
+  }, [page, search, statusFilter, tab, section.pageType, section.label]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
+  const switchTab = (next: ListTab) => {
+    if (next === tab) return;
+    setTab(next);
+    setPage(1);
+    setSearch("");
+    setStatusFilter("");
+  };
+
   const onDelete = async (id: string, title: string) => {
-    if (!window.confirm(`Delete “${title}”?`)) return;
-    setError(null);
+    const ok = await cmsConfirm({
+      title: "Move to Recently Deleted?",
+      description: `“${title}” will be soft-deleted. You can restore it later from Recently Deleted.`,
+      confirmLabel: "Move to deleted",
+      tone: "danger",
+    });
+    if (!ok) return;
     try {
-      await cmsApi.deleteLegalPage(id);
+      const res = await cmsApi.deleteLegalPage(section.pageType, id);
+      cmsToast.success(
+        res?.message || `${section.label} deleted successfully`
+      );
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete");
+      cmsToast.error(
+        err instanceof Error ? err.message : "Failed to delete"
+      );
+    }
+  };
+
+  const onRestore = async (id: string, title: string) => {
+    const ok = await cmsConfirm({
+      title: `Restore ${section.singular}?`,
+      description: `“${title}” will be restored and show again in All entries.`,
+      confirmLabel: "Restore",
+    });
+    if (!ok) return;
+    setRestoringId(id);
+    try {
+      const res = await cmsApi.restoreLegalPage(section.pageType, id);
+      cmsToast.success(
+        res.message || `${section.label} restored successfully`
+      );
+      await load();
+    } catch (err) {
+      cmsToast.error(
+        err instanceof Error ? err.message : "Failed to restore"
+      );
+    } finally {
+      setRestoringId(null);
     }
   };
 
@@ -86,8 +155,8 @@ export default function LegalPagesListPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <p className="max-w-xl font-manrope text-sm text-muted-foreground">
-          Manage {section.label.toLowerCase()} content. Published versions are
-          served on{" "}
+          Manage {section.label.toLowerCase()}. Soft-deleted items stay in
+          Recently Deleted until you restore them. Published versions show on{" "}
           <Link
             href={section.publicPath}
             target="_blank"
@@ -106,6 +175,31 @@ export default function LegalPagesListPage({
         </Link>
       </div>
 
+      <div className="inline-flex rounded-xl bg-white p-1 ring-1 ring-black/5">
+        <button
+          type="button"
+          onClick={() => switchTab("active")}
+          className={`rounded-lg px-3.5 py-1.5 font-manrope text-sm font-medium transition ${
+            tab === "active"
+              ? "bg-[#C45A7A] text-white"
+              : "text-[#5C5C5C] hover:text-[#212121]"
+          }`}
+        >
+          All entries
+        </button>
+        <button
+          type="button"
+          onClick={() => switchTab("deleted")}
+          className={`rounded-lg px-3.5 py-1.5 font-manrope text-sm font-medium transition ${
+            tab === "deleted"
+              ? "bg-[#C45A7A] text-white"
+              : "text-[#5C5C5C] hover:text-[#212121]"
+          }`}
+        >
+          Recently deleted
+        </button>
+      </div>
+
       {error ? (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
           {error}
@@ -114,17 +208,19 @@ export default function LegalPagesListPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>{section.label}</CardTitle>
+          <CardTitle>
+            {tab === "deleted" ? "Recently deleted" : section.label}
+          </CardTitle>
           <CardDescription>
             {loading
               ? "Loading…"
-              : `${meta.total} total · page ${meta.page} of ${meta.totalPages}`}
+              : `${meta.total} ${tab === "deleted" ? "deleted" : "total"} · page ${meta.page} of ${meta.totalPages}`}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex flex-col gap-2 sm:flex-row">
             <Input
-              placeholder="Search title / slug…"
+              placeholder="Search title / content…"
               value={search}
               onChange={(e) => {
                 setPage(1);
@@ -132,55 +228,67 @@ export default function LegalPagesListPage({
               }}
               className="sm:flex-1"
             />
-            <select
-              className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none"
-              value={statusFilter}
-              onChange={(e) => {
-                setPage(1);
-                setStatusFilter(e.target.value as ContentStatus | "");
-              }}
-            >
-              <option value="">All statuses</option>
-              <option value="draft">draft</option>
-              <option value="published">published</option>
-              <option value="archived">archived</option>
-            </select>
+            {tab === "active" ? (
+              <select
+                className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none"
+                value={statusFilter}
+                onChange={(e) => {
+                  setPage(1);
+                  setStatusFilter(e.target.value as ContentStatus | "");
+                }}
+              >
+                <option value="">All statuses</option>
+                <option value="draft">draft</option>
+                <option value="published">published</option>
+                <option value="archived">archived</option>
+              </select>
+            ) : null}
           </div>
 
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Title</TableHead>
-                <TableHead>Slug</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>
+                  {tab === "deleted" ? "Deleted" : "Status"}
+                </TableHead>
                 <TableHead>Updated</TableHead>
-                <TableHead className="w-28 text-right">Actions</TableHead>
+                <TableHead className="w-36 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {pages.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-muted-foreground">
-                    No entries yet.{" "}
-                    <Link
-                      href={`${section.basePath}/new`}
-                      className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
-                    >
-                      Create one
-                    </Link>
+                  <TableCell colSpan={4} className="text-muted-foreground">
+                    {tab === "deleted" ? (
+                      "No deleted entries."
+                    ) : (
+                      <>
+                        No entries yet.{" "}
+                        <Link
+                          href={`${section.basePath}/new`}
+                          className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
+                        >
+                          Create one
+                        </Link>
+                      </>
+                    )}
                   </TableCell>
                 </TableRow>
               ) : (
                 pages.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell className="font-medium">{item.title}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {item.slug}
-                    </TableCell>
                     <TableCell>
-                      <span className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-xs text-[#5C5C5C]">
-                        {item.status}
-                      </span>
+                      {tab === "deleted" ? (
+                        <span className="font-manrope text-xs text-[#5C5C5C]">
+                          {formatDeletedAt(item.deletedAt)}
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-xs text-[#5C5C5C]">
+                          {item.status}
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {item.updatedAt
@@ -189,29 +297,60 @@ export default function LegalPagesListPage({
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-0.5">
-                        <Link
-                          href={`${section.basePath}/${item.id}`}
-                          className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
-                          title="View"
-                        >
-                          <Eye className="size-4" />
-                        </Link>
-                        <Link
-                          href={`${section.basePath}/${item.id}/edit`}
-                          className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
-                          title="Edit"
-                        >
-                          <Pencil className="size-4" />
-                        </Link>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-sm"
-                          title="Delete"
-                          onClick={() => void onDelete(item.id, item.title)}
-                        >
-                          <Trash2 className="size-4 text-destructive" />
-                        </Button>
+                        {tab === "deleted" ? (
+                          <>
+                            <Link
+                              href={`${section.basePath}/${item.id}`}
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                              aria-label={`View ${item.title}`}
+                            >
+                              <Eye className="size-4" />
+                            </Link>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-manrope text-xs font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+                              disabled={restoringId === item.id}
+                              aria-label={`Restore ${item.title}`}
+                              onClick={() =>
+                                void onRestore(item.id, item.title)
+                              }
+                            >
+                              <RotateCcw className="size-3.5" />
+                              {restoringId === item.id
+                                ? "Restoring…"
+                                : "Restore"}
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Link
+                              href={`${section.basePath}/${item.id}`}
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                              aria-label={`View ${item.title}`}
+                            >
+                              <Eye className="size-4" />
+                            </Link>
+                            <Link
+                              href={`${section.basePath}/${item.id}/edit`}
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                              aria-label={`Edit ${item.title}`}
+                            >
+                              <Pencil className="size-4" />
+                            </Link>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-sm"
+                              aria-label={`Delete ${item.title}`}
+                              onClick={() =>
+                                void onDelete(item.id, item.title)
+                              }
+                            >
+                              <Trash2 className="size-4 text-destructive" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { cmsApi } from "@/domains/cms/lib/api";
 import type { LegalSectionConfig } from "@/domains/cms/lib/legal-sections";
+import { cmsToast } from "@/domains/cms/lib/toast";
 import LegalPageForm, {
   emptyLegalPageForm,
   formValuesToPayload,
@@ -33,11 +34,14 @@ export default function LegalPageEditPage({
       setLoading(true);
       setError(null);
       try {
-        const res = await cmsApi.getLegalPage(id);
+        const res = await cmsApi.getLegalPage(section.pageType, id);
         if (!cancelled) setForm(legalPageToFormValues(res.data));
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load");
+          const message =
+            err instanceof Error ? err.message : "Failed to load";
+          setError(message);
+          cmsToast.error(message);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -47,7 +51,7 @@ export default function LegalPageEditPage({
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, section.pageType]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,13 +59,20 @@ export default function LegalPageEditPage({
     setSaving(true);
     setError(null);
     try {
-      await cmsApi.updateLegalPage(
+      const res = await cmsApi.updateLegalPage(
+        section.pageType,
         id,
-        formValuesToPayload(form, section.pageType)
+        formValuesToPayload(form)
+      );
+      cmsToast.success(
+        res.message || `${section.label} updated successfully`
       );
       router.push(`${section.basePath}/${id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update");
+      const message =
+        err instanceof Error ? err.message : "Failed to update";
+      setError(message);
+      cmsToast.error(message);
       setSaving(false);
     }
   };
@@ -96,7 +107,6 @@ export default function LegalPageEditPage({
         submitLabel="Save changes"
         saving={saving}
         error={error}
-        slugLocked
       />
     </div>
   );

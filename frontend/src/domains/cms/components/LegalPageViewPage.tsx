@@ -3,11 +3,20 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ExternalLink, Pencil, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  Pencil,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { cmsApi } from "@/domains/cms/lib/api";
+import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import type { LegalSectionConfig } from "@/domains/cms/lib/legal-sections";
+import { cmsToast } from "@/domains/cms/lib/toast";
 import type { LegalPage } from "@/domains/cms/lib/types";
+import CmsHtmlContent from "./CmsHtmlContent";
 
 export default function LegalPageViewPage({
   section,
@@ -19,7 +28,7 @@ export default function LegalPageViewPage({
   const [page, setPage] = useState<LegalPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -29,11 +38,14 @@ export default function LegalPageViewPage({
       setLoading(true);
       setError(null);
       try {
-        const res = await cmsApi.getLegalPage(id);
+        const res = await cmsApi.getLegalPage(section.pageType, id);
         if (!cancelled) setPage(res.data);
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load");
+          const message =
+            err instanceof Error ? err.message : "Failed to load";
+          setError(message);
+          cmsToast.error(message);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -43,17 +55,53 @@ export default function LegalPageViewPage({
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, section.pageType]);
 
   const onDelete = async () => {
-    if (!page || !window.confirm(`Delete “${page.title}”?`)) return;
-    setDeleting(true);
+    if (!page) return;
+    const ok = await cmsConfirm({
+      title: "Move to Recently Deleted?",
+      description: `“${page.title}” will be soft-deleted. You can restore it later from Recently Deleted.`,
+      confirmLabel: "Move to deleted",
+      tone: "danger",
+    });
+    if (!ok) return;
+    setBusy(true);
     try {
-      await cmsApi.deleteLegalPage(page.id);
+      const res = await cmsApi.deleteLegalPage(section.pageType, page.id);
+      cmsToast.success(
+        res?.message || `${section.label} deleted successfully`
+      );
       router.replace(section.basePath);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete");
-      setDeleting(false);
+      cmsToast.error(
+        err instanceof Error ? err.message : "Failed to delete"
+      );
+      setBusy(false);
+    }
+  };
+
+  const onRestore = async () => {
+    if (!page) return;
+    const ok = await cmsConfirm({
+      title: `Restore ${section.singular}?`,
+      description: `“${page.title}” will be restored and show again in All entries.`,
+      confirmLabel: "Restore",
+    });
+    if (!ok) return;
+    setBusy(true);
+    try {
+      const res = await cmsApi.restoreLegalPage(section.pageType, page.id);
+      cmsToast.success(
+        res.message || `${section.label} restored successfully`
+      );
+      setPage(res.data);
+    } catch (err) {
+      cmsToast.error(
+        err instanceof Error ? err.message : "Failed to restore"
+      );
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -82,6 +130,8 @@ export default function LegalPageViewPage({
     );
   }
 
+  const isDeleted = Boolean(page.deletedAt);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -100,14 +150,16 @@ export default function LegalPageViewPage({
             <span className="rounded-full bg-[#FFF1C2] px-2.5 py-0.5 font-manrope text-xs font-medium text-[#7A5A00]">
               {page.status}
             </span>
+            {isDeleted ? (
+              <span className="rounded-full bg-red-50 px-2.5 py-0.5 font-manrope text-xs font-medium text-red-700">
+                deleted
+              </span>
+            ) : null}
           </div>
-          <p className="mt-1 font-manrope text-sm text-muted-foreground">
-            /{page.slug}
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {page.status === "published" ? (
+          {!isDeleted && page.status === "published" ? (
             <Link
               href={section.publicPath}
               target="_blank"
@@ -117,23 +169,38 @@ export default function LegalPageViewPage({
               Public page
             </Link>
           ) : null}
-          <Link
-            href={`${section.basePath}/${page.id}/edit`}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#FCCC2D] px-3 font-manrope text-sm font-semibold text-[#212121] transition hover:brightness-105"
-          >
-            <Pencil className="size-3.5" />
-            Edit
-          </Link>
-          <Button
-            type="button"
-            variant="outline"
-            className="h-9 text-destructive"
-            disabled={deleting}
-            onClick={() => void onDelete()}
-          >
-            <Trash2 className="size-3.5" />
-            {deleting ? "Deleting…" : "Delete"}
-          </Button>
+          {isDeleted ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 gap-1.5 border-black/10 bg-white font-manrope text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+              disabled={busy}
+              onClick={() => void onRestore()}
+            >
+              <RotateCcw className="size-3.5" />
+              {busy ? "Restoring…" : "Restore"}
+            </Button>
+          ) : (
+            <>
+              <Link
+                href={`${section.basePath}/${page.id}/edit`}
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#FCCC2D] px-3 font-manrope text-sm font-semibold text-[#212121] transition hover:brightness-105"
+              >
+                <Pencil className="size-3.5" />
+                Edit
+              </Link>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-9 text-destructive"
+                disabled={busy}
+                onClick={() => void onDelete()}
+              >
+                <Trash2 className="size-3.5" />
+                {busy ? "Deleting…" : "Delete"}
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -142,10 +209,7 @@ export default function LegalPageViewPage({
           Content
         </h3>
         {page.content ? (
-          <div
-            className="prose prose-sm max-w-none font-manrope text-[#212121] prose-headings:text-[#212121] prose-p:text-[#444]"
-            dangerouslySetInnerHTML={{ __html: page.content }}
-          />
+          <CmsHtmlContent html={page.content} />
         ) : (
           <p className="font-manrope text-sm text-muted-foreground">
             No content yet — add it in Edit.

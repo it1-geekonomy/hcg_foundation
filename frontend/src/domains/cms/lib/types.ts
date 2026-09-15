@@ -81,19 +81,16 @@ export type LegalPageType = "privacy_policy" | "terms_and_conditions";
 export type LegalPage = SeoFields & {
   id: string;
   title: string;
-  slug: string;
   content?: string | null;
-  pageType: LegalPageType;
   status: ContentStatus;
+  deletedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
 
 export type CreateLegalPagePayload = SeoFields & {
   title: string;
-  slug: string;
-  content?: string;
-  pageType: LegalPageType;
+  content: string;
   status?: ContentStatus;
 };
 
