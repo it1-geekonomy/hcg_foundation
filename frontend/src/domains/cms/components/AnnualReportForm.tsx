@@ -19,6 +19,7 @@ export type AnnualReportFormValues = {
   metaDescription: string;
   schemaCode: string;
   bannerFile: File | null;
+  mobileBannerFile: File | null;
   reportFile: File | null;
 };
 
@@ -31,6 +32,7 @@ export const emptyAnnualReportForm = (): AnnualReportFormValues => ({
   metaDescription: "",
   schemaCode: "",
   bannerFile: null,
+  mobileBannerFile: null,
   reportFile: null,
 });
 
@@ -55,6 +57,7 @@ export function annualReportToFormValues(
     metaDescription: report.metaDescription ?? "",
     schemaCode: report.schemaCode ?? "",
     bannerFile: null,
+    mobileBannerFile: null,
     reportFile: null,
   };
 }
@@ -80,12 +83,16 @@ type AnnualReportFormProps = {
   submitLabel: string;
   saving?: boolean;
   error?: string | null;
-  /** Existing R2 URLs when editing */
   existingBannerUrl?: string | null;
+  existingMobileBannerUrl?: string | null;
   existingFileUrl?: string | null;
   slugLocked?: boolean;
   onSlugManualEdit?: () => void;
 };
+
+function previewUrl(url?: string | null) {
+  return url && url.trim() ? url.trim() : null;
+}
 
 export default function AnnualReportForm({
   value,
@@ -95,10 +102,15 @@ export default function AnnualReportForm({
   saving,
   error,
   existingBannerUrl,
+  existingMobileBannerUrl,
   existingFileUrl,
   slugLocked,
   onSlugManualEdit,
 }: AnnualReportFormProps) {
+  const bannerUrl = previewUrl(existingBannerUrl);
+  const mobileBannerUrl = previewUrl(existingMobileBannerUrl);
+  const fileUrl = previewUrl(existingFileUrl);
+
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-3xl space-y-5">
       {error ? (
@@ -145,11 +157,11 @@ export default function AnnualReportForm({
         <CmsFormField
           label="Report year"
           htmlFor="reportYear"
-          hint="e.g. 2024-25"
+          hint="Max 9 chars, e.g. 2024-25 or 2024-2025"
         >
           <Input
             id="reportYear"
-            placeholder="2024-25"
+            placeholder="2024-2025"
             maxLength={9}
             value={value.reportYear}
             onChange={(e) =>
@@ -159,24 +171,24 @@ export default function AnnualReportForm({
         </CmsFormField>
 
         <CmsFormField
-          label="Banner image"
-          htmlFor="banner"
-          hint="Uploaded to Cloudflare R2"
+          label="Desktop / web banner"
+          htmlFor="annualReportBanner"
+          hint="WebP or AVIF, max 5MB → annualReportBanner"
         >
-          {existingBannerUrl ? (
+          {bannerUrl ? (
             <div className="mb-2 flex h-40 items-center justify-center overflow-hidden rounded-lg border border-black/5 bg-[#F0EEE9]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={existingBannerUrl}
+                src={bannerUrl}
                 alt="Current banner"
                 className="max-h-full max-w-full object-contain p-2"
               />
             </div>
           ) : null}
           <Input
-            id="banner"
+            id="annualReportBanner"
             type="file"
-            accept="image/*"
+            accept="image/webp,image/avif,.webp,.avif"
             onChange={(e) =>
               onChange({
                 ...value,
@@ -192,15 +204,48 @@ export default function AnnualReportForm({
         </CmsFormField>
 
         <CmsFormField
-          label="Report file (PDF)"
-          htmlFor="file"
-          hint="Uploaded to Cloudflare R2"
+          label="Mobile banner"
+          htmlFor="annualReportMobileBanner"
+          hint="WebP or AVIF, max 5MB → annualReportMobileBanner"
         >
-          {existingFileUrl ? (
+          {mobileBannerUrl ? (
+            <div className="mb-2 flex h-40 items-center justify-center overflow-hidden rounded-lg border border-black/5 bg-[#F0EEE9]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={mobileBannerUrl}
+                alt="Current mobile banner"
+                className="max-h-full max-w-full object-contain p-2"
+              />
+            </div>
+          ) : null}
+          <Input
+            id="annualReportMobileBanner"
+            type="file"
+            accept="image/webp,image/avif,.webp,.avif"
+            onChange={(e) =>
+              onChange({
+                ...value,
+                mobileBannerFile: e.target.files?.[0] ?? null,
+              })
+            }
+          />
+          {value.mobileBannerFile ? (
+            <p className="font-manrope text-xs text-[#5C5C5C]">
+              Selected: {value.mobileBannerFile.name}
+            </p>
+          ) : null}
+        </CmsFormField>
+
+        <CmsFormField
+          label="Report file"
+          htmlFor="annualReportFile"
+          hint="PDF or Word, max 25MB → annualReportFile"
+        >
+          {fileUrl ? (
             <p className="mb-2 font-manrope text-xs">
               Current:{" "}
               <a
-                href={existingFileUrl}
+                href={fileUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
@@ -210,9 +255,9 @@ export default function AnnualReportForm({
             </p>
           ) : null}
           <Input
-            id="file"
+            id="annualReportFile"
             type="file"
-            accept=".pdf,application/pdf"
+            accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             onChange={(e) =>
               onChange({
                 ...value,

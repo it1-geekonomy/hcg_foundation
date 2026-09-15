@@ -9,6 +9,7 @@ import TeamMemberCard from "@/domains/about/components/TeamMemberCard";
 import { cmsApi } from "@/domains/cms/lib/api";
 import type { Team } from "@/domains/cms/lib/types";
 import { cmsToast } from "@/domains/cms/lib/toast";
+import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import CmsHtmlContent from "./CmsHtmlContent";
 
 function plainText(value?: string | null) {
@@ -56,7 +57,14 @@ export default function TeamViewPage() {
   }, [id]);
 
   const onDelete = async () => {
-    if (!team || !window.confirm(`Delete “${team.title}”?`)) return;
+    if (!team) return;
+    const ok = await cmsConfirm({
+      title: "Move to Recently Deleted?",
+      description: `“${team.title}” will be soft-deleted. You can restore it later from Recently Deleted.`,
+      confirmLabel: "Move to deleted",
+      tone: "danger",
+    });
+    if (!ok) return;
     setDeleting(true);
     try {
       const res = await cmsApi.deleteTeam(team.id);

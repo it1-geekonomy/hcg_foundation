@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { cmsApi } from "@/domains/cms/lib/api";
+import { cmsToast } from "@/domains/cms/lib/toast";
 import type { AnnualReport } from "@/domains/cms/lib/types";
 import AnnualReportForm, {
   annualReportToFormValues,
@@ -22,7 +23,6 @@ export default function AnnualReportEditPage() {
   );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -30,7 +30,6 @@ export default function AnnualReportEditPage() {
 
     (async () => {
       setLoading(true);
-      setError(null);
       try {
         const res = await cmsApi.getAnnualReport(id);
         if (!cancelled) {
@@ -39,7 +38,9 @@ export default function AnnualReportEditPage() {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load");
+          cmsToast.error(
+            err instanceof Error ? err.message : "Failed to load"
+          );
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -53,17 +54,24 @@ export default function AnnualReportEditPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id) return;
+    if (!id || saving) return;
     setSaving(true);
-    setError(null);
     try {
-      await cmsApi.updateAnnualReport(id, formValuesToFields(form), {
-        banner: form.bannerFile,
-        file: form.reportFile,
-      });
+      const res = await cmsApi.updateAnnualReport(
+        id,
+        formValuesToFields(form),
+        {
+          banner: form.bannerFile,
+          mobileBanner: form.mobileBannerFile,
+          file: form.reportFile,
+        }
+      );
+      cmsToast.success(res.message || "Annual report updated successfully");
       router.push(`/admin/annual-reports/${id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update");
+      cmsToast.error(
+        err instanceof Error ? err.message : "Failed to update"
+      );
       setSaving(false);
     }
   };
@@ -90,7 +98,7 @@ export default function AnnualReportEditPage() {
           Edit annual report
         </h1>
         <p className="mt-1 font-manrope text-sm text-muted-foreground">
-          Leave file inputs empty to keep existing R2 assets; pick a new file to
+          Leave file inputs empty to keep existing assets; pick a new file to
           replace.
         </p>
       </div>
@@ -101,8 +109,8 @@ export default function AnnualReportEditPage() {
         onSubmit={onSubmit}
         submitLabel="Save changes"
         saving={saving}
-        error={error}
         existingBannerUrl={report?.annualReportBanner}
+        existingMobileBannerUrl={report?.annualReportMobileBanner}
         existingFileUrl={report?.annualReportFile}
         slugLocked
       />

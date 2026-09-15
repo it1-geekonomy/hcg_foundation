@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import AdminSidebar from "@/domains/cms/components/AdminSidebar";
+import CmsConfirmDialog from "@/domains/cms/components/CmsConfirmDialog";
 import CmsToaster from "@/domains/cms/components/CmsToaster";
 import { adminMenu } from "@/navigation/admin-menu.config";
 
@@ -71,6 +72,7 @@ export default function AdminShell({
       </div>
 
       <CmsToaster />
+      <CmsConfirmDialog />
     </div>
   );
 }
