@@ -10,6 +10,7 @@ import {
   FileText,
   Shield,
   ScrollText,
+  Award,
 } from "lucide-react";
 
 export type AdminMenuItem = {
@@ -46,6 +47,11 @@ export const adminMenuGroups: AdminMenuGroup[] = [
         label: "Annual Reports",
         href: "/admin/annual-reports",
         icon: FileText,
+      },
+      {
+        label: "Awards",
+        href: "/admin/awards",
+        icon: Award,
       },
       {
         label: "Privacy Policy",
