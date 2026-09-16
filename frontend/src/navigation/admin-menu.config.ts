@@ -12,6 +12,7 @@ import {
   ScrollText,
   Award,
   CalendarDays,
+  FolderKanban,
 } from "lucide-react";
 
 export type AdminMenuItem = {
@@ -58,6 +59,11 @@ export const adminMenuGroups: AdminMenuGroup[] = [
         label: "Events",
         href: "/admin/events",
         icon: CalendarDays,
+      },
+      {
+        label: "Projects",
+        href: "/admin/projects",
+        icon: FolderKanban,
       },
       {
         label: "Privacy Policy",

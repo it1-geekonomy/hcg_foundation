@@ -5,12 +5,14 @@ import type {
   Award,
   AwardFields,
   CmsEvent,
+  CmsProject,
   CreateLegalPagePayload,
   CreateUserPayload,
   EventFields,
   LegalPage,
   LegalPageType,
   Paginated,
+  ProjectFields,
   Team,
   TeamFields,
   AdminUser,
@@ -327,6 +329,78 @@ function eventPatchFormData(
   return fd;
 }
 
+function projectFormData(
+  fields: ProjectFields,
+  files?: {
+    projectBanner?: File | null;
+    projectMobileBanner?: File | null;
+  }
+) {
+  const fd = new FormData();
+  fd.append("title", fields.title.trim());
+  fd.append("slug", fields.slug.trim());
+  if (fields.projectDate?.trim()) {
+    fd.append("projectDate", fields.projectDate.trim());
+  }
+  if (fields.content?.trim()) fd.append("content", fields.content);
+  if (fields.shortDescription?.trim()) {
+    fd.append("shortDescription", fields.shortDescription.trim());
+  }
+  if (fields.status) fd.append("status", fields.status);
+  if (fields.metaTitle?.trim()) fd.append("metaTitle", fields.metaTitle.trim());
+  if (fields.metaDescription?.trim()) {
+    fd.append("metaDescription", fields.metaDescription.trim());
+  }
+  if (fields.schemaCode?.trim()) {
+    fd.append("schemaCode", fields.schemaCode.trim());
+  }
+  if (files?.projectBanner instanceof File) {
+    fd.append("projectBanner", files.projectBanner, files.projectBanner.name);
+  }
+  if (files?.projectMobileBanner instanceof File) {
+    fd.append(
+      "projectMobileBanner",
+      files.projectMobileBanner,
+      files.projectMobileBanner.name
+    );
+  }
+  return fd;
+}
+
+function projectPatchFormData(
+  fields: Partial<ProjectFields>,
+  files?: {
+    projectBanner?: File | null;
+    projectMobileBanner?: File | null;
+  }
+) {
+  const fd = new FormData();
+  const append = (key: string, value?: string | null) => {
+    if (value === undefined) return;
+    fd.append(key, value ?? "");
+  };
+  append("title", fields.title);
+  append("slug", fields.slug);
+  append("projectDate", fields.projectDate);
+  append("content", fields.content);
+  append("shortDescription", fields.shortDescription);
+  append("status", fields.status);
+  append("metaTitle", fields.metaTitle);
+  append("metaDescription", fields.metaDescription);
+  append("schemaCode", fields.schemaCode);
+  if (files?.projectBanner instanceof File) {
+    fd.append("projectBanner", files.projectBanner, files.projectBanner.name);
+  }
+  if (files?.projectMobileBanner instanceof File) {
+    fd.append(
+      "projectMobileBanner",
+      files.projectMobileBanner,
+      files.projectMobileBanner.name
+    );
+  }
+  return fd;
+}
+
 export const cmsApi = {
   listTeams: (params?: ListQuery) =>
     request<Paginated<Team>>(`/teams${toQuery({ page: 1, limit: 20, ...params })}`),
@@ -489,6 +563,72 @@ export const cmsApi = {
 
   restoreEvent: (id: string) =>
     request<ApiEnvelope<CmsEvent>>(`/events/${id}/restore`, {
+      method: "POST",
+    }),
+
+  listProjects: (params?: ListQuery) =>
+    request<Paginated<CmsProject>>(
+      `/projects${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedProjects: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<CmsProject>>(
+      `/projects/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getProject: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<CmsProject>>(`/projects/${id}`);
+    } catch (err) {
+      const deleted = await request<Paginated<CmsProject>>(
+        `/projects/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  createProject: (
+    fields: ProjectFields,
+    files?: {
+      projectBanner?: File | null;
+      projectMobileBanner?: File | null;
+    }
+  ) =>
+    requestFormData<ApiEnvelope<CmsProject>>(
+      "/projects",
+      "POST",
+      projectFormData(fields, files)
+    ),
+
+  updateProject: (
+    id: string,
+    fields: Partial<ProjectFields>,
+    files?: {
+      projectBanner?: File | null;
+      projectMobileBanner?: File | null;
+    }
+  ) =>
+    requestFormData<ApiEnvelope<CmsProject>>(
+      `/projects/${id}`,
+      "PATCH",
+      projectPatchFormData(fields, files)
+    ),
+
+  deleteProject: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(`/projects/${id}`, {
+      method: "DELETE",
+    }),
+
+  restoreProject: (id: string) =>
+    request<ApiEnvelope<CmsProject>>(`/projects/${id}/restore`, {
       method: "POST",
     }),
 

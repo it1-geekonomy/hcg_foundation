@@ -125,6 +125,30 @@ export type EventFields = SeoFields & {
   status?: ContentStatus;
 };
 
+export type CmsProject = SeoFields & {
+  id: string;
+  title: string;
+  slug: string;
+  projectBanner?: string | null;
+  projectMobileBanner?: string | null;
+  projectDate?: string | null;
+  content?: string | null;
+  shortDescription?: string | null;
+  status: ContentStatus;
+  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ProjectFields = SeoFields & {
+  title: string;
+  slug: string;
+  projectDate?: string;
+  content?: string;
+  shortDescription?: string;
+  status?: ContentStatus;
+};
+
 export type LegalPageType = "privacy_policy" | "terms_and_conditions";
 
 export type LegalPage = SeoFields & {

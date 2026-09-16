@@ -21,6 +21,8 @@ import {
   TableRow,
 } from "@/shared/ui/table";
 import { cmsApi } from "@/domains/cms/lib/api";
+import { cmsConfirm } from "@/domains/cms/lib/confirm";
+import { cmsToast } from "@/domains/cms/lib/toast";
 import type { AdminUser } from "@/domains/cms/lib/types";
 import { CmsPagination, type PaginationMeta } from "./CmsPagination";
 
@@ -64,13 +66,23 @@ export default function UsersListPage() {
   }, [load]);
 
   const onDelete = async (id: string, name: string) => {
-    if (!window.confirm(`Delete “${name}”?`)) return;
+    const ok = await cmsConfirm({
+      title: "Delete user?",
+      description: `“${name}” will be removed from CMS admin accounts.`,
+      confirmLabel: "Delete",
+      tone: "danger",
+    });
+    if (!ok) return;
     setError(null);
     try {
       await cmsApi.deleteUser(id);
+      cmsToast.success("User deleted successfully");
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete");
+      const message =
+        err instanceof Error ? err.message : "Failed to delete";
+      setError(message);
+      cmsToast.error(message);
     }
   };
 

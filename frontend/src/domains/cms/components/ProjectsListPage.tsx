@@ -21,9 +21,9 @@ import {
   TableRow,
 } from "@/shared/ui/table";
 import { cmsApi } from "@/domains/cms/lib/api";
-import type { ContentStatus, Team } from "@/domains/cms/lib/types";
-import { cmsToast } from "@/domains/cms/lib/toast";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
+import { cmsToast } from "@/domains/cms/lib/toast";
+import type { CmsProject, ContentStatus } from "@/domains/cms/lib/types";
 import { CmsPagination, type PaginationMeta } from "./CmsPagination";
 import CmsSelect, { CONTENT_STATUS_FILTER_OPTIONS } from "./CmsSelect";
 
@@ -51,9 +51,13 @@ function formatDeletedAt(value?: string | null) {
   });
 }
 
-export default function TeamsListPage() {
+function hasUrl(value?: string | null) {
+  return Boolean(value && value.trim());
+}
+
+export default function ProjectsListPage() {
   const [tab, setTab] = useState<ListTab>("active");
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [projects, setProjects] = useState<CmsProject[]>([]);
   const [meta, setMeta] = useState<PaginationMeta>(emptyMeta);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -68,22 +72,22 @@ export default function TeamsListPage() {
     try {
       const res =
         tab === "deleted"
-          ? await cmsApi.listDeletedTeams({
+          ? await cmsApi.listDeletedProjects({
               page,
               limit: PAGE_SIZE,
               search: search || undefined,
             })
-          : await cmsApi.listTeams({
+          : await cmsApi.listProjects({
               page,
               limit: PAGE_SIZE,
               search: search || undefined,
               status: statusFilter || undefined,
             });
-      setTeams(res.data ?? []);
+      setProjects(res.data ?? []);
       setMeta(res.meta ?? emptyMeta);
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Failed to load teams";
+        err instanceof Error ? err.message : "Failed to load projects";
       setError(message);
       cmsToast.error(message);
     } finally {
@@ -112,8 +116,8 @@ export default function TeamsListPage() {
     });
     if (!ok) return;
     try {
-      const res = await cmsApi.deleteTeam(id);
-      cmsToast.success(res?.message || "Team member deleted successfully");
+      const res = await cmsApi.deleteProject(id);
+      cmsToast.success(res?.message || "Project deleted successfully");
       await load();
     } catch (err) {
       cmsToast.error(
@@ -124,15 +128,15 @@ export default function TeamsListPage() {
 
   const onRestore = async (id: string, title: string) => {
     const ok = await cmsConfirm({
-      title: "Restore team member?",
-      description: `“${title}” will be restored and show again in All members.`,
+      title: "Restore project?",
+      description: `“${title}” will be restored and show again in All projects.`,
       confirmLabel: "Restore",
     });
     if (!ok) return;
     setRestoringId(id);
     try {
-      const res = await cmsApi.restoreTeam(id);
-      cmsToast.success(res.message || "Team member restored successfully");
+      const res = await cmsApi.restoreProject(id);
+      cmsToast.success(res.message || "Project restored successfully");
       await load();
     } catch (err) {
       cmsToast.error(
@@ -147,16 +151,16 @@ export default function TeamsListPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <p className="max-w-xl font-manrope text-sm text-muted-foreground">
-          Manage team members. Soft-deleted items stay in Recently Deleted until
-          you restore them.
+          Manage projects. Soft-deleted items stay in Recently Deleted until you
+          restore them.
         </p>
 
         <Link
-          href="/admin/team/new"
+          href="/admin/projects/new"
           className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[#C45A7A] px-4 font-manrope text-sm font-semibold text-white transition hover:bg-[#b04e6c]"
         >
           <Plus className="size-4" />
-          Add member
+          Add project
         </Link>
       </div>
 
@@ -170,7 +174,7 @@ export default function TeamsListPage() {
               : "text-[#5C5C5C] hover:text-[#212121]"
           }`}
         >
-          All members
+          All projects
         </button>
         <button
           type="button"
@@ -194,7 +198,7 @@ export default function TeamsListPage() {
       <Card>
         <CardHeader>
           <CardTitle>
-            {tab === "deleted" ? "Recently deleted" : "All members"}
+            {tab === "deleted" ? "Recently deleted" : "All projects"}
           </CardTitle>
           <CardDescription>
             {loading
@@ -205,7 +209,7 @@ export default function TeamsListPage() {
         <CardContent>
           <div className="mb-4 flex flex-col gap-2 sm:flex-row">
             <Input
-              placeholder="Search name / designation…"
+              placeholder="Search title / slug…"
               value={search}
               onChange={(e) => {
                 setPage(1);
@@ -230,28 +234,28 @@ export default function TeamsListPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-14">Image</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Designation</TableHead>
+                <TableHead className="w-14">Banner</TableHead>
+                <TableHead>Title</TableHead>
+                <TableHead>Date</TableHead>
                 {tab === "deleted" ? (
                   <TableHead>Deleted at</TableHead>
                 ) : (
                   <TableHead>Status</TableHead>
                 )}
-                <TableHead className="w-36 text-right">Actions</TableHead>
+                <TableHead className="w-40 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {teams.length === 0 ? (
+              {projects.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-muted-foreground">
                     {tab === "deleted" ? (
-                      "No deleted members."
+                      "No deleted projects."
                     ) : (
                       <>
-                        No members yet.{" "}
+                        No projects yet.{" "}
                         <Link
-                          href="/admin/team/new"
+                          href="/admin/projects/new"
                           className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
                         >
                           Create one
@@ -261,13 +265,13 @@ export default function TeamsListPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                teams.map((team) => (
-                  <TableRow key={team.id}>
+                projects.map((project) => (
+                  <TableRow key={project.id}>
                     <TableCell>
-                      {team.teamImage ? (
+                      {hasUrl(project.projectBanner) ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={team.teamImage}
+                          src={project.projectBanner!}
                           alt=""
                           className="size-10 rounded-lg object-cover ring-1 ring-black/5"
                         />
@@ -275,48 +279,64 @@ export default function TeamsListPage() {
                         <div className="size-10 rounded-lg bg-[#F0EEE9] ring-1 ring-black/5" />
                       )}
                     </TableCell>
-                    <TableCell className="font-medium">{team.title}</TableCell>
-                    <TableCell>{team.designation || "—"}</TableCell>
+                    <TableCell>
+                      <p className="font-medium">{project.title}</p>
+                      <p className="font-manrope text-xs text-[#8A8A8A]">
+                        /{project.slug}
+                      </p>
+                    </TableCell>
+                    <TableCell>{project.projectDate || "—"}</TableCell>
                     <TableCell>
                       {tab === "deleted" ? (
                         <span className="font-manrope text-xs text-[#5C5C5C]">
-                          {formatDeletedAt(team.deletedAt)}
+                          {formatDeletedAt(project.deletedAt)}
                         </span>
                       ) : (
                         <span className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-xs text-[#5C5C5C]">
-                          {team.status}
+                          {project.status}
                         </span>
                       )}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-0.5">
                         {tab === "deleted" ? (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-manrope text-xs font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
-                            disabled={restoringId === team.id}
-                            aria-label={`Restore ${team.title}`}
-                            onClick={() => void onRestore(team.id, team.title)}
-                          >
-                            <RotateCcw className="size-3.5" />
-                            {restoringId === team.id ? "Restoring…" : "Restore"}
-                          </Button>
+                          <>
+                            <Link
+                              href={`/admin/projects/${project.id}`}
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                              aria-label={`View ${project.title}`}
+                            >
+                              <Eye className="size-4" />
+                            </Link>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-manrope text-xs font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+                              disabled={restoringId === project.id}
+                              aria-label={`Restore ${project.title}`}
+                              onClick={() =>
+                                void onRestore(project.id, project.title)
+                              }
+                            >
+                              <RotateCcw className="size-3.5" />
+                              {restoringId === project.id
+                                ? "Restoring…"
+                                : "Restore"}
+                            </Button>
+                          </>
                         ) : (
                           <>
                             <Link
-                              href={`/admin/team/${team.id}`}
+                              href={`/admin/projects/${project.id}`}
                               className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
-                              title="View"
-                              aria-label={`View ${team.title}`}
+                              aria-label={`View ${project.title}`}
                             >
                               <Eye className="size-4" />
                             </Link>
                             <Link
-                              href={`/admin/team/${team.id}/edit`}
+                              href={`/admin/projects/${project.id}/edit`}
                               className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
-                              title="Edit"
-                              aria-label={`Edit ${team.title}`}
+                              aria-label={`Edit ${project.title}`}
                             >
                               <Pencil className="size-4" />
                             </Link>
@@ -324,8 +344,10 @@ export default function TeamsListPage() {
                               type="button"
                               variant="ghost"
                               size="icon-sm"
-                              title="Delete"
-                              onClick={() => void onDelete(team.id, team.title)}
+                              aria-label={`Delete ${project.title}`}
+                              onClick={() =>
+                                void onDelete(project.id, project.title)
+                              }
                             >
                               <Trash2 className="size-4 text-destructive" />
                             </Button>

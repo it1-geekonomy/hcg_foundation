@@ -25,6 +25,7 @@ import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import type { Award, ContentStatus } from "@/domains/cms/lib/types";
 import { CmsPagination, type PaginationMeta } from "./CmsPagination";
+import CmsSelect, { CONTENT_STATUS_FILTER_OPTIONS } from "./CmsSelect";
 
 const PAGE_SIZE = 20;
 
@@ -213,19 +214,16 @@ export default function AwardsListPage() {
               className="sm:flex-1"
             />
             {tab === "active" ? (
-              <select
-                className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none"
+              <CmsSelect
+                size="sm"
+                className="sm:w-44"
                 value={statusFilter}
-                onChange={(e) => {
+                options={CONTENT_STATUS_FILTER_OPTIONS}
+                onChange={(next) => {
                   setPage(1);
-                  setStatusFilter(e.target.value as ContentStatus | "");
+                  setStatusFilter(next as ContentStatus | "");
                 }}
-              >
-                <option value="">All statuses</option>
-                <option value="draft">draft</option>
-                <option value="published">published</option>
-                <option value="archived">archived</option>
-              </select>
+              />
             ) : null}
           </div>
 
