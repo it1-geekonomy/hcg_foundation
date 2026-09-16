@@ -4,11 +4,13 @@ import type {
   AnnualReportFields,
   Award,
   AwardFields,
+  CampaignStatus,
   CmsEvent,
   CmsProject,
   CreateLegalPagePayload,
   CreateUserPayload,
   EventFields,
+  FundraisingCampaign,
   HomeBanner,
   HomeBannerFields,
   LegalPage,
@@ -22,6 +24,7 @@ import type {
   DonationStatus,
   Donor,
   TeamMemberType,
+  UpdateFundraisingCampaignPayload,
   UpdateHomeBannerPayload,
   UpdateLegalPagePayload,
 } from "./types";
@@ -36,7 +39,7 @@ export type ListQuery = {
   page?: number;
   limit?: number;
   search?: string;
-  status?: ContentStatus | DonationStatus;
+  status?: ContentStatus | DonationStatus | CampaignStatus;
   memberType?: TeamMemberType;
   pageType?: LegalPageType;
   includeDeleted?: boolean;
@@ -952,6 +955,61 @@ export const cmsApi = {
     ),
 
   getDonor: (id: string) => request<ApiEnvelope<Donor>>(`/donors/${id}`),
+
+  listFundraisingCampaigns: (params?: ListQuery) =>
+    request<Paginated<FundraisingCampaign>>(
+      `/fundraising-campaigns${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedFundraisingCampaigns: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<FundraisingCampaign>>(
+      `/fundraising-campaigns/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getFundraisingCampaign: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<FundraisingCampaign>>(
+        `/fundraising-campaigns/${id}`
+      );
+    } catch (err) {
+      const deleted = await request<Paginated<FundraisingCampaign>>(
+        `/fundraising-campaigns/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  updateFundraisingCampaign: (
+    id: string,
+    payload: UpdateFundraisingCampaignPayload
+  ) =>
+    request<ApiEnvelope<FundraisingCampaign>>(
+      `/fundraising-campaigns/${id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }
+    ),
+
+  deleteFundraisingCampaign: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(
+      `/fundraising-campaigns/${id}`,
+      { method: "DELETE" }
+    ),
+
+  restoreFundraisingCampaign: (id: string) =>
+    request<ApiEnvelope<FundraisingCampaign>>(
+      `/fundraising-campaigns/${id}/restore`,
+      { method: "POST" }
+    ),
 };
 
 /** Public site: published people */

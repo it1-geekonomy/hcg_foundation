@@ -142,6 +142,18 @@ export const DONATION_STATUS_OPTIONS: CmsSelectOption[] = [
   { value: "refunded", label: "Refunded" },
 ];
 
+export const CAMPAIGN_STATUS_OPTIONS: CmsSelectOption[] = [
+  { value: "pending", label: "Pending" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
+  { value: "completed", label: "Completed" },
+];
+
+export const CAMPAIGN_STATUS_FILTER_OPTIONS: CmsSelectOption[] = [
+  { value: "", label: "All statuses" },
+  ...CAMPAIGN_STATUS_OPTIONS,
+];
+
 export const ACTIVE_STATUS_OPTIONS: CmsSelectOption[] = [
   { value: "true", label: "Active" },
   { value: "false", label: "Inactive" },
