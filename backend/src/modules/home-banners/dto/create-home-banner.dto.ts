@@ -34,30 +34,6 @@ export class CreateHomeBannerDto {
   @IsString()
   shortDescription?: string;
 
-  @ApiPropertyOptional({
-    description:
-      'Banner image URL (leave empty if uploading bannerImage via multipart form-data)',
-  })
-  @IsOptional()
-  @IsString()
-  bannerImageUrl?: string;
-
-  @ApiPropertyOptional({
-    description:
-      'Mobile banner image URL (leave empty if uploading mobileBannerImage via multipart form-data)',
-  })
-  @IsOptional()
-  @IsString()
-  mobileBannerImageUrl?: string;
-
-  @ApiPropertyOptional({
-    description:
-      'Profile image URL (leave empty if uploading profileImage via multipart form-data)',
-  })
-  @IsOptional()
-  @IsString()
-  profileImageUrl?: string;
-
   @ApiPropertyOptional({ example: 1, default: 1 })
   @IsOptional()
   @Type(() => Number)
