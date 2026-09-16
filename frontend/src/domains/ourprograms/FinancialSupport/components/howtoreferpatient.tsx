@@ -3,7 +3,7 @@ import Typography from "@/lib/Typography";
 import {
   referralSteps,
   type ReferralStep,
-} from "@/domains/ourprograms/constants/howtoreferpatient";
+} from "@/domains/ourprograms/FinancialSupport/constants/howtoreferpatient";
 
  
 function StepCard({ step }: { step: ReferralStep }) {
