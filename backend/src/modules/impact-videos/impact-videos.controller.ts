@@ -47,13 +47,11 @@ export class ImpactVideosController {
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateImpactVideoMultipartDto })
-  @UseInterceptors(
-    FileFieldsInterceptor([{ name: 'videoFile', maxCount: 1 }]),
-  )
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'videoFile', maxCount: 1 }]))
   @ApiOperation({
     summary: 'Create impact video (CMS / super-admin)',
     description:
-      'Send multipart form fields with optional `videoFile` (MP4/WebM, max 50MB, no duration limit) or direct `videoUrl`. Uploaded videos are stored on Cloudflare R2 CDN.',
+      'Send multipart form fields plus required `videoFile` (MP4 or WebM, max 50MB, no duration limit). Uploaded videos are stored on Cloudflare R2 CDN.',
   })
   @ApiCreatedResponse({ type: ImpactVideo })
   @ApiUnauthorizedResponse({
@@ -158,9 +156,7 @@ export class ImpactVideosController {
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UpdateImpactVideoMultipartDto })
-  @UseInterceptors(
-    FileFieldsInterceptor([{ name: 'videoFile', maxCount: 1 }]),
-  )
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'videoFile', maxCount: 1 }]))
   @ApiOperation({
     summary: 'Update impact video (CMS / super-admin)',
     description:
@@ -188,7 +184,8 @@ export class ImpactVideosController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Restore soft-deleted impact video (CMS / super-admin)',
-    description: 'Clears deletedAt so the video shows again in CMS and on the website if published.',
+    description:
+      'Clears deletedAt so the video shows again in CMS and on the website if published.',
   })
   @ApiOkResponse({ type: ImpactVideo })
   @ApiUnauthorizedResponse({
@@ -208,7 +205,8 @@ export class ImpactVideosController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Soft-delete impact video (CMS / super-admin)',
-    description: 'Sets deletedAt. Hidden from CMS lists and the website. CDN file is kept.',
+    description:
+      'Sets deletedAt. Hidden from CMS lists and the website. CDN file is kept.',
   })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',

@@ -1,16 +1,9 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, Min } from 'class-validator';
 import { ContentStatus } from '../../../common/enums/content-status.enum';
 
 export class CreateImpactVideoDto {
-  @ApiPropertyOptional({
-    description: 'Direct video URL (leave empty if uploading videoFile via multipart form-data)',
-  })
-  @IsOptional()
-  @IsString()
-  videoUrl?: string;
-
   @ApiPropertyOptional({
     description: 'Display order sequence for display in frontend lists',
     example: 1,
