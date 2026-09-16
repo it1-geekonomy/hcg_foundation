@@ -13,9 +13,13 @@ import type {
   FundraisingCampaign,
   HomeBanner,
   HomeBannerFields,
+  InquiryStatus,
+  LeadsContact,
+  LeadsInternship,
   LegalPage,
   LegalPageType,
   Paginated,
+  PartnershipInquiry,
   ProjectFields,
   Team,
   TeamFields,
@@ -26,7 +30,10 @@ import type {
   TeamMemberType,
   UpdateFundraisingCampaignPayload,
   UpdateHomeBannerPayload,
+  UpdateLeadsContactPayload,
+  UpdateLeadsInternshipPayload,
   UpdateLegalPagePayload,
+  UpdatePartnershipInquiryPayload,
 } from "./types";
 
 const API_BASE =
@@ -39,7 +46,7 @@ export type ListQuery = {
   page?: number;
   limit?: number;
   search?: string;
-  status?: ContentStatus | DonationStatus | CampaignStatus;
+  status?: ContentStatus | DonationStatus | CampaignStatus | InquiryStatus;
   memberType?: TeamMemberType;
   pageType?: LegalPageType;
   includeDeleted?: boolean;
@@ -1010,6 +1017,152 @@ export const cmsApi = {
       `/fundraising-campaigns/${id}/restore`,
       { method: "POST" }
     ),
+
+  listPartnershipInquiries: (params?: ListQuery) =>
+    request<Paginated<PartnershipInquiry>>(
+      `/partnership-inquiries${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedPartnershipInquiries: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<PartnershipInquiry>>(
+      `/partnership-inquiries/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getPartnershipInquiry: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<PartnershipInquiry>>(
+        `/partnership-inquiries/${id}`
+      );
+    } catch (err) {
+      const deleted = await request<Paginated<PartnershipInquiry>>(
+        `/partnership-inquiries/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  updatePartnershipInquiry: (
+    id: string,
+    payload: UpdatePartnershipInquiryPayload
+  ) =>
+    request<ApiEnvelope<PartnershipInquiry>>(`/partnership-inquiries/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  deletePartnershipInquiry: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(
+      `/partnership-inquiries/${id}`,
+      { method: "DELETE" }
+    ),
+
+  restorePartnershipInquiry: (id: string) =>
+    request<ApiEnvelope<PartnershipInquiry>>(
+      `/partnership-inquiries/${id}/restore`,
+      { method: "POST" }
+    ),
+
+  listLeadsInternship: (params?: ListQuery) =>
+    request<Paginated<LeadsInternship>>(
+      `/leads-internship${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedLeadsInternship: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<LeadsInternship>>(
+      `/leads-internship/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getLeadsInternship: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<LeadsInternship>>(
+        `/leads-internship/${id}`
+      );
+    } catch (err) {
+      const deleted = await request<Paginated<LeadsInternship>>(
+        `/leads-internship/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  updateLeadsInternship: (id: string, payload: UpdateLeadsInternshipPayload) =>
+    request<ApiEnvelope<LeadsInternship>>(`/leads-internship/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  deleteLeadsInternship: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(
+      `/leads-internship/${id}`,
+      { method: "DELETE" }
+    ),
+
+  restoreLeadsInternship: (id: string) =>
+    request<ApiEnvelope<LeadsInternship>>(`/leads-internship/${id}/restore`, {
+      method: "POST",
+    }),
+
+  listLeadsContact: (params?: ListQuery) =>
+    request<Paginated<LeadsContact>>(
+      `/leads-contact${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedLeadsContact: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<LeadsContact>>(
+      `/leads-contact/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getLeadsContact: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<LeadsContact>>(`/leads-contact/${id}`);
+    } catch (err) {
+      const deleted = await request<Paginated<LeadsContact>>(
+        `/leads-contact/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  updateLeadsContact: (id: string, payload: UpdateLeadsContactPayload) =>
+    request<ApiEnvelope<LeadsContact>>(`/leads-contact/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  deleteLeadsContact: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(
+      `/leads-contact/${id}`,
+      { method: "DELETE" }
+    ),
+
+  restoreLeadsContact: (id: string) =>
+    request<ApiEnvelope<LeadsContact>>(`/leads-contact/${id}/restore`, {
+      method: "POST",
+    }),
 };
 
 /** Public site: published people */

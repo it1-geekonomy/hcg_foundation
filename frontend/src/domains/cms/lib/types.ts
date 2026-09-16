@@ -254,6 +254,87 @@ export type UpdateFundraisingCampaignPayload = Partial<{
   status: CampaignStatus;
 }>;
 
+export type InquiryStatus =
+  | "pending"
+  | "in_review"
+  | "contacted"
+  | "resolved"
+  | "rejected";
+
+export type PartnershipInquiry = {
+  id: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  organizationName?: string | null;
+  message: string;
+  termsAccepted: boolean;
+  status: InquiryStatus;
+  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UpdatePartnershipInquiryPayload = Partial<{
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  organizationName: string;
+  message: string;
+  termsAccepted: boolean;
+  status: InquiryStatus;
+}>;
+
+export type LeadsInternship = {
+  id: string;
+  fullName: string;
+  phone?: string | null;
+  email?: string | null;
+  gender?: string | null;
+  dob?: string | null;
+  currentCourse?: string | null;
+  address?: string | null;
+  languages?: string | null;
+  computerSkills?: string | null;
+  message?: string | null;
+  termsAccepted: boolean;
+  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UpdateLeadsInternshipPayload = Partial<{
+  fullName: string;
+  phone: string;
+  email: string;
+  gender: string;
+  dob: string;
+  currentCourse: string;
+  address: string;
+  languages: string;
+  computerSkills: string;
+  message: string;
+  termsAccepted: boolean;
+}>;
+
+export type LeadsContact = {
+  id: string;
+  fullName: string;
+  phone?: string | null;
+  email?: string | null;
+  message?: string | null;
+  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UpdateLeadsContactPayload = Partial<{
+  fullName: string;
+  phone: string;
+  email: string;
+  message: string;
+}>;
+
 export type Paginated<T> = {
   data: T[];
   meta: {

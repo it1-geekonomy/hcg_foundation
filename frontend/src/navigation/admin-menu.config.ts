@@ -14,6 +14,9 @@ import {
   CalendarDays,
   FolderKanban,
   PanelsTopLeft,
+  Handshake,
+  GraduationCap,
+  Mail,
 } from "lucide-react";
 
 export type AdminMenuItem = {
@@ -81,8 +84,28 @@ export const adminMenuGroups: AdminMenuGroup[] = [
         href: "/admin/terms",
         icon: ScrollText,
       },
+    ],
+  },
+  {
+    label: "Forms",
+    items: [
       {
-        label: "Campaigns",
+        label: "Contact Leads",
+        href: "/admin/leads-contact",
+        icon: Mail,
+      },
+      {
+        label: "Internship Leads",
+        href: "/admin/leads-internship",
+        icon: GraduationCap,
+      },
+      {
+        label: "Partnership Inquiries",
+        href: "/admin/partnership-inquiries",
+        icon: Handshake,
+      },
+      {
+        label: "Fundraising Campaigns",
         href: "/admin/campaigns",
         icon: Megaphone,
       },

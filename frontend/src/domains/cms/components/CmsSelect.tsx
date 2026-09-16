@@ -154,6 +154,19 @@ export const CAMPAIGN_STATUS_FILTER_OPTIONS: CmsSelectOption[] = [
   ...CAMPAIGN_STATUS_OPTIONS,
 ];
 
+export const INQUIRY_STATUS_OPTIONS: CmsSelectOption[] = [
+  { value: "pending", label: "Pending" },
+  { value: "in_review", label: "In review" },
+  { value: "contacted", label: "Contacted" },
+  { value: "resolved", label: "Resolved" },
+  { value: "rejected", label: "Rejected" },
+];
+
+export const INQUIRY_STATUS_FILTER_OPTIONS: CmsSelectOption[] = [
+  { value: "", label: "All statuses" },
+  ...INQUIRY_STATUS_OPTIONS,
+];
+
 export const ACTIVE_STATUS_OPTIONS: CmsSelectOption[] = [
   { value: "true", label: "Active" },
   { value: "false", label: "Inactive" },
