@@ -43,18 +43,14 @@ export class ImpactVideosService {
     dto: CreateImpactVideoDto,
     file?: CdnFile,
   ): Promise<ImpactVideo> {
-    let videoUrl = dto.videoUrl;
-
-    if (file) {
-      this.validateVideoFile(file);
-      videoUrl = await this.cdn.upload(file, 'impact-videos', 'video');
-    }
-
-    if (!videoUrl) {
+    if (!file) {
       throw new BadRequestException(
-        'Video file or videoUrl is required to create an impact video.',
+        'Video file is required to create an impact video.',
       );
     }
+
+    this.validateVideoFile(file);
+    const videoUrl = await this.cdn.upload(file, 'impact-videos', 'video');
 
     try {
       const entity = this.repo.create({
@@ -64,9 +60,7 @@ export class ImpactVideosService {
       });
       return await this.repo.save(entity);
     } catch (err) {
-      if (file && videoUrl) {
-        await this.cdn.delete(videoUrl);
-      }
+      await this.cdn.delete(videoUrl);
       throw err;
     }
   }
@@ -139,9 +133,6 @@ export class ImpactVideosService {
       if (replacedUrl) {
         entity.videoUrl = replacedUrl;
       }
-    } else if (dto.videoUrl && dto.videoUrl !== entity.videoUrl) {
-      await this.cdn.delete(entity.videoUrl);
-      entity.videoUrl = dto.videoUrl;
     }
 
     if (dto.displayOrder !== undefined) {

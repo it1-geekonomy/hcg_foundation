@@ -9,7 +9,8 @@ import { ContentStatus } from '../../../common/enums/content-status.enum';
 export class ImpactVideo extends BaseEntity {
   @ApiProperty({
     description: 'CDN URL of the video file',
-    example: 'https://cdn.hcgfoundation.org/impact-videos/success-story-2026.mp4',
+    example:
+      'https://cdn.hcgfoundation.org/impact-videos/success-story-2026.mp4',
   })
   @Column({ name: 'video_url', type: 'text', nullable: false })
   videoUrl: string;

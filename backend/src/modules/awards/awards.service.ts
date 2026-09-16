@@ -38,15 +38,12 @@ export class AwardsService {
   ) {}
 
   async create(dto: CreateAwardDto, files?: AwardFiles): Promise<Award> {
-    const awardImageUrl = files?.awardImage
-      ? await this.cdn.upload(files.awardImage, 'awards')
-      : dto.awardImageUrl ?? null;
-
-    if (!awardImageUrl) {
+    if (!files?.awardImage) {
       throw new BadRequestException(
-        'Award image file or awardImageUrl is required to create an award.',
+        'Award image file is required to create an award.',
       );
     }
+    const awardImageUrl = await this.cdn.upload(files.awardImage, 'awards');
 
     try {
       const entity = this.repo.create({
@@ -56,9 +53,7 @@ export class AwardsService {
       });
       return await this.saveOrThrow(entity);
     } catch (err) {
-      if (files?.awardImage) {
-        await this.cdn.delete(awardImageUrl);
-      }
+      await this.cdn.delete(awardImageUrl);
       throw err;
     }
   }
@@ -92,7 +87,9 @@ export class AwardsService {
     return buildPaginatedResult(data, total, page, limit);
   }
 
-  async findDeleted(query: PaginationQueryDto): Promise<PaginatedResult<Award>> {
+  async findDeleted(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResult<Award>> {
     return this.findAll({ ...query, includeDeleted: true, onlyDeleted: true });
   }
 
@@ -122,11 +119,13 @@ export class AwardsService {
     files?: AwardFiles,
   ): Promise<Award> {
     const entity = await this.findOne(id);
-    const { awardImageUrl: _ignored, ...rest } = dto;
-    Object.assign(entity, rest);
+    Object.assign(entity, dto);
     entity.awardImageUrl =
-      (await this.cdn.replace(entity.awardImageUrl, files?.awardImage, 'awards')) ??
-      entity.awardImageUrl;
+      (await this.cdn.replace(
+        entity.awardImageUrl,
+        files?.awardImage,
+        'awards',
+      )) ?? entity.awardImageUrl;
     return this.saveOrThrow(entity);
   }
 

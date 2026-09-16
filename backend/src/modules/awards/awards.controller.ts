@@ -33,7 +33,11 @@ import {
 } from './dto/award-multipart.dto';
 import { UpdateAwardDto } from './dto/update-award.dto';
 import { Award } from './entities/award.entity';
-import { AwardFiles, AwardUploadedFiles, AwardsService } from './awards.service';
+import {
+  AwardFiles,
+  AwardUploadedFiles,
+  AwardsService,
+} from './awards.service';
 
 @ApiTags('Awards')
 @Controller('awards')
@@ -44,13 +48,11 @@ export class AwardsController {
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateAwardMultipartDto })
-  @UseInterceptors(
-    FileFieldsInterceptor([{ name: 'awardImage', maxCount: 1 }]),
-  )
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'awardImage', maxCount: 1 }]))
   @ApiOperation({
     summary: 'Create award (CMS / super-admin)',
     description:
-      'Send multipart form fields with optional `awardImage` (WebP or AVIF, max 5MB) or direct `awardImageUrl`. Uploaded images are stored on Cloudflare R2 CDN.',
+      'Send multipart form fields plus required `awardImage` file (WebP or AVIF, max 5MB). Uploaded images are stored on Cloudflare R2 CDN.',
   })
   @ApiCreatedResponse({ type: Award })
   @ApiUnauthorizedResponse({
@@ -151,9 +153,7 @@ export class AwardsController {
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UpdateAwardMultipartDto })
-  @UseInterceptors(
-    FileFieldsInterceptor([{ name: 'awardImage', maxCount: 1 }]),
-  )
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'awardImage', maxCount: 1 }]))
   @ApiOperation({
     summary: 'Update award (CMS / super-admin)',
     description:
@@ -181,7 +181,8 @@ export class AwardsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Restore soft-deleted award (CMS / super-admin)',
-    description: 'Clears deletedAt so the award shows again in CMS and on the website if published.',
+    description:
+      'Clears deletedAt so the award shows again in CMS and on the website if published.',
   })
   @ApiOkResponse({ type: Award })
   @ApiUnauthorizedResponse({
