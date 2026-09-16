@@ -2,10 +2,12 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 import { SeoFieldsDto } from '../../../common/dto/seo-fields.dto';
 import { ContentStatus } from '../../../common/enums/content-status.enum';
+import { TeamType } from '../../../common/enums/team-type.enum';
 
 export class CreateTeamDto extends SeoFieldsDto {
   @ApiProperty({ example: 'Dr. John Smith' })
   @IsString()
+  @IsNotEmpty()
   @MaxLength(255)
   title: string;
 
@@ -31,13 +33,13 @@ export class CreateTeamDto extends SeoFieldsDto {
   @IsString()
   content?: string;
 
-  @ApiPropertyOptional({
-    example: 'Senior oncologist specializing in breast cancer treatment',
-    description: 'Short blurb for cards',
+  @ApiProperty({
+    enum: TeamType,
+    example: TeamType.TEAM,
+    description: 'Whether this person is a team member or a trustee',
   })
-  @IsOptional()
-  @IsString()
-  shortDescription?: string;
+  @IsEnum(TeamType)
+  type: TeamType;
 
   @ApiPropertyOptional({
     enum: ContentStatus,

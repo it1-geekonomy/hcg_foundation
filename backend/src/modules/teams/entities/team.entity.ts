@@ -1,9 +1,11 @@
 import { Column, Entity, Index } from 'typeorm';
 import { SeoContentEntity } from '../../../common/entities/seo-content.entity';
 import { ContentStatus } from '../../../common/enums/content-status.enum';
+import { TeamType } from '../../../common/enums/team-type.enum';
 
 @Entity('teams')
 @Index('idx_teams_status', ['status'])
+@Index('idx_teams_type', ['type'])
 export class Team extends SeoContentEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
   title: string;
@@ -17,8 +19,14 @@ export class Team extends SeoContentEntity {
   @Column({ type: 'text', nullable: true })
   content?: string;
 
-  @Column({ name: 'short_description', type: 'text', nullable: true })
-  shortDescription?: string;
+  @Column({
+    type: 'enum',
+    enumName: 'team_type',
+    enum: TeamType,
+    nullable: false,
+    default: TeamType.TEAM,
+  })
+  type: TeamType;
 
   @Column({
     type: 'enum',
