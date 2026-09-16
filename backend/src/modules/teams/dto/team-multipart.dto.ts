@@ -1,10 +1,10 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { TeamType } from '../../../common/enums/team-type.enum';
 
 /** Swagger-only shape so file pickers appear on multipart endpoints. */
 export class CreateTeamMultipartDto {
   @ApiProperty({ example: 'Dr. John Smith' })
   title: string;
-
 
   @ApiPropertyOptional({ example: 'Senior Oncologist' })
   designation?: string;
@@ -21,10 +21,11 @@ export class CreateTeamMultipartDto {
   })
   content?: string;
 
-  @ApiPropertyOptional({
-    example: 'Senior oncologist specializing in breast cancer treatment',
+  @ApiProperty({
+    enum: TeamType,
+    example: TeamType.TEAM,
   })
-  shortDescription?: string;
+  type: TeamType;
 
   @ApiPropertyOptional({ enum: ['draft', 'published', 'archived'], example: 'draft' })
   status?: string;
