@@ -36,7 +36,7 @@ export default function ProjectsPage() {
     <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope pt-24 sm:pt-28 lg:pt-32">
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         <div className="mb-8 sm:mb-12">
-          <Typography variant="heading-1" as="h1" style={{ textAlign: "left" }} className="font-serif text-[1.875rem] sm:text-[2.25rem] lg:text-[2.625rem] italic text-[#2E1C12]">
+          <Typography variant="heading-1" as="h1" className="font-serif text-[1.875rem] sm:text-[2.25rem] lg:text-[2.625rem] italic text-[#2E1C12]">
             Projects
           </Typography>
         </div>
@@ -57,7 +57,7 @@ export default function ProjectsPage() {
 
               <div className="absolute inset-x-3 bottom-3 sm:inset-x-4 sm:bottom-4 xl:inset-x-5 xl:bottom-5 p-3 sm:p-4 lg:p-5 xl:pt-[1.8rem] xl:pr-[2.6125rem] xl:pb-[1.74375rem] xl:pl-[1.74375rem] flex items-center justify-between gap-3 sm:gap-4 rounded-[6px] border border-white/10 bg-[#8D8D8D]/40 backdrop-blur-[28px] text-white transition duration-300 group-hover:bg-[#8D8D8D]/50">
                 <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 sm:gap-1.5 xl:gap-[0.581rem]">
-                  <Typography variant="heading-3" as="h2" style={{ textAlign: "left" }} className="text-[0.875rem] sm:text-[1rem] lg:text-[1.125rem] xl:text-[1.25rem] font-normal text-white font-manrope drop-shadow-xs line-clamp-1 group-hover:text-[#FCCC2D] transition">
+                  <Typography variant="heading-3" as="h2" className="text-[0.875rem] sm:text-[1rem] lg:text-[1.125rem] xl:text-[1.25rem] font-normal text-white drop-shadow-xs line-clamp-1 group-hover:text-[#FCCC2D] transition">
                     {projectItem.title}
                   </Typography>
 

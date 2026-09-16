@@ -64,9 +64,9 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   return (
     <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope pt-24 sm:pt-28 lg:pt-32">
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-12 sm:gap-10 lg:gap-14 items-start font-manrope">
-          <div className="sm:col-span-7 flex flex-col font-manrope">
-            <Typography variant="heading-1" as="h1" style={{ textAlign: "left" }} className="font-serif text-[1.5rem] sm:text-[1.75rem] md:text-[2.125rem] lg:text-[2.375rem] xl:text-[2.5rem] italic text-[#2E1C12] tracking-tight font-normal leading-snug">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-12 sm:gap-10 lg:gap-14 items-start">
+          <div className="sm:col-span-7 flex flex-col">
+            <Typography variant="heading-1" as="h1" className="font-serif text-[1.5rem] sm:text-[1.75rem] md:text-[2.125rem] lg:text-[2.375rem] xl:text-[2.5rem] italic text-[#2E1C12] tracking-tight font-normal leading-snug">
               {projectItem.title}
             </Typography>
 
@@ -77,7 +77,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
             <div className="mt-5 sm:mt-6 space-y-3 lg:space-y-4 text-[0.75rem] sm:text-[0.84375rem] md:text-[0.90625rem] lg:text-[0.9375rem] xl:text-[1.0625rem] 2xl:text-[1.1625rem] leading-[150%] tracking-[0.0116rem] text-[#343E43] text-justify font-normal">
               {projectItem.fullStory.split("\n\n").map((paragraph, index) => (
-                <Typography variant="body-8" as="p" key={index} style={{ textAlign: "left" }}>
+                <Typography variant="body-8" as="p" key={index}>
                   {paragraph}
                 </Typography>
               ))}
@@ -133,12 +133,12 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
       <section className={`${CONTAINER} py-8 sm:py-12 border-t border-[#E8DFC5]`}>
         <div className="flex items-center justify-between mb-6 sm:mb-8">
-          <Typography variant="heading-2" as="h2" style={{ textAlign: "left" }} className="font-serif italic text-[1.5rem] sm:text-[1.875rem] text-[#2E1C12] font-normal">
+          <Typography variant="heading-2" as="h2" className="font-serif italic text-[1.5rem] sm:text-[1.875rem] text-[#2E1C12] font-normal">
             Related Articles
           </Typography>
           <Link
             href="/resources/projects"
-            className="inline-flex items-center gap-1 font-manrope text-[0.875rem] sm:text-[1rem] font-semibold text-[#2E1C12] transition hover:text-[#B88700]"
+            className="inline-flex items-center gap-1 text-[0.875rem] sm:text-[1rem] font-semibold text-[#2E1C12] transition hover:text-[#B88700]"
           >
             <Typography variant="body-8" as="span">View All</Typography>
             <ArrowUpRight className="size-4 text-[#2E1C12]" />
@@ -161,7 +161,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
               <div className="absolute inset-x-3 bottom-3 sm:inset-x-4 sm:bottom-4 xl:inset-x-5 xl:bottom-5 p-3 sm:p-4 lg:p-5 xl:pt-[1.8rem] xl:pr-[2.6125rem] xl:pb-[1.74375rem] xl:pl-[1.74375rem] flex items-center justify-between gap-3 sm:gap-4 rounded-[6px] border border-white/10 bg-[#8D8D8D]/40 backdrop-blur-[28px] text-white transition duration-300 group-hover:bg-[#8D8D8D]/50">
                 <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 sm:gap-1.5 xl:gap-[0.581rem]">
-                  <Typography variant="heading-3" as="h3" style={{ textAlign: "left" }} className="text-[0.875rem] sm:text-[1rem] lg:text-[1.125rem] xl:text-[1.25rem] font-normal text-white font-manrope drop-shadow-xs line-clamp-1 group-hover:text-[#FCCC2D] transition">
+                  <Typography variant="heading-3" as="h3" className="text-[0.875rem] sm:text-[1rem] lg:text-[1.125rem] xl:text-[1.25rem] font-normal text-white drop-shadow-xs line-clamp-1 group-hover:text-[#FCCC2D] transition">
                     {item.title}
                   </Typography>
 

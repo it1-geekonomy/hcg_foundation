@@ -18,12 +18,12 @@ export default function GrantsAndPhilanthropyPage() {
         {/* Header Section */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start mb-10 sm:mb-14">
           <div className="lg:col-span-6">
-            <Typography variant="heading-1" as="h1" style={{ textAlign: "left" }} className="font-serif text-[1.5rem] sm:text-[1.875rem] lg:text-[2.75rem] italic text-[#2E1C12] tracking-tight font-normal leading-tight lg:leading-[3rem]">
+            <Typography variant="heading-1" as="h1" className="font-serif text-[1.5rem] sm:text-[1.875rem] lg:text-[2.75rem] italic text-[#2E1C12] tracking-tight font-normal leading-tight lg:leading-[3rem]">
               Creating Lasting Change Through Partnership
             </Typography>
           </div>
           <div className="lg:col-span-6">
-            <Typography variant="body-8" as="p" style={{ textAlign: "left" }} className="font-manrope text-[0.875rem] sm:text-[1rem] lg:text-[1.1875rem] text-[#6C6048] leading-relaxed lg:leading-[1.6875rem] text-justify max-w-2xl lg:ml-auto">
+            <Typography variant="body-8" as="p" className="text-[0.875rem] sm:text-[1rem] lg:text-[1.1875rem] text-[#6C6048] leading-relaxed lg:leading-[1.6875rem] text-justify max-w-2xl lg:ml-auto">
               HCG Foundation welcomes partnerships with grant-making foundations, trusts, and philanthropic organizations aligned with our mission of equitable cancer care.
             </Typography>
           </div>
@@ -46,10 +46,10 @@ export default function GrantsAndPhilanthropyPage() {
                   />
                 </div>
                 <div>
-                  <Typography variant="heading-2" as="h2" style={{ textAlign: "left" }} className="font-serif text-[1.25rem] sm:text-[1.5rem] lg:text-[1.75rem] font-normal text-[#2E1C12] leading-tight mb-2">
+                  <Typography variant="heading-2" as="h2" className="font-serif text-[1.25rem] sm:text-[1.5rem] lg:text-[1.75rem] font-normal text-[#2E1C12] leading-tight mb-2">
                     {card.title}
                   </Typography>
-                  <Typography variant="body-8" as="p" style={{ textAlign: "left" }} className="font-manrope text-[0.875rem] sm:text-[1rem] lg:text-[1.1875rem] leading-relaxed text-[#6C6048]">
+                  <Typography variant="body-8" as="p" className="text-[0.875rem] sm:text-[1rem] lg:text-[1.1875rem] leading-relaxed text-[#6C6048]">
                     {card.description}
                   </Typography>
                 </div>
@@ -71,12 +71,12 @@ export default function GrantsAndPhilanthropyPage() {
         {/* Bottom Impact Banner matching Figma 100% */}
         <div className="mt-10 sm:mt-14 lg:mt-16 rounded-[12px] bg-[#FFF5D6] p-6 sm:p-10 lg:p-14 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
           <div className="lg:col-span-7">
-            <Typography variant="heading-2" as="h2" style={{ textAlign: "left" }} className="font-serif text-[1.5rem] sm:text-[1.875rem] lg:text-[2.625rem] italic text-[#2E1C12] font-normal leading-tight lg:leading-[3.125rem] max-w-lg">
+            <Typography variant="heading-2" as="h2" className="font-serif text-[1.5rem] sm:text-[1.875rem] lg:text-[2.625rem] italic text-[#2E1C12] font-normal leading-tight lg:leading-[3.125rem] max-w-lg">
               Creating Lasting Change Through Partnership
             </Typography>
           </div>
           <div className="lg:col-span-5 flex flex-col items-start gap-4 sm:gap-5">
-            <Typography variant="body-8" as="p" style={{ textAlign: "left" }} className="font-manrope text-[0.875rem] sm:text-[1rem] lg:text-[1.125rem] text-[#5A503C] leading-relaxed max-w-md text-left">
+            <Typography variant="body-8" as="p" className="text-[0.875rem] sm:text-[1rem] lg:text-[1.125rem] text-[#5A503C] leading-relaxed max-w-md text-left">
               Your contribution can help a patient receive care, give a family hope, and help build healthier communities.
             </Typography>
             <button

@@ -63,8 +63,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
   return (
     <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope pt-24 sm:pt-28 lg:pt-32">
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-12 sm:gap-10 lg:gap-14 items-start font-manrope">
-          <div className="sm:col-span-7 flex flex-col font-manrope">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-12 sm:gap-10 lg:gap-14 items-start">
+          <div className="sm:col-span-7 flex flex-col">
             <h1 className="font-serif text-2xl sm:text-[28px] md:text-[34px] lg:text-[38px] xl:text-[40px] italic text-[#2E1C12] tracking-tight font-normal leading-snug">
               {eventItem.title}
             </h1>
@@ -135,7 +135,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
           </h2>
           <Link
             href="/resources/events"
-            className="inline-flex items-center gap-1 font-manrope text-sm sm:text-base font-semibold text-[#2E1C12] transition hover:text-[#B88700]"
+            className="inline-flex items-center gap-1 text-sm sm:text-base font-semibold text-[#2E1C12] transition hover:text-[#B88700]"
           >
             <span>View All</span>
             <ArrowUpRight className="size-4 text-[#2E1C12]" />
@@ -158,7 +158,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
 
               <div className="absolute inset-x-3 bottom-3 sm:inset-x-4 sm:bottom-4 xl:inset-x-5 xl:bottom-5 p-3 sm:p-4 lg:p-5 xl:pt-[28.8px] xl:pr-[41.8px] xl:pb-[27.9px] xl:pl-[27.9px] flex items-center justify-between gap-3 sm:gap-4 rounded-[6px] border border-white/10 bg-[#8D8D8D]/40 backdrop-blur-[28px] text-white transition duration-300 group-hover:bg-[#8D8D8D]/50">
                 <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 sm:gap-1.5 xl:gap-[9.3px]">
-                  <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-normal text-white font-manrope drop-shadow-xs line-clamp-1 group-hover:text-[#FCCC2D] transition">
+                  <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-normal text-white drop-shadow-xs line-clamp-1 group-hover:text-[#FCCC2D] transition">
                     {item.title}
                   </h3>
 

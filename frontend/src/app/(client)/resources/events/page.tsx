@@ -14,7 +14,6 @@ export default function EventsPage() {
           <Typography
             variant="heading-1"
             as="h1"
-            style={{ textAlign: "left" }}
             className="font-serif text-[1.875rem] sm:text-[2.25rem] lg:text-[2.625rem] italic text-[#2E1C12] tracking-tight font-normal leading-tight"
           >
             Events & Community Drives
@@ -22,7 +21,6 @@ export default function EventsPage() {
           <Typography
             variant="body-1"
             as="p"
-            style={{ textAlign: "left" }}
             className="mt-4 text-[0.875rem] sm:text-[1rem] lg:text-[1.0625rem] text-[#6C6048] leading-relaxed"
           >
             Stay tuned for upcoming cancer awareness drives, screening camps, and foundation fundraising events.
