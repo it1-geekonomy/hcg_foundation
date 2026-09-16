@@ -3,13 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  ArrowLeft,
-  ExternalLink,
-  Pencil,
-  RotateCcw,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { cmsApi } from "@/domains/cms/lib/api";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
@@ -159,16 +153,6 @@ export default function LegalPageViewPage({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {!isDeleted && page.status === "published" ? (
-            <Link
-              href={section.publicPath}
-              target="_blank"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 font-manrope text-sm text-[#212121] transition hover:bg-[#F7F7F5]"
-            >
-              <ExternalLink className="size-3.5" />
-              Public page
-            </Link>
-          ) : null}
           {isDeleted ? (
             <Button
               type="button"

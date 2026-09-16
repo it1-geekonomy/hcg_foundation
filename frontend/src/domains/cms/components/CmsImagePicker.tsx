@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ImagePlus, Trash2, Upload } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { cmsToast } from "@/domains/cms/lib/toast";
+import { cn } from "@/lib/utils";
 
 export type CmsImageValue = {
   file: File | null;
@@ -30,6 +31,7 @@ export default function CmsImagePicker({
 }: CmsImagePickerProps) {
   const inputId = useId();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
 
   const localPreview = useMemo(() => {
     if (!value.file) return null;
@@ -44,50 +46,34 @@ export default function CmsImagePicker({
 
   const previewSrc = localPreview || value.url;
 
+  const openPicker = () => {
+    if (disabled) return;
+    fileRef.current?.click();
+  };
+
   const clear = () => {
     onChange({ file: null, url: null });
     if (fileRef.current) fileRef.current.value = "";
   };
 
+  const applyFile = (file: File | null) => {
+    if (!file) {
+      onChange({ file: null, url: value.url });
+      return;
+    }
+    if (!ALLOWED_TYPES.has(file.type)) {
+      cmsToast.error("Only WebP or AVIF images are allowed.");
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      cmsToast.error("Image must be 5MB or smaller.");
+      return;
+    }
+    onChange({ file, url: null });
+  };
+
   return (
     <div className="space-y-3">
-      <div className="overflow-hidden rounded-xl border border-black/8 bg-[#F7F6F3]">
-        <div className="relative flex h-52 items-center justify-center sm:h-56">
-          {previewSrc ? (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={previewSrc}
-                alt=""
-                className="absolute inset-0 h-full w-full object-contain p-3"
-              />
-              {!disabled ? (
-                <button
-                  type="button"
-                  onClick={clear}
-                  className="absolute top-2 right-2 inline-flex size-8 items-center justify-center rounded-full bg-white/95 text-[#212121] shadow-sm ring-1 ring-black/10 transition hover:bg-white"
-                  aria-label="Remove image"
-                >
-                  <Trash2 className="size-3.5 text-destructive" />
-                </button>
-              ) : null}
-            </>
-          ) : (
-            <div className="flex flex-col items-center gap-2 px-6 text-center">
-              <div className="flex size-12 items-center justify-center rounded-full bg-white ring-1 ring-black/5">
-                <ImagePlus className="size-5 text-[#8A8A8A]" />
-              </div>
-              <p className="font-manrope text-sm font-medium text-[#3A3A3A]">
-                No {label} selected
-              </p>
-              <p className="max-w-[240px] font-manrope text-xs text-[#7A7A7A]">
-                Upload a WebP or AVIF image (max 5MB)
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-
       <input
         ref={fileRef}
         id={inputId}
@@ -97,23 +83,99 @@ export default function CmsImagePicker({
         disabled={disabled}
         onChange={(e) => {
           const file = e.target.files?.[0] ?? null;
-          if (!file) {
-            onChange({ file: null, url: value.url });
-            return;
-          }
-          if (!ALLOWED_TYPES.has(file.type)) {
-            cmsToast.error("Only WebP or AVIF images are allowed.");
-            e.target.value = "";
-            return;
-          }
-          if (file.size > MAX_BYTES) {
-            cmsToast.error("Image must be 5MB or smaller.");
-            e.target.value = "";
-            return;
-          }
-          onChange({ file, url: null });
+          if (!file) return;
+          applyFile(file);
+          e.target.value = "";
         }}
       />
+
+      <div
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        aria-disabled={disabled}
+        aria-label={
+          previewSrc ? `Change ${label}` : `Upload ${label}`
+        }
+        onClick={() => openPicker()}
+        onKeyDown={(e) => {
+          if (disabled) return;
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openPicker();
+          }
+        }}
+        onDragEnter={(e) => {
+          if (disabled) return;
+          e.preventDefault();
+          e.stopPropagation();
+          setDragging(true);
+        }}
+        onDragOver={(e) => {
+          if (disabled) return;
+          e.preventDefault();
+          e.stopPropagation();
+          setDragging(true);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setDragging(false);
+        }}
+        onDrop={(e) => {
+          if (disabled) return;
+          e.preventDefault();
+          e.stopPropagation();
+          setDragging(false);
+          const file = e.dataTransfer.files?.[0] ?? null;
+          applyFile(file);
+        }}
+        className={cn(
+          "overflow-hidden rounded-xl border border-black/8 bg-[#F7F6F3] outline-none transition",
+          !disabled && "cursor-pointer hover:border-[#C45A7A]/35 hover:bg-[#F3F1ED]",
+          !disabled &&
+            "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+          dragging && !disabled && "border-[#C45A7A]/50 bg-[#FFF6E8]",
+          disabled && "cursor-not-allowed opacity-60"
+        )}
+      >
+        <div className="relative flex h-52 items-center justify-center sm:h-56">
+          {previewSrc ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={previewSrc}
+                alt=""
+                className="pointer-events-none absolute inset-0 h-full w-full object-contain p-3"
+              />
+              {!disabled ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    clear();
+                  }}
+                  className="absolute top-2 right-2 z-10 inline-flex size-8 items-center justify-center rounded-full bg-white/95 text-[#212121] shadow-sm ring-1 ring-black/10 transition hover:bg-white"
+                  aria-label="Remove image"
+                >
+                  <Trash2 className="size-3.5 text-destructive" />
+                </button>
+              ) : null}
+            </>
+          ) : (
+            <div className="pointer-events-none flex flex-col items-center gap-2 px-6 text-center">
+              <div className="flex size-12 items-center justify-center rounded-full bg-white ring-1 ring-black/5">
+                <ImagePlus className="size-5 text-[#8A8A8A]" />
+              </div>
+              <p className="font-manrope text-sm font-medium text-[#3A3A3A]">
+                No {label} selected
+              </p>
+              <p className="max-w-[240px] font-manrope text-xs text-[#7A7A7A]">
+                Click or drop a WebP or AVIF image (max 5MB)
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="flex flex-wrap gap-2">
         <Button
@@ -121,7 +183,7 @@ export default function CmsImagePicker({
           variant="outline"
           disabled={disabled}
           className="h-9 gap-1.5"
-          onClick={() => fileRef.current?.click()}
+          onClick={() => openPicker()}
         >
           <Upload className="size-3.5" />
           Upload new

@@ -97,6 +97,33 @@ export type AwardFields = {
   status?: ContentStatus;
 };
 
+export type HomeBanner = {
+  id: string;
+  name: string;
+  title: string;
+  location?: string | null;
+  shortDescription?: string | null;
+  bannerImageUrl: string;
+  mobileBannerImageUrl?: string | null;
+  profileImageUrl?: string | null;
+  displayOrder: number;
+  isActive: boolean;
+  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type HomeBannerFields = {
+  name: string;
+  title: string;
+  location?: string;
+  shortDescription?: string;
+  displayOrder: number;
+  isActive: boolean;
+};
+
+export type UpdateHomeBannerPayload = Partial<HomeBannerFields>;
+
 export type CmsEvent = SeoFields & {
   id: string;
   title: string;
@@ -134,6 +161,7 @@ export type CmsProject = SeoFields & {
   projectDate?: string | null;
   content?: string | null;
   shortDescription?: string | null;
+  displayOrder: number;
   status: ContentStatus;
   deletedAt?: string | null;
   createdAt: string;
@@ -146,6 +174,7 @@ export type ProjectFields = SeoFields & {
   projectDate?: string;
   content?: string;
   shortDescription?: string;
+  displayOrder?: number;
   status?: ContentStatus;
 };
 

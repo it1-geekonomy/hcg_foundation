@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Eye, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -23,10 +23,10 @@ import {
 import { cmsApi } from "@/domains/cms/lib/api";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import { cmsToast } from "@/domains/cms/lib/toast";
-import type { Award, ContentStatus } from "@/domains/cms/lib/types";
+import type { HomeBanner } from "@/domains/cms/lib/types";
 import { CmsPagination, type PaginationMeta } from "./CmsPagination";
 import CmsSearchInput from "./CmsSearchInput";
-import CmsSelect, { CONTENT_STATUS_FILTER_OPTIONS } from "./CmsSelect";
+import CmsSelect, { ACTIVE_STATUS_FILTER_OPTIONS } from "./CmsSelect";
 
 const PAGE_SIZE = 20;
 
@@ -52,13 +52,13 @@ function formatDeletedAt(value?: string | null) {
   });
 }
 
-export default function AwardsListPage() {
+export default function HomeBannersListPage() {
   const [tab, setTab] = useState<ListTab>("active");
-  const [awards, setAwards] = useState<Award[]>([]);
+  const [banners, setBanners] = useState<HomeBanner[]>([]);
   const [meta, setMeta] = useState<PaginationMeta>(emptyMeta);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<ContentStatus | "">("");
+  const [activeFilter, setActiveFilter] = useState<"" | "true" | "false">("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [restoringId, setRestoringId] = useState<string | null>(null);
@@ -69,39 +69,44 @@ export default function AwardsListPage() {
     try {
       const res =
         tab === "deleted"
-          ? await cmsApi.listDeletedAwards({
+          ? await cmsApi.listDeletedHomeBanners({
               page,
               limit: PAGE_SIZE,
               search: search || undefined,
             })
-          : await cmsApi.listAwards({
+          : await cmsApi.listHomeBanners({
               page,
               limit: PAGE_SIZE,
               search: search || undefined,
-              status: statusFilter || undefined,
             });
-      setAwards(res.data ?? []);
+      setBanners(res.data ?? []);
       setMeta(res.meta ?? emptyMeta);
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Failed to load awards";
+        err instanceof Error ? err.message : "Failed to load home banners";
       setError(message);
       cmsToast.error(message);
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter, tab]);
+  }, [page, search, tab]);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  const visibleBanners = useMemo(() => {
+    if (tab === "deleted" || !activeFilter) return banners;
+    const wantActive = activeFilter === "true";
+    return banners.filter((b) => b.isActive === wantActive);
+  }, [activeFilter, banners, tab]);
 
   const switchTab = (next: ListTab) => {
     if (next === tab) return;
     setTab(next);
     setPage(1);
     setSearch("");
-    setStatusFilter("");
+    setActiveFilter("");
   };
 
   const onDelete = async (id: string, title: string) => {
@@ -113,8 +118,8 @@ export default function AwardsListPage() {
     });
     if (!ok) return;
     try {
-      const res = await cmsApi.deleteAward(id);
-      cmsToast.success(res?.message || "Award deleted successfully");
+      const res = await cmsApi.deleteHomeBanner(id);
+      cmsToast.success(res?.message || "Home banner deleted successfully");
       await load();
     } catch (err) {
       cmsToast.error(
@@ -125,15 +130,15 @@ export default function AwardsListPage() {
 
   const onRestore = async (id: string, title: string) => {
     const ok = await cmsConfirm({
-      title: "Restore award?",
-      description: `“${title}” will be restored and show again in All awards.`,
+      title: "Restore home banner?",
+      description: `“${title}” will be restored and show again in All banners.`,
       confirmLabel: "Restore",
     });
     if (!ok) return;
     setRestoringId(id);
     try {
-      const res = await cmsApi.restoreAward(id);
-      cmsToast.success(res.message || "Award restored successfully");
+      const res = await cmsApi.restoreHomeBanner(id);
+      cmsToast.success(res.message || "Home banner restored successfully");
       await load();
     } catch (err) {
       cmsToast.error(
@@ -148,16 +153,16 @@ export default function AwardsListPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <p className="max-w-xl font-manrope text-sm text-muted-foreground">
-          Manage awards. Soft-deleted items stay in Recently Deleted until you
-          restore them.
+          Manage homepage banners. Soft-deleted items stay in Recently Deleted
+          until you restore them.
         </p>
 
         <Link
-          href="/admin/awards/new"
+          href="/admin/home-banners/new"
           className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[#C45A7A] px-4 font-manrope text-sm font-semibold text-white transition hover:bg-[#b04e6c]"
         >
           <Plus className="size-4" />
-          Add award
+          Add banner
         </Link>
       </div>
 
@@ -171,7 +176,7 @@ export default function AwardsListPage() {
               : "text-[#5C5C5C] hover:text-[#212121]"
           }`}
         >
-          All awards
+          All banners
         </button>
         <button
           type="button"
@@ -195,7 +200,7 @@ export default function AwardsListPage() {
       <Card>
         <CardHeader>
           <CardTitle>
-            {tab === "deleted" ? "Recently deleted" : "All awards"}
+            {tab === "deleted" ? "Recently deleted" : "All banners"}
           </CardTitle>
           <CardDescription>
             {loading
@@ -206,7 +211,7 @@ export default function AwardsListPage() {
         <CardContent>
           <div className="mb-4 flex flex-col gap-2 sm:flex-row">
             <CmsSearchInput
-              placeholder="Search title / description…"
+              placeholder="Search name / title…"
               value={search}
               onDebouncedChange={(next) => {
                 setPage(1);
@@ -218,12 +223,11 @@ export default function AwardsListPage() {
               <CmsSelect
                 size="sm"
                 className="sm:w-44"
-                value={statusFilter}
-                options={CONTENT_STATUS_FILTER_OPTIONS}
-                onChange={(next) => {
-                  setPage(1);
-                  setStatusFilter(next as ContentStatus | "");
-                }}
+                value={activeFilter}
+                options={ACTIVE_STATUS_FILTER_OPTIONS}
+                onChange={(next) =>
+                  setActiveFilter(next as "" | "true" | "false")
+                }
               />
             ) : null}
           </div>
@@ -233,26 +237,26 @@ export default function AwardsListPage() {
               <TableRow>
                 <TableHead className="w-14">Image</TableHead>
                 <TableHead>Title</TableHead>
-                <TableHead>Year</TableHead>
+                <TableHead>Order</TableHead>
                 {tab === "deleted" ? (
                   <TableHead>Deleted at</TableHead>
                 ) : (
-                  <TableHead>Status</TableHead>
+                  <TableHead>Visibility</TableHead>
                 )}
                 <TableHead className="w-40 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {awards.length === 0 ? (
+              {visibleBanners.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-muted-foreground">
                     {tab === "deleted" ? (
-                      "No deleted awards."
+                      "No deleted banners."
                     ) : (
                       <>
-                        No awards yet.{" "}
+                        No banners yet.{" "}
                         <Link
-                          href="/admin/awards/new"
+                          href="/admin/home-banners/new"
                           className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
                         >
                           Create one
@@ -262,13 +266,13 @@ export default function AwardsListPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                awards.map((award) => (
-                  <TableRow key={award.id}>
+                visibleBanners.map((banner) => (
+                  <TableRow key={banner.id}>
                     <TableCell>
-                      {award.awardImageUrl ? (
+                      {banner.bannerImageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={award.awardImageUrl}
+                          src={banner.bannerImageUrl}
                           alt=""
                           className="size-10 rounded-lg object-contain ring-1 ring-black/5"
                         />
@@ -276,16 +280,27 @@ export default function AwardsListPage() {
                         <div className="size-10 rounded-lg bg-[#F0EEE9] ring-1 ring-black/5" />
                       )}
                     </TableCell>
-                    <TableCell className="font-medium">{award.title}</TableCell>
-                    <TableCell>{award.year ?? "—"}</TableCell>
+                    <TableCell>
+                      <div className="font-medium">{banner.title}</div>
+                      <div className="font-manrope text-xs text-[#8A8A8A]">
+                        {banner.name}
+                      </div>
+                    </TableCell>
+                    <TableCell>{banner.displayOrder}</TableCell>
                     <TableCell>
                       {tab === "deleted" ? (
                         <span className="font-manrope text-xs text-[#5C5C5C]">
-                          {formatDeletedAt(award.deletedAt)}
+                          {formatDeletedAt(banner.deletedAt)}
                         </span>
                       ) : (
-                        <span className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-xs text-[#5C5C5C]">
-                          {award.status}
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs ${
+                            banner.isActive
+                              ? "bg-[#E8F6EC] text-[#1B6B3A]"
+                              : "bg-[#F4F4F4] text-[#5C5C5C]"
+                          }`}
+                        >
+                          {banner.isActive ? "Active" : "Inactive"}
                         </span>
                       )}
                     </TableCell>
@@ -294,9 +309,9 @@ export default function AwardsListPage() {
                         {tab === "deleted" ? (
                           <>
                             <Link
-                              href={`/admin/awards/${award.id}`}
+                              href={`/admin/home-banners/${banner.id}`}
                               className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
-                              aria-label={`View ${award.title}`}
+                              aria-label={`View ${banner.title}`}
                             >
                               <Eye className="size-4" />
                             </Link>
@@ -304,14 +319,14 @@ export default function AwardsListPage() {
                               type="button"
                               variant="outline"
                               className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-manrope text-xs font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
-                              disabled={restoringId === award.id}
-                              aria-label={`Restore ${award.title}`}
+                              disabled={restoringId === banner.id}
+                              aria-label={`Restore ${banner.title}`}
                               onClick={() =>
-                                void onRestore(award.id, award.title)
+                                void onRestore(banner.id, banner.title)
                               }
                             >
                               <RotateCcw className="size-3.5" />
-                              {restoringId === award.id
+                              {restoringId === banner.id
                                 ? "Restoring…"
                                 : "Restore"}
                             </Button>
@@ -319,16 +334,16 @@ export default function AwardsListPage() {
                         ) : (
                           <>
                             <Link
-                              href={`/admin/awards/${award.id}`}
+                              href={`/admin/home-banners/${banner.id}`}
                               className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
-                              aria-label={`View ${award.title}`}
+                              aria-label={`View ${banner.title}`}
                             >
                               <Eye className="size-4" />
                             </Link>
                             <Link
-                              href={`/admin/awards/${award.id}/edit`}
+                              href={`/admin/home-banners/${banner.id}/edit`}
                               className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
-                              aria-label={`Edit ${award.title}`}
+                              aria-label={`Edit ${banner.title}`}
                             >
                               <Pencil className="size-4" />
                             </Link>
@@ -336,9 +351,9 @@ export default function AwardsListPage() {
                               type="button"
                               variant="ghost"
                               size="icon-sm"
-                              aria-label={`Delete ${award.title}`}
+                              aria-label={`Delete ${banner.title}`}
                               onClick={() =>
-                                void onDelete(award.id, award.title)
+                                void onDelete(banner.id, banner.title)
                               }
                             >
                               <Trash2 className="size-4 text-destructive" />

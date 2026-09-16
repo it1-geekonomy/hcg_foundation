@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ExternalLink, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import TeamMemberCard from "@/domains/about/components/TeamMemberCard";
 import { cmsApi } from "@/domains/cms/lib/api";
@@ -136,16 +136,6 @@ export default function TeamViewPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {team.status === "published" ? (
-            <Link
-              href="/about/our-team"
-              target="_blank"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 font-manrope text-sm text-[#212121] transition hover:bg-[#F7F7F5]"
-            >
-              <ExternalLink className="size-3.5" />
-              Public page
-            </Link>
-          ) : null}
           <Link
             href={`/admin/team/${team.id}/edit`}
             className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#FCCC2D] px-3 font-manrope text-sm font-semibold text-[#212121] transition hover:brightness-105"

@@ -1,6 +1,7 @@
 export { default as BannerSection } from "./components/bannerSection";
 export { default as StatSection } from "./components/StatSection";
 export { default as ProjectsSection } from "./components/ProjectsSection";
+export { default as HomeProjectsSection } from "./components/HomeProjectsSection";
 export { default as Smilestories } from "./components/Smilestories";
 export { default as HopeSection } from "./components/HopeSection";
 export { default as Community } from "./components/Community";

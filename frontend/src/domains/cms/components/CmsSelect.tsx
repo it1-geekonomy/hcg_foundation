@@ -141,3 +141,13 @@ export const DONATION_STATUS_OPTIONS: CmsSelectOption[] = [
   { value: "failed", label: "Failed" },
   { value: "refunded", label: "Refunded" },
 ];
+
+export const ACTIVE_STATUS_OPTIONS: CmsSelectOption[] = [
+  { value: "true", label: "Active" },
+  { value: "false", label: "Inactive" },
+];
+
+export const ACTIVE_STATUS_FILTER_OPTIONS: CmsSelectOption[] = [
+  { value: "", label: "All banners" },
+  ...ACTIVE_STATUS_OPTIONS,
+];

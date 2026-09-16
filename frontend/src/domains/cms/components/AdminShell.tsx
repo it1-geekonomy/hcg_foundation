@@ -38,8 +38,8 @@ export default function AdminShell({
         onMobileClose={closeMobile}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-[#E8E8E4] bg-[#F7F7F5]/95 px-4 backdrop-blur-md sm:h-16 sm:px-6 lg:px-8">
+      <div className="relative z-0 flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-[#E8E8E4] bg-[#F7F7F5]/95 px-4 backdrop-blur-md sm:h-16 sm:px-6 lg:px-8">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
@@ -67,7 +67,7 @@ export default function AdminShell({
         </header>
 
         <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
-          <div className="mx-auto w-full max-w-6xl">{children}</div>
+          <div className="mx-auto w-full max-w-none">{children}</div>
         </main>
       </div>
 

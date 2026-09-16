@@ -1,44 +1,49 @@
 export type CardData = {
+  id?: string;
   number: string;
   title: string;
   date: string;
   description: string;
   image: string;
+  href?: string;
 };
 
-export const CARDS: CardData[] = [
-  {
-    number: "1",
-    title: "Art Therapy & Wellness",
-    date: "19 Dec 2025",
-    description:
-      "Publishing and graphic design. Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content.",
-    image: "/Projects/p1.png",
-  },
-  {
-    number: "2",
-    title: "Cancer Awareness & Screening",
-    date: "19 Dec 2025",
-    description:
-      "Publishing and graphic design. Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content.",
-    image: "/Projects/p2.png",
-  },
-  {
-    number: "3",
-    title: "HPV Vaccination Program",
-    date: "19 Dec 2025",
-    description:
-      "Publishing and graphic design. Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content.",
-    image: "/Projects/p3.png",
-  },
-  {
-    number: "4",
-    title: "Financial Support for Pediatric Patients",
-    date: "19 Dec 2025",
-    description:
-      "Publishing and graphic design. Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content.",
-    image: "/Projects/p4.png",
-  },
-];
-
 export const COLLAPSED_WIDTH = 130;
+
+export function formatProjectCardDate(value?: string | null): string {
+  if (!value?.trim()) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export function mapProjectToCard(
+  project: {
+    id?: string;
+    title: string;
+    slug?: string;
+    projectBanner?: string | null;
+    projectMobileBanner?: string | null;
+    projectDate?: string | null;
+    shortDescription?: string | null;
+    displayOrder?: number | null;
+  },
+  index: number
+): CardData {
+  return {
+    id: project.id,
+    number: String(project.displayOrder ?? index + 1),
+    title: project.title,
+    date: formatProjectCardDate(project.projectDate),
+    description: project.shortDescription?.trim() || "No description yet.",
+    image:
+      project.projectBanner?.trim() ||
+      project.projectMobileBanner?.trim() ||
+      "/Projects/p1.png",
+    href: project.slug ? `/resources/projects/${project.slug}` : undefined,
+  };
+}

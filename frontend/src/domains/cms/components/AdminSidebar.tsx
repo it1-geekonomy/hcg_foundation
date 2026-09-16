@@ -89,7 +89,7 @@ function SidebarNav({
           <button
             type="button"
             onClick={() => onCollapsedChange(!collapsed)}
-            className="absolute top-1/2 right-0 z-40 flex size-7 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/12 bg-[#171717] text-white/70 shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors hover:border-[#FCCC2D]/50 hover:text-[#FCCC2D]"
+            className="absolute top-1/2 right-0 z-50 flex size-7 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/12 bg-[#171717] text-white/70 shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors hover:border-[#FCCC2D]/50 hover:text-[#FCCC2D]"
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? (
@@ -258,7 +258,7 @@ export default function AdminSidebar({
 
       <aside
         className={cn(
-          "relative sticky top-0 z-30 hidden h-screen shrink-0 flex-col overflow-visible border-r border-white/[0.06] bg-[#0C0C0C] text-white transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:flex",
+          "relative sticky top-0 z-50 hidden h-screen shrink-0 flex-col overflow-visible border-r border-white/[0.06] bg-[#0C0C0C] text-white transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:flex",
           collapsed ? "w-[88px]" : "w-[280px]"
         )}
       >

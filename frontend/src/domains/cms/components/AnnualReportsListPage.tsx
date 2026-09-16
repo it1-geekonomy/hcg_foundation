@@ -11,6 +11,7 @@ import { cmsToast } from "@/domains/cms/lib/toast";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import AnnualReportCoverTile from "./AnnualReportCoverTile";
 import { CmsPagination, type PaginationMeta } from "./CmsPagination";
+import CmsSearchInput from "./CmsSearchInput";
 import CmsSelect, { CONTENT_STATUS_FILTER_OPTIONS } from "./CmsSelect";
 
 const PAGE_SIZE = 20;
@@ -167,14 +168,15 @@ export default function AnnualReportsListPage() {
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <Input
+        <CmsSearchInput
           placeholder="Search title / year…"
           value={search}
-          onChange={(e) => {
+          onDebouncedChange={(next) => {
             setPage(1);
-            setSearch(e.target.value);
+            setSearch(next);
           }}
-          className="h-10 bg-white sm:max-w-sm sm:flex-1"
+          className="sm:max-w-sm sm:flex-1"
+          inputClassName="h-10 bg-white"
         />
         {tab === "active" ? (
           <CmsSelect

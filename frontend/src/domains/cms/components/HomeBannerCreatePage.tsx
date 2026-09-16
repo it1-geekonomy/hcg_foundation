@@ -6,33 +6,41 @@ import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { cmsApi } from "@/domains/cms/lib/api";
 import { cmsToast } from "@/domains/cms/lib/toast";
-import ProjectForm, {
-  emptyProjectForm,
+import HomeBannerForm, {
+  emptyHomeBannerForm,
   formValuesToFields,
-  type ProjectFormValues,
-} from "./ProjectForm";
+  type HomeBannerFormValues,
+} from "./HomeBannerForm";
 
-export default function ProjectCreatePage() {
+export default function HomeBannerCreatePage() {
   const router = useRouter();
-  const [form, setForm] = useState<ProjectFormValues>(emptyProjectForm);
-  const [slugLocked, setSlugLocked] = useState(false);
+  const [form, setForm] = useState<HomeBannerFormValues>(emptyHomeBannerForm);
   const [saving, setSaving] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (saving) return;
-    if (!form.title.trim() || !form.slug.trim()) {
-      cmsToast.error("Title and slug are required");
+    if (!form.name.trim()) {
+      cmsToast.error("Name is required");
+      return;
+    }
+    if (!form.title.trim()) {
+      cmsToast.error("Title is required");
+      return;
+    }
+    if (!form.bannerImageFile) {
+      cmsToast.error("Banner image is required");
       return;
     }
     setSaving(true);
     try {
-      const res = await cmsApi.createProject(formValuesToFields(form), {
-        projectBanner: form.projectBannerFile,
-        projectMobileBanner: form.projectMobileBannerFile,
+      const res = await cmsApi.createHomeBanner(formValuesToFields(form), {
+        bannerImage: form.bannerImageFile,
+        mobileBannerImage: form.mobileBannerImageFile,
+        profileImage: form.profileImageFile,
       });
-      cmsToast.success(res.message || "Project created successfully");
-      router.push(`/admin/projects/${res.data.id}`);
+      cmsToast.success(res.message || "Home banner created successfully");
+      router.push(`/admin/home-banners/${res.data.id}`);
     } catch (err) {
       cmsToast.error(
         err instanceof Error ? err.message : "Failed to create"
@@ -45,29 +53,28 @@ export default function ProjectCreatePage() {
     <div className="space-y-6">
       <div>
         <Link
-          href="/admin/projects"
+          href="/admin/home-banners"
           className="mb-3 inline-flex items-center gap-1.5 font-manrope text-sm text-[#5C5C5C] transition hover:text-[#212121]"
         >
           <ArrowLeft className="size-3.5" />
           Back to list
         </Link>
         <h1 className="font-manrope text-2xl font-semibold text-[#212121]">
-          Add project
+          Add home banner
         </h1>
         <p className="mt-1 font-manrope text-sm text-muted-foreground">
-          Upload banner images (WebP/AVIF, max 5MB). Set status to{" "}
-          <strong>published</strong> to show on the website.
+          Upload banner images and set visibility to <strong>Active</strong> to
+          show on the website.
         </p>
       </div>
 
-      <ProjectForm
+      <HomeBannerForm
+        mode="create"
         value={form}
         onChange={setForm}
         onSubmit={onSubmit}
-        submitLabel="Create project"
+        submitLabel="Create banner"
         saving={saving}
-        slugLocked={slugLocked}
-        onSlugManualEdit={() => setSlugLocked(true)}
       />
     </div>
   );
