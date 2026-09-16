@@ -144,16 +144,16 @@ export default function ParticipateModal({
         <div className="relative z-10 p-5 sm:p-8 md:p-10 overflow-y-auto max-h-[85vh] sm:max-h-[88vh] flex flex-col justify-between">
           {/* Header Title & Subtitle matching Figma 100% */}
           <div className="text-center max-w-xl mx-auto mb-6 sm:mb-8">
-            <Typography variant="heading-2" as="h2" className="font-serif text-2xl sm:text-3xl lg:text-[32px] text-[#2E1C12] italic font-normal tracking-tight mb-1">
+            <Typography variant="heading-2" as="h2" className="font-serif text-[1.5rem] sm:text-[1.875rem] lg:text-[2rem] text-[#2E1C12] italic font-normal tracking-tight mb-1">
               {isIntern && "Apply for Internship at"}
               {isFundraise && "Start a Fundraising Campaign at"}
               {!isIntern && !isFundraise && "Become a Volunteer at"}
             </Typography>
-            <div className="text-2xl sm:text-3xl lg:text-[32px] font-sans font-bold tracking-tight mb-3">
+            <div className="text-[1.5rem] sm:text-[1.875rem] lg:text-[2rem] font-sans font-bold tracking-tight mb-3">
               <span className="text-[#0083B0]">HCG </span>
               <span className="text-[#DF6A4B]">Foundation</span>
             </div>
-            <Typography variant="body-8" as="p" className="font-manrope text-xs sm:text-sm text-[#6C6048] leading-relaxed">
+            <Typography variant="body-8" as="p" className="font-manrope text-[0.75rem] sm:text-[0.875rem] text-[#6C6048] leading-relaxed">
               {isIntern &&
                 "Passionate about making a difference? Join the HCG Foundation Internship Program to gain hands-on experience, learn from experts, and build skills for your future career."}
               {isFundraise &&
@@ -460,7 +460,7 @@ export default function ParticipateModal({
                 />
                 <label
                   htmlFor="participate-terms"
-                  className="text-xs text-[#6C6048] cursor-pointer"
+                  className="text-[0.75rem] text-[#6C6048] cursor-pointer"
                 >
                   I have read and agree to the{" "}
                   <a
@@ -477,7 +477,7 @@ export default function ParticipateModal({
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#382E07] font-semibold text-sm sm:text-base rounded-[8px] shadow-xs transition duration-300 hover:bg-[#E9B510] hover:shadow-md cursor-pointer"
+                className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#382E07] font-semibold text-[0.875rem] sm:text-[1rem] rounded-[8px] shadow-xs transition duration-300 hover:bg-[#E9B510] hover:shadow-md cursor-pointer"
               >
                 Submit Application
               </button>

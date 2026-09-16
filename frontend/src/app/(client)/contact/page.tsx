@@ -39,7 +39,7 @@ export default function ClientContact() {
             variant="heading-1"
             as="h1"
             style={{ textAlign: "left" }}
-            className="font-serif text-2xl sm:text-3xl lg:text-4xl italic text-[#2E1C12] tracking-tight text-left font-normal"
+            className="font-serif text-[1.5rem] sm:text-[1.875rem] lg:text-[2.25rem] italic text-[#2E1C12] tracking-tight text-left font-normal"
           >
             Let&apos;s Connect
           </Typography>
@@ -47,7 +47,7 @@ export default function ClientContact() {
             variant="body-8"
             as="p"
             style={{ textAlign: "left" }}
-            className="mt-3 sm:mt-4 max-w-full lg:max-w-[68.75rem] font-manrope text-sm sm:text-base lg:text-[1.0625rem] leading-relaxed text-[#6C6048]"
+            className="mt-3 sm:mt-4 max-w-full lg:max-w-[68.75rem] font-manrope text-[0.875rem] sm:text-[1rem] lg:text-[1.0625rem] leading-relaxed text-[#6C6048]"
           >
             Whether you&apos;re seeking patient support, exploring partnership
             opportunities, interested in volunteering, or simply have a
@@ -63,12 +63,12 @@ export default function ClientContact() {
                 <Phone className="size-7 sm:size-8" />
               </div>
               <div className="flex flex-col font-manrope text-left">
-                <Typography variant="body-8" as="span" style={{ textAlign: "left" }} className="text-lg sm:text-xl font-bold text-[#2E1C12]">
+                <Typography variant="body-8" as="span" style={{ textAlign: "left" }} className="text-[1.125rem] sm:text-[1.25rem] font-bold text-[#2E1C12]">
                   Phone Number
                 </Typography>
                 <a
                   href="tel:+918033669999"
-                  className="mt-1 text-lg sm:text-xl font-medium text-[#3D382E] transition hover:text-[#B88700]"
+                  className="mt-1 text-[1.125rem] sm:text-[1.25rem] font-medium text-[#3D382E] transition hover:text-[#B88700]"
                 >
                   +91 80 3366 9999
                 </a>
@@ -80,12 +80,12 @@ export default function ClientContact() {
                 <Mail className="size-7 sm:size-8" />
               </div>
               <div className="flex flex-col font-manrope text-left">
-                <Typography variant="body-8" as="span" style={{ textAlign: "left" }} className="text-lg sm:text-xl font-bold text-[#2E1C12]">
+                <Typography variant="body-8" as="span" style={{ textAlign: "left" }} className="text-[1.125rem] sm:text-[1.25rem] font-bold text-[#2E1C12]">
                   Email
                 </Typography>
                 <a
                   href="mailto:hcgfoundation@gmail.com"
-                  className="mt-1 text-lg sm:text-xl font-medium text-[#3D382E] transition hover:text-[#B88700]"
+                  className="mt-1 text-[1.125rem] sm:text-[1.25rem] font-medium text-[#3D382E] transition hover:text-[#B88700]"
                 >
                   hcgfoundation@gmail.com
                 </a>
@@ -97,10 +97,10 @@ export default function ClientContact() {
                 <MapPin className="size-7 sm:size-8" />
               </div>
               <div className="flex flex-col font-manrope text-left">
-                <Typography variant="body-8" as="span" style={{ textAlign: "left" }} className="text-lg sm:text-xl font-bold text-[#2E1C12]">
+                <Typography variant="body-8" as="span" style={{ textAlign: "left" }} className="text-[1.125rem] sm:text-[1.25rem] font-bold text-[#2E1C12]">
                   Address
                 </Typography>
-                <Typography variant="body-8" as="p" style={{ textAlign: "left" }} className="mt-1 text-base sm:text-lg lg:text-xl font-medium leading-relaxed text-[#3D382E]">
+                <Typography variant="body-8" as="p" style={{ textAlign: "left" }} className="mt-1 text-[1rem] sm:text-[1.125rem] lg:text-[1.25rem] font-medium leading-relaxed text-[#3D382E]">
                   Ground Floor, Tower Block
                   <br />
                   Unity Building Complex, Mission Road
@@ -114,10 +114,10 @@ export default function ClientContact() {
           <div className="lg:col-span-7 font-manrope w-full flex lg:justify-end">
             <div className="w-full max-w-full lg:max-w-[45rem] min-h-[32.481rem] rounded-[10px] bg-[#FFF4D4] p-6 sm:p-8 lg:p-[2.125rem_2.5625rem] border border-[#F3E3B6] font-manrope flex flex-col justify-between items-start gap-4 lg:gap-[0.581rem]">
               <div className="w-full text-left">
-                <Typography variant="heading-3" as="h2" style={{ textAlign: "left" }} className="font-manrope text-2xl sm:text-3xl font-bold text-[#3D382E] tracking-tight">
+                <Typography variant="heading-3" as="h2" style={{ textAlign: "left" }} className="font-manrope text-[1.5rem] sm:text-[1.875rem] font-bold text-[#3D382E] tracking-tight">
                   Send Us a Message
                 </Typography>
-                <Typography variant="body-8" as="p" style={{ textAlign: "left" }} className="mt-2 font-manrope text-xs sm:text-sm text-[#706656] leading-relaxed">
+                <Typography variant="body-8" as="p" style={{ textAlign: "left" }} className="mt-2 font-manrope text-[0.75rem] sm:text-[0.875rem] text-[#706656] leading-relaxed">
                   Have a question or would like to collaborate with us? Fill out the form below, and our team will get back to you as soon as possible.
                 </Typography>
               </div>
@@ -125,15 +125,15 @@ export default function ClientContact() {
               {formSubmitted ? (
                 <div className="mt-6 w-full flex flex-col items-center justify-center rounded-[10px] bg-white p-6 sm:p-8 text-center border border-[#FDE599] font-manrope my-auto">
                   <CheckCircle2 className="size-12 sm:size-14 text-[#2E7D32]" />
-                  <Typography variant="heading-3" as="h3" className="mt-4 font-manrope text-lg sm:text-xl font-bold text-[#382E07]">
+                  <Typography variant="heading-3" as="h3" className="mt-4 font-manrope text-[1.125rem] sm:text-[1.25rem] font-bold text-[#382E07]">
                     Message Sent Successfully!
                   </Typography>
-                  <Typography variant="body-2" as="p" className="mt-2 font-manrope text-xs sm:text-sm text-[#5C5232]">
+                  <Typography variant="body-2" as="p" className="mt-2 font-manrope text-[0.75rem] sm:text-[0.875rem] text-[#5C5232]">
                     Thank you for reaching out to HCG Foundation. We will respond to your message shortly.
                   </Typography>
                   <button
                     onClick={() => setFormSubmitted(false)}
-                    className="mt-6 font-manrope rounded-[6px] bg-[#FDC61D] px-6 py-2.5 text-sm sm:text-base font-semibold text-[#382E07] transition hover:bg-[#E9B510]"
+                    className="mt-6 font-manrope rounded-[6px] bg-[#FDC61D] px-6 py-2.5 text-[0.875rem] sm:text-[1rem] font-semibold text-[#382E07] transition hover:bg-[#E9B510]"
                   >
                     Send Another Message
                   </button>
@@ -188,7 +188,7 @@ export default function ClientContact() {
         <div className="relative mt-10 sm:mt-14 overflow-hidden rounded-[10px] border border-[#EFEAD8] bg-white shadow-xs">
           <div className="absolute top-4 left-4 z-10 hidden sm:block max-w-[16.25rem] rounded-lg bg-white/95 p-4 shadow-md backdrop-blur-xs border border-black/5 font-sans">
             <div className="flex items-center justify-between gap-2">
-              <Typography variant="body-8" as="span" style={{ textAlign: "left" }} className="font-bold text-xs text-[#2E1C12]">HCG Foundation</Typography>
+              <Typography variant="body-8" as="span" style={{ textAlign: "left" }} className="font-bold text-[0.75rem] text-[#2E1C12]">HCG Foundation</Typography>
               <div className="flex items-center gap-2">
                 <a
                   href="https://maps.google.com/?q=HCG+Foundation+Unity+Building+Mission+Road+Bangalore"
