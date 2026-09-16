@@ -122,7 +122,7 @@ export default function TeamViewPage() {
               {team.title}
             </h2>
             <span className="rounded-full bg-[#E8F0F6] px-2.5 py-0.5 font-manrope text-xs font-medium capitalize text-[#1A4A6E]">
-              {team.memberType ?? "trustee"}
+              {team.type ?? "team"}
             </span>
             <span className="rounded-full bg-[#FFF1C2] px-2.5 py-0.5 font-manrope text-xs font-medium text-[#7A5A00]">
               {team.status}
@@ -168,7 +168,7 @@ export default function TeamViewPage() {
               designation={team.designation}
               imageUrl={team.teamImage}
               description={hoverDescription || undefined}
-              variant={team.memberType === "team" ? "team" : "trustee"}
+              variant={team.type === "trustee" ? "trustee" : "team"}
             />
           </div>
         </div>
