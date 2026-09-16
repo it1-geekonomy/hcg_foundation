@@ -17,7 +17,7 @@ export default () => ({
     jwtSecret:
       process.env.AUTH_JWT_SECRET ?? 'hcg-dev-secret-change-me',
     jwtExpiresInSeconds: parseInt(
-      process.env.AUTH_JWT_EXPIRES_IN_SECONDS ?? String(60 * 60 * 24 * 7),
+      process.env.AUTH_JWT_EXPIRES_IN_SECONDS ?? String(60 * 60 * 24),
       10,
     ),
   },
