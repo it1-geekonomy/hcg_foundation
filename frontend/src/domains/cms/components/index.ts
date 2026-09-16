@@ -33,4 +33,7 @@ export { default as UsersListPage } from "./UsersListPage";
 export { default as UserCreatePage } from "./UserCreatePage";
 export { default as DonorsListPage } from "./DonorsListPage";
 export { default as DonorsViewPage } from "./DonorsViewPage";
+export { default as FundraisingCampaignsListPage } from "./FundraisingCampaignsListPage";
+export { default as FundraisingCampaignViewPage } from "./FundraisingCampaignViewPage";
+export { default as FundraisingCampaignEditPage } from "./FundraisingCampaignEditPage";
 export { default as CmsRichTextEditor } from "./CmsRichTextEditor";

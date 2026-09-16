@@ -220,6 +220,40 @@ export type Donor = {
   updatedAt: string;
 };
 
+export type CampaignStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "completed";
+
+export type FundraisingCampaign = {
+  id: string;
+  fullName: string;
+  phoneNumber: string;
+  email: string;
+  city: string;
+  fundraisingGoal: string;
+  fundraisingReason: string;
+  message?: string | null;
+  termsAccepted: boolean;
+  status: CampaignStatus;
+  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UpdateFundraisingCampaignPayload = Partial<{
+  fullName: string;
+  phoneNumber: string;
+  email: string;
+  city: string;
+  fundraisingGoal: string;
+  fundraisingReason: string;
+  message: string;
+  termsAccepted: boolean;
+  status: CampaignStatus;
+}>;
+
 export type Paginated<T> = {
   data: T[];
   meta: {
