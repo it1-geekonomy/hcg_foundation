@@ -103,8 +103,7 @@ export default function TeamViewPage() {
     );
   }
 
-  const hoverDescription =
-    plainText(team.content) || plainText(team.shortDescription);
+  const hoverDescription = plainText(team.content);
 
   return (
     <div className="space-y-6">
@@ -157,7 +156,6 @@ export default function TeamViewPage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(240px,300px)_minmax(0,1fr)]">
-        {/* Card preview — hover shows short description */}
         <div className="rounded-3xl bg-[#F3EEE3] p-5 sm:p-6">
           <p className="mb-4 text-center font-manrope text-[11px] font-semibold tracking-[0.16em] text-[#8A7A55] uppercase">
             Card preview · hover to slide content up
@@ -173,23 +171,7 @@ export default function TeamViewPage() {
           </div>
         </div>
 
-        {/* CMS content always visible */}
         <div className="space-y-4">
-          <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
-            <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
-              Short description
-            </h3>
-            {team.shortDescription ? (
-              <p className="font-manrope text-sm leading-relaxed text-[#444]">
-                {team.shortDescription}
-              </p>
-            ) : (
-              <p className="font-manrope text-sm text-muted-foreground">
-                No short description — add one in Edit for the card hover.
-              </p>
-            )}
-          </section>
-
           <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
             <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
               Content

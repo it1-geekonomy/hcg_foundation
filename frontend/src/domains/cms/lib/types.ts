@@ -18,7 +18,6 @@ export type Team = SeoFields & {
   designation?: string | null;
   teamImage?: string | null;
   content?: string | null;
-  shortDescription?: string | null;
   /** team | trustee — API field name is `type` */
   type: TeamType;
   status: ContentStatus;
@@ -33,7 +32,6 @@ export type TeamFields = SeoFields & {
   type: TeamType;
   designation?: string;
   content?: string;
-  shortDescription?: string;
   status?: ContentStatus;
   metaTitle?: string;
   metaDescription?: string;

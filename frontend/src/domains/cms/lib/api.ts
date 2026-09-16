@@ -209,9 +209,6 @@ function teamFormData(
   if (fields.content?.trim()) {
     fd.append("content", fields.content);
   }
-  if (fields.shortDescription?.trim()) {
-    fd.append("shortDescription", fields.shortDescription.trim());
-  }
   fd.append("status", fields.status ?? "draft");
   if (fields.metaTitle?.trim()) {
     fd.append("metaTitle", fields.metaTitle.trim());
@@ -242,7 +239,6 @@ function teamPatchFormData(
   append("type", fields.type);
   append("designation", fields.designation);
   append("content", fields.content);
-  append("shortDescription", fields.shortDescription);
   append("status", fields.status);
   append("metaTitle", fields.metaTitle);
   append("metaDescription", fields.metaDescription);

@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import { Textarea } from "@/shared/ui/textarea";
 import type {
   ContentStatus,
   Team,
@@ -31,7 +30,6 @@ export type TeamFormValues = {
   title: string;
   type: TeamType;
   designation: string;
-  shortDescription: string;
   content: string;
   status: ContentStatus;
   metaTitle: string;
@@ -45,7 +43,6 @@ export const emptyTeamForm = (): TeamFormValues => ({
   title: "",
   type: "team",
   designation: "",
-  shortDescription: "",
   content: "",
   status: "draft",
   metaTitle: "",
@@ -60,7 +57,6 @@ export function teamToFormValues(team: Team): TeamFormValues {
     title: team.title ?? "",
     type: team.type ?? "team",
     designation: team.designation ?? "",
-    shortDescription: team.shortDescription ?? "",
     content: team.content ?? "",
     status: team.status ?? "draft",
     metaTitle: team.metaTitle ?? "",
@@ -82,7 +78,6 @@ export function formValuesToFields(form: TeamFormValues): TeamFields {
     title: form.title.trim(),
     type: form.type,
     designation: form.designation.trim() || undefined,
-    shortDescription: form.shortDescription.trim() || undefined,
     content: plainContent ? form.content : undefined,
     status: form.status,
     metaTitle: form.metaTitle.trim() || undefined,
@@ -132,7 +127,6 @@ export function getTeamPatch(
     "type",
     "designation",
     "content",
-    "shortDescription",
     "status",
     "metaTitle",
     "metaDescription",
@@ -231,17 +225,6 @@ export default function TeamForm({
               })
             }
             disabled={saving}
-          />
-        </CmsFormField>
-
-        <CmsFormField label="Short Description" htmlFor="shortDescription">
-          <Textarea
-            id="shortDescription"
-            placeholder="Short blurb for cards"
-            value={value.shortDescription}
-            onChange={(e) =>
-              onChange({ ...value, shortDescription: e.target.value })
-            }
           />
         </CmsFormField>
 
