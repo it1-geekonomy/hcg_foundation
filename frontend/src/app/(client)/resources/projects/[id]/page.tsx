@@ -66,7 +66,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-12 sm:gap-10 lg:gap-14 items-start">
           <div className="sm:col-span-7 flex flex-col">
-            <Typography variant="heading-1" as="h1" className="font-serif text-[1.5rem] sm:text-[1.75rem] md:text-[2.125rem] lg:text-[2.375rem] xl:text-[2.5rem] italic text-[#2E1C12] tracking-tight font-normal leading-snug">
+            <Typography variant="heading-1" as="h1" className="text-[#2E1C12]">
               {projectItem.title}
             </Typography>
 
@@ -84,7 +84,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             </div>
 
             <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-2.5 sm:gap-3">
-              <Typography variant="body-8" as="span" className="text-[0.75rem] sm:text-[0.875rem] font-semibold text-[#8B7355]">Share this project</Typography>
+              <span className="text-[0.75rem] sm:text-[0.875rem] font-semibold text-[#8B7355]">Share this project</span>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -133,7 +133,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
       <section className={`${CONTAINER} py-8 sm:py-12 border-t border-[#E8DFC5]`}>
         <div className="flex items-center justify-between mb-6 sm:mb-8">
-          <Typography variant="heading-2" as="h2" className="font-serif italic text-[1.5rem] sm:text-[1.875rem] text-[#2E1C12] font-normal">
+          <Typography variant="heading-2" as="h2" className="text-[#2E1C12]">
             Related Articles
           </Typography>
           <Link
@@ -161,19 +161,21 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
               <div className="absolute inset-x-3 bottom-3 sm:inset-x-4 sm:bottom-4 xl:inset-x-5 xl:bottom-5 p-3 sm:p-4 lg:p-5 xl:pt-[1.8rem] xl:pr-[2.6125rem] xl:pb-[1.74375rem] xl:pl-[1.74375rem] flex items-center justify-between gap-3 sm:gap-4 rounded-[6px] border border-white/10 bg-[#8D8D8D]/40 backdrop-blur-[28px] text-white transition duration-300 group-hover:bg-[#8D8D8D]/50">
                 <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 sm:gap-1.5 xl:gap-[0.581rem]">
-                  <Typography variant="heading-3" as="h3" className="text-[0.875rem] sm:text-[1rem] lg:text-[1.125rem] xl:text-[1.25rem] font-normal text-white drop-shadow-xs line-clamp-1 group-hover:text-[#FCCC2D] transition">
-                    {item.title}
-                  </Typography>
+                  <div className="drop-shadow-xs line-clamp-1 group-hover:text-[#FCCC2D] transition">
+                    <Typography variant="heading-3" as="h3" className="text-white">
+                      {item.title}
+                    </Typography>
+                  </div>
 
-                  <div className="flex items-center gap-1.5 text-[0.6875rem] sm:text-[0.75rem] lg:text-[0.875rem] text-white/90 font-normal">
+                  <div className="flex items-center gap-1.5 text-white/90 truncate">
                     <Calendar className="size-3 sm:size-3.5 xl:size-4 text-white/90 shrink-0" />
-                    <Typography variant="body-8" as="span" className="truncate">Project Date: {item.date}</Typography>
+                    <Typography variant="body-8" as="span">Project Date: {item.date}</Typography>
                   </div>
                 </div>
 
                 <div className="shrink-0">
                   <span className="flex items-center justify-center gap-1.5 xl:gap-[0.581rem] px-3 py-2 sm:px-3.5 sm:py-2.5 xl:w-[11rem] xl:h-[3.5625rem] xl:py-[0.581rem] xl:pr-[0.581rem] xl:pl-[1.1rem] rounded-[6px] border border-white/10 bg-[#FCCC2D] backdrop-blur-[21px] text-[#382E07] text-[0.75rem] sm:text-[0.875rem] font-semibold shadow-xs transition duration-300 group-hover:bg-[#E9B510] group-hover:scale-105 cursor-pointer">
-                    <Typography variant="body-8" as="span" className="whitespace-nowrap">Read More</Typography>
+                    <Typography variant="body-8" as="span">Read More</Typography>
                     <ArrowUpRight className="size-3.5 sm:size-4 xl:size-5 text-[#382E07] shrink-0" />
                   </span>
                 </div>

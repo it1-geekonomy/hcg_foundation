@@ -15,7 +15,6 @@ import {
   Target,
   ChevronDown,
 } from "lucide-react";
-import Typography from "@/lib/Typography";
 import PhoneInputField from "@/shared/forms/PhoneInputField";
 
 export type ParticipateModalType = "intern" | "fundraise" | "volunteer" | null;
@@ -144,16 +143,16 @@ export default function ParticipateModal({
         <div className="relative z-10 p-5 sm:p-8 md:p-10 overflow-y-auto max-h-[85vh] sm:max-h-[88vh] flex flex-col justify-between">
           {/* Header Title & Subtitle matching Figma 100% */}
           <div className="text-center max-w-xl mx-auto mb-6 sm:mb-8">
-            <Typography variant="heading-2" as="h2" className="font-serif text-[1.5rem] sm:text-[1.875rem] lg:text-[2rem] text-[#2E1C12] italic font-normal tracking-tight mb-1">
+            <h2 className="font-serif text-[1.5rem] sm:text-[1.875rem] lg:text-[2rem] text-[#2E1C12] italic font-normal tracking-tight mb-1">
               {isIntern && "Apply for Internship at"}
               {isFundraise && "Start a Fundraising Campaign at"}
               {!isIntern && !isFundraise && "Become a Volunteer at"}
-            </Typography>
+            </h2>
             <div className="text-[1.5rem] sm:text-[1.875rem] lg:text-[2rem] font-sans font-bold tracking-tight mb-3">
               <span className="text-[#0083B0]">HCG </span>
               <span className="text-[#DF6A4B]">Foundation</span>
             </div>
-            <Typography variant="body-8" as="p" className="font-manrope text-[0.75rem] sm:text-[0.875rem] text-[#6C6048] leading-relaxed">
+            <p className="font-manrope text-[0.75rem] sm:text-[0.875rem] text-[#6C6048] leading-relaxed">
               {isIntern &&
                 "Passionate about making a difference? Join the HCG Foundation Internship Program to gain hands-on experience, learn from experts, and build skills for your future career."}
               {isFundraise &&
@@ -161,17 +160,17 @@ export default function ParticipateModal({
               {!isIntern &&
                 !isFundraise &&
                 "Join our team of dedicated volunteers and help support patient care initiatives, screening camps, administrative work, and community outreach."}
-            </Typography>
+            </p>
           </div>
 
           {submitted ? (
             <div className="my-8 p-6 bg-[#FFF9EA] border border-[#F3E3B6] rounded-[8px] text-center">
-              <Typography variant="heading-3" as="h3" className="font-serif text-xl text-[#2E1C12] font-semibold mb-2">
+              <h3 className="font-serif text-xl text-[#2E1C12] font-semibold mb-2">
                 Application Submitted!
-              </Typography>
-              <Typography variant="body-8" as="p" className="font-manrope text-sm text-[#6C6048]">
+              </h3>
+              <p className="font-manrope text-sm text-[#6C6048]">
                 Thank you for reaching out to HCG Foundation. Our team will review your application and get in touch with you soon.
-              </Typography>
+              </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 lg:space-y-6 font-manrope">

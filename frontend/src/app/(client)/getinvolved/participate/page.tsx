@@ -28,18 +28,20 @@ export default function ParticipatePage() {
           <div className="lg:col-span-6">
             <div className="flex items-center gap-2 mb-2">
               <span className="inline-block size-2 rounded-full bg-[#B88700]" />
-              <Typography variant="body-8" as="span" className="text-[0.75rem] font-semibold text-[#B88700] uppercase tracking-wider">
+              <Typography variant="body-8" as="span" className="text-[#B88700]">
                 Our Mission
               </Typography>
             </div>
-            <Typography variant="heading-1" as="h1" className="font-serif text-[1.5rem] sm:text-[1.875rem] lg:text-[2.5rem] italic text-[#2E1C12] tracking-tight font-normal leading-tight lg:leading-[3rem]">
+            <Typography variant="heading-1" as="h1" className="text-[#2E1C12]">
               Art Gallery & Art Therapy Sessions
             </Typography>
           </div>
-          <div className="lg:col-span-6 lg:pt-6">
-            <Typography variant="body-8" as="p" className="text-[0.875rem] sm:text-[1rem] lg:text-[1.1875rem] text-[#6C6048] leading-relaxed lg:leading-[1.6875rem] text-justify max-w-2xl lg:ml-auto">
-              Your time, skills and support can bring hope to patients and families. Explore the different ways you can get involved with HCG Foundation.
-            </Typography>
+          <div className="lg:col-span-6 lg:pt-6 flex justify-end">
+            <div className="max-w-2xl">
+              <Typography variant="body-8" as="p" className="text-[#6C6048]">
+                Your time, skills and support can bring hope to patients and families. Explore the different ways you can get involved with HCG Foundation.
+              </Typography>
+            </div>
           </div>
         </div>
 
@@ -72,12 +74,16 @@ export default function ParticipatePage() {
               {/* Card Body: Title, Description, Apply Button */}
               <div className="p-6 sm:p-7 pt-3 flex-1 flex flex-col justify-between">
                 <div>
-                  <Typography variant="heading-2" as="h2" className="font-serif text-[1.25rem] sm:text-[1.5rem] lg:text-[2rem] font-normal text-[#2E1C12] leading-tight mb-3">
-                    {card.title}
-                  </Typography>
-                  <Typography variant="body-8" as="p" className="text-[0.875rem] sm:text-[1rem] lg:text-[1.0625rem] leading-relaxed text-[#6C6048] mb-6">
-                    {card.description}
-                  </Typography>
+                  <div className="mb-3">
+                    <Typography variant="heading-2" as="h2" className="text-[#2E1C12]">
+                      {card.title}
+                    </Typography>
+                  </div>
+                  <div className="mb-6">
+                    <Typography variant="body-8" as="p" className="text-[#6C6048]">
+                      {card.description}
+                    </Typography>
+                  </div>
                 </div>
 
                 <div>
@@ -109,10 +115,12 @@ export default function ParticipatePage() {
                 />
               </div>
               <div>
-                <Typography variant="heading-3" as="h3" className="font-serif text-[1.125rem] sm:text-[1.25rem] lg:text-[1.5625rem] font-normal text-[#2E1C12] leading-tight mb-1.5">
-                  {benefit.title}
-                </Typography>
-                <Typography variant="body-8" as="p" className="text-[0.75rem] sm:text-[0.875rem] lg:text-[1.09375rem] text-[#6C6048] leading-relaxed">
+                <div className="mb-1.5">
+                  <Typography variant="heading-3" as="h3" className="text-[#2E1C12]">
+                    {benefit.title}
+                  </Typography>
+                </div>
+                <Typography variant="body-8" as="p" className="text-[#6C6048]">
                   {benefit.description}
                 </Typography>
               </div>

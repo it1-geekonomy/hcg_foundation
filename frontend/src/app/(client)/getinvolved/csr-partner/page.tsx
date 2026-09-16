@@ -18,14 +18,16 @@ export default function CsrPartnerPage() {
         {/* Top Header Section aligned 100% with Navbar */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start mb-10 sm:mb-14">
           <div className="lg:col-span-6">
-            <Typography variant="heading-1" as="h1" className="font-serif text-[1.5rem] sm:text-[1.875rem] lg:text-[2.5rem] italic text-[#2E1C12] tracking-tight font-normal leading-tight lg:leading-[3rem]">
+            <Typography variant="heading-1" as="h1" className="text-[#2E1C12]">
               Different Ways To Partner with HCG Foundation
             </Typography>
           </div>
-          <div className="lg:col-span-6">
-            <Typography variant="body-8" as="p" className="text-[0.875rem] sm:text-[1rem] lg:text-[1.0625rem] text-[#6C6048] leading-relaxed lg:leading-[1.6875rem] text-justify max-w-2xl lg:ml-auto">
-              Corporate can partner with HCG Foundation to make your CSR investment count where it matters most. We have a wide range of partnership options for you to choose from; all of which are customizable to meet your CSR goals.
-            </Typography>
+          <div className="lg:col-span-6 flex justify-end">
+            <div className="max-w-2xl">
+              <Typography variant="body-8" as="p" className="text-[#6C6048]">
+                Corporate can partner with HCG Foundation to make your CSR investment count where it matters most. We have a wide range of partnership options for you to choose from; all of which are customizable to meet your CSR goals.
+              </Typography>
+            </div>
           </div>
         </div>
 
@@ -48,13 +50,17 @@ export default function CsrPartnerPage() {
 
               {/* Right Column: Number, Title, Description (Increased Text Size for Desktop Legibility) */}
               <div className="flex-1 p-6 sm:p-7 flex flex-col justify-start">
-                <Typography variant="display-1" as="span" className="font-serif text-[1.875rem] sm:text-[2.25rem] lg:text-[3.125rem] font-normal text-[#2E1C12]/40 tracking-tight mb-2">
-                  {card.number}
-                </Typography>
-                <Typography variant="heading-2" as="h2" className="font-serif text-[1.25rem] sm:text-[1.5rem] lg:text-[1.875rem] font-normal text-[#2E1C12] leading-tight mb-3">
-                  {card.title}
-                </Typography>
-                <Typography variant="body-8" as="p" className="text-[0.875rem] sm:text-[1rem] lg:text-[0.96875rem] leading-relaxed lg:leading-[1.5625rem] text-[#6C6048] font-normal text-justify">
+                <div className="mb-2">
+                  <Typography variant="display-1" as="span" className="text-[#2E1C12]/40">
+                    {card.number}
+                  </Typography>
+                </div>
+                <div className="mb-3">
+                  <Typography variant="heading-2" as="h2" className="text-[#2E1C12]">
+                    {card.title}
+                  </Typography>
+                </div>
+                <Typography variant="body-8" as="p" className="text-[#6C6048]">
                   {card.description}
                 </Typography>
               </div>
@@ -65,14 +71,16 @@ export default function CsrPartnerPage() {
         {/* Bottom Impact Banner */}
         <div className="mt-12 sm:mt-16 rounded-[8px] bg-[#FFF4D4] p-6 sm:p-10 border border-[#F3E3B6] grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
           <div className="lg:col-span-7">
-            <Typography variant="heading-2" as="h2" className="font-serif text-[1.5rem] sm:text-[1.875rem] lg:text-[2.25rem] italic text-[#2E1C12] font-normal leading-tight">
+            <Typography variant="heading-2" as="h2" className="text-[#2E1C12]">
               Together, We Can Create Greater Impact
             </Typography>
           </div>
           <div className="lg:col-span-5 flex flex-col items-start lg:items-end gap-4">
-            <Typography variant="body-8" as="p" className="text-[0.75rem] sm:text-[0.875rem] lg:text-[0.9375rem] text-[#6C6048] max-w-md lg:text-right">
-              Your organisation can help strengthen cancer care, support communities, and bring meaningful change to those who need it most.
-            </Typography>
+            <div className="max-w-md lg:text-right">
+              <Typography variant="body-8" as="p" className="text-[#6C6048]">
+                Your organisation can help strengthen cancer care, support communities, and bring meaningful change to those who need it most.
+              </Typography>
+            </div>
             <button
               type="button"
               onClick={() => setIsPartnerModalOpen(true)}

@@ -39,13 +39,15 @@ const CONTACT_INFO = [
     icon: MapPin,
     title: "Address",
     content: (
-      <Typography variant="body-8" as="p" className="mt-1 text-[1rem] sm:text-[1.125rem] lg:text-[1.25rem] font-medium leading-relaxed text-[#3D382E]">
-        Ground Floor, Tower Block
-        <br />
-        Unity Building Complex, Mission Road
-        <br />
-        Bangalore 560027, Karnataka, India
-      </Typography>
+      <div className="mt-1">
+        <Typography variant="body-8" as="p" className="text-[#3D382E]">
+          Ground Floor, Tower Block
+          <br />
+          Unity Building Complex, Mission Road
+          <br />
+          Bangalore 560027, Karnataka, India
+        </Typography>
+      </div>
     ),
   },
 ];
@@ -75,23 +77,17 @@ export default function ClientContact() {
     <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope pt-24 sm:pt-28 lg:pt-32">
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         <div className="w-full text-left">
-          <Typography
-            variant="heading-2"
-            as="h1"
-            className="font-serif text-[1.5rem] sm:text-[1.875rem] lg:text-[2.25rem] text-[#2E1C12] tracking-tight"
-          >
+          <Typography variant="heading-2" as="h1" className="text-[#2E1C12]">
             Let&apos;s Connect
           </Typography>
-          <Typography
-            variant="body-8"
-            as="p"
-            className="mt-3 sm:mt-4 max-w-full lg:max-w-[68.75rem] text-[0.875rem] sm:text-[1rem] lg:text-[1.0625rem] leading-relaxed text-[#6C6048]"
-          >
-            Whether you&apos;re seeking patient support, exploring partnership
-            opportunities, interested in volunteering, or simply have a
-            question, we&apos;re here to help. Reach out to us, and our team
-            will get back to you as soon as possible.
-          </Typography>
+          <div className="mt-3 sm:mt-4 max-w-full lg:max-w-[68.75rem]">
+            <Typography variant="body-8" as="p" className="text-[#6C6048]">
+              Whether you&apos;re seeking patient support, exploring partnership
+              opportunities, interested in volunteering, or simply have a
+              question, we&apos;re here to help. Reach out to us, and our team
+              will get back to you as soon as possible.
+            </Typography>
+          </div>
         </div>
 
         <div className="mt-8 sm:mt-12 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-12 items-start">
@@ -114,23 +110,29 @@ export default function ClientContact() {
           <div className="lg:col-span-7 w-full flex lg:justify-end">
             <div className="w-full max-w-full lg:max-w-[45rem] min-h-[32.481rem] rounded-[10px] bg-[#FFF4D4] p-6 sm:p-8 lg:p-[2.125rem_2.5625rem] border border-[#F3E3B6] flex flex-col justify-between items-start gap-4 lg:gap-[0.581rem]">
               <div className="w-full">
-                <Typography variant="heading-7" as="h2" className="text-[1.5rem] sm:text-[1.875rem] font-bold text-[#3D382E] tracking-tight">
+                <Typography variant="heading-7" as="h2" className="text-[#3D382E]">
                   Send Us a Message
                 </Typography>
-                <Typography variant="body-8" as="p" className="mt-2 text-[0.75rem] sm:text-[0.875rem] text-[#706656] leading-relaxed">
-                  Have a question or would like to collaborate with us? Fill out the form below, and our team will get back to you as soon as possible.
-                </Typography>
+                <div className="mt-2">
+                  <Typography variant="body-8" as="p" className="text-[#706656]">
+                    Have a question or would like to collaborate with us? Fill out the form below, and our team will get back to you as soon as possible.
+                  </Typography>
+                </div>
               </div>
 
               {formSubmitted ? (
                 <div className="mt-6 w-full flex flex-col items-center justify-center rounded-[10px] bg-white p-6 sm:p-8 text-center border border-[#FDE599] my-auto">
                   <CheckCircle2 className="size-12 sm:size-14 text-[#2E7D32]" />
-                  <Typography variant="heading-3" as="h3" className="mt-4 text-[1.125rem] sm:text-[1.25rem] font-bold text-[#382E07]">
-                    Message Sent Successfully!
-                  </Typography>
-                  <Typography variant="body-2" as="p" className="mt-2 text-[0.75rem] sm:text-[0.875rem] text-[#5C5232]">
-                    Thank you for reaching out to HCG Foundation. We will respond to your message shortly.
-                  </Typography>
+                  <div className="mt-4">
+                    <Typography variant="heading-8" as="h3" className="text-[#382E07]">
+                      Message Sent Successfully!
+                    </Typography>
+                  </div>
+                  <div className="mt-2">
+                    <Typography variant="body-2" as="p" className="text-[#5C5232]">
+                      Thank you for reaching out to HCG Foundation. We will respond to your message shortly.
+                    </Typography>
+                  </div>
                   <button
                     onClick={() => setFormSubmitted(false)}
                     className="mt-6 rounded-[6px] bg-[#FDC61D] px-6 py-2.5 text-[0.875rem] sm:text-[1rem] font-semibold text-[#382E07] transition hover:bg-[#E9B510]"
@@ -188,7 +190,7 @@ export default function ClientContact() {
         <div className="relative mt-10 sm:mt-14 overflow-hidden rounded-[10px] border border-[#EFEAD8] bg-white shadow-xs">
           <div className="absolute top-4 left-4 z-10 hidden sm:block max-w-[16.25rem] rounded-lg bg-white/95 p-4 shadow-md backdrop-blur-xs border border-black/5 font-sans">
             <div className="flex items-center justify-between gap-2">
-              <Typography variant="text-1" as="span" className="text-[0.75rem] text-[#2E1C12]">HCG Foundation</Typography>
+              <span className="text-[0.75rem] text-[#2E1C12]">HCG Foundation</span>
               <div className="flex items-center gap-2">
                 <a
                   href="https://maps.google.com/?q=HCG+Foundation+Unity+Building+Mission+Road+Bangalore"
@@ -210,17 +212,17 @@ export default function ClientContact() {
                 </a>
               </div>
             </div>
-            <Typography variant="body-8" as="p" className="mt-1.5 text-[0.6875rem] leading-snug text-[#5F6368]">
+            <p className="mt-1.5 text-[0.6875rem] leading-snug text-[#5F6368]">
               Ground Floor, Tower Block, UNITY BUILDING, Kalinga Rao Rd, Bengaluru, Karnataka 560027
-            </Typography>
+            </p>
             <div className="mt-2 flex items-center gap-1 text-[0.6875rem] font-medium text-[#5F6368]">
-              <Typography variant="body-8" as="span" className="font-bold text-[#E37400]">4.7</Typography>
+              <span className="font-bold text-[#E37400]">4.7</span>
               <div className="flex items-center text-[#F4B400]">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="size-3 fill-current" />
                 ))}
               </div>
-              <Typography variant="body-8" as="span" className="text-[#70757A] ml-0.5">(29)</Typography>
+              <span className="text-[#70757A] ml-0.5">(29)</span>
             </div>
           </div>
 
