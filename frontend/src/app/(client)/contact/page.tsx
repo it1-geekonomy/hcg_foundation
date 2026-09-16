@@ -15,24 +15,22 @@ const CONTACT_INFO = [
     icon: Phone,
     title: "Phone Number",
     content: (
-      <a
-        href="tel:+918033669999"
-        className="mt-1 text-[1.125rem] sm:text-[1.25rem] font-medium text-[#3D382E] transition hover:text-[#B88700]"
-      >
-        +91 80 3366 9999
-      </a>
+      <div className="mt-1">
+        <Typography variant="body-8" as="p" className="text-[#3D382E]">
+          +91 80 3366 9999
+        </Typography>
+      </div>
     ),
   },
   {
     icon: Mail,
     title: "Email",
     content: (
-      <a
-        href="mailto:hcgfoundation@gmail.com"
-        className="mt-1 text-[1.125rem] sm:text-[1.25rem] font-medium text-[#3D382E] transition hover:text-[#B88700]"
-      >
-        hcgfoundation@gmail.com
-      </a>
+      <div className="mt-1">
+        <Typography variant="body-8" as="p" className="text-[#3D382E]">
+          hcgfoundation@gmail.com
+        </Typography>
+      </div>
     ),
   },
   {
