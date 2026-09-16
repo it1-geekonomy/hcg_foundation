@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsEnum, IsInt, IsOptional, IsString, Matches, MaxLength, Min } from 'class-validator';
 import { SeoFieldsDto } from '../../../common/dto/seo-fields.dto';
 import { ContentStatus } from '../../../common/enums/content-status.enum';
 
@@ -34,6 +35,17 @@ export class CreateProjectDto extends SeoFieldsDto {
   @IsOptional()
   @IsString()
   shortDescription?: string;
+
+  @ApiPropertyOptional({
+    example: 1,
+    default: 1,
+    description: 'Order on the website. Lower numbers appear first.',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  displayOrder?: number = 1;
 
   @ApiPropertyOptional({
     enum: ContentStatus,

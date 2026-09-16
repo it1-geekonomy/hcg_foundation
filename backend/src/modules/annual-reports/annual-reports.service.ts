@@ -53,7 +53,7 @@ export class AnnualReportsService {
       : (dto.annualReportMobileBanner ?? null);
 
     const annualReportFile = files?.annualReportFile
-      ? await this.cdn.upload(files.annualReportFile, 'annual-reports')
+      ? await this.cdn.upload(files.annualReportFile, 'annual-reports', 'document')
       : (dto.annualReportFile ?? null);
 
     try {
@@ -181,6 +181,7 @@ export class AnnualReportsService {
         entity.annualReportFile,
         files.annualReportFile,
         'annual-reports',
+        'document',
       );
     } else if (dto.annualReportFile !== undefined) {
       entity.annualReportFile = dto.annualReportFile;
