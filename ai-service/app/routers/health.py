@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.config import settings
-from app.services import chroma_store
+from app.services import vector_store
 
 router = APIRouter(tags=["health"])
 
@@ -9,9 +9,10 @@ router = APIRouter(tags=["health"])
 def health():
     return {
         "status": "ok",
-        "indexed_chunks": chroma_store.indexed_count(),
+        "vector_store": "pgvector",
+        "indexed_chunks": vector_store.indexed_count(),
         "openai_configured": bool(settings.openai_api_key),
         "chat_model": settings.resolved_chat_model,
         "embedding_model": settings.resolved_embedding_model,
-        "fingerprint": chroma_store.load_fingerprint(),
+        "fingerprint": vector_store.load_fingerprint(),
     }

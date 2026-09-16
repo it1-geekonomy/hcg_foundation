@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from app.config import settings
-from app.services import chroma_store
+from app.services import vector_store
 
 
 AUTHORITY_KEYWORDS = {
@@ -22,7 +22,7 @@ def hybrid_retrieve(queries: list[str], intents: set[str]) -> list[dict]:
     merged: dict[str, dict] = {}
 
     for q in queries:
-        for hit in chroma_store.search(q, n_results=settings.retrieval_candidate_k):
+        for hit in vector_store.search(q, n_results=settings.retrieval_candidate_k):
             parent = hit["parent_source_id"]
             prev = merged.get(parent)
             if not prev or hit["similarity"] > prev["similarity"]:
@@ -33,7 +33,7 @@ def hybrid_retrieve(queries: list[str], intents: set[str]) -> list[dict]:
     for intent in intents:
         keyword_bag.extend(AUTHORITY_KEYWORDS.get(intent, []))
     if keyword_bag:
-        for hit in chroma_store.get_by_title_keywords(keyword_bag):
+        for hit in vector_store.get_by_title_keywords(keyword_bag):
             parent = hit["parent_source_id"]
             prev = merged.get(parent)
             if not prev or hit["similarity"] > prev["similarity"]:
@@ -41,18 +41,18 @@ def hybrid_retrieve(queries: list[str], intents: set[str]) -> list[dict]:
 
     # Category expansion
     if "trustees" in intents or "founder" in intents:
-        for hit in chroma_store.get_all_by_category("Trustee"):
+        for hit in vector_store.get_all_by_category("Trustee"):
             parent = hit["parent_source_id"]
             if parent not in merged:
                 merged[parent] = hit
     if "events" in intents:
-        for hit in chroma_store.get_all_by_category("Event"):
+        for hit in vector_store.get_all_by_category("Event"):
             parent = hit["parent_source_id"]
             if parent not in merged:
                 merged[parent] = hit
     if "programs" in intents:
         for cat in ("Project", "Page", "Award"):
-            for hit in chroma_store.get_all_by_category(cat):
+            for hit in vector_store.get_all_by_category(cat):
                 parent = hit["parent_source_id"]
                 if parent not in merged:
                     merged[parent] = hit

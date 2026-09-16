@@ -12,7 +12,7 @@ from app.rag.normalize import normalize_for_retrieval
 from app.rag.rerank import pick_sources, rerank
 from app.rag.retrieve import hybrid_retrieve
 from app.rag.rewrite import build_multi_queries, rewrite_query
-from app.services import chroma_store
+from app.services import vector_store
 
 
 def run_chat(message: str, session_id: str | None = None) -> dict:
@@ -32,7 +32,7 @@ def run_chat(message: str, session_id: str | None = None) -> dict:
             "response_time_ms": int((time.perf_counter() - started) * 1000),
         }
 
-    if chroma_store.indexed_count() == 0:
+    if vector_store.indexed_count() == 0:
         return {
             "answer": C.SETUP_ANSWER,
             "sources": [],

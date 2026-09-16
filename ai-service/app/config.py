@@ -45,6 +45,7 @@ class Settings(BaseSettings):
     chroma_collection: str = "hcg_foundation_knowledge"
     knowledge_dir: str = "./knowledge/public"
     site_base_url: str = "https://hcgfoundation.org"
+    # Vectors live in Postgres via pgvector (document_chunks).
 
     @property
     def resolved_chat_model(self) -> str:

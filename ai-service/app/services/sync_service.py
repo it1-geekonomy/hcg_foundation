@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.services import chroma_store, corpus
+from app.services import corpus, vector_store
 
 
 def upsert_cms_event(event: dict) -> dict:
@@ -9,7 +9,7 @@ def upsert_cms_event(event: dict) -> dict:
     source_id = str(event["source_id"])
 
     if action == "delete":
-        deleted = chroma_store.delete_row(table, source_id)
+        deleted = vector_store.delete_row(table, source_id)
         return {
             "status": "deleted",
             "table": table,
@@ -27,7 +27,7 @@ def upsert_cms_event(event: dict) -> dict:
         "slug": event.get("slug") or "",
         "designation": event.get("designation") or "",
     }
-    chunks = chroma_store.upsert_document(doc)
+    chunks = vector_store.upsert_document(doc)
     return {
         "status": "upserted",
         "table": table,
@@ -38,31 +38,31 @@ def upsert_cms_event(event: dict) -> dict:
 
 def full_sync(force: bool = False) -> dict:
     """
-    Rebuild static + knowledge corpus into Chroma.
+    Rebuild static + knowledge corpus into Postgres/pgvector.
     CMS rows are upserted separately by NestJS; this endpoint refreshes
     curated pages/files and can force a fingerprint rewrite.
     """
     docs = corpus.load_corpus_documents()
-    fp = chroma_store.compute_fingerprint(docs)
-    current = chroma_store.load_fingerprint()
+    fp = vector_store.compute_fingerprint(docs)
+    current = vector_store.load_fingerprint()
 
-    if not force and current == fp and chroma_store.indexed_count() > 0:
+    if not force and current == fp and vector_store.indexed_count() > 0:
         return {
             "status": "skipped",
             "reason": "fingerprint_unchanged",
             "fingerprint": fp,
-            "indexed_chunks": chroma_store.indexed_count(),
+            "indexed_chunks": vector_store.indexed_count(),
             "corpus_documents": len(docs),
         }
 
     # Upsert corpus docs without wiping CMS chunks: delete only static/knowledge parents first
     for doc in docs:
-        chroma_store.upsert_document(doc)
+        vector_store.upsert_document(doc)
 
-    chroma_store.save_fingerprint(fp)
+    vector_store.save_fingerprint(fp)
     return {
         "status": "synced",
         "fingerprint": fp,
         "corpus_documents": len(docs),
-        "indexed_chunks": chroma_store.indexed_count(),
+        "indexed_chunks": vector_store.indexed_count(),
     }
