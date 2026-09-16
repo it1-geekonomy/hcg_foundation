@@ -4,8 +4,10 @@ import type {
   AnnualReportFields,
   Award,
   AwardFields,
+  CmsEvent,
   CreateLegalPagePayload,
   CreateUserPayload,
+  EventFields,
   LegalPage,
   LegalPageType,
   Paginated,
@@ -249,6 +251,82 @@ function awardPatchFormData(
   return fd;
 }
 
+function eventFormData(
+  fields: EventFields,
+  files?: {
+    eventBanner?: File | null;
+    eventMobileBanner?: File | null;
+  }
+) {
+  const fd = new FormData();
+  fd.append("title", fields.title.trim());
+  fd.append("slug", fields.slug.trim());
+  if (fields.eventDate?.trim()) fd.append("eventDate", fields.eventDate.trim());
+  if (fields.eventLocation?.trim()) {
+    fd.append("eventLocation", fields.eventLocation.trim());
+  }
+  if (fields.eventTime?.trim()) fd.append("eventTime", fields.eventTime.trim());
+  if (fields.content?.trim()) fd.append("content", fields.content);
+  if (fields.shortDescription?.trim()) {
+    fd.append("shortDescription", fields.shortDescription.trim());
+  }
+  if (fields.status) fd.append("status", fields.status);
+  if (fields.metaTitle?.trim()) fd.append("metaTitle", fields.metaTitle.trim());
+  if (fields.metaDescription?.trim()) {
+    fd.append("metaDescription", fields.metaDescription.trim());
+  }
+  if (fields.schemaCode?.trim()) {
+    fd.append("schemaCode", fields.schemaCode.trim());
+  }
+  if (files?.eventBanner instanceof File) {
+    fd.append("eventBanner", files.eventBanner, files.eventBanner.name);
+  }
+  if (files?.eventMobileBanner instanceof File) {
+    fd.append(
+      "eventMobileBanner",
+      files.eventMobileBanner,
+      files.eventMobileBanner.name
+    );
+  }
+  return fd;
+}
+
+function eventPatchFormData(
+  fields: Partial<EventFields>,
+  files?: {
+    eventBanner?: File | null;
+    eventMobileBanner?: File | null;
+  }
+) {
+  const fd = new FormData();
+  const append = (key: string, value?: string | null) => {
+    if (value === undefined) return;
+    fd.append(key, value ?? "");
+  };
+  append("title", fields.title);
+  append("slug", fields.slug);
+  append("eventDate", fields.eventDate);
+  append("eventLocation", fields.eventLocation);
+  append("eventTime", fields.eventTime);
+  append("content", fields.content);
+  append("shortDescription", fields.shortDescription);
+  append("status", fields.status);
+  append("metaTitle", fields.metaTitle);
+  append("metaDescription", fields.metaDescription);
+  append("schemaCode", fields.schemaCode);
+  if (files?.eventBanner instanceof File) {
+    fd.append("eventBanner", files.eventBanner, files.eventBanner.name);
+  }
+  if (files?.eventMobileBanner instanceof File) {
+    fd.append(
+      "eventMobileBanner",
+      files.eventMobileBanner,
+      files.eventMobileBanner.name
+    );
+  }
+  return fd;
+}
+
 export const cmsApi = {
   listTeams: (params?: ListQuery) =>
     request<Paginated<Team>>(`/teams${toQuery({ page: 1, limit: 20, ...params })}`),
@@ -345,6 +423,72 @@ export const cmsApi = {
 
   restoreAward: (id: string) =>
     request<ApiEnvelope<Award>>(`/awards/${id}/restore`, {
+      method: "POST",
+    }),
+
+  listEvents: (params?: ListQuery) =>
+    request<Paginated<CmsEvent>>(
+      `/events${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedEvents: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<CmsEvent>>(
+      `/events/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getEvent: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<CmsEvent>>(`/events/${id}`);
+    } catch (err) {
+      const deleted = await request<Paginated<CmsEvent>>(
+        `/events/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  createEvent: (
+    fields: EventFields,
+    files?: {
+      eventBanner?: File | null;
+      eventMobileBanner?: File | null;
+    }
+  ) =>
+    requestFormData<ApiEnvelope<CmsEvent>>(
+      "/events",
+      "POST",
+      eventFormData(fields, files)
+    ),
+
+  updateEvent: (
+    id: string,
+    fields: Partial<EventFields>,
+    files?: {
+      eventBanner?: File | null;
+      eventMobileBanner?: File | null;
+    }
+  ) =>
+    requestFormData<ApiEnvelope<CmsEvent>>(
+      `/events/${id}`,
+      "PATCH",
+      eventPatchFormData(fields, files)
+    ),
+
+  deleteEvent: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(`/events/${id}`, {
+      method: "DELETE",
+    }),
+
+  restoreEvent: (id: string) =>
+    request<ApiEnvelope<CmsEvent>>(`/events/${id}/restore`, {
       method: "POST",
     }),
 

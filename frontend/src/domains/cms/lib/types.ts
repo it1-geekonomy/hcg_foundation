@@ -97,6 +97,34 @@ export type AwardFields = {
   status?: ContentStatus;
 };
 
+export type CmsEvent = SeoFields & {
+  id: string;
+  title: string;
+  slug: string;
+  eventBanner?: string | null;
+  eventMobileBanner?: string | null;
+  eventDate?: string | null;
+  eventLocation?: string | null;
+  eventTime?: string | null;
+  content?: string | null;
+  shortDescription?: string | null;
+  status: ContentStatus;
+  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type EventFields = SeoFields & {
+  title: string;
+  slug: string;
+  eventDate?: string;
+  eventLocation?: string;
+  eventTime?: string;
+  content?: string;
+  shortDescription?: string;
+  status?: ContentStatus;
+};
+
 export type LegalPageType = "privacy_policy" | "terms_and_conditions";
 
 export type LegalPage = SeoFields & {

@@ -11,6 +11,7 @@ import {
   Shield,
   ScrollText,
   Award,
+  CalendarDays,
 } from "lucide-react";
 
 export type AdminMenuItem = {
@@ -52,6 +53,11 @@ export const adminMenuGroups: AdminMenuGroup[] = [
         label: "Awards",
         href: "/admin/awards",
         icon: Award,
+      },
+      {
+        label: "Events",
+        href: "/admin/events",
+        icon: CalendarDays,
       },
       {
         label: "Privacy Policy",
