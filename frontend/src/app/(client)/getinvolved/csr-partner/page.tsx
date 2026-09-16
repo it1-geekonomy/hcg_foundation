@@ -1,0 +1,99 @@
+"use client";
+
+import React, { useState } from "react";
+import { ArrowUpRight } from "lucide-react";
+import DonateForm from "@/shared/components/DonateForm";
+import PartnerWithUsModal from "@/shared/components/PartnerWithUsModal";
+import { CSR_PARTNER_CARDS } from "@/domains/getinvolved/constants/csr-partner";
+
+const CONTAINER = "max-w-[1200px] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6";
+
+export default function CsrPartnerPage() {
+  const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
+
+  return (
+    <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope pt-24 sm:pt-28 lg:pt-32">
+      <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
+        {/* Top Header Section aligned 100% with Navbar */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start mb-10 sm:mb-14">
+          <div className="lg:col-span-6">
+            <h1 className="font-serif text-2xl sm:text-3xl lg:text-[40px] italic text-[#2E1C12] tracking-tight font-normal leading-tight lg:leading-[48px]">
+              Different Ways To Partner with HCG Foundation
+            </h1>
+          </div>
+          <div className="lg:col-span-6">
+            <p className="font-manrope text-sm sm:text-base lg:text-[17px] text-[#6C6048] leading-relaxed lg:leading-[27px] text-justify max-w-2xl lg:ml-auto">
+              Corporate can partner with HCG Foundation to make your CSR investment count where it matters most. We have a wide range of partnership options for you to choose from; all of which are customizable to meet your CSR goals.
+            </p>
+          </div>
+        </div>
+
+        {/* 2-Column Horizontal Cards Grid with Larger Readable Desktop Text */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
+          {CSR_PARTNER_CARDS.map((card) => (
+            <div
+              key={card.id}
+              className="group relative flex flex-col sm:flex-row overflow-hidden rounded-[8px] bg-[#FFF9EA] border border-[#F3E3B6] shadow-xs transition duration-300 hover:shadow-md"
+            >
+              {/* Left Column: Image Asset */}
+              <div className="sm:w-[200px] md:w-[210px] lg:w-[230px] shrink-0 overflow-hidden relative min-h-[220px] sm:min-h-full bg-[#EFEAD8]">
+                <img
+                  src={card.imageUrl}
+                  alt={card.title}
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+              </div>
+
+              {/* Right Column: Number, Title, Description (Increased Text Size for Desktop Legibility) */}
+              <div className="flex-1 p-6 sm:p-7 flex flex-col justify-start">
+                <span className="font-serif text-3xl sm:text-4xl lg:text-[50px] font-normal text-[#2E1C12]/40 tracking-tight mb-2">
+                  {card.number}
+                </span>
+                <h2 className="font-serif text-xl sm:text-2xl lg:text-[30px] font-normal text-[#2E1C12] leading-tight mb-3">
+                  {card.title}
+                </h2>
+                <p className="font-manrope text-sm sm:text-base lg:text-[15.5px] leading-relaxed lg:leading-[25px] text-[#6C6048] font-normal text-justify">
+                  {card.description}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom Impact Banner */}
+        <div className="mt-12 sm:mt-16 rounded-[8px] bg-[#FFF4D4] p-6 sm:p-10 border border-[#F3E3B6] grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <div className="lg:col-span-7">
+            <h2 className="font-serif text-2xl sm:text-3xl lg:text-[36px] italic text-[#2E1C12] font-normal leading-tight">
+              Together, We Can Create Greater Impact
+            </h2>
+          </div>
+          <div className="lg:col-span-5 flex flex-col items-start lg:items-end gap-4">
+            <p className="font-manrope text-xs sm:text-sm lg:text-[15px] text-[#6C6048] max-w-md lg:text-right">
+              Your organisation can help strengthen cancer care, support communities, and bring meaningful change to those who need it most.
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsPartnerModalOpen(true)}
+              className="inline-flex items-center gap-2 px-5 py-3 sm:px-6 sm:py-3.5 bg-[#FCCC2D] text-[#382E07] text-sm sm:text-base lg:text-[17px] font-semibold rounded-[6px] shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
+            >
+              <span>Partner With Us</span>
+              <ArrowUpRight className="size-4 sm:size-5 text-[#382E07]" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Partner With Us Popup Modal */}
+      <PartnerWithUsModal
+        isOpen={isPartnerModalOpen}
+        onClose={() => setIsPartnerModalOpen(false)}
+      />
+
+      {/* Donate Form Section */}
+      <div id="donate-form">
+        <DonateForm />
+      </div>
+    </main>
+  );
+}
