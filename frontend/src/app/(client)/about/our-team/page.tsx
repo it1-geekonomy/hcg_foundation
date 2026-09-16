@@ -35,7 +35,7 @@ export default async function OurTeamPage() {
       name: m.title,
       designation: m.designation,
       imageUrl: m.teamImage,
-      description: plainText(m.content) || plainText(m.shortDescription),
+      description: plainText(m.content),
       href: `/about/our-team/${m.id}`,
     }));
 
@@ -44,7 +44,7 @@ export default async function OurTeamPage() {
       name: m.title,
       designation: m.designation,
       imageUrl: m.teamImage,
-      description: plainText(m.content) || plainText(m.shortDescription),
+      description: plainText(m.content),
       href: `/about/our-team/${m.id}`,
     }));
   } catch (err) {
