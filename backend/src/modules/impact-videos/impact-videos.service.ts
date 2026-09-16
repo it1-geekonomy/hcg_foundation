@@ -13,6 +13,12 @@ import {
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
 import {
+  applyDisplayOrderUpdate,
+  assignDisplayOrderOnRestore,
+  compactDisplayOrderAfterDelete,
+  prepareInsertDisplayOrder,
+} from '../../common/utils/display-order';
+import {
   applyDeletedFilter,
   restoreSoftDeleted,
 } from '../../common/utils/soft-delete';
@@ -52,10 +58,15 @@ export class ImpactVideosService {
     this.validateVideoFile(file);
     const videoUrl = await this.cdn.upload(file, 'impact-videos', 'video');
 
+    const displayOrder = await prepareInsertDisplayOrder(
+      this.repo,
+      dto.displayOrder,
+    );
+
     try {
       const entity = this.repo.create({
         videoUrl,
-        displayOrder: dto.displayOrder ?? 1,
+        displayOrder,
         status: dto.status ?? ContentStatus.DRAFT,
       });
       return await this.repo.save(entity);
@@ -135,8 +146,16 @@ export class ImpactVideosService {
       }
     }
 
-    if (dto.displayOrder !== undefined) {
-      entity.displayOrder = dto.displayOrder;
+    if (
+      dto.displayOrder !== undefined &&
+      dto.displayOrder !== entity.displayOrder
+    ) {
+      entity.displayOrder = await applyDisplayOrderUpdate(
+        this.repo,
+        id,
+        entity.displayOrder,
+        dto.displayOrder,
+      );
     }
 
     if (dto.status !== undefined) {
@@ -148,11 +167,14 @@ export class ImpactVideosService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
+    const removedOrder = entity.displayOrder;
     await this.repo.softRemove(entity);
+    await compactDisplayOrderAfterDelete(this.repo, removedOrder);
   }
 
   async restore(id: string): Promise<ImpactVideo> {
-    return restoreSoftDeleted(this.repo, id, 'Impact video');
+    const entity = await restoreSoftDeleted(this.repo, id, 'Impact video');
+    return assignDisplayOrderOnRestore(this.repo, entity);
   }
 
   private validateVideoFile(file: CdnFile): void {

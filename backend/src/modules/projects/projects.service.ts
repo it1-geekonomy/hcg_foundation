@@ -13,6 +13,12 @@ import {
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
 import {
+  applyDisplayOrderUpdate,
+  compactDisplayOrderAfterDelete,
+  assignDisplayOrderOnRestore,
+  prepareInsertDisplayOrder,
+} from '../../common/utils/display-order';
+import {
   applyDeletedFilter,
   restoreSoftDeleted,
 } from '../../common/utils/soft-delete';
@@ -46,12 +52,18 @@ export class ProjectsService {
       ? await this.cdn.upload(files.projectMobileBanner, 'projects')
       : null;
 
+    const { displayOrder: requestedOrder, ...rest } = dto;
+    const displayOrder = await prepareInsertDisplayOrder(
+      this.repo,
+      requestedOrder,
+    );
+
     try {
       const entity = this.repo.create({
-        ...dto,
+        ...rest,
         projectBanner,
         projectMobileBanner,
-        displayOrder: dto.displayOrder ?? 1,
+        displayOrder,
         status: dto.status ?? ContentStatus.DRAFT,
       });
       return await this.saveOrThrow(entity, dto.slug);
@@ -136,7 +148,18 @@ export class ProjectsService {
     files?: ProjectFiles,
   ): Promise<Project> {
     const entity = await this.findOne(id);
-    Object.assign(entity, dto);
+    const { displayOrder: newOrder, ...rest } = dto;
+    Object.assign(entity, rest);
+
+    if (newOrder !== undefined && newOrder !== entity.displayOrder) {
+      entity.displayOrder = await applyDisplayOrderUpdate(
+        this.repo,
+        id,
+        entity.displayOrder,
+        newOrder,
+      );
+    }
+
     entity.projectBanner = await this.cdn.replace(
       entity.projectBanner,
       files?.projectBanner,
@@ -152,11 +175,14 @@ export class ProjectsService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
+    const removedOrder = entity.displayOrder;
     await this.repo.softRemove(entity);
+    await compactDisplayOrderAfterDelete(this.repo, removedOrder);
   }
 
   async restore(id: string): Promise<Project> {
-    return restoreSoftDeleted(this.repo, id, 'Project');
+    const entity = await restoreSoftDeleted(this.repo, id, 'Project');
+    return assignDisplayOrderOnRestore(this.repo, entity);
   }
 
   private async saveOrThrow(
