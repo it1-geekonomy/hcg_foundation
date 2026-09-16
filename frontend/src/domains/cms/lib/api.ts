@@ -9,6 +9,8 @@ import type {
   CreateLegalPagePayload,
   CreateUserPayload,
   EventFields,
+  HomeBanner,
+  HomeBannerFields,
   LegalPage,
   LegalPageType,
   Paginated,
@@ -20,6 +22,7 @@ import type {
   DonationStatus,
   Donor,
   TeamMemberType,
+  UpdateHomeBannerPayload,
   UpdateLegalPagePayload,
 } from "./types";
 
@@ -85,20 +88,41 @@ function authHeaders(): HeadersInit {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders(),
-      ...(init?.headers ?? {}),
-    },
-    cache: "no-store",
-  });
+/** Dedupe concurrent identical GETs (React Strict Mode double-mount in dev). */
+const inFlightGets = new Map<string, Promise<unknown>>();
 
-  if (!res.ok) throw new Error(await parseError(res));
-  if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const method = (init?.method ?? "GET").toUpperCase();
+
+  if (method === "GET") {
+    const pending = inFlightGets.get(path);
+    if (pending) return pending as Promise<T>;
+  }
+
+  const promise = (async (): Promise<T> => {
+    const res = await fetch(`${API_BASE}${path}`, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeaders(),
+        ...(init?.headers ?? {}),
+      },
+      cache: "no-store",
+    });
+
+    if (!res.ok) throw new Error(await parseError(res));
+    if (res.status === 204) return undefined as T;
+    return res.json() as Promise<T>;
+  })();
+
+  if (method === "GET") {
+    inFlightGets.set(path, promise);
+    promise.finally(() => {
+      inFlightGets.delete(path);
+    });
+  }
+
+  return promise;
 }
 
 /** Multipart — do not set Content-Type (browser sets boundary). */
@@ -253,6 +277,82 @@ function awardPatchFormData(
   return fd;
 }
 
+function homeBannerFormData(
+  fields: HomeBannerFields,
+  files?: {
+    bannerImage?: File | null;
+    mobileBannerImage?: File | null;
+    profileImage?: File | null;
+  }
+) {
+  const fd = new FormData();
+  fd.append("name", fields.name.trim());
+  fd.append("title", fields.title.trim());
+  if (fields.location?.trim()) fd.append("location", fields.location.trim());
+  if (fields.shortDescription?.trim()) {
+    fd.append("shortDescription", fields.shortDescription.trim());
+  }
+  fd.append("displayOrder", String(fields.displayOrder));
+  fd.append("isActive", fields.isActive ? "true" : "false");
+  if (files?.bannerImage instanceof File) {
+    fd.append("bannerImage", files.bannerImage, files.bannerImage.name);
+  }
+  if (files?.mobileBannerImage instanceof File) {
+    fd.append(
+      "mobileBannerImage",
+      files.mobileBannerImage,
+      files.mobileBannerImage.name
+    );
+  }
+  if (files?.profileImage instanceof File) {
+    fd.append("profileImage", files.profileImage, files.profileImage.name);
+  }
+  return fd;
+}
+
+function homeBannerPatchFormData(
+  fields: Partial<HomeBannerFields>,
+  files?: {
+    bannerImage?: File | null;
+    mobileBannerImage?: File | null;
+    profileImage?: File | null;
+  }
+) {
+  const fd = new FormData();
+  const append = (key: keyof HomeBannerFields, value?: string | number | boolean | null) => {
+    if (value === undefined) return;
+    if (key === "displayOrder") {
+      fd.append(key, String(value));
+      return;
+    }
+    if (key === "isActive") {
+      fd.append(key, value ? "true" : "false");
+      return;
+    }
+    fd.append(key, value == null ? "" : String(value));
+  };
+  append("name", fields.name);
+  append("title", fields.title);
+  append("location", fields.location);
+  append("shortDescription", fields.shortDescription);
+  append("displayOrder", fields.displayOrder);
+  append("isActive", fields.isActive);
+  if (files?.bannerImage instanceof File) {
+    fd.append("bannerImage", files.bannerImage, files.bannerImage.name);
+  }
+  if (files?.mobileBannerImage instanceof File) {
+    fd.append(
+      "mobileBannerImage",
+      files.mobileBannerImage,
+      files.mobileBannerImage.name
+    );
+  }
+  if (files?.profileImage instanceof File) {
+    fd.append("profileImage", files.profileImage, files.profileImage.name);
+  }
+  return fd;
+}
+
 function eventFormData(
   fields: EventFields,
   files?: {
@@ -346,6 +446,9 @@ function projectFormData(
   if (fields.shortDescription?.trim()) {
     fd.append("shortDescription", fields.shortDescription.trim());
   }
+  if (fields.displayOrder != null) {
+    fd.append("displayOrder", String(fields.displayOrder));
+  }
   if (fields.status) fd.append("status", fields.status);
   if (fields.metaTitle?.trim()) fd.append("metaTitle", fields.metaTitle.trim());
   if (fields.metaDescription?.trim()) {
@@ -388,6 +491,9 @@ function projectPatchFormData(
   append("metaTitle", fields.metaTitle);
   append("metaDescription", fields.metaDescription);
   append("schemaCode", fields.schemaCode);
+  if (fields.displayOrder !== undefined) {
+    fd.append("displayOrder", String(fields.displayOrder));
+  }
   if (files?.projectBanner instanceof File) {
     fd.append("projectBanner", files.projectBanner, files.projectBanner.name);
   }
@@ -497,6 +603,74 @@ export const cmsApi = {
 
   restoreAward: (id: string) =>
     request<ApiEnvelope<Award>>(`/awards/${id}/restore`, {
+      method: "POST",
+    }),
+
+  listHomeBanners: (params?: ListQuery) =>
+    request<Paginated<HomeBanner>>(
+      `/home-banners${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedHomeBanners: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<HomeBanner>>(
+      `/home-banners/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getHomeBanner: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<HomeBanner>>(`/home-banners/${id}`);
+    } catch (err) {
+      const deleted = await request<Paginated<HomeBanner>>(
+        `/home-banners/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  createHomeBanner: (
+    fields: HomeBannerFields,
+    files: {
+      bannerImage: File;
+      mobileBannerImage?: File | null;
+      profileImage?: File | null;
+    }
+  ) =>
+    requestFormData<ApiEnvelope<HomeBanner>>(
+      "/home-banners",
+      "POST",
+      homeBannerFormData(fields, files)
+    ),
+
+  updateHomeBanner: (
+    id: string,
+    fields: UpdateHomeBannerPayload,
+    files?: {
+      bannerImage?: File | null;
+      mobileBannerImage?: File | null;
+      profileImage?: File | null;
+    }
+  ) =>
+    requestFormData<ApiEnvelope<HomeBanner>>(
+      `/home-banners/${id}`,
+      "PATCH",
+      homeBannerPatchFormData(fields, files)
+    ),
+
+  deleteHomeBanner: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(`/home-banners/${id}`, {
+      method: "DELETE",
+    }),
+
+  restoreHomeBanner: (id: string) =>
+    request<ApiEnvelope<HomeBanner>>(`/home-banners/${id}/restore`, {
       method: "POST",
     }),
 
@@ -788,4 +962,23 @@ export const publicTeamsApi = {
     ),
 
   getById: (id: string) => request<ApiEnvelope<Team>>(`/teams/${id}`),
+};
+
+/** Public site: published projects */
+export const publicProjectsApi = {
+  listPublished: (params?: Omit<ListQuery, "status">) =>
+    request<Paginated<CmsProject>>(
+      `/projects/published${toQuery({ page: 1, limit: 12, ...params })}`
+    ),
+
+  getBySlug: (slug: string) =>
+    request<ApiEnvelope<CmsProject>>(
+      `/projects/published/slug/${encodeURIComponent(slug)}`
+    ),
+};
+
+/** Public site: active home banners */
+export const publicHomeBannersApi = {
+  listActive: () =>
+    request<ApiEnvelope<HomeBanner[]>>("/home-banners/active"),
 };

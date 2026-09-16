@@ -13,6 +13,7 @@ import {
   Award,
   CalendarDays,
   FolderKanban,
+  PanelsTopLeft,
 } from "lucide-react";
 
 export type AdminMenuItem = {
@@ -40,6 +41,11 @@ export const adminMenuGroups: AdminMenuGroup[] = [
   {
     label: "Content",
     items: [
+      {
+        label: "Home Banners",
+        href: "/admin/home-banners",
+        icon: PanelsTopLeft,
+      },
       {
         label: "Teams",
         href: "/admin/team",

@@ -2,29 +2,23 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import {
-  ArrowLeft,
-  ExternalLink,
-  Pencil,
-  RotateCcw,
-  Trash2,
-} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
-import { cmsApi } from "@/domains/cms/lib/api";
+import { cmsApi, publicProjectsApi } from "@/domains/cms/lib/api";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import type { CmsProject } from "@/domains/cms/lib/types";
+import { mapProjectToCard } from "@/domains/home/constants/project";
+import ProjectsSection from "@/domains/home/components/ProjectsSection";
 import CmsHtmlContent from "./CmsHtmlContent";
-
-function hasUrl(value?: string | null) {
-  return Boolean(value && value.trim());
-}
+import CmsWebsitePreview from "./CmsWebsitePreview";
 
 export default function ProjectViewPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [project, setProject] = useState<CmsProject | null>(null);
+  const [published, setPublished] = useState<CmsProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -37,8 +31,14 @@ export default function ProjectViewPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await cmsApi.getProject(id);
-        if (!cancelled) setProject(res.data);
+        const [res, publishedRes] = await Promise.all([
+          cmsApi.getProject(id),
+          publicProjectsApi.listPublished({ limit: 12 }).catch(() => null),
+        ]);
+        if (!cancelled) {
+          setProject(res.data);
+          setPublished(publishedRes?.data ?? []);
+        }
       } catch (err) {
         if (!cancelled) {
           const message =
@@ -55,6 +55,28 @@ export default function ProjectViewPage() {
       cancelled = true;
     };
   }, [id]);
+
+  const { previewCards, activeIndex } = useMemo(() => {
+    if (!project) return { previewCards: [], activeIndex: 0 };
+
+    const list = [...published];
+    const existingIdx = list.findIndex((p) => p.id === project.id);
+    if (existingIdx === -1) {
+      list.unshift(project);
+    } else {
+      list[existingIdx] = project;
+    }
+
+    const cards = list
+      .slice(0, 12)
+      .map((item, index) => mapProjectToCard(item, index));
+    const idx = Math.max(
+      0,
+      cards.findIndex((c) => c.id === project.id)
+    );
+
+    return { previewCards: cards, activeIndex: idx };
+  }, [project, published]);
 
   const onDelete = async () => {
     if (!project) return;
@@ -154,24 +176,19 @@ export default function ProjectViewPage() {
           <p className="mt-1 font-manrope text-sm text-muted-foreground">
             /{project.slug}
           </p>
-          {project.projectDate ? (
-            <p className="mt-1 font-manrope text-sm text-[#5C5C5C]">
-              {project.projectDate}
-            </p>
-          ) : null}
+          <p className="mt-1 font-manrope text-sm text-[#5C5C5C]">
+            {[
+              project.projectDate || null,
+              project.displayOrder != null
+                ? `Order ${project.displayOrder}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" · ") || "No date set"}
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {!isDeleted && project.status === "published" ? (
-            <Link
-              href={`/resources/projects/${project.slug}`}
-              target="_blank"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 font-manrope text-sm text-[#212121] transition hover:bg-[#F7F7F5]"
-            >
-              <ExternalLink className="size-3.5" />
-              Public page
-            </Link>
-          ) : null}
           {isDeleted ? (
             <Button
               type="button"
@@ -207,95 +224,58 @@ export default function ProjectViewPage() {
         </div>
       </div>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(180px,240px)_minmax(0,1fr)]">
-        <div className="space-y-3 self-start">
-          <div className="overflow-hidden rounded-xl bg-white shadow-[0_4px_14px_rgba(0,0,0,0.05)] ring-1 ring-black/[0.05]">
-            <div className="relative h-44 bg-[#F0EEE9]">
-              {hasUrl(project.projectBanner) ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={project.projectBanner!}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-contain p-2"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center font-manrope text-sm text-[#9A9A9A]">
-                  No desktop banner
-                </div>
-              )}
-            </div>
-            <p className="border-t border-black/[0.04] px-3 py-2 font-manrope text-xs text-[#8A8A8A]">
-              Desktop banner
-            </p>
-          </div>
-          <div className="overflow-hidden rounded-xl bg-white shadow-[0_4px_14px_rgba(0,0,0,0.05)] ring-1 ring-black/[0.05]">
-            <div className="relative h-36 bg-[#F0EEE9]">
-              {hasUrl(project.projectMobileBanner) ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={project.projectMobileBanner!}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-contain p-2"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center font-manrope text-sm text-[#9A9A9A]">
-                  No mobile banner
-                </div>
-              )}
-            </div>
-            <p className="border-t border-black/[0.04] px-3 py-2 font-manrope text-xs text-[#8A8A8A]">
-              Mobile banner
-            </p>
-          </div>
+      <section className="overflow-hidden rounded-2xl ring-1 ring-black/5">
+        <div className="border-b border-black/5 bg-white px-4 py-3 sm:px-5">
+          <h3 className="font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
+            Website preview
+          </h3>
         </div>
+        <CmsWebsitePreview className="bg-[#FFF6D8]">
+          <ProjectsSection
+            cards={previewCards}
+            defaultActiveIndex={activeIndex}
+            previewMode
+          />
+        </CmsWebsitePreview>
+      </section>
 
-        <div className="space-y-4">
-          <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
-            <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
-              Short description
-            </h3>
-            <p className="font-manrope text-sm leading-relaxed text-[#212121]">
-              {project.shortDescription?.trim() || "—"}
+      <div className="space-y-4">
+        <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
+          <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
+            Content
+          </h3>
+          {project.content ? (
+            <CmsHtmlContent html={project.content} />
+          ) : (
+            <p className="font-manrope text-sm text-muted-foreground">
+              No content yet.
             </p>
-          </section>
+          )}
+        </section>
 
-          <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
-            <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
-              Content
-            </h3>
-            {project.content ? (
-              <CmsHtmlContent html={project.content} />
-            ) : (
-              <p className="font-manrope text-sm text-muted-foreground">
-                No content yet.
-              </p>
-            )}
-          </section>
-
-          <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
-            <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
-              SEO
-            </h3>
-            <dl className="grid gap-3 font-manrope text-sm sm:grid-cols-2">
-              <div>
-                <dt className="text-xs text-muted-foreground">Meta title</dt>
-                <dd className="mt-0.5">{project.metaTitle || "—"}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-muted-foreground">
-                  Meta description
-                </dt>
-                <dd className="mt-0.5">{project.metaDescription || "—"}</dd>
-              </div>
-              <div className="sm:col-span-2">
-                <dt className="text-xs text-muted-foreground">Schema</dt>
-                <dd className="mt-0.5 whitespace-pre-wrap break-all">
-                  {project.schemaCode || "—"}
-                </dd>
-              </div>
-            </dl>
-          </section>
-        </div>
+        <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
+          <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
+            SEO
+          </h3>
+          <dl className="grid gap-3 font-manrope text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-xs text-muted-foreground">Meta title</dt>
+              <dd className="mt-0.5">{project.metaTitle || "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-muted-foreground">
+                Meta description
+              </dt>
+              <dd className="mt-0.5">{project.metaDescription || "—"}</dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-xs text-muted-foreground">Schema</dt>
+              <dd className="mt-0.5 break-all whitespace-pre-wrap">
+                {project.schemaCode || "—"}
+              </dd>
+            </div>
+          </dl>
+        </section>
       </div>
     </div>
   );

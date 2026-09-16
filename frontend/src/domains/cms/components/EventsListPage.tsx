@@ -25,6 +25,7 @@ import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import type { CmsEvent, ContentStatus } from "@/domains/cms/lib/types";
 import { CmsPagination, type PaginationMeta } from "./CmsPagination";
+import CmsSearchInput from "./CmsSearchInput";
 import CmsSelect, { CONTENT_STATUS_FILTER_OPTIONS } from "./CmsSelect";
 
 const PAGE_SIZE = 20;
@@ -208,12 +209,12 @@ export default function EventsListPage() {
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex flex-col gap-2 sm:flex-row">
-            <Input
+            <CmsSearchInput
               placeholder="Search title / slug / location…"
               value={search}
-              onChange={(e) => {
+              onDebouncedChange={(next) => {
                 setPage(1);
-                setSearch(e.target.value);
+                setSearch(next);
               }}
               className="sm:flex-1"
             />

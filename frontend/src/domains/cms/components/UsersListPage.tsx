@@ -25,6 +25,7 @@ import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import type { AdminUser } from "@/domains/cms/lib/types";
 import { CmsPagination, type PaginationMeta } from "./CmsPagination";
+import CmsSearchInput from "./CmsSearchInput";
 
 const PAGE_SIZE = 10;
 
@@ -119,12 +120,12 @@ export default function UsersListPage() {
         </CardHeader>
         <CardContent>
           <div className="mb-4">
-            <Input
+            <CmsSearchInput
               placeholder="Search name / email / username…"
               value={search}
-              onChange={(e) => {
+              onDebouncedChange={(next) => {
                 setPage(1);
-                setSearch(e.target.value);
+                setSearch(next);
               }}
             />
           </div>
