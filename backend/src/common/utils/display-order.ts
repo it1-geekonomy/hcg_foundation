@@ -1,3 +1,4 @@
+import { ConflictException } from '@nestjs/common';
 import { ObjectLiteral, Repository } from 'typeorm';
 
 function tableName(repo: Repository<ObjectLiteral>): string {
@@ -7,18 +8,45 @@ function tableName(repo: Repository<ObjectLiteral>): string {
 /** Highest display_order among non-deleted rows (0 if none). */
 export async function getActiveMaxDisplayOrder(
   repo: Repository<ObjectLiteral>,
+  excludeId?: string,
 ): Promise<number> {
-  const row = await repo
+  const qb = repo
     .createQueryBuilder('entity')
     .select('MAX(entity.displayOrder)', 'max')
-    .where('entity.deletedAt IS NULL')
-    .getRawOne<{ max: string | null }>();
+    .where('entity.deletedAt IS NULL');
+  if (excludeId) {
+    qb.andWhere('entity.id != :excludeId', { excludeId });
+  }
+  const row = await qb.getRawOne<{ max: string | null }>();
   return Number(row?.max ?? 0);
 }
 
+async function isDisplayOrderTaken(
+  repo: Repository<ObjectLiteral>,
+  order: number,
+  excludeId?: string,
+): Promise<boolean> {
+  const qb = repo
+    .createQueryBuilder('entity')
+    .where('entity.deletedAt IS NULL')
+    .andWhere('entity.displayOrder = :order', { order });
+  if (excludeId) {
+    qb.andWhere('entity.id != :excludeId', { excludeId });
+  }
+  const count = await qb.getCount();
+  return count > 0;
+}
+
+function duplicateOrderError(order: number): ConflictException {
+  return new ConflictException(
+    `Display order ${order} is already in use. Choose a different display order.`,
+  );
+}
+
 /**
- * Pick order for a new row and shift siblings so orders stay unique 1..n.
- * Omit `requested` to append at the end.
+ * Pick order for a new row.
+ * Omit `requested` to append at the end (max + 1).
+ * If `requested` is already used → 409 Conflict.
  */
 export async function prepareInsertDisplayOrder(
   repo: Repository<ObjectLiteral>,
@@ -29,18 +57,18 @@ export async function prepareInsertDisplayOrder(
     return max + 1;
   }
 
-  const order = Math.max(1, Math.min(requested, max + 1));
-  if (order <= max) {
-    await repo.query(
-      `UPDATE "${tableName(repo)}" SET display_order = display_order + 1
-       WHERE deleted_at IS NULL AND display_order >= $1`,
-      [order],
-    );
+  const order = Math.max(1, requested);
+  if (await isDisplayOrderTaken(repo, order)) {
+    throw duplicateOrderError(order);
   }
   return order;
 }
 
-/** Move one row from oldOrder → newOrder; keeps 1..n without duplicates. */
+/**
+ * Change display order on update.
+ * Same order as now → no-op.
+ * Target already used by another row → 409 Conflict.
+ */
 export async function applyDisplayOrderUpdate(
   repo: Repository<ObjectLiteral>,
   entityId: string,
@@ -51,24 +79,10 @@ export async function applyDisplayOrderUpdate(
     return oldOrder;
   }
 
-  const max = await getActiveMaxDisplayOrder(repo);
-  const target = Math.max(1, Math.min(newOrder, max));
-  const table = tableName(repo);
-
-  if (target < oldOrder) {
-    await repo.query(
-      `UPDATE "${table}" SET display_order = display_order + 1
-       WHERE deleted_at IS NULL AND display_order >= $1 AND display_order < $2 AND id != $3`,
-      [target, oldOrder, entityId],
-    );
-  } else {
-    await repo.query(
-      `UPDATE "${table}" SET display_order = display_order - 1
-       WHERE deleted_at IS NULL AND display_order > $1 AND display_order <= $2 AND id != $3`,
-      [oldOrder, target, entityId],
-    );
+  const target = Math.max(1, newOrder);
+  if (await isDisplayOrderTaken(repo, target, entityId)) {
+    throw duplicateOrderError(target);
   }
-
   return target;
 }
 
@@ -84,19 +98,37 @@ export async function compactDisplayOrderAfterDelete(
   );
 }
 
-/** Restored rows go to the end so they do not collide with live orders. */
-export async function nextDisplayOrderOnRestore(
+/**
+ * Put a restored row back at its original display_order.
+ * Soft-deleted rows keep their old order; after compact the live list is 1..n.
+ * Re-insert at that original slot (clamped to max+1) and shift siblings.
+ */
+export async function restoreDisplayOrderAtOriginal(
   repo: Repository<ObjectLiteral>,
+  entityId: string,
+  originalOrder: number,
 ): Promise<number> {
-  return (await getActiveMaxDisplayOrder(repo)) + 1;
+  const maxOthers = await getActiveMaxDisplayOrder(repo, entityId);
+  const target = Math.max(1, Math.min(originalOrder || 1, maxOthers + 1));
+
+  await repo.query(
+    `UPDATE "${tableName(repo)}" SET display_order = display_order + 1
+     WHERE deleted_at IS NULL AND display_order >= $1 AND id != $2`,
+    [target, entityId],
+  );
+
+  return target;
 }
 
 export async function assignDisplayOrderOnRestore<T extends ObjectLiteral>(
   repo: Repository<T>,
-  entity: T & { displayOrder: number },
+  entity: T & { id: string; displayOrder: number },
 ): Promise<T> {
-  entity.displayOrder = await nextDisplayOrderOnRestore(
+  const originalOrder = entity.displayOrder ?? 1;
+  entity.displayOrder = await restoreDisplayOrderAtOriginal(
     repo as Repository<ObjectLiteral>,
+    entity.id,
+    originalOrder,
   );
   return repo.save(entity);
 }

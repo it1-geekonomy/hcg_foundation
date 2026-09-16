@@ -16,7 +16,7 @@ import { CdnFile, CdnService } from '../../common/storage/cdn.service';
 import {
   applyDisplayOrderUpdate,
   compactDisplayOrderAfterDelete,
-  nextDisplayOrderOnRestore,
+  assignDisplayOrderOnRestore,
   prepareInsertDisplayOrder,
 } from '../../common/utils/display-order';
 import {
@@ -163,8 +163,13 @@ export class AwardsService {
 
   async restore(id: string): Promise<Award> {
     const entity = await restoreSoftDeleted(this.repo, id, 'Award');
-    entity.displayOrder = await nextDisplayOrderOnRestore(this.repo);
-    return this.repo.save(entity);
+    if (entity.displayOrder == null) {
+      entity.displayOrder = 1;
+    }
+    return assignDisplayOrderOnRestore(this.repo, entity as Award & {
+      id: string;
+      displayOrder: number;
+    });
   }
 
   private async saveOrThrow(entity: Award): Promise<Award> {
