@@ -8,10 +8,14 @@ import type {
   ContentStatus,
   Team,
   TeamFields,
+  TeamType,
 } from "@/domains/cms/lib/types";
 import CmsImagePicker from "./CmsImagePicker";
 import { CmsFormField } from "./CmsFormField";
-import CmsSelect, { CONTENT_STATUS_OPTIONS } from "./CmsSelect";
+import CmsSelect, {
+  CONTENT_STATUS_OPTIONS,
+  TEAM_TYPE_OPTIONS,
+} from "./CmsSelect";
 import { SeoFieldsSection } from "./SeoFieldsSection";
 
 const CmsRichTextEditor = dynamic(() => import("./CmsRichTextEditor"), {
@@ -25,6 +29,7 @@ const CmsRichTextEditor = dynamic(() => import("./CmsRichTextEditor"), {
 
 export type TeamFormValues = {
   title: string;
+  type: TeamType;
   designation: string;
   shortDescription: string;
   content: string;
@@ -38,6 +43,7 @@ export type TeamFormValues = {
 
 export const emptyTeamForm = (): TeamFormValues => ({
   title: "",
+  type: "team",
   designation: "",
   shortDescription: "",
   content: "",
@@ -52,6 +58,7 @@ export const emptyTeamForm = (): TeamFormValues => ({
 export function teamToFormValues(team: Team): TeamFormValues {
   return {
     title: team.title ?? "",
+    type: team.type ?? "team",
     designation: team.designation ?? "",
     shortDescription: team.shortDescription ?? "",
     content: team.content ?? "",
@@ -73,6 +80,7 @@ export function formValuesToFields(form: TeamFormValues): TeamFields {
 
   return {
     title: form.title.trim(),
+    type: form.type,
     designation: form.designation.trim() || undefined,
     shortDescription: form.shortDescription.trim() || undefined,
     content: plainContent ? form.content : undefined,
@@ -121,6 +129,7 @@ export function getTeamPatch(
 
   const keys: (keyof TeamFields)[] = [
     "title",
+    "type",
     "designation",
     "content",
     "shortDescription",
@@ -178,6 +187,20 @@ export default function TeamForm({
             placeholder="Dr. John Smith"
             value={value.title}
             onChange={(e) => onChange({ ...value, title: e.target.value })}
+          />
+        </CmsFormField>
+
+        <CmsFormField label="Type" htmlFor="type">
+          <CmsSelect
+            id="type"
+            value={value.type}
+            options={TEAM_TYPE_OPTIONS}
+            onChange={(type) =>
+              onChange({
+                ...value,
+                type: type as TeamType,
+              })
+            }
           />
         </CmsFormField>
 

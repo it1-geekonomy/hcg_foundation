@@ -21,12 +21,15 @@ import {
   TableRow,
 } from "@/shared/ui/table";
 import { cmsApi } from "@/domains/cms/lib/api";
-import type { ContentStatus, Team } from "@/domains/cms/lib/types";
+import type { ContentStatus, Team, TeamType } from "@/domains/cms/lib/types";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import { CmsPagination, type PaginationMeta } from "./CmsPagination";
 import CmsSearchInput from "./CmsSearchInput";
-import CmsSelect, { CONTENT_STATUS_FILTER_OPTIONS } from "./CmsSelect";
+import CmsSelect, {
+  CONTENT_STATUS_FILTER_OPTIONS,
+  TEAM_TYPE_FILTER_OPTIONS,
+} from "./CmsSelect";
 
 const PAGE_SIZE = 20;
 
@@ -59,6 +62,7 @@ export default function TeamsListPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ContentStatus | "">("");
+  const [typeFilter, setTypeFilter] = useState<TeamType | "">("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [restoringId, setRestoringId] = useState<string | null>(null);
@@ -79,6 +83,7 @@ export default function TeamsListPage() {
               limit: PAGE_SIZE,
               search: search || undefined,
               status: statusFilter || undefined,
+              type: typeFilter || undefined,
             });
       setTeams(res.data ?? []);
       setMeta(res.meta ?? emptyMeta);
@@ -90,7 +95,7 @@ export default function TeamsListPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter, tab]);
+  }, [page, search, statusFilter, typeFilter, tab]);
 
   useEffect(() => {
     void load();
@@ -102,6 +107,7 @@ export default function TeamsListPage() {
     setPage(1);
     setSearch("");
     setStatusFilter("");
+    setTypeFilter("");
   };
 
   const onDelete = async (id: string, title: string) => {
@@ -215,16 +221,28 @@ export default function TeamsListPage() {
               className="sm:flex-1"
             />
             {tab === "active" ? (
-              <CmsSelect
-                size="sm"
-                className="sm:w-44"
-                value={statusFilter}
-                options={CONTENT_STATUS_FILTER_OPTIONS}
-                onChange={(next) => {
-                  setPage(1);
-                  setStatusFilter(next as ContentStatus | "");
-                }}
-              />
+              <>
+                <CmsSelect
+                  size="sm"
+                  className="sm:w-40"
+                  value={typeFilter}
+                  options={TEAM_TYPE_FILTER_OPTIONS}
+                  onChange={(next) => {
+                    setPage(1);
+                    setTypeFilter(next as TeamType | "");
+                  }}
+                />
+                <CmsSelect
+                  size="sm"
+                  className="sm:w-44"
+                  value={statusFilter}
+                  options={CONTENT_STATUS_FILTER_OPTIONS}
+                  onChange={(next) => {
+                    setPage(1);
+                    setStatusFilter(next as ContentStatus | "");
+                  }}
+                />
+              </>
             ) : null}
           </div>
 
@@ -233,6 +251,7 @@ export default function TeamsListPage() {
               <TableRow>
                 <TableHead className="w-14">Image</TableHead>
                 <TableHead>Name</TableHead>
+                <TableHead>Type</TableHead>
                 <TableHead>Designation</TableHead>
                 {tab === "deleted" ? (
                   <TableHead>Deleted at</TableHead>
@@ -245,7 +264,7 @@ export default function TeamsListPage() {
             <TableBody>
               {teams.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-muted-foreground">
+                  <TableCell colSpan={6} className="text-muted-foreground">
                     {tab === "deleted" ? (
                       "No deleted members."
                     ) : (
@@ -277,6 +296,11 @@ export default function TeamsListPage() {
                       )}
                     </TableCell>
                     <TableCell className="font-medium">{team.title}</TableCell>
+                    <TableCell>
+                      <span className="rounded-full bg-[#E8F0F6] px-2 py-0.5 text-xs capitalize text-[#1A4A6E]">
+                        {team.type ?? "—"}
+                      </span>
+                    </TableCell>
                     <TableCell>{team.designation || "—"}</TableCell>
                     <TableCell>
                       {tab === "deleted" ? (

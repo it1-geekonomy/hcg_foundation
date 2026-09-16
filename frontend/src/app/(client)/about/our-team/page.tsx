@@ -26,8 +26,8 @@ export default async function OurTeamPage() {
 
   try {
     const [trusteesRes, teamRes] = await Promise.all([
-      publicTeamsApi.listPublished({ limit: 50, memberType: "trustee" }),
-      publicTeamsApi.listPublished({ limit: 50, memberType: "team" }),
+      publicTeamsApi.listPublished({ limit: 50, type: "trustee" }),
+      publicTeamsApi.listPublished({ limit: 50, type: "team" }),
     ]);
 
     trustees = (trusteesRes.data ?? []).map((m) => ({
