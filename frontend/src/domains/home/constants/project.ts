@@ -43,7 +43,7 @@ export function mapProjectToCard(
     image:
       project.projectBanner?.trim() ||
       project.projectMobileBanner?.trim() ||
-      "/Projects/p1.png",
+      "",
     href: project.slug ? `/resources/projects/${project.slug}` : undefined,
   };
 }
