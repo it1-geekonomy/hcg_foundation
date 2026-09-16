@@ -12,6 +12,12 @@ import {
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
 import {
+  applyDisplayOrderUpdate,
+  assignDisplayOrderOnRestore,
+  compactDisplayOrderAfterDelete,
+  prepareInsertDisplayOrder,
+} from '../../common/utils/display-order';
+import {
   applyDeletedFilter,
   restoreSoftDeleted,
 } from '../../common/utils/soft-delete';
@@ -69,13 +75,19 @@ export class HomeBannersService {
       ? await this.cdn.upload(files.profileImage, CDN_FOLDER)
       : undefined;
 
+    const { displayOrder: requestedOrder, ...rest } = dto;
+    const displayOrder = await prepareInsertDisplayOrder(
+      this.repo,
+      requestedOrder,
+    );
+
     try {
       const entity = this.repo.create({
-        ...dto,
+        ...rest,
         bannerImageUrl,
         mobileBannerImageUrl,
         profileImageUrl,
-        displayOrder: dto.displayOrder ?? 1,
+        displayOrder,
         isActive: dto.isActive ?? true,
       });
       return await this.repo.save(entity);
@@ -134,7 +146,17 @@ export class HomeBannersService {
     files?: HomeBannerFiles,
   ): Promise<HomeBanner> {
     const entity = await this.findOne(id);
-    Object.assign(entity, dto);
+    const { displayOrder: newOrder, ...rest } = dto;
+    Object.assign(entity, rest);
+
+    if (newOrder !== undefined && newOrder !== entity.displayOrder) {
+      entity.displayOrder = await applyDisplayOrderUpdate(
+        this.repo,
+        id,
+        entity.displayOrder,
+        newOrder,
+      );
+    }
 
     this.assertIsImage(files?.bannerImage, 'bannerImage');
     this.assertIsImage(files?.mobileBannerImage, 'mobileBannerImage');
@@ -157,10 +179,13 @@ export class HomeBannersService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
+    const removedOrder = entity.displayOrder;
     await this.repo.softRemove(entity);
+    await compactDisplayOrderAfterDelete(this.repo, removedOrder);
   }
 
   async restore(id: string): Promise<HomeBanner> {
-    return restoreSoftDeleted(this.repo, id, 'Home banner');
+    const entity = await restoreSoftDeleted(this.repo, id, 'Home banner');
+    return assignDisplayOrderOnRestore(this.repo, entity);
   }
 }
