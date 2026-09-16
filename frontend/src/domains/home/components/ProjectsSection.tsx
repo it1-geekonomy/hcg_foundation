@@ -616,13 +616,20 @@ export default function ProjectsSection({
               className="group relative min-w-0 cursor-pointer overflow-hidden rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-white/70"
               style={{ willChange: "flex-grow, flex-basis" }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={card.image}
-                alt=""
-                aria-hidden="true"
-                className="card-image absolute inset-0 h-full w-full object-cover will-change-transform"
-              />
+              {card.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={card.image}
+                  alt=""
+                  aria-hidden="true"
+                  className="card-image absolute inset-0 h-full w-full object-cover will-change-transform"
+                />
+              ) : (
+                <div
+                  className="card-image absolute inset-0 h-full w-full bg-[#2A2410] will-change-transform"
+                  aria-hidden="true"
+                />
+              )}
 
               <div className="card-tint absolute inset-0 bg-[#FFD43B6E]" />
 
@@ -726,13 +733,20 @@ export default function ProjectsSection({
               }`}
               style={{ willChange: "height" }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={card.image}
-                alt=""
-                aria-hidden="true"
-                className="m-card-image absolute inset-0 h-full w-full object-cover will-change-transform"
-              />
+              {card.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={card.image}
+                  alt=""
+                  aria-hidden="true"
+                  className="m-card-image absolute inset-0 h-full w-full object-cover will-change-transform"
+                />
+              ) : (
+                <div
+                  className="m-card-image absolute inset-0 h-full w-full bg-[#2A2410] will-change-transform"
+                  aria-hidden="true"
+                />
+              )}
 
               <div className="m-card-tint absolute inset-0 bg-[#FFD43B6E]" />
 
