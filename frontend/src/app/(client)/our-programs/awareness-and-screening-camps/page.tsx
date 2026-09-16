@@ -1,11 +1,18 @@
-import Typography from "@/lib/Typography";
-
-export default function AwarenessPage() {
+import Bannersection from "@/domains/ourprograms/AwarenessAndScreening/components/bannersection";
+import DonateForm from "@/shared/components/DonateForm";
+import Cancerscreening from "@/domains/ourprograms/AwarenessAndScreening/components/cancerscreening";
+import ReferralProcess from "@/domains/ourprograms/AwarenessAndScreening/components/referalprocess";
+import Screeningsection from "@/domains/ourprograms/AwarenessAndScreening/components/screeningsection";
+export default function OurTeamPage() {
   return (
-    <section className="flex min-h-screen items-center justify-center bg-slate-100">
-      <Typography variant="heading-3" as="h1" className="text-[#382E07]">
-        Awareness And Screening Camps
-      </Typography>
-    </section>
+    <>
+      <Bannersection />
+      <Cancerscreening /> 
+      <ReferralProcess /> 
+      <Screeningsection />   
+      <div id="donate-form">
+        <DonateForm />
+        </div>
+    </>
   );
 }

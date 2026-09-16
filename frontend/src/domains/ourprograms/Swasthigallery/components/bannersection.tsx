@@ -2,19 +2,17 @@ import Banner from "@/shared/components/Herobannersection";
 
 // Content is data, kept separate from markup so the same Banner
 // can be reused across pages by swapping this object out.
-const ABOUT_US_BANNER = {
-  bgImage: "/aboutus/aboutus.png",
+const AWARENESS_BANNER = {
+  bgImage: "/swasthigallery/swasthibanner.png",
   bgImageMobile: "/aboutus/aboutus-mobile.png",
-  bgImageAlt: "Doctors, nurses and families smiling together outside the hospital",
+  bgImageAlt: "awareness",
   breadcrumbs: [
     { label: "Home", href: "/" },
-    { label: "About Us" },
+    { label: "Our Program" },
   ],
   title: (
     <>
-      Creating Hope
-      <br />
-      Through Compassion
+      Swasthi Gallery 
     </>
   ),
 };
@@ -23,11 +21,11 @@ export default function AboutUsPage() {
   return (
     <main>
       <Banner
-        bgImage={ABOUT_US_BANNER.bgImage}
-        bgImageMobile={ABOUT_US_BANNER.bgImageMobile}
-        bgImageAlt={ABOUT_US_BANNER.bgImageAlt}
-        breadcrumbs={ABOUT_US_BANNER.breadcrumbs}
-        title={ABOUT_US_BANNER.title}
+        bgImage={AWARENESS_BANNER.bgImage}
+        bgImageMobile={AWARENESS_BANNER.bgImageMobile}
+        bgImageAlt={AWARENESS_BANNER.bgImageAlt}
+        breadcrumbs={AWARENESS_BANNER.breadcrumbs}
+        title={AWARENESS_BANNER.title}
       />
 
       {/* Rest of the About Us page content goes here */}

@@ -2,18 +2,19 @@ import Banner from "@/shared/components/Herobannersection";
 
 // Content is data, kept separate from markup so the same Banner
 // can be reused across pages by swapping this object out.
-const ABOUT_US_BANNER = {
+const AWARENESS_BANNER = {
   bgImage: "/financialbanner/financialsupportbanner.png",
-  bgImageAlt: "financialsupport",
+  bgImageMobile: "/aboutus/aboutus-mobile.png",
+  bgImageAlt: "awareness",
   breadcrumbs: [
     { label: "Home", href: "/" },
-    { label: "Our Programs" },
+    { label: "Our Program" },
   ],
   title: (
     <>
-      Financial Support for
+      Awareness &
       <br />
-      Pediatric Patients
+      Screening Camps
     </>
   ),
 };
@@ -22,10 +23,11 @@ export default function AboutUsPage() {
   return (
     <main>
       <Banner
-        bgImage={ABOUT_US_BANNER.bgImage}
-        bgImageAlt={ABOUT_US_BANNER.bgImageAlt}
-        breadcrumbs={ABOUT_US_BANNER.breadcrumbs}
-        title={ABOUT_US_BANNER.title}
+        bgImage={AWARENESS_BANNER.bgImage}
+        bgImageMobile={AWARENESS_BANNER.bgImageMobile}
+        bgImageAlt={AWARENESS_BANNER.bgImageAlt}
+        breadcrumbs={AWARENESS_BANNER.breadcrumbs}
+        title={AWARENESS_BANNER.title}
       />
 
       {/* Rest of the About Us page content goes here */}
@@ -38,6 +40,7 @@ Reusing Banner on another page just means passing different props, e.g.:
 
 <Banner
   bgImage="/images/programs-hero.jpg"
+  bgImageMobile="/images/programs-hero-mobile.jpg"
   breadcrumbs={[{ label: "Home", href: "/" }, { label: "Our Programs" }]}
   subtitle="What We Do"
   title="Programs That Change Lives"
