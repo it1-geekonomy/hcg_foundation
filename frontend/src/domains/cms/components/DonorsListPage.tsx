@@ -21,6 +21,7 @@ import {
 import { cmsApi } from "@/domains/cms/lib/api";
 import type { DonationStatus, Donor } from "@/domains/cms/lib/types";
 import { CmsPagination, type PaginationMeta } from "./CmsPagination";
+import CmsSelect, { DONATION_STATUS_OPTIONS } from "./CmsSelect";
 
 const PAGE_SIZE = 10;
 
@@ -100,19 +101,16 @@ export default function DonorsListPage() {
                 setSearch(e.target.value);
               }}
             />
-            <select
+            <CmsSelect
+              size="sm"
+              className="sm:w-40"
               value={status}
-              onChange={(e) => {
+              options={DONATION_STATUS_OPTIONS}
+              onChange={(next) => {
                 setPage(1);
-                setStatus(e.target.value as DonationStatus | "");
+                setStatus(next as DonationStatus | "");
               }}
-              className="h-8 rounded-lg border border-input bg-transparent px-2.5 font-manrope text-sm"
-            >
-              <option value="paid">Paid</option>
-              <option value="pending">Pending</option>
-              <option value="failed">Failed</option>
-              <option value="refunded">Refunded</option>
-            </select>
+            />
           </div>
 
           <div className="overflow-x-auto">

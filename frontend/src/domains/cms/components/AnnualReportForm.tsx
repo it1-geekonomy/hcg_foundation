@@ -8,6 +8,7 @@ import type {
   ContentStatus,
 } from "@/domains/cms/lib/types";
 import { CmsFormField } from "./CmsFormField";
+import CmsSelect, { CONTENT_STATUS_OPTIONS } from "./CmsSelect";
 import { SeoFieldsSection } from "./SeoFieldsSection";
 
 export type AnnualReportFormValues = {
@@ -273,21 +274,17 @@ export default function AnnualReportForm({
         </CmsFormField>
 
         <CmsFormField label="Status" htmlFor="status">
-          <select
+          <CmsSelect
             id="status"
-            className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             value={value.status}
-            onChange={(e) =>
+            options={CONTENT_STATUS_OPTIONS}
+            onChange={(status) =>
               onChange({
                 ...value,
-                status: e.target.value as ContentStatus,
+                status: status as ContentStatus,
               })
             }
-          >
-            <option value="draft">draft</option>
-            <option value="published">published</option>
-            <option value="archived">archived</option>
-          </select>
+          />
         </CmsFormField>
       </div>
 

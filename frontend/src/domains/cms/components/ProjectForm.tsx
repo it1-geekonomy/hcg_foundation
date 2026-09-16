@@ -5,9 +5,9 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 import type {
+  CmsProject,
   ContentStatus,
-  Team,
-  TeamFields,
+  ProjectFields,
 } from "@/domains/cms/lib/types";
 import CmsImagePicker from "./CmsImagePicker";
 import { CmsFormField } from "./CmsFormField";
@@ -23,48 +23,66 @@ const CmsRichTextEditor = dynamic(() => import("./CmsRichTextEditor"), {
   ),
 });
 
-export type TeamFormValues = {
+export type ProjectFormValues = {
   title: string;
-  designation: string;
+  slug: string;
+  projectDate: string;
   shortDescription: string;
   content: string;
   status: ContentStatus;
   metaTitle: string;
   metaDescription: string;
   schemaCode: string;
-  teamImageFile: File | null;
-  teamImageUrl: string | null;
+  projectBannerFile: File | null;
+  projectBannerUrl: string | null;
+  projectMobileBannerFile: File | null;
+  projectMobileBannerUrl: string | null;
 };
 
-export const emptyTeamForm = (): TeamFormValues => ({
+export const emptyProjectForm = (): ProjectFormValues => ({
   title: "",
-  designation: "",
+  slug: "",
+  projectDate: "",
   shortDescription: "",
   content: "",
   status: "draft",
   metaTitle: "",
   metaDescription: "",
   schemaCode: "",
-  teamImageFile: null,
-  teamImageUrl: null,
+  projectBannerFile: null,
+  projectBannerUrl: null,
+  projectMobileBannerFile: null,
+  projectMobileBannerUrl: null,
 });
 
-export function teamToFormValues(team: Team): TeamFormValues {
+export function slugifyTitle(title: string) {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 255);
+}
+
+export function projectToFormValues(project: CmsProject): ProjectFormValues {
   return {
-    title: team.title ?? "",
-    designation: team.designation ?? "",
-    shortDescription: team.shortDescription ?? "",
-    content: team.content ?? "",
-    status: team.status ?? "draft",
-    metaTitle: team.metaTitle ?? "",
-    metaDescription: team.metaDescription ?? "",
-    schemaCode: team.schemaCode ?? "",
-    teamImageFile: null,
-    teamImageUrl: team.teamImage ?? null,
+    title: project.title ?? "",
+    slug: project.slug ?? "",
+    projectDate: project.projectDate ?? "",
+    shortDescription: project.shortDescription ?? "",
+    content: project.content ?? "",
+    status: project.status ?? "draft",
+    metaTitle: project.metaTitle ?? "",
+    metaDescription: project.metaDescription ?? "",
+    schemaCode: project.schemaCode ?? "",
+    projectBannerFile: null,
+    projectBannerUrl: project.projectBanner ?? null,
+    projectMobileBannerFile: null,
+    projectMobileBannerUrl: project.projectMobileBanner ?? null,
   };
 }
 
-export function formValuesToFields(form: TeamFormValues): TeamFields {
+export function formValuesToFields(form: ProjectFormValues): ProjectFields {
   const plainContent = form.content
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/g, " ")
@@ -73,7 +91,8 @@ export function formValuesToFields(form: TeamFormValues): TeamFields {
 
   return {
     title: form.title.trim(),
-    designation: form.designation.trim() || undefined,
+    slug: form.slug.trim() || slugifyTitle(form.title),
+    projectDate: form.projectDate.trim() || undefined,
     shortDescription: form.shortDescription.trim() || undefined,
     content: plainContent ? form.content : undefined,
     status: form.status,
@@ -87,7 +106,6 @@ function norm(value?: string | null) {
   return (value ?? "").trim();
 }
 
-/** Collapse TinyMCE / HTML noise so equivalent content isn't treated as dirty. */
 function normHtml(value?: string | null) {
   return (value ?? "")
     .replace(/\r\n/g, "\n")
@@ -101,29 +119,26 @@ function normHtml(value?: string | null) {
     .trim();
 }
 
-function valuesEqual(key: keyof TeamFields, a?: string, b?: string) {
-  if (key === "content") return normHtml(a) === normHtml(b);
-  return norm(a) === norm(b);
-}
-
-/** Diff edit form vs loaded snapshot — only changed keys for PATCH. */
-export function getTeamPatch(
-  initial: TeamFormValues,
-  current: TeamFormValues
+export function getProjectPatch(
+  initial: ProjectFormValues,
+  current: ProjectFormValues
 ): {
-  fields: Partial<TeamFields>;
-  file: File | null;
+  fields: Partial<ProjectFields>;
+  files: {
+    projectBanner: File | null;
+    projectMobileBanner: File | null;
+  };
   hasChanges: boolean;
 } {
   const prev = formValuesToFields(initial);
   const next = formValuesToFields(current);
-  const fields: Partial<TeamFields> = {};
-
-  const keys: (keyof TeamFields)[] = [
+  const fields: Partial<ProjectFields> = {};
+  const keys: (keyof ProjectFields)[] = [
     "title",
-    "designation",
-    "content",
+    "slug",
+    "projectDate",
     "shortDescription",
+    "content",
     "status",
     "metaTitle",
     "metaDescription",
@@ -131,87 +146,138 @@ export function getTeamPatch(
   ];
 
   for (const key of keys) {
-    const before = prev[key] as string | undefined;
-    const after = next[key] as string | undefined;
-    if (valuesEqual(key, before, after)) continue;
+    const before = prev[key];
+    const after = next[key];
+    const equal =
+      key === "content"
+        ? normHtml(before) === normHtml(after)
+        : norm(before) === norm(after);
+    if (equal) continue;
     fields[key] = (after === undefined ? "" : after) as never;
   }
 
-  const file = current.teamImageFile;
+  const files = {
+    projectBanner: current.projectBannerFile,
+    projectMobileBanner: current.projectMobileBannerFile,
+  };
+
   return {
     fields,
-    file,
-    hasChanges: Object.keys(fields).length > 0 || !!file,
+    files,
+    hasChanges:
+      Object.keys(fields).length > 0 ||
+      !!files.projectBanner ||
+      !!files.projectMobileBanner,
   };
 }
 
-type TeamFormProps = {
-  value: TeamFormValues;
-  onChange: (next: TeamFormValues) => void;
+type ProjectFormProps = {
+  value: ProjectFormValues;
+  onChange: (next: ProjectFormValues) => void;
   onSubmit: (e: React.FormEvent) => void;
   submitLabel: string;
   saving?: boolean;
-  error?: string | null;
+  slugLocked?: boolean;
+  onSlugManualEdit?: () => void;
 };
 
-export default function TeamForm({
+export default function ProjectForm({
   value,
   onChange,
   onSubmit,
   submitLabel,
   saving,
-  error,
-}: TeamFormProps) {
+  slugLocked,
+  onSlugManualEdit,
+}: ProjectFormProps) {
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-3xl space-y-5">
-      {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
-          {error}
-        </div>
-      ) : null}
-
       <div className="space-y-4 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-        <CmsFormField label="Title / Name" htmlFor="title">
+        <CmsFormField label="Title" htmlFor="title">
           <Input
             id="title"
             required
-            placeholder="Dr. John Smith"
+            placeholder="Clean Water Initiative"
             value={value.title}
-            onChange={(e) => onChange({ ...value, title: e.target.value })}
+            onChange={(e) => {
+              const title = e.target.value;
+              onChange({
+                ...value,
+                title,
+                slug: slugLocked ? value.slug : slugifyTitle(title),
+              });
+            }}
           />
         </CmsFormField>
 
-        <CmsFormField label="Designation" htmlFor="designation">
+        <CmsFormField label="Slug" htmlFor="slug">
           <Input
-            id="designation"
-            placeholder="Senior Oncologist"
-            value={value.designation}
+            id="slug"
+            required
+            value={value.slug}
+            onChange={(e) => {
+              onSlugManualEdit?.();
+              onChange({ ...value, slug: e.target.value });
+            }}
+          />
+        </CmsFormField>
+
+        <CmsFormField label="Date" htmlFor="projectDate">
+          <Input
+            id="projectDate"
+            type="date"
+            value={value.projectDate}
             onChange={(e) =>
-              onChange({ ...value, designation: e.target.value })
+              onChange({ ...value, projectDate: e.target.value })
             }
           />
         </CmsFormField>
 
         <CmsFormField
-          label="Team image"
-          htmlFor="teamImage"
+          label="Desktop / web banner"
+          htmlFor="projectBanner"
           hint="WebP or AVIF"
         >
           <CmsImagePicker
-            label="team image"
-            value={{ file: value.teamImageFile, url: value.teamImageUrl }}
+            label="desktop banner"
+            value={{
+              file: value.projectBannerFile,
+              url: value.projectBannerUrl,
+            }}
             onChange={({ file, url }) =>
               onChange({
                 ...value,
-                teamImageFile: file,
-                teamImageUrl: url,
+                projectBannerFile: file,
+                projectBannerUrl: url,
               })
             }
             disabled={saving}
           />
         </CmsFormField>
 
-        <CmsFormField label="Short Description" htmlFor="shortDescription">
+        <CmsFormField
+          label="Mobile banner"
+          htmlFor="projectMobileBanner"
+          hint="WebP or AVIF"
+        >
+          <CmsImagePicker
+            label="mobile banner"
+            value={{
+              file: value.projectMobileBannerFile,
+              url: value.projectMobileBannerUrl,
+            }}
+            onChange={({ file, url }) =>
+              onChange({
+                ...value,
+                projectMobileBannerFile: file,
+                projectMobileBannerUrl: url,
+              })
+            }
+            disabled={saving}
+          />
+        </CmsFormField>
+
+        <CmsFormField label="Short description" htmlFor="shortDescription">
           <Textarea
             id="shortDescription"
             placeholder="Short blurb for cards"
@@ -227,7 +293,7 @@ export default function TeamForm({
             id="content"
             value={value.content}
             onChange={(content) => onChange({ ...value, content })}
-            placeholder="Full biography"
+            placeholder="Full project details…"
           />
         </CmsFormField>
 
@@ -257,7 +323,7 @@ export default function TeamForm({
 
       <Button
         type="submit"
-        disabled={saving || !value.title.trim()}
+        disabled={saving || !value.title.trim() || !value.slug.trim()}
         className="h-11 w-full bg-[#C45A7A] text-white hover:bg-[#b04e6c] sm:w-auto sm:min-w-[200px]"
       >
         {saving ? "Saving…" : submitLabel}
