@@ -37,11 +37,11 @@ async function isDisplayOrderTaken(
   return count > 0;
 }
 
-function duplicateOrderError(order: number): ConflictException {
-  return new ConflictException(
-    `Display order ${order} is already in use. Choose a different display order.`,
-  );
-}
+// function duplicateOrderError(order: number): ConflictException {
+//   return new ConflictException(
+//     `Display order ${order} is already in use. Choose a different display order.`,
+//   );
+// }
 
 /**
  * Pick order for a new row.
@@ -58,9 +58,9 @@ export async function prepareInsertDisplayOrder(
   }
 
   const order = Math.max(1, requested);
-  if (await isDisplayOrderTaken(repo, order)) {
-    throw duplicateOrderError(order);
-  }
+  // if (await isDisplayOrderTaken(repo, order)) {
+  //   throw duplicateOrderError(order);
+  // }
   return order;
 }
 
@@ -80,9 +80,9 @@ export async function applyDisplayOrderUpdate(
   }
 
   const target = Math.max(1, newOrder);
-  if (await isDisplayOrderTaken(repo, target, entityId)) {
-    throw duplicateOrderError(target);
-  }
+  // if (await isDisplayOrderTaken(repo, target, entityId)) {
+  //   throw duplicateOrderError(target);
+  // }
   return target;
 }
 
