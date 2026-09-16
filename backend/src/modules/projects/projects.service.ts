@@ -51,6 +51,7 @@ export class ProjectsService {
         ...dto,
         projectBanner,
         projectMobileBanner,
+        displayOrder: dto.displayOrder ?? 1,
         status: dto.status ?? ContentStatus.DRAFT,
       });
       return await this.saveOrThrow(entity, dto.slug);
@@ -67,7 +68,8 @@ export class ProjectsService {
 
     const qb = this.repo
       .createQueryBuilder('entity')
-      .orderBy('entity.projectDate', 'DESC', 'NULLS LAST')
+      .orderBy('entity.displayOrder', 'ASC')
+      .addOrderBy('entity.projectDate', 'DESC', 'NULLS LAST')
       .addOrderBy('entity.createdAt', 'DESC');
     applyDeletedFilter(qb, query);
 

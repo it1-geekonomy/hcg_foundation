@@ -30,6 +30,10 @@ export class Project extends SeoContentEntity {
   @Column({ name: 'short_description', type: 'text', nullable: true })
   shortDescription?: string | null;
 
+  @Index('idx_projects_display_order')
+  @Column({ name: 'display_order', type: 'int', nullable: false, default: 1 })
+  displayOrder: number;
+
   @Index('idx_projects_status')
   @Column({
     type: 'enum',

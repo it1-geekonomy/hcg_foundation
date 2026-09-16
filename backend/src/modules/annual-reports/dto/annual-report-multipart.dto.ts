@@ -27,7 +27,7 @@ export class CreateAnnualReportMultipartDto extends OmitType(
   @ApiPropertyOptional({
     type: 'string',
     format: 'binary',
-    description: 'Annual report document / PDF (PDF, Word, max 25MB)',
+    description: 'Annual report PDF (PDF only, max 25MB)',
   })
   annualReportFile?: unknown;
 }

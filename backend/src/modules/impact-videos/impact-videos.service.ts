@@ -47,7 +47,7 @@ export class ImpactVideosService {
 
     if (file) {
       this.validateVideoFile(file);
-      videoUrl = await this.cdn.upload(file, 'impact-videos');
+      videoUrl = await this.cdn.upload(file, 'impact-videos', 'video');
     }
 
     if (!videoUrl) {
@@ -134,6 +134,7 @@ export class ImpactVideosService {
         entity.videoUrl,
         file,
         'impact-videos',
+        'video',
       );
       if (replacedUrl) {
         entity.videoUrl = replacedUrl;
