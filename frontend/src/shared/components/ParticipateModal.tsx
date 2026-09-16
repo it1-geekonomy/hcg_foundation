@@ -15,6 +15,7 @@ import {
   Target,
   ChevronDown,
 } from "lucide-react";
+import Typography from "@/lib/Typography";
 import PhoneInputField from "@/shared/forms/PhoneInputField";
 
 export type ParticipateModalType = "intern" | "fundraise" | "volunteer" | null;
@@ -114,12 +115,12 @@ export default function ParticipateModal({
       {/* Backdrop overlay click to close */}
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
-      {/* Main Modal Container with exact Figma CSS specs per modal type */}
+      {/* Main Modal Container with exact Figma styling & fluid responsive height for all screens */}
       <div
         className={`relative z-10 w-full max-w-[640px] bg-white shadow-2xl overflow-hidden my-auto flex flex-col ${
           isIntern
-            ? "h-auto md:h-[860px] max-h-[95vh] rounded-[6px]"
-            : "h-auto md:h-[736px] max-h-[92vh] rounded-[4px]"
+            ? "max-h-[92vh] lg:h-auto lg:max-h-[860px] rounded-[6px]"
+            : "max-h-[90vh] lg:h-auto lg:max-h-[736px] rounded-[4px]"
         }`}
       >
         {/* Full Modal Watermark Background Image matching Figma */}
@@ -133,26 +134,26 @@ export default function ParticipateModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 z-20 p-2 text-[#6C6048] hover:text-[#2E1C12] transition-colors rounded-full hover:bg-black/5"
+          className="absolute top-3 right-3 sm:top-5 sm:right-5 z-20 p-2 text-[#6C6048] hover:text-[#2E1C12] transition-colors rounded-full hover:bg-black/5 cursor-pointer"
           aria-label="Close modal"
         >
           <X className="size-5 sm:size-6" />
         </button>
 
         {/* Modal Scrollable Body */}
-        <div className="relative z-10 p-6 sm:p-8 md:p-10 overflow-y-auto h-full flex flex-col justify-between">
+        <div className="relative z-10 p-5 sm:p-8 md:p-10 overflow-y-auto max-h-[85vh] sm:max-h-[88vh] flex flex-col justify-between">
           {/* Header Title & Subtitle matching Figma 100% */}
           <div className="text-center max-w-xl mx-auto mb-6 sm:mb-8">
-            <h2 className="font-serif text-2xl sm:text-3xl lg:text-[32px] text-[#2E1C12] italic font-normal tracking-tight mb-1">
+            <Typography variant="heading-2" as="h2" className="font-serif text-2xl sm:text-3xl lg:text-[32px] text-[#2E1C12] italic font-normal tracking-tight mb-1">
               {isIntern && "Apply for Internship at"}
               {isFundraise && "Start a Fundraising Campaign at"}
               {!isIntern && !isFundraise && "Become a Volunteer at"}
-            </h2>
+            </Typography>
             <div className="text-2xl sm:text-3xl lg:text-[32px] font-sans font-bold tracking-tight mb-3">
               <span className="text-[#0083B0]">HCG </span>
               <span className="text-[#DF6A4B]">Foundation</span>
             </div>
-            <p className="font-manrope text-xs sm:text-sm text-[#6C6048] leading-relaxed">
+            <Typography variant="body-8" as="p" className="font-manrope text-xs sm:text-sm text-[#6C6048] leading-relaxed">
               {isIntern &&
                 "Passionate about making a difference? Join the HCG Foundation Internship Program to gain hands-on experience, learn from experts, and build skills for your future career."}
               {isFundraise &&
@@ -160,22 +161,22 @@ export default function ParticipateModal({
               {!isIntern &&
                 !isFundraise &&
                 "Join our team of dedicated volunteers and help support patient care initiatives, screening camps, administrative work, and community outreach."}
-            </p>
+            </Typography>
           </div>
 
           {submitted ? (
             <div className="my-8 p-6 bg-[#FFF9EA] border border-[#F3E3B6] rounded-[8px] text-center">
-              <h3 className="font-serif text-xl text-[#2E1C12] font-semibold mb-2">
+              <Typography variant="heading-3" as="h3" className="font-serif text-xl text-[#2E1C12] font-semibold mb-2">
                 Application Submitted!
-              </h3>
-              <p className="font-manrope text-sm text-[#6C6048]">
+              </Typography>
+              <Typography variant="body-8" as="p" className="font-manrope text-sm text-[#6C6048]">
                 Thank you for reaching out to HCG Foundation. Our team will review your application and get in touch with you soon.
-              </p>
+              </Typography>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6 font-manrope">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 lg:space-y-6 font-manrope">
               {/* Row 1: Full Name & Phone Number */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="relative">
                   <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
                     <User className="size-4 text-[#A09578] shrink-0 mr-3" />
@@ -203,7 +204,7 @@ export default function ParticipateModal({
               </div>
 
               {/* Row 2: Email & Gender (Intern) / Location (Fundraise/Volunteer) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="relative">
                   <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
                     <Mail className="size-4 text-[#A09578] shrink-0 mr-3" />
@@ -265,7 +266,7 @@ export default function ParticipateModal({
               {/* Row 3 (Specific to Intern vs Fundraise/Volunteer) */}
               {isIntern ? (
                 <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div className="relative">
                       <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
                         <Calendar className="size-4 text-[#A09578] shrink-0 mr-3" />
@@ -316,7 +317,7 @@ export default function ParticipateModal({
                   </div>
 
                   {/* Languages & Computer Skills */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div className="relative">
                       <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
                         <Globe className="size-4 text-[#A09578] shrink-0 mr-3" />
@@ -364,7 +365,7 @@ export default function ParticipateModal({
                 </>
               ) : (
                 /* Specific to Fundraise / Volunteer */
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="relative">
                     <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
                       <Calendar className="size-4 text-[#A09578] shrink-0 mr-3" />

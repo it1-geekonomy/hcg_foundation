@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
+import Typography from "@/lib/Typography";
 import DonateForm from "@/shared/components/DonateForm";
 import PartnerWithUsModal from "@/shared/components/PartnerWithUsModal";
 import ParticipateModal, {
@@ -27,18 +28,18 @@ export default function ParticipatePage() {
           <div className="lg:col-span-6">
             <div className="flex items-center gap-2 mb-2">
               <span className="inline-block size-2 rounded-full bg-[#B88700]" />
-              <span className="text-xs font-semibold text-[#B88700] uppercase tracking-wider">
+              <Typography variant="body-8" as="span" className="text-xs font-semibold text-[#B88700] uppercase tracking-wider">
                 Our Mission
-              </span>
+              </Typography>
             </div>
-            <h1 className="font-serif text-2xl sm:text-3xl lg:text-[40px] italic text-[#2E1C12] tracking-tight font-normal leading-tight lg:leading-[48px]">
+            <Typography variant="heading-1" as="h1" style={{ textAlign: "left" }} className="font-serif text-2xl sm:text-3xl lg:text-[40px] italic text-[#2E1C12] tracking-tight font-normal leading-tight lg:leading-[48px]">
               Art Gallery & Art Therapy Sessions
-            </h1>
+            </Typography>
           </div>
           <div className="lg:col-span-6 lg:pt-6">
-            <p className="font-manrope text-sm sm:text-base lg:text-[19px] text-[#6C6048] leading-relaxed lg:leading-[27px] text-justify max-w-2xl lg:ml-auto">
+            <Typography variant="body-8" as="p" style={{ textAlign: "left" }} className="font-manrope text-sm sm:text-base lg:text-[19px] text-[#6C6048] leading-relaxed lg:leading-[27px] text-justify max-w-2xl lg:ml-auto">
               Your time, skills and support can bring hope to patients and families. Explore the different ways you can get involved with HCG Foundation.
-            </p>
+            </Typography>
           </div>
         </div>
 
@@ -71,12 +72,12 @@ export default function ParticipatePage() {
               {/* Card Body: Title, Description, Apply Button */}
               <div className="p-6 sm:p-7 pt-3 flex-1 flex flex-col justify-between">
                 <div>
-                  <h2 className="font-serif text-xl sm:text-2xl lg:text-[32px] font-normal text-[#2E1C12] leading-tight mb-3">
+                  <Typography variant="heading-2" as="h2" style={{ textAlign: "left" }} className="font-serif text-xl sm:text-2xl lg:text-[32px] font-normal text-[#2E1C12] leading-tight mb-3">
                     {card.title}
-                  </h2>
-                  <p className="font-manrope text-sm sm:text-base lg:text-[17px] leading-relaxed text-[#6C6048] mb-6">
+                  </Typography>
+                  <Typography variant="body-8" as="p" style={{ textAlign: "left" }} className="font-manrope text-sm sm:text-base lg:text-[17px] leading-relaxed text-[#6C6048] mb-6">
                     {card.description}
-                  </p>
+                  </Typography>
                 </div>
 
                 <div>
@@ -87,7 +88,7 @@ export default function ParticipatePage() {
                     }
                     className="inline-flex items-center gap-2 px-6 py-3 bg-[#FCCC2D] text-[#382E07] text-sm sm:text-base lg:text-[17px] font-semibold rounded-[6px] shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
                   >
-                    <span>Apply Now</span>
+                    <Typography variant="body-8" as="span">Apply Now</Typography>
                     <ArrowUpRight className="size-4 sm:size-5 text-[#382E07]" />
                   </button>
                 </div>
@@ -108,12 +109,12 @@ export default function ParticipatePage() {
                 />
               </div>
               <div>
-                <h3 className="font-serif text-lg sm:text-xl lg:text-[25px] font-normal text-[#2E1C12] leading-tight mb-1.5">
+                <Typography variant="heading-3" as="h3" style={{ textAlign: "left" }} className="font-serif text-lg sm:text-xl lg:text-[25px] font-normal text-[#2E1C12] leading-tight mb-1.5">
                   {benefit.title}
-                </h3>
-                <p className="font-manrope text-xs sm:text-sm lg:text-[17.5px] text-[#6C6048] leading-relaxed">
+                </Typography>
+                <Typography variant="body-8" as="p" style={{ textAlign: "left" }} className="font-manrope text-xs sm:text-sm lg:text-[17.5px] text-[#6C6048] leading-relaxed">
                   {benefit.description}
-                </p>
+                </Typography>
               </div>
             </div>
           ))}
