@@ -32,7 +32,7 @@ export default async function TermsAndConditionsPage() {
     <LegalDocumentPage
       document={document}
       fallbackTitle="Terms & Conditions"
-      emptyMessage="Our Terms & Conditions will appear here once they are published in the CMS."
+      emptyMessage="We are currently updating our Terms & Conditions. Please check back soon, or contact us at hcgfoundation@gmail.com if you have any questions."
     />
   );
 }
