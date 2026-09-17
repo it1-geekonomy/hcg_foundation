@@ -61,13 +61,13 @@ export const FOOTER_QUICK_LINKS = [
 ] as const;
 
 export const FOOTER_INNER_PAGES = [
-  "Team",
-  "Trustees",
-  "Events",
-  "Projects",
-  "Privacy Policy",
-  "Terms and Conditions",
-  "Disclaimer",
+  { label: "Team", href: "/about/our-team" },
+  { label: "Trustees", href: "/about/our-team" },
+  { label: "Events", href: "/" },
+  { label: "Projects", href: "/" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms and Conditions", href: "/terms" },
+  { label: "Disclaimer", href: "/" },
 ] as const;
 
 export const FOOTER_CONTACT_INFO = {

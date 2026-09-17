@@ -1192,3 +1192,23 @@ export const publicHomeBannersApi = {
   listActive: () =>
     request<ApiEnvelope<HomeBanner[]>>("/home-banners/active"),
 };
+
+/**
+ * Public legal documents.
+ * Privacy `/published` returns a paginated list; Terms returns a single document (or null).
+ */
+export const publicLegalApi = {
+  getPublishedPrivacyPolicy: async (): Promise<LegalPage | null> => {
+    const res = await request<Paginated<LegalPage>>(
+      `/privacy-policy/published${toQuery({ page: 1, limit: 1 })}`
+    );
+    return res.data?.[0] ?? null;
+  },
+
+  getPublishedTerms: async (): Promise<LegalPage | null> => {
+    const res = await request<ApiEnvelope<LegalPage | null>>(
+      "/terms-and-conditions/published"
+    );
+    return res.data ?? null;
+  },
+};
