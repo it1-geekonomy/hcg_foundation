@@ -5,16 +5,18 @@ import Statsection from "@/domains/about/components/statsection";
 import WhatWeStandFor from "@/domains/about/components/whatwestand";
 import AwardsRecognition from "@/domains/about/components/awardssection";
 import TeamSection from "@/domains/about/components/teamsection";
+import AnnualReportForm from "@/domains/about/components/annualreports";
 
 export default function OurTeamPage() {
   return (
-    <>
+    <>                                                                               
       <Bannersection />
       <OurMissionSection />
       <Statsection />
       <WhatWeStandFor />
       <TeamSection />
       <AwardsRecognition />
+      {/* <AnnualReportForm /> */}
 
       <div id="donate-form" className="pt-14 bg-[#FFF6D8]">
         <DonateForm />
