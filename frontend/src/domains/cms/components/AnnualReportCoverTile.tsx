@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Eye, FileDown, Pencil, Trash2 } from "lucide-react";
+import Typography from "@/lib/Typography";
 import type { AnnualReport } from "@/domains/cms/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -34,18 +35,28 @@ export default function AnnualReportCoverTile({ report, onDelete }: Props) {
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 px-3 text-center">
-            <span className="font-manrope text-[10px] font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
+            <Typography
+              variant="caption-1"
+              as="span"
+              className="font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase"
+            >
               Annual report
-            </span>
-            <span className="font-manrope text-lg font-semibold text-[#212121]">
+            </Typography>
+            <Typography
+              variant="body-9"
+              as="span"
+              className="font-semibold text-[#212121]"
+            >
               {year || "—"}
-            </span>
+            </Typography>
           </div>
         )}
 
-        <span
+        <Typography
+          variant="caption-1"
+          as="span"
           className={cn(
-            "absolute top-2 right-2 z-20 rounded-full px-2 py-0.5 font-manrope text-[9px] font-semibold tracking-wide uppercase shadow-sm",
+            "absolute top-2 right-2 z-20 rounded-full px-2 py-0.5 font-semibold tracking-wide uppercase shadow-sm",
             report.status === "published"
               ? "bg-[#FCCC2D] text-[#212121]"
               : report.status === "archived"
@@ -54,26 +65,30 @@ export default function AnnualReportCoverTile({ report, onDelete }: Props) {
           )}
         >
           {report.status}
-        </span>
+        </Typography>
 
         <div className="pointer-events-none absolute inset-0 z-10 flex items-end justify-center bg-black/0 p-2 opacity-0 transition duration-200 group-hover:bg-black/30 group-hover:opacity-100 group-focus-within:bg-black/30 group-focus-within:opacity-100 max-sm:bg-black/20 max-sm:opacity-100">
           <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-1.5">
             <Link
               href={`/admin/annual-reports/${report.id}`}
-              className="inline-flex h-8 items-center gap-1 rounded-md bg-white px-2.5 font-manrope text-[11px] font-semibold text-[#212121] shadow-sm"
+              className="inline-flex h-8 items-center gap-1 rounded-md bg-white px-2.5 text-[#212121] shadow-sm"
             >
               <Eye className="size-3" />
-              View
+              <Typography variant="button-2" as="span" className="font-semibold">
+                View
+              </Typography>
             </Link>
             {hasPdf ? (
               <a
                 href={report.annualReportFile!}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex h-8 items-center gap-1 rounded-md bg-[#C45A7A] px-2.5 font-manrope text-[11px] font-semibold text-white shadow-sm"
+                className="inline-flex h-8 items-center gap-1 rounded-md bg-[#C45A7A] px-2.5 text-white shadow-sm"
               >
                 <FileDown className="size-3" />
-                PDF
+                <Typography variant="button-2" as="span" className="font-semibold text-white">
+                  PDF
+                </Typography>
               </a>
             ) : null}
           </div>
@@ -90,14 +105,20 @@ export default function AnnualReportCoverTile({ report, onDelete }: Props) {
         <div className="min-w-0 flex-1">
           <Link
             href={`/admin/annual-reports/${report.id}`}
-            className="line-clamp-2 block font-manrope text-sm font-semibold leading-snug text-[#212121] transition hover:text-[#9A7B00]"
+            className="line-clamp-2 block font-semibold leading-snug text-[#212121] transition hover:text-[#9A7B00]"
           >
-            {report.title}
+            <Typography variant="label-1" as="span">
+              {report.title}
+            </Typography>
           </Link>
           {year ? (
-            <p className="mt-0.5 font-manrope text-[11px] text-[#8A8A8A]">
+            <Typography
+              variant="caption-1"
+              as="p"
+              className="mt-0.5 text-[#8A8A8A]"
+            >
               {year}
-            </p>
+            </Typography>
           ) : null}
         </div>
 

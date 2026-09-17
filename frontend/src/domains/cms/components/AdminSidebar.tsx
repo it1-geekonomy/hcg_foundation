@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight, LogOut, X } from "lucide-react";
 import { authApi } from "@/domains/cms/lib/auth-api";
 import { adminMenuGroups } from "@/navigation/admin-menu.config";
 import { useAuthStore } from "@/store/auth.store";
+import Typography from "@/lib/Typography";
 import { cn } from "@/lib/utils";
 
 function isActivePath(pathname: string, href: string) {
@@ -108,9 +109,13 @@ function SidebarNav({
               {collapsed && showDesktopToggle ? (
                 <div className="mx-auto mb-2.5 h-px w-5 bg-white/10" />
               ) : (
-                <p className="mb-2.5 px-3 font-manrope text-[10px] font-semibold tracking-[0.2em] text-white/30 uppercase">
+                <Typography
+                  variant="caption-1"
+                  as="p"
+                  className="mb-2.5 px-3 font-semibold tracking-[0.2em] text-white/30 uppercase"
+                >
                   {group.label}
-                </p>
+                </Typography>
               )}
 
               <ul className="space-y-1">
@@ -126,7 +131,7 @@ function SidebarNav({
                         title={item.label}
                         onClick={onNavigate}
                         className={cn(
-                          "group relative flex items-center gap-3 overflow-hidden rounded-xl py-2.5 font-manrope text-sm font-medium transition-colors duration-200",
+                          "group relative flex items-center gap-3 overflow-hidden rounded-xl py-2.5 font-medium transition-colors duration-200",
                           iconOnly ? "justify-center px-0" : "px-3",
                           active
                             ? "bg-[linear-gradient(90deg,rgba(252,204,45,0.16),rgba(252,204,45,0.04))] text-[#FCCC2D]"
@@ -149,9 +154,13 @@ function SidebarNav({
                         </span>
 
                         {!iconOnly ? (
-                          <span className="truncate tracking-[-0.01em]">
+                          <Typography
+                            variant="label-1"
+                            as="span"
+                            className="truncate tracking-[-0.01em]"
+                          >
                             {item.label}
-                          </span>
+                          </Typography>
                         ) : null}
                       </Link>
                     </li>
@@ -176,16 +185,28 @@ function SidebarNav({
           </button>
         ) : (
           <div className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-3 ring-1 ring-white/[0.06]">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#FCCC2D]/15 font-manrope text-xs font-bold text-[#FCCC2D]">
+            <Typography
+              variant="caption-1"
+              as="div"
+              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#FCCC2D]/15 font-bold text-[#FCCC2D]"
+            >
               {initialsFromName(user?.fullName)}
-            </div>
+            </Typography>
             <div className="min-w-0 flex-1">
-              <p className="truncate font-manrope text-sm font-semibold text-white">
+              <Typography
+                variant="label-1"
+                as="p"
+                className="truncate font-semibold text-white"
+              >
                 {user?.fullName || "Admin"}
-              </p>
-              <p className="truncate font-manrope text-xs text-white/35">
+              </Typography>
+              <Typography
+                variant="caption-1"
+                as="p"
+                className="truncate text-white/35"
+              >
                 {user?.email || "CMS access"}
-              </p>
+              </Typography>
             </div>
             <button
               type="button"

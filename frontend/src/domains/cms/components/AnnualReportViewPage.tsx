@@ -11,6 +11,7 @@ import {
   RotateCcw,
   Trash2,
 } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { cmsApi } from "@/domains/cms/lib/api";
 import { cmsToast } from "@/domains/cms/lib/toast";
@@ -102,9 +103,13 @@ export default function AnnualReportViewPage() {
 
   if (loading) {
     return (
-      <div className="py-16 text-center font-manrope text-sm text-muted-foreground">
+      <Typography
+        variant="label-1"
+        as="div"
+        className="py-16 text-center text-muted-foreground"
+      >
         Loading report…
-      </div>
+      </Typography>
     );
   }
 
@@ -113,14 +118,20 @@ export default function AnnualReportViewPage() {
       <div className="space-y-4">
         <Link
           href="/admin/annual-reports"
-          className="inline-flex items-center gap-1.5 font-manrope text-sm text-[#5C5C5C] hover:text-[#212121]"
+          className="inline-flex items-center gap-1.5 text-[#5C5C5C] hover:text-[#212121]"
         >
           <ArrowLeft className="size-3.5" />
-          Back to list
+          <Typography variant="label-1" as="span">
+            Back to list
+          </Typography>
         </Link>
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error || "Report not found"}
-        </div>
+        </Typography>
       </div>
     );
   }
@@ -133,32 +144,54 @@ export default function AnnualReportViewPage() {
         <div>
           <Link
             href="/admin/annual-reports"
-            className="mb-3 inline-flex items-center gap-1.5 font-manrope text-sm text-[#5C5C5C] transition hover:text-[#212121]"
+            className="mb-3 inline-flex items-center gap-1.5 text-[#5C5C5C] transition hover:text-[#212121]"
           >
             <ArrowLeft className="size-3.5" />
-            Back to list
+            <Typography variant="label-1" as="span">
+              Back to list
+            </Typography>
           </Link>
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="font-manrope text-xl font-semibold text-[#212121] sm:text-2xl">
+            <Typography
+              variant="heading-8"
+              as="h2"
+              className="font-semibold text-[#212121]"
+            >
               {report.title}
-            </h2>
+            </Typography>
             {report.reportYear ? (
-              <span className="rounded-full bg-[#E8F0F6] px-2.5 py-0.5 font-manrope text-xs font-medium text-[#1A4A6E]">
+              <Typography
+                variant="caption-1"
+                as="span"
+                className="rounded-full bg-[#E8F0F6] px-2.5 py-0.5 font-medium text-[#1A4A6E]"
+              >
                 {report.reportYear}
-              </span>
+              </Typography>
             ) : null}
-            <span className="rounded-full bg-[#FFF1C2] px-2.5 py-0.5 font-manrope text-xs font-medium text-[#7A5A00]">
+            <Typography
+              variant="caption-1"
+              as="span"
+              className="rounded-full bg-[#FFF1C2] px-2.5 py-0.5 font-medium text-[#7A5A00]"
+            >
               {report.status}
-            </span>
+            </Typography>
             {isDeleted ? (
-              <span className="rounded-full bg-red-50 px-2.5 py-0.5 font-manrope text-xs font-medium text-red-700">
+              <Typography
+                variant="caption-1"
+                as="span"
+                className="rounded-full bg-red-50 px-2.5 py-0.5 font-medium text-red-700"
+              >
                 deleted
-              </span>
+              </Typography>
             ) : null}
           </div>
-          <p className="mt-1 font-manrope text-sm text-muted-foreground">
+          <Typography
+            variant="label-1"
+            as="p"
+            className="mt-1 text-muted-foreground"
+          >
             /{report.slug}
-          </p>
+          </Typography>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -167,17 +200,19 @@ export default function AnnualReportViewPage() {
               href={report.annualReportFile!}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#C45A7A] px-3 font-manrope text-sm font-semibold text-white transition hover:bg-[#b04e6c]"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#C45A7A] px-3 text-white transition hover:bg-[#b04e6c]"
             >
               <FileDown className="size-3.5" />
-              Open file
+              <Typography variant="button-3" as="span">
+                Open file
+              </Typography>
             </a>
           ) : null}
           {isDeleted ? (
             <Button
               type="button"
               variant="outline"
-              className="h-9 gap-1.5 border-black/10 bg-white font-manrope text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+              className="h-9 gap-1.5 border-black/10 bg-white text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
               disabled={busy}
               onClick={() => void onRestore()}
             >
@@ -188,10 +223,12 @@ export default function AnnualReportViewPage() {
             <>
               <Link
                 href={`/admin/annual-reports/${report.id}/edit`}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#FCCC2D] px-3 font-manrope text-sm font-semibold text-[#212121] transition hover:brightness-105"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#FCCC2D] px-3 text-[#212121] transition hover:brightness-105"
               >
                 <Pencil className="size-3.5" />
-                Edit
+                <Typography variant="button-3" as="span">
+                  Edit
+                </Typography>
               </Link>
               <Button
                 type="button"
@@ -219,26 +256,40 @@ export default function AnnualReportViewPage() {
                 className="absolute inset-0 h-full w-full object-contain object-center p-2"
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center font-manrope text-sm text-[#9A9A9A]">
+              <Typography
+                variant="label-1"
+                as="div"
+                className="absolute inset-0 flex items-center justify-center text-[#9A9A9A]"
+              >
                 No cover image
-              </div>
+              </Typography>
             )}
           </div>
           <div className="border-t border-black/[0.04] px-3 py-2.5 text-center">
-            <p className="font-manrope text-sm font-semibold text-[#212121]">
+            <Typography
+              variant="label-1"
+              as="p"
+              className="font-semibold text-[#212121]"
+            >
               {report.title}
-            </p>
+            </Typography>
           </div>
         </div>
 
         <div className="space-y-4">
           <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
-            <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
+            <Typography
+              variant="caption-1"
+              as="h3"
+              className="mb-3 font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase"
+            >
               Files (R2)
-            </h3>
-            <ul className="space-y-3 font-manrope text-sm">
+            </Typography>
+            <ul className="space-y-3">
               <li className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-[#5C5C5C]">Desktop / web banner</span>
+                <Typography variant="label-1" as="span" className="text-[#5C5C5C]">
+                  Desktop / web banner
+                </Typography>
                 {hasUrl(report.annualReportBanner) ? (
                   <a
                     href={report.annualReportBanner!}
@@ -246,14 +297,25 @@ export default function AnnualReportViewPage() {
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 font-medium text-[#9A7B00] underline-offset-2 hover:underline"
                   >
-                    Open URL <ExternalLink className="size-3.5" />
+                    <Typography variant="label-1" as="span">
+                      Open URL
+                    </Typography>{" "}
+                    <ExternalLink className="size-3.5" />
                   </a>
                 ) : (
-                  <span className="text-muted-foreground">Not uploaded</span>
+                  <Typography
+                    variant="label-1"
+                    as="span"
+                    className="text-muted-foreground"
+                  >
+                    Not uploaded
+                  </Typography>
                 )}
               </li>
               <li className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-[#5C5C5C]">Mobile banner</span>
+                <Typography variant="label-1" as="span" className="text-[#5C5C5C]">
+                  Mobile banner
+                </Typography>
                 {hasUrl(report.annualReportMobileBanner) ? (
                   <a
                     href={report.annualReportMobileBanner!}
@@ -261,14 +323,25 @@ export default function AnnualReportViewPage() {
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 font-medium text-[#9A7B00] underline-offset-2 hover:underline"
                   >
-                    Open URL <ExternalLink className="size-3.5" />
+                    <Typography variant="label-1" as="span">
+                      Open URL
+                    </Typography>{" "}
+                    <ExternalLink className="size-3.5" />
                   </a>
                 ) : (
-                  <span className="text-muted-foreground">Not uploaded</span>
+                  <Typography
+                    variant="label-1"
+                    as="span"
+                    className="text-muted-foreground"
+                  >
+                    Not uploaded
+                  </Typography>
                 )}
               </li>
               <li className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-[#5C5C5C]">Report file</span>
+                <Typography variant="label-1" as="span" className="text-[#5C5C5C]">
+                  Report file
+                </Typography>
                 {hasUrl(report.annualReportFile) ? (
                   <a
                     href={report.annualReportFile!}
@@ -276,35 +349,72 @@ export default function AnnualReportViewPage() {
                     rel="noreferrer"
                     className="inline-flex items-center gap-1 font-medium text-[#9A7B00] underline-offset-2 hover:underline"
                   >
-                    Open file <ExternalLink className="size-3.5" />
+                    <Typography variant="label-1" as="span">
+                      Open file
+                    </Typography>{" "}
+                    <ExternalLink className="size-3.5" />
                   </a>
                 ) : (
-                  <span className="text-muted-foreground">Not uploaded</span>
+                  <Typography
+                    variant="label-1"
+                    as="span"
+                    className="text-muted-foreground"
+                  >
+                    Not uploaded
+                  </Typography>
                 )}
               </li>
             </ul>
           </section>
 
           <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
-            <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
+            <Typography
+              variant="caption-1"
+              as="h3"
+              className="mb-3 font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase"
+            >
               SEO
-            </h3>
-            <dl className="grid gap-3 font-manrope text-sm sm:grid-cols-2">
+            </Typography>
+            <dl className="grid gap-3 sm:grid-cols-2">
               <div>
-                <dt className="text-xs text-muted-foreground">Meta title</dt>
-                <dd className="mt-0.5">{report.metaTitle || "—"}</dd>
+                <Typography
+                  variant="caption-1"
+                  as="dt"
+                  className="text-muted-foreground"
+                >
+                  Meta title
+                </Typography>
+                <Typography variant="label-1" as="dd" className="mt-0.5">
+                  {report.metaTitle || "—"}
+                </Typography>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">
+                <Typography
+                  variant="caption-1"
+                  as="dt"
+                  className="text-muted-foreground"
+                >
                   Meta description
-                </dt>
-                <dd className="mt-0.5">{report.metaDescription || "—"}</dd>
+                </Typography>
+                <Typography variant="label-1" as="dd" className="mt-0.5">
+                  {report.metaDescription || "—"}
+                </Typography>
               </div>
               <div className="sm:col-span-2">
-                <dt className="text-xs text-muted-foreground">Schema</dt>
-                <dd className="mt-0.5 whitespace-pre-wrap break-all">
+                <Typography
+                  variant="caption-1"
+                  as="dt"
+                  className="text-muted-foreground"
+                >
+                  Schema
+                </Typography>
+                <Typography
+                  variant="label-1"
+                  as="dd"
+                  className="mt-0.5 whitespace-pre-wrap break-all"
+                >
                   {report.schemaCode || "—"}
-                </dd>
+                </Typography>
               </div>
             </dl>
           </section>

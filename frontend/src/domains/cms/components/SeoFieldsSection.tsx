@@ -1,5 +1,6 @@
 "use client";
 
+import Typography from "@/lib/Typography";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 import { CmsFormField } from "./CmsFormField";
@@ -19,9 +20,13 @@ export function SeoFieldsSection({
 }) {
   return (
     <section className="space-y-4 rounded-xl border border-[#FCCC2D]/40 bg-[#FFF8E8]/60 p-4">
-      <h3 className="font-manrope text-sm font-bold tracking-wide text-[#C45A7A]">
+      <Typography
+        variant="label-1"
+        as="h3"
+        className="font-bold tracking-wide text-[#C45A7A]"
+      >
         SEO Meta Tags:
-      </h3>
+      </Typography>
 
       <CmsFormField label="Meta Title" htmlFor="metaTitle">
         <Input

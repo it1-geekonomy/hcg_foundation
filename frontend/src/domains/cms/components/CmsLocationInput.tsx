@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { Loader2, MapPin } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { Input } from "@/shared/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -294,7 +295,7 @@ export default function CmsLocationInput({
               <button
                 type="button"
                 className={cn(
-                  "flex w-full items-start gap-2 px-3 py-2 text-left font-manrope text-sm transition",
+                  "flex w-full items-start gap-2 px-3 py-2 text-left transition",
                   index === activeIndex
                     ? "bg-[#FFF6E8] text-[#212121]"
                     : "text-[#3A3A3A] hover:bg-[#F7F7F5]"
@@ -303,7 +304,9 @@ export default function CmsLocationInput({
                 onClick={() => pick(item.label)}
               >
                 <MapPin className="mt-0.5 size-3.5 shrink-0 text-[#C45A7A]" />
-                <span className="leading-snug">{item.label}</span>
+                <Typography variant="label-1" as="span" className="leading-snug">
+                  {item.label}
+                </Typography>
               </button>
             </li>
           ))}
@@ -315,9 +318,13 @@ export default function CmsLocationInput({
       !loading &&
       value.trim().length >= 2 &&
       suggestions.length === 0 ? (
-        <p className="mt-1.5 font-manrope text-[11px] text-[#8A8A8A]">
+        <Typography
+          variant="caption-1"
+          as="p"
+          className="mt-1.5 text-[#8A8A8A]"
+        >
           No places found — you can still save this as a custom location.
-        </p>
+        </Typography>
       ) : null}
     </div>
   );

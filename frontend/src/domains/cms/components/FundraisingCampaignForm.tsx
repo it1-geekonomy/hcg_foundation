@@ -1,5 +1,6 @@
 "use client";
 
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
@@ -92,9 +93,13 @@ export default function FundraisingCampaignForm({
   return (
     <form onSubmit={onSubmit} className="space-y-5">
       {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error}
-        </div>
+        </Typography>
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -172,7 +177,11 @@ export default function FundraisingCampaignForm({
         />
       </CmsFormField>
 
-      <label className="flex items-center gap-2 font-manrope text-sm text-[#212121]">
+      <Typography
+        variant="label-1"
+        as="label"
+        className="flex items-center gap-2 text-[#212121]"
+      >
         <input
           type="checkbox"
           checked={value.termsAccepted}
@@ -180,12 +189,12 @@ export default function FundraisingCampaignForm({
           className="size-4 rounded border-black/20"
         />
         Terms accepted
-      </label>
+      </Typography>
 
       <Button
         type="submit"
         disabled={saving}
-        className="bg-[#C45A7A] font-manrope hover:bg-[#b04e6c]"
+        className="bg-[#C45A7A] hover:bg-[#b04e6c]"
       >
         {saving ? "Saving…" : submitLabel}
       </Button>

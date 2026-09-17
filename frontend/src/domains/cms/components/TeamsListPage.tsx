@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Eye, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import {
@@ -153,17 +154,23 @@ export default function TeamsListPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <p className="max-w-xl font-manrope text-sm text-muted-foreground">
+        <Typography
+          variant="label-1"
+          as="p"
+          className="max-w-xl text-muted-foreground"
+        >
           Manage team members. Soft-deleted items stay in Recently Deleted until
           you restore them.
-        </p>
+        </Typography>
 
         <Link
           href="/admin/team/new"
-          className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[#C45A7A] px-4 font-manrope text-sm font-semibold text-white transition hover:bg-[#b04e6c]"
+          className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[#C45A7A] px-4 text-white transition hover:bg-[#b04e6c]"
         >
           <Plus className="size-4" />
-          Add member
+          <Typography variant="button-3" as="span">
+            Add member
+          </Typography>
         </Link>
       </div>
 
@@ -171,31 +178,39 @@ export default function TeamsListPage() {
         <button
           type="button"
           onClick={() => switchTab("active")}
-          className={`rounded-lg px-3.5 py-1.5 font-manrope text-sm font-medium transition ${
+          className={`rounded-lg px-3.5 py-1.5 font-medium transition ${
             tab === "active"
               ? "bg-[#C45A7A] text-white"
               : "text-[#5C5C5C] hover:text-[#212121]"
           }`}
         >
-          All members
+          <Typography variant="label-1" as="span">
+            All members
+          </Typography>
         </button>
         <button
           type="button"
           onClick={() => switchTab("deleted")}
-          className={`rounded-lg px-3.5 py-1.5 font-manrope text-sm font-medium transition ${
+          className={`rounded-lg px-3.5 py-1.5 font-medium transition ${
             tab === "deleted"
               ? "bg-[#C45A7A] text-white"
               : "text-[#5C5C5C] hover:text-[#212121]"
           }`}
         >
-          Recently deleted
+          <Typography variant="label-1" as="span">
+            Recently deleted
+          </Typography>
         </button>
       </div>
 
       {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error}
-        </div>
+        </Typography>
       ) : null}
 
       <Card>
@@ -297,20 +312,32 @@ export default function TeamsListPage() {
                     </TableCell>
                     <TableCell className="font-medium">{team.title}</TableCell>
                     <TableCell>
-                      <span className="rounded-full bg-[#E8F0F6] px-2 py-0.5 text-xs capitalize text-[#1A4A6E]">
+                      <Typography
+                        variant="caption-1"
+                        as="span"
+                        className="rounded-full bg-[#E8F0F6] px-2 py-0.5 capitalize text-[#1A4A6E]"
+                      >
                         {team.type ?? "—"}
-                      </span>
+                      </Typography>
                     </TableCell>
                     <TableCell>{team.designation || "—"}</TableCell>
                     <TableCell>
                       {tab === "deleted" ? (
-                        <span className="font-manrope text-xs text-[#5C5C5C]">
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="text-[#5C5C5C]"
+                        >
                           {formatDeletedAt(team.deletedAt)}
-                        </span>
+                        </Typography>
                       ) : (
-                        <span className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-xs text-[#5C5C5C]">
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-[#5C5C5C]"
+                        >
                           {team.status}
-                        </span>
+                        </Typography>
                       )}
                     </TableCell>
                     <TableCell>
@@ -319,13 +346,15 @@ export default function TeamsListPage() {
                           <Button
                             type="button"
                             variant="outline"
-                            className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-manrope text-xs font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+                            className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
                             disabled={restoringId === team.id}
                             aria-label={`Restore ${team.title}`}
                             onClick={() => void onRestore(team.id, team.title)}
                           >
                             <RotateCcw className="size-3.5" />
-                            {restoringId === team.id ? "Restoring…" : "Restore"}
+                            <Typography variant="caption-1" as="span">
+                              {restoringId === team.id ? "Restoring…" : "Restore"}
+                            </Typography>
                           </Button>
                         ) : (
                           <>

@@ -6,17 +6,24 @@ import {
   FADE_GRADIENT,
 } from "@/domains/ourprograms/Swasthigallery/constants/artgallery";
 import GallerySection from "./gallerysection";
+
 function Card({
   icon,
   title,
   description,
+  showMobileDivider = false,
 }: {
   icon: string;
   title: string;
   description: string;
+  showMobileDivider?: boolean;
 }) {
   return (
-    <div className="min-w-0 p-6 sm:p-8 lg:p-6 xl:p-10">
+    <div
+      className={`min-w-0 p-6 sm:p-8 lg:p-6 xl:p-10 ${
+        showMobileDivider ? "border-b border-[#FFECC5] sm:border-b-0" : ""
+      }`}
+    >
       <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#FEF0D3] sm:h-14 sm:w-14 lg:h-16 lg:w-16 xl:h-20 xl:w-20">
         <Image
           src={icon}
@@ -118,9 +125,9 @@ export default function SwastiArtGallery() {
             crossing where the two lines meet stays fully solid. */}
         <div className="relative min-w-0 border border-[#FFECC5] bg-[#FFFBEE]">
           <div className="grid grid-cols-1 sm:grid-cols-2">
-            <Card {...card1} />
-            <Card {...card2} />
-            <Card {...card3} />
+            <Card {...card1} showMobileDivider />
+            <Card {...card2} showMobileDivider />
+            <Card {...card3} showMobileDivider />
             <Card {...card4} />
           </div>
           <VerticalDivider />

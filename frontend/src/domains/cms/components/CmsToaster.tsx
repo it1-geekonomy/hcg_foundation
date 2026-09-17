@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { useCmsToastStore } from "@/domains/cms/lib/toast";
 
 const toneClass: Record<string, string> = {
@@ -26,9 +27,13 @@ export default function CmsToaster() {
           className={`pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg ${toneClass[toast.tone] ?? toneClass.info}`}
           role="status"
         >
-          <p className="min-w-0 flex-1 font-manrope text-sm leading-snug">
+          <Typography
+            variant="label-1"
+            as="p"
+            className="min-w-0 flex-1 leading-snug"
+          >
             {toast.message}
-          </p>
+          </Typography>
           <button
             type="button"
             onClick={() => dismiss(toast.id)}

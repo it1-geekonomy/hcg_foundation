@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
+import Typography from "@/lib/Typography";
 import AdminSidebar from "@/domains/cms/components/AdminSidebar";
 import CmsConfirmDialog from "@/domains/cms/components/CmsConfirmDialog";
 import CmsToaster from "@/domains/cms/components/CmsToaster";
@@ -50,19 +51,31 @@ export default function AdminShell({
           </button>
 
           <div className="min-w-0 flex-1">
-            <p className="font-manrope text-[10px] font-semibold tracking-[0.18em] text-[#9A7B00] uppercase">
+            <Typography
+              variant="caption-1"
+              as="p"
+              className="font-semibold tracking-[0.18em] text-[#9A7B00] uppercase"
+            >
               Content management
-            </p>
-            <h1 className="truncate font-manrope text-lg font-semibold tracking-tight text-[#141414] sm:text-xl">
+            </Typography>
+            <Typography
+              variant="body-9"
+              as="h1"
+              className="truncate font-semibold tracking-tight text-[#141414]"
+            >
               {title}
-            </h1>
+            </Typography>
           </div>
 
           <div className="hidden items-center gap-2 sm:flex">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 font-manrope text-xs font-medium text-[#5C5C5C] shadow-[0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.06]">
+            <Typography
+              variant="caption-1"
+              as="span"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 font-medium text-[#5C5C5C] shadow-[0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.06]"
+            >
               <span className="size-1.5 rounded-full bg-emerald-500" />
               Connected
-            </span>
+            </Typography>
           </div>
         </header>
 

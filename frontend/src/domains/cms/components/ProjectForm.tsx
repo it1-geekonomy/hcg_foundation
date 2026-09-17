@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
@@ -17,9 +18,13 @@ import { SeoFieldsSection } from "./SeoFieldsSection";
 const CmsRichTextEditor = dynamic(() => import("./CmsRichTextEditor"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-[360px] items-center justify-center rounded-lg border border-input bg-white font-manrope text-sm text-muted-foreground">
+    <Typography
+      variant="label-1"
+      as="div"
+      className="flex h-[360px] items-center justify-center rounded-lg border border-input bg-white text-muted-foreground"
+    >
       Loading editor…
-    </div>
+    </Typography>
   ),
 });
 

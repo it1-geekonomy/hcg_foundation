@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { cmsApi } from "@/domains/cms/lib/api";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import type { AnnualReport } from "@/domains/cms/lib/types";
@@ -78,9 +79,13 @@ export default function AnnualReportEditPage() {
 
   if (loading) {
     return (
-      <div className="py-16 text-center font-manrope text-sm text-muted-foreground">
+      <Typography
+        variant="label-1"
+        as="div"
+        className="py-16 text-center text-muted-foreground"
+      >
         Loading editor…
-      </div>
+      </Typography>
     );
   }
 
@@ -89,18 +94,28 @@ export default function AnnualReportEditPage() {
       <div>
         <Link
           href={`/admin/annual-reports/${id}`}
-          className="mb-3 inline-flex items-center gap-1.5 font-manrope text-sm text-[#5C5C5C] transition hover:text-[#212121]"
+          className="mb-3 inline-flex items-center gap-1.5 text-[#5C5C5C] transition hover:text-[#212121]"
         >
           <ArrowLeft className="size-3.5" />
-          Back to view
+          <Typography variant="label-1" as="span">
+            Back to view
+          </Typography>
         </Link>
-        <h1 className="font-manrope text-2xl font-semibold text-[#212121]">
+        <Typography
+          variant="heading-8"
+          as="h1"
+          className="font-semibold text-[#212121]"
+        >
           Edit annual report
-        </h1>
-        <p className="mt-1 font-manrope text-sm text-muted-foreground">
+        </Typography>
+        <Typography
+          variant="label-1"
+          as="p"
+          className="mt-1 text-muted-foreground"
+        >
           Leave file inputs empty to keep existing assets; pick a new file to
           replace.
-        </p>
+        </Typography>
       </div>
 
       <AnnualReportForm

@@ -3,6 +3,7 @@
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
+import Typography from "@/lib/Typography";
 import type {
   LeadsContact,
   UpdateLeadsContactPayload,
@@ -68,9 +69,13 @@ export default function LeadsContactForm({
   return (
     <form onSubmit={onSubmit} className="space-y-5">
       {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error}
-        </div>
+        </Typography>
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">

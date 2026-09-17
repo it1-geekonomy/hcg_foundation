@@ -1,8 +1,6 @@
-"use client";
-
 import React from "react";
-import DonateForm from "@/shared/components/DonateForm";
 import Typography from "@/lib/Typography";
+import DonateForm from "@/shared/components/DonateForm";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
@@ -33,4 +31,3 @@ export default function EventsPage() {
     </main>
   );
 }
-
