@@ -12,8 +12,30 @@ export type CmsImageValue = {
   url: string | null;
 };
 
+export type CmsImageRequiredSize = {
+  width: number;
+  height: number;
+};
+
 const ALLOWED_TYPES = new Set(["image/webp", "image/avif"]);
 const MAX_BYTES = 5 * 1024 * 1024;
+
+function readImageSize(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new window.Image();
+    img.onload = () => {
+      const size = { width: img.naturalWidth, height: img.naturalHeight };
+      URL.revokeObjectURL(url);
+      resolve(size);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Could not read image dimensions"));
+    };
+    img.src = url;
+  });
+}
 
 type CmsImagePickerProps = {
   value: CmsImageValue;
@@ -21,6 +43,8 @@ type CmsImagePickerProps = {
   label?: string;
   accept?: string;
   disabled?: boolean;
+  /** When set, only images matching this exact pixel size are accepted. */
+  requiredSize?: CmsImageRequiredSize;
 };
 
 export default function CmsImagePicker({
@@ -29,6 +53,7 @@ export default function CmsImagePicker({
   label = "image",
   accept = "image/webp,image/avif,.webp,.avif",
   disabled,
+  requiredSize,
 }: CmsImagePickerProps) {
   const inputId = useId();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -46,6 +71,9 @@ export default function CmsImagePicker({
   }, [localPreview]);
 
   const previewSrc = localPreview || value.url;
+  const sizeLabel = requiredSize
+    ? `${requiredSize.width} × ${requiredSize.height}px`
+    : null;
 
   const openPicker = () => {
     if (disabled) return;
@@ -57,7 +85,7 @@ export default function CmsImagePicker({
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  const applyFile = (file: File | null) => {
+  const applyFile = async (file: File | null) => {
     if (!file) {
       onChange({ file: null, url: value.url });
       return;
@@ -69,6 +97,23 @@ export default function CmsImagePicker({
     if (file.size > MAX_BYTES) {
       cmsToast.error("Image must be 5MB or smaller.");
       return;
+    }
+    if (requiredSize) {
+      try {
+        const { width, height } = await readImageSize(file);
+        if (
+          width !== requiredSize.width ||
+          height !== requiredSize.height
+        ) {
+          cmsToast.error(
+            `Image must be exactly ${requiredSize.width} × ${requiredSize.height}px (got ${width} × ${height}px).`
+          );
+          return;
+        }
+      } catch {
+        cmsToast.error("Could not verify image resolution. Try another file.");
+        return;
+      }
     }
     onChange({ file, url: null });
   };
@@ -85,10 +130,29 @@ export default function CmsImagePicker({
         onChange={(e) => {
           const file = e.target.files?.[0] ?? null;
           if (!file) return;
-          applyFile(file);
+          void applyFile(file);
           e.target.value = "";
         }}
       />
+
+      {sizeLabel ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-[#FCCC2D]/50 bg-[#FFF8E8] px-3 py-2">
+          <Typography
+            variant="caption-1"
+            as="span"
+            className="font-semibold tracking-wide text-[#7A5A00] uppercase"
+          >
+            Required size
+          </Typography>
+          <Typography
+            variant="label-1"
+            as="span"
+            className="font-semibold text-[#212121]"
+          >
+            {sizeLabel}
+          </Typography>
+        </div>
+      ) : null}
 
       <div
         role="button"
@@ -128,7 +192,7 @@ export default function CmsImagePicker({
           e.stopPropagation();
           setDragging(false);
           const file = e.dataTransfer.files?.[0] ?? null;
-          applyFile(file);
+          void applyFile(file);
         }}
         className={cn(
           "overflow-hidden rounded-xl border border-black/8 bg-[#F7F6F3] outline-none transition",
@@ -177,9 +241,11 @@ export default function CmsImagePicker({
               <Typography
                 variant="caption-1"
                 as="p"
-                className="max-w-[240px] text-[#7A7A7A]"
+                className="max-w-[280px] text-[#7A7A7A]"
               >
-                Click or drop a WebP or AVIF image (max 5MB)
+                {sizeLabel
+                  ? `Attach a WebP or AVIF image at exactly ${sizeLabel} (max 5MB)`
+                  : "Click or drop a WebP or AVIF image (max 5MB)"}
               </Typography>
             </div>
           )}
@@ -215,6 +281,7 @@ export default function CmsImagePicker({
         <Typography variant="caption-1" as="p" className="text-[#5C5C5C]">
           Selected file: {value.file.name} (
           {(value.file.size / 1024).toFixed(0)} KB)
+          {sizeLabel ? ` · ${sizeLabel}` : ""}
         </Typography>
       ) : null}
     </div>

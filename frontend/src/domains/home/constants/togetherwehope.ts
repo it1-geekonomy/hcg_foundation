@@ -24,10 +24,40 @@ export interface TogetherContent {
 }
 
 export interface CarouselSlide {
+  id?: string;
   location: string;
   image: string;
   title: string;
   description: string;
+  href?: string;
+}
+
+/** Homepage carousel / CMS desktop banner — matches Figma export */
+export const EVENT_BANNER_SIZE = { width: 849, height: 984 } as const;
+
+/** Map a published CMS event → homepage carousel slide (image design). */
+export function mapEventToCarouselSlide(event: {
+  id?: string;
+  title: string;
+  slug?: string;
+  eventBanner?: string | null;
+  eventMobileBanner?: string | null;
+  eventLocation?: string | null;
+  shortDescription?: string | null;
+}): CarouselSlide {
+  return {
+    id: event.id,
+    location: event.eventLocation?.trim() || "—",
+    image:
+      event.eventBanner?.trim() ||
+      event.eventMobileBanner?.trim() ||
+      "",
+    title: event.title,
+    description:
+      event.shortDescription?.trim() ||
+      "Through community outreach programs, free screenings, and educational initiatives, we empower individuals with knowledge and encourage early detection.",
+    href: event.slug ? `/resources/events/${event.slug}` : undefined,
+  };
 }
 
 export const TOGETHER_CONTENT: TogetherContent = {

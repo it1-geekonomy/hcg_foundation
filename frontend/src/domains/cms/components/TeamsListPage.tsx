@@ -307,7 +307,14 @@ export default function TeamsListPage() {
                           className="size-10 rounded-lg object-cover ring-1 ring-black/5"
                         />
                       ) : (
-                        <div className="size-10 rounded-lg bg-[#F0EEE9] ring-1 ring-black/5" />
+                        <Typography
+                          variant="caption-1"
+                          as="div"
+                          className="flex size-10 items-center justify-center rounded-lg border border-red-200 bg-red-50 px-1 text-center leading-tight text-red-700"
+                          title="Image not available"
+                        >
+                          N/A
+                        </Typography>
                       )}
                     </TableCell>
                     <TableCell className="font-medium">{team.title}</TableCell>
