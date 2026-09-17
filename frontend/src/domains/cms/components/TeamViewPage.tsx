@@ -6,21 +6,13 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
-import TeamMemberCard from "@/domains/about/components/TeamMemberCard";
+import { PersonCard } from "@/domains/about/components/teamsection";
+import { mapTeamToPerson } from "@/domains/about/constants/teams";
 import { cmsApi } from "@/domains/cms/lib/api";
 import type { Team } from "@/domains/cms/lib/types";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import CmsHtmlContent from "./CmsHtmlContent";
-
-function plainText(value?: string | null) {
-  if (!value) return "";
-  return value
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
 
 export default function TeamViewPage() {
   const { id } = useParams<{ id: string }>();
@@ -86,7 +78,7 @@ export default function TeamViewPage() {
         as="div"
         className="py-16 text-center text-muted-foreground"
       >
-        Loading trustee…
+        Loading member…
       </Typography>
     );
   }
@@ -108,13 +100,14 @@ export default function TeamViewPage() {
           as="div"
           className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
         >
-          {error || "Trustee not found"}
+          {error || "Member not found"}
         </Typography>
       </div>
     );
   }
 
-  const hoverDescription = plainText(team.content);
+  const person = mapTeamToPerson(team);
+  const isTrustee = team.type === "trustee";
 
   return (
     <div className="space-y-6">
@@ -186,23 +179,24 @@ export default function TeamViewPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(240px,300px)_minmax(0,1fr)]">
-        <div className="rounded-3xl bg-[#F3EEE3] p-5 sm:p-6">
+      <div className="grid gap-6 xl:grid-cols-[minmax(280px,340px)_minmax(0,1fr)]">
+        <div className="overflow-hidden rounded-3xl bg-[#FFF6D8] p-6 sm:p-8">
           <Typography
             variant="caption-1"
             as="p"
-            className="mb-4 text-center font-semibold tracking-[0.16em] text-[#8A7A55] uppercase"
+            className="mb-2 text-center font-semibold tracking-[0.16em] text-[#8A7A55] uppercase"
           >
-            Card preview · hover to slide content up
+            Website preview · {isTrustee ? "Trustee" : "Team"} card
           </Typography>
-          <div className="mx-auto w-full max-w-[260px]">
-            <TeamMemberCard
-              name={team.title}
-              designation={team.designation}
-              imageUrl={team.teamImage}
-              description={hoverDescription || undefined}
-              variant={team.type === "trustee" ? "trustee" : "team"}
-            />
+          <Typography
+            variant="caption-1"
+            as="p"
+            className="mb-8 text-center text-[#9A9A9A]"
+          >
+            Same flip card visitors see on About Us — click the arrow to open
+          </Typography>
+          <div className="mx-auto flex justify-center pt-10">
+            <PersonCard {...person} />
           </div>
         </div>
 

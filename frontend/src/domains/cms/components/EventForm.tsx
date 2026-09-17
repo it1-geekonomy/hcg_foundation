@@ -10,6 +10,9 @@ import type {
   ContentStatus,
   EventFields,
 } from "@/domains/cms/lib/types";
+import {
+  EVENT_BANNER_SIZE,
+} from "@/domains/home/constants/togetherwehope";
 import CmsImagePicker from "./CmsImagePicker";
 import { CmsFormField } from "./CmsFormField";
 import CmsLocationInput from "./CmsLocationInput";
@@ -280,10 +283,11 @@ export default function EventForm({
         <CmsFormField
           label="Desktop / web banner"
           htmlFor="eventBanner"
-          hint="WebP or AVIF"
+          hint={`WebP or AVIF · required size ${EVENT_BANNER_SIZE.width} × ${EVENT_BANNER_SIZE.height}px (homepage carousel)`}
         >
           <CmsImagePicker
             label="desktop banner"
+            requiredSize={EVENT_BANNER_SIZE}
             value={{
               file: value.eventBannerFile,
               url: value.eventBannerUrl,

@@ -6,6 +6,7 @@ import WhatWeStandFor from "@/domains/about/components/whatwestand";
 import AwardsRecognition from "@/domains/about/components/awardssection";
 import TeamSection from "@/domains/about/components/teamsection";
 import AnnualReportForm from "@/domains/about/components/annualreports";
+import AboutTeamSection from "@/domains/about/components/AboutTeamSection";
 
 export default function OurTeamPage() {
   return (
@@ -14,7 +15,7 @@ export default function OurTeamPage() {
       <OurMissionSection />
       <Statsection />
       <WhatWeStandFor />
-      <TeamSection />
+      <AboutTeamSection />
       <AwardsRecognition />
       {/* <AnnualReportForm /> */}
 

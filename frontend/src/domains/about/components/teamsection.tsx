@@ -9,12 +9,7 @@ import {
   CARD_GRADIENT_BG,
   CARD_W,
   CARD_W_2XL,
-  DUMMY_DESCRIPTION,
   SM_FLUID_CARD_WIDTH,
-  trusteesRowOne,
-  trusteesRowTwo,
-  teamRow,
-  XS_FIXED_CARD_WIDTH,
   type Person,
 } from "@/domains/about/constants/teams";
 
@@ -71,7 +66,22 @@ function FlipIcon({ back = false }: { back?: boolean }) {
   );
 }
 
-function PersonCard({
+/** Same style as CMS / site error banners — used when photo is missing or fails. */
+function ImageUnavailableNotice() {
+  return (
+    <div className="flex size-full items-center justify-center bg-[#FFF8F0] p-4">
+      <Typography
+        variant="caption-1"
+        as="p"
+        className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-center text-red-700"
+      >
+        Image not available
+      </Typography>
+    </div>
+  );
+}
+
+export function PersonCard({
   name,
   role,
   img,
@@ -80,7 +90,7 @@ function PersonCard({
   wrapLabel = false,
   dropShadow = true,
   topOffsetClass,
-  description = DUMMY_DESCRIPTION,
+  description = [],
   labelRef,
   labelHeight,
 }: Person & {
@@ -93,7 +103,13 @@ function PersonCard({
   labelHeight?: number | null;
 }) {
   const [flipped, setFlipped] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const showImage = Boolean(img?.trim()) && !imageFailed;
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [img]);
 
   useEffect(() => {
     if (!flipped) return;
@@ -127,7 +143,6 @@ function PersonCard({
       <div className={cx("absolute inset-0 rounded-md", flipped && "pointer-events-none")}>
         <div className="absolute inset-0 rounded-md bg-[linear-gradient(to_bottom,_#FFE380_0%,_rgba(255,255,255,0)_100%)]" />
 
-        {/* IMAGE — fluid width via clamp(), no fixed-px breakpoints */}
         <div
           className={cx(
             "absolute inset-x-0 overflow-hidden rounded-md",
@@ -135,13 +150,19 @@ function PersonCard({
             resolvedTopOffsetClass,
           )}
         >
-          <Image
-            src={img}
-            alt={name}
-            fill
-            sizes={`(min-width: 1536px) ${CARD_W_2XL}px, ${CARD_W}px`}
-            className="object-cover object-top"
-          />
+          {showImage ? (
+            <Image
+              src={img}
+              alt={name}
+              fill
+              sizes={`(min-width: 1536px) ${CARD_W_2XL}px, ${CARD_W}px`}
+              className="object-cover object-top"
+              unoptimized={/^https?:\/\//i.test(img)}
+              onError={() => setImageFailed(true)}
+            />
+          ) : (
+            <ImageUnavailableNotice />
+          )}
         </div>
 
         <div
@@ -162,13 +183,15 @@ function PersonCard({
               {name}
             </Typography>
 
-            <Typography
-              variant="body-7"
-              as="p"
-              className="font-normal font-manrope text-white/85"
-            >
-              {role}
-            </Typography>
+            {role ? (
+              <Typography
+                variant="body-7"
+                as="p"
+                className="font-normal font-manrope text-white/85"
+              >
+                {role}
+              </Typography>
+            ) : null}
           </div>
 
           <button
@@ -238,16 +261,18 @@ function PersonCard({
                 "[&::-webkit-scrollbar]:hidden",
               )}
             >
-              {description.map((paragraph, i) => (
-                <Typography
-                  key={i}
-                  variant="body-7"
-                  as="p"
-                  className="font-normal font-manrope leading-relaxed text-white/90"
-                >
-                  {paragraph}
-                </Typography>
-              ))}
+              {description.length > 0 ? (
+                description.map((paragraph, i) => (
+                  <Typography
+                    key={i}
+                    variant="body-7"
+                    as="p"
+                    className="font-normal font-manrope leading-relaxed text-white/90"
+                  >
+                    {paragraph}
+                  </Typography>
+                ))
+              ) : null}
             </div>
           </div>
         </div>
@@ -378,7 +403,7 @@ function TeamCarousel({ people }: { people: Person[] }) {
         >
           {people.map((p, i) => (
             <PersonCard
-              key={p.name}
+              key={p.id ?? p.name}
               {...p}
               widthClass={FIXED_CARD_WIDTH_CLASS}
               labelRef={setLabelRef(i)}
@@ -511,17 +536,35 @@ function ArrowScrollCarousel({ people }: { people: Person[] }) {
   );
 }
 
-export default function TeamSection() {
-  const allTrustees = [...trusteesRowOne, ...trusteesRowTwo];
-  const trusteesIsOdd = allTrustees.length % 2 === 1;
+export type TeamSectionProps = {
+  trustees?: Person[];
+  teamMembers?: Person[];
+};
+
+function chunkPeople(people: Person[], size: number): Person[][] {
+  if (people.length === 0) return [];
+  const rows: Person[][] = [];
+  for (let i = 0; i < people.length; i += size) {
+    rows.push(people.slice(i, i + size));
+  }
+  return rows;
+}
+
+export default function TeamSection({
+  trustees,
+  teamMembers,
+}: TeamSectionProps) {
+  const allTrustees = trustees ?? [];
+  const teamPeople = teamMembers ?? [];
+  const trusteeRowsLg = chunkPeople(allTrustees, 3);
+
   const { setRef: setTrusteeLabelRef, height: trusteeLabelHeight } =
     useSyncedLabelHeight(allTrustees.length);
   const { setRef: setTeamGridLabelRef, height: teamGridLabelHeight } =
-    useSyncedLabelHeight(teamRow.length);
+    useSyncedLabelHeight(teamPeople.length);
 
   return (
-    <section className="bg-[#FFF6D8] pt-6 pb-6 px-8 sm:px-12 md:px-16 lg:py-10 xl:py-20 lg:px-6 xl:px-6">
-      {/* HEADER */}
+    <section className="bg-[#FFF6D8] px-8 pt-6 pb-6 sm:px-12 md:px-16 lg:px-6 lg:py-10 xl:px-6 xl:py-20">
       <div className="mx-auto mb-12 flex flex-col gap-5 lg:mb-16 lg:flex-row lg:items-start lg:justify-between lg:gap-[60px] 2xl:px-40">
         <div className="flex items-stretch gap-5">
           <span className="w-[3px] flex-none rounded-full bg-[#FCCC2D]" />
@@ -547,84 +590,81 @@ export default function TeamSection() {
         </Typography>
       </div>
 
-      {/* TRUSTEES DIVIDER */}
-      <div className="mx-auto mb-4 lg:mb-24 flex max-w-[1260px] items-center justify-center gap-4 md:gap-[22px]">
-        <span className="h-px w-full max-w-[3.75rem] bg-gradient-to-l from-[#635612] to-[#FEF2C9]/[0.41] md:max-w-[16.25rem]" />
+      {allTrustees.length > 0 ? (
+        <>
+          <div className="mx-auto mb-4 flex max-w-[1260px] items-center justify-center gap-4 md:gap-[22px] lg:mb-24">
+            <span className="h-px w-full max-w-[3.75rem] bg-gradient-to-l from-[#635612] to-[#FEF2C9]/[0.41] md:max-w-[16.25rem]" />
+            <Typography
+              variant="heading-6"
+              as="span"
+              className="whitespace-nowrap font-tiempos-headline text-[#382E07]"
+            >
+              Trustees
+            </Typography>
+            <span className="h-px w-full max-w-[3.75rem] bg-gradient-to-r from-[#635612] to-[#FEF2C9]/[0.41] md:max-w-[16.25rem]" />
+          </div>
 
-        <Typography
-          variant="heading-6"
-          as="span"
-          className="whitespace-nowrap font-tiempos-headline text-[#382E07]"
-        >
-          Trustees
-        </Typography>
+          <div className="mb-4 lg:hidden">
+            <ArrowScrollCarousel people={allTrustees} />
+          </div>
 
-        <span className="h-px w-full max-w-[3.75rem] bg-gradient-to-r from-[#635612] to-[#FEF2C9]/[0.41] md:max-w-[16.25rem]" />
-      </div>
+          <div className="mx-auto mb-16 hidden max-w-[1260px] flex-col gap-16 md:mb-24 lg:flex">
+            {trusteeRowsLg.map((row, rowIndex) => {
+              const offset = rowIndex * 3;
+              return (
+                <div
+                  key={`trustee-row-${rowIndex}`}
+                  className="flex flex-wrap justify-center gap-[1.875rem]"
+                >
+                  {row.map((p, i) => (
+                    <PersonCard
+                      key={p.id ?? p.name}
+                      {...p}
+                      labelRef={setTrusteeLabelRef(offset + i)}
+                      labelHeight={trusteeLabelHeight}
+                    />
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        </>
+      ) : null}
 
-{/* TRUSTEES — BELOW LG */}
-<div className="mb-4 lg:hidden">
-  <ArrowScrollCarousel people={allTrustees} />
-</div>
+      {teamPeople.length > 0 ? (
+        <>
+          <div className="mx-auto mb-4 flex max-w-[1260px] items-center justify-center gap-4 md:gap-[22px] lg:mb-24">
+            <span className="h-px w-full max-w-[3.75rem] bg-gradient-to-l from-[#635612] to-[#FEF2C9]/[0.41] md:max-w-[16.25rem]" />
+            <Typography
+              variant="heading-6"
+              as="span"
+              className="whitespace-nowrap font-tiempos-headline text-[#382E07]"
+            >
+              Teams
+            </Typography>
+            <span className="h-px w-full max-w-[3.75rem] bg-gradient-to-r from-[#635612] to-[#FEF2C9]/[0.41] md:max-w-[16.25rem]" />
+          </div>
 
-      {/* TRUSTEES — LG+ */}
-      <div className="mx-auto mb-16 hidden max-w-[1260px] flex-wrap justify-center gap-[1.875rem] md:mb-20 lg:flex">
-        {trusteesRowOne.map((p, i) => (
-          <PersonCard
-            key={p.name}
-            {...p}
-            labelRef={setTrusteeLabelRef(i)}
-            labelHeight={trusteeLabelHeight}
-          />
-        ))}
-      </div>
+          <div className="lg:hidden">
+            <ArrowScrollCarousel people={teamPeople} />
+          </div>
 
-      <div className="mx-auto mb-16 hidden max-w-[1260px] flex-wrap justify-center gap-[1.875rem] md:mb-24 lg:flex">
-        {trusteesRowTwo.map((p, i) => (
-          <PersonCard
-            key={p.name}
-            {...p}
-            labelRef={setTrusteeLabelRef(trusteesRowOne.length + i)}
-            labelHeight={trusteeLabelHeight}
-          />
-        ))}
-      </div>
-            {/* TRUSTEES DIVIDER */}
-      <div className="mx-auto mb-4 lg:mb-24 flex max-w-[1260px] items-center justify-center gap-4 md:gap-[22px]">
-        <span className="h-px w-full max-w-[3.75rem] bg-gradient-to-l from-[#635612] to-[#FEF2C9]/[0.41] md:max-w-[16.25rem]" />
+          <div className="hidden lg:block 2xl:hidden">
+            <TeamCarousel people={teamPeople} />
+          </div>
 
-        <Typography
-          variant="heading-6"
-          as="span"
-          className="whitespace-nowrap font-tiempos-headline text-[#382E07]"
-        >
-          Teams
-        </Typography>
-
-        <span className="h-px w-full max-w-[3.75rem] bg-gradient-to-r from-[#635612] to-[#FEF2C9]/[0.41] md:max-w-[16.25rem]" />
-      </div>
-
-      {/* TEAM MEMBERS — BELOW LG */}
-      <div className="lg:hidden">
-        <ArrowScrollCarousel people={teamRow} />
-      </div>
-
-      {/* TEAM MEMBERS — LG & XL */}
-      <div className="hidden lg:block 2xl:hidden">
-        <TeamCarousel people={teamRow} />
-      </div>
-
-      {/* TEAM MEMBERS — 2XL+ */}
-      <div className="hidden grid-cols-4 justify-items-center gap-30 px-20 2xl:grid 3xl:gap-20 3xl:px-50">
-        {teamRow.map((p, i) => (
-          <PersonCard
-            key={p.name}
-            {...p}
-            labelRef={setTeamGridLabelRef(i)}
-            labelHeight={teamGridLabelHeight}
-          />
-        ))}
-      </div>
+          <div className="hidden grid-cols-4 justify-items-center gap-30 px-20 2xl:grid 3xl:gap-20 3xl:px-50">
+            {teamPeople.map((p, i) => (
+              <PersonCard
+                key={p.id ?? p.name}
+                {...p}
+                labelRef={setTeamGridLabelRef(i)}
+                labelHeight={teamGridLabelHeight}
+              />
+            ))}
+          </div>
+        </>
+      ) : null}
     </section>
   );
 }
