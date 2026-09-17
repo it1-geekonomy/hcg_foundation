@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { authApi } from "@/domains/cms/lib/auth-api";
 import { useAuthStore } from "@/store/auth.store";
 
@@ -58,8 +59,10 @@ export default function LoginForm() {
 
   if (!hasHydrated || isAuthenticated) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center text-sm text-white/50">
-        Loading…
+      <div className="flex min-h-[40vh] items-center justify-center text-white/50">
+        <Typography variant="label-1" as="span">
+          Loading…
+        </Typography>
       </div>
     );
   }
@@ -75,12 +78,20 @@ export default function LoginForm() {
           className="mb-6 h-14 w-auto object-contain"
           priority
         />
-        <h1 className="font-manrope text-2xl font-semibold tracking-tight text-white">
+        <Typography
+          variant="heading-8"
+          as="h1"
+          className="font-semibold tracking-tight text-white"
+        >
           Sign in
-        </h1>
-        <p className="mt-2 font-manrope text-sm text-white/45">
+        </Typography>
+        <Typography
+          variant="label-1"
+          as="p"
+          className="mt-2 text-white/45"
+        >
           Access the HCG Foundation content studio
-        </p>
+        </Typography>
       </div>
 
       <form
@@ -88,24 +99,32 @@ export default function LoginForm() {
         className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
       >
         <label className="mb-4 block">
-          <span className="mb-1.5 block font-manrope text-xs font-semibold tracking-wide text-white/50 uppercase">
+          <Typography
+            variant="caption-1"
+            as="span"
+            className="mb-1.5 block font-semibold tracking-wide text-white/50 uppercase"
+          >
             Email or username
-          </span>
+          </Typography>
           <input
             type="text"
             autoComplete="username"
             required
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-[#141414] px-3.5 py-2.5 font-manrope text-sm text-white outline-none transition focus:border-[#FCCC2D]/50"
+            className="w-full rounded-xl border border-white/10 bg-[#141414] px-3.5 py-2.5 font-manrope text-white outline-none transition focus:border-[#FCCC2D]/50"
             placeholder="admin@hcg.org"
           />
         </label>
 
         <label className="mb-5 block">
-          <span className="mb-1.5 block font-manrope text-xs font-semibold tracking-wide text-white/50 uppercase">
+          <Typography
+            variant="caption-1"
+            as="span"
+            className="mb-1.5 block font-semibold tracking-wide text-white/50 uppercase"
+          >
             Password
-          </span>
+          </Typography>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -114,7 +133,7 @@ export default function LoginForm() {
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-[#141414] py-2.5 pr-11 pl-3.5 font-manrope text-sm text-white outline-none transition focus:border-[#FCCC2D]/50"
+              className="w-full rounded-xl border border-white/10 bg-[#141414] py-2.5 pr-11 pl-3.5 font-manrope text-white outline-none transition focus:border-[#FCCC2D]/50"
               placeholder="••••••••"
             />
             <button
@@ -133,24 +152,34 @@ export default function LoginForm() {
         </label>
 
         {error ? (
-          <p className="mb-4 rounded-lg bg-red-500/10 px-3 py-2 font-manrope text-sm text-red-300 ring-1 ring-red-500/20">
+          <Typography
+            variant="label-1"
+            as="p"
+            className="mb-4 rounded-lg bg-red-500/10 px-3 py-2 text-red-300 ring-1 ring-red-500/20"
+          >
             {error}
-          </p>
+          </Typography>
         ) : null}
 
         <button
           type="submit"
           disabled={loading}
-          className="flex w-full items-center justify-center rounded-xl bg-[#FCCC2D] px-4 py-2.5 font-manrope text-sm font-semibold text-[#141414] transition hover:brightness-105 disabled:opacity-60"
+          className="flex w-full items-center justify-center rounded-xl bg-[#FCCC2D] px-4 py-2.5 text-[#141414] transition hover:brightness-105 disabled:opacity-60"
         >
-          {loading ? "Signing in…" : "Sign in"}
+          <Typography variant="button-3" as="span">
+            {loading ? "Signing in…" : "Sign in"}
+          </Typography>
         </button>
 
-        <p className="mt-5 text-center font-manrope text-xs text-white/35">
+        <Typography
+          variant="caption-1"
+          as="p"
+          className="mt-5 text-center text-white/35"
+        >
           <Link href="/" className="underline-offset-2 hover:text-white/60 hover:underline">
             Back to website
           </Link>
-        </p>
+        </Typography>
       </form>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ImagePlus, Trash2, Upload } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import { cn } from "@/lib/utils";
@@ -166,12 +167,20 @@ export default function CmsImagePicker({
               <div className="flex size-12 items-center justify-center rounded-full bg-white ring-1 ring-black/5">
                 <ImagePlus className="size-5 text-[#8A8A8A]" />
               </div>
-              <p className="font-manrope text-sm font-medium text-[#3A3A3A]">
+              <Typography
+                variant="label-1"
+                as="p"
+                className="font-medium text-[#3A3A3A]"
+              >
                 No {label} selected
-              </p>
-              <p className="max-w-[240px] font-manrope text-xs text-[#7A7A7A]">
+              </Typography>
+              <Typography
+                variant="caption-1"
+                as="p"
+                className="max-w-[240px] text-[#7A7A7A]"
+              >
                 Click or drop a WebP or AVIF image (max 5MB)
-              </p>
+              </Typography>
             </div>
           )}
         </div>
@@ -203,10 +212,10 @@ export default function CmsImagePicker({
       </div>
 
       {value.file ? (
-        <p className="font-manrope text-xs text-[#5C5C5C]">
+        <Typography variant="caption-1" as="p" className="text-[#5C5C5C]">
           Selected file: {value.file.name} (
           {(value.file.size / 1024).toFixed(0)} KB)
-        </p>
+        </Typography>
       ) : null}
     </div>
   );

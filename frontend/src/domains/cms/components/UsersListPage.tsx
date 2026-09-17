@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui/input";
 import {
   Card,
   CardContent,
@@ -90,23 +90,33 @@ export default function UsersListPage() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <p className="max-w-xl font-manrope text-sm text-muted-foreground">
+        <Typography
+          variant="label-1"
+          as="p"
+          className="max-w-xl text-muted-foreground"
+        >
           CMS admin accounts. Create users separately — this page is the list
           only.
-        </p>
+        </Typography>
         <Link
           href="/admin/users/new"
-          className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[#FCCC2D] px-4 font-manrope text-sm font-semibold text-[#212121] transition hover:brightness-105"
+          className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[#FCCC2D] px-4 text-[#212121] transition hover:brightness-105"
         >
           <Plus className="size-4" />
-          Add user
+          <Typography variant="button-3" as="span">
+            Add user
+          </Typography>
         </Link>
       </div>
 
       {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error}
-        </div>
+        </Typography>
       ) : null}
 
       <Card>

@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { Clock } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { cn } from "@/lib/utils";
 
 type CmsTimePickerProps = {
@@ -108,20 +109,22 @@ export default function CmsTimePicker({
           setOpen((v) => !v);
         }}
         className={cn(
-          "flex h-9 w-full items-center justify-between rounded-lg border border-input bg-white px-2.5 text-left font-manrope text-sm outline-none transition",
+          "flex h-9 w-full items-center justify-between rounded-lg border border-input bg-white px-2.5 text-left outline-none transition",
           "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
           "disabled:cursor-not-allowed disabled:opacity-50",
           open && "border-[#C45A7A]/40 ring-3 ring-[#C45A7A]/15"
         )}
       >
-        <span
+        <Typography
+          variant="label-1"
+          as="span"
           className={cn(
             "tabular-nums",
             parsed ? "text-[#212121]" : "text-muted-foreground"
           )}
         >
           {parsed ? formatDisplay(value) : "Select time"}
-        </span>
+        </Typography>
         <Clock className="size-3.5 shrink-0 text-[#8A8A8A]" />
       </button>
 
@@ -132,15 +135,27 @@ export default function CmsTimePicker({
           className="absolute top-[calc(100%+6px)] left-0 z-50 w-[min(100%,280px)] overflow-hidden rounded-xl bg-white shadow-[0_12px_32px_rgba(0,0,0,0.12)] ring-1 ring-black/10"
         >
           <div className="grid grid-cols-3 border-b border-black/[0.06] bg-[#FAFAF8] px-3 py-2">
-            <p className="text-center font-manrope text-[10px] font-semibold tracking-[0.14em] text-[#9A9A9A] uppercase">
+            <Typography
+              variant="caption-1"
+              as="p"
+              className="text-center font-semibold tracking-[0.14em] text-[#9A9A9A] uppercase"
+            >
               Hour
-            </p>
-            <p className="text-center font-manrope text-[10px] font-semibold tracking-[0.14em] text-[#9A9A9A] uppercase">
+            </Typography>
+            <Typography
+              variant="caption-1"
+              as="p"
+              className="text-center font-semibold tracking-[0.14em] text-[#9A9A9A] uppercase"
+            >
               Min
-            </p>
-            <p className="text-center font-manrope text-[10px] font-semibold tracking-[0.14em] text-[#9A9A9A] uppercase">
+            </Typography>
+            <Typography
+              variant="caption-1"
+              as="p"
+              className="text-center font-semibold tracking-[0.14em] text-[#9A9A9A] uppercase"
+            >
               —
-            </p>
+            </Typography>
           </div>
           <div className="grid grid-cols-3 gap-0">
             <div className="max-h-48 overflow-y-auto border-r border-black/[0.04]">
@@ -151,13 +166,19 @@ export default function CmsTimePicker({
                       type="button"
                       onClick={() => commit(h, minute, periodValue)}
                       className={cn(
-                        "flex w-full items-center justify-center px-2 py-1.5 font-manrope text-sm tabular-nums transition",
+                        "flex w-full items-center justify-center px-2 py-1.5 transition",
                         h === hour12
                           ? "bg-[#C45A7A] font-semibold text-white"
                           : "text-[#212121] hover:bg-[#F7F7F5]"
                       )}
                     >
-                      {pad(h)}
+                      <Typography
+                        variant="label-1"
+                        as="span"
+                        className="tabular-nums"
+                      >
+                        {pad(h)}
+                      </Typography>
                     </button>
                   </li>
                 ))}
@@ -171,13 +192,19 @@ export default function CmsTimePicker({
                       type="button"
                       onClick={() => commit(hour12, m, periodValue)}
                       className={cn(
-                        "flex w-full items-center justify-center px-2 py-1.5 font-manrope text-sm tabular-nums transition",
+                        "flex w-full items-center justify-center px-2 py-1.5 transition",
                         m === minute
                           ? "bg-[#C45A7A] font-semibold text-white"
                           : "text-[#212121] hover:bg-[#F7F7F5]"
                       )}
                     >
-                      {pad(m)}
+                      <Typography
+                        variant="label-1"
+                        as="span"
+                        className="tabular-nums"
+                      >
+                        {pad(m)}
+                      </Typography>
                     </button>
                   </li>
                 ))}
@@ -191,13 +218,15 @@ export default function CmsTimePicker({
                       type="button"
                       onClick={() => commit(hour12, minute, p)}
                       className={cn(
-                        "flex w-full items-center justify-center px-2 py-1.5 font-manrope text-sm transition",
+                        "flex w-full items-center justify-center px-2 py-1.5 transition",
                         p === periodValue
                           ? "bg-[#C45A7A] font-semibold text-white"
                           : "text-[#212121] hover:bg-[#F7F7F5]"
                       )}
                     >
-                      {p}
+                      <Typography variant="label-1" as="span">
+                        {p}
+                      </Typography>
                     </button>
                   </li>
                 ))}
@@ -207,20 +236,24 @@ export default function CmsTimePicker({
           <div className="flex items-center justify-between gap-2 border-t border-black/[0.06] px-3 py-2">
             <button
               type="button"
-              className="font-manrope text-xs font-medium text-[#8A8A8A] transition hover:text-[#212121]"
+              className="font-medium text-[#8A8A8A] transition hover:text-[#212121]"
               onClick={() => {
                 onChange("");
                 setOpen(false);
               }}
             >
-              Clear
+              <Typography variant="caption-1" as="span">
+                Clear
+              </Typography>
             </button>
             <button
               type="button"
-              className="rounded-md bg-[#FCCC2D] px-3 py-1.5 font-manrope text-xs font-semibold text-[#212121] transition hover:brightness-105"
+              className="rounded-md bg-[#FCCC2D] px-3 py-1.5 font-semibold text-[#212121] transition hover:brightness-105"
               onClick={() => setOpen(false)}
             >
-              Done
+              <Typography variant="caption-1" as="span">
+                Done
+              </Typography>
             </button>
           </div>
         </div>

@@ -31,9 +31,13 @@ export default function LegalDocumentPage({
   return (
     <section className="min-h-screen bg-[#FFF6D8] px-8 py-12 text-[#382E07] sm:px-12 md:px-16 lg:px-6 lg:py-16 xl:px-6 xl:py-20 2xl:px-40">
       <div className="mx-auto max-w-3xl">
-        <p className="mb-3 font-manrope text-xs font-semibold tracking-[0.18em] text-[#6F5E09] uppercase">
+        <Typography
+          variant="caption-1"
+          as="p"
+          className="mb-3 font-semibold tracking-[0.18em] text-[#6F5E09] uppercase"
+        >
           HCG Foundation
-        </p>
+        </Typography>
 
         <Typography
           variant="heading-3"
@@ -44,9 +48,13 @@ export default function LegalDocumentPage({
         </Typography>
 
         {updated ? (
-          <p className="mt-3 font-manrope text-sm text-[#9A7B00]">
+          <Typography
+            variant="label-1"
+            as="p"
+            className="mt-3 text-[#9A7B00]"
+          >
             Last updated {updated}
-          </p>
+          </Typography>
         ) : null}
 
         <div className="mt-8 h-px w-full bg-[#FCCC2D]/60" />
@@ -58,14 +66,20 @@ export default function LegalDocumentPage({
           />
         ) : (
           <div className="mt-10 space-y-4">
-            <p className="font-manrope text-base leading-relaxed text-[#5C5C5C]">
+            <Typography
+              variant="body-8"
+              as="p"
+              className="leading-relaxed text-[#5C5C5C]"
+            >
               {emptyMessage}
-            </p>
+            </Typography>
             <Link
               href="/"
-              className="inline-flex font-manrope text-sm font-medium text-[#9A7B00] underline-offset-2 hover:underline"
+              className="inline-flex text-[#9A7B00] underline-offset-2 hover:underline"
             >
-              ← Back to home
+              <Typography variant="label-1" as="span" className="font-medium text-[#9A7B00]">
+                ← Back to home
+              </Typography>
             </Link>
           </div>
         )}

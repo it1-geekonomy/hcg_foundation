@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import {
   Card,
@@ -20,12 +21,20 @@ import type { FundraisingCampaign } from "@/domains/cms/lib/types";
 function Row({ label, value }: { label: string; value?: string | null }) {
   return (
     <div className="grid gap-1 border-b border-border/60 py-3 sm:grid-cols-[180px_1fr]">
-      <p className="font-manrope text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <Typography
+        variant="caption-1"
+        as="p"
+        className="font-semibold uppercase tracking-wide text-muted-foreground"
+      >
         {label}
-      </p>
-      <p className="whitespace-pre-wrap font-manrope text-sm text-foreground">
+      </Typography>
+      <Typography
+        variant="label-1"
+        as="p"
+        className="whitespace-pre-wrap text-foreground"
+      >
         {value || "—"}
-      </p>
+      </Typography>
     </div>
   );
 }
@@ -119,9 +128,13 @@ export default function FundraisingCampaignViewPage() {
 
   if (loading) {
     return (
-      <div className="py-16 text-center font-manrope text-sm text-muted-foreground">
+      <Typography
+        variant="label-1"
+        as="div"
+        className="py-16 text-center text-muted-foreground"
+      >
         Loading campaign…
-      </div>
+      </Typography>
     );
   }
 
@@ -130,14 +143,20 @@ export default function FundraisingCampaignViewPage() {
       <div className="space-y-4">
         <Link
           href="/admin/campaigns"
-          className="inline-flex items-center gap-1.5 font-manrope text-sm text-[#5C5C5C] hover:text-[#212121]"
+          className="inline-flex items-center gap-1.5 text-[#5C5C5C] hover:text-[#212121]"
         >
           <ArrowLeft className="size-3.5" />
-          Back to list
+          <Typography variant="label-1" as="span">
+            Back to list
+          </Typography>
         </Link>
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error || "Campaign not found"}
-        </div>
+        </Typography>
       </div>
     );
   }
@@ -147,10 +166,12 @@ export default function FundraisingCampaignViewPage() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <Link
           href="/admin/campaigns"
-          className="inline-flex items-center gap-1.5 font-manrope text-sm text-[#9A7B00] hover:underline"
+          className="inline-flex items-center gap-1.5 text-[#9A7B00] hover:underline"
         >
           <ArrowLeft className="size-4" />
-          Back to campaigns
+          <Typography variant="label-1" as="span">
+            Back to campaigns
+          </Typography>
         </Link>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -159,30 +180,36 @@ export default function FundraisingCampaignViewPage() {
               type="button"
               variant="outline"
               disabled={busy}
-              className="h-9 gap-1.5 border-black/10 bg-white font-manrope text-sm"
+              className="h-9 gap-1.5 border-black/10 bg-white"
               onClick={() => void onRestore()}
             >
               <RotateCcw className="size-3.5" />
-              {busy ? "Restoring…" : "Restore"}
+              <Typography variant="label-1" as="span">
+                {busy ? "Restoring…" : "Restore"}
+              </Typography>
             </Button>
           ) : (
             <>
               <Link
                 href={`/admin/campaigns/${campaign.id}/edit`}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 font-manrope text-sm font-medium text-[#212121] transition hover:bg-[#F0F0EC]"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 font-medium text-[#212121] transition hover:bg-[#F0F0EC]"
               >
                 <Pencil className="size-3.5" />
-                Edit
+                <Typography variant="label-1" as="span">
+                  Edit
+                </Typography>
               </Link>
               <Button
                 type="button"
                 variant="outline"
                 disabled={busy}
-                className="h-9 gap-1.5 border-red-200 bg-white font-manrope text-sm text-red-600 hover:bg-red-50 hover:text-red-700"
+                className="h-9 gap-1.5 border-red-200 bg-white text-red-600 hover:bg-red-50 hover:text-red-700"
                 onClick={() => void onDelete()}
               >
                 <Trash2 className="size-3.5" />
-                Delete
+                <Typography variant="label-1" as="span">
+                  Delete
+                </Typography>
               </Button>
             </>
           )}
