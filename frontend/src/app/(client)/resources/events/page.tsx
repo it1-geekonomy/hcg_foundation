@@ -1,11 +1,31 @@
+"use client";
+
+import React from "react";
+import DonateForm from "@/shared/components/DonateForm";
 import Typography from "@/lib/Typography";
+
+const CONTAINER = "max-w-[75rem] 2xl:max-w-[100rem] mx-auto px-4 sm:px-6";
 
 export default function EventsPage() {
   return (
-    <section className="flex min-h-screen items-center justify-center bg-slate-100">
-      <Typography variant="heading-3" as="h1" className="text-[#382E07]">
-        Events
-      </Typography>
-    </section>
+    <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope pt-24 sm:pt-28 lg:pt-32">
+      <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
+        <div className="max-w-3xl">
+          <Typography variant="heading-1" as="h1" className="text-[#2E1C12]">
+            Events & Community Drives
+          </Typography>
+          <div className="mt-4">
+            <Typography variant="body-6" as="p" className="text-[#6C6048]">
+              Stay tuned for upcoming cancer awareness drives, screening camps, and foundation fundraising events.
+            </Typography>
+          </div>
+        </div>
+      </section>
+
+      <div id="donate-form">
+        <DonateForm />
+      </div>
+    </main>
   );
 }
+
