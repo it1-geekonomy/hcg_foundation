@@ -49,21 +49,6 @@ const InstagramIcon = () => (
   </svg>
 );
 
-const QUICK_LINK_ROUTES: Record<string, string> = {
-  "Home": "/",
-  "About Us": "/about",
-  "Patient Stories": "/journey-of-hope/patient-stories",
-  "Patient Testimonials": "/journey-of-hope/patient-testimonials",
-  "Patient Aid": "/what-we-do/patient-aid",
-  "Donate Now": "/contact#donate-form",
-  "Contact Us": "/contact",
-};
-
-const INNER_PAGE_OVERRIDES: Record<string, string> = {
-  "Events": "/resources/events",
-  "Projects": "/resources/projects",
-};
-
 export default function Footer() {
   return (
     <footer className="bg-[#373737] text-white">
@@ -103,84 +88,82 @@ export default function Footer() {
           </div>
 
           <div className="col-span-2 md:col-span-3 lg:col-span-1 grid grid-cols-2 md:grid-cols-3 gap-x-6 md:gap-x-8 gap-y-10 lg:flex lg:flex-row lg:items-start lg:justify-end lg:gap-x-10 xl:gap-x-14 2xl:gap-x-28">
-            <div className="col-span-1">
-              <FooterHeading>QUICK LINKS</FooterHeading>
-              <ul className="mt-8 space-y-3">
-                {FOOTER_QUICK_LINKS.map((label) => (
-                  <li key={label}>
-                    <Link href={QUICK_LINK_ROUTES[label] || "/"} className="hover:text-[#FDB723] transition-colors">
-                      <Typography variant="body-9" as="span" className="text-white">
-                        {label}
-                      </Typography>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="col-span-1">
+            <FooterHeading>QUICK LINKS</FooterHeading>
+            <ul className="mt-8 space-y-3">
+              {FOOTER_QUICK_LINKS.map((label) => (
+                <li key={label}>
+                  <Link href="/" className="hover:text-[#FDB723] transition-colors">
+                    <Typography variant="body-9" as="span" className="text-white">
+                      {label}
+                    </Typography>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            <div className="col-span-1">
-              <FooterHeading>INNER PAGES</FooterHeading>
-              <ul className="mt-8 space-y-3">
-                {FOOTER_INNER_PAGES.map((item) => {
-                  const href = INNER_PAGE_OVERRIDES[item.label] || item.href;
-                  return (
-                    <li key={item.label}>
-                      <Link href={href} className="hover:text-[#FDB723] transition-colors">
-                        <Typography variant="body-9" as="span" className="text-white">
-                          {item.label}
-                        </Typography>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+          <div className="col-span-1">
+            <FooterHeading>INNER PAGES</FooterHeading>
+            <ul className="mt-8 space-y-3">
+              {FOOTER_INNER_PAGES.map((item) => (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    className="hover:text-[#FDB723] transition-colors"
+                  >
+                    <Typography variant="body-9" as="span" className="text-white">
+                      {item.label}
+                    </Typography>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            <div className="col-span-2 md:col-span-1">
-              <FooterHeading>CONTACT US</FooterHeading>
-              <div className="mt-8 space-y-4">
-                <div className="flex items-start space-x-4 max-w-[260px]">
-                  <MapPin className="w-5 h-5 text-[#787878] flex-shrink-0 mt-0.5" />
-                  <Typography variant="body-8" as="p" className="text-white">
-                    {FOOTER_CONTACT_INFO.address}
+          <div className="col-span-2 md:col-span-1">
+            <FooterHeading>CONTACT US</FooterHeading>
+            <div className="mt-8 space-y-4">
+              <div className="flex items-start space-x-4 max-w-[260px]">
+                <MapPin className="w-5 h-5 text-[#787878] flex-shrink-0 mt-0.5" />
+                <Typography variant="body-8" as="p" className="text-white">
+                  {FOOTER_CONTACT_INFO.address}
+                </Typography>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <Phone className="w-5 h-5 text-[#787878] flex-shrink-0" />
+                <a href={FOOTER_CONTACT_INFO.phoneLink}>
+                  <Typography variant="body-8" as="span" className="text-white hover:text-[#FDB723] transition-colors">
+                    {FOOTER_CONTACT_INFO.phone}
                   </Typography>
-                </div>
+                </a>
+              </div>
 
-                <div className="flex items-center space-x-4">
-                  <Phone className="w-5 h-5 text-[#787878] flex-shrink-0" />
-                  <a href={FOOTER_CONTACT_INFO.phoneLink}>
-                    <Typography variant="body-8" as="span" className="text-white hover:text-[#FDB723] transition-colors">
-                      {FOOTER_CONTACT_INFO.phone}
-                    </Typography>
+              <div className="flex items-center space-x-4">
+                <Mail className="w-5 h-5 text-[#787878] flex-shrink-0" />
+                <a href={FOOTER_CONTACT_INFO.emailLink}>
+                  <Typography variant="body-8" as="span" className="text-white hover:text-[#FDB723] transition-colors">
+                    {FOOTER_CONTACT_INFO.email}
+                  </Typography>
+                </a>
+              </div>
+
+              <div className="flex space-x-4 pt-2">
+                {FOOTER_SOCIAL_LINKS.map((social) => (
+                  <a
+                    key={social.name}
+                    href={social.href}
+                    className="w-10 h-10 bg-[#FDB723] rounded-full flex items-center justify-center hover:bg-yellow-500 transition-colors"
+                  >
+                    {social.name === "Facebook" && <FacebookIcon />}
+                    {social.name === "LinkedIn" && <LinkedinIcon />}
+                    {social.name === "Instagram" && <InstagramIcon />}
                   </a>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <Mail className="w-5 h-5 text-[#787878] flex-shrink-0" />
-                  <a href={FOOTER_CONTACT_INFO.emailLink}>
-                    <Typography variant="body-8" as="span" className="text-white hover:text-[#FDB723] transition-colors">
-                      {FOOTER_CONTACT_INFO.email}
-                    </Typography>
-                  </a>
-                </div>
-
-                <div className="flex space-x-4 pt-2">
-                  {FOOTER_SOCIAL_LINKS.map((social) => (
-                    <a
-                      key={social.name}
-                      href={social.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="w-10 h-10 bg-[#FDB723] rounded-full flex items-center justify-center hover:bg-yellow-500 transition-colors"
-                    >
-                      {social.name === "Facebook" && <FacebookIcon />}
-                      {social.name === "LinkedIn" && <LinkedinIcon />}
-                      {social.name === "Instagram" && <InstagramIcon />}
-                    </a>
-                  ))}
-                </div>
+                ))}
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>
