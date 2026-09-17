@@ -13,7 +13,7 @@ export default function OurTeamPage() {
       <OurMissionSection />
       <Statsection />
       <WhatWeStandFor />
-      {/* <TeamSection /> */}
+      <TeamSection />
       <AwardsRecognition />
 
       <div id="donate-form" className="pt-14 bg-[#FFF6D8]">
