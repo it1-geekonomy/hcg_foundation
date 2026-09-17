@@ -45,7 +45,7 @@ export class CreateProjectDto extends SeoFieldsDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  displayOrder?: number = 1;
+  displayOrder?: number;
 
   @ApiPropertyOptional({
     enum: ContentStatus,

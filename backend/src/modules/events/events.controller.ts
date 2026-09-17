@@ -20,6 +20,7 @@ import {
   ApiConsumes,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiQuery,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -145,8 +146,20 @@ export class EventsController {
       'Public detail page. Use slug in the URL, e.g. /resources/events/pink-hope-awareness-walk',
   })
   @ApiOkResponse({ type: Event })
-  async findPublishedBySlug(@Param('slug') slug: string) {
-    const data = await this.service.findPublishedBySlug(slug);
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of related items to return (default depends on module)',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for related items (default: 1)',
+  })
+  async findPublishedBySlug(@Param('slug') slug: string, @Query('limit') limit?: string, @Query('page') page?: string) {
+    const data = await this.service.findPublishedBySlugWithRelated(slug, limit ? parseInt(limit, 10) : undefined, page ? parseInt(page, 10) : undefined);
     return {
       statusCode: HttpStatus.OK,
       message: 'Published event fetched successfully',
