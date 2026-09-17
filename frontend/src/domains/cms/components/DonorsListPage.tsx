@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { Input } from "@/shared/ui/input";
+import Typography from "@/lib/Typography";
 import {
   Card,
   CardContent,
@@ -73,14 +73,22 @@ export default function DonorsListPage() {
 
   return (
     <div className="space-y-5">
-      <p className="max-w-xl font-manrope text-sm text-muted-foreground">
+      <Typography
+        variant="label-1"
+        as="p"
+        className="max-w-xl text-muted-foreground"
+      >
         Website donations that completed payment.
-      </p>
+      </Typography>
 
       {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error}
-        </div>
+        </Typography>
       ) : null}
 
       <Card>
@@ -151,9 +159,13 @@ export default function DonorsListPage() {
                           {donor.country?.trim() || "India"}
                         </span>
                         {donor.isInternational ? (
-                          <span className="font-manrope text-xs text-[#9A7B00]">
+                          <Typography
+                            variant="caption-1"
+                            as="span"
+                            className="text-[#9A7B00]"
+                          >
                             International
-                          </span>
+                          </Typography>
                         ) : null}
                       </TableCell>
                       <TableCell className="capitalize">{donor.status}</TableCell>

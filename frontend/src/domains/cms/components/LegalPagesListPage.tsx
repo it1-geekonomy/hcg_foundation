@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Eye, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import {
@@ -156,7 +157,11 @@ export default function LegalPagesListPage({
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <p className="max-w-xl font-manrope text-sm text-muted-foreground">
+        <Typography
+          variant="label-1"
+          as="p"
+          className="max-w-xl text-muted-foreground"
+        >
           Manage {section.label.toLowerCase()}. Soft-deleted items stay in
           Recently Deleted until you restore them. Published versions show on{" "}
           <Link
@@ -167,13 +172,15 @@ export default function LegalPagesListPage({
             {section.publicPath}
           </Link>
           .
-        </p>
+        </Typography>
         <Link
           href={`${section.basePath}/new`}
-          className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[#C45A7A] px-4 font-manrope text-sm font-semibold text-white transition hover:bg-[#b04e6c]"
+          className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[#C45A7A] px-4 text-white transition hover:bg-[#b04e6c]"
         >
           <Plus className="size-4" />
-          Add {section.singular}
+          <Typography variant="button-3" as="span">
+            Add {section.singular}
+          </Typography>
         </Link>
       </div>
 
@@ -181,31 +188,39 @@ export default function LegalPagesListPage({
         <button
           type="button"
           onClick={() => switchTab("active")}
-          className={`rounded-lg px-3.5 py-1.5 font-manrope text-sm font-medium transition ${
+          className={`rounded-lg px-3.5 py-1.5 font-medium transition ${
             tab === "active"
               ? "bg-[#C45A7A] text-white"
               : "text-[#5C5C5C] hover:text-[#212121]"
           }`}
         >
-          {section.activeListLabel}
+          <Typography variant="label-1" as="span">
+            {section.activeListLabel}
+          </Typography>
         </button>
         <button
           type="button"
           onClick={() => switchTab("deleted")}
-          className={`rounded-lg px-3.5 py-1.5 font-manrope text-sm font-medium transition ${
+          className={`rounded-lg px-3.5 py-1.5 font-medium transition ${
             tab === "deleted"
               ? "bg-[#C45A7A] text-white"
               : "text-[#5C5C5C] hover:text-[#212121]"
           }`}
         >
-          Recently deleted
+          <Typography variant="label-1" as="span">
+            Recently deleted
+          </Typography>
         </button>
       </div>
 
       {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error}
-        </div>
+        </Typography>
       ) : null}
 
       <Card>
@@ -280,13 +295,21 @@ export default function LegalPagesListPage({
                     <TableCell className="font-medium">{item.title}</TableCell>
                     <TableCell>
                       {tab === "deleted" ? (
-                        <span className="font-manrope text-xs text-[#5C5C5C]">
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="text-[#5C5C5C]"
+                        >
                           {formatDeletedAt(item.deletedAt)}
-                        </span>
+                        </Typography>
                       ) : (
-                        <span className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-xs text-[#5C5C5C]">
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-[#5C5C5C]"
+                        >
                           {item.status}
-                        </span>
+                        </Typography>
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -308,7 +331,7 @@ export default function LegalPagesListPage({
                             <Button
                               type="button"
                               variant="outline"
-                              className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-manrope text-xs font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+                              className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
                               disabled={restoringId === item.id}
                               aria-label={`Restore ${item.title}`}
                               onClick={() =>
@@ -316,9 +339,11 @@ export default function LegalPagesListPage({
                               }
                             >
                               <RotateCcw className="size-3.5" />
-                              {restoringId === item.id
-                                ? "Restoring…"
-                                : "Restore"}
+                              <Typography variant="caption-1" as="span">
+                                {restoringId === item.id
+                                  ? "Restoring…"
+                                  : "Restore"}
+                              </Typography>
                             </Button>
                           </>
                         ) : (

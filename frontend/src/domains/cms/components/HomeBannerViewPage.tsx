@@ -10,6 +10,7 @@ import {
   RotateCcw,
   Trash2,
 } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { cmsApi } from "@/domains/cms/lib/api";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
@@ -97,9 +98,13 @@ export default function HomeBannerViewPage() {
 
   if (loading) {
     return (
-      <div className="py-16 text-center font-manrope text-sm text-muted-foreground">
+      <Typography
+        variant="label-1"
+        as="div"
+        className="py-16 text-center text-muted-foreground"
+      >
         Loading banner…
-      </div>
+      </Typography>
     );
   }
 
@@ -108,14 +113,20 @@ export default function HomeBannerViewPage() {
       <div className="space-y-4">
         <Link
           href="/admin/home-banners"
-          className="inline-flex items-center gap-1.5 font-manrope text-sm text-[#5C5C5C] hover:text-[#212121]"
+          className="inline-flex items-center gap-1.5 text-[#5C5C5C] hover:text-[#212121]"
         >
           <ArrowLeft className="size-3.5" />
-          Back to list
+          <Typography variant="label-1" as="span">
+            Back to list
+          </Typography>
         </Link>
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error || "Home banner not found"}
-        </div>
+        </Typography>
       </div>
     );
   }
@@ -128,35 +139,51 @@ export default function HomeBannerViewPage() {
         <div>
           <Link
             href="/admin/home-banners"
-            className="mb-3 inline-flex items-center gap-1.5 font-manrope text-sm text-[#5C5C5C] transition hover:text-[#212121]"
+            className="mb-3 inline-flex items-center gap-1.5 text-[#5C5C5C] transition hover:text-[#212121]"
           >
             <ArrowLeft className="size-3.5" />
-            Back to list
+            <Typography variant="label-1" as="span">
+              Back to list
+            </Typography>
           </Link>
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="font-manrope text-xl font-semibold text-[#212121] sm:text-2xl">
+            <Typography
+              variant="heading-8"
+              as="h2"
+              className="font-semibold text-[#212121]"
+            >
               {banner.title}
-            </h2>
-            <span
-              className={`rounded-full px-2.5 py-0.5 font-manrope text-xs font-medium ${
+            </Typography>
+            <Typography
+              variant="caption-1"
+              as="span"
+              className={`rounded-full px-2.5 py-0.5 font-medium ${
                 banner.isActive
                   ? "bg-[#E8F6EC] text-[#1B6B3A]"
                   : "bg-[#FFF1C2] text-[#7A5A00]"
               }`}
             >
               {banner.isActive ? "Active" : "Inactive"}
-            </span>
+            </Typography>
             {isDeleted ? (
-              <span className="rounded-full bg-red-50 px-2.5 py-0.5 font-manrope text-xs font-medium text-red-700">
+              <Typography
+                variant="caption-1"
+                as="span"
+                className="rounded-full bg-red-50 px-2.5 py-0.5 font-medium text-red-700"
+              >
                 deleted
-              </span>
+              </Typography>
             ) : null}
           </div>
-          <p className="mt-1 font-manrope text-sm text-muted-foreground">
+          <Typography
+            variant="label-1"
+            as="p"
+            className="mt-1 text-muted-foreground"
+          >
             {banner.name}
             {banner.location ? ` · ${banner.location}` : ""} · order{" "}
             {banner.displayOrder}
-          </p>
+          </Typography>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -165,17 +192,19 @@ export default function HomeBannerViewPage() {
               href={banner.bannerImageUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 font-manrope text-sm text-[#212121] transition hover:bg-[#F7F7F5]"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 text-[#212121] transition hover:bg-[#F7F7F5]"
             >
               <ExternalLink className="size-3.5" />
-              Open image
+              <Typography variant="label-1" as="span">
+                Open image
+              </Typography>
             </a>
           ) : null}
           {isDeleted ? (
             <Button
               type="button"
               variant="outline"
-              className="h-9 gap-1.5 border-black/10 bg-white font-manrope text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+              className="h-9 gap-1.5 border-black/10 bg-white text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
               disabled={busy}
               onClick={() => void onRestore()}
             >
@@ -186,10 +215,12 @@ export default function HomeBannerViewPage() {
             <>
               <Link
                 href={`/admin/home-banners/${banner.id}/edit`}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#FCCC2D] px-3 font-manrope text-sm font-semibold text-[#212121] transition hover:brightness-105"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#FCCC2D] px-3 text-[#212121] transition hover:brightness-105"
               >
                 <Pencil className="size-3.5" />
-                Edit
+                <Typography variant="button-3" as="span">
+                  Edit
+                </Typography>
               </Link>
               <Button
                 type="button"
@@ -218,9 +249,13 @@ export default function HomeBannerViewPage() {
                   className="absolute inset-0 h-full w-full object-contain object-center p-3"
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center font-manrope text-sm text-[#9A9A9A]">
+                <Typography
+                  variant="label-1"
+                  as="div"
+                  className="absolute inset-0 flex items-center justify-center text-[#9A9A9A]"
+                >
                   No banner image
-                </div>
+                </Typography>
               )}
             </div>
           </div>
@@ -228,9 +263,13 @@ export default function HomeBannerViewPage() {
             <div className="grid grid-cols-2 gap-3">
               {banner.mobileBannerImageUrl ? (
                 <div className="overflow-hidden rounded-xl bg-white ring-1 ring-black/[0.05]">
-                  <p className="px-2 pt-2 font-manrope text-[10px] font-semibold tracking-wider text-[#9A9A9A] uppercase">
+                  <Typography
+                    variant="caption-1"
+                    as="p"
+                    className="px-2 pt-2 font-semibold tracking-wider text-[#9A9A9A] uppercase"
+                  >
                     Mobile
-                  </p>
+                  </Typography>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={banner.mobileBannerImageUrl}
@@ -241,9 +280,13 @@ export default function HomeBannerViewPage() {
               ) : null}
               {banner.profileImageUrl ? (
                 <div className="overflow-hidden rounded-xl bg-white ring-1 ring-black/[0.05]">
-                  <p className="px-2 pt-2 font-manrope text-[10px] font-semibold tracking-wider text-[#9A9A9A] uppercase">
+                  <Typography
+                    variant="caption-1"
+                    as="p"
+                    className="px-2 pt-2 font-semibold tracking-wider text-[#9A9A9A] uppercase"
+                  >
                     Profile
-                  </p>
+                  </Typography>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={banner.profileImageUrl}
@@ -257,17 +300,29 @@ export default function HomeBannerViewPage() {
         </div>
 
         <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
-          <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
+          <Typography
+            variant="caption-1"
+            as="h3"
+            className="mb-3 font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase"
+          >
             Short description
-          </h3>
+          </Typography>
           {banner.shortDescription?.trim() ? (
-            <p className="whitespace-pre-wrap font-manrope text-sm leading-relaxed text-[#212121]">
+            <Typography
+              variant="label-1"
+              as="p"
+              className="whitespace-pre-wrap leading-relaxed text-[#212121]"
+            >
               {banner.shortDescription}
-            </p>
+            </Typography>
           ) : (
-            <p className="font-manrope text-sm text-muted-foreground">
+            <Typography
+              variant="label-1"
+              as="p"
+              className="text-muted-foreground"
+            >
               No description yet.
-            </p>
+            </Typography>
           )}
         </section>
       </div>

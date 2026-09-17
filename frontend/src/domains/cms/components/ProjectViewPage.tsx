@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { cmsApi, publicProjectsApi } from "@/domains/cms/lib/api";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
@@ -124,9 +125,13 @@ export default function ProjectViewPage() {
 
   if (loading) {
     return (
-      <div className="py-16 text-center font-manrope text-sm text-muted-foreground">
+      <Typography
+        variant="label-1"
+        as="div"
+        className="py-16 text-center text-muted-foreground"
+      >
         Loading project…
-      </div>
+      </Typography>
     );
   }
 
@@ -135,14 +140,20 @@ export default function ProjectViewPage() {
       <div className="space-y-4">
         <Link
           href="/admin/projects"
-          className="inline-flex items-center gap-1.5 font-manrope text-sm text-[#5C5C5C] hover:text-[#212121]"
+          className="inline-flex items-center gap-1.5 text-[#5C5C5C] hover:text-[#212121]"
         >
           <ArrowLeft className="size-3.5" />
-          Back to list
+          <Typography variant="label-1" as="span">
+            Back to list
+          </Typography>
         </Link>
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error || "Project not found"}
-        </div>
+        </Typography>
       </div>
     );
   }
@@ -155,28 +166,46 @@ export default function ProjectViewPage() {
         <div>
           <Link
             href="/admin/projects"
-            className="mb-3 inline-flex items-center gap-1.5 font-manrope text-sm text-[#5C5C5C] transition hover:text-[#212121]"
+            className="mb-3 inline-flex items-center gap-1.5 text-[#5C5C5C] transition hover:text-[#212121]"
           >
             <ArrowLeft className="size-3.5" />
-            Back to list
+            <Typography variant="label-1" as="span">
+              Back to list
+            </Typography>
           </Link>
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="font-manrope text-xl font-semibold text-[#212121] sm:text-2xl">
+            <Typography
+              variant="heading-8"
+              as="h2"
+              className="font-semibold text-[#212121]"
+            >
               {project.title}
-            </h2>
-            <span className="rounded-full bg-[#FFF1C2] px-2.5 py-0.5 font-manrope text-xs font-medium text-[#7A5A00]">
+            </Typography>
+            <Typography
+              variant="caption-1"
+              as="span"
+              className="rounded-full bg-[#FFF1C2] px-2.5 py-0.5 font-medium text-[#7A5A00]"
+            >
               {project.status}
-            </span>
+            </Typography>
             {isDeleted ? (
-              <span className="rounded-full bg-red-50 px-2.5 py-0.5 font-manrope text-xs font-medium text-red-700">
+              <Typography
+                variant="caption-1"
+                as="span"
+                className="rounded-full bg-red-50 px-2.5 py-0.5 font-medium text-red-700"
+              >
                 deleted
-              </span>
+              </Typography>
             ) : null}
           </div>
-          <p className="mt-1 font-manrope text-sm text-muted-foreground">
+          <Typography
+            variant="label-1"
+            as="p"
+            className="mt-1 text-muted-foreground"
+          >
             /{project.slug}
-          </p>
-          <p className="mt-1 font-manrope text-sm text-[#5C5C5C]">
+          </Typography>
+          <Typography variant="label-1" as="p" className="mt-1 text-[#5C5C5C]">
             {[
               project.projectDate || null,
               project.displayOrder != null
@@ -185,7 +214,7 @@ export default function ProjectViewPage() {
             ]
               .filter(Boolean)
               .join(" · ") || "No date set"}
-          </p>
+          </Typography>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -193,7 +222,7 @@ export default function ProjectViewPage() {
             <Button
               type="button"
               variant="outline"
-              className="h-9 gap-1.5 border-black/10 bg-white font-manrope text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+              className="h-9 gap-1.5 border-black/10 bg-white text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
               disabled={busy}
               onClick={() => void onRestore()}
             >
@@ -204,10 +233,12 @@ export default function ProjectViewPage() {
             <>
               <Link
                 href={`/admin/projects/${project.id}/edit`}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#FCCC2D] px-3 font-manrope text-sm font-semibold text-[#212121] transition hover:brightness-105"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#FCCC2D] px-3 text-[#212121] transition hover:brightness-105"
               >
                 <Pencil className="size-3.5" />
-                Edit
+                <Typography variant="button-3" as="span">
+                  Edit
+                </Typography>
               </Link>
               <Button
                 type="button"
@@ -226,9 +257,13 @@ export default function ProjectViewPage() {
 
       <section className="overflow-hidden rounded-2xl ring-1 ring-black/5">
         <div className="border-b border-black/5 bg-white px-4 py-3 sm:px-5">
-          <h3 className="font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
+          <Typography
+            variant="caption-1"
+            as="h3"
+            className="font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase"
+          >
             Website preview
-          </h3>
+          </Typography>
         </div>
         <CmsWebsitePreview className="bg-[#FFF6D8]">
           <ProjectsSection
@@ -241,38 +276,74 @@ export default function ProjectViewPage() {
 
       <div className="space-y-4">
         <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
-          <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
+          <Typography
+            variant="caption-1"
+            as="h3"
+            className="mb-3 font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase"
+          >
             Content
-          </h3>
+          </Typography>
           {project.content ? (
             <CmsHtmlContent html={project.content} />
           ) : (
-            <p className="font-manrope text-sm text-muted-foreground">
+            <Typography
+              variant="label-1"
+              as="p"
+              className="text-muted-foreground"
+            >
               No content yet.
-            </p>
+            </Typography>
           )}
         </section>
 
         <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
-          <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
+          <Typography
+            variant="caption-1"
+            as="h3"
+            className="mb-3 font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase"
+          >
             SEO
-          </h3>
-          <dl className="grid gap-3 font-manrope text-sm sm:grid-cols-2">
+          </Typography>
+          <dl className="grid gap-3 sm:grid-cols-2">
             <div>
-              <dt className="text-xs text-muted-foreground">Meta title</dt>
-              <dd className="mt-0.5">{project.metaTitle || "—"}</dd>
+              <Typography
+                variant="caption-1"
+                as="dt"
+                className="text-muted-foreground"
+              >
+                Meta title
+              </Typography>
+              <Typography variant="label-1" as="dd" className="mt-0.5">
+                {project.metaTitle || "—"}
+              </Typography>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">
+              <Typography
+                variant="caption-1"
+                as="dt"
+                className="text-muted-foreground"
+              >
                 Meta description
-              </dt>
-              <dd className="mt-0.5">{project.metaDescription || "—"}</dd>
+              </Typography>
+              <Typography variant="label-1" as="dd" className="mt-0.5">
+                {project.metaDescription || "—"}
+              </Typography>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-xs text-muted-foreground">Schema</dt>
-              <dd className="mt-0.5 break-all whitespace-pre-wrap">
+              <Typography
+                variant="caption-1"
+                as="dt"
+                className="text-muted-foreground"
+              >
+                Schema
+              </Typography>
+              <Typography
+                variant="label-1"
+                as="dd"
+                className="mt-0.5 break-all whitespace-pre-wrap"
+              >
                 {project.schemaCode || "—"}
-              </dd>
+              </Typography>
             </div>
           </dl>
         </section>

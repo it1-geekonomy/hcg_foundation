@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Eye, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import {
   Card,
@@ -154,40 +155,52 @@ export default function FundraisingCampaignsListPage() {
 
   return (
     <div className="space-y-6">
-      <p className="max-w-xl font-manrope text-sm text-muted-foreground">
+      <Typography
+        variant="label-1"
+        as="p"
+        className="max-w-xl text-muted-foreground"
+      >
         Review fundraising campaign applications submitted from the website.
         Soft-deleted items stay in Recently Deleted until you restore them.
-      </p>
+      </Typography>
 
       <div className="inline-flex rounded-xl bg-white p-1 ring-1 ring-black/5">
         <button
           type="button"
           onClick={() => switchTab("active")}
-          className={`rounded-lg px-3.5 py-1.5 font-manrope text-sm font-medium transition ${
+          className={`rounded-lg px-3.5 py-1.5 font-medium transition ${
             tab === "active"
               ? "bg-[#C45A7A] text-white"
               : "text-[#5C5C5C] hover:text-[#212121]"
           }`}
         >
-          All campaigns
+          <Typography variant="label-1" as="span">
+            All campaigns
+          </Typography>
         </button>
         <button
           type="button"
           onClick={() => switchTab("deleted")}
-          className={`rounded-lg px-3.5 py-1.5 font-manrope text-sm font-medium transition ${
+          className={`rounded-lg px-3.5 py-1.5 font-medium transition ${
             tab === "deleted"
               ? "bg-[#C45A7A] text-white"
               : "text-[#5C5C5C] hover:text-[#212121]"
           }`}
         >
-          Recently deleted
+          <Typography variant="label-1" as="span">
+            Recently deleted
+          </Typography>
         </button>
       </div>
 
       {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error}
-        </div>
+        </Typography>
       ) : null}
 
       <Card>
@@ -261,9 +274,13 @@ export default function FundraisingCampaignsListPage() {
                         >
                           {campaign.fullName}
                         </Link>
-                        <p className="font-manrope text-xs text-[#8A8A8A]">
+                        <Typography
+                          variant="caption-1"
+                          as="p"
+                          className="text-[#8A8A8A]"
+                        >
                           {campaign.email}
-                        </p>
+                        </Typography>
                       </TableCell>
                       <TableCell>
                         {formatGoal(campaign.fundraisingGoal)}
@@ -271,13 +288,21 @@ export default function FundraisingCampaignsListPage() {
                       <TableCell>{campaign.city}</TableCell>
                       <TableCell>
                         {tab === "deleted" ? (
-                          <span className="font-manrope text-xs text-[#5C5C5C]">
+                          <Typography
+                            variant="caption-1"
+                            as="span"
+                            className="text-[#5C5C5C]"
+                          >
                             {formatDeletedAt(campaign.deletedAt)}
-                          </span>
+                          </Typography>
                         ) : (
-                          <span className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-xs capitalize text-[#5C5C5C]">
+                          <Typography
+                            variant="caption-1"
+                            as="span"
+                            className="rounded-full bg-[#F4F4F4] px-2 py-0.5 capitalize text-[#5C5C5C]"
+                          >
                             {campaign.status}
-                          </span>
+                          </Typography>
                         )}
                       </TableCell>
                       <TableCell className="whitespace-nowrap text-muted-foreground">
@@ -299,7 +324,7 @@ export default function FundraisingCampaignsListPage() {
                               <Button
                                 type="button"
                                 variant="outline"
-                                className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-manrope text-xs font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+                                className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
                                 disabled={restoringId === campaign.id}
                                 aria-label={`Restore ${campaign.fullName}`}
                                 onClick={() =>
@@ -310,9 +335,11 @@ export default function FundraisingCampaignsListPage() {
                                 }
                               >
                                 <RotateCcw className="size-3.5" />
-                                {restoringId === campaign.id
-                                  ? "Restoring…"
-                                  : "Restore"}
+                                <Typography variant="caption-1" as="span">
+                                  {restoringId === campaign.id
+                                    ? "Restoring…"
+                                    : "Restore"}
+                                </Typography>
                               </Button>
                             </>
                           ) : (

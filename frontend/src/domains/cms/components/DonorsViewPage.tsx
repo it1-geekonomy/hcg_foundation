@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import Typography from "@/lib/Typography";
 import {
   Card,
   CardContent,
@@ -17,10 +18,16 @@ import type { Donor } from "@/domains/cms/lib/types";
 function Row({ label, value }: { label: string; value?: string | null }) {
   return (
     <div className="grid gap-1 border-b border-border/60 py-3 sm:grid-cols-[160px_1fr]">
-      <p className="font-manrope text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <Typography
+        variant="caption-1"
+        as="p"
+        className="font-semibold uppercase tracking-wide text-muted-foreground"
+      >
         {label}
-      </p>
-      <p className="font-manrope text-sm text-foreground">{value || "—"}</p>
+      </Typography>
+      <Typography variant="label-1" as="p" className="text-foreground">
+        {value || "—"}
+      </Typography>
     </div>
   );
 }
@@ -50,24 +57,34 @@ export default function DonorsViewPage() {
 
   if (error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+      <Typography
+        variant="label-1"
+        as="div"
+        className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+      >
         {error}
-      </div>
+      </Typography>
     );
   }
 
   if (!donor) {
-    return <p className="font-manrope text-sm text-muted-foreground">Loading…</p>;
+    return (
+      <Typography variant="label-1" as="p" className="text-muted-foreground">
+        Loading…
+      </Typography>
+    );
   }
 
   return (
     <div className="space-y-5">
       <Link
         href="/admin/donations"
-        className="inline-flex items-center gap-1.5 font-manrope text-sm text-[#9A7B00] hover:underline"
+        className="inline-flex items-center gap-1.5 text-[#9A7B00] hover:underline"
       >
         <ArrowLeft className="size-4" />
-        Back to donations
+        <Typography variant="label-1" as="span">
+          Back to donations
+        </Typography>
       </Link>
 
       <Card>

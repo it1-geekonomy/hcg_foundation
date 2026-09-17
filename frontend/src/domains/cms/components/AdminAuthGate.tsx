@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Typography from "@/lib/Typography";
 import { useAuthStore } from "@/store/auth.store";
 
 /** Protects /admin/* — unauthenticated users go to /login */
@@ -33,8 +34,10 @@ export default function AdminAuthGate({
 
   if (!hasHydrated || !isAuthenticated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F7F7F5] font-manrope text-sm text-[#5C5C5C]">
-        Checking session…
+      <div className="flex min-h-screen items-center justify-center bg-[#F7F7F5]">
+        <Typography variant="label-1" as="p" className="text-[#5C5C5C]">
+          Checking session…
+        </Typography>
       </div>
     );
   }

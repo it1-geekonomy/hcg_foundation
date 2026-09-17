@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -34,9 +35,9 @@ export function CmsPagination({
         className
       )}
     >
-      <p className="font-manrope text-xs text-muted-foreground">
+      <Typography variant="caption-1" as="p" className="text-muted-foreground">
         Showing {from}–{to} of {total}
-      </p>
+      </Typography>
 
       <div className="flex items-center gap-2">
         <Button
@@ -48,11 +49,17 @@ export function CmsPagination({
           className="h-8 gap-1"
         >
           <ChevronLeft className="size-3.5" />
-          Prev
+          <Typography variant="caption-1" as="span">
+            Prev
+          </Typography>
         </Button>
-        <span className="min-w-[4.5rem] text-center font-manrope text-xs font-medium text-[#212121]">
+        <Typography
+          variant="caption-1"
+          as="span"
+          className="min-w-[4.5rem] text-center font-medium text-[#212121]"
+        >
           {page} / {totalPages}
-        </span>
+        </Typography>
         <Button
           type="button"
           variant="outline"
@@ -61,7 +68,9 @@ export function CmsPagination({
           onClick={() => onPageChange(page + 1)}
           className="h-8 gap-1"
         >
-          Next
+          <Typography variant="caption-1" as="span">
+            Next
+          </Typography>
           <ChevronRight className="size-3.5" />
         </Button>
       </div>
