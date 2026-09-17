@@ -106,11 +106,14 @@ export default function Footer() {
           <div className="col-span-1">
             <FooterHeading>INNER PAGES</FooterHeading>
             <ul className="mt-8 space-y-3">
-              {FOOTER_INNER_PAGES.map((label) => (
-                <li key={label}>
-                  <Link href="/" className="hover:text-[#FDB723] transition-colors">
+              {FOOTER_INNER_PAGES.map((item) => (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    className="hover:text-[#FDB723] transition-colors"
+                  >
                     <Typography variant="body-9" as="span" className="text-white">
-                      {label}
+                      {item.label}
                     </Typography>
                   </Link>
                 </li>
