@@ -21,7 +21,7 @@ export const navLinks = [
     hasDropdown: true,
     dropdownItems: [
       { label: "CSR Partner", href: "/getinvolved/CSR-partner" },
-      { label: "Granst & Philanthrophy", href: "/getinvolved/granst-and-philanthrophy" },
+      { label: "Grants & Philanthropy", href: "/getinvolved/grants-and-philanthropy" },
       { label: "Participate", href: "/getinvolved/participate" },
     ],
   },
