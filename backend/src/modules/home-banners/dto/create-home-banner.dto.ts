@@ -39,7 +39,7 @@ export class CreateHomeBannerDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  displayOrder?: number = 1;
+  displayOrder?: number;
 
   @ApiPropertyOptional({ example: true, default: true })
   @IsOptional()
