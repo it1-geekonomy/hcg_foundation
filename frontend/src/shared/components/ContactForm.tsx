@@ -31,11 +31,11 @@ export default function ContactForm() {
   return (
     <div className="w-full max-w-full lg:max-w-[45rem] min-h-[32.481rem] rounded-[0.625rem] bg-[#FFF4D4] p-6 sm:p-8 lg:p-[2.125rem_2.5625rem] border border-[#F3E3B6] flex flex-col justify-between items-start gap-4 lg:gap-[0.581rem]">
       <div className="w-full">
-        <Typography variant="heading-7" as="h2" className="text-[#3D382E]">
+        <Typography variant="heading-7" as="h2" className="text-[#505050]">
           Send Us a Message
         </Typography>
-        <div className="mt-2">
-          <Typography variant="body-8" as="p" className="text-[#706656]">
+        <div className="mt-2 text-justify">
+          <Typography variant="body-8" as="p" className="text-[#505050]">
             Have a question or would like to collaborate with us? Fill out the form below, and our team will get back to you as soon as possible.
           </Typography>
         </div>

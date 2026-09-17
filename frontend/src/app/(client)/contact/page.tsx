@@ -14,7 +14,7 @@ const CONTACT_INFO = [
     title: "Phone Number",
     content: (
       <div className="mt-1">
-        <Typography variant="body-8" as="p" className="text-[#3D382E]">
+        <Typography variant="body-9" as="p" className="text-[#0D2838]">
           +91 80 3366 9999
         </Typography>
       </div>
@@ -25,7 +25,7 @@ const CONTACT_INFO = [
     title: "Email",
     content: (
       <div className="mt-1">
-        <Typography variant="body-8" as="p" className="text-[#3D382E]">
+        <Typography variant="body-9" as="p" className="text-[#0D2838]">
           hcgfoundation@gmail.com
         </Typography>
       </div>
@@ -36,7 +36,7 @@ const CONTACT_INFO = [
     title: "Address",
     content: (
       <div className="mt-1">
-        <Typography variant="body-8" as="p" className="text-[#3D382E]">
+        <Typography variant="body-9" as="p" className="text-[#0D2838]">
           Ground Floor, Tower Block
           <br />
           Unity Building Complex, Mission Road
@@ -53,11 +53,11 @@ export default function ClientContact() {
     <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope pt-24 sm:pt-28 lg:pt-32">
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         <div className="w-full text-left">
-          <Typography variant="heading-2" as="h1" className="text-[#2E1C12]">
+          <Typography variant="heading-2" as="h1" className="text-[#0D2838]">
             Let&apos;s Connect
           </Typography>
-          <div className="mt-3 sm:mt-4 max-w-full lg:max-w-[68.75rem]">
-            <Typography variant="body-8" as="p" className="text-[#6C6048]">
+          <div className="mt-3 sm:mt-4 max-w-full lg:max-w-[68.75rem] text-justify">
+            <Typography variant="body-10" as="p" className="text-[#596D79]">
               Whether you&apos;re seeking patient support, exploring partnership
               opportunities, interested in volunteering, or simply have a
               question, we&apos;re here to help. Reach out to us, and our team
@@ -74,7 +74,7 @@ export default function ClientContact() {
                   <item.icon className="size-7 sm:size-8" />
                 </div>
                 <div className="flex flex-col">
-                  <Typography variant="text-1" as="span" className="text-[#2E1C12]">
+                  <Typography variant="body-2" as="span" className="text-[#0D2838]">
                     {item.title}
                   </Typography>
                   {item.content}

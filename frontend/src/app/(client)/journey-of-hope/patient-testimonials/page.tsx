@@ -116,11 +116,11 @@ export default function PatientTestimonialsPage() {
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         {/* Header Title & Subtitle matching Figma specs (2 lines on tablet & desktop) */}
         <div className="w-full text-left">
-          <Typography variant="heading-1" as="h1" className="text-[#2E1C12]">
+          <Typography variant="heading-2" as="h1" className="text-[#0D2838]">
             Patient Testimonials
           </Typography>
-          <div className="mt-3 sm:mt-4 max-w-full md:max-w-[51.25rem] lg:max-w-[86.25rem]">
-            <Typography variant="body-6" as="p" className="text-[#596D79]">
+          <div className="mt-3 sm:mt-4 max-w-full md:max-w-[51.25rem] lg:max-w-[86.25rem] text-justify">
+            <Typography variant="body-10" as="p" className="text-[#596D79]">
               Every journey is filled with courage, compassion, and resilience. Explore inspiring patient stories, community initiatives, and life-changing moments that reflect HCG Foundation&apos;s commitment to bringing hope, healing, and support to those who need it most.
             </Typography>
           </div>
@@ -192,11 +192,11 @@ export default function PatientTestimonialsPage() {
                   <div className="w-1.5 h-10 sm:h-12 bg-[#FDC61D] rounded-full shrink-0" />
                   <div className="flex flex-col text-white font-manrope min-w-0">
                     <div className="truncate">
-                      <Typography variant="heading-2" as="h3" className="text-white">
+                      <Typography variant="heading-7" as="h3" className="text-white">
                         {item.patientName}
                       </Typography>
                     </div>
-                    <Typography variant="body-8" as="span" className="text-white/85">
+                    <Typography variant="body-8" as="span" className="text-white">
                       {item.role}
                     </Typography>
                   </div>
