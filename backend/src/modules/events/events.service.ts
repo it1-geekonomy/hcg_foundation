@@ -126,6 +126,26 @@ export class EventsService {
     return entity;
   }
 
+
+  async findPublishedBySlugWithRelated(
+    slug: string,
+    limit = 3,
+    page = 1,
+  ): Promise<{ detail: Event; related: PaginatedResult<Event> }> {
+    const detail = await this.findPublishedBySlug(slug);
+
+    const [data, total] = await this.repo
+      .createQueryBuilder('entity')
+      .where('entity.status = :status', { status: ContentStatus.PUBLISHED })
+      .andWhere('entity.id != :id', { id: detail.id })
+      .orderBy('entity.eventDate', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    return { detail, related: buildPaginatedResult(data, total, page, limit) };
+  }
+
   async update(
     id: string,
     dto: UpdateEventDto,

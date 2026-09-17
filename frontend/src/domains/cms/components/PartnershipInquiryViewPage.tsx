@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import {
   Card,
@@ -20,12 +21,20 @@ import type { PartnershipInquiry } from "@/domains/cms/lib/types";
 function Row({ label, value }: { label: string; value?: string | null }) {
   return (
     <div className="grid gap-1 border-b border-border/60 py-3 sm:grid-cols-[180px_1fr]">
-      <p className="font-manrope text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <Typography
+        variant="caption-1"
+        as="p"
+        className="font-semibold uppercase tracking-wide text-muted-foreground"
+      >
         {label}
-      </p>
-      <p className="whitespace-pre-wrap font-manrope text-sm text-foreground">
+      </Typography>
+      <Typography
+        variant="label-1"
+        as="p"
+        className="whitespace-pre-wrap text-foreground"
+      >
         {value || "—"}
-      </p>
+      </Typography>
     </div>
   );
 }
@@ -107,9 +116,13 @@ export default function PartnershipInquiryViewPage() {
 
   if (loading) {
     return (
-      <div className="py-16 text-center font-manrope text-sm text-muted-foreground">
+      <Typography
+        variant="label-1"
+        as="div"
+        className="py-16 text-center text-muted-foreground"
+      >
         Loading inquiry…
-      </div>
+      </Typography>
     );
   }
 
@@ -118,13 +131,20 @@ export default function PartnershipInquiryViewPage() {
       <div className="space-y-4">
         <Link
           href="/admin/partnership-inquiries"
-          className="inline-flex items-center gap-1.5 font-manrope text-sm text-[#5C5C5C]"
+          className="inline-flex items-center gap-1.5 text-[#5C5C5C]"
         >
-          <ArrowLeft className="size-3.5" /> Back to list
+          <ArrowLeft className="size-3.5" />
+          <Typography variant="label-1" as="span">
+            Back to list
+          </Typography>
         </Link>
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error || "Not found"}
-        </div>
+        </Typography>
       </div>
     );
   }
@@ -134,9 +154,12 @@ export default function PartnershipInquiryViewPage() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <Link
           href="/admin/partnership-inquiries"
-          className="inline-flex items-center gap-1.5 font-manrope text-sm text-[#9A7B00] hover:underline"
+          className="inline-flex items-center gap-1.5 text-[#9A7B00] hover:underline"
         >
-          <ArrowLeft className="size-4" /> Back to inquiries
+          <ArrowLeft className="size-4" />
+          <Typography variant="label-1" as="span">
+            Back to inquiries
+          </Typography>
         </Link>
         <div className="flex flex-wrap gap-2">
           {isDeleted ? (
@@ -154,9 +177,12 @@ export default function PartnershipInquiryViewPage() {
             <>
               <Link
                 href={`/admin/partnership-inquiries/${row.id}/edit`}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 font-manrope text-sm"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3"
               >
-                <Pencil className="size-3.5" /> Edit
+                <Pencil className="size-3.5" />
+                <Typography variant="label-1" as="span">
+                  Edit
+                </Typography>
               </Link>
               <Button
                 type="button"
@@ -168,8 +194,7 @@ export default function PartnershipInquiryViewPage() {
                 <Trash2 className="size-3.5" /> Delete
               </Button>
             </>
-          )}
-        </div>
+          )}        </div>
       </div>
 
       <Card>

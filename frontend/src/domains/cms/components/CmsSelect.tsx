@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { cn } from "@/lib/utils";
 
 export type CmsSelectOption = {
@@ -65,21 +66,23 @@ export default function CmsSelect({
           if (!disabled) setOpen((v) => !v);
         }}
         className={cn(
-          "flex w-full items-center justify-between gap-2 rounded-lg border border-input bg-white text-left font-manrope outline-none transition",
+          "flex w-full items-center justify-between gap-2 rounded-lg border border-input bg-white text-left outline-none transition",
           "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
           "disabled:cursor-not-allowed disabled:opacity-50",
           open && "border-[#C45A7A]/40 ring-3 ring-[#C45A7A]/15",
-          size === "sm" ? "h-8 px-2.5 text-sm" : "h-9 px-2.5 text-sm"
+          size === "sm" ? "h-8 px-2.5" : "h-9 px-2.5"
         )}
       >
-        <span
+        <Typography
+          variant="label-1"
+          as="span"
           className={cn(
             "truncate",
             selected ? "text-[#212121]" : "text-muted-foreground"
           )}
         >
           {selected?.label ?? placeholder}
-        </span>
+        </Typography>
         <ChevronDown
           className={cn(
             "size-3.5 shrink-0 text-[#8A8A8A] transition",
@@ -100,7 +103,7 @@ export default function CmsSelect({
                 <button
                   type="button"
                   className={cn(
-                    "flex w-full items-center justify-between gap-2 px-3 py-2 text-left font-manrope text-sm transition",
+                    "flex w-full items-center justify-between gap-2 px-3 py-2 text-left transition",
                     isActive
                       ? "bg-[#FFF6E8] font-medium text-[#212121]"
                       : "text-[#3A3A3A] hover:bg-[#F7F7F5]"
@@ -110,7 +113,9 @@ export default function CmsSelect({
                     setOpen(false);
                   }}
                 >
-                  <span>{option.label}</span>
+                  <Typography variant="label-1" as="span">
+                    {option.label}
+                  </Typography>
                   {isActive ? (
                     <Check className="size-3.5 shrink-0 text-[#C45A7A]" />
                   ) : null}

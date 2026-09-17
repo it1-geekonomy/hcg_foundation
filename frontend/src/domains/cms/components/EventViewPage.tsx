@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { cmsApi } from "@/domains/cms/lib/api";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
@@ -96,9 +97,13 @@ export default function EventViewPage() {
 
   if (loading) {
     return (
-      <div className="py-16 text-center font-manrope text-sm text-muted-foreground">
+      <Typography
+        variant="label-1"
+        as="div"
+        className="py-16 text-center text-muted-foreground"
+      >
         Loading event…
-      </div>
+      </Typography>
     );
   }
 
@@ -107,14 +112,20 @@ export default function EventViewPage() {
       <div className="space-y-4">
         <Link
           href="/admin/events"
-          className="inline-flex items-center gap-1.5 font-manrope text-sm text-[#5C5C5C] hover:text-[#212121]"
+          className="inline-flex items-center gap-1.5 text-[#5C5C5C] hover:text-[#212121]"
         >
           <ArrowLeft className="size-3.5" />
-          Back to list
+          <Typography variant="label-1" as="span">
+            Back to list
+          </Typography>
         </Link>
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error || "Event not found"}
-        </div>
+        </Typography>
       </div>
     );
   }
@@ -127,28 +138,46 @@ export default function EventViewPage() {
         <div>
           <Link
             href="/admin/events"
-            className="mb-3 inline-flex items-center gap-1.5 font-manrope text-sm text-[#5C5C5C] transition hover:text-[#212121]"
+            className="mb-3 inline-flex items-center gap-1.5 text-[#5C5C5C] transition hover:text-[#212121]"
           >
             <ArrowLeft className="size-3.5" />
-            Back to list
+            <Typography variant="label-1" as="span">
+              Back to list
+            </Typography>
           </Link>
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="font-manrope text-xl font-semibold text-[#212121] sm:text-2xl">
+            <Typography
+              variant="heading-8"
+              as="h2"
+              className="font-semibold text-[#212121]"
+            >
               {event.title}
-            </h2>
-            <span className="rounded-full bg-[#FFF1C2] px-2.5 py-0.5 font-manrope text-xs font-medium text-[#7A5A00]">
+            </Typography>
+            <Typography
+              variant="caption-1"
+              as="span"
+              className="rounded-full bg-[#FFF1C2] px-2.5 py-0.5 font-medium text-[#7A5A00]"
+            >
               {event.status}
-            </span>
+            </Typography>
             {isDeleted ? (
-              <span className="rounded-full bg-red-50 px-2.5 py-0.5 font-manrope text-xs font-medium text-red-700">
+              <Typography
+                variant="caption-1"
+                as="span"
+                className="rounded-full bg-red-50 px-2.5 py-0.5 font-medium text-red-700"
+              >
                 deleted
-              </span>
+              </Typography>
             ) : null}
           </div>
-          <p className="mt-1 font-manrope text-sm text-muted-foreground">
+          <Typography
+            variant="label-1"
+            as="p"
+            className="mt-1 text-muted-foreground"
+          >
             /{event.slug}
-          </p>
-          <p className="mt-1 font-manrope text-sm text-[#5C5C5C]">
+          </Typography>
+          <Typography variant="label-1" as="p" className="mt-1 text-[#5C5C5C]">
             {[
               event.eventDate,
               event.eventTime ? event.eventTime.slice(0, 5) : null,
@@ -156,7 +185,7 @@ export default function EventViewPage() {
             ]
               .filter(Boolean)
               .join(" · ") || "Date / location not set"}
-          </p>
+          </Typography>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -164,7 +193,7 @@ export default function EventViewPage() {
             <Button
               type="button"
               variant="outline"
-              className="h-9 gap-1.5 border-black/10 bg-white font-manrope text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+              className="h-9 gap-1.5 border-black/10 bg-white text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
               disabled={busy}
               onClick={() => void onRestore()}
             >
@@ -175,10 +204,12 @@ export default function EventViewPage() {
             <>
               <Link
                 href={`/admin/events/${event.id}/edit`}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#FCCC2D] px-3 font-manrope text-sm font-semibold text-[#212121] transition hover:brightness-105"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#FCCC2D] px-3 text-[#212121] transition hover:brightness-105"
               >
                 <Pencil className="size-3.5" />
-                Edit
+                <Typography variant="button-3" as="span">
+                  Edit
+                </Typography>
               </Link>
               <Button
                 type="button"
@@ -207,14 +238,22 @@ export default function EventViewPage() {
                   className="absolute inset-0 h-full w-full object-contain p-2"
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center font-manrope text-sm text-[#9A9A9A]">
+                <Typography
+                  variant="label-1"
+                  as="div"
+                  className="absolute inset-0 flex items-center justify-center text-[#9A9A9A]"
+                >
                   No desktop banner
-                </div>
+                </Typography>
               )}
             </div>
-            <p className="border-t border-black/[0.04] px-3 py-2 font-manrope text-xs text-[#8A8A8A]">
+            <Typography
+              variant="caption-1"
+              as="p"
+              className="border-t border-black/[0.04] px-3 py-2 text-[#8A8A8A]"
+            >
               Desktop banner
-            </p>
+            </Typography>
           </div>
           <div className="overflow-hidden rounded-xl bg-white shadow-[0_4px_14px_rgba(0,0,0,0.05)] ring-1 ring-black/[0.05]">
             <div className="relative h-36 bg-[#F0EEE9]">
@@ -226,60 +265,112 @@ export default function EventViewPage() {
                   className="absolute inset-0 h-full w-full object-contain p-2"
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center font-manrope text-sm text-[#9A9A9A]">
+                <Typography
+                  variant="label-1"
+                  as="div"
+                  className="absolute inset-0 flex items-center justify-center text-[#9A9A9A]"
+                >
                   No mobile banner
-                </div>
+                </Typography>
               )}
             </div>
-            <p className="border-t border-black/[0.04] px-3 py-2 font-manrope text-xs text-[#8A8A8A]">
+            <Typography
+              variant="caption-1"
+              as="p"
+              className="border-t border-black/[0.04] px-3 py-2 text-[#8A8A8A]"
+            >
               Mobile banner
-            </p>
+            </Typography>
           </div>
         </div>
 
         <div className="space-y-4">
           <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
-            <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
+            <Typography
+              variant="caption-1"
+              as="h3"
+              className="mb-3 font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase"
+            >
               Short description
-            </h3>
-            <p className="font-manrope text-sm leading-relaxed text-[#212121]">
+            </Typography>
+            <Typography
+              variant="label-1"
+              as="p"
+              className="leading-relaxed text-[#212121]"
+            >
               {event.shortDescription?.trim() || "—"}
-            </p>
+            </Typography>
           </section>
 
           <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
-            <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
+            <Typography
+              variant="caption-1"
+              as="h3"
+              className="mb-3 font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase"
+            >
               Content
-            </h3>
+            </Typography>
             {event.content ? (
               <CmsHtmlContent html={event.content} />
             ) : (
-              <p className="font-manrope text-sm text-muted-foreground">
+              <Typography
+                variant="label-1"
+                as="p"
+                className="text-muted-foreground"
+              >
                 No content yet.
-              </p>
+              </Typography>
             )}
           </section>
 
           <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
-            <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
+            <Typography
+              variant="caption-1"
+              as="h3"
+              className="mb-3 font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase"
+            >
               SEO
-            </h3>
-            <dl className="grid gap-3 font-manrope text-sm sm:grid-cols-2">
+            </Typography>
+            <dl className="grid gap-3 sm:grid-cols-2">
               <div>
-                <dt className="text-xs text-muted-foreground">Meta title</dt>
-                <dd className="mt-0.5">{event.metaTitle || "—"}</dd>
+                <Typography
+                  variant="caption-1"
+                  as="dt"
+                  className="text-muted-foreground"
+                >
+                  Meta title
+                </Typography>
+                <Typography variant="label-1" as="dd" className="mt-0.5">
+                  {event.metaTitle || "—"}
+                </Typography>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">
+                <Typography
+                  variant="caption-1"
+                  as="dt"
+                  className="text-muted-foreground"
+                >
                   Meta description
-                </dt>
-                <dd className="mt-0.5">{event.metaDescription || "—"}</dd>
+                </Typography>
+                <Typography variant="label-1" as="dd" className="mt-0.5">
+                  {event.metaDescription || "—"}
+                </Typography>
               </div>
               <div className="sm:col-span-2">
-                <dt className="text-xs text-muted-foreground">Schema</dt>
-                <dd className="mt-0.5 whitespace-pre-wrap break-all">
+                <Typography
+                  variant="caption-1"
+                  as="dt"
+                  className="text-muted-foreground"
+                >
+                  Schema
+                </Typography>
+                <Typography
+                  variant="label-1"
+                  as="dd"
+                  className="mt-0.5 whitespace-pre-wrap break-all"
+                >
                   {event.schemaCode || "—"}
-                </dd>
+                </Typography>
               </div>
             </dl>
           </section>

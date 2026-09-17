@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { useCmsConfirmStore } from "@/domains/cms/lib/confirm";
 
@@ -41,19 +42,23 @@ export default function CmsConfirmDialog() {
         }
         className="relative w-full max-w-md rounded-2xl bg-white p-5 shadow-xl ring-1 ring-black/10 sm:p-6"
       >
-        <h2
+        <Typography
+          variant="body-9"
+          as="h2"
           id="cms-confirm-title"
-          className="font-manrope text-lg font-semibold text-[#212121]"
+          className="font-semibold text-[#212121]"
         >
           {options.title}
-        </h2>
+        </Typography>
         {options.description ? (
-          <p
+          <Typography
+            variant="label-1"
+            as="p"
             id="cms-confirm-desc"
-            className="mt-2 font-manrope text-sm leading-relaxed text-[#5C5C5C]"
+            className="mt-2 leading-relaxed text-[#5C5C5C]"
           >
             {options.description}
-          </p>
+          </Typography>
         ) : null}
         <div className="mt-5 flex flex-wrap justify-end gap-2">
           <Button
@@ -62,7 +67,9 @@ export default function CmsConfirmDialog() {
             className="h-9 border-black/10 bg-white text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
             onClick={() => close(false)}
           >
-            {cancelLabel}
+            <Typography variant="button-3" as="span">
+              {cancelLabel}
+            </Typography>
           </Button>
           <Button
             type="button"
@@ -73,7 +80,9 @@ export default function CmsConfirmDialog() {
             }
             onClick={() => close(true)}
           >
-            {confirmLabel}
+            <Typography variant="button-3" as="span">
+              {confirmLabel}
+            </Typography>
           </Button>
         </div>
       </div>

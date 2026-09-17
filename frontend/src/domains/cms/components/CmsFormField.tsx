@@ -1,3 +1,4 @@
+import Typography from "@/lib/Typography";
 import { cn } from "@/lib/utils";
 
 export function CmsFormField({
@@ -15,15 +16,19 @@ export function CmsFormField({
 }) {
   return (
     <div className={cn("space-y-1.5", className)}>
-      <label
+      <Typography
+        variant="label-1"
+        as="label"
         htmlFor={htmlFor}
-        className="block font-manrope text-sm font-semibold text-[#212121]"
+        className="block font-semibold text-[#212121]"
       >
         {label}
-      </label>
+      </Typography>
       {children}
       {hint ? (
-        <p className="font-manrope text-xs text-muted-foreground">{hint}</p>
+        <Typography variant="caption-1" as="p" className="text-muted-foreground">
+          {hint}
+        </Typography>
       ) : null}
     </div>
   );

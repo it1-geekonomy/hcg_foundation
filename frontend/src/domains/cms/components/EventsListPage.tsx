@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Eye, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import {
@@ -151,17 +152,23 @@ export default function EventsListPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <p className="max-w-xl font-manrope text-sm text-muted-foreground">
+        <Typography
+          variant="label-1"
+          as="p"
+          className="max-w-xl text-muted-foreground"
+        >
           Manage events. Soft-deleted items stay in Recently Deleted until you
           restore them.
-        </p>
+        </Typography>
 
         <Link
           href="/admin/events/new"
-          className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[#C45A7A] px-4 font-manrope text-sm font-semibold text-white transition hover:bg-[#b04e6c]"
+          className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[#C45A7A] px-4 text-white transition hover:bg-[#b04e6c]"
         >
           <Plus className="size-4" />
-          Add event
+          <Typography variant="button-3" as="span">
+            Add event
+          </Typography>
         </Link>
       </div>
 
@@ -169,31 +176,39 @@ export default function EventsListPage() {
         <button
           type="button"
           onClick={() => switchTab("active")}
-          className={`rounded-lg px-3.5 py-1.5 font-manrope text-sm font-medium transition ${
+          className={`rounded-lg px-3.5 py-1.5 font-medium transition ${
             tab === "active"
               ? "bg-[#C45A7A] text-white"
               : "text-[#5C5C5C] hover:text-[#212121]"
           }`}
         >
-          All events
+          <Typography variant="label-1" as="span">
+            All events
+          </Typography>
         </button>
         <button
           type="button"
           onClick={() => switchTab("deleted")}
-          className={`rounded-lg px-3.5 py-1.5 font-manrope text-sm font-medium transition ${
+          className={`rounded-lg px-3.5 py-1.5 font-medium transition ${
             tab === "deleted"
               ? "bg-[#C45A7A] text-white"
               : "text-[#5C5C5C] hover:text-[#212121]"
           }`}
         >
-          Recently deleted
+          <Typography variant="label-1" as="span">
+            Recently deleted
+          </Typography>
         </button>
       </div>
 
       {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error}
-        </div>
+        </Typography>
       ) : null}
 
       <Card>
@@ -282,9 +297,13 @@ export default function EventsListPage() {
                     </TableCell>
                     <TableCell>
                       <p className="font-medium">{event.title}</p>
-                      <p className="font-manrope text-xs text-[#8A8A8A]">
+                      <Typography
+                        variant="caption-1"
+                        as="p"
+                        className="text-[#8A8A8A]"
+                      >
                         /{event.slug}
-                      </p>
+                      </Typography>
                     </TableCell>
                     <TableCell>
                       {event.eventDate || "—"}
@@ -294,13 +313,21 @@ export default function EventsListPage() {
                     </TableCell>
                     <TableCell>
                       {tab === "deleted" ? (
-                        <span className="font-manrope text-xs text-[#5C5C5C]">
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="text-[#5C5C5C]"
+                        >
                           {formatDeletedAt(event.deletedAt)}
-                        </span>
+                        </Typography>
                       ) : (
-                        <span className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-xs text-[#5C5C5C]">
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-[#5C5C5C]"
+                        >
                           {event.status}
-                        </span>
+                        </Typography>
                       )}
                     </TableCell>
                     <TableCell>
@@ -317,7 +344,7 @@ export default function EventsListPage() {
                             <Button
                               type="button"
                               variant="outline"
-                              className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-manrope text-xs font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+                              className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
                               disabled={restoringId === event.id}
                               aria-label={`Restore ${event.title}`}
                               onClick={() =>
@@ -325,9 +352,11 @@ export default function EventsListPage() {
                               }
                             >
                               <RotateCcw className="size-3.5" />
-                              {restoringId === event.id
-                                ? "Restoring…"
-                                : "Restore"}
+                              <Typography variant="caption-1" as="span">
+                                {restoringId === event.id
+                                  ? "Restoring…"
+                                  : "Restore"}
+                              </Typography>
                             </Button>
                           </>
                         ) : (

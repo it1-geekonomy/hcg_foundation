@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import type {
@@ -15,9 +16,13 @@ import { SeoFieldsSection } from "./SeoFieldsSection";
 const CmsRichTextEditor = dynamic(() => import("./CmsRichTextEditor"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-[360px] items-center justify-center rounded-lg border border-input bg-white font-manrope text-sm text-muted-foreground">
+    <Typography
+      variant="label-1"
+      as="div"
+      className="flex h-[360px] items-center justify-center rounded-lg border border-input bg-white text-muted-foreground"
+    >
       Loading editor…
-    </div>
+    </Typography>
   ),
 });
 
@@ -96,9 +101,13 @@ export default function LegalPageForm({
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-3xl space-y-5">
       {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error}
-        </div>
+        </Typography>
       ) : null}
 
       <div className="space-y-4 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">

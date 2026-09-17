@@ -1,5 +1,6 @@
 "use client";
 
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import type {
@@ -115,9 +116,13 @@ export default function AnnualReportForm({
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-3xl space-y-5">
       {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+        >
           {error}
-        </div>
+        </Typography>
       ) : null}
 
       <div className="space-y-4 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
@@ -198,9 +203,9 @@ export default function AnnualReportForm({
             }
           />
           {value.bannerFile ? (
-            <p className="font-manrope text-xs text-[#5C5C5C]">
+            <Typography variant="caption-1" as="p" className="text-[#5C5C5C]">
               Selected: {value.bannerFile.name}
-            </p>
+            </Typography>
           ) : null}
         </CmsFormField>
 
@@ -231,9 +236,9 @@ export default function AnnualReportForm({
             }
           />
           {value.mobileBannerFile ? (
-            <p className="font-manrope text-xs text-[#5C5C5C]">
+            <Typography variant="caption-1" as="p" className="text-[#5C5C5C]">
               Selected: {value.mobileBannerFile.name}
-            </p>
+            </Typography>
           ) : null}
         </CmsFormField>
 
@@ -243,7 +248,7 @@ export default function AnnualReportForm({
           hint="PDF or Word, max 25MB → annualReportFile"
         >
           {fileUrl ? (
-            <p className="mb-2 font-manrope text-xs">
+            <Typography variant="caption-1" as="p" className="mb-2">
               Current:{" "}
               <a
                 href={fileUrl}
@@ -253,7 +258,7 @@ export default function AnnualReportForm({
               >
                 Open on CDN
               </a>
-            </p>
+            </Typography>
           ) : null}
           <Input
             id="annualReportFile"
@@ -267,9 +272,9 @@ export default function AnnualReportForm({
             }
           />
           {value.reportFile ? (
-            <p className="font-manrope text-xs text-[#5C5C5C]">
+            <Typography variant="caption-1" as="p" className="text-[#5C5C5C]">
               Selected: {value.reportFile.name}
-            </p>
+            </Typography>
           ) : null}
         </CmsFormField>
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { cmsApi } from "@/domains/cms/lib/api";
@@ -45,17 +46,27 @@ export default function UserCreatePage() {
       <div>
         <Link
           href="/admin/users"
-          className="mb-3 inline-flex items-center gap-1.5 font-manrope text-sm text-[#5C5C5C] transition hover:text-[#212121]"
+          className="mb-3 inline-flex items-center gap-1.5 text-[#5C5C5C] transition hover:text-[#212121]"
         >
           <ArrowLeft className="size-3.5" />
-          Back to users
+          <Typography variant="label-1" as="span">
+            Back to users
+          </Typography>
         </Link>
-        <h2 className="font-manrope text-xl font-semibold text-[#212121] sm:text-2xl">
+        <Typography
+          variant="heading-8"
+          as="h2"
+          className="font-semibold text-[#212121]"
+        >
           Create user
-        </h2>
-        <p className="mt-1 font-manrope text-sm text-muted-foreground">
+        </Typography>
+        <Typography
+          variant="label-1"
+          as="p"
+          className="mt-1 text-muted-foreground"
+        >
           Admin account only — no SEO fields.
-        </p>
+        </Typography>
       </div>
 
       <form
@@ -63,9 +74,13 @@ export default function UserCreatePage() {
         className="mx-auto max-w-xl space-y-4 rounded-2xl border border-black/5 bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:p-6"
       >
         {error ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-manrope text-sm text-red-700">
+          <Typography
+            variant="label-1"
+            as="div"
+            className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700"
+          >
             {error}
-          </div>
+          </Typography>
         ) : null}
 
         <CmsFormField label="Full Name" htmlFor="fullName">

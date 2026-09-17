@@ -34,7 +34,7 @@ export default function CommunitySection() {
   };
 
   return (
-    <section className="w-full px-6 sm:px-10 md:px-14 lg:px-16 lg:py-16 xl:px-24 2xl:px-32">
+    <section className="w-full px-6 pt-8 sm:px-10 md:px-14 lg:px-16 lg:py-16 xl:px-24 2xl:px-32">
       <div className="mx-auto max-w-[1400px]">
         {/* Tags left · heading + body right · vertically centered (Figma) */}
         <div className="mb-10 flex flex-col gap-8 md:mb-14 lg:mb-14 lg:flex-row lg:items-center lg:justify-between lg:gap-12 xl:gap-20">
