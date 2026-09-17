@@ -50,7 +50,7 @@ export const STUDENT_IMAGES = [
   },
 ];
 
-export const PAGE_SIZE_MOBILE = 4;
+export const PAGE_SIZE_MOBILE = 1;
 
 export const PAGE_SIZE_DESKTOP = 6;
 

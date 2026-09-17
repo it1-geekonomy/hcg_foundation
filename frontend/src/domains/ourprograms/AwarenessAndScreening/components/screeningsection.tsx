@@ -65,14 +65,26 @@ function ArrowButton({
     </button>
   );
 }
-function GalleryTile({ image }: { image: GalleryImage }) {
+function GalleryTile({
+  image,
+  fullWidth = false,
+}: {
+  image: GalleryImage;
+  fullWidth?: boolean;
+}) {
   return (
-    <div className="relative aspect-[4/3] w-[calc((100%-1rem)/2)] shrink-0 overflow-hidden rounded-sm sm:w-[calc((100%-2rem)/3)]">
+    <div
+      className={`relative aspect-[4/3] shrink-0 overflow-hidden rounded-sm ${
+        fullWidth
+          ? "w-full"
+          : "w-[calc((100%-1rem)/2)] sm:w-[calc((100%-2rem)/3)]"
+      }`}
+    >
       <Image
         src={image.src}
         alt={image.alt}
         fill
-        sizes="(min-width: 640px) 33vw, 50vw"
+        sizes={fullWidth ? "100vw" : "(min-width: 640px) 33vw, 50vw"}
         className="object-cover"
       />
     </div>
@@ -81,7 +93,7 @@ function GalleryTile({ image }: { image: GalleryImage }) {
 
 function ScreeningGrid() {
   const isSmUp = useIsSmUp();
-  const pageSize = isSmUp ? PAGE_SIZE_DESKTOP : PAGE_SIZE_MOBILE;
+  const pageSize = isSmUp ? PAGE_SIZE_DESKTOP : 1;
   const maxStart = Math.max(0, SCREENING_IMAGES.length - pageSize);
   const [windowStart, setWindowStart] = useState(0);
   useEffect(() => {
@@ -100,20 +112,38 @@ function ScreeningGrid() {
   const goPrev = () => setWindowStart((s) => Math.max(0, s - pageSize));
   const goNext = () => setWindowStart((s) => Math.min(maxStart, s + pageSize));
 
+  // Swipe / drag support
+  const touchStartX = useState({ x: 0 })[0];
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.x = e.touches[0].clientX;
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const deltaX = e.changedTouches[0].clientX - touchStartX.x;
+    const SWIPE_THRESHOLD = 40;
+    if (deltaX > SWIPE_THRESHOLD && canGoPrev) goPrev();
+    else if (deltaX < -SWIPE_THRESHOLD && canGoNext) goNext();
+  };
+
+  const isMobileSingle = !isSmUp && pageSize === 1;
+
   return (
     <div className="flex w-full items-center gap-1">
       {showArrows && <ArrowButton direction="left" onClick={goPrev} disabled={!canGoPrev} />}
 
-      <div className="flex min-w-0 flex-1 flex-col gap-4">
+      <div
+        className="flex min-w-0 flex-1 flex-col gap-4 touch-pan-y"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <div className="flex flex-wrap justify-center gap-4">
           {row1.map((image) => (
-            <GalleryTile key={image.id} image={image} />
+            <GalleryTile key={image.id} image={image} fullWidth={isMobileSingle} />
           ))}
         </div>
         {row2.length > 0 && (
           <div className="flex flex-wrap justify-center gap-4">
             {row2.map((image) => (
-              <GalleryTile key={image.id} image={image} />
+              <GalleryTile key={image.id} image={image} fullWidth={isMobileSingle} />
             ))}
           </div>
         )}
