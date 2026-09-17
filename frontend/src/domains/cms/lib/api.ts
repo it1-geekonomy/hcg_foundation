@@ -1187,6 +1187,19 @@ export const publicProjectsApi = {
     ),
 };
 
+/** Public site: published events */
+export const publicEventsApi = {
+  listPublished: (params?: Omit<ListQuery, "status">) =>
+    request<Paginated<CmsEvent>>(
+      `/events/published${toQuery({ page: 1, limit: 10, ...params })}`
+    ),
+
+  getBySlug: (slug: string) =>
+    request<ApiEnvelope<CmsEvent>>(
+      `/events/published/slug/${encodeURIComponent(slug)}`
+    ),
+};
+
 /** Public site: active home banners */
 export const publicHomeBannersApi = {
   listActive: () =>
