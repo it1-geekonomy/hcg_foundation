@@ -20,6 +20,7 @@ import {
   ApiConsumes,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiQuery,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -146,8 +147,20 @@ export class PatientStoriesController {
       'Public detail page. Use slug in the URL, e.g. /resources/patient-stories/john-doe-recovery-journey',
   })
   @ApiOkResponse({ type: PatientStory })
-  async findPublishedBySlug(@Param('slug') slug: string) {
-    const data = await this.service.findPublishedBySlug(slug);
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of related items to return (default depends on module)',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for related items (default: 1)',
+  })
+  async findPublishedBySlug(@Param('slug') slug: string, @Query('limit') limit?: string, @Query('page') page?: string) {
+    const data = await this.service.findPublishedBySlugWithRelated(slug, limit ? parseInt(limit, 10) : undefined, page ? parseInt(page, 10) : undefined);
     return {
       statusCode: HttpStatus.OK,
       message: 'Published patient story fetched successfully',
@@ -159,6 +172,18 @@ export class PatientStoriesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get patient story by id (CMS, any status)' })
   @ApiOkResponse({ type: PatientStory })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of related items to return (default depends on module)',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for related items (default: 1)',
+  })
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.service.findOne(id);
     return {
@@ -181,6 +206,18 @@ export class PatientStoriesController {
       'Optional new `patientImage` file replaces the previous CDN object.',
   })
   @ApiOkResponse({ type: PatientStory })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of related items to return (default depends on module)',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for related items (default: 1)',
+  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })
@@ -209,6 +246,18 @@ export class PatientStoriesController {
     description: 'Clears deletedAt so the story shows again in CMS and on the website if published.',
   })
   @ApiOkResponse({ type: PatientStory })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of related items to return (default depends on module)',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for related items (default: 1)',
+  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })

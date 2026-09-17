@@ -20,6 +20,7 @@ import {
   ApiConsumes,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiQuery,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -145,8 +146,20 @@ export class EventsController {
       'Public detail page. Use slug in the URL, e.g. /resources/events/pink-hope-awareness-walk',
   })
   @ApiOkResponse({ type: Event })
-  async findPublishedBySlug(@Param('slug') slug: string) {
-    const data = await this.service.findPublishedBySlug(slug);
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of related items to return (default depends on module)',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for related items (default: 1)',
+  })
+  async findPublishedBySlug(@Param('slug') slug: string, @Query('limit') limit?: string, @Query('page') page?: string) {
+    const data = await this.service.findPublishedBySlugWithRelated(slug, limit ? parseInt(limit, 10) : undefined, page ? parseInt(page, 10) : undefined);
     return {
       statusCode: HttpStatus.OK,
       message: 'Published event fetched successfully',
@@ -158,6 +171,18 @@ export class EventsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get event by id (CMS, any status)' })
   @ApiOkResponse({ type: Event })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of related items to return (default depends on module)',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for related items (default: 1)',
+  })
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.service.findOne(id);
     return {
@@ -183,6 +208,18 @@ export class EventsController {
       'Optional new `eventBanner` / `eventMobileBanner` files replace the previous CDN objects.',
   })
   @ApiOkResponse({ type: Event })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of related items to return (default depends on module)',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for related items (default: 1)',
+  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })
@@ -207,6 +244,18 @@ export class EventsController {
     description: 'Clears deletedAt so the event shows again in CMS and on the website if published.',
   })
   @ApiOkResponse({ type: Event })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of related items to return (default depends on module)',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for related items (default: 1)',
+  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })
