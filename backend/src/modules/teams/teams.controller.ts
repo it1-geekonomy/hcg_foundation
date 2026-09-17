@@ -25,8 +25,8 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Public } from '../../common/decorators/public.decorator';
-import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 import { CreateTeamDto } from './dto/create-team.dto';
+import { TeamQueryDto } from './dto/team-query.dto';
 import {
   CreateTeamMultipartDto,
   UpdateTeamMultipartDto,
@@ -35,7 +35,7 @@ import { UpdateTeamDto } from './dto/update-team.dto';
 import { Team } from './entities/team.entity';
 import { TeamFiles, TeamUploadedFiles, TeamsService } from './teams.service';
 
-@ApiTags('Teams')
+@ApiTags('Teams & Trustees')
 @Controller('teams')
 export class TeamsController {
   constructor(private readonly service: TeamsService) {}
@@ -50,7 +50,7 @@ export class TeamsController {
     ]),
   )
   @ApiOperation({
-    summary: 'Create team member (CMS / super-admin)',
+    summary: 'Create team member or trustee (CMS / super-admin)',
     description:
       'Send multipart form fields plus optional image file `teamImage`. CDN URL is stored on the row.',
   })
@@ -74,22 +74,22 @@ export class TeamsController {
   @Get()
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'List all team members (CMS)',
+    summary: 'List all team members/trustees (CMS)',
     description:
-      'Returns draft, published, and archived. Optional status/search filters. Requires Bearer token.',
+      'Returns draft, published, and archived. Filter by status, search, or type. Requires Bearer token.',
   })
   @ApiOkResponse({ description: 'Paginated CMS list' })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })
-  async findAll(@Query() query: PaginationQueryDto) {
+  async findAll(@Query() query: TeamQueryDto) {
     const result = await this.service.findAll(query);
     return {
       statusCode: HttpStatus.OK,
       message:
         result.meta.total === 0
-          ? 'No team members found'
-          : 'Team members fetched successfully',
+          ? 'No members found'
+          : 'Members fetched successfully',
       ...result,
     };
   }
@@ -97,7 +97,7 @@ export class TeamsController {
   @Get('deleted')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'List recently deleted team members (CMS trash)',
+    summary: 'List recently deleted team members/trustees (CMS trash)',
     description:
       'Soft-deleted members only, newest first. Restore with POST /teams/:id/restore.',
   })
@@ -105,14 +105,14 @@ export class TeamsController {
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })
-  async findDeleted(@Query() query: PaginationQueryDto) {
+  async findDeleted(@Query() query: TeamQueryDto) {
     const result = await this.service.findDeleted(query);
     return {
       statusCode: HttpStatus.OK,
       message:
         result.meta.total === 0
-          ? 'No deleted team members found'
-          : 'Deleted team members fetched successfully',
+          ? 'No deleted members found'
+          : 'Deleted members fetched successfully',
       ...result,
     };
   }
@@ -120,31 +120,31 @@ export class TeamsController {
   @Public()
   @Get('published')
   @ApiOperation({
-    summary: 'List published team members (website)',
+    summary: 'List published team members/trustees (website)',
     description: 'Public. Only status=published. No token required.',
   })
   @ApiOkResponse({ description: 'Paginated published list' })
-  async findPublished(@Query() query: PaginationQueryDto) {
+  async findPublished(@Query() query: TeamQueryDto) {
     const result = await this.service.findPublished(query);
     return {
       statusCode: HttpStatus.OK,
       message:
         result.meta.total === 0
-          ? 'No published team members found'
-          : 'Published team members fetched successfully',
+          ? 'No published members found'
+          : 'Published members fetched successfully',
       ...result,
     };
   }
 
   @Get(':id')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get team member by id (CMS, any status)' })
+  @ApiOperation({ summary: 'Get team member/trustee by id (CMS, any status)' })
   @ApiOkResponse({ type: Team })
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.service.findOne(id);
     return {
       statusCode: HttpStatus.OK,
-      message: 'Team member fetched successfully',
+      message: 'Member fetched successfully',
       data,
     };
   }
@@ -159,7 +159,7 @@ export class TeamsController {
     ]),
   )
   @ApiOperation({
-    summary: 'Update team member (CMS / super-admin)',
+    summary: 'Update team member/trustee (CMS / super-admin)',
     description:
       'Optional new `teamImage` file replaces the previous CDN object.',
   })
@@ -176,7 +176,7 @@ export class TeamsController {
     const data = await this.service.update(id, dto, this.toTeamFiles(files));
     return {
       statusCode: HttpStatus.OK,
-      message: 'Team member updated successfully',
+      message: 'Member updated successfully',
       data,
     };
   }
@@ -195,7 +195,7 @@ export class TeamsController {
     const data = await this.service.restore(id);
     return {
       statusCode: HttpStatus.OK,
-      message: 'Team member restored successfully',
+      message: 'Member restored successfully',
       data,
     };
   }
@@ -214,7 +214,7 @@ export class TeamsController {
     await this.service.remove(id);
     return {
       statusCode: HttpStatus.OK,
-      message: 'Team member deleted successfully',
+      message: 'Member deleted successfully',
     };
   }
 

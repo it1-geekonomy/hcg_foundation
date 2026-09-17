@@ -1,11 +1,16 @@
-import Typography from "@/lib/Typography";
+import Bannersection from "@/domains/ourprograms/Swasthigallery/components/bannersection";
+import DonateForm from "@/shared/components/DonateForm";
+import Artgallery from "@/domains/ourprograms/Swasthigallery/components/artgallery";
 
-export default function GalleryPage() {
+export default function OurTeamPage() {
   return (
-    <section className="flex min-h-screen items-center justify-center bg-slate-100">
-      <Typography variant="heading-3" as="h1" className="text-[#382E07]">
-       Swasthi Gallery
-      </Typography>
-    </section>
+    <>
+      <Bannersection />
+      <Artgallery />
+        
+      <div id="donate-form">
+        <DonateForm />
+        </div>
+    </>
   );
 }

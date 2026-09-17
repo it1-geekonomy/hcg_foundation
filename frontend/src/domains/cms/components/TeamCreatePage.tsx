@@ -51,11 +51,12 @@ export default function TeamCreatePage() {
           Back to list
         </Link>
         <h1 className="font-manrope text-2xl font-semibold text-[#212121]">
-          Add team member
+          Add team member / trustee
         </h1>
         <p className="mt-1 font-manrope text-sm text-muted-foreground">
-          Upload a photo. Set status to{" "}
-          <strong>published</strong> to show on the website.
+          Choose <strong>Team</strong> or <strong>Trustee</strong>, upload a
+          photo, and set status to <strong>published</strong> to show on the
+          website.
         </p>
       </div>
 

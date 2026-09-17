@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsInt,
@@ -6,6 +7,7 @@ import {
   IsOptional,
   IsString,
   MaxLength,
+  Min,
 } from 'class-validator';
 
 export class CreateHomeBannerDto {
@@ -32,26 +34,19 @@ export class CreateHomeBannerDto {
   @IsString()
   shortDescription?: string;
 
-  @ApiProperty({ description: 'Banner image URL (required)' })
-  @IsString()
-  @IsNotEmpty()
-  bannerImageUrl: string;
-
-  @ApiPropertyOptional({ description: 'Mobile banner image URL' })
+  @ApiPropertyOptional({ example: 1, default: 1 })
   @IsOptional()
-  @IsString()
-  mobileBannerImageUrl?: string;
-
-  @ApiPropertyOptional({ description: 'Profile image URL' })
-  @IsOptional()
-  @IsString()
-  profileImageUrl?: string;
-
-  @ApiProperty({ example: 1, default: 1 })
+  @Type(() => Number)
   @IsInt()
-  displayOrder: number;
+  @Min(1)
+  displayOrder?: number = 1;
 
-  @ApiProperty({ example: true, default: true })
+  @ApiPropertyOptional({ example: true, default: true })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === '') return undefined;
+    return value === true || value === 'true' || value === '1';
+  })
   @IsBoolean()
-  isActive: boolean;
+  isActive?: boolean = true;
 }

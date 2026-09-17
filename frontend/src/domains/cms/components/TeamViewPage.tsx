@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ExternalLink, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import TeamMemberCard from "@/domains/about/components/TeamMemberCard";
 import { cmsApi } from "@/domains/cms/lib/api";
@@ -103,8 +103,7 @@ export default function TeamViewPage() {
     );
   }
 
-  const hoverDescription =
-    plainText(team.content) || plainText(team.shortDescription);
+  const hoverDescription = plainText(team.content);
 
   return (
     <div className="space-y-6">
@@ -122,7 +121,7 @@ export default function TeamViewPage() {
               {team.title}
             </h2>
             <span className="rounded-full bg-[#E8F0F6] px-2.5 py-0.5 font-manrope text-xs font-medium capitalize text-[#1A4A6E]">
-              {team.memberType ?? "trustee"}
+              {team.type ?? "team"}
             </span>
             <span className="rounded-full bg-[#FFF1C2] px-2.5 py-0.5 font-manrope text-xs font-medium text-[#7A5A00]">
               {team.status}
@@ -136,16 +135,6 @@ export default function TeamViewPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {team.status === "published" ? (
-            <Link
-              href="/about/our-team"
-              target="_blank"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 font-manrope text-sm text-[#212121] transition hover:bg-[#F7F7F5]"
-            >
-              <ExternalLink className="size-3.5" />
-              Public page
-            </Link>
-          ) : null}
           <Link
             href={`/admin/team/${team.id}/edit`}
             className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#FCCC2D] px-3 font-manrope text-sm font-semibold text-[#212121] transition hover:brightness-105"
@@ -167,7 +156,6 @@ export default function TeamViewPage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(240px,300px)_minmax(0,1fr)]">
-        {/* Card preview — hover shows short description */}
         <div className="rounded-3xl bg-[#F3EEE3] p-5 sm:p-6">
           <p className="mb-4 text-center font-manrope text-[11px] font-semibold tracking-[0.16em] text-[#8A7A55] uppercase">
             Card preview · hover to slide content up
@@ -178,28 +166,12 @@ export default function TeamViewPage() {
               designation={team.designation}
               imageUrl={team.teamImage}
               description={hoverDescription || undefined}
-              variant={team.memberType === "team" ? "team" : "trustee"}
+              variant={team.type === "trustee" ? "trustee" : "team"}
             />
           </div>
         </div>
 
-        {/* CMS content always visible */}
         <div className="space-y-4">
-          <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
-            <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
-              Short description
-            </h3>
-            {team.shortDescription ? (
-              <p className="font-manrope text-sm leading-relaxed text-[#444]">
-                {team.shortDescription}
-              </p>
-            ) : (
-              <p className="font-manrope text-sm text-muted-foreground">
-                No short description — add one in Edit for the card hover.
-              </p>
-            )}
-          </section>
-
           <section className="rounded-2xl bg-white p-5 ring-1 ring-black/5 sm:p-6">
             <h3 className="mb-3 font-manrope text-xs font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase">
               Content

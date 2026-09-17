@@ -26,6 +26,7 @@ import type { LegalSectionConfig } from "@/domains/cms/lib/legal-sections";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import type { ContentStatus, LegalPage } from "@/domains/cms/lib/types";
 import { CmsPagination, type PaginationMeta } from "./CmsPagination";
+import CmsSearchInput from "./CmsSearchInput";
 import CmsSelect, { CONTENT_STATUS_FILTER_OPTIONS } from "./CmsSelect";
 
 const PAGE_SIZE = 20;
@@ -220,12 +221,12 @@ export default function LegalPagesListPage({
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex flex-col gap-2 sm:flex-row">
-            <Input
+            <CmsSearchInput
               placeholder="Search title / content…"
               value={search}
-              onChange={(e) => {
+              onDebouncedChange={(next) => {
                 setPage(1);
-                setSearch(e.target.value);
+                setSearch(next);
               }}
               className="sm:flex-1"
             />

@@ -1,6 +1,10 @@
 export type ContentStatus = "draft" | "published" | "archived";
 
-export type TeamMemberType = "trustee" | "team";
+/** Backend field `type` — team member vs trustee */
+export type TeamType = "team" | "trustee";
+
+/** @deprecated use TeamType */
+export type TeamMemberType = TeamType;
 
 export type SeoFields = {
   metaTitle?: string;
@@ -14,9 +18,8 @@ export type Team = SeoFields & {
   designation?: string | null;
   teamImage?: string | null;
   content?: string | null;
-  shortDescription?: string | null;
-  /** Legacy; backend teams table no longer stores this */
-  memberType?: TeamMemberType;
+  /** team | trustee — API field name is `type` */
+  type: TeamType;
   status: ContentStatus;
   deletedAt?: string | null;
   createdAt: string;
@@ -26,9 +29,9 @@ export type Team = SeoFields & {
 /** Text fields for POST/PATCH /teams (multipart). Image is a file, not a URL. */
 export type TeamFields = SeoFields & {
   title: string;
+  type: TeamType;
   designation?: string;
   content?: string;
-  shortDescription?: string;
   status?: ContentStatus;
   metaTitle?: string;
   metaDescription?: string;
@@ -97,6 +100,33 @@ export type AwardFields = {
   status?: ContentStatus;
 };
 
+export type HomeBanner = {
+  id: string;
+  name: string;
+  title: string;
+  location?: string | null;
+  shortDescription?: string | null;
+  bannerImageUrl: string;
+  mobileBannerImageUrl?: string | null;
+  profileImageUrl?: string | null;
+  displayOrder: number;
+  isActive: boolean;
+  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type HomeBannerFields = {
+  name: string;
+  title: string;
+  location?: string;
+  shortDescription?: string;
+  displayOrder: number;
+  isActive: boolean;
+};
+
+export type UpdateHomeBannerPayload = Partial<HomeBannerFields>;
+
 export type CmsEvent = SeoFields & {
   id: string;
   title: string;
@@ -134,6 +164,7 @@ export type CmsProject = SeoFields & {
   projectDate?: string | null;
   content?: string | null;
   shortDescription?: string | null;
+  displayOrder: number;
   status: ContentStatus;
   deletedAt?: string | null;
   createdAt: string;
@@ -146,6 +177,7 @@ export type ProjectFields = SeoFields & {
   projectDate?: string;
   content?: string;
   shortDescription?: string;
+  displayOrder?: number;
   status?: ContentStatus;
 };
 
@@ -190,6 +222,121 @@ export type Donor = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type CampaignStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "completed";
+
+export type FundraisingCampaign = {
+  id: string;
+  fullName: string;
+  phoneNumber: string;
+  email: string;
+  city: string;
+  fundraisingGoal: string;
+  fundraisingReason: string;
+  message?: string | null;
+  termsAccepted: boolean;
+  status: CampaignStatus;
+  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UpdateFundraisingCampaignPayload = Partial<{
+  fullName: string;
+  phoneNumber: string;
+  email: string;
+  city: string;
+  fundraisingGoal: string;
+  fundraisingReason: string;
+  message: string;
+  termsAccepted: boolean;
+  status: CampaignStatus;
+}>;
+
+export type InquiryStatus =
+  | "pending"
+  | "in_review"
+  | "contacted"
+  | "resolved"
+  | "rejected";
+
+export type PartnershipInquiry = {
+  id: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  organizationName?: string | null;
+  message: string;
+  termsAccepted: boolean;
+  status: InquiryStatus;
+  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UpdatePartnershipInquiryPayload = Partial<{
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  organizationName: string;
+  message: string;
+  termsAccepted: boolean;
+  status: InquiryStatus;
+}>;
+
+export type LeadsInternship = {
+  id: string;
+  fullName: string;
+  phone?: string | null;
+  email?: string | null;
+  gender?: string | null;
+  dob?: string | null;
+  currentCourse?: string | null;
+  address?: string | null;
+  languages?: string | null;
+  computerSkills?: string | null;
+  message?: string | null;
+  termsAccepted: boolean;
+  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UpdateLeadsInternshipPayload = Partial<{
+  fullName: string;
+  phone: string;
+  email: string;
+  gender: string;
+  dob: string;
+  currentCourse: string;
+  address: string;
+  languages: string;
+  computerSkills: string;
+  message: string;
+  termsAccepted: boolean;
+}>;
+
+export type LeadsContact = {
+  id: string;
+  fullName: string;
+  phone?: string | null;
+  email?: string | null;
+  message?: string | null;
+  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UpdateLeadsContactPayload = Partial<{
+  fullName: string;
+  phone: string;
+  email: string;
+  message: string;
+}>;
 
 export type Paginated<T> = {
   data: T[];

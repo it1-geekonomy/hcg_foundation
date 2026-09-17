@@ -3,12 +3,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import Typography from "@/lib/Typography";
+
 export interface BannerBreadcrumb {
   label: string;
   href?: string;
 }
+
 export interface BannerProps {
   bgImage: string;
+  /** Optional image shown below the lg breakpoint (1024px). Falls back to bgImage if omitted. */
+  bgImageMobile?: string;
   bgImageAlt?: string;
   breadcrumbs?: BannerBreadcrumb[];
   subtitle?: string;
@@ -17,8 +21,10 @@ export interface BannerProps {
   children?: ReactNode;
   className?: string;
 }
+
 export default function Banner({
   bgImage,
+  bgImageMobile,
   bgImageAlt = "",
   breadcrumbs,
   title,
@@ -28,15 +34,25 @@ export default function Banner({
     <section
       className={`relative isolate min-h-[420px] w-full overflow-hidden sm:min-h-[500px] lg:min-h-[740px] ${className}`}
     >
+      {/* Below 1024px */}
+      <Image
+        src={bgImageMobile ?? bgImage}
+        alt={bgImageAlt}
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover object-center lg:hidden"
+      />
+      {/* 1024px and up */}
       <Image
         src={bgImage}
         alt={bgImageAlt}
         fill
         priority
         sizes="100vw"
-        className="object-cover object-center"
+        className="hidden object-cover object-center lg:block"
       />
-    <div className="absolute inset-0 z-10 flex items-center px-6 sm:px-10 xl:px-40 mt-30 sm:mt-32 lg:mt-40">
+      <div className="absolute inset-0 z-10 flex items-center px-6 sm:px-10 xl:px-40 mt-30 sm:mt-32 lg:mt-40">
         <div className="w-full">
           {breadcrumbs && breadcrumbs.length > 0 && (
             <nav aria-label="Breadcrumb" className="mb-6 sm:mb-16">

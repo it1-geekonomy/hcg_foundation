@@ -1,3 +1,9 @@
-export {default as financialbanner} from "./components/financialsupport";
-export {default as hopesection} from "./components/hopesection";
-export {default as howtoreferpatient} from "./components/howtoreferpatient";
+export {default as financialbanner} from "./FinancialSupport/components/financialsupport";
+export {default as hopesection} from "./FinancialSupport/components/hopesection";
+export {default as howtoreferpatient} from "./FinancialSupport/components/howtoreferpatient";
+export {default as bannersection} from "./AwarenessAndScreening/components/bannersection";
+export {default as cancerscreening} from "./AwarenessAndScreening/components/cancerscreening";
+export {default as referalprocess} from "./AwarenessAndScreening/components/referalprocess";
+export {default as gallerybanner} from "./Swasthigallery/components/bannersection";
+export {default as artgallery} from "./Swasthigallery/components/artgallery";
+export {default as screeningsection} from "./AwarenessAndScreening/components/screeningsection";

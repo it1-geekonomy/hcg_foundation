@@ -21,6 +21,7 @@ import {
 import { cmsApi } from "@/domains/cms/lib/api";
 import type { DonationStatus, Donor } from "@/domains/cms/lib/types";
 import { CmsPagination, type PaginationMeta } from "./CmsPagination";
+import CmsSearchInput from "./CmsSearchInput";
 import CmsSelect, { DONATION_STATUS_OPTIONS } from "./CmsSelect";
 
 const PAGE_SIZE = 10;
@@ -93,12 +94,12 @@ export default function DonorsListPage() {
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex flex-col gap-3 sm:flex-row">
-            <Input
+            <CmsSearchInput
               placeholder="Search name / email / phone / country…"
               value={search}
-              onChange={(e) => {
+              onDebouncedChange={(next) => {
                 setPage(1);
-                setSearch(e.target.value);
+                setSearch(next);
               }}
             />
             <CmsSelect

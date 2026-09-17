@@ -25,6 +25,7 @@ import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import type { CmsProject, ContentStatus } from "@/domains/cms/lib/types";
 import { CmsPagination, type PaginationMeta } from "./CmsPagination";
+import CmsSearchInput from "./CmsSearchInput";
 import CmsSelect, { CONTENT_STATUS_FILTER_OPTIONS } from "./CmsSelect";
 
 const PAGE_SIZE = 20;
@@ -208,12 +209,12 @@ export default function ProjectsListPage() {
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex flex-col gap-2 sm:flex-row">
-            <Input
+            <CmsSearchInput
               placeholder="Search title / slug…"
               value={search}
-              onChange={(e) => {
+              onDebouncedChange={(next) => {
                 setPage(1);
-                setSearch(e.target.value);
+                setSearch(next);
               }}
               className="sm:flex-1"
             />
@@ -236,6 +237,7 @@ export default function ProjectsListPage() {
               <TableRow>
                 <TableHead className="w-14">Banner</TableHead>
                 <TableHead>Title</TableHead>
+                <TableHead className="w-16">Order</TableHead>
                 <TableHead>Date</TableHead>
                 {tab === "deleted" ? (
                   <TableHead>Deleted at</TableHead>
@@ -248,7 +250,7 @@ export default function ProjectsListPage() {
             <TableBody>
               {projects.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-muted-foreground">
+                  <TableCell colSpan={6} className="text-muted-foreground">
                     {tab === "deleted" ? (
                       "No deleted projects."
                     ) : (
@@ -285,6 +287,7 @@ export default function ProjectsListPage() {
                         /{project.slug}
                       </p>
                     </TableCell>
+                    <TableCell>{project.displayOrder ?? "—"}</TableCell>
                     <TableCell>{project.projectDate || "—"}</TableCell>
                     <TableCell>
                       {tab === "deleted" ? (

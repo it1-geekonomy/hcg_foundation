@@ -1,6 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, IsUrl, MaxLength, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { ContentStatus } from '../../../common/enums/content-status.enum';
 
 export class CreateAwardDto {
@@ -21,14 +28,6 @@ export class CreateAwardDto {
   @IsOptional()
   @IsString()
   description?: string;
-
-  @ApiPropertyOptional({
-    example: 'https://example.com/award-image.jpg',
-    description: 'URL of the award image (leave empty if uploading awardImage via multipart form-data)',
-  })
-  @IsOptional()
-  @IsUrl()
-  awardImageUrl?: string;
 
   @ApiPropertyOptional({ example: 1, default: 1 })
   @IsOptional()

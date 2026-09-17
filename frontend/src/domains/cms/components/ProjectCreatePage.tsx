@@ -55,7 +55,7 @@ export default function ProjectCreatePage() {
           Add project
         </h1>
         <p className="mt-1 font-manrope text-sm text-muted-foreground">
-          Optional banners (WebP/AVIF). Set status to{" "}
+          Upload banner images (WebP/AVIF, max 5MB). Set status to{" "}
           <strong>published</strong> to show on the website.
         </p>
       </div>

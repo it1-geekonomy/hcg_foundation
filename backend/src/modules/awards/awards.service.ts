@@ -14,6 +14,12 @@ import {
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
 import {
+  applyDisplayOrderUpdate,
+  compactDisplayOrderAfterDelete,
+  assignDisplayOrderOnRestore,
+  prepareInsertDisplayOrder,
+} from '../../common/utils/display-order';
+import {
   applyDeletedFilter,
   restoreSoftDeleted,
 } from '../../common/utils/soft-delete';
@@ -38,27 +44,29 @@ export class AwardsService {
   ) {}
 
   async create(dto: CreateAwardDto, files?: AwardFiles): Promise<Award> {
-    const awardImageUrl = files?.awardImage
-      ? await this.cdn.upload(files.awardImage, 'awards')
-      : dto.awardImageUrl ?? null;
-
-    if (!awardImageUrl) {
+    if (!files?.awardImage) {
       throw new BadRequestException(
-        'Award image file or awardImageUrl is required to create an award.',
+        'Award image file is required to create an award.',
       );
     }
+    const awardImageUrl = await this.cdn.upload(files.awardImage, 'awards');
+
+    const { displayOrder: requestedOrder, ...rest } = dto;
+    const displayOrder = await prepareInsertDisplayOrder(
+      this.repo,
+      requestedOrder,
+    );
 
     try {
       const entity = this.repo.create({
-        ...dto,
+        ...rest,
         awardImageUrl,
+        displayOrder,
         status: dto.status ?? ContentStatus.DRAFT,
       });
       return await this.saveOrThrow(entity);
     } catch (err) {
-      if (files?.awardImage) {
-        await this.cdn.delete(awardImageUrl);
-      }
+      await this.cdn.delete(awardImageUrl);
       throw err;
     }
   }
@@ -92,7 +100,9 @@ export class AwardsService {
     return buildPaginatedResult(data, total, page, limit);
   }
 
-  async findDeleted(query: PaginationQueryDto): Promise<PaginatedResult<Award>> {
+  async findDeleted(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResult<Award>> {
     return this.findAll({ ...query, includeDeleted: true, onlyDeleted: true });
   }
 
@@ -122,21 +132,44 @@ export class AwardsService {
     files?: AwardFiles,
   ): Promise<Award> {
     const entity = await this.findOne(id);
-    const { awardImageUrl: _ignored, ...rest } = dto;
+    const { displayOrder: newOrder, ...rest } = dto;
     Object.assign(entity, rest);
+
+    const currentOrder = entity.displayOrder ?? 1;
+    if (newOrder !== undefined && newOrder !== currentOrder) {
+      entity.displayOrder = await applyDisplayOrderUpdate(
+        this.repo,
+        id,
+        currentOrder,
+        newOrder,
+      );
+    }
+
     entity.awardImageUrl =
-      (await this.cdn.replace(entity.awardImageUrl, files?.awardImage, 'awards')) ??
-      entity.awardImageUrl;
+      (await this.cdn.replace(
+        entity.awardImageUrl,
+        files?.awardImage,
+        'awards',
+      )) ?? entity.awardImageUrl;
     return this.saveOrThrow(entity);
   }
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
+    const removedOrder = entity.displayOrder ?? 1;
     await this.repo.softRemove(entity);
+    await compactDisplayOrderAfterDelete(this.repo, removedOrder);
   }
 
   async restore(id: string): Promise<Award> {
-    return restoreSoftDeleted(this.repo, id, 'Award');
+    const entity = await restoreSoftDeleted(this.repo, id, 'Award');
+    if (entity.displayOrder == null) {
+      entity.displayOrder = 1;
+    }
+    return assignDisplayOrderOnRestore(this.repo, entity as Award & {
+      id: string;
+      displayOrder: number;
+    });
   }
 
   private async saveOrThrow(entity: Award): Promise<Award> {

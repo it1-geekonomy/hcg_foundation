@@ -33,6 +33,7 @@ export type ProjectFormValues = {
   metaTitle: string;
   metaDescription: string;
   schemaCode: string;
+  displayOrder: string;
   projectBannerFile: File | null;
   projectBannerUrl: string | null;
   projectMobileBannerFile: File | null;
@@ -49,6 +50,7 @@ export const emptyProjectForm = (): ProjectFormValues => ({
   metaTitle: "",
   metaDescription: "",
   schemaCode: "",
+  displayOrder: "1",
   projectBannerFile: null,
   projectBannerUrl: null,
   projectMobileBannerFile: null,
@@ -75,6 +77,8 @@ export function projectToFormValues(project: CmsProject): ProjectFormValues {
     metaTitle: project.metaTitle ?? "",
     metaDescription: project.metaDescription ?? "",
     schemaCode: project.schemaCode ?? "",
+    displayOrder:
+      project.displayOrder != null ? String(project.displayOrder) : "1",
     projectBannerFile: null,
     projectBannerUrl: project.projectBanner ?? null,
     projectMobileBannerFile: null,
@@ -89,12 +93,15 @@ export function formValuesToFields(form: ProjectFormValues): ProjectFields {
     .replace(/\s+/g, " ")
     .trim();
 
+  const order = Number.parseInt(form.displayOrder.trim(), 10);
+
   return {
     title: form.title.trim(),
     slug: form.slug.trim() || slugifyTitle(form.title),
     projectDate: form.projectDate.trim() || undefined,
     shortDescription: form.shortDescription.trim() || undefined,
     content: plainContent ? form.content : undefined,
+    displayOrder: Number.isFinite(order) && order > 0 ? order : 1,
     status: form.status,
     metaTitle: form.metaTitle.trim() || undefined,
     metaDescription: form.metaDescription.trim() || undefined,
@@ -139,6 +146,7 @@ export function getProjectPatch(
     "projectDate",
     "shortDescription",
     "content",
+    "displayOrder",
     "status",
     "metaTitle",
     "metaDescription",
@@ -150,8 +158,12 @@ export function getProjectPatch(
     const after = next[key];
     const equal =
       key === "content"
-        ? normHtml(before) === normHtml(after)
-        : norm(before) === norm(after);
+        ? normHtml(before as string | undefined) ===
+          normHtml(after as string | undefined)
+        : key === "displayOrder"
+          ? before === after
+          : norm(before as string | undefined) ===
+            norm(after as string | undefined);
     if (equal) continue;
     fields[key] = (after === undefined ? "" : after) as never;
   }
@@ -191,7 +203,7 @@ export default function ProjectForm({
   onSlugManualEdit,
 }: ProjectFormProps) {
   return (
-    <form onSubmit={onSubmit} className="mx-auto max-w-3xl space-y-5">
+    <form onSubmit={onSubmit} className="w-full space-y-5">
       <div className="space-y-4 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <CmsFormField label="Title" htmlFor="title">
           <Input
@@ -222,21 +234,40 @@ export default function ProjectForm({
           />
         </CmsFormField>
 
-        <CmsFormField label="Date" htmlFor="projectDate">
-          <Input
-            id="projectDate"
-            type="date"
-            value={value.projectDate}
-            onChange={(e) =>
-              onChange({ ...value, projectDate: e.target.value })
-            }
-          />
-        </CmsFormField>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CmsFormField label="Date" htmlFor="projectDate">
+            <Input
+              id="projectDate"
+              type="date"
+              value={value.projectDate}
+              onChange={(e) =>
+                onChange({ ...value, projectDate: e.target.value })
+              }
+            />
+          </CmsFormField>
+
+          <CmsFormField
+            label="Display order"
+            htmlFor="displayOrder"
+            hint="Lower numbers appear first on the website"
+          >
+            <Input
+              id="displayOrder"
+              type="number"
+              min={1}
+              inputMode="numeric"
+              value={value.displayOrder}
+              onChange={(e) =>
+                onChange({ ...value, displayOrder: e.target.value })
+              }
+            />
+          </CmsFormField>
+        </div>
 
         <CmsFormField
           label="Desktop / web banner"
           htmlFor="projectBanner"
-          hint="WebP or AVIF"
+          hint="WebP or AVIF, max 5MB"
         >
           <CmsImagePicker
             label="desktop banner"
@@ -258,7 +289,7 @@ export default function ProjectForm({
         <CmsFormField
           label="Mobile banner"
           htmlFor="projectMobileBanner"
-          hint="WebP or AVIF"
+          hint="WebP or AVIF, max 5MB"
         >
           <CmsImagePicker
             label="mobile banner"

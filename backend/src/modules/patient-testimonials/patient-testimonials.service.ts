@@ -51,7 +51,11 @@ export class PatientTestimonialsService {
       ? await this.cdn.upload(files.patientTestimonialMobileBanner, 'patient-testimonials')
       : null;
     const patientTestimonialFile = files?.patientTestimonialFile
-      ? await this.cdn.upload(files.patientTestimonialFile, 'patient-testimonials')
+      ? await this.cdn.upload(
+          files.patientTestimonialFile,
+          'patient-testimonials',
+          'video',
+        )
       : null;
 
     try {
@@ -149,6 +153,7 @@ export class PatientTestimonialsService {
       entity.patientTestimonialFile,
       files?.patientTestimonialFile,
       'patient-testimonials',
+      'video',
     );
     return this.saveOrThrow(entity);
   }

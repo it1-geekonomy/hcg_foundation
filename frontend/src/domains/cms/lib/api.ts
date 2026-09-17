@@ -4,14 +4,22 @@ import type {
   AnnualReportFields,
   Award,
   AwardFields,
+  CampaignStatus,
   CmsEvent,
   CmsProject,
   CreateLegalPagePayload,
   CreateUserPayload,
   EventFields,
+  FundraisingCampaign,
+  HomeBanner,
+  HomeBannerFields,
+  InquiryStatus,
+  LeadsContact,
+  LeadsInternship,
   LegalPage,
   LegalPageType,
   Paginated,
+  PartnershipInquiry,
   ProjectFields,
   Team,
   TeamFields,
@@ -19,8 +27,13 @@ import type {
   ContentStatus,
   DonationStatus,
   Donor,
-  TeamMemberType,
+  TeamType,
+  UpdateFundraisingCampaignPayload,
+  UpdateHomeBannerPayload,
+  UpdateLeadsContactPayload,
+  UpdateLeadsInternshipPayload,
   UpdateLegalPagePayload,
+  UpdatePartnershipInquiryPayload,
 } from "./types";
 
 const API_BASE =
@@ -33,8 +46,9 @@ export type ListQuery = {
   page?: number;
   limit?: number;
   search?: string;
-  status?: ContentStatus | DonationStatus;
-  memberType?: TeamMemberType;
+  status?: ContentStatus | DonationStatus | CampaignStatus | InquiryStatus;
+  /** Filter teams by type (team | trustee) — query param `type` */
+  type?: TeamType;
   pageType?: LegalPageType;
   includeDeleted?: boolean;
   onlyDeleted?: boolean;
@@ -46,7 +60,7 @@ function toQuery(params?: ListQuery) {
   if (params?.limit) q.set("limit", String(params.limit));
   if (params?.search?.trim()) q.set("search", params.search.trim());
   if (params?.status) q.set("status", params.status);
-  if (params?.memberType) q.set("memberType", params.memberType);
+  if (params?.type) q.set("type", params.type);
   if (params?.pageType) q.set("pageType", params.pageType);
   if (params?.includeDeleted === true) q.set("includeDeleted", "true");
   if (params?.onlyDeleted === true) q.set("onlyDeleted", "true");
@@ -85,20 +99,41 @@ function authHeaders(): HeadersInit {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders(),
-      ...(init?.headers ?? {}),
-    },
-    cache: "no-store",
-  });
+/** Dedupe concurrent identical GETs (React Strict Mode double-mount in dev). */
+const inFlightGets = new Map<string, Promise<unknown>>();
 
-  if (!res.ok) throw new Error(await parseError(res));
-  if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const method = (init?.method ?? "GET").toUpperCase();
+
+  if (method === "GET") {
+    const pending = inFlightGets.get(path);
+    if (pending) return pending as Promise<T>;
+  }
+
+  const promise = (async (): Promise<T> => {
+    const res = await fetch(`${API_BASE}${path}`, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeaders(),
+        ...(init?.headers ?? {}),
+      },
+      cache: "no-store",
+    });
+
+    if (!res.ok) throw new Error(await parseError(res));
+    if (res.status === 204) return undefined as T;
+    return res.json() as Promise<T>;
+  })();
+
+  if (method === "GET") {
+    inFlightGets.set(path, promise);
+    promise.finally(() => {
+      inFlightGets.delete(path);
+    });
+  }
+
+  return promise;
 }
 
 /** Multipart — do not set Content-Type (browser sets boundary). */
@@ -167,14 +202,12 @@ function teamFormData(
 ) {
   const fd = new FormData();
   fd.append("title", fields.title.trim());
+  fd.append("type", fields.type);
   if (fields.designation?.trim()) {
     fd.append("designation", fields.designation.trim());
   }
   if (fields.content?.trim()) {
     fd.append("content", fields.content);
-  }
-  if (fields.shortDescription?.trim()) {
-    fd.append("shortDescription", fields.shortDescription.trim());
   }
   fd.append("status", fields.status ?? "draft");
   if (fields.metaTitle?.trim()) {
@@ -203,9 +236,9 @@ function teamPatchFormData(
     fd.append(key, value ?? "");
   };
   append("title", fields.title);
+  append("type", fields.type);
   append("designation", fields.designation);
   append("content", fields.content);
-  append("shortDescription", fields.shortDescription);
   append("status", fields.status);
   append("metaTitle", fields.metaTitle);
   append("metaDescription", fields.metaDescription);
@@ -249,6 +282,82 @@ function awardPatchFormData(
   append("status", fields.status);
   if (awardImageFile instanceof File) {
     fd.append("awardImage", awardImageFile, awardImageFile.name);
+  }
+  return fd;
+}
+
+function homeBannerFormData(
+  fields: HomeBannerFields,
+  files?: {
+    bannerImage?: File | null;
+    mobileBannerImage?: File | null;
+    profileImage?: File | null;
+  }
+) {
+  const fd = new FormData();
+  fd.append("name", fields.name.trim());
+  fd.append("title", fields.title.trim());
+  if (fields.location?.trim()) fd.append("location", fields.location.trim());
+  if (fields.shortDescription?.trim()) {
+    fd.append("shortDescription", fields.shortDescription.trim());
+  }
+  fd.append("displayOrder", String(fields.displayOrder));
+  fd.append("isActive", fields.isActive ? "true" : "false");
+  if (files?.bannerImage instanceof File) {
+    fd.append("bannerImage", files.bannerImage, files.bannerImage.name);
+  }
+  if (files?.mobileBannerImage instanceof File) {
+    fd.append(
+      "mobileBannerImage",
+      files.mobileBannerImage,
+      files.mobileBannerImage.name
+    );
+  }
+  if (files?.profileImage instanceof File) {
+    fd.append("profileImage", files.profileImage, files.profileImage.name);
+  }
+  return fd;
+}
+
+function homeBannerPatchFormData(
+  fields: Partial<HomeBannerFields>,
+  files?: {
+    bannerImage?: File | null;
+    mobileBannerImage?: File | null;
+    profileImage?: File | null;
+  }
+) {
+  const fd = new FormData();
+  const append = (key: keyof HomeBannerFields, value?: string | number | boolean | null) => {
+    if (value === undefined) return;
+    if (key === "displayOrder") {
+      fd.append(key, String(value));
+      return;
+    }
+    if (key === "isActive") {
+      fd.append(key, value ? "true" : "false");
+      return;
+    }
+    fd.append(key, value == null ? "" : String(value));
+  };
+  append("name", fields.name);
+  append("title", fields.title);
+  append("location", fields.location);
+  append("shortDescription", fields.shortDescription);
+  append("displayOrder", fields.displayOrder);
+  append("isActive", fields.isActive);
+  if (files?.bannerImage instanceof File) {
+    fd.append("bannerImage", files.bannerImage, files.bannerImage.name);
+  }
+  if (files?.mobileBannerImage instanceof File) {
+    fd.append(
+      "mobileBannerImage",
+      files.mobileBannerImage,
+      files.mobileBannerImage.name
+    );
+  }
+  if (files?.profileImage instanceof File) {
+    fd.append("profileImage", files.profileImage, files.profileImage.name);
   }
   return fd;
 }
@@ -346,6 +455,9 @@ function projectFormData(
   if (fields.shortDescription?.trim()) {
     fd.append("shortDescription", fields.shortDescription.trim());
   }
+  if (fields.displayOrder != null) {
+    fd.append("displayOrder", String(fields.displayOrder));
+  }
   if (fields.status) fd.append("status", fields.status);
   if (fields.metaTitle?.trim()) fd.append("metaTitle", fields.metaTitle.trim());
   if (fields.metaDescription?.trim()) {
@@ -388,6 +500,9 @@ function projectPatchFormData(
   append("metaTitle", fields.metaTitle);
   append("metaDescription", fields.metaDescription);
   append("schemaCode", fields.schemaCode);
+  if (fields.displayOrder !== undefined) {
+    fd.append("displayOrder", String(fields.displayOrder));
+  }
   if (files?.projectBanner instanceof File) {
     fd.append("projectBanner", files.projectBanner, files.projectBanner.name);
   }
@@ -497,6 +612,74 @@ export const cmsApi = {
 
   restoreAward: (id: string) =>
     request<ApiEnvelope<Award>>(`/awards/${id}/restore`, {
+      method: "POST",
+    }),
+
+  listHomeBanners: (params?: ListQuery) =>
+    request<Paginated<HomeBanner>>(
+      `/home-banners${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedHomeBanners: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<HomeBanner>>(
+      `/home-banners/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getHomeBanner: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<HomeBanner>>(`/home-banners/${id}`);
+    } catch (err) {
+      const deleted = await request<Paginated<HomeBanner>>(
+        `/home-banners/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  createHomeBanner: (
+    fields: HomeBannerFields,
+    files: {
+      bannerImage: File;
+      mobileBannerImage?: File | null;
+      profileImage?: File | null;
+    }
+  ) =>
+    requestFormData<ApiEnvelope<HomeBanner>>(
+      "/home-banners",
+      "POST",
+      homeBannerFormData(fields, files)
+    ),
+
+  updateHomeBanner: (
+    id: string,
+    fields: UpdateHomeBannerPayload,
+    files?: {
+      bannerImage?: File | null;
+      mobileBannerImage?: File | null;
+      profileImage?: File | null;
+    }
+  ) =>
+    requestFormData<ApiEnvelope<HomeBanner>>(
+      `/home-banners/${id}`,
+      "PATCH",
+      homeBannerPatchFormData(fields, files)
+    ),
+
+  deleteHomeBanner: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(`/home-banners/${id}`, {
+      method: "DELETE",
+    }),
+
+  restoreHomeBanner: (id: string) =>
+    request<ApiEnvelope<HomeBanner>>(`/home-banners/${id}/restore`, {
       method: "POST",
     }),
 
@@ -778,6 +961,207 @@ export const cmsApi = {
     ),
 
   getDonor: (id: string) => request<ApiEnvelope<Donor>>(`/donors/${id}`),
+
+  listFundraisingCampaigns: (params?: ListQuery) =>
+    request<Paginated<FundraisingCampaign>>(
+      `/fundraising-campaigns${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedFundraisingCampaigns: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<FundraisingCampaign>>(
+      `/fundraising-campaigns/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getFundraisingCampaign: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<FundraisingCampaign>>(
+        `/fundraising-campaigns/${id}`
+      );
+    } catch (err) {
+      const deleted = await request<Paginated<FundraisingCampaign>>(
+        `/fundraising-campaigns/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  updateFundraisingCampaign: (
+    id: string,
+    payload: UpdateFundraisingCampaignPayload
+  ) =>
+    request<ApiEnvelope<FundraisingCampaign>>(
+      `/fundraising-campaigns/${id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }
+    ),
+
+  deleteFundraisingCampaign: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(
+      `/fundraising-campaigns/${id}`,
+      { method: "DELETE" }
+    ),
+
+  restoreFundraisingCampaign: (id: string) =>
+    request<ApiEnvelope<FundraisingCampaign>>(
+      `/fundraising-campaigns/${id}/restore`,
+      { method: "POST" }
+    ),
+
+  listPartnershipInquiries: (params?: ListQuery) =>
+    request<Paginated<PartnershipInquiry>>(
+      `/partnership-inquiries${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedPartnershipInquiries: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<PartnershipInquiry>>(
+      `/partnership-inquiries/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getPartnershipInquiry: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<PartnershipInquiry>>(
+        `/partnership-inquiries/${id}`
+      );
+    } catch (err) {
+      const deleted = await request<Paginated<PartnershipInquiry>>(
+        `/partnership-inquiries/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  updatePartnershipInquiry: (
+    id: string,
+    payload: UpdatePartnershipInquiryPayload
+  ) =>
+    request<ApiEnvelope<PartnershipInquiry>>(`/partnership-inquiries/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  deletePartnershipInquiry: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(
+      `/partnership-inquiries/${id}`,
+      { method: "DELETE" }
+    ),
+
+  restorePartnershipInquiry: (id: string) =>
+    request<ApiEnvelope<PartnershipInquiry>>(
+      `/partnership-inquiries/${id}/restore`,
+      { method: "POST" }
+    ),
+
+  listLeadsInternship: (params?: ListQuery) =>
+    request<Paginated<LeadsInternship>>(
+      `/leads-internship${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedLeadsInternship: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<LeadsInternship>>(
+      `/leads-internship/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getLeadsInternship: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<LeadsInternship>>(
+        `/leads-internship/${id}`
+      );
+    } catch (err) {
+      const deleted = await request<Paginated<LeadsInternship>>(
+        `/leads-internship/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  updateLeadsInternship: (id: string, payload: UpdateLeadsInternshipPayload) =>
+    request<ApiEnvelope<LeadsInternship>>(`/leads-internship/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  deleteLeadsInternship: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(
+      `/leads-internship/${id}`,
+      { method: "DELETE" }
+    ),
+
+  restoreLeadsInternship: (id: string) =>
+    request<ApiEnvelope<LeadsInternship>>(`/leads-internship/${id}/restore`, {
+      method: "POST",
+    }),
+
+  listLeadsContact: (params?: ListQuery) =>
+    request<Paginated<LeadsContact>>(
+      `/leads-contact${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedLeadsContact: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<LeadsContact>>(
+      `/leads-contact/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getLeadsContact: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<LeadsContact>>(`/leads-contact/${id}`);
+    } catch (err) {
+      const deleted = await request<Paginated<LeadsContact>>(
+        `/leads-contact/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  updateLeadsContact: (id: string, payload: UpdateLeadsContactPayload) =>
+    request<ApiEnvelope<LeadsContact>>(`/leads-contact/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  deleteLeadsContact: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(
+      `/leads-contact/${id}`,
+      { method: "DELETE" }
+    ),
+
+  restoreLeadsContact: (id: string) =>
+    request<ApiEnvelope<LeadsContact>>(`/leads-contact/${id}/restore`, {
+      method: "POST",
+    }),
 };
 
 /** Public site: published people */
@@ -788,4 +1172,43 @@ export const publicTeamsApi = {
     ),
 
   getById: (id: string) => request<ApiEnvelope<Team>>(`/teams/${id}`),
+};
+
+/** Public site: published projects */
+export const publicProjectsApi = {
+  listPublished: (params?: Omit<ListQuery, "status">) =>
+    request<Paginated<CmsProject>>(
+      `/projects/published${toQuery({ page: 1, limit: 12, ...params })}`
+    ),
+
+  getBySlug: (slug: string) =>
+    request<ApiEnvelope<CmsProject>>(
+      `/projects/published/slug/${encodeURIComponent(slug)}`
+    ),
+};
+
+/** Public site: active home banners */
+export const publicHomeBannersApi = {
+  listActive: () =>
+    request<ApiEnvelope<HomeBanner[]>>("/home-banners/active"),
+};
+
+/**
+ * Public legal documents.
+ * Privacy `/published` returns a paginated list; Terms returns a single document (or null).
+ */
+export const publicLegalApi = {
+  getPublishedPrivacyPolicy: async (): Promise<LegalPage | null> => {
+    const res = await request<Paginated<LegalPage>>(
+      `/privacy-policy/published${toQuery({ page: 1, limit: 1 })}`
+    );
+    return res.data?.[0] ?? null;
+  },
+
+  getPublishedTerms: async (): Promise<LegalPage | null> => {
+    const res = await request<ApiEnvelope<LegalPage | null>>(
+      "/terms-and-conditions/published"
+    );
+    return res.data ?? null;
+  },
 };

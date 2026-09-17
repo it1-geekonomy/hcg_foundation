@@ -135,9 +135,54 @@ export const CONTENT_STATUS_FILTER_OPTIONS: CmsSelectOption[] = [
   ...CONTENT_STATUS_OPTIONS,
 ];
 
+export const TEAM_TYPE_OPTIONS: CmsSelectOption[] = [
+  { value: "team", label: "Team" },
+  { value: "trustee", label: "Trustee" },
+];
+
+export const TEAM_TYPE_FILTER_OPTIONS: CmsSelectOption[] = [
+  { value: "", label: "All types" },
+  ...TEAM_TYPE_OPTIONS,
+];
+
 export const DONATION_STATUS_OPTIONS: CmsSelectOption[] = [
   { value: "paid", label: "Paid" },
   { value: "pending", label: "Pending" },
   { value: "failed", label: "Failed" },
   { value: "refunded", label: "Refunded" },
+];
+
+export const CAMPAIGN_STATUS_OPTIONS: CmsSelectOption[] = [
+  { value: "pending", label: "Pending" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
+  { value: "completed", label: "Completed" },
+];
+
+export const CAMPAIGN_STATUS_FILTER_OPTIONS: CmsSelectOption[] = [
+  { value: "", label: "All statuses" },
+  ...CAMPAIGN_STATUS_OPTIONS,
+];
+
+export const INQUIRY_STATUS_OPTIONS: CmsSelectOption[] = [
+  { value: "pending", label: "Pending" },
+  { value: "in_review", label: "In review" },
+  { value: "contacted", label: "Contacted" },
+  { value: "resolved", label: "Resolved" },
+  { value: "rejected", label: "Rejected" },
+];
+
+export const INQUIRY_STATUS_FILTER_OPTIONS: CmsSelectOption[] = [
+  { value: "", label: "All statuses" },
+  ...INQUIRY_STATUS_OPTIONS,
+];
+
+export const ACTIVE_STATUS_OPTIONS: CmsSelectOption[] = [
+  { value: "true", label: "Active" },
+  { value: "false", label: "Inactive" },
+];
+
+export const ACTIVE_STATUS_FILTER_OPTIONS: CmsSelectOption[] = [
+  { value: "", label: "All banners" },
+  ...ACTIVE_STATUS_OPTIONS,
 ];

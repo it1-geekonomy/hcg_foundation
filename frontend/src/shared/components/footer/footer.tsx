@@ -59,14 +59,9 @@ const QUICK_LINK_ROUTES: Record<string, string> = {
   "Contact Us": "/contact",
 };
 
-const INNER_PAGE_ROUTES: Record<string, string> = {
-  "Team": "/about/our-team",
-  "Trustees": "/about/our-team",
+const INNER_PAGE_OVERRIDES: Record<string, string> = {
   "Events": "/resources/events",
   "Projects": "/resources/projects",
-  "Privacy Policy": "/admin/privacy-policy",
-  "Terms and Conditions": "/admin/terms",
-  "Disclaimer": "/admin/terms",
 };
 
 export default function Footer() {
@@ -126,15 +121,18 @@ export default function Footer() {
             <div className="col-span-1">
               <FooterHeading>INNER PAGES</FooterHeading>
               <ul className="mt-8 space-y-3">
-                {FOOTER_INNER_PAGES.map((label) => (
-                  <li key={label}>
-                    <Link href={INNER_PAGE_ROUTES[label] || "/"} className="hover:text-[#FDB723] transition-colors">
-                      <Typography variant="body-9" as="span" className="text-white">
-                        {label}
-                      </Typography>
-                    </Link>
-                  </li>
-                ))}
+                {FOOTER_INNER_PAGES.map((item) => {
+                  const href = INNER_PAGE_OVERRIDES[item.label] || item.href;
+                  return (
+                    <li key={item.label}>
+                      <Link href={href} className="hover:text-[#FDB723] transition-colors">
+                        <Typography variant="body-9" as="span" className="text-white">
+                          {item.label}
+                        </Typography>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
