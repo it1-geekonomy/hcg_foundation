@@ -188,9 +188,9 @@ export default function PatientTestimonialsPage() {
                 </div>
 
                 {/* Bottom Overlay: Yellow Accent Bar + Patient Name & Role */}
-                <div className="absolute left-6 right-6 bottom-6 flex items-center gap-3.5 z-10 font-manrope pointer-events-none">
+                <div className="absolute left-6 right-6 bottom-6 flex items-center gap-3.5 z-10 pointer-events-none">
                   <div className="w-1.5 h-10 sm:h-12 bg-[#FDC61D] rounded-full shrink-0" />
-                  <div className="flex flex-col text-white font-manrope min-w-0">
+                  <div className="flex flex-col text-white min-w-0">
                     <div className="truncate">
                       <Typography variant="heading-7" as="h3" className="text-white">
                         {item.patientName}

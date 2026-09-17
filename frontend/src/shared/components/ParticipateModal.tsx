@@ -145,14 +145,14 @@ export default function ParticipateModal({
           {/* Header Title & Subtitle matching Figma 100% */}
           <div className="text-center max-w-xl mx-auto mb-6 sm:mb-8">
             <div className="mb-1">
-              <Typography variant="heading-2" as="h2" className="text-[#2E1C12]">
+              <Typography variant="heading-5" as="h2" className="text-[#2E1C12]">
                 {isIntern && "Apply for Internship at"}
                 {isFundraise && "Start a Fundraising Campaign at"}
                 {!isIntern && !isFundraise && "Become a Volunteer at"}
               </Typography>
             </div>
             <div className="mb-3">
-              <Typography variant="heading-2" as="div">
+              <Typography variant="heading-5" as="div">
                 <span className="text-[#0083B0]">HCG </span>
                 <span className="text-[#DF6A4B]">Foundation</span>
               </Typography>
@@ -489,7 +489,7 @@ export default function ParticipateModal({
                 type="submit"
                 className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#382E07] rounded-lg shadow-xs transition duration-300 hover:bg-[#E9B510] hover:shadow-md cursor-pointer"
               >
-                <Typography variant="body-8" as="span" className="text-[#382E07]">
+                <Typography variant="button-1" as="span" className="text-[#382E07]">
                   Submit Application
                 </Typography>
               </button>

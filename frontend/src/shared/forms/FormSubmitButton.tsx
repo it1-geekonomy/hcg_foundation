@@ -18,7 +18,7 @@ export default function FormSubmitButton({
       className={`mt-4 w-full rounded-md bg-[#FDC61D] py-3.5 sm:py-4 shadow-xs transition hover:bg-[#E9B510] active:scale-[0.99] cursor-pointer ${className}`}
       {...props}
     >
-      <Typography variant="body-8" as="span" className="text-[#382E07]">
+      <Typography variant="button-1" as="span" className="text-[#382E07]">
         {children}
       </Typography>
     </button>

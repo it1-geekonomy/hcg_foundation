@@ -93,7 +93,7 @@ export default function PartnerWithUsModal({
         <div className="w-full md:w-1/2 p-6 sm:p-8 md:p-10 flex flex-col justify-between overflow-y-auto max-h-[90vh] md:max-h-none">
           <div>
             <div className="mb-2">
-              <Typography variant="heading-2" as="h2" className="text-[#2E1C12]">
+              <Typography variant="heading-5" as="h2" className="text-[#2E1C12]">
                 Be a Part of Someone&apos;s Cancer Journey
               </Typography>
             </div>
@@ -230,7 +230,7 @@ export default function PartnerWithUsModal({
                   type="submit"
                   className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#382E07] rounded-lg shadow-xs transition duration-300 hover:bg-[#E9B510] hover:shadow-md cursor-pointer"
                 >
-                  <Typography variant="body-8" as="span" className="text-[#382E07]">
+                  <Typography variant="button-1" as="span" className="text-[#382E07]">
                     Submit
                   </Typography>
                 </button>

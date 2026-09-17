@@ -54,9 +54,9 @@ export default function PatientStoriesPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent transition duration-300 group-hover:from-black/90" />
 
               {/* Bottom Card Content: Name, Date (Left) + Circular Arrow Button (Right) */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 flex items-end justify-between gap-3 font-manrope z-10">
+              <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 flex items-end justify-between gap-3 z-10">
                 {/* Left: Patient Name & Date */}
-                <div className="flex flex-col text-white font-manrope min-w-0">
+                <div className="flex flex-col text-white min-w-0">
                   <div className="truncate drop-shadow-xs">
                     <Typography variant="heading-8" as="h3" className="text-white">
                       {story.patientName}
