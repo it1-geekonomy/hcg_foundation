@@ -3,15 +3,18 @@
 import dynamic from "next/dynamic";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import { Textarea } from "@/shared/ui/textarea";
 import type {
   ContentStatus,
   Team,
   TeamFields,
+  TeamType,
 } from "@/domains/cms/lib/types";
 import CmsImagePicker from "./CmsImagePicker";
 import { CmsFormField } from "./CmsFormField";
-import CmsSelect, { CONTENT_STATUS_OPTIONS } from "./CmsSelect";
+import CmsSelect, {
+  CONTENT_STATUS_OPTIONS,
+  TEAM_TYPE_OPTIONS,
+} from "./CmsSelect";
 import { SeoFieldsSection } from "./SeoFieldsSection";
 
 const CmsRichTextEditor = dynamic(() => import("./CmsRichTextEditor"), {
@@ -25,8 +28,8 @@ const CmsRichTextEditor = dynamic(() => import("./CmsRichTextEditor"), {
 
 export type TeamFormValues = {
   title: string;
+  type: TeamType;
   designation: string;
-  shortDescription: string;
   content: string;
   status: ContentStatus;
   metaTitle: string;
@@ -38,8 +41,8 @@ export type TeamFormValues = {
 
 export const emptyTeamForm = (): TeamFormValues => ({
   title: "",
+  type: "team",
   designation: "",
-  shortDescription: "",
   content: "",
   status: "draft",
   metaTitle: "",
@@ -52,8 +55,8 @@ export const emptyTeamForm = (): TeamFormValues => ({
 export function teamToFormValues(team: Team): TeamFormValues {
   return {
     title: team.title ?? "",
+    type: team.type ?? "team",
     designation: team.designation ?? "",
-    shortDescription: team.shortDescription ?? "",
     content: team.content ?? "",
     status: team.status ?? "draft",
     metaTitle: team.metaTitle ?? "",
@@ -73,8 +76,8 @@ export function formValuesToFields(form: TeamFormValues): TeamFields {
 
   return {
     title: form.title.trim(),
+    type: form.type,
     designation: form.designation.trim() || undefined,
-    shortDescription: form.shortDescription.trim() || undefined,
     content: plainContent ? form.content : undefined,
     status: form.status,
     metaTitle: form.metaTitle.trim() || undefined,
@@ -121,9 +124,9 @@ export function getTeamPatch(
 
   const keys: (keyof TeamFields)[] = [
     "title",
+    "type",
     "designation",
     "content",
-    "shortDescription",
     "status",
     "metaTitle",
     "metaDescription",
@@ -181,6 +184,20 @@ export default function TeamForm({
           />
         </CmsFormField>
 
+        <CmsFormField label="Type" htmlFor="type">
+          <CmsSelect
+            id="type"
+            value={value.type}
+            options={TEAM_TYPE_OPTIONS}
+            onChange={(type) =>
+              onChange({
+                ...value,
+                type: type as TeamType,
+              })
+            }
+          />
+        </CmsFormField>
+
         <CmsFormField label="Designation" htmlFor="designation">
           <Input
             id="designation"
@@ -208,17 +225,6 @@ export default function TeamForm({
               })
             }
             disabled={saving}
-          />
-        </CmsFormField>
-
-        <CmsFormField label="Short Description" htmlFor="shortDescription">
-          <Textarea
-            id="shortDescription"
-            placeholder="Short blurb for cards"
-            value={value.shortDescription}
-            onChange={(e) =>
-              onChange({ ...value, shortDescription: e.target.value })
-            }
           />
         </CmsFormField>
 

@@ -68,11 +68,6 @@ export default async function OurTeamMemberPage({
               {member.designation}
             </p>
           ) : null}
-          {member.shortDescription ? (
-            <p className="mt-4 font-manrope text-base text-[#5C5C5C]">
-              {member.shortDescription}
-            </p>
-          ) : null}
           {member.content ? (
             <CmsHtmlContent html={member.content} className="mt-8" />
           ) : null}

@@ -1,6 +1,10 @@
 export type ContentStatus = "draft" | "published" | "archived";
 
-export type TeamMemberType = "trustee" | "team";
+/** Backend field `type` — team member vs trustee */
+export type TeamType = "team" | "trustee";
+
+/** @deprecated use TeamType */
+export type TeamMemberType = TeamType;
 
 export type SeoFields = {
   metaTitle?: string;
@@ -14,9 +18,8 @@ export type Team = SeoFields & {
   designation?: string | null;
   teamImage?: string | null;
   content?: string | null;
-  shortDescription?: string | null;
-  /** Legacy; backend teams table no longer stores this */
-  memberType?: TeamMemberType;
+  /** team | trustee — API field name is `type` */
+  type: TeamType;
   status: ContentStatus;
   deletedAt?: string | null;
   createdAt: string;
@@ -26,9 +29,9 @@ export type Team = SeoFields & {
 /** Text fields for POST/PATCH /teams (multipart). Image is a file, not a URL. */
 export type TeamFields = SeoFields & {
   title: string;
+  type: TeamType;
   designation?: string;
   content?: string;
-  shortDescription?: string;
   status?: ContentStatus;
   metaTitle?: string;
   metaDescription?: string;

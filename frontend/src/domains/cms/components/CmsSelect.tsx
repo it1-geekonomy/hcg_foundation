@@ -135,6 +135,16 @@ export const CONTENT_STATUS_FILTER_OPTIONS: CmsSelectOption[] = [
   ...CONTENT_STATUS_OPTIONS,
 ];
 
+export const TEAM_TYPE_OPTIONS: CmsSelectOption[] = [
+  { value: "team", label: "Team" },
+  { value: "trustee", label: "Trustee" },
+];
+
+export const TEAM_TYPE_FILTER_OPTIONS: CmsSelectOption[] = [
+  { value: "", label: "All types" },
+  ...TEAM_TYPE_OPTIONS,
+];
+
 export const DONATION_STATUS_OPTIONS: CmsSelectOption[] = [
   { value: "paid", label: "Paid" },
   { value: "pending", label: "Pending" },

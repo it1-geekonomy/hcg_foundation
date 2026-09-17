@@ -27,7 +27,7 @@ import type {
   ContentStatus,
   DonationStatus,
   Donor,
-  TeamMemberType,
+  TeamType,
   UpdateFundraisingCampaignPayload,
   UpdateHomeBannerPayload,
   UpdateLeadsContactPayload,
@@ -47,7 +47,8 @@ export type ListQuery = {
   limit?: number;
   search?: string;
   status?: ContentStatus | DonationStatus | CampaignStatus | InquiryStatus;
-  memberType?: TeamMemberType;
+  /** Filter teams by type (team | trustee) — query param `type` */
+  type?: TeamType;
   pageType?: LegalPageType;
   includeDeleted?: boolean;
   onlyDeleted?: boolean;
@@ -59,7 +60,7 @@ function toQuery(params?: ListQuery) {
   if (params?.limit) q.set("limit", String(params.limit));
   if (params?.search?.trim()) q.set("search", params.search.trim());
   if (params?.status) q.set("status", params.status);
-  if (params?.memberType) q.set("memberType", params.memberType);
+  if (params?.type) q.set("type", params.type);
   if (params?.pageType) q.set("pageType", params.pageType);
   if (params?.includeDeleted === true) q.set("includeDeleted", "true");
   if (params?.onlyDeleted === true) q.set("onlyDeleted", "true");
@@ -201,14 +202,12 @@ function teamFormData(
 ) {
   const fd = new FormData();
   fd.append("title", fields.title.trim());
+  fd.append("type", fields.type);
   if (fields.designation?.trim()) {
     fd.append("designation", fields.designation.trim());
   }
   if (fields.content?.trim()) {
     fd.append("content", fields.content);
-  }
-  if (fields.shortDescription?.trim()) {
-    fd.append("shortDescription", fields.shortDescription.trim());
   }
   fd.append("status", fields.status ?? "draft");
   if (fields.metaTitle?.trim()) {
@@ -237,9 +236,9 @@ function teamPatchFormData(
     fd.append(key, value ?? "");
   };
   append("title", fields.title);
+  append("type", fields.type);
   append("designation", fields.designation);
   append("content", fields.content);
-  append("shortDescription", fields.shortDescription);
   append("status", fields.status);
   append("metaTitle", fields.metaTitle);
   append("metaDescription", fields.metaDescription);

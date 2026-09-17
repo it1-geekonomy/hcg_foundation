@@ -1,11 +1,9 @@
 import {
-  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
-import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
+import { Repository } from 'typeorm';
 import { ContentStatus } from '../../common/enums/content-status.enum';
 import {
   buildPaginatedResult,
@@ -17,6 +15,7 @@ import {
   restoreSoftDeleted,
 } from '../../common/utils/soft-delete';
 import { CreateTeamDto } from './dto/create-team.dto';
+import { TeamQueryDto } from './dto/team-query.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 import { Team } from './entities/team.entity';
 
@@ -49,12 +48,12 @@ export class TeamsService {
       });
       return await this.repo.save(entity);
     } catch (err) {
-      await this.cdn.delete(teamImage);
+      if (teamImage) await this.cdn.delete(teamImage);
       throw err;
     }
   }
 
-  async findAll(query: PaginationQueryDto): Promise<PaginatedResult<Team>> {
+  async findAll(query: TeamQueryDto): Promise<PaginatedResult<Team>> {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
 
@@ -67,9 +66,13 @@ export class TeamsService {
       qb.andWhere('entity.status = :status', { status: query.status });
     }
 
+    if (query.type) {
+      qb.andWhere('entity.type = :type', { type: query.type });
+    }
+
     if (query.search) {
       qb.andWhere(
-        '(entity.title ILIKE :search OR entity.designation ILIKE :search OR entity.shortDescription ILIKE :search)',
+        '(entity.title ILIKE :search OR entity.designation ILIKE :search)',
         { search: `%${query.search}%` },
       );
     }
@@ -82,13 +85,11 @@ export class TeamsService {
     return buildPaginatedResult(data, total, page, limit);
   }
 
-  async findDeleted(query: PaginationQueryDto): Promise<PaginatedResult<Team>> {
+  async findDeleted(query: TeamQueryDto): Promise<PaginatedResult<Team>> {
     return this.findAll({ ...query, includeDeleted: true, onlyDeleted: true });
   }
 
-  async findPublished(
-    query: PaginationQueryDto,
-  ): Promise<PaginatedResult<Team>> {
+  async findPublished(query: TeamQueryDto): Promise<PaginatedResult<Team>> {
     return this.findAll({
       ...query,
       status: ContentStatus.PUBLISHED,
