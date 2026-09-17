@@ -1,4 +1,5 @@
 import React from "react";
+import Typography from "@/lib/Typography";
 
 interface FormErrorProps {
   message?: string;
@@ -8,8 +9,10 @@ interface FormErrorProps {
 export default function FormError({ message, className = "" }: FormErrorProps) {
   if (!message) return null;
   return (
-    <span className={`text-xs font-sans text-red-500 font-medium ${className}`}>
-      {message}
-    </span>
+    <div className={`mt-0.5 ${className}`}>
+      <Typography variant="caption-1" as="span" className="text-red-500">
+        {message}
+      </Typography>
+    </div>
   );
 }

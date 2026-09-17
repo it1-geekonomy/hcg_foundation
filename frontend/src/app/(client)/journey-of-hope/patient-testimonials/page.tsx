@@ -116,7 +116,7 @@ export default function PatientTestimonialsPage() {
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         {/* Header Title & Subtitle matching Figma specs (2 lines on tablet & desktop) */}
         <div className="w-full text-left">
-          <Typography variant="heading-1" as="h1" className="text-[#2E1C12] italic">
+          <Typography variant="heading-1" as="h1" className="text-[#2E1C12]">
             Patient Testimonials
           </Typography>
           <div className="mt-3 sm:mt-4 max-w-full md:max-w-[51.25rem] lg:max-w-[86.25rem]">
@@ -191,9 +191,11 @@ export default function PatientTestimonialsPage() {
                 <div className="absolute left-6 right-6 bottom-6 flex items-center gap-3.5 z-10 font-manrope pointer-events-none">
                   <div className="w-1.5 h-10 sm:h-12 bg-[#FDC61D] rounded-full shrink-0" />
                   <div className="flex flex-col text-white font-manrope min-w-0">
-                    <Typography variant="heading-2" as="h3" className="text-white truncate">
-                      {item.patientName}
-                    </Typography>
+                    <div className="truncate">
+                      <Typography variant="heading-2" as="h3" className="text-white">
+                        {item.patientName}
+                      </Typography>
+                    </div>
                     <Typography variant="body-8" as="span" className="text-white/85">
                       {item.role}
                     </Typography>

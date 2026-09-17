@@ -99,7 +99,7 @@ export default async function StoryDetailPage({
           {/* Right Column: Patient Name Title, Date, and Full Story Narrative */}
           <div className="sm:col-span-7 flex flex-col font-manrope">
             {/* Patient Name Title */}
-            <Typography variant="heading-1" as="h1" className="text-[#2E1C12] italic">
+            <Typography variant="heading-1" as="h1" className="text-[#2E1C12]">
               {story.patientName}
             </Typography>
 
@@ -171,9 +171,11 @@ export default async function StoryDetailPage({
                   <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 flex items-end justify-between gap-3 font-manrope z-10">
                     {/* Left: Patient Name & Date */}
                     <div className="flex flex-col text-white font-manrope min-w-0">
-                      <Typography variant="heading-3" as="h3" className="text-white drop-shadow-xs truncate">
-                        {relStory.patientName}
-                      </Typography>
+                      <div className="truncate drop-shadow-xs">
+                        <Typography variant="heading-3" as="h3" className="text-white">
+                          {relStory.patientName}
+                        </Typography>
+                      </div>
                       <div className="mt-1 flex items-center gap-1.5">
                         <Calendar className="size-3 text-white/90 shrink-0" />
                         <Typography variant="body-8" as="span" className="text-white/85">

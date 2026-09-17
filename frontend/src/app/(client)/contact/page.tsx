@@ -70,7 +70,7 @@ export default function ClientContact() {
           <div className="flex flex-col justify-between gap-6 lg:gap-0 lg:h-[32.481rem] lg:py-1 lg:col-span-5 w-full">
             {CONTACT_INFO.map((item, index) => (
               <div key={index} className="flex items-start gap-4 sm:gap-5">
-                <div className="flex size-14 sm:size-15 shrink-0 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs">
+                <div className="flex size-14 sm:size-16 shrink-0 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs">
                   <item.icon className="size-7 sm:size-8" />
                 </div>
                 <div className="flex flex-col">

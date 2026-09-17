@@ -93,7 +93,7 @@ export default function PartnerWithUsModal({
         <div className="w-full md:w-1/2 p-6 sm:p-8 md:p-10 flex flex-col justify-between overflow-y-auto max-h-[90vh] md:max-h-none">
           <div>
             <div className="mb-2">
-              <Typography variant="heading-2" as="h2" className="text-[#2E1C12] italic">
+              <Typography variant="heading-2" as="h2" className="text-[#2E1C12]">
                 Be a Part of Someone&apos;s Cancer Journey
               </Typography>
             </div>
@@ -207,16 +207,20 @@ export default function PartnerWithUsModal({
                   />
                   <label
                     htmlFor="modal-terms"
-                    className="text-xs text-[#6C6048] cursor-pointer"
+                    className="cursor-pointer"
                   >
-                    I have read and agree to the{" "}
+                    <Typography variant="caption-1" as="span" className="text-[#6C6048]">
+                      I have read and agree to the{" "}
+                    </Typography>
                     <a
                       href="/terms"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#D99A00] underline font-medium hover:text-[#B58000]"
+                      className="underline hover:opacity-80 transition-opacity"
                     >
-                      Terms & Conditions
+                      <Typography variant="caption-1" as="span" className="text-[#D99A00]">
+                        Terms & Conditions
+                      </Typography>
                     </a>
                   </label>
                 </div>

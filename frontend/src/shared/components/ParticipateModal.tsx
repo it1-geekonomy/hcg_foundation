@@ -145,7 +145,7 @@ export default function ParticipateModal({
           {/* Header Title & Subtitle matching Figma 100% */}
           <div className="text-center max-w-xl mx-auto mb-6 sm:mb-8">
             <div className="mb-1">
-              <Typography variant="heading-2" as="h2" className="text-[#2E1C12] italic">
+              <Typography variant="heading-2" as="h2" className="text-[#2E1C12]">
                 {isIntern && "Apply for Internship at"}
                 {isFundraise && "Start a Fundraising Campaign at"}
                 {!isIntern && !isFundraise && "Become a Volunteer at"}
@@ -466,16 +466,20 @@ export default function ParticipateModal({
                 />
                 <label
                   htmlFor="participate-terms"
-                  className="text-xs text-[#6C6048] cursor-pointer"
+                  className="cursor-pointer"
                 >
-                  I have read and agree to the{" "}
+                  <Typography variant="caption-1" as="span" className="text-[#6C6048]">
+                    I have read and agree to the{" "}
+                  </Typography>
                   <a
                     href="/terms"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#D99A00] underline font-medium hover:text-[#B58000]"
+                    className="underline hover:opacity-80 transition-opacity"
                   >
-                    Terms & Conditions
+                    <Typography variant="caption-1" as="span" className="text-[#D99A00]">
+                      Terms & Conditions
+                    </Typography>
                   </a>
                 </label>
               </div>

@@ -14,17 +14,19 @@ export default function TransparencyAndKnowledgeHubPage() {
           <Typography
             variant="heading-1"
             as="h1"
-            className="font-serif text-[1.875rem] sm:text-[2.25rem] lg:text-[2.625rem] italic text-[#2E1C12] tracking-tight font-normal leading-tight"
+            className="text-[#2E1C12]"
           >
             Transparency & Knowledge Hub
           </Typography>
-          <Typography
-            variant="body-1"
-            as="p"
-            className="mt-4 text-[0.875rem] sm:text-[1rem] lg:text-[1.0625rem] text-[#6C6048] leading-relaxed"
-          >
-            At HCG Foundation, we believe in complete transparency, open accountability, and empowering communities through shared knowledge on cancer care, financial aid reports, and foundation impact metrics.
-          </Typography>
+          <div className="mt-4">
+            <Typography
+              variant="body-8"
+              as="p"
+              className="text-[#6C6048]"
+            >
+              At HCG Foundation, we believe in complete transparency, open accountability, and empowering communities through shared knowledge on cancer care, financial aid reports, and foundation impact metrics.
+            </Typography>
+          </div>
         </div>
       </section>
 

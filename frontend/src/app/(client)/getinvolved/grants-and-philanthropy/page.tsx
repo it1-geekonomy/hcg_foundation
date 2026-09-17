@@ -40,7 +40,7 @@ export default function GrantsAndPhilanthropyPage() {
             >
               {/* Card Top: Circular Icon Badge + Title + Description */}
               <div className="p-6 sm:p-8 flex items-start gap-4 sm:gap-5 min-h-[10rem] sm:min-h-[11.25rem]">
-                <div className="size-13 sm:size-15 shrink-0 rounded-full bg-[#FDE599]/70 flex items-center justify-center border border-[#FCCC2D]/40 p-3">
+                <div className="size-12 sm:size-14 shrink-0 rounded-full bg-[#FDE599]/70 flex items-center justify-center border border-[#FCCC2D]/40 p-3">
                   <img
                     src={card.iconUrl}
                     alt={card.title}
@@ -95,7 +95,7 @@ export default function GrantsAndPhilanthropyPage() {
               <Typography variant="body-8" as="span" className="text-[#382E07]">
                 Partner With Us
               </Typography>
-              <ArrowUpRight className="size-4 sm:size-5 lg:size-5.5 text-[#382E07]" />
+              <ArrowUpRight className="size-4 sm:size-5 lg:size-6 text-[#382E07]" />
             </button>
           </div>
         </div>

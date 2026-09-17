@@ -1,4 +1,5 @@
 import React from "react";
+import Typography from "@/lib/Typography";
 
 interface FormFieldProps
   extends React.InputHTMLAttributes<HTMLInputElement | HTMLTextAreaElement> {
@@ -22,10 +23,18 @@ export default function FormField({
   const fieldId = id || label.toLowerCase().replace(/\s+/g, "-");
 
   return (
-    <div className="flex flex-col gap-1 font-manrope">
-      <label htmlFor={fieldId} className="font-manrope text-xs sm:text-sm font-semibold text-[#4D4539]">
-        {label}
-        {required && <span className="text-[#4D4539] ml-0.5">*</span>}
+    <div className="flex flex-col gap-1">
+      <label htmlFor={fieldId} className="block">
+        <Typography variant="body-8" as="span" className="text-[#4D4539]">
+          {label}
+        </Typography>
+        {required && (
+          <span className="ml-0.5">
+            <Typography variant="body-8" as="span" className="text-[#4D4539]">
+              *
+            </Typography>
+          </span>
+        )}
       </label>
       {isTextArea ? (
         <textarea
@@ -41,7 +50,13 @@ export default function FormField({
           {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
         />
       )}
-      {error && <span className="text-xs font-manrope text-red-500 mt-0.5">{error}</span>}
+      {error && (
+        <div className="mt-0.5">
+          <Typography variant="caption-1" as="span" className="text-red-500">
+            {error}
+          </Typography>
+        </div>
+      )}
     </div>
   );
 }
