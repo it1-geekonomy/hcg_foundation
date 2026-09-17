@@ -29,7 +29,7 @@ export default function ContactForm() {
   };
 
   return (
-    <div className="w-full max-w-full lg:max-w-[45rem] min-h-[32.481rem] rounded-[10px] bg-[#FFF4D4] p-6 sm:p-8 lg:p-[2.125rem_2.5625rem] border border-[#F3E3B6] flex flex-col justify-between items-start gap-4 lg:gap-[0.581rem]">
+    <div className="w-full max-w-full lg:max-w-[45rem] min-h-[32.481rem] rounded-[0.625rem] bg-[#FFF4D4] p-6 sm:p-8 lg:p-[2.125rem_2.5625rem] border border-[#F3E3B6] flex flex-col justify-between items-start gap-4 lg:gap-[0.581rem]">
       <div className="w-full">
         <Typography variant="heading-7" as="h2" className="text-[#3D382E]">
           Send Us a Message
@@ -42,7 +42,7 @@ export default function ContactForm() {
       </div>
 
       {formSubmitted ? (
-        <div className="mt-6 w-full flex flex-col items-center justify-center rounded-[10px] bg-white p-6 sm:p-8 text-center border border-[#FDE599] my-auto">
+        <div className="mt-6 w-full flex flex-col items-center justify-center rounded-[0.625rem] bg-white p-6 sm:p-8 text-center border border-[#FDE599] my-auto">
           <CheckCircle2 className="size-12 sm:size-14 text-[#2E7D32]" />
           <div className="mt-4">
             <Typography variant="heading-8" as="h3" className="text-[#382E07]">
@@ -57,9 +57,11 @@ export default function ContactForm() {
           <button
             type="button"
             onClick={() => setFormSubmitted(false)}
-            className="mt-6 rounded-[6px] bg-[#FDC61D] px-6 py-2.5 text-[0.875rem] sm:text-[1rem] font-semibold text-[#382E07] transition hover:bg-[#E9B510] cursor-pointer"
+            className="mt-6 rounded-md bg-[#FDC61D] px-6 py-2.5 transition hover:bg-[#E9B510] cursor-pointer"
           >
-            Send Another Message
+            <Typography variant="body-8" as="span" className="text-[#382E07]">
+              Send Another Message
+            </Typography>
           </button>
         </div>
       ) : (

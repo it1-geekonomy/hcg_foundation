@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { Play, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, PanInfo } from "framer-motion";
+import Typography from "@/lib/Typography";
 import DonateForm from "@/shared/components/DonateForm";
 import { PATIENT_TESTIMONIALS, PatientTestimonial } from "@/domains/journey-of-hope/constants/testimonials";
 
-const CONTAINER = "max-w-[1440px] 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8";
+const CONTAINER = "max-w-[90rem] 2xl:max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8";
 
 export default function PatientTestimonialsPage() {
   const [testimonials] = useState<PatientTestimonial[]>(PATIENT_TESTIMONIALS);
@@ -66,7 +67,7 @@ export default function PatientTestimonialsPage() {
     if (diff === 1) {
       // RIGHT CARD (Figma: 415px x 236px with exact ~33px gap)
       return {
-        x: isDesktop ? "calc(-50% + 590px)" : isTablet ? "calc(-50% + 430px)" : "calc(-50% + 82%)",
+        x: isDesktop ? "calc(-50% + 36.875rem)" : isTablet ? "calc(-50% + 26.875rem)" : "calc(-50% + 82%)",
         y: "-50%",
         scale: isDesktop ? 0.594 : isTablet ? 0.6 : 0.75,
         opacity: isDesktop || isTablet ? 0.85 : 0.35,
@@ -79,7 +80,7 @@ export default function PatientTestimonialsPage() {
     if (diff === -1) {
       // LEFT CARD (Figma: 415px x 236px with exact ~33px gap)
       return {
-        x: isDesktop ? "calc(-50% - 590px)" : isTablet ? "calc(-50% - 430px)" : "calc(-50% - 82%)",
+        x: isDesktop ? "calc(-50% - 36.875rem)" : isTablet ? "calc(-50% - 26.875rem)" : "calc(-50% - 82%)",
         y: "-50%",
         scale: isDesktop ? 0.594 : isTablet ? 0.6 : 0.75,
         opacity: isDesktop || isTablet ? 0.85 : 0.35,
@@ -92,8 +93,8 @@ export default function PatientTestimonialsPage() {
     // HIDDEN / OFF-SCREEN CARDS SLIDING IN/OUT
     return {
       x: diff > 0
-        ? isDesktop ? "calc(-50% + 1040px)" : "calc(-50% + 800px)"
-        : isDesktop ? "calc(-50% - 1040px)" : "calc(-50% - 800px)",
+        ? isDesktop ? "calc(-50% + 65rem)" : "calc(-50% + 50rem)"
+        : isDesktop ? "calc(-50% - 65rem)" : "calc(-50% - 50rem)",
       y: "-50%",
       scale: 0.5,
       opacity: 0,
@@ -115,16 +116,18 @@ export default function PatientTestimonialsPage() {
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         {/* Header Title & Subtitle matching Figma specs (2 lines on tablet & desktop) */}
         <div className="w-full text-left">
-          <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl italic text-[#2E1C12] tracking-tight font-normal">
+          <Typography variant="heading-1" as="h1" className="text-[#2E1C12] italic">
             Patient Testimonials
-          </h1>
-          <p className="mt-3 sm:mt-4 max-w-full md:max-w-[820px] lg:max-w-[1380px] text-xs sm:text-base lg:text-[18.6px] font-normal leading-[150%] tracking-[0.186px] text-[#596D79] font-manrope">
-            Every journey is filled with courage, compassion, and resilience. Explore inspiring patient stories, community initiatives, and life-changing moments that reflect HCG Foundation&apos;s commitment to bringing hope, healing, and support to those who need it most.
-          </p>
+          </Typography>
+          <div className="mt-3 sm:mt-4 max-w-full md:max-w-[51.25rem] lg:max-w-[86.25rem]">
+            <Typography variant="body-6" as="p" className="text-[#596D79]">
+              Every journey is filled with courage, compassion, and resilience. Explore inspiring patient stories, community initiatives, and life-changing moments that reflect HCG Foundation&apos;s commitment to bringing hope, healing, and support to those who need it most.
+            </Typography>
+          </div>
         </div>
 
         {/* Horizontal 3D Carousel Stage with Hardware-Accelerated 60fps Motion */}
-        <div className="relative mt-10 sm:mt-14 w-full h-[260px] sm:h-[340px] lg:h-[420px] overflow-visible flex items-center justify-center">
+        <div className="relative mt-10 sm:mt-14 w-full h-[16.25rem] sm:h-[21.25rem] lg:h-[26.25rem] overflow-visible flex items-center justify-center">
           {testimonials.map((item, idx) => {
             const diff = getRelativeOffset(idx);
             const isCenter = diff === 0;
@@ -150,11 +153,11 @@ export default function PatientTestimonialsPage() {
                   else if (diff === 0) setActiveVideoUrl(item.videoUrl);
                 }}
                 style={{
-                  width: isDesktop ? "698.85px" : isTablet ? "520px" : "calc(100vw - 32px)",
-                  height: isDesktop ? "397.19px" : isTablet ? "295px" : "220px",
+                  width: isDesktop ? "43.678rem" : isTablet ? "32.5rem" : "calc(100vw - 2rem)",
+                  height: isDesktop ? "24.824rem" : isTablet ? "18.4375rem" : "13.75rem",
                   transformOrigin: "center center",
                 }}
-                className={`group absolute top-1/2 left-1/2 overflow-hidden rounded-[17.62px] bg-[#EFEAD8] shadow-lg cursor-pointer transition-shadow duration-300 ${
+                className={`group absolute top-1/2 left-1/2 overflow-hidden rounded-[1.1rem] bg-[#EFEAD8] shadow-lg cursor-pointer transition-shadow duration-300 ${
                   isCenter ? "shadow-2xl ring-1 ring-black/5" : "hover:brightness-95"
                 }`}
               >
@@ -187,13 +190,13 @@ export default function PatientTestimonialsPage() {
                 {/* Bottom Overlay: Yellow Accent Bar + Patient Name & Role */}
                 <div className="absolute left-6 right-6 bottom-6 flex items-center gap-3.5 z-10 font-manrope pointer-events-none">
                   <div className="w-1.5 h-10 sm:h-12 bg-[#FDC61D] rounded-full shrink-0" />
-                  <div className="flex flex-col text-white font-manrope">
-                    <h3 className="font-manrope font-bold text-white text-xl sm:text-2xl lg:text-3xl leading-tight">
+                  <div className="flex flex-col text-white font-manrope min-w-0">
+                    <Typography variant="heading-2" as="h3" className="text-white truncate">
                       {item.patientName}
-                    </h3>
-                    <span className="font-semibold text-white/85 text-xs sm:text-sm">
+                    </Typography>
+                    <Typography variant="body-8" as="span" className="text-white/85">
                       {item.role}
-                    </span>
+                    </Typography>
                   </div>
                 </div>
               </motion.div>

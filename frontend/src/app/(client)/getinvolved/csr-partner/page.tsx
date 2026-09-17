@@ -36,7 +36,7 @@ export default function CsrPartnerPage() {
           {CSR_PARTNER_CARDS.map((card) => (
             <div
               key={card.id}
-              className="group relative flex flex-col sm:flex-row overflow-hidden rounded-[8px] bg-[#FFF9EA] border border-[#F3E3B6] shadow-xs transition duration-300 hover:shadow-md"
+              className="group relative flex flex-col sm:flex-row overflow-hidden rounded-lg bg-[#FFF9EA] border border-[#F3E3B6] shadow-xs transition duration-300 hover:shadow-md"
             >
               {/* Left Column: Image Asset */}
               <div className="sm:w-[12.5rem] md:w-[13.125rem] lg:w-[14.375rem] shrink-0 overflow-hidden relative min-h-[13.75rem] sm:min-h-full bg-[#EFEAD8]">
@@ -69,7 +69,7 @@ export default function CsrPartnerPage() {
         </div>
 
         {/* Bottom Impact Banner */}
-        <div className="mt-12 sm:mt-16 rounded-[8px] bg-[#FFF4D4] p-6 sm:p-10 border border-[#F3E3B6] grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div className="mt-12 sm:mt-16 rounded-lg bg-[#FFF4D4] p-6 sm:p-10 border border-[#F3E3B6] grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
           <div className="lg:col-span-7">
             <Typography variant="heading-2" as="h2" className="text-[#2E1C12]">
               Together, We Can Create Greater Impact
@@ -84,9 +84,11 @@ export default function CsrPartnerPage() {
             <button
               type="button"
               onClick={() => setIsPartnerModalOpen(true)}
-              className="inline-flex items-center gap-2 px-5 py-3 sm:px-6 sm:py-3.5 bg-[#FCCC2D] text-[#382E07] text-[0.875rem] sm:text-[1rem] lg:text-[1.0625rem] font-semibold rounded-[6px] shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-3 sm:px-6 sm:py-3.5 bg-[#FCCC2D] text-[#382E07] rounded-md shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
             >
-              <Typography variant="body-8" as="span">Partner With Us</Typography>
+              <Typography variant="body-8" as="span" className="text-[#382E07]">
+                Partner With Us
+              </Typography>
               <ArrowUpRight className="size-4 sm:size-5 text-[#382E07]" />
             </button>
           </div>

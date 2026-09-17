@@ -50,7 +50,7 @@ export default function ParticipatePage() {
           {PARTICIPATE_CARDS.map((card) => (
             <div
               key={card.id}
-              className="group flex flex-col justify-between overflow-hidden rounded-[8px] bg-[#FFF9EA] border border-[#F3E3B6] shadow-xs transition duration-300 hover:shadow-md"
+              className="group flex flex-col justify-between overflow-hidden rounded-lg bg-[#FFF9EA] border border-[#F3E3B6] shadow-xs transition duration-300 hover:shadow-md"
             >
               {/* Card Top: Image Asset */}
               <div className="w-full h-[15rem] sm:h-[16.25rem] lg:h-[22.1875rem] overflow-hidden relative bg-[#EFEAD8]">
@@ -92,9 +92,11 @@ export default function ParticipatePage() {
                     onClick={() =>
                       setActiveModalType(card.id as ParticipateModalType)
                     }
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#FCCC2D] text-[#382E07] text-[0.875rem] sm:text-[1rem] lg:text-[1.0625rem] font-semibold rounded-[6px] shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#FCCC2D] text-[#382E07] rounded-md shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
                   >
-                    <Typography variant="body-8" as="span">Apply Now</Typography>
+                    <Typography variant="body-8" as="span" className="text-[#382E07]">
+                      Apply Now
+                    </Typography>
                     <ArrowUpRight className="size-4 sm:size-5 text-[#382E07]" />
                   </button>
                 </div>
@@ -104,7 +106,7 @@ export default function ParticipatePage() {
         </div>
 
         {/* Bottom Benefits Banner matching Figma */}
-        <div className="rounded-[6px] bg-[#FFF5D6] p-6 sm:p-10 lg:p-12 border border-[#F3E3B6] grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-10 items-center">
+        <div className="rounded-md bg-[#FFF5D6] p-6 sm:p-10 lg:p-12 border border-[#F3E3B6] grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-10 items-center">
           {PARTICIPATE_BENEFITS.map((benefit) => (
             <div key={benefit.id} className="flex items-center gap-4 lg:gap-5">
               <div className="size-14 lg:size-16 rounded-full bg-[#FDE599]/70 flex items-center justify-center border border-[#FCCC2D]/40 shrink-0 p-3 lg:p-3.5">

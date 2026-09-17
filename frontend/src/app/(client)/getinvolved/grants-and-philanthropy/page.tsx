@@ -36,7 +36,7 @@ export default function GrantsAndPhilanthropyPage() {
           {PHILANTHROPY_CARDS.map((card) => (
             <div
               key={card.id}
-              className="group flex flex-col justify-between overflow-hidden rounded-[12px] bg-[#FFF9EA] border border-[#F3E3B6] shadow-xs transition duration-300 hover:shadow-md"
+              className="group flex flex-col justify-between overflow-hidden rounded-xl bg-[#FFF9EA] border border-[#F3E3B6] shadow-xs transition duration-300 hover:shadow-md"
             >
               {/* Card Top: Circular Icon Badge + Title + Description */}
               <div className="p-6 sm:p-8 flex items-start gap-4 sm:gap-5 min-h-[10rem] sm:min-h-[11.25rem]">
@@ -73,7 +73,7 @@ export default function GrantsAndPhilanthropyPage() {
         </div>
 
         {/* Bottom Impact Banner matching Figma 100% */}
-        <div className="mt-10 sm:mt-14 lg:mt-16 rounded-[12px] bg-[#FFF5D6] p-6 sm:p-10 lg:p-14 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
+        <div className="mt-10 sm:mt-14 lg:mt-16 rounded-xl bg-[#FFF5D6] p-6 sm:p-10 lg:p-14 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
           <div className="lg:col-span-7">
             <div className="max-w-lg">
               <Typography variant="heading-2" as="h2" className="text-[#2E1C12]">
@@ -90,9 +90,11 @@ export default function GrantsAndPhilanthropyPage() {
             <button
               type="button"
               onClick={() => setIsPartnerModalOpen(true)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 lg:px-8 lg:py-4 bg-[#FCCC2D] text-[#382E07] text-[0.875rem] sm:text-[1rem] lg:text-[1.125rem] font-semibold rounded-[6px] shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 lg:px-8 lg:py-4 bg-[#FCCC2D] text-[#382E07] rounded-md shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
             >
-              <Typography variant="body-8" as="span">Partner With Us</Typography>
+              <Typography variant="body-8" as="span" className="text-[#382E07]">
+                Partner With Us
+              </Typography>
               <ArrowUpRight className="size-4 sm:size-5 lg:size-5.5 text-[#382E07]" />
             </button>
           </div>

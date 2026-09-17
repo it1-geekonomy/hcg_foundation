@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use } from "react";
+import React, { use, useState } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Typography from "@/lib/Typography";
 import DonateForm from "@/shared/components/DonateForm";
+import PaginationControls from "@/shared/components/PaginationControls";
 import { PROJECTS_DATA, ProjectItem } from "@/domains/resources/constants/projects";
 
 const CONTAINER = "max-w-[107.625rem] mx-auto px-4 sm:px-8 lg:px-[4.5rem]";
@@ -52,7 +53,23 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     notFound();
   }
 
-  const relatedProjects = PROJECTS_DATA.filter((e) => e.id !== projectItem.id).slice(0, 2);
+  const allRelatedProjects = PROJECTS_DATA.filter((e) => e.id !== projectItem.id);
+  const [relatedPage, setRelatedPage] = useState(1);
+  const RELATED_PER_PAGE = 2;
+  const RELATED_STEP = 2;
+
+  // Sliding window ensures a full 2-card grid on every page (never leaves a single lonely card)
+  const maxRelatedStartIndex = Math.max(0, allRelatedProjects.length - RELATED_PER_PAGE);
+  const totalRelatedPages =
+    allRelatedProjects.length <= RELATED_PER_PAGE
+      ? 1
+      : Math.ceil((allRelatedProjects.length - RELATED_PER_PAGE) / RELATED_STEP) + 1;
+
+  const relatedStartIndex = Math.min((relatedPage - 1) * RELATED_STEP, maxRelatedStartIndex);
+  const currentRelated = allRelatedProjects.slice(
+    relatedStartIndex,
+    relatedStartIndex + RELATED_PER_PAGE
+  );
 
   const handleCopyLink = () => {
     if (typeof window !== "undefined") {
@@ -70,21 +87,25 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               {projectItem.title}
             </Typography>
 
-            <div className="mt-3 sm:mt-4 flex items-center gap-2 text-[0.75rem] sm:text-[0.875rem] lg:text-[0.9375rem] font-medium text-[#B88700]">
+            <div className="mt-3 sm:mt-4 flex items-center gap-2">
               <Calendar className="size-4 text-[#B88700] shrink-0" />
-              <Typography variant="body-8" as="span">Project Date: {projectItem.date}</Typography>
+              <Typography variant="body-8" as="span" className="text-[#B88700]">
+                Project Date: {projectItem.date}
+              </Typography>
             </div>
 
-            <div className="mt-5 sm:mt-6 space-y-3 lg:space-y-4 text-[0.75rem] sm:text-[0.84375rem] md:text-[0.90625rem] lg:text-[0.9375rem] xl:text-[1.0625rem] 2xl:text-[1.1625rem] leading-[150%] tracking-[0.0116rem] text-[#343E43] text-justify font-normal">
+            <div className="mt-5 sm:mt-6 space-y-3.5 text-justify">
               {projectItem.fullStory.split("\n\n").map((paragraph, index) => (
-                <Typography variant="body-8" as="p" key={index}>
+                <Typography key={index} variant="body-6" as="p" className="text-[#343E43]">
                   {paragraph}
                 </Typography>
               ))}
             </div>
 
             <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-2.5 sm:gap-3">
-              <span className="text-[0.75rem] sm:text-[0.875rem] font-semibold text-[#8B7355]">Share this project</span>
+              <Typography variant="body-8" as="span" className="text-[#8B7355]">
+                Share this project
+              </Typography>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -120,7 +141,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           </div>
 
           <div className="sm:col-span-5 flex flex-col items-start w-full order-first sm:order-last">
-            <div className="relative aspect-[4/3] sm:aspect-[600/440] w-full max-w-[37.5rem] overflow-hidden rounded-[5px] sm:rounded-[8px] bg-[#EFEAD8] shadow-md">
+            <div className="relative aspect-[4/3] sm:aspect-[600/440] w-full max-w-[37.5rem] overflow-hidden rounded-md sm:rounded-lg bg-[#EFEAD8] shadow-md">
               <img
                 src={projectItem.imageUrl}
                 alt={projectItem.title}
@@ -138,19 +159,21 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           </Typography>
           <Link
             href="/resources/projects"
-            className="inline-flex items-center gap-1 text-[0.875rem] sm:text-[1rem] font-semibold text-[#2E1C12] transition hover:text-[#B88700]"
+            className="inline-flex items-center gap-1 transition hover:text-[#B88700]"
           >
-            <Typography variant="body-8" as="span">View All</Typography>
+            <Typography variant="body-7" as="span" className="text-[#2E1C12]">
+              View All
+            </Typography>
             <ArrowUpRight className="size-4 text-[#2E1C12]" />
           </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-          {relatedProjects.map((item) => (
+          {currentRelated.map((item) => (
             <Link
               key={item.id}
               href={`/resources/projects/${item.id}`}
-              className="group relative block aspect-[16/11] sm:aspect-[16/10] xl:aspect-[600/380] w-full min-h-[16.25rem] sm:min-h-[18.75rem] overflow-hidden rounded-[8px] sm:rounded-[10px] bg-[#EFEAD8] shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+              className="group relative block aspect-[16/11] sm:aspect-[16/10] xl:aspect-[600/380] w-full min-h-[16.25rem] sm:min-h-[18.75rem] overflow-hidden rounded-lg sm:rounded-[0.625rem] bg-[#EFEAD8] shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
             >
               <img
                 src={item.imageUrl}
@@ -159,23 +182,29 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 loading="lazy"
               />
 
-              <div className="absolute inset-x-3 bottom-3 sm:inset-x-4 sm:bottom-4 xl:inset-x-5 xl:bottom-5 p-3 sm:p-4 lg:p-5 xl:pt-[1.8rem] xl:pr-[2.6125rem] xl:pb-[1.74375rem] xl:pl-[1.74375rem] flex items-center justify-between gap-3 sm:gap-4 rounded-[6px] border border-white/10 bg-[#8D8D8D]/40 backdrop-blur-[28px] text-white transition duration-300 group-hover:bg-[#8D8D8D]/50">
+              <div className="absolute inset-x-3 bottom-3 sm:inset-x-4 sm:bottom-4 xl:inset-x-5 xl:bottom-5 p-3 sm:p-4 lg:p-5 xl:pt-[1.8rem] xl:pr-[2.6125rem] xl:pb-[1.74375rem] xl:pl-[1.74375rem] flex items-center justify-between gap-3 sm:gap-4 rounded-md border border-white/10 bg-[#8D8D8D]/40 backdrop-blur-[1.75rem] text-white transition duration-300 group-hover:bg-[#8D8D8D]/50">
                 <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 sm:gap-1.5 xl:gap-[0.581rem]">
-                  <div className="drop-shadow-xs line-clamp-1 group-hover:text-[#FCCC2D] transition">
-                    <Typography variant="heading-3" as="h3" className="text-white">
+                  <div className="truncate drop-shadow-xs">
+                    <Typography variant="heading-3" as="h3" className="text-white group-hover:text-[#FCCC2D] transition">
                       {item.title}
                     </Typography>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-white/90 truncate">
+                  <div className="flex items-center gap-1.5 min-w-0">
                     <Calendar className="size-3 sm:size-3.5 xl:size-4 text-white/90 shrink-0" />
-                    <Typography variant="body-8" as="span">Project Date: {item.date}</Typography>
+                    <div className="truncate">
+                      <Typography variant="body-8" as="span" className="text-white/90">
+                        Project Date: {item.date}
+                      </Typography>
+                    </div>
                   </div>
                 </div>
 
                 <div className="shrink-0">
-                  <span className="flex items-center justify-center gap-1.5 xl:gap-[0.581rem] px-3 py-2 sm:px-3.5 sm:py-2.5 xl:w-[11rem] xl:h-[3.5625rem] xl:py-[0.581rem] xl:pr-[0.581rem] xl:pl-[1.1rem] rounded-[6px] border border-white/10 bg-[#FCCC2D] backdrop-blur-[21px] text-[#382E07] text-[0.75rem] sm:text-[0.875rem] font-semibold shadow-xs transition duration-300 group-hover:bg-[#E9B510] group-hover:scale-105 cursor-pointer">
-                    <Typography variant="body-8" as="span">Read More</Typography>
+                  <span className="flex items-center justify-center whitespace-nowrap gap-1.5 xl:gap-[0.581rem] px-3 py-2 sm:px-3.5 sm:py-2.5 xl:w-[11rem] xl:h-[3.5625rem] xl:py-[0.581rem] xl:pr-[0.581rem] xl:pl-[1.1rem] rounded-md border border-white/10 bg-[#FCCC2D] backdrop-blur-[1.3125rem] text-[#382E07] shadow-xs transition duration-300 group-hover:bg-[#E9B510] group-hover:scale-105 cursor-pointer">
+                    <Typography variant="body-8" as="span" className="text-[#382E07]">
+                      Read More
+                    </Typography>
                     <ArrowUpRight className="size-3.5 sm:size-4 xl:size-5 text-[#382E07] shrink-0" />
                   </span>
                 </div>
@@ -183,6 +212,14 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             </Link>
           ))}
         </div>
+
+        {/* Bottom Centered Pagination Navigation Arrows matching patient-stories */}
+        <PaginationControls
+          currentPage={relatedPage}
+          totalPages={totalRelatedPages}
+          onPageChange={(page) => setRelatedPage(page)}
+          className="mt-8 sm:mt-10"
+        />
       </section>
 
       <div id="donate-form">

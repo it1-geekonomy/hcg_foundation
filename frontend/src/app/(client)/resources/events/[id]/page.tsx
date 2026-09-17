@@ -9,9 +9,10 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import DonateForm from "@/shared/components/DonateForm";
+import Typography from "@/lib/Typography";
 import { EVENTS_DATA } from "@/domains/resources/constants/events";
 
-const CONTAINER = "max-w-[1722px] mx-auto px-4 sm:px-8 lg:px-[72px]";
+const CONTAINER = "max-w-[107.625rem] mx-auto px-4 sm:px-8 lg:px-[4.5rem]";
 
 function FacebookIcon() {
   return (
@@ -65,23 +66,29 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-12 sm:gap-10 lg:gap-14 items-start">
           <div className="sm:col-span-7 flex flex-col">
-            <h1 className="font-serif text-2xl sm:text-[28px] md:text-[34px] lg:text-[38px] xl:text-[40px] italic text-[#2E1C12] tracking-tight font-normal leading-snug">
+            <Typography variant="heading-1" as="h1" className="text-[#2E1C12]">
               {eventItem.title}
-            </h1>
+            </Typography>
 
-            <div className="mt-3 sm:mt-4 flex items-center gap-2 text-xs sm:text-sm lg:text-[15px] font-medium text-[#B88700]">
+            <div className="mt-3 sm:mt-4 flex items-center gap-2">
               <Calendar className="size-4 text-[#B88700] shrink-0" />
-              <span>{eventItem.date}</span>
+              <Typography variant="body-8" as="span" className="text-[#B88700]">
+                {eventItem.date}
+              </Typography>
             </div>
 
-            <div className="mt-5 sm:mt-6 space-y-3 lg:space-y-4 text-xs sm:text-[13.5px] md:text-[14.5px] lg:text-[15px] xl:text-[17px] 2xl:text-[18.6px] leading-[150%] tracking-[0.186px] text-[#343E43] text-justify font-normal">
+            <div className="mt-5 sm:mt-6 space-y-3.5 text-justify">
               {eventItem.fullStory.split("\n\n").map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
+                <Typography key={index} variant="body-6" as="p" className="text-[#343E43]">
+                  {paragraph}
+                </Typography>
               ))}
             </div>
 
             <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-2.5 sm:gap-3">
-              <span className="text-xs sm:text-sm font-semibold text-[#8B7355]">Share this story</span>
+              <Typography variant="body-8" as="span" className="text-[#8B7355]">
+                Share this story
+              </Typography>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -117,7 +124,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
           </div>
 
           <div className="sm:col-span-5 flex flex-col items-start w-full order-first sm:order-last">
-            <div className="relative aspect-[4/3] sm:aspect-[600/440] w-full max-w-[600px] overflow-hidden rounded-[5px] sm:rounded-[8px] bg-[#EFEAD8] shadow-md">
+            <div className="relative aspect-[4/3] sm:aspect-[600/440] w-full max-w-[37.5rem] overflow-hidden rounded-md sm:rounded-lg bg-[#EFEAD8] shadow-md">
               <img
                 src={eventItem.imageUrl}
                 alt={eventItem.title}
@@ -130,14 +137,16 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
 
       <section className={`${CONTAINER} py-8 sm:py-12 border-t border-[#E8DFC5]`}>
         <div className="flex items-center justify-between mb-6 sm:mb-8">
-          <h2 className="font-serif italic text-2xl sm:text-3xl text-[#2E1C12] font-normal">
+          <Typography variant="heading-2" as="h2" className="text-[#2E1C12]">
             Related Articles
-          </h2>
+          </Typography>
           <Link
             href="/resources/events"
-            className="inline-flex items-center gap-1 text-sm sm:text-base font-semibold text-[#2E1C12] transition hover:text-[#B88700]"
+            className="inline-flex items-center gap-1 transition hover:text-[#B88700]"
           >
-            <span>View All</span>
+            <Typography variant="body-7" as="span" className="text-[#2E1C12]">
+              View All
+            </Typography>
             <ArrowUpRight className="size-4 text-[#2E1C12]" />
           </Link>
         </div>
@@ -147,7 +156,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
             <Link
               key={item.id}
               href={`/resources/events/${item.id}`}
-              className="group relative block aspect-[16/11] sm:aspect-[16/10] xl:aspect-[600/380] w-full min-h-[260px] sm:min-h-[300px] overflow-hidden rounded-[8px] sm:rounded-[10px] bg-[#EFEAD8] shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+              className="group relative block aspect-[16/11] sm:aspect-[16/10] xl:aspect-[600/380] w-full min-h-[16.25rem] sm:min-h-[18.75rem] overflow-hidden rounded-lg sm:rounded-[0.625rem] bg-[#EFEAD8] shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
             >
               <img
                 src={item.imageUrl}
@@ -156,21 +165,29 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                 loading="lazy"
               />
 
-              <div className="absolute inset-x-3 bottom-3 sm:inset-x-4 sm:bottom-4 xl:inset-x-5 xl:bottom-5 p-3 sm:p-4 lg:p-5 xl:pt-[28.8px] xl:pr-[41.8px] xl:pb-[27.9px] xl:pl-[27.9px] flex items-center justify-between gap-3 sm:gap-4 rounded-[6px] border border-white/10 bg-[#8D8D8D]/40 backdrop-blur-[28px] text-white transition duration-300 group-hover:bg-[#8D8D8D]/50">
-                <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 sm:gap-1.5 xl:gap-[9.3px]">
-                  <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-normal text-white drop-shadow-xs line-clamp-1 group-hover:text-[#FCCC2D] transition">
-                    {item.title}
-                  </h3>
+              <div className="absolute inset-x-3 bottom-3 sm:inset-x-4 sm:bottom-4 xl:inset-x-5 xl:bottom-5 p-3 sm:p-4 lg:p-5 xl:pt-[1.8rem] xl:pr-[2.6125rem] xl:pb-[1.74375rem] xl:pl-[1.74375rem] flex items-center justify-between gap-3 sm:gap-4 rounded-md border border-white/10 bg-[#8D8D8D]/40 backdrop-blur-[1.75rem] text-white transition duration-300 group-hover:bg-[#8D8D8D]/50">
+                <div className="flex-1 min-w-0 flex flex-col justify-center gap-1 sm:gap-1.5 xl:gap-[0.581rem]">
+                  <div className="truncate drop-shadow-xs">
+                    <Typography variant="heading-3" as="h3" className="text-white group-hover:text-[#FCCC2D] transition">
+                      {item.title}
+                    </Typography>
+                  </div>
 
-                  <div className="flex items-center gap-1.5 text-[11px] sm:text-xs lg:text-sm text-white/90 font-normal">
+                  <div className="flex items-center gap-1.5 min-w-0">
                     <Calendar className="size-3 sm:size-3.5 xl:size-4 text-white/90 shrink-0" />
-                    <span className="truncate">Project Date: {item.date}</span>
+                    <div className="truncate">
+                      <Typography variant="body-8" as="span" className="text-white/90">
+                        Project Date: {item.date}
+                      </Typography>
+                    </div>
                   </div>
                 </div>
 
                 <div className="shrink-0">
-                  <span className="flex items-center justify-center gap-1.5 xl:gap-[9.3px] px-3 py-2 sm:px-3.5 sm:py-2.5 xl:w-[176px] xl:h-[57px] xl:py-[9.3px] xl:pr-[9.3px] xl:pl-[17.6px] rounded-[6px] border border-white/10 bg-[#FCCC2D] backdrop-blur-[21px] text-[#382E07] text-xs sm:text-sm font-semibold shadow-xs transition duration-300 group-hover:bg-[#E9B510] group-hover:scale-105 cursor-pointer">
-                    <span className="whitespace-nowrap">Read More</span>
+                  <span className="flex items-center justify-center whitespace-nowrap gap-1.5 xl:gap-[0.581rem] px-3 py-2 sm:px-3.5 sm:py-2.5 xl:w-[11rem] xl:h-[3.5625rem] xl:py-[0.581rem] xl:pr-[0.581rem] xl:pl-[1.1rem] rounded-md border border-white/10 bg-[#FCCC2D] backdrop-blur-[1.3125rem] text-[#382E07] shadow-xs transition duration-300 group-hover:bg-[#E9B510] group-hover:scale-105 cursor-pointer">
+                    <Typography variant="body-8" as="span" className="text-[#382E07]">
+                      Read More
+                    </Typography>
                     <ArrowUpRight className="size-3.5 sm:size-4 xl:size-5 text-[#382E07] shrink-0" />
                   </span>
                 </div>

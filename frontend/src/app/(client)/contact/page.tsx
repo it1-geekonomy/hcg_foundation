@@ -88,10 +88,12 @@ export default function ClientContact() {
           </div>
         </div>
 
-        <div className="relative mt-10 sm:mt-14 overflow-hidden rounded-[10px] border border-[#EFEAD8] bg-white shadow-xs">
-          <div className="absolute top-4 left-4 z-10 hidden sm:block max-w-[16.25rem] rounded-lg bg-white/95 p-4 shadow-md backdrop-blur-xs border border-black/5 font-sans">
+        <div className="relative mt-10 sm:mt-14 overflow-hidden rounded-[0.625rem] border border-[#EFEAD8] bg-white shadow-xs">
+          <div className="absolute top-4 left-4 z-10 hidden sm:block max-w-[16.25rem] rounded-lg bg-white/95 p-4 shadow-md backdrop-blur-xs border border-black/5">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[0.75rem] text-[#2E1C12]">HCG Foundation</span>
+              <Typography variant="body-8" as="span" className="text-[#2E1C12]">
+                HCG Foundation
+              </Typography>
               <div className="flex items-center gap-2">
                 <a
                   href="https://maps.google.com/?q=HCG+Foundation+Unity+Building+Mission+Road+Bangalore"
@@ -113,11 +115,13 @@ export default function ClientContact() {
                 </a>
               </div>
             </div>
-            <p className="mt-1.5 text-[0.6875rem] leading-snug text-[#5F6368]">
-              Ground Floor, Tower Block, UNITY BUILDING, Kalinga Rao Rd, Bengaluru, Karnataka 560027
-            </p>
-            <div className="mt-2 flex items-center gap-1 text-[0.6875rem] font-medium text-[#5F6368]">
-              <span className="font-bold text-[#E37400]">4.7</span>
+            <div className="mt-1.5">
+              <Typography variant="body-8" as="p" className="text-[#5F6368]">
+                Ground Floor, Tower Block, UNITY BUILDING, Kalinga Rao Rd, Bengaluru, Karnataka 560027
+              </Typography>
+            </div>
+            <div className="mt-2 flex items-center gap-1 text-[#5F6368]">
+              <span className="font-semibold text-[#E37400]">4.7</span>
               <div className="flex items-center text-[#F4B400]">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="size-3 fill-current" />

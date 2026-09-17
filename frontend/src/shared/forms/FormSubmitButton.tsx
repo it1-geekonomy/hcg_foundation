@@ -1,4 +1,5 @@
 import React from "react";
+import Typography from "@/lib/Typography";
 
 interface FormSubmitButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -14,10 +15,12 @@ export default function FormSubmitButton({
   return (
     <button
       type={type}
-      className={`mt-4 w-full font-manrope rounded-[6px] bg-[#FDC61D] py-3.5 sm:py-4 text-base sm:text-lg font-bold text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-[0.99] ${className}`}
+      className={`mt-4 w-full rounded-md bg-[#FDC61D] py-3.5 sm:py-4 shadow-xs transition hover:bg-[#E9B510] active:scale-[0.99] cursor-pointer ${className}`}
       {...props}
     >
-      {children}
+      <Typography variant="body-8" as="span" className="text-[#382E07]">
+        {children}
+      </Typography>
     </button>
   );
 }

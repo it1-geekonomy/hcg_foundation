@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Calendar, ArrowUpRight, Share2 } from "lucide-react";
 import DonateForm from "@/shared/components/DonateForm";
+import Typography from "@/lib/Typography";
 import { PATIENT_STORIES, PatientStory } from "@/domains/journey-of-hope/constants/stories";
 
 const FacebookIcon = () => (
@@ -23,7 +24,7 @@ const WhatsappIcon = () => (
   </svg>
 );
 
-const CONTAINER = "max-w-[1440px] 2xl:max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-8";
+const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
 export default async function StoryDetailPage({
   params,
@@ -50,7 +51,7 @@ export default async function StoryDetailPage({
           {/* Left Column: Patient Image + Social Share Buttons */}
           <div className="sm:col-span-5 flex flex-col items-start w-full">
             {/* Patient Portrait Photo */}
-            <div className="relative aspect-[615/646] w-full max-w-[600px] sm:max-w-[420px] md:max-w-[480px] lg:max-w-[520px] xl:max-w-[560px] overflow-hidden rounded-[6px] bg-[#EFEAD8] shadow-xs">
+            <div className="relative aspect-[615/646] w-full max-w-[37.5rem] sm:max-w-[26.25rem] md:max-w-[30rem] lg:max-w-[32.5rem] xl:max-w-[35rem] overflow-hidden rounded-md bg-[#EFEAD8] shadow-xs">
               <img
                 src={story.imageUrl}
                 alt={story.patientName}
@@ -59,7 +60,9 @@ export default async function StoryDetailPage({
             </div>
 
             <div className="mt-4 sm:mt-6 flex flex-wrap items-center gap-2.5 sm:gap-3">
-              <span className="text-xs sm:text-sm font-semibold text-[#8B7355]">Share this story</span>
+              <Typography variant="body-8" as="span" className="text-[#8B7355]">
+                Share this story
+              </Typography>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -95,30 +98,30 @@ export default async function StoryDetailPage({
 
           {/* Right Column: Patient Name Title, Date, and Full Story Narrative */}
           <div className="sm:col-span-7 flex flex-col font-manrope">
-            {/* Patient Name (Italic Serif Title matching Figma specs) */}
-            <h1 className="font-serif text-2xl sm:text-[28px] md:text-[34px] lg:text-[38px] xl:text-[40px] italic text-[#2E1C12] tracking-tight font-normal leading-snug">
+            {/* Patient Name Title */}
+            <Typography variant="heading-1" as="h1" className="text-[#2E1C12] italic">
               {story.patientName}
-            </h1>
+            </Typography>
 
             {/* Date with Gold Calendar Icon */}
-            <div className="mt-2 sm:mt-2.5 flex items-center gap-2 text-xs sm:text-sm lg:text-[15px] font-medium text-[#B88700]">
+            <div className="mt-2 sm:mt-2.5 flex items-center gap-2">
               <Calendar className="size-4 text-[#B88700] shrink-0" />
-              <span>{story.date}</span>
+              <Typography variant="body-8" as="span" className="text-[#B88700]">
+                {story.date}
+              </Typography>
             </div>
 
-            {/* Full Story Paragraph Text matching exact Figma Dev Mode Specs */}
-            <div className="mt-4 sm:mt-5 space-y-2.5 lg:space-y-3 xl:space-y-3.5 text-xs sm:text-[13.5px] md:text-[14.5px] lg:text-[15px] xl:text-[17px] 2xl:text-[18.6px] leading-[145%] xl:leading-[150%] tracking-[0.186px] text-[#343E43] text-justify font-normal">
+            {/* Full Story Paragraph Text matching exact Figma Specs */}
+            <div className="mt-4 sm:mt-5 space-y-3.5 text-justify">
               {story.fullStory.split("\n\n").map((paragraph, index) => (
-                <p
+                <Typography
                   key={index}
-                  className={
-                    paragraph.startsWith("Friday,") || paragraph.startsWith("Monday,")
-                      ? "text-[#343E43] font-medium text-xs sm:text-[13.5px] md:text-[14.5px] lg:text-[15px] xl:text-[17px] 2xl:text-[18.6px] mb-1 not-italic"
-                      : ""
-                  }
+                  variant="body-6"
+                  as="p"
+                  className="text-[#343E43]"
                 >
                   {paragraph}
-                </p>
+                </Typography>
               ))}
             </div>
           </div>
@@ -131,14 +134,16 @@ export default async function StoryDetailPage({
         {relatedStories.length > 0 && (
           <div>
             <div className="flex items-center justify-between">
-              <h2 className="font-manrope text-xl sm:text-2xl font-bold text-[#2E1C12] tracking-tight">
+              <Typography variant="heading-2" as="h2" className="text-[#2E1C12]">
                 Read More Stories
-              </h2>
+              </Typography>
               <Link
                 href="/journey-of-hope/patient-stories"
-                className="inline-flex items-center gap-1 font-manrope text-sm font-semibold text-[#2E1C12] transition hover:text-[#B88700]"
+                className="inline-flex items-center gap-1 transition hover:text-[#B88700]"
               >
-                <span>View All</span>
+                <Typography variant="body-7" as="span" className="text-[#2E1C12]">
+                  View All
+                </Typography>
                 <ArrowUpRight className="size-4 text-[#2E1C12]" />
               </Link>
             </div>
@@ -149,7 +154,7 @@ export default async function StoryDetailPage({
                 <Link
                   key={relStory.id}
                   href={`/journey-of-hope/patient-stories/${relStory.id}`}
-                  className="group relative block aspect-[413/515] w-full overflow-hidden rounded-[22px] bg-[#EFEAD8] shadow-xs transition duration-300 hover:shadow-md"
+                  className="group relative block aspect-[413/515] w-full overflow-hidden rounded-[1.375rem] bg-[#EFEAD8] shadow-xs transition duration-300 hover:shadow-md"
                 >
                   {/* Full Card Background Image */}
                   <img
@@ -165,13 +170,15 @@ export default async function StoryDetailPage({
                   {/* Bottom Card Content: Name, Date (Left) + Circular Arrow Button (Right) */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 flex items-end justify-between gap-3 font-manrope z-10">
                     {/* Left: Patient Name & Date */}
-                    <div className="flex flex-col text-white font-manrope">
-                      <h3 className="font-manrope text-lg sm:text-xl font-bold tracking-tight text-white drop-shadow-xs">
+                    <div className="flex flex-col text-white font-manrope min-w-0">
+                      <Typography variant="heading-3" as="h3" className="text-white drop-shadow-xs truncate">
                         {relStory.patientName}
-                      </h3>
-                      <div className="mt-1 flex items-center gap-1.5 text-xs font-medium text-white/85">
+                      </Typography>
+                      <div className="mt-1 flex items-center gap-1.5">
                         <Calendar className="size-3 text-white/90 shrink-0" />
-                        <span>{relStory.date}</span>
+                        <Typography variant="body-8" as="span" className="text-white/85">
+                          {relStory.date}
+                        </Typography>
                       </div>
                     </div>
 

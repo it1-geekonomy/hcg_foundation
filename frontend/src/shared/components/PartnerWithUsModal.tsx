@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { X, User, Mail, Phone, Building2, MessageSquare } from "lucide-react";
-
+import Typography from "@/lib/Typography";
 import PhoneInputField from "@/shared/forms/PhoneInputField";
 
 interface PartnerWithUsModalProps {
@@ -79,7 +79,7 @@ export default function PartnerWithUsModal({
       />
 
       {/* Modal Card Container */}
-      <div className="relative z-10 w-full max-w-4xl bg-white rounded-[16px] shadow-2xl overflow-hidden flex flex-col md:flex-row my-auto max-h-[90vh]">
+      <div className="relative z-10 w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row my-auto max-h-[90vh]">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -92,21 +92,27 @@ export default function PartnerWithUsModal({
         {/* Left Column: Form Content */}
         <div className="w-full md:w-1/2 p-6 sm:p-8 md:p-10 flex flex-col justify-between overflow-y-auto max-h-[90vh] md:max-h-none">
           <div>
-            <h2 className="font-serif text-2xl sm:text-3xl text-[#2E1C12] italic font-normal tracking-tight mb-2">
-              Be a Part of Someone&apos;s Cancer Journey
-            </h2>
-            <p className="font-manrope text-xs sm:text-sm text-[#6C6048] leading-relaxed mb-6">
-              Share a few details and our team will get in touch with you to explore partnership opportunities.
-            </p>
+            <div className="mb-2">
+              <Typography variant="heading-2" as="h2" className="text-[#2E1C12] italic">
+                Be a Part of Someone&apos;s Cancer Journey
+              </Typography>
+            </div>
+            <div className="mb-6">
+              <Typography variant="body-8" as="p" className="text-[#6C6048]">
+                Share a few details and our team will get in touch with you to explore partnership opportunities.
+              </Typography>
+            </div>
 
             {submitted ? (
-              <div className="my-8 p-6 bg-[#FFF9EA] border border-[#F3E3B6] rounded-[8px] text-center">
-                <h3 className="font-serif text-xl text-[#2E1C12] font-semibold mb-2">
-                  Thank You!
-                </h3>
-                <p className="font-manrope text-sm text-[#6C6048]">
+              <div className="my-8 p-6 bg-[#FFF9EA] border border-[#F3E3B6] rounded-lg text-center">
+                <div className="mb-2">
+                  <Typography variant="heading-3" as="h3" className="text-[#2E1C12]">
+                    Thank You!
+                  </Typography>
+                </div>
+                <Typography variant="body-8" as="p" className="text-[#6C6048]">
                   We have received your details and will get in touch shortly.
-                </p>
+                </Typography>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -218,9 +224,11 @@ export default function PartnerWithUsModal({
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#382E07] font-semibold text-sm sm:text-base rounded-[8px] shadow-xs transition duration-300 hover:bg-[#E9B510] hover:shadow-md cursor-pointer"
+                  className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#382E07] rounded-lg shadow-xs transition duration-300 hover:bg-[#E9B510] hover:shadow-md cursor-pointer"
                 >
-                  Submit
+                  <Typography variant="body-8" as="span" className="text-[#382E07]">
+                    Submit
+                  </Typography>
                 </button>
               </form>
             )}
