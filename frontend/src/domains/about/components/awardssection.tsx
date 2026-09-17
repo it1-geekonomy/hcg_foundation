@@ -65,7 +65,8 @@ export default function AwardsRecognition({ className = "" }: AwardsRecognitionP
     const el = trackRef.current;
     if (!el) return;
     const card = el.querySelector<HTMLElement>("[data-award-card]");
-    const amount = card ? card.offsetWidth + 24 : el.clientWidth * 0.8;
+    const gap = parseFloat(window.getComputedStyle(el).columnGap || "24") || 24;
+    const amount = card ? card.offsetWidth + gap : el.clientWidth * 0.8;
     el.scrollBy({ left: direction === "left" ? -amount : amount, behavior: "smooth" });
   };
 
@@ -142,23 +143,23 @@ export default function AwardsRecognition({ className = "" }: AwardsRecognitionP
 
         <div
           ref={trackRef}
-          className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex gap-6 lg:gap-12 overflow-x-auto scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {awards.map((award, index) => (
             <div
               key={index}
               data-award-card
-              className="min-w-0 flex-none basis-full snap-start sm:basis-[calc(50%-12px)] lg:basis-[calc(50%-12px)]"
+              className="min-w-0 flex-none basis-full snap-start sm:basis-[calc(50%-12px)] lg:basis-[calc(50%-24px)]"
             >
               <div
                 ref={index === 0 ? firstImageRef : undefined}
-                className="relative aspect-[4/5] w-full overflow-hidden"
+                className="relative aspect-[4/5] w-[80%] mx-auto overflow-hidden sm:w-full sm:mx-0"
               >
                 <Image
                   src={award.image}
                   alt=""
                   fill
-                  className="object-contain"
+                  className="object-cover"
                 />
               </div>
 

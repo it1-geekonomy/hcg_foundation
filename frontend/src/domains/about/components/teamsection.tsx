@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import type { CSSProperties } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Typography from "@/lib/Typography";
 import {
   BACK_PANEL_BG,
@@ -21,31 +21,39 @@ import {
 const BACK_PANEL_GLASS_BG =
   "bg-[linear-gradient(90deg,rgba(252,204,45,0.62)_0%,rgba(56,43,0,0.70)_100%)] backdrop-blur-lg";
 
-// How long the reveal (bottom -> top) takes when opening / closing.
-// NOTE: Tailwind's utility classes are resolved statically at build time,
-// so these values can't be read into `duration-[...]` classes at runtime.
-// The numbers below and the `duration-[600ms]` / `duration-[500ms]`
-// classes used in PersonCard's back panel must be kept in sync manually.
 const OPEN_DURATION_MS = 600;
 const CLOSE_DURATION_MS = 500;
-
-// The glass -> solid crossfade runs for the full open duration, in sync
-// with the clip-path reveal, so the color blends in continuously as the
-// panel grows rather than snapping at some point partway through.
-// (Mirrors OPEN_DURATION_MS — see the `duration-[600ms]` classes below.)
 const CROSSFADE_DURATION_MS = OPEN_DURATION_MS;
-
-// Card / image sizing — expressed with clamp() and rem instead of raw px
-// or stepped breakpoints, so the card and its image scale fluidly with
-// the viewport rather than snapping between fixed sizes.
 const DEFAULT_CARD_WIDTH_CLASS = "w-[clamp(17.5rem,20vw,21.25rem)]"; // 280px – 340px
 const DEFAULT_CARD_TOP_OFFSET_CLASS =
   "-top-[clamp(1.875rem,6vw,3.75rem)]"; // 30px – 60px
 const CARD_IMAGE_BOTTOM_INSET_CLASS = "bottom-[1.875rem]"; // 30px
 
-/** Joins truthy class fragments together, dropping falsy ones. */
 function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
+}
+
+function useSyncedLabelHeight(count: number) {
+  const refs = useRef<(HTMLDivElement | null)[]>([]);
+  const [height, setHeight] = useState<number | null>(null);
+
+  const measure = useCallback(() => {
+    const heights = refs.current.map((el) => el?.offsetHeight ?? 0);
+    const max = heights.length ? Math.max(...heights) : 0;
+    setHeight(max || null);
+  }, []);
+
+  useEffect(() => {
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [measure, count]);
+
+  const setRef = (i: number) => (el: HTMLDivElement | null) => {
+    refs.current[i] = el;
+  };
+
+  return { setRef, height };
 }
 
 function FlipIcon({ back = false }: { back?: boolean }) {
@@ -68,20 +76,21 @@ function PersonCard({
   role,
   img,
   widthClass,
-  // NOTE: these three flags are accepted (and passed by callers) but are
-  // currently not wired to any visual behavior below — kept as-is to
-  // avoid changing behavior; flagged here for a future pass.
   fadeBottom = false,
   wrapLabel = false,
   dropShadow = true,
   topOffsetClass,
   description = DUMMY_DESCRIPTION,
+  labelRef,
+  labelHeight,
 }: Person & {
   widthClass?: string;
   fadeBottom?: boolean;
   wrapLabel?: boolean;
   dropShadow?: boolean;
   topOffsetClass?: string;
+  labelRef?: (el: HTMLDivElement | null) => void;
+  labelHeight?: number | null;
 }) {
   const [flipped, setFlipped] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -135,8 +144,9 @@ function PersonCard({
           />
         </div>
 
-        {/* LABEL */}
         <div
+          ref={labelRef}
+          style={labelHeight ? { minHeight: `${labelHeight}px` } : undefined}
           className={cx(
             "absolute inset-x-[0.875rem] bottom-[2.75rem] flex min-h-[5.25rem] items-center justify-between gap-3 rounded-xl px-4 py-3 transition-opacity duration-150 ease-out",
             flipped ? "opacity-0" : "opacity-100",
@@ -184,11 +194,7 @@ function PersonCard({
           !flipped && "pointer-events-none",
         )}
       >
-        {/* REVEALED PANEL — grows bottom -> top via clip-path so text
-            doesn't stretch like it would with a scaleY transform.
-            Background + content live together inside, so content is
-            visible progressively as the panel grows, not delayed.
-            Durations below must match OPEN_DURATION_MS / CLOSE_DURATION_MS. */}
+    
         <div
           className={cx(
             "absolute inset-0 transition-[clip-path] ease-out",
@@ -197,28 +203,23 @@ function PersonCard({
               : "[clip-path:inset(100%_0_0_0)] duration-[500ms]",
           )}
         >
-          {/* GLASS LAYER — fades out smoothly across the whole grow,
-              in sync with the clip-path reveal */}
+          
           <div
             className={cx(
               "absolute inset-0 transition-opacity ease-in-out",
               BACK_PANEL_GLASS_BG,
-              flipped ? "opacity-0 duration-[600ms]" : "opacity-100 duration-0",
+              flipped ? "opacity-0 duration-[600ms]" : "opacity-100 duration-[500ms]",
             )}
           />
 
-          {/* SOLID LAYER — fades in smoothly across the whole grow,
-              finishing right as the panel finishes growing */}
           <div
             className={cx(
               "absolute inset-0 transition-opacity ease-in-out",
               BACK_PANEL_BG,
-              flipped ? "opacity-100 duration-[600ms]" : "opacity-0 duration-0",
+              flipped ? "opacity-100 duration-[600ms]" : "opacity-0 duration-[500ms]",
             )}
           />
 
-          {/* CONTENT — sits at full, real size the whole time; the
-              clip-path on the parent is what reveals it bottom -> top */}
           <div className="relative flex h-full flex-col p-5">
             <Typography
               variant="body-2"
@@ -295,36 +296,51 @@ function ArrowButton({
   );
 }
 
-/* =========================================================
-   LG — FIXED TEAM CAROUSEL
-========================================================= */
-
-// Matches the track's `gap-6` utility (1.5rem = 24px). Kept as a number
-// because it feeds the pixel arithmetic below (trackWidth/step), which
-// is inherently dynamic (derived from the imported CARD_W token and from
-// carousel state) and so can't be expressed as static Tailwind classes.
 const CAROUSEL_GAP_PX = 24;
-
-// The lg/xl carousel relies on every card being exactly CARD_W wide so
-// that trackWidth/step (pixel math below) stay in sync with what's
-// actually rendered. PersonCard's own default width is a fluid
-// clamp() that does NOT resolve to CARD_W at every viewport size, so
-// cards here must be pinned to this fixed width explicitly — otherwise
-// the real rendered track width drifts from `--track-w` and the
-// `overflow-hidden` wrapper silently clips the last card.
 const FIXED_CARD_WIDTH_CLASS = `w-[${CARD_W}px]`;
 
 function TeamCarousel({ people }: { people: Person[] }) {
   const visibleCount = 3;
   const trackWidth = visibleCount * CARD_W + (visibleCount - 1) * CAROUSEL_GAP_PX;
   const step = CARD_W + CAROUSEL_GAP_PX;
-
   const maxIndex = Math.max(0, people.length - visibleCount);
   const [index, setIndex] = useState(0);
+  const needsCarousel = people.length > visibleCount;
+  const [dragging, setDragging] = useState(false);
+  const [dragDeltaPx, setDragDeltaPx] = useState(0);
+  const dragStartXRef = useRef(0);
+
+  const clampIndex = (i: number) => Math.min(maxIndex, Math.max(0, i));
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (!needsCarousel) return;
+    setDragging(true);
+    dragStartXRef.current = e.clientX;
+    setDragDeltaPx(0);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!dragging) return;
+    setDragDeltaPx(e.clientX - dragStartXRef.current);
+  };
+
+  const endDrag = () => {
+    if (!dragging) return;
+    setDragging(false);
+    const threshold = step / 4;
+    if (dragDeltaPx <= -threshold) {
+      setIndex((i) => clampIndex(i + 1));
+    } else if (dragDeltaPx >= threshold) {
+      setIndex((i) => clampIndex(i - 1));
+    }
+    setDragDeltaPx(0);
+  };
+
+  const { setRef: setLabelRef, height: labelHeight } = useSyncedLabelHeight(people.length);
 
   const atStart = index === 0;
   const atEnd = index >= maxIndex;
-  const needsCarousel = people.length > visibleCount;
 
   const goPrev = () => {
     setIndex((i) => Math.max(0, i - 1));
@@ -340,35 +356,34 @@ function TeamCarousel({ people }: { people: Person[] }) {
         <ArrowButton direction="left" disabled={atStart} onClick={goPrev} />
       )}
 
-      {/*
-        FIX: was using `clipPath: inset(-80px 0px 0px 0px)` here.
-        clip-path only clips PAINT, not layout — so the off-screen
-        cards in the flex row below still counted toward the page's
-        scrollable width, causing a horizontal scrollbar and the
-        blank space on the right at lg/xl widths.
-
-        Replaced with `overflow-hidden` (which actually clips layout
-        overflow) combined with `-mt-20 pt-20` (-80px / +80px) so the
-        box's edges land in exactly the same place as the old
-        clip-path did — same visual bleed above the cards, same
-        bottom edge, same left/right edges — just properly clipped
-        now instead of only visually hidden.
-
-        `--track-w` / `--track-x` are the only values here that
-        genuinely can't be static Tailwind classes: they're computed
-        from the imported CARD_W token and from live carousel state.
-        Everything else is a plain utility class.
-      */}
       <div
-        className="-mt-20 w-[var(--track-w)] max-w-full overflow-hidden pt-20"
+        className={cx(
+          "-mt-20 w-[var(--track-w)] max-w-full overflow-hidden pt-20",
+          needsCarousel && "touch-pan-y select-none",
+          dragging ? "cursor-grabbing" : needsCarousel && "cursor-grab",
+        )}
         style={{ "--track-w": `${trackWidth}px` } as CSSProperties}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onPointerLeave={endDrag}
       >
         <div
-          className="flex translate-x-[var(--track-x)] gap-6 transition-transform duration-500 ease-out"
-          style={{ "--track-x": `-${index * step}px` } as CSSProperties}
+          className={cx(
+            "flex translate-x-[var(--track-x)] gap-6 ease-out",
+            dragging ? "duration-0" : "transition-transform duration-500",
+          )}
+          style={{ "--track-x": `${-(index * step) + dragDeltaPx}px` } as CSSProperties}
         >
-          {people.map((p) => (
-            <PersonCard key={p.name} {...p} widthClass={FIXED_CARD_WIDTH_CLASS} />
+          {people.map((p, i) => (
+            <PersonCard
+              key={p.name}
+              {...p}
+              widthClass={FIXED_CARD_WIDTH_CLASS}
+              labelRef={setLabelRef(i)}
+              labelHeight={labelHeight}
+            />
           ))}
         </div>
       </div>
@@ -379,14 +394,6 @@ function TeamCarousel({ people }: { people: Person[] }) {
     </div>
   );
 }
-
-/* =========================================================
-   BELOW LG TEAM CAROUSEL
-========================================================= */
-
-// Fallback amount (px) added to a card's measured width when estimating
-// scroll distance — matches the desktop `gap-4` utility (1rem = 16px)
-// used on the track below.
 const MOBILE_CARD_GAP_PX = 16;
 
 function ArrowScrollCarousel({ people }: { people: Person[] }) {
@@ -394,6 +401,8 @@ function ArrowScrollCarousel({ people }: { people: Person[] }) {
 
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(people.length <= 1);
+
+  const { setRef: setLabelRef, height: labelHeight } = useSyncedLabelHeight(people.length);
 
   const updateEdges = () => {
     const el = scrollRef.current;
@@ -422,7 +431,6 @@ function ArrowScrollCarousel({ people }: { people: Person[] }) {
       window.removeEventListener("resize", onResize);
     };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const scrollByCard = (dir: 1 | -1) => {
@@ -443,10 +451,6 @@ function ArrowScrollCarousel({ people }: { people: Person[] }) {
     <div
       className={cx(
         "mx-auto flex w-full max-w-[1260px] items-center gap-1",
-
-        // BELOW 640px ONLY: cancel the section's px-8 so the arrows can
-        // use that space, and keep them directly beside the fixed-width
-        // card, centering the whole (arrow + card + arrow) group.
         "max-sm:-mx-8",
         "max-sm:w-[calc(100%+4rem)]",
         "max-sm:gap-0",
@@ -475,7 +479,7 @@ function ArrowScrollCarousel({ people }: { people: Person[] }) {
         )}
       >
         <div className={cx("flex gap-4", "max-sm:gap-0")}>
-          {people.map((p) => (
+          {people.map((p, i) => (
             <div
               key={p.name}
               data-card
@@ -493,6 +497,8 @@ function ArrowScrollCarousel({ people }: { people: Person[] }) {
                 wrapLabel
                 dropShadow={false}
                 topOffsetClass="-top-[clamp(1.25rem,6vw,1.875rem)]"
+                labelRef={setLabelRef(i)}
+                labelHeight={labelHeight}
               />
             </div>
           ))}
@@ -507,8 +513,11 @@ function ArrowScrollCarousel({ people }: { people: Person[] }) {
 
 export default function TeamSection() {
   const allTrustees = [...trusteesRowOne, ...trusteesRowTwo];
-
   const trusteesIsOdd = allTrustees.length % 2 === 1;
+  const { setRef: setTrusteeLabelRef, height: trusteeLabelHeight } =
+    useSyncedLabelHeight(allTrustees.length);
+  const { setRef: setTeamGridLabelRef, height: teamGridLabelHeight } =
+    useSyncedLabelHeight(teamRow.length);
 
   return (
     <section className="bg-[#FFF6D8] pt-6 pb-6 px-8 sm:px-12 md:px-16 lg:py-10 xl:py-20 lg:px-6 xl:px-6">
@@ -539,7 +548,7 @@ export default function TeamSection() {
       </div>
 
       {/* TRUSTEES DIVIDER */}
-      <div className="mx-auto mb-24 flex max-w-[1260px] items-center justify-center gap-4 md:gap-[22px]">
+      <div className="mx-auto mb-4 lg:mb-24 flex max-w-[1260px] items-center justify-center gap-4 md:gap-[22px]">
         <span className="h-px w-full max-w-[3.75rem] bg-gradient-to-l from-[#635612] to-[#FEF2C9]/[0.41] md:max-w-[16.25rem]" />
 
         <Typography
@@ -553,46 +562,46 @@ export default function TeamSection() {
         <span className="h-px w-full max-w-[3.75rem] bg-gradient-to-r from-[#635612] to-[#FEF2C9]/[0.41] md:max-w-[16.25rem]" />
       </div>
 
-      {/* TRUSTEES — BELOW LG */}
-      <div className="mx-auto mb-8 grid max-w-[1260px] grid-cols-1 justify-items-center gap-x-4 gap-y-16 sm:grid-cols-2 lg:hidden">
-        {allTrustees.map((p, i) => {
-          const isDanglingLast = trusteesIsOdd && i === allTrustees.length - 1;
-
-          return (
-            <div
-              key={p.name}
-              className={cx(
-                XS_FIXED_CARD_WIDTH,
-                "sm:w-full",
-                isDanglingLast && "sm:col-span-2",
-              )}
-            >
-              <PersonCard
-                {...p}
-                widthClass={
-                  isDanglingLast
-                    ? "w-full sm:mx-auto sm:w-[calc((100%-1rem)/2)]"
-                    : "w-full"
-                }
-                fadeBottom
-                wrapLabel
-              />
-            </div>
-          );
-        })}
-      </div>
+{/* TRUSTEES — BELOW LG */}
+<div className="mb-4 lg:hidden">
+  <ArrowScrollCarousel people={allTrustees} />
+</div>
 
       {/* TRUSTEES — LG+ */}
       <div className="mx-auto mb-16 hidden max-w-[1260px] flex-wrap justify-center gap-[1.875rem] md:mb-20 lg:flex">
-        {trusteesRowOne.map((p) => (
-          <PersonCard key={p.name} {...p} />
+        {trusteesRowOne.map((p, i) => (
+          <PersonCard
+            key={p.name}
+            {...p}
+            labelRef={setTrusteeLabelRef(i)}
+            labelHeight={trusteeLabelHeight}
+          />
         ))}
       </div>
 
       <div className="mx-auto mb-16 hidden max-w-[1260px] flex-wrap justify-center gap-[1.875rem] md:mb-24 lg:flex">
-        {trusteesRowTwo.map((p) => (
-          <PersonCard key={p.name} {...p} />
+        {trusteesRowTwo.map((p, i) => (
+          <PersonCard
+            key={p.name}
+            {...p}
+            labelRef={setTrusteeLabelRef(trusteesRowOne.length + i)}
+            labelHeight={trusteeLabelHeight}
+          />
         ))}
+      </div>
+            {/* TRUSTEES DIVIDER */}
+      <div className="mx-auto mb-4 lg:mb-24 flex max-w-[1260px] items-center justify-center gap-4 md:gap-[22px]">
+        <span className="h-px w-full max-w-[3.75rem] bg-gradient-to-l from-[#635612] to-[#FEF2C9]/[0.41] md:max-w-[16.25rem]" />
+
+        <Typography
+          variant="heading-6"
+          as="span"
+          className="whitespace-nowrap font-tiempos-headline text-[#382E07]"
+        >
+          Teams
+        </Typography>
+
+        <span className="h-px w-full max-w-[3.75rem] bg-gradient-to-r from-[#635612] to-[#FEF2C9]/[0.41] md:max-w-[16.25rem]" />
       </div>
 
       {/* TEAM MEMBERS — BELOW LG */}
@@ -607,8 +616,13 @@ export default function TeamSection() {
 
       {/* TEAM MEMBERS — 2XL+ */}
       <div className="hidden grid-cols-4 justify-items-center gap-30 px-20 2xl:grid 3xl:gap-20 3xl:px-50">
-        {teamRow.map((p) => (
-          <PersonCard key={p.name} {...p} />
+        {teamRow.map((p, i) => (
+          <PersonCard
+            key={p.name}
+            {...p}
+            labelRef={setTeamGridLabelRef(i)}
+            labelHeight={teamGridLabelHeight}
+          />
         ))}
       </div>
     </section>
