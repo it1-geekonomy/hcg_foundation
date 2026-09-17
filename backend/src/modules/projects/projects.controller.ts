@@ -175,18 +175,6 @@ export class ProjectsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get project by id (CMS, any status)' })
   @ApiOkResponse({ type: Project })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Number of related items to return (default depends on module)',
-  })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number for related items (default: 1)',
-  })
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.service.findOne(id);
     return {
@@ -212,18 +200,6 @@ export class ProjectsController {
       'Optional new `projectBanner` / `projectMobileBanner` files replace the previous CDN objects.',
   })
   @ApiOkResponse({ type: Project })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Number of related items to return (default depends on module)',
-  })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number for related items (default: 1)',
-  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })
@@ -252,18 +228,6 @@ export class ProjectsController {
     description: 'Clears deletedAt so the project shows again in CMS and on the website if published.',
   })
   @ApiOkResponse({ type: Project })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Number of related items to return (default depends on module)',
-  })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number for related items (default: 1)',
-  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })

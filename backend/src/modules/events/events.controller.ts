@@ -171,18 +171,6 @@ export class EventsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get event by id (CMS, any status)' })
   @ApiOkResponse({ type: Event })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Number of related items to return (default depends on module)',
-  })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number for related items (default: 1)',
-  })
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     const data = await this.service.findOne(id);
     return {
@@ -208,18 +196,6 @@ export class EventsController {
       'Optional new `eventBanner` / `eventMobileBanner` files replace the previous CDN objects.',
   })
   @ApiOkResponse({ type: Event })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Number of related items to return (default depends on module)',
-  })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number for related items (default: 1)',
-  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })
@@ -244,18 +220,6 @@ export class EventsController {
     description: 'Clears deletedAt so the event shows again in CMS and on the website if published.',
   })
   @ApiOkResponse({ type: Event })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Number of related items to return (default depends on module)',
-  })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number for related items (default: 1)',
-  })
   @ApiUnauthorizedResponse({
     description: 'Missing, invalid, or expired bearer token',
   })
