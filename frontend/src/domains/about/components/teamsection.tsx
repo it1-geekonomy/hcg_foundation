@@ -93,6 +93,7 @@ export function PersonCard({
   description = [],
   labelRef,
   labelHeight,
+  style,
 }: Person & {
   widthClass?: string;
   fadeBottom?: boolean;
@@ -101,6 +102,7 @@ export function PersonCard({
   topOffsetClass?: string;
   labelRef?: (el: HTMLDivElement | null) => void;
   labelHeight?: number | null;
+  style?: CSSProperties;
 }) {
   const [flipped, setFlipped] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
@@ -134,6 +136,7 @@ export function PersonCard({
   return (
     <div
       ref={cardRef}
+      style={style}
       className={cx(
         "relative aspect-[320/380] flex-none",
         widthClass ?? DEFAULT_CARD_WIDTH_CLASS,
@@ -158,6 +161,8 @@ export function PersonCard({
               sizes={`(min-width: 1536px) ${CARD_W_2XL}px, ${CARD_W}px`}
               className="object-cover object-top"
               unoptimized={/^https?:\/\//i.test(img)}
+              draggable={false}
+              onDragStart={(e) => e.preventDefault()}
               onError={() => setImageFailed(true)}
             />
           ) : (
@@ -197,6 +202,11 @@ export function PersonCard({
           <button
             type="button"
             aria-label={`Show details for ${name}`}
+            onPointerDown={(e) => {
+              // Prevent the carousel track's drag/pointer-capture logic
+              // from swallowing this interaction before it becomes a click.
+              e.stopPropagation();
+            }}
             onClick={(e) => {
               e.stopPropagation();
               setFlipped(true);
@@ -322,23 +332,69 @@ function ArrowButton({
 }
 
 const CAROUSEL_GAP_PX = 24;
-const FIXED_CARD_WIDTH_CLASS = `w-[${CARD_W}px]`;
+// Static, literal class (no interpolation) so Tailwind always generates it —
+// the actual pixel value is supplied at runtime via the --card-w CSS
+// variable, set through the `style` prop on each PersonCard.
+const CAROUSEL_CARD_WIDTH_CLASS = "w-[var(--card-w)]";
 
-function TeamCarousel({ people }: { people: Person[] }) {
-  const visibleCount = 3;
-  const trackWidth = visibleCount * CARD_W + (visibleCount - 1) * CAROUSEL_GAP_PX;
-  const step = CARD_W + CAROUSEL_GAP_PX;
+// How long the index-change slide transition takes. Wheel input is locked
+// out for this long after a shift so one scroll gesture = one card, not a
+// cascade of shifts while momentum/trackpad scrolling is still emitting
+// wheel events.
+const WHEEL_STEP_LOCK_MS = 550;
+// Minimum accumulated wheel delta (px) before we treat it as an intentional
+// horizontal scroll rather than noise from a vertical scroll gesture.
+const WHEEL_DELTA_THRESHOLD = 10;
+
+/**
+ * NOTE: visibleCount / cardWidthPx are now configurable (defaulting to the
+ * original lg/xl values: 3 visible cards at CARD_W) so the exact same
+ * carousel — same arrows, same drag/scroll behavior, same gap — can be
+ * reused for the 2xl grid when it has more than 4 people, without touching
+ * anything about how it already behaves on lg/xl.
+ */
+function TeamCarousel({
+  people,
+  visibleCount = 3,
+  cardWidthPx = CARD_W,
+}: {
+  people: Person[];
+  visibleCount?: number;
+  cardWidthPx?: number;
+}) {
+  const trackWidth = visibleCount * cardWidthPx + (visibleCount - 1) * CAROUSEL_GAP_PX;
+  const step = cardWidthPx + CAROUSEL_GAP_PX;
   const maxIndex = Math.max(0, people.length - visibleCount);
   const [index, setIndex] = useState(0);
   const needsCarousel = people.length > visibleCount;
   const [dragging, setDragging] = useState(false);
   const [dragDeltaPx, setDragDeltaPx] = useState(0);
   const dragStartXRef = useRef(0);
+  const trackViewportRef = useRef<HTMLDivElement>(null);
+  const wheelLockedRef = useRef(false);
 
-  const clampIndex = (i: number) => Math.min(maxIndex, Math.max(0, i));
+  const clampIndex = useCallback(
+    (i: number) => Math.min(maxIndex, Math.max(0, i)),
+    [maxIndex],
+  );
+
+  // Keep the current index in range if the visible count / people length
+  // changes (e.g. responsive breakpoint swap) so we never end up pointing
+  // past the last valid page.
+  useEffect(() => {
+    setIndex((i) => clampIndex(i));
+  }, [clampIndex]);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!needsCarousel) return;
+
+    // Don't hijack pointer capture when the gesture starts on an
+    // interactive control (e.g. the card's flip button) — otherwise the
+    // resulting click never reaches the button because the track has
+    // already captured the pointer.
+    const target = e.target as HTMLElement;
+    if (target.closest("button")) return;
+
     setDragging(true);
     dragStartXRef.current = e.clientX;
     setDragDeltaPx(0);
@@ -362,6 +418,34 @@ function TeamCarousel({ people }: { people: Person[] }) {
     setDragDeltaPx(0);
   };
 
+  // Smooth, one-shift-per-gesture horizontal wheel/trackpad scrolling.
+  // Attached via a native, non-passive listener (React's onWheel is passive
+  // by default, which would block preventDefault) so we can stop the page
+  // from also scrolling vertically while the user is swiping the carousel.
+  useEffect(() => {
+    const el = trackViewportRef.current;
+    if (!el || !needsCarousel) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (Math.abs(delta) < WHEEL_DELTA_THRESHOLD) return;
+
+      e.preventDefault();
+
+      if (wheelLockedRef.current) return;
+      wheelLockedRef.current = true;
+
+      setIndex((i) => clampIndex(i + (delta > 0 ? 1 : -1)));
+
+      window.setTimeout(() => {
+        wheelLockedRef.current = false;
+      }, WHEEL_STEP_LOCK_MS);
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, [needsCarousel, clampIndex]);
+
   const { setRef: setLabelRef, height: labelHeight } = useSyncedLabelHeight(people.length);
 
   const atStart = index === 0;
@@ -375,6 +459,16 @@ function TeamCarousel({ people }: { people: Person[] }) {
     setIndex((i) => Math.min(maxIndex, i + 1));
   };
 
+  // Clamp the *visual* translate so the track can never be dragged past the
+  // first or last card — no rubber-banding into empty space beyond the
+  // carousel's actual bounds.
+  const minTranslateX = -(maxIndex * step);
+  const maxTranslateX = 0;
+  const baseTranslateX = -(index * step);
+  const trackTranslateX = dragging
+    ? Math.min(maxTranslateX, Math.max(minTranslateX, baseTranslateX + dragDeltaPx))
+    : baseTranslateX;
+
   return (
     <div className="mx-auto flex w-fit max-w-full items-center gap-2">
       {needsCarousel && (
@@ -382,6 +476,7 @@ function TeamCarousel({ people }: { people: Person[] }) {
       )}
 
       <div
+        ref={trackViewportRef}
         className={cx(
           "-mt-20 w-[var(--track-w)] max-w-full overflow-hidden pt-20",
           needsCarousel && "touch-pan-y select-none",
@@ -399,13 +494,14 @@ function TeamCarousel({ people }: { people: Person[] }) {
             "flex translate-x-[var(--track-x)] gap-6 ease-out",
             dragging ? "duration-0" : "transition-transform duration-500",
           )}
-          style={{ "--track-x": `${-(index * step) + dragDeltaPx}px` } as CSSProperties}
+          style={{ "--track-x": `${trackTranslateX}px` } as CSSProperties}
         >
           {people.map((p, i) => (
             <PersonCard
               key={p.id ?? p.name}
               {...p}
-              widthClass={FIXED_CARD_WIDTH_CLASS}
+              widthClass={CAROUSEL_CARD_WIDTH_CLASS}
+              style={{ "--card-w": `${cardWidthPx}px` } as CSSProperties}
               labelRef={setLabelRef(i)}
               labelHeight={labelHeight}
             />
@@ -557,6 +653,9 @@ export default function TeamSection({
   const allTrustees = trustees ?? [];
   const teamPeople = teamMembers ?? [];
   const trusteeRowsLg = chunkPeople(allTrustees, 3);
+  // Only the 2xl grid layout needs to become a carousel — this is the only
+  // thing that changes based on count. Everything else is untouched.
+  const teamNeeds2xlCarousel = teamPeople.length > 4;
 
   const { setRef: setTrusteeLabelRef, height: trusteeLabelHeight } =
     useSyncedLabelHeight(allTrustees.length);
@@ -653,16 +752,29 @@ export default function TeamSection({
             <TeamCarousel people={teamPeople} />
           </div>
 
-          <div className="hidden grid-cols-4 justify-items-center gap-30 px-20 2xl:grid 3xl:gap-20 3xl:px-50">
-            {teamPeople.map((p, i) => (
-              <PersonCard
-                key={p.id ?? p.name}
-                {...p}
-                labelRef={setTeamGridLabelRef(i)}
-                labelHeight={teamGridLabelHeight}
+          {teamNeeds2xlCarousel ? (
+            // More than 4 team members: reuse the exact same carousel
+            // (arrows + drag/scroll) used on lg/xl, just sized for 4
+            // visible cards at the 2xl card width.
+            <div className="hidden 2xl:block">
+              <TeamCarousel
+                people={teamPeople}
+                visibleCount={4}
+                cardWidthPx={CARD_W_2XL}
               />
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="hidden grid-cols-4 justify-items-center gap-30 px-20 2xl:grid 3xl:gap-20 3xl:px-50">
+              {teamPeople.map((p, i) => (
+                <PersonCard
+                  key={p.id ?? p.name}
+                  {...p}
+                  labelRef={setTeamGridLabelRef(i)}
+                  labelHeight={teamGridLabelHeight}
+                />
+              ))}
+            </div>
+          )}
         </>
       ) : null}
     </section>
