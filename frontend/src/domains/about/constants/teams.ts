@@ -141,6 +141,16 @@ export const teamRow: Person[] = [
 export const CARD_W = 280;
 export const CARD_W_2XL = 340;
 
+/**
+ * Exact CMS upload size for About Us team / trustee photos.
+ * PersonCard frame is aspect 320/380 with object-cover (head/top-weighted).
+ *
+ * Why 960×1140:
+ * - Exact 320:380 ratio (same as the card)
+ * - 3× the design frame — sharp on desktop (up to 340px) and mobile
+ */
+export const TEAM_IMAGE_SIZE = { width: 960, height: 1140 } as const;
+
 export const XS_FIXED_CARD_WIDTH = "w-[260px]";
 
 export const SM_FLUID_CARD_WIDTH =

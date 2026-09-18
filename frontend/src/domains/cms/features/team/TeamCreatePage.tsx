@@ -44,9 +44,10 @@ export default function TeamCreatePage() {
         title="Add team member / trustee"
         description={
           <>
-            Choose <strong>Team</strong> or <strong>Trustee</strong>, upload a
-            photo, and set status to <strong>published</strong> to show on the
-            website.
+            Photo must be exactly{" "}
+            <strong>960 × 1140px</strong> (320:380 WebP/AVIF). Choose{" "}
+            <strong>Team</strong> or <strong>Trustee</strong>, set status to{" "}
+            <strong>published</strong> to show on About Us.
           </>
         }
       />
