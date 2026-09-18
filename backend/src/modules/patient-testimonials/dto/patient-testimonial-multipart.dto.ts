@@ -20,7 +20,7 @@ export class CreatePatientTestimonialMultipartDto extends CreatePatientTestimoni
   @ApiPropertyOptional({
     type: 'string',
     format: 'binary',
-     description: 'Testimonial video (MP4, WebM, max 50MB)',
+     description: 'Testimonial video (MP4, WebM)',
   })
   patientTestimonialFile?: unknown;
 }
