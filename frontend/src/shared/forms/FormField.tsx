@@ -25,12 +25,12 @@ export default function FormField({
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={fieldId} className="block">
-        <Typography variant="body-8" as="span" className="text-[#4D4539]">
+        <Typography variant="body-8" as="span" className="font-manrope font-medium text-[#4D4539]">
           {label}
         </Typography>
         {required && (
           <span className="ml-0.5">
-            <Typography variant="body-8" as="span" className="text-[#4D4539]">
+            <Typography variant="body-8" as="span" className="font-manrope font-medium text-[#4D4539]">
               *
             </Typography>
           </span>
@@ -52,7 +52,7 @@ export default function FormField({
       )}
       {error && (
         <div className="mt-0.5">
-          <Typography variant="caption-1" as="span" className="text-red-500">
+          <Typography variant="caption-1" as="span" className="font-manrope font-normal text-red-500">
             {error}
           </Typography>
         </div>

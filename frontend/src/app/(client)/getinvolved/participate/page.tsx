@@ -28,22 +28,21 @@ export default function ParticipatePage() {
           <div className="md:col-span-6 max-w-xl">
             <div className="flex items-center gap-2 mb-2">
               <span className="inline-block size-2 rounded-full bg-[#6F5E09]" />
-              <Typography variant="body-8" as="span" className="text-[#6F5E09]">
+              <Typography variant="body-8" as="span" className="font-manrope font-normal text-[#6F5E09]">
                 Our Mission
               </Typography>
             </div>
             <Typography
               variant="heading-1"
               as="h1"
-              className="text-[#0D2838]"
-              style={{ textAlign: "left" }}
+              className="font-tiempos-headline font-normal text-left text-[#0D2838]"
             >
               Art Gallery & Art Therapy Sessions
             </Typography>
           </div>
           <div className="md:col-span-6 md:pt-7 flex justify-start md:justify-end">
             <div className="max-w-[35.5rem] text-left">
-              <Typography variant="body-10" as="p" className="text-[#596D79]">
+              <Typography variant="body-10" as="p" className="font-argestadisplay font-normal text-[#596D79]">
                 Your time, skills and support can bring hope to patients and families. Explore the different ways you can get involved with HCG Foundation.
               </Typography>
             </div>
@@ -80,12 +79,12 @@ export default function ParticipatePage() {
               <div className="p-6 sm:p-7 pt-3 flex-1 flex flex-col justify-between">
                 <div>
                   <div className="mb-3">
-                    <Typography variant="heading-10" as="h2" className="text-[#0D2838]">
+                    <Typography variant="heading-10" as="h2" className="font-argestadisplay font-normal text-[#0D2838]">
                       {card.title}
                     </Typography>
                   </div>
                   <div className="mb-6">
-                    <Typography variant="body-9" as="p" className="text-[#6C6C6C]">
+                    <Typography variant="body-9" as="p" className="font-manrope font-normal text-[#6C6C6C]">
                       {card.description}
                     </Typography>
                   </div>
@@ -99,7 +98,7 @@ export default function ParticipatePage() {
                     }
                     className="inline-flex items-center gap-2 px-6 py-3 bg-[#FCCC2D] text-[#2D2D2D] rounded-md shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
                   >
-                    <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
+                    <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#2D2D2D]">
                       Apply Now
                     </Typography>
                     <ArrowUpRight className="size-4 sm:size-5 text-[#2D2D2D]" />
@@ -126,13 +125,12 @@ export default function ParticipatePage() {
                   <Typography
                     variant="body-1"
                     as="h3"
-                    className="text-[#2C2C2C]"
-                    style={{ textAlign: "left" }}
+                    className="font-argestadisplay font-normal text-left text-[#2C2C2C]"
                   >
                     {benefit.title}
                   </Typography>
                 </div>
-                <Typography variant="body-9" as="p" className="text-[#6C6C6C]">
+                <Typography variant="body-9" as="p" className="font-manrope font-normal text-[#6C6C6C]">
                   {benefit.description}
                 </Typography>
               </div>

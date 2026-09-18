@@ -21,15 +21,14 @@ export default function GrantsAndPhilanthropyPage() {
             <Typography
               variant="heading-1"
               as="h1"
-              className="text-[#0D2838]"
-              style={{ textAlign: "left" }}
+              className="font-tiempos-headline font-normal text-left text-[#0D2838]"
             >
               Creating Lasting Change Through Partnership
             </Typography>
           </div>
           <div className="md:col-span-6 flex justify-start md:justify-end">
             <div className="max-w-[35.5rem] text-left">
-              <Typography variant="body-10" as="p" className="text-[#596D79]">
+              <Typography variant="body-10" as="p" className="font-argestadisplay font-normal text-[#596D79]">
                 HCG Foundation welcomes partnerships with grant-making foundations, trusts, and philanthropic organizations aligned with our mission of equitable cancer care.
               </Typography>
             </div>
@@ -54,11 +53,11 @@ export default function GrantsAndPhilanthropyPage() {
                 </div>
                 <div>
                   <div className="mb-2">
-                    <Typography variant="heading-10" as="h2" className="text-[#0D2838]">
+                    <Typography variant="heading-10" as="h2" className="font-argestadisplay font-normal text-[#0D2838]">
                       {card.title}
                     </Typography>
                   </div>
-                  <Typography variant="body-9" as="p" className="text-[#606060]">
+                  <Typography variant="body-9" as="p" className="font-manrope font-normal text-[#606060]">
                     {card.description}
                   </Typography>
                 </div>
@@ -84,8 +83,7 @@ export default function GrantsAndPhilanthropyPage() {
               <Typography
                 variant="heading-1"
                 as="h2"
-                className="text-[#0D2838]"
-                style={{ textAlign: "left" }}
+                className="font-tiempos-headline font-normal text-left text-[#0D2838]"
               >
                 Creating Lasting Change Through Partnership
               </Typography>
@@ -93,7 +91,7 @@ export default function GrantsAndPhilanthropyPage() {
           </div>
           <div className="lg:col-span-5 flex flex-col items-start gap-4 sm:gap-5">
             <div className="max-w-md text-justify">
-              <Typography variant="body-10" as="p" className="text-[#121212]">
+              <Typography variant="body-10" as="p" className="font-argestadisplay font-normal text-[#121212]">
                 Your contribution can help a patient receive care, give a family hope, and help build healthier communities.
               </Typography>
             </div>
@@ -102,7 +100,7 @@ export default function GrantsAndPhilanthropyPage() {
               onClick={() => setIsPartnerModalOpen(true)}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 lg:px-8 lg:py-4 bg-[#FCCC2D] text-[#2D2D2D] rounded-md shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
             >
-              <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
+              <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#2D2D2D]">
                 Partner With Us
               </Typography>
               <ArrowUpRight className="size-4 sm:size-5 lg:size-6 text-[#2D2D2D]" />

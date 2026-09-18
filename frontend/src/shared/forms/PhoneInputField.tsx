@@ -23,18 +23,18 @@ export default function PhoneInputField({
   return (
     <div className="flex flex-col gap-1">
       <label className="block">
-        <Typography variant="body-8" as="span" className="text-[#4D4539]">
+        <Typography variant="body-8" as="span" className="font-manrope font-medium text-[#4D4539]">
           {label}
         </Typography>
         {required && (
           <span className="ml-0.5">
-            <Typography variant="body-8" as="span" className="text-[#4D4539]">
+            <Typography variant="body-8" as="span" className="font-manrope font-medium text-[#4D4539]">
               *
             </Typography>
           </span>
         )}
       </label>
-      <div className="custom-phone-input-wrapper w-full border-b border-[#C7B793] py-1 text-[#2E1C12]">
+      <div className="w-full border-b border-[#C7B793] py-1 text-[#2E1C12] [&_.PhoneInputInput]:bg-transparent [&_.PhoneInputInput]:border-none [&_.PhoneInputInput]:outline-none [&_.PhoneInputInput]:text-[#2E1C12] [&_.PhoneInputInput]:w-full [&_.PhoneInputInput]:text-base [&_.PhoneInputCountrySelect]:bg-[#FFF4D4] [&_.PhoneInputCountrySelect]:border-none [&_.PhoneInputCountrySelect]:outline-none [&_.PhoneInputCountrySelect]:text-[#2E1C12] [&_.PhoneInputCountrySelect]:cursor-pointer [&_.PhoneInputCountryIcon]:w-6 [&_.PhoneInputCountryIcon]:h-4 [&_.PhoneInputCountryIcon]:rounded-xs [&_.PhoneInputCountryIcon]:shadow-xs">
         <PhoneInput
           international
           defaultCountry="IN"
@@ -45,37 +45,11 @@ export default function PhoneInputField({
       </div>
       {error && (
         <div className="mt-0.5">
-          <Typography variant="caption-1" as="span" className="text-red-500">
+          <Typography variant="caption-1" as="span" className="font-manrope font-normal text-red-500">
             {error}
           </Typography>
         </div>
       )}
-      
-      <style jsx global>{`
-        .custom-phone-input-wrapper .PhoneInputInput {
-          background: transparent;
-          border: none;
-          outline: none;
-          color: #2E1C12;
-          font-family: inherit;
-          font-size: 1rem;
-          width: 100%;
-        }
-        .custom-phone-input-wrapper .PhoneInputCountrySelect {
-          background: #FFF4D4;
-          border: none;
-          outline: none;
-          color: #2E1C12;
-          font-family: inherit;
-          cursor: pointer;
-        }
-        .custom-phone-input-wrapper .PhoneInputCountryIcon {
-          width: 1.5rem;
-          height: 1rem;
-          border-radius: 0.125rem;
-          box-shadow: 0 0.0625rem 0.125rem rgba(0, 0, 0, 0.1);
-        }
-      `}</style>
     </div>
   );
 }

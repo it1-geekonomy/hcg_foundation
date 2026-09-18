@@ -10,7 +10,7 @@ export default function FormError({ message, className = "" }: FormErrorProps) {
   if (!message) return null;
   return (
     <div className={`mt-0.5 ${className}`}>
-      <Typography variant="caption-1" as="span" className="text-red-500">
+      <Typography variant="caption-1" as="span" className="font-manrope font-normal text-red-500">
         {message}
       </Typography>
     </div>

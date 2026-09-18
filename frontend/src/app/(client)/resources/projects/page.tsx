@@ -35,10 +35,9 @@ export default function ProjectsPage() {
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         <div className="mb-8 sm:mb-12">
           <Typography
-            variant="heading-1"
+            variant="heading-2"
             as="h1"
-            className="text-[#0D2838]"
-            style={{ textAlign: "left" }}
+            className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
           >
             Projects
           </Typography>

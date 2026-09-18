@@ -58,13 +58,13 @@ export default function PatientStoriesPage() {
                 {/* Left: Patient Name & Date */}
                 <div className="flex flex-col text-white min-w-0">
                   <div className="truncate drop-shadow-xs">
-                    <Typography variant="heading-8" as="h3" className="text-white">
+                    <Typography variant="heading-8" as="h3" className="font-manrope font-bold text-white">
                       {story.patientName}
                     </Typography>
                   </div>
                   <div className="mt-1 flex items-center gap-1.5">
                     <Calendar className="size-3 text-white shrink-0" />
-                    <Typography variant="body-8" as="span" className="text-white">
+                    <Typography variant="body-8" as="span" className="font-manrope font-medium text-white">
                       {story.date}
                     </Typography>
                   </div>

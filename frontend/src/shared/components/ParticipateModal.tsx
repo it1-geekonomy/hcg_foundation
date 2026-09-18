@@ -145,19 +145,19 @@ export default function ParticipateModal({
           {/* Header Title & Subtitle matching Figma 100% */}
           <div className="text-center max-w-xl mx-auto mb-6 sm:mb-8">
             <div className="mb-1">
-              <Typography variant="heading-5" as="h2" className="text-[#2E1C12]">
+              <Typography variant="heading-5" as="h2" className="font-tiempos-headline font-normal italic text-[#2E1C12]">
                 {isIntern && "Apply for Internship at"}
                 {isFundraise && "Start a Fundraising Campaign at"}
                 {!isIntern && !isFundraise && "Become a Volunteer at"}
               </Typography>
             </div>
             <div className="mb-3">
-              <Typography variant="heading-5" as="div">
+              <Typography variant="heading-5" as="div" className="font-tiempos-headline font-normal italic">
                 <span className="text-[#0083B0]">HCG </span>
                 <span className="text-[#DF6A4B]">Foundation</span>
               </Typography>
             </div>
-            <Typography variant="body-8" as="p" className="text-[#6C6048]">
+            <Typography variant="body-8" as="p" className="font-manrope font-normal text-[#6C6048]">
               {isIntern &&
                 "Passionate about making a difference? Join the HCG Foundation Internship Program to gain hands-on experience, learn from experts, and build skills for your future career."}
               {isFundraise &&
@@ -171,11 +171,11 @@ export default function ParticipateModal({
           {submitted ? (
             <div className="my-8 p-6 bg-[#FFF9EA] border border-[#F3E3B6] rounded-lg text-center">
               <div className="mb-2">
-                <Typography variant="heading-3" as="h3" className="text-[#2E1C12]">
+                <Typography variant="heading-3" as="h3" className="font-manrope font-medium text-[#2E1C12]">
                   Application Submitted!
                 </Typography>
               </div>
-              <Typography variant="body-8" as="p" className="text-[#6C6048]">
+              <Typography variant="body-8" as="p" className="font-manrope font-normal text-[#6C6048]">
                 Thank you for reaching out to HCG Foundation. Our team will review your application and get in touch with you soon.
               </Typography>
             </div>
@@ -468,7 +468,7 @@ export default function ParticipateModal({
                   htmlFor="participate-terms"
                   className="cursor-pointer"
                 >
-                  <Typography variant="caption-1" as="span" className="text-[#6C6048]">
+                  <Typography variant="caption-1" as="span" className="font-manrope font-normal text-[#6C6048]">
                     I have read and agree to the{" "}
                   </Typography>
                   <a
@@ -477,7 +477,7 @@ export default function ParticipateModal({
                     rel="noopener noreferrer"
                     className="underline hover:opacity-80 transition-opacity"
                   >
-                    <Typography variant="caption-1" as="span" className="text-[#D99A00]">
+                    <Typography variant="caption-1" as="span" className="font-manrope font-medium text-[#D99A00]">
                       Terms & Conditions
                     </Typography>
                   </a>
@@ -489,7 +489,7 @@ export default function ParticipateModal({
                 type="submit"
                 className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#382E07] rounded-lg shadow-xs transition duration-300 hover:bg-[#E9B510] hover:shadow-md cursor-pointer"
               >
-                <Typography variant="button-1" as="span" className="text-[#382E07]">
+                <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#382E07]">
                   Submit Application
                 </Typography>
               </button>

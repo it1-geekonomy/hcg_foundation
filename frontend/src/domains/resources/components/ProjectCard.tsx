@@ -36,17 +36,16 @@ export default function ProjectCard({
             <Typography
               variant="body-1"
               as={headingTag}
-              className="text-white group-hover:text-[#FCCC2D] transition"
-              style={{ textAlign: "left" }}
+              className="font-argestadisplay font-normal text-left text-white"
             >
               {project.title}
             </Typography>
           </div>
 
           <div className="flex items-center gap-2 min-w-0">
-            <Calendar className="size-4 text-white/90 shrink-0" />
+            <Calendar className="size-4 text-white shrink-0" />
             <div className="truncate">
-              <Typography variant="body-8" as="span" className="text-white/90">
+              <Typography variant="body-8" as="span" className="font-manrope font-medium text-white">
                 Project Date: {project.date}
               </Typography>
             </div>
@@ -55,7 +54,7 @@ export default function ProjectCard({
 
         <div className="shrink-0">
           <span className="flex items-center justify-center whitespace-nowrap gap-2 px-4 py-2.5 rounded-md border border-white/10 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs transition duration-300 group-hover:bg-[#E9B510] group-hover:scale-105 cursor-pointer">
-            <Typography variant="button-3" as="span" className="text-[#2D2D2D]">
+            <Typography variant="button-3" as="span" className="font-manrope font-semibold text-[#2D2D2D]">
               Read More
             </Typography>
             <ArrowUpRight className="size-4 text-[#2D2D2D] shrink-0" />

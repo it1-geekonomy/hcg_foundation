@@ -43,7 +43,7 @@ export default async function StoryDetailPage({
             </div>
 
             <div className="mt-4 sm:mt-6 flex flex-wrap items-center gap-2.5 sm:gap-3">
-              <Typography variant="body-10" as="span" className="text-[#C08600]">
+              <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
                 Share this story
               </Typography>
               <div className="flex items-center gap-2">
@@ -82,14 +82,14 @@ export default async function StoryDetailPage({
           {/* Right Column: Patient Name Title, Date, and Full Story Narrative */}
           <div className="sm:col-span-7 flex flex-col">
             {/* Patient Name Title */}
-            <Typography variant="heading-1" as="h1" className="text-[#0D2838]">
+            <Typography variant="heading-1" as="h1" className="font-tiempos-headline font-normal text-left text-[#0D2838]">
               {story.patientName}
             </Typography>
 
             {/* Date with Gold Calendar Icon */}
             <div className="mt-2 sm:mt-2.5 flex items-center gap-2">
               <Calendar className="size-4 text-[#C08600] shrink-0" />
-              <Typography variant="body-10" as="span" className="text-[#C08600]">
+              <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
                 {story.date}
               </Typography>
             </div>
@@ -101,7 +101,7 @@ export default async function StoryDetailPage({
                   key={index}
                   variant="body-10"
                   as="p"
-                  className="text-[#343E43]"
+                  className="font-argestadisplay font-normal text-[#343E43]"
                 >
                   {paragraph}
                 </Typography>
@@ -117,14 +117,14 @@ export default async function StoryDetailPage({
         {relatedStories.length > 0 && (
           <div>
             <div className="flex items-center justify-between">
-              <Typography variant="body-9" as="h2" className="text-[#161A1D]">
+              <Typography variant="body-9" as="h2" className="font-manrope font-medium text-[#161A1D]">
                 Read More Stories
               </Typography>
               <Link
                 href="/journey-of-hope/patient-stories"
                 className="inline-flex items-center gap-1 transition hover:text-[#B88700]"
               >
-                <Typography variant="body-9" as="span" className="text-[#2D2D2D]">
+                <Typography variant="body-9" as="span" className="font-manrope font-semibold text-[#2D2D2D]">
                   View All
                 </Typography>
                 <ArrowUpRight className="size-4 text-[#2D2D2D]" />
@@ -155,13 +155,13 @@ export default async function StoryDetailPage({
                     {/* Left: Patient Name & Date */}
                     <div className="flex flex-col text-white min-w-0">
                       <div className="truncate drop-shadow-xs">
-                        <Typography variant="heading-8" as="h3" className="text-white">
+                        <Typography variant="heading-8" as="h3" className="font-manrope font-bold text-white">
                           {relStory.patientName}
                         </Typography>
                       </div>
                       <div className="mt-1 flex items-center gap-1.5">
                         <Calendar className="size-3 text-white shrink-0" />
-                        <Typography variant="body-8" as="span" className="text-white">
+                        <Typography variant="body-8" as="span" className="font-manrope font-medium text-white">
                           {relStory.date}
                         </Typography>
                       </div>

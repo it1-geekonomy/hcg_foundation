@@ -93,12 +93,12 @@ export default function PartnerWithUsModal({
         <div className="w-full md:w-1/2 p-6 sm:p-8 md:p-10 flex flex-col justify-between overflow-y-auto max-h-[90vh] md:max-h-none">
           <div>
             <div className="mb-2">
-              <Typography variant="heading-5" as="h2" className="text-[#2E1C12]">
+              <Typography variant="heading-5" as="h2" className="font-tiempos-headline font-normal italic text-[#2E1C12]">
                 Be a Part of Someone&apos;s Cancer Journey
               </Typography>
             </div>
             <div className="mb-6">
-              <Typography variant="body-8" as="p" className="text-[#6C6048]">
+              <Typography variant="body-8" as="p" className="font-manrope font-normal text-[#6C6048]">
                 Share a few details and our team will get in touch with you to explore partnership opportunities.
               </Typography>
             </div>
@@ -106,11 +106,11 @@ export default function PartnerWithUsModal({
             {submitted ? (
               <div className="my-8 p-6 bg-[#FFF9EA] border border-[#F3E3B6] rounded-lg text-center">
                 <div className="mb-2">
-                  <Typography variant="heading-3" as="h3" className="text-[#2E1C12]">
+                  <Typography variant="heading-3" as="h3" className="font-manrope font-medium text-[#2E1C12]">
                     Thank You!
                   </Typography>
                 </div>
-                <Typography variant="body-8" as="p" className="text-[#6C6048]">
+                <Typography variant="body-8" as="p" className="font-manrope font-normal text-[#6C6048]">
                   We have received your details and will get in touch shortly.
                 </Typography>
               </div>
@@ -209,7 +209,7 @@ export default function PartnerWithUsModal({
                     htmlFor="modal-terms"
                     className="cursor-pointer"
                   >
-                    <Typography variant="caption-1" as="span" className="text-[#6C6048]">
+                    <Typography variant="caption-1" as="span" className="font-manrope font-normal text-[#6C6048]">
                       I have read and agree to the{" "}
                     </Typography>
                     <a
@@ -218,7 +218,7 @@ export default function PartnerWithUsModal({
                       rel="noopener noreferrer"
                       className="underline hover:opacity-80 transition-opacity"
                     >
-                      <Typography variant="caption-1" as="span" className="text-[#D99A00]">
+                      <Typography variant="caption-1" as="span" className="font-manrope font-medium text-[#D99A00]">
                         Terms & Conditions
                       </Typography>
                     </a>
@@ -230,7 +230,7 @@ export default function PartnerWithUsModal({
                   type="submit"
                   className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#382E07] rounded-lg shadow-xs transition duration-300 hover:bg-[#E9B510] hover:shadow-md cursor-pointer"
                 >
-                  <Typography variant="button-1" as="span" className="text-[#382E07]">
+                  <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#382E07]">
                     Submit
                   </Typography>
                 </button>

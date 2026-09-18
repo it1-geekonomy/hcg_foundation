@@ -62,31 +62,35 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-12 sm:gap-10 lg:gap-14 items-start">
           <div className="sm:col-span-7 flex flex-col">
             <Typography
-              variant="heading-1"
+              variant="heading-2"
               as="h1"
-              className="text-[#0D2838]"
-              style={{ textAlign: "left" }}
+              className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
             >
               {projectItem.title}
             </Typography>
 
             <div className="mt-3 sm:mt-4 flex items-center gap-2">
-              <Calendar className="size-4 text-[#B88700] shrink-0" />
-              <Typography variant="body-10" as="span" className="text-[#B88700]">
+              <Calendar className="size-4 text-[#C08600] shrink-0" />
+              <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
                 Project Date: {projectItem.date}
               </Typography>
             </div>
 
             <div className="mt-5 sm:mt-6 space-y-4 text-left">
               {projectItem.fullStory.split("\n\n").map((paragraph, index) => (
-                <Typography key={index} variant="body-10" as="p" className="text-[#596D79]">
+                <Typography
+                  key={index}
+                  variant="body-10"
+                  as="p"
+                  className="font-argestadisplay font-normal text-justify text-[#596D79]"
+                >
                   {paragraph}
                 </Typography>
               ))}
             </div>
 
             <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-2.5 sm:gap-3">
-              <Typography variant="body-10" as="span" className="text-[#B88700]">
+              <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
                 Share this story
               </Typography>
               <div className="flex items-center gap-2">
@@ -141,19 +145,18 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           <Typography
             variant="heading-6"
             as="h2"
-            className="text-[#0D2838]"
-            style={{ textAlign: "left" }}
+            className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
           >
             Related Articles
           </Typography>
           <Link
             href="/resources/projects"
-            className="inline-flex items-center gap-1 text-[#0D2838] transition hover:text-[#B88700]"
+            className="inline-flex items-center gap-1 text-[#2D2D2D] transition hover:text-[#B88700]"
           >
-            <Typography variant="body-7" as="span" className="text-[#0D2838]">
+            <Typography variant="body-9" as="span" className="font-manrope font-semibold text-[#2D2D2D]">
               View All
             </Typography>
-            <ArrowUpRight className="size-4 text-[#0D2838]" />
+            <ArrowUpRight className="size-4 text-[#2D2D2D]" />
           </Link>
         </div>
 

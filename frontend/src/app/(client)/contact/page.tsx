@@ -1,63 +1,34 @@
 "use client";
 
 import React from "react";
-import { Phone, Mail, MapPin, ExternalLink, Navigation, Star } from "lucide-react";
+import { ExternalLink, Navigation, Star } from "lucide-react";
+import { CONTACT_INFO } from "@/domains/contact/constants/contact";
 import Typography from "@/lib/Typography";
 import DonateForm from "@/shared/components/DonateForm";
 import ContactForm from "@/shared/components/ContactForm";
 
 const CONTAINER = "max-w-[75rem] 2xl:max-w-[100rem] mx-auto px-4 sm:px-6";
 
-const CONTACT_INFO = [
-  {
-    icon: Phone,
-    title: "Phone Number",
-    content: (
-      <div className="mt-1">
-        <Typography variant="body-9" as="p" className="text-[#0D2838]">
-          +91 80 3366 9999
-        </Typography>
-      </div>
-    ),
-  },
-  {
-    icon: Mail,
-    title: "Email",
-    content: (
-      <div className="mt-1">
-        <Typography variant="body-9" as="p" className="text-[#0D2838]">
-          hcgfoundation@gmail.com
-        </Typography>
-      </div>
-    ),
-  },
-  {
-    icon: MapPin,
-    title: "Address",
-    content: (
-      <div className="mt-1">
-        <Typography variant="body-9" as="p" className="text-[#0D2838]">
-          Ground Floor, Tower Block
-          <br />
-          Unity Building Complex, Mission Road
-          <br />
-          Bangalore 560027, Karnataka, India
-        </Typography>
-      </div>
-    ),
-  },
-];
+
 
 export default function ClientContact() {
   return (
     <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope pt-24 sm:pt-28 lg:pt-32">
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         <div className="w-full text-left">
-          <Typography variant="heading-2" as="h1" className="text-[#0D2838]">
+          <Typography
+            variant="heading-2"
+            as="h1"
+            className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
+          >
             Let&apos;s Connect
           </Typography>
-          <div className="mt-3 sm:mt-4 max-w-full lg:max-w-[68.75rem] text-justify">
-            <Typography variant="body-10" as="p" className="text-[#596D79]">
+          <div className="mt-3 sm:mt-4 max-w-full lg:max-w-[68.75rem]">
+            <Typography
+              variant="body-10"
+              as="p"
+              className="font-argestadisplay font-normal text-justify text-[#596D79]"
+            >
               Whether you&apos;re seeking patient support, exploring partnership
               opportunities, interested in volunteering, or simply have a
               question, we&apos;re here to help. Reach out to us, and our team
@@ -74,7 +45,11 @@ export default function ClientContact() {
                   <item.icon className="size-7 sm:size-8" />
                 </div>
                 <div className="flex flex-col">
-                  <Typography variant="body-2" as="span" className="text-[#0D2838]">
+                  <Typography
+                    variant="body-2"
+                    as="span"
+                    className="font-argestadisplay font-normal text-left text-[#0D2838]"
+                  >
                     {item.title}
                   </Typography>
                   {item.content}
@@ -91,7 +66,7 @@ export default function ClientContact() {
         <div className="relative mt-10 sm:mt-14 overflow-hidden rounded-[0.625rem] border border-[#EFEAD8] bg-white shadow-xs">
           <div className="absolute top-4 left-4 z-10 hidden sm:block max-w-[16.25rem] rounded-lg bg-white/95 p-4 shadow-md backdrop-blur-xs border border-black/5">
             <div className="flex items-center justify-between gap-2">
-              <Typography variant="body-8" as="span" className="text-[#2E1C12]">
+              <Typography variant="body-8" as="span" className="font-manrope text-[#2E1C12]">
                 HCG Foundation
               </Typography>
               <div className="flex items-center gap-2">
@@ -116,7 +91,7 @@ export default function ClientContact() {
               </div>
             </div>
             <div className="mt-1.5">
-              <Typography variant="body-8" as="p" className="text-[#5F6368]">
+              <Typography variant="body-8" as="p" className="font-manrope text-[#5F6368]">
                 Ground Floor, Tower Block, UNITY BUILDING, Kalinga Rao Rd, Bengaluru, Karnataka 560027
               </Typography>
             </div>

@@ -54,7 +54,7 @@ export const FOOTER_QUICK_LINKS = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about-us" },
   { label: "Patient Stories", href: "/journey-of-hope/patient-stories" },
-  { label: "Patient Testimonials", href: "/journey-of-hope/patient-testimonials" },
+  { label: "Patient Testimonials", href: "/journey-of-hope/testimonials" },
   { label: "Patient Aid", href: "/our-programs/financial-support-for-pediatric-patients" },
   { label: "Donate Now", href: "#donate-form" },
   { label: "Contact Us", href: "/contact" },

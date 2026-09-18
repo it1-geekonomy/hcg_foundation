@@ -31,11 +31,11 @@ export default function ContactForm() {
   return (
     <div className="w-full max-w-full lg:max-w-[45rem] min-h-[32.481rem] rounded-[0.625rem] bg-[#FFF4D4] p-6 sm:p-8 lg:p-[2.125rem_2.5625rem] border border-[#F3E3B6] flex flex-col justify-between items-start gap-4 lg:gap-[0.581rem]">
       <div className="w-full">
-        <Typography variant="heading-7" as="h2" className="text-[#505050]">
+        <Typography variant="heading-7" as="h2" className="font-manrope font-bold text-left text-[#505050]">
           Send Us a Message
         </Typography>
-        <div className="mt-2 text-justify">
-          <Typography variant="body-8" as="p" className="text-[#505050]">
+        <div className="mt-2">
+          <Typography variant="body-8" as="p" className="font-manrope font-normal text-justify text-[#505050]">
             Have a question or would like to collaborate with us? Fill out the form below, and our team will get back to you as soon as possible.
           </Typography>
         </div>
@@ -45,12 +45,12 @@ export default function ContactForm() {
         <div className="mt-6 w-full flex flex-col items-center justify-center rounded-[0.625rem] bg-white p-6 sm:p-8 text-center border border-[#FDE599] my-auto">
           <CheckCircle2 className="size-12 sm:size-14 text-[#2E7D32]" />
           <div className="mt-4">
-            <Typography variant="heading-8" as="h3" className="text-[#382E07]">
+            <Typography variant="heading-8" as="h3" className="font-manrope font-bold text-[#382E07]">
               Message Sent Successfully!
             </Typography>
           </div>
           <div className="mt-2">
-            <Typography variant="body-2" as="p" className="text-[#5C5232]">
+            <Typography variant="body-2" as="p" className="font-manrope font-normal text-[#5C5232]">
               Thank you for reaching out to HCG Foundation. We will respond to your message shortly.
             </Typography>
           </div>
@@ -59,7 +59,7 @@ export default function ContactForm() {
             onClick={() => setFormSubmitted(false)}
             className="mt-6 rounded-md bg-[#FDC61D] px-6 py-2.5 transition hover:bg-[#E9B510] cursor-pointer"
           >
-            <Typography variant="body-8" as="span" className="text-[#382E07]">
+            <Typography variant="body-8" as="span" className="font-manrope font-semibold text-[#382E07]">
               Send Another Message
             </Typography>
           </button>
