@@ -15,17 +15,58 @@ function awardKey(award: AwardItem, index: number) {
   return award.id ?? `${award.title}-${index}`;
 }
 
+function AwardScrollArrow({
+  direction,
+  disabled,
+  onClick,
+}: {
+  direction: "left" | "right";
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  const isLeft = direction === "left";
+  return (
+    <button
+      type="button"
+      aria-label={isLeft ? "Scroll to previous award" : "Scroll to next award"}
+      onClick={onClick}
+      disabled={disabled}
+      className={`pointer-events-auto flex h-10 w-10 items-center justify-center transition-opacity ${
+        isLeft
+          ? "-ml-4 sm:-ml-6 lg:-ml-10"
+          : "-mr-4 sm:-mr-6 lg:-mr-10"
+      } ${
+        disabled
+          ? "cursor-not-allowed opacity-40"
+          : "cursor-pointer opacity-100"
+      }`}
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path
+          d={isLeft ? "M15 18l-6-6 6-6" : "M9 6l6 6-6 6"}
+          stroke="#382E07"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
+  );
+}
+
+/**
+ * Shared About Us awards section — used on the public site and in CMS preview.
+ * Arrow centering is pure CSS (image-height rail), so scaled CMS preview matches the website.
+ */
 export default function AwardsRecognition({
   items,
   className = "",
   hideIntro = false,
 }: AwardsRecognitionProps) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const firstImageRef = useRef<HTMLDivElement>(null);
   const titleRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
-  const [arrowTop, setArrowTop] = useState<number | null>(null);
   const [titleHeight, setTitleHeight] = useState<number | null>(null);
 
   const updateScrollState = useCallback(() => {
@@ -33,12 +74,6 @@ export default function AwardsRecognition({
     if (!el) return;
     setCanScrollLeft(el.scrollLeft > 4);
     setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  }, []);
-
-  const updateArrowPosition = useCallback(() => {
-    const imageEl = firstImageRef.current;
-    if (!imageEl) return;
-    setArrowTop(imageEl.offsetHeight / 2);
   }, []);
 
   const updateTitleHeight = useCallback(() => {
@@ -50,8 +85,8 @@ export default function AwardsRecognition({
   useEffect(() => {
     titleRefs.current = titleRefs.current.slice(0, items.length);
     updateScrollState();
-    updateArrowPosition();
     updateTitleHeight();
+
     const el = trackRef.current;
     if (!el) return;
 
@@ -60,7 +95,6 @@ export default function AwardsRecognition({
 
     const onResize = () => {
       updateScrollState();
-      updateArrowPosition();
       updateTitleHeight();
     };
     window.addEventListener("resize", onResize);
@@ -69,7 +103,7 @@ export default function AwardsRecognition({
       el.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
     };
-  }, [items, updateScrollState, updateArrowPosition, updateTitleHeight]);
+  }, [items, updateScrollState, updateTitleHeight]);
 
   const scrollByCard = (direction: "left" | "right") => {
     const el = trackRef.current;
@@ -86,7 +120,6 @@ export default function AwardsRecognition({
   if (items.length === 0) return null;
 
   const showArrows = canScrollLeft || canScrollRight;
-  const arrowStyle = arrowTop !== null ? { top: `${arrowTop}px` } : undefined;
 
   return (
     <section
@@ -114,53 +147,29 @@ export default function AwardsRecognition({
       ) : null}
 
       <div className={hideIntro ? "relative" : "relative mt-10"}>
+        {/*
+          Arrow rail height = award image (4:5). Same CSS on site + CMS —
+          no JS measurement, so scaled preview cannot drift.
+        */}
         {showArrows ? (
-          <>
-            <button
-              type="button"
-              aria-label="Scroll to previous award"
-              onClick={() => scrollByCard("left")}
-              disabled={!canScrollLeft}
-              style={arrowStyle}
-              className={`absolute -left-4 top-1/3 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center transition-opacity sm:-left-6 lg:-left-10 ${
-                canScrollLeft
-                  ? "cursor-pointer opacity-100"
-                  : "cursor-not-allowed opacity-40"
-              }`}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-                <path
-                  d="M15 18l-6-6 6-6"
-                  stroke="#382E07"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              aria-label="Scroll to next award"
-              onClick={() => scrollByCard("right")}
-              disabled={!canScrollRight}
-              style={arrowStyle}
-              className={`absolute -right-4 top-1/3 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center transition-opacity sm:-right-6 lg:-right-10 ${
-                canScrollRight
-                  ? "cursor-pointer opacity-100"
-                  : "cursor-not-allowed opacity-40"
-              }`}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-                <path
-                  d="M9 6l6 6-6 6"
-                  stroke="#382E07"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          </>
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 grid">
+            <div
+              aria-hidden
+              className="col-start-1 row-start-1 mx-auto aspect-[4/5] w-[80%] sm:mx-0 sm:w-[calc(50%-12px)] lg:w-[calc(50%-24px)]"
+            />
+            <div className="col-start-1 row-start-1 flex items-center justify-between self-stretch">
+              <AwardScrollArrow
+                direction="left"
+                disabled={!canScrollLeft}
+                onClick={() => scrollByCard("left")}
+              />
+              <AwardScrollArrow
+                direction="right"
+                disabled={!canScrollRight}
+                onClick={() => scrollByCard("right")}
+              />
+            </div>
+          </div>
         ) : null}
 
         <div
@@ -178,13 +187,6 @@ export default function AwardsRecognition({
                 titleRef={(el) => {
                   titleRefs.current[index] = el;
                 }}
-                imageRef={
-                  index === 0
-                    ? (el) => {
-                        firstImageRef.current = el;
-                      }
-                    : undefined
-                }
               />
             </div>
           ))}
