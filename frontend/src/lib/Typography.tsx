@@ -10,14 +10,19 @@ import {
   type TypographyVariant,
 } from "./type-scale";
 
-export interface TypographyProps {
+type TypographyOwnProps = {
   children: React.ReactNode;
   /** Figma text style id from typography/specs.ts */
   variant?: TypographyVariant;
   as?: React.ElementType;
   className?: string;
   style?: React.CSSProperties;
-}
+};
+
+export type TypographyProps = TypographyOwnProps &
+  Omit<React.HTMLAttributes<HTMLElement>, keyof TypographyOwnProps | "color"> & {
+    htmlFor?: string;
+  };
 
 const Typography = ({
   children,
@@ -25,6 +30,7 @@ const Typography = ({
   as,
   className,
   style,
+  ...rest
 }: TypographyProps) => {
   const { scale, style: variantStyle } = getTypographyStyles(variant);
   const Tag: React.ElementType =
@@ -35,6 +41,7 @@ const Typography = ({
 
   return (
     <Tag
+      {...rest}
       {...{ [TYPO_FLUID_ATTR]: "" }}
       className={cn(scale.fontClass, weightClass, fontStyleClass, className)}
       style={{ ...variantStyle, ...style }}

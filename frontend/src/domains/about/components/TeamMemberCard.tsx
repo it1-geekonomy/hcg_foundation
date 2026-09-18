@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import Typography from "@/lib/Typography";
 import { cn } from "@/lib/utils";
+import { ImageUnavailableNotice } from "./shared/ImageUnavailableNotice";
 
 export type TeamMemberCardProps = {
   href?: string;
@@ -21,26 +24,31 @@ export default function TeamMemberCard({
   description,
   variant = "trustee",
 }: TeamMemberCardProps) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const showImage = Boolean(imageUrl?.trim()) && !imageFailed;
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [imageUrl]);
+
   const idleBarClass =
     variant === "team" ? "bg-[#B89B6E]/90" : "bg-[#1C1C1C]/88";
 
   const inner = (
     <>
-      {/* Photo */}
       <div className="absolute inset-0">
-        {imageUrl ? (
+        {showImage ? (
           <Image
-            src={imageUrl}
+            src={imageUrl!}
             alt={name}
             fill
             className="object-cover object-top grayscale transition duration-500 group-hover:scale-[1.03]"
             sizes="(max-width: 640px) 50vw, 280px"
             unoptimized
+            onError={() => setImageFailed(true)}
           />
         ) : (
-          <div className="flex size-full items-center justify-center bg-[#E8E0D0] font-manrope text-sm text-[#9A9A9A]">
-            No photo
-          </div>
+          <ImageUnavailableNotice />
         )}
         <div
           aria-hidden
@@ -48,7 +56,6 @@ export default function TeamMemberCard({
         />
       </div>
 
-      {/* Idle: name + role pinned at bottom */}
       <div
         className={cn(
           "absolute inset-x-0 bottom-0 z-10 px-4 py-3.5 transition-opacity duration-300 group-hover:pointer-events-none group-hover:opacity-0",
@@ -65,10 +72,6 @@ export default function TeamMemberCard({
         ) : null}
       </div>
 
-      {/*
-        Hover panel: light wash slides up from bottom,
-        covering the portrait with name + role + description.
-      */}
       <div
         className={cn(
           "absolute inset-0 z-20 flex translate-y-full flex-col bg-[#E8F0F6]/95 px-4 py-5 backdrop-blur-[2px] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] sm:px-5 sm:py-6",
@@ -88,11 +91,7 @@ export default function TeamMemberCard({
             <p className="mt-3 font-manrope text-xs leading-relaxed text-[#163A58] sm:mt-4 sm:text-[13px] sm:leading-relaxed">
               {description}
             </p>
-          ) : (
-            <p className="mt-3 font-manrope text-xs text-[#1A4A6E]/60">
-              No description added yet.
-            </p>
-          )}
+          ) : null}
         </div>
       </div>
     </>

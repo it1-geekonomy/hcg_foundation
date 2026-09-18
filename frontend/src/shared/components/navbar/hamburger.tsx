@@ -69,13 +69,16 @@ export function MobileMenuPanel({
       <div className="flex flex-col items-start gap-1 bg-black/[0.18] px-[clamp(1rem,3vw,1.5rem)] pb-6 pt-3 border-t border-white/10 mt-1 text-left">
         {navLinks.map((link, i) => {
           const isOpen = openDropdown === i;
+          const isChildActive =
+            link.hasDropdown && link.dropdownItems?.some((item) => item.href === pathname);
+          const isLinkActive = link.href === pathname || isChildActive;
 
           return (
             <div key={i} className="w-full">
               {link.hasDropdown ? (
                 <button
                   onClick={() => toggleDropdown(i)}
-                  className={`group w-full flex items-center justify-between gap-2 py-3.5 text-left transition-all duration-300 ease-in-out delay-[var(--stagger-delay)] ${
+                  className={`w-full flex items-center justify-between gap-2 py-3.5 text-left transition-all duration-300 ease-in-out delay-[var(--stagger-delay)] ${
                     isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
                   }`}
                   style={
@@ -84,17 +87,18 @@ export function MobileMenuPanel({
                     } as React.CSSProperties
                   }
                 >
-                  <Typography variant="text-2"
+                  <Typography
+                    variant="text-2"
                     as="span"
-                    className={`font-light transition-colors duration-300 ${
-                      isOpen ? "text-[#FED034]" : "text-white group-hover:text-[#FED034]"
+                    className={`text-white transition-colors duration-300 ${
+                      isLinkActive ? "font-bold" : "font-medium"
                     }`}
                   >
                     {link.label}
                   </Typography>
                   <ChevronDown
-                    className={`h-4 w-4 shrink-0 transition-all duration-300 ease-in-out ${
-                      isOpen ? "rotate-180 text-[#FED034]" : "text-[#FFFFFF] group-hover:text-[#FED034]"
+                    className={`h-4 w-4 shrink-0 text-white transition-all duration-300 ease-in-out ${
+                      isOpen ? "rotate-180" : ""
                     }`}
                     strokeWidth={2.5}
                   />
@@ -106,7 +110,7 @@ export function MobileMenuPanel({
                     setIsMenuOpen(false);
                     if (link.href === "/" && onHomeNav) onHomeNav(event);
                   }}
-                  className={`group flex items-center py-3.5 transition-all duration-300 ease-in-out delay-[var(--stagger-delay)] ${
+                  className={`flex items-center py-3.5 transition-all duration-300 ease-in-out delay-[var(--stagger-delay)] ${
                     isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
                   }`}
                   style={
@@ -115,9 +119,12 @@ export function MobileMenuPanel({
                     } as React.CSSProperties
                   }
                 >
-                  <Typography variant={link.href === pathname ? "text-1" : "text-2"}
+                  <Typography
+                    variant="text-2"
                     as="span"
-                    className="text-white font-light transition-colors duration-300 group-hover:text-[#FED034]"
+                    className={`text-white transition-colors duration-300 ${
+                      isLinkActive ? "font-bold" : "font-medium"
+                    }`}
                   >
                     {link.label}
                   </Typography>
@@ -133,29 +140,36 @@ export function MobileMenuPanel({
                 >
                   <div className="w-full min-h-0 overflow-hidden">
                     <div className="flex flex-col gap-1 pl-4 border-l-2 border-[#FED034]/50 ml-1 mb-2 pt-1">
-                      {link.dropdownItems.map((item, j) => (
-                        <Link
-                          key={j}
-                          href={item.href}
-                          onClick={() => setIsMenuOpen(false)}
-                          className={`group/item relative flex items-center overflow-hidden rounded-none py-2 pl-3 pr-3 transition-all duration-300 ease-out delay-[var(--stagger-delay)] ${
-                            isOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
-                          }`}
-                          style={
-                            {
-                              "--stagger-delay": isOpen ? `${j * 50}ms` : "0ms",
-                            } as React.CSSProperties
-                          }
-                        >
-                          <span className="absolute inset-0 origin-left scale-x-0 bg-[#FED034]/10 transition-transform duration-300 ease-out group-hover/item:scale-x-100" />
-                          <Typography variant="text-2"
-                            as="span"
-                            className="relative z-10 text-white font-light transition-colors duration-300 group-hover/item:text-[#FED034]"
+                      {link.dropdownItems.map((item, j) => {
+                        const isItemActive = item.href === pathname;
+
+                        return (
+                          <Link
+                            key={j}
+                            href={item.href}
+                            onClick={() => setIsMenuOpen(false)}
+                            className={`group/item relative flex items-center overflow-hidden rounded-none py-2 pl-3 pr-3 transition-all duration-300 ease-out delay-[var(--stagger-delay)] ${
+                              isOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
+                            }`}
+                            style={
+                              {
+                                "--stagger-delay": isOpen ? `${j * 50}ms` : "0ms",
+                              } as React.CSSProperties
+                            }
                           >
-                            {item.label}
-                          </Typography>
-                        </Link>
-                      ))}
+                            <span className="absolute inset-0 origin-left scale-x-0 bg-[#FED034]/10 transition-transform duration-300 ease-out group-hover/item:scale-x-100" />
+                            <Typography
+                              variant="text-2"
+                              as="span"
+                              className={`relative z-10 text-white transition-colors duration-300 ${
+                                isItemActive ? "font-bold" : "font-medium"
+                              }`}
+                            >
+                              {item.label}
+                            </Typography>
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>

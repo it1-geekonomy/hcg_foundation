@@ -1,11 +1,23 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.routers import sync, chat, health
 
 app = FastAPI(
-    title="NGO Chatbot AI Service",
-    description="Agentic RAG microservice: ingests CMS content via webhooks, answers questions via a tool-using LLM agent.",
-    version="1.0.0",
+    title="HCG Foundation Chatbot AI Service",
+    description=(
+        "Quality RAG chatbot: intents, query rewrite, multi-query retrieval, "
+        "rerank, grounded generation. Sync is fingerprint-based — not on every chat."
+    ),
+    version="2.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(health.router)

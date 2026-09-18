@@ -25,7 +25,7 @@ export class AuthService {
       this.config.get<string>('auth.jwtSecret') ||
       'hcg-dev-secret-change-me';
     this.ttlSeconds =
-      this.config.get<number>('auth.jwtExpiresInSeconds') || 60 * 60 * 24 * 7;
+      this.config.get<number>('auth.jwtExpiresInSeconds') || 60 * 60 * 24;
   }
 
   async login(dto: LoginDto) {

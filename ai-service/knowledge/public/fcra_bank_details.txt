@@ -1,0 +1,20 @@
+HCG Foundation — FCRA bank account (foreign / overseas donations)
+
+For foreign contribution / FCRA remittances, use this State Bank of India FCRA current account:
+
+Account holder: M/S HCG FOUNDATION
+Bank: State Bank of India (SBI)
+Account type: FCRA Current Account
+Account number: 40676010670
+IFSC: SBIN0000691
+SWIFT: SBININBB104
+Branch: New Delhi Main Branch — FCRA Cell
+Branch address: 11, Sansad Marg / Parliament Street, New Delhi - 110001
+Branch phone: 011-23374390 / 4392 / 4143
+Branch email: fcra.00691@sbi.co.in
+
+Account opened under FCRA Section 17(1) (as per SBI FCRA cell letter).
+
+If someone asks for bank account details to send a foreign / overseas / NRI / FCRA payment, share the account number, IFSC, and SWIFT above.
+For regular Indian donations, prefer the website Donate Now flow and 80G guidance; use this FCRA account specifically for foreign contributions.
+Do not invent UPI IDs, other account numbers, or cancelled-cheque images as payment instructions.

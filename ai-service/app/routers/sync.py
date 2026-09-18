@@ -1,30 +1,23 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-
-from app.database import get_db
 from app.core.security import verify_internal_api_key
-from app.schemas.schemas import SyncEvent
-from app.services import vector_store
+from app.schemas.schemas import SyncEvent, FullSyncRequest
+from app.services import sync_service
 
-router = APIRouter(prefix="/internal", tags=["sync"], dependencies=[Depends(verify_internal_api_key)])
+router = APIRouter(tags=["sync"], dependencies=[Depends(verify_internal_api_key)])
+
+
+@router.post("/internal/sync")
+def sync_event(event: SyncEvent):
+    """Incremental CMS row upsert/delete from NestJS."""
+    return sync_service.upsert_cms_event(event.model_dump())
 
 
 @router.post("/sync")
-def sync_event(event: SyncEvent, db: Session = Depends(get_db)):
+def full_sync(payload: FullSyncRequest | None = None):
     """
-    Called by NestJS's ChatbotSyncSubscriber whenever a tracked CMS row is
-    inserted, updated, or deleted. This is the only way data enters or
-    leaves the vector store — there's no separate manual reindex here because
-    NestJS already exposes that (it just replays sync calls for every row).
+    Fingerprint sync for static pages + knowledge files.
+    Skips re-embed when unchanged unless force=true.
+    Does NOT run on every /chat.
     """
-    if event.action == "delete":
-        vector_store.delete_row(db, event.table, event.source_id)
-        return {"status": "deleted", "table": event.table, "source_id": event.source_id}
-
-    chunks_stored = vector_store.upsert_row(db, event.table, event.source_id, event.content or "")
-    return {
-        "status": "upserted",
-        "table": event.table,
-        "source_id": event.source_id,
-        "chunks_stored": chunks_stored,
-    }
+    force = bool(payload.force) if payload else False
+    return sync_service.full_sync(force=force)
