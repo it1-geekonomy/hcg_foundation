@@ -51,23 +51,23 @@ export const FOOTER_COLORS = {
 } as const;
 
 export const FOOTER_QUICK_LINKS = [
-  "Home",
-  "About Us",
-  "Patient Stories",
-  "Patient Testimonials",
-  "Patient Aid",
-  "Donate Now",
-  "Contact Us",
+  { label: "Home", href: "/" },
+  { label: "About Us", href: "/about-us" },
+  { label: "Patient Stories", href: "/journey-of-hope/patient-stories" },
+  { label: "Patient Testimonials", href: "/journey-of-hope/testimonials" },
+  { label: "Patient Aid", href: "/our-programs/financial-support-for-pediatric-patients" },
+  { label: "Donate Now", href: "#donate-form" },
+  { label: "Contact Us", href: "/contact" },
 ] as const;
 
 export const FOOTER_INNER_PAGES = [
-  { label: "Team", href: "/about/our-team" },
-  { label: "Trustees", href: "/about/our-team" },
-  { label: "Events", href: "/" },
-  { label: "Projects", href: "/" },
+  { label: "Team", href: "/about-us" },
+  { label: "Trustees", href: "/about-us" },
+  { label: "Events", href: "/resources/events" },
+  { label: "Projects", href: "/resources/projects" },
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms and Conditions", href: "/terms" },
-  { label: "Disclaimer", href: "/" },
+  { label: "Disclaimer", href: "/terms" },
 ] as const;
 
 export const FOOTER_CONTACT_INFO = {
