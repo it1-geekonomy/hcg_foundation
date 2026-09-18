@@ -91,11 +91,11 @@ export default function Footer() {
           <div className="col-span-1">
             <FooterHeading>QUICK LINKS</FooterHeading>
             <ul className="mt-8 space-y-3">
-              {FOOTER_QUICK_LINKS.map((label) => (
-                <li key={label}>
-                  <Link href="/" className="hover:text-[#FDB723] transition-colors">
+              {FOOTER_QUICK_LINKS.map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="hover:text-[#FDB723] transition-colors">
                     <Typography variant="body-9" as="span" className="text-white">
-                      {label}
+                      {item.label}
                     </Typography>
                   </Link>
                 </li>

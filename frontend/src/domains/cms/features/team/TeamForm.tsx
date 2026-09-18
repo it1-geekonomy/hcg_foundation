@@ -10,6 +10,7 @@ import type {
   TeamFields,
   TeamType,
 } from "@/domains/cms/lib/types";
+import { TEAM_IMAGE_SIZE } from "@/domains/about/constants/teams";
 import CmsImagePicker from "@/domains/cms/ui/CmsImagePicker";
 import { CmsFormField } from "@/domains/cms/ui/CmsFormField";
 import CmsSelect, {
@@ -223,7 +224,7 @@ export default function TeamForm({
         <CmsFormField
           label="Team image"
           htmlFor="teamImage"
-          hint="WebP or AVIF"
+          hint={`WebP or AVIF · exact size ${TEAM_IMAGE_SIZE.width} × ${TEAM_IMAGE_SIZE.height}px (320:380 portrait — same crop on mobile & desktop; keep face near the top)`}
         >
           <CmsImagePicker
             label="team image"
@@ -235,6 +236,7 @@ export default function TeamForm({
                 teamImageUrl: url,
               })
             }
+            requiredSize={TEAM_IMAGE_SIZE}
             disabled={saving}
           />
         </CmsFormField>
