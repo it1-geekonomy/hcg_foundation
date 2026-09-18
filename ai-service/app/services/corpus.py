@@ -129,10 +129,44 @@ def _static_documents() -> list[dict]:
                 "Title: Registration Certificates Summary\nCategory: Page\n\n"
                 "HCG Foundation maintains charitable registrations commonly referenced as "
                 "12A, 80G, CSR-1, FCRA, and Darpan where applicable. "
-                "For foreign donations, refer to FCRA registration materials — not only Donate Now. "
+                f"Organisation PAN: {C.OFFICIAL_PAN}. "
+                "For foreign donations, refer to FCRA registration and the FCRA SBI bank account details. "
                 "For Indian tax-exempt receipts, refer to 80G materials. "
                 "Ask the website/CMS published certificate pages for the latest numbers and dates. "
                 f"Contact {C.OFFICIAL_EMAIL} for verification copies."
+            ),
+        },
+        {
+            "table": "static",
+            "source_id": "pan-details",
+            "title": "HCG Foundation PAN",
+            "url": "/about-us",
+            "category": "Page",
+            "content": (
+                "Title: HCG Foundation PAN\nCategory: Page\n\n"
+                f"Entity: HCG FOUNDATION\n"
+                f"PAN: {C.OFFICIAL_PAN}\n"
+                "If asked whether HCG Foundation has a PAN card or for the PAN number, "
+                f"share {C.OFFICIAL_PAN}."
+            ),
+        },
+        {
+            "table": "static",
+            "source_id": "fcra-bank-details",
+            "title": "FCRA Bank Account Details",
+            "url": "/donate",
+            "category": "Page",
+            "content": (
+                "Title: FCRA Bank Account Details\nCategory: Page\n\n"
+                "For foreign / overseas / NRI / FCRA remittances:\n"
+                f"Account holder: {C.FCRA_ACCOUNT_HOLDER}\n"
+                f"Bank: {C.FCRA_BANK_NAME}\n"
+                f"Account number: {C.FCRA_ACCOUNT_NUMBER}\n"
+                f"IFSC: {C.FCRA_IFSC}\n"
+                f"SWIFT: {C.FCRA_SWIFT}\n"
+                f"Branch: {C.FCRA_BRANCH}\n"
+                "Share these when visitors ask for bank account details for foreign payment. "
+                "For domestic Indian donations, prefer Donate Now on the website."
             ),
         },
         {
@@ -180,7 +214,8 @@ _OFFICIAL_VARIANTS = {
 def sanitize_knowledge_text(text: str) -> str:
     lines = []
     for line in (text or "").splitlines():
-        lower = line.lower()
+        lower = line.lower().strip()
+        # Strip staff/internal proposal noise — keep official org PAN / FCRA bank lines.
         if any(
             k in lower
             for k in (
@@ -188,10 +223,15 @@ def sanitize_knowledge_text(text: str) -> str:
                 "phone number:",
                 "submitted to:",
                 "cancelled cheque",
-                "bank account",
-                "pan number",
-                "pan:",
             )
+        ):
+            continue
+        # Drop non-FCRA bank slip rows from partner proposals
+        if (
+            any(k in lower for k in ("account no", "a/c no", "beneficiary bank", "ifsc code"))
+            and "fcra" not in lower
+            and "sbin0000691" not in lower
+            and C.FCRA_ACCOUNT_NUMBER not in line
         ):
             continue
 
@@ -205,6 +245,23 @@ def sanitize_knowledge_text(text: str) -> str:
     return "\n".join(lines).strip()
 
 
+def _title_from_txt(path: Path) -> tuple[str, str, str]:
+    stem = path.stem.replace("_", " ").replace("-", " ").title()
+    lower = stem.lower()
+    category = "Page"
+    url = "/about-us"
+    if "newsletter" in lower:
+        category = "Newsletter"
+        url = "/resources"
+    elif "patient" in lower:
+        url = "/patient-aid"
+    elif "donate" in lower or "fcra bank" in lower:
+        url = "/donate"
+    elif "contact" in lower:
+        url = "/contact"
+    return stem, category, url
+
+
 def load_knowledge_files() -> list[dict]:
     root = Path(settings.knowledge_dir)
     if not root.exists():
@@ -215,31 +272,69 @@ def load_knowledge_files() -> list[dict]:
         if not path.is_file():
             continue
         if path.suffix.lower() not in {".txt", ".md"}:
-            # PDF/DOCX/PPTX can be added later with optional deps
             continue
         raw = path.read_text(encoding="utf-8", errors="ignore")
         cleaned = sanitize_knowledge_text(raw)
         if not cleaned:
             continue
-        stem = path.stem.replace("_", " ").replace("-", " ").title()
-        category = "Page"
-        lower = stem.lower()
-        if any(k in lower for k in ("80g", "12a", "fcra", "csr", "darpan", "registration")):
-            category = "Page"
-        elif "newsletter" in lower:
-            category = "Newsletter"
+        title, category, url = _title_from_txt(path)
         docs.append(
             {
                 "table": "knowledge",
-                "source_id": path.as_posix(),
-                "title": stem,
-                "url": "/about-us",
+                "source_id": f"public/{path.name}",
+                "title": title,
+                "url": url,
                 "category": category,
-                "content": f"Title: {stem}\nCategory: {category}\n\n{cleaned}",
+                "content": f"Title: {title}\nCategory: {category}\n\n{cleaned}",
+            }
+        )
+    return docs
+
+
+def load_geekonomy_documents() -> list[dict]:
+    """Whitelist PDF/DOCX/PPTX from knowledge/source-docs."""
+    from app.services import doc_extract
+    from app.services.knowledge_whitelist import (
+        MAX_CHARS_PER_DOC,
+        classify_doc,
+        is_allowed_knowledge_file,
+    )
+
+    root = Path(settings.geekonomy_docs_dir)
+    if not root.exists():
+        return []
+
+    docs: list[dict] = []
+    for path in sorted(root.rglob("*")):
+        if not is_allowed_knowledge_file(path, root):
+            continue
+        raw = doc_extract.extract_file(path)
+        cleaned = sanitize_knowledge_text(raw)
+        if len(cleaned) < 40:
+            # Likely scanned image PDF with no text layer — skip quietly
+            continue
+        if len(cleaned) > MAX_CHARS_PER_DOC:
+            cleaned = (
+                cleaned[:MAX_CHARS_PER_DOC]
+                + "\n\n[Document truncated for chatbot indexing.]"
+            )
+        title, category, url = classify_doc(path)
+        rel = path.relative_to(root).as_posix()
+        docs.append(
+            {
+                "table": "knowledge",
+                "source_id": f"geekonomy/{rel}",
+                "title": title,
+                "url": url,
+                "category": category,
+                "content": (
+                    f"Title: {title}\nCategory: {category}\nSource file: {rel}\n\n"
+                    f"{cleaned}"
+                ),
             }
         )
     return docs
 
 
 def load_corpus_documents() -> list[dict]:
-    return _static_documents() + load_knowledge_files()
+    return _static_documents() + load_knowledge_files() + load_geekonomy_documents()
