@@ -1,15 +1,20 @@
 HCG Foundation registration summary
 
-Common charitable registrations referenced for HCG Foundation include:
-- 12A
-- 80G (tax exemption receipt for eligible Indian donations)
-- CSR-1
-- FCRA (foreign contribution registration)
-- Darpan
+Organisation: HCG FOUNDATION
+PAN: AAATH6254R
 
-For foreign / overseas donations, use FCRA guidance — do not treat the generic Donate Now page as FCRA proof.
+Common charitable registrations:
+- 12A / 12AA charitable trust registration (effective from 04.12.2006)
+  - Current URN (Form 10AC): AAATH6254RE20215 (valid AY 2022-23 to AY 2026-27)
+- 80G donor tax deduction approval
+  - Current URN (Form 10AC): AAATH6254RF20213 (valid AY 2022-23 to AY 2026-27)
+  - Eligible Indian donations may receive an 80G tax receipt as described in registration materials
+- CSR-1 registration number: CSR00030677 (MCA letter dated 26-05-2022)
+- FCRA (foreign contribution registration) — foreign remittances use the FCRA SBI account
+- Darpan Unique Id: KA/2017/0162762
+- GST: not registered (no GSTIN); treated as unregistered dealer/customer
 
-For Indian tax receipts, refer to 80G materials. If a minimum donation amount for 80G is not stated in published materials, say that clearly and point donors to Donate Now plus official contact.
+For foreign / overseas donations, use FCRA guidance and the FCRA SBI bank account details — do not treat the generic Donate Now page as FCRA proof.
 
 Email: hcgfoundation@gmail.com
 Phone: +91-80-4660-7760
