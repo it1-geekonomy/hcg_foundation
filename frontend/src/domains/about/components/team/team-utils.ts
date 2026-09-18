@@ -18,3 +18,13 @@ export const DEFAULT_CARD_TOP_OFFSET_CLASS =
 export const CARD_IMAGE_BOTTOM_INSET_CLASS = "bottom-[1.875rem]";
 export const CAROUSEL_GAP_PX = 24;
 export const MOBILE_CARD_GAP_PX = 16;
+
+// Static, literal class (no interpolation) so Tailwind always generates it —
+// the actual pixel value is supplied at runtime via the --card-w CSS variable.
+export const CAROUSEL_CARD_WIDTH_CLASS = "w-[var(--card-w)]";
+
+// How long the index-change slide transition takes. Wheel input is locked
+// out for this long after a shift so one scroll gesture = one card.
+export const WHEEL_STEP_LOCK_MS = 550;
+// Minimum accumulated wheel delta (px) before we treat it as intentional.
+export const WHEEL_DELTA_THRESHOLD = 10;
