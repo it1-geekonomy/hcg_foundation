@@ -1174,6 +1174,14 @@ export const publicTeamsApi = {
   getById: (id: string) => request<ApiEnvelope<Team>>(`/teams/${id}`),
 };
 
+/** Public site: published awards (About Us) */
+export const publicAwardsApi = {
+  listPublished: (params?: Omit<ListQuery, "status">) =>
+    request<Paginated<Award>>(
+      `/awards/published${toQuery({ page: 1, limit: 50, ...params })}`
+    ),
+};
+
 /** Public site: published projects */
 export const publicProjectsApi = {
   listPublished: (params?: Omit<ListQuery, "status">) =>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { publicTeamsApi } from "@/domains/cms/lib/api";
-import TeamSection from "@/domains/about/components/teamsection";
+import TeamSection from "@/domains/about/components/team";
 import {
   mapTeamToPerson,
   type Person,

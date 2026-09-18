@@ -1,4 +1,4 @@
-import AwardViewPage from "@/domains/cms/components/AwardViewPage";
+import AwardViewPage from "@/domains/cms/features/awards/AwardViewPage";
 
 export default function AdminAwardViewPage() {
   return <AwardViewPage />;

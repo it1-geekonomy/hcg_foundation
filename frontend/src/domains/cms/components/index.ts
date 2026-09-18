@@ -1,48 +1,7 @@
-export { default as AdminSidebar } from "./AdminSidebar";
-export { default as AdminShell } from "./AdminShell";
-export { default as TeamsListPage } from "./TeamsListPage";
-export { default as TeamCreatePage } from "./TeamCreatePage";
-export { default as TeamViewPage } from "./TeamViewPage";
-export { default as TeamEditPage } from "./TeamEditPage";
-export { default as AnnualReportsListPage } from "./AnnualReportsListPage";
-export { default as AnnualReportCreatePage } from "./AnnualReportCreatePage";
-export { default as AnnualReportViewPage } from "./AnnualReportViewPage";
-export { default as AnnualReportEditPage } from "./AnnualReportEditPage";
-export { default as AnnualReportCoverTile } from "./AnnualReportCoverTile";
-export { default as AwardsListPage } from "./AwardsListPage";
-export { default as AwardCreatePage } from "./AwardCreatePage";
-export { default as AwardViewPage } from "./AwardViewPage";
-export { default as AwardEditPage } from "./AwardEditPage";
-export { default as HomeBannersListPage } from "./HomeBannersListPage";
-export { default as HomeBannerCreatePage } from "./HomeBannerCreatePage";
-export { default as HomeBannerViewPage } from "./HomeBannerViewPage";
-export { default as HomeBannerEditPage } from "./HomeBannerEditPage";
-export { default as EventsListPage } from "./EventsListPage";
-export { default as EventCreatePage } from "./EventCreatePage";
-export { default as EventViewPage } from "./EventViewPage";
-export { default as EventEditPage } from "./EventEditPage";
-export { default as ProjectsListPage } from "./ProjectsListPage";
-export { default as ProjectCreatePage } from "./ProjectCreatePage";
-export { default as ProjectViewPage } from "./ProjectViewPage";
-export { default as ProjectEditPage } from "./ProjectEditPage";
-export { default as LegalPagesListPage } from "./LegalPagesListPage";
-export { default as LegalPageCreatePage } from "./LegalPageCreatePage";
-export { default as LegalPageViewPage } from "./LegalPageViewPage";
-export { default as LegalPageEditPage } from "./LegalPageEditPage";
-export { default as UsersListPage } from "./UsersListPage";
-export { default as UserCreatePage } from "./UserCreatePage";
-export { default as DonorsListPage } from "./DonorsListPage";
-export { default as DonorsViewPage } from "./DonorsViewPage";
-export { default as FundraisingCampaignsListPage } from "./FundraisingCampaignsListPage";
-export { default as FundraisingCampaignViewPage } from "./FundraisingCampaignViewPage";
-export { default as FundraisingCampaignEditPage } from "./FundraisingCampaignEditPage";
-export { default as PartnershipInquiriesListPage } from "./PartnershipInquiriesListPage";
-export { default as PartnershipInquiryViewPage } from "./PartnershipInquiryViewPage";
-export { default as PartnershipInquiryEditPage } from "./PartnershipInquiryEditPage";
-export { default as LeadsInternshipListPage } from "./LeadsInternshipListPage";
-export { default as LeadsInternshipViewPage } from "./LeadsInternshipViewPage";
-export { default as LeadsInternshipEditPage } from "./LeadsInternshipEditPage";
-export { default as LeadsContactListPage } from "./LeadsContactListPage";
-export { default as LeadsContactViewPage } from "./LeadsContactViewPage";
-export { default as LeadsContactEditPage } from "./LeadsContactEditPage";
-export { default as CmsRichTextEditor } from "./CmsRichTextEditor";
+/**
+ * @deprecated Prefer `@/domains/cms/features/<entity>` or `@/domains/cms`.
+ * Kept as a compatibility barrel during the folder restructure.
+ */
+export * from "../shell";
+export * from "../ui";
+export * from "../features";
