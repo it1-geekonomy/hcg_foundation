@@ -1,14 +1,15 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Typography from "@/lib/Typography";
-import { PersonCard } from "@/domains/about/components/team";
+import TeamSection from "@/domains/about/components/team";
 import { mapTeamToPerson } from "@/domains/about/constants/teams";
-import { cmsApi } from "@/domains/cms/lib/api";
+import { cmsApi, publicTeamsApi } from "@/domains/cms/lib/api";
 import type { Team } from "@/domains/cms/lib/types";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
+import CmsWebsitePreview from "@/domains/cms/ui/CmsWebsitePreview";
 import {
   CmsBadge,
   CmsHtmlContentCard,
@@ -26,6 +27,8 @@ export default function TeamViewPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [team, setTeam] = useState<Team | null>(null);
+  const [publishedTrustees, setPublishedTrustees] = useState<Team[]>([]);
+  const [publishedTeam, setPublishedTeam] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -38,8 +41,19 @@ export default function TeamViewPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await cmsApi.getTeam(id);
-        if (!cancelled) setTeam(res.data);
+        const [res, trusteesRes, teamRes] = await Promise.all([
+          cmsApi.getTeam(id),
+          publicTeamsApi
+            .listPublished({ limit: 50, type: "trustee" })
+            .catch(() => null),
+          publicTeamsApi
+            .listPublished({ limit: 50, type: "team" })
+            .catch(() => null),
+        ]);
+        if (cancelled) return;
+        setTeam(res.data);
+        setPublishedTrustees(trusteesRes?.data ?? []);
+        setPublishedTeam(teamRes?.data ?? []);
       } catch (err) {
         if (cancelled) return;
         const message = cmsErrorMessage(err, "Failed to load");
@@ -54,6 +68,31 @@ export default function TeamViewPage() {
       cancelled = true;
     };
   }, [id]);
+
+  const { trustees, teamMembers } = useMemo(() => {
+    if (!team) return { trustees: [], teamMembers: [] };
+
+    const isTrustee = team.type === "trustee";
+
+    const merge = (list: Team[], current: Team) => {
+      const others = list
+        .filter((m) => m.id !== current.id)
+        .map(mapTeamToPerson);
+      return [mapTeamToPerson(current), ...others];
+    };
+
+    if (isTrustee) {
+      return {
+        trustees: merge(publishedTrustees, team),
+        teamMembers: publishedTeam.map(mapTeamToPerson),
+      };
+    }
+
+    return {
+      trustees: publishedTrustees.map(mapTeamToPerson),
+      teamMembers: merge(publishedTeam, team),
+    };
+  }, [team, publishedTrustees, publishedTeam]);
 
   const onDelete = async () => {
     if (!team) return;
@@ -85,7 +124,6 @@ export default function TeamViewPage() {
     );
   }
 
-  const person = mapTeamToPerson(team);
   const isTrustee = team.type === "trustee";
 
   return (
@@ -122,38 +160,23 @@ export default function TeamViewPage() {
         }
       />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(280px,340px)_minmax(0,1fr)]">
-        <div className="overflow-hidden rounded-3xl bg-[#FFF6D8] p-6 sm:p-8">
-          <Typography
-            variant="caption-1"
-            as="p"
-            className="mb-2 text-center font-semibold tracking-[0.16em] text-[#8A7A55] uppercase"
-          >
-            Website preview · {isTrustee ? "Trustee" : "Team"} card
-          </Typography>
-          <Typography
-            variant="caption-1"
-            as="p"
-            className="mb-8 text-center text-[#9A9A9A]"
-          >
-            Same flip card visitors see on About Us — click the arrow to open
-          </Typography>
-          <div className="mx-auto flex justify-center pt-10">
-            <PersonCard {...person} />
-          </div>
-        </div>
+      <CmsWebsitePreview
+        label={`Website preview · About Us · ${isTrustee ? "Trustees" : "Teams"}`}
+        className="bg-[#FFF6D8]"
+      >
+        <TeamSection trustees={trustees} teamMembers={teamMembers} />
+      </CmsWebsitePreview>
 
-        <div className="space-y-4">
-          <CmsHtmlContentCard
-            html={team.content}
-            empty="No content yet — add it in Edit (TinyMCE)."
-          />
-          <CmsSeoCard
-            metaTitle={team.metaTitle}
-            metaDescription={team.metaDescription}
-            schemaCode={team.schemaCode}
-          />
-        </div>
+      <div className="space-y-4">
+        <CmsHtmlContentCard
+          html={team.content}
+          empty="No content yet — add it in Edit (TinyMCE)."
+        />
+        <CmsSeoCard
+          metaTitle={team.metaTitle}
+          metaDescription={team.metaDescription}
+          schemaCode={team.schemaCode}
+        />
       </div>
     </div>
   );
