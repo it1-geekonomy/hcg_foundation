@@ -1,4 +1,4 @@
-import HomeBannerEditPage from "@/domains/cms/components/HomeBannerEditPage";
+import HomeBannerEditPage from "@/domains/cms/features/home-banners/HomeBannerEditPage";
 
 export default function AdminHomeBannerEditPage() {
   return <HomeBannerEditPage />;

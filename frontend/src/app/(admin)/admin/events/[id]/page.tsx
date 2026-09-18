@@ -1,4 +1,4 @@
-import EventViewPage from "@/domains/cms/components/EventViewPage";
+import EventViewPage from "@/domains/cms/features/events/EventViewPage";
 
 export default function AdminEventViewPage() {
   return <EventViewPage />;

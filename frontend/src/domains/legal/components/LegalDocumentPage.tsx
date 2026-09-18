@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { LegalPage } from "@/domains/cms/lib/types";
-import CmsHtmlContent from "@/domains/cms/components/CmsHtmlContent";
+import CmsHtmlContent from "@/domains/cms/ui/CmsHtmlContent";
 import Typography from "@/lib/Typography";
 
 type LegalDocumentPageProps = {

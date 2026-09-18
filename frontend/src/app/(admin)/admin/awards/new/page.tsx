@@ -1,4 +1,4 @@
-import AwardCreatePage from "@/domains/cms/components/AwardCreatePage";
+import AwardCreatePage from "@/domains/cms/features/awards/AwardCreatePage";
 
 export default function AdminAwardsNewPage() {
   return <AwardCreatePage />;

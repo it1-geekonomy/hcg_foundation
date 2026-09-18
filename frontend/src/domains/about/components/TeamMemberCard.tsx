@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Typography from "@/lib/Typography";
 import { cn } from "@/lib/utils";
+import { ImageUnavailableNotice } from "./shared/ImageUnavailableNotice";
 
 export type TeamMemberCardProps = {
   href?: string;
@@ -14,20 +15,6 @@ export type TeamMemberCardProps = {
   description?: string | null;
   variant?: "trustee" | "team";
 };
-
-function ImageUnavailableNotice() {
-  return (
-    <div className="flex size-full items-center justify-center bg-[#FFF8F0] p-3">
-      <Typography
-        variant="caption-1"
-        as="p"
-        className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-center text-red-700"
-      >
-        Image not available
-      </Typography>
-    </div>
-  );
-}
 
 export default function TeamMemberCard({
   href,
