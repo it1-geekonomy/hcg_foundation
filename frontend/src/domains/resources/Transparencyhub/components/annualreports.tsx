@@ -6,7 +6,7 @@ import {
   BREAKPOINTS,
   getBreakpoint,
   REPORTS,
-} from "@/domains/about/constants/annualreport";
+} from "@/domains/resources/Transparencyhub/constants/annualreport";
 
 export default function AnnualReportsSection() {
   const [breakpoint, setBreakpoint] = useState(BREAKPOINTS[0]);
