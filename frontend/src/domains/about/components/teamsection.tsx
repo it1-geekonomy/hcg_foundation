@@ -28,6 +28,11 @@ function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
+/** Prefer CMS id; fall back to name+index so duplicate names stay unique. */
+function personKey(person: Person, index: number) {
+  return person.id ?? `${person.name}-${index}`;
+}
+
 function useSyncedLabelHeight(count: number) {
   const refs = useRef<(HTMLDivElement | null)[]>([]);
   const [height, setHeight] = useState<number | null>(null);
@@ -403,7 +408,7 @@ function TeamCarousel({ people }: { people: Person[] }) {
         >
           {people.map((p, i) => (
             <PersonCard
-              key={p.id ?? p.name}
+              key={personKey(p, i)}
               {...p}
               widthClass={FIXED_CARD_WIDTH_CLASS}
               labelRef={setLabelRef(i)}
@@ -506,7 +511,7 @@ function ArrowScrollCarousel({ people }: { people: Person[] }) {
         <div className={cx("flex gap-4", "max-sm:gap-0")}>
           {people.map((p, i) => (
             <div
-              key={p.name}
+              key={personKey(p, i)}
               data-card
               className={cx(
                 "flex-none snap-center sm:snap-start",
@@ -618,7 +623,7 @@ export default function TeamSection({
                 >
                   {row.map((p, i) => (
                     <PersonCard
-                      key={p.id ?? p.name}
+                      key={personKey(p, offset + i)}
                       {...p}
                       labelRef={setTrusteeLabelRef(offset + i)}
                       labelHeight={trusteeLabelHeight}
@@ -656,7 +661,7 @@ export default function TeamSection({
           <div className="hidden grid-cols-4 justify-items-center gap-30 px-20 2xl:grid 3xl:gap-20 3xl:px-50">
             {teamPeople.map((p, i) => (
               <PersonCard
-                key={p.id ?? p.name}
+                key={personKey(p, i)}
                 {...p}
                 labelRef={setTeamGridLabelRef(i)}
                 labelHeight={teamGridLabelHeight}
