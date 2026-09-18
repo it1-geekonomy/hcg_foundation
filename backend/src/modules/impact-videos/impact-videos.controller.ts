@@ -51,7 +51,7 @@ export class ImpactVideosController {
   @ApiOperation({
     summary: 'Create impact video (CMS / super-admin)',
     description:
-      'Send multipart form fields plus required `videoFile` (MP4 or WebM, max 50MB, no duration limit). Uploaded videos are stored on Cloudflare R2 CDN.',
+      'Send multipart form fields plus required `videoFile` (MP4 or WebM, no duration limit). Uploaded videos are stored on Cloudflare R2 CDN.',
   })
   @ApiCreatedResponse({ type: ImpactVideo })
   @ApiUnauthorizedResponse({

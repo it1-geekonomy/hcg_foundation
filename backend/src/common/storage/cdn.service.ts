@@ -7,7 +7,6 @@ const VIDEO_TYPES = new Set(['video/mp4', 'video/webm']);
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_DOCUMENT_BYTES = 25 * 1024 * 1024;
-const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
 
 export type CdnFileKind = 'image' | 'document' | 'video';
 
@@ -94,12 +93,7 @@ export class CdnService {
     }
 
     if (!VIDEO_TYPES.has(file.mimetype)) {
-      throw new BadRequestException(
-        'Only MP4 or WebM videos are allowed (max 50MB).',
-      );
-    }
-    if (file.size > MAX_VIDEO_BYTES) {
-      throw new BadRequestException('Video must be 50MB or smaller.');
+      throw new BadRequestException('Only MP4 or WebM videos are allowed.');
     }
   }
 }

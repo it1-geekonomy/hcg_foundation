@@ -6,7 +6,7 @@ export class CreateImpactVideoMultipartDto extends CreateImpactVideoDto {
   @ApiPropertyOptional({
     type: 'string',
     format: 'binary',
-    description: 'Impact video file (MP4 or WebM, max 50MB, no duration limit)',
+    description: 'Impact video file (MP4 or WebM, no duration limit)',
   })
   videoFile?: unknown;
 }
