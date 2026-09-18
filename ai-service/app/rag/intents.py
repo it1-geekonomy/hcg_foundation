@@ -62,6 +62,27 @@ def detect_intents(text: str) -> set[str]:
         intents.add("donate")
     if any(k in t for k in ("fcra", "foreign", "overseas", "nri")):
         intents.add("fcra")
+    if any(
+        k in t
+        for k in (
+            "bank",
+            "account number",
+            "account no",
+            "a/c",
+            "ifsc",
+            "swift",
+            "neft",
+            "rtgs",
+            "wire transfer",
+            "bank details",
+            "bank account",
+        )
+    ):
+        intents.add("bank")
+        intents.add("fcra")
+    if any(k in t for k in ("pan", "pan card", "permanent account")):
+        intents.add("pan")
+        intents.add("certificate")
     if any(k in t for k in ("12a", "csr", "darpan", "certificate", "registration")):
         intents.add("certificate")
     if any(

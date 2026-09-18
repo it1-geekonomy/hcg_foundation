@@ -22,12 +22,36 @@ def rerank(hits: list[dict], intents: set[str]) -> list[dict]:
                 score += 0.40
             if category in ("patient story", "patient testimonial"):
                 score -= 0.50  # stories leak fake donation amounts
+            if "proposal" in title:
+                score -= 0.35  # partner proposals are not public donate FAQs
 
-        if "certificate" in intents or "fcra" in intents:
-            if any(k in title for k in ("fcra", "80g", "12a", "csr", "darpan", "registration")):
+        if "certificate" in intents or "fcra" in intents or "bank" in intents or "pan" in intents:
+            if any(
+                k in title
+                for k in (
+                    "fcra",
+                    "80g",
+                    "12a",
+                    "csr",
+                    "darpan",
+                    "registration",
+                    "pan",
+                    "bank",
+                )
+            ):
                 score += 0.45
-            if category == "page" and "donate" in title:
+            if category == "page" and "donate" in title and "bank" not in intents:
                 score -= 0.15
+            if "proposal" in title:
+                score -= 0.40
+
+        if "bank" in intents:
+            if any(k in title for k in ("bank", "fcra")) or "ifsc" in content.lower():
+                score += 0.50
+
+        if "pan" in intents:
+            if "pan" in title or "pan" in content.lower():
+                score += 0.50
 
         if "founder" in intents:
             if "ajaikumar" in title or "ajaikumar" in content.lower():
@@ -44,6 +68,8 @@ def rerank(hits: list[dict], intents: set[str]) -> list[dict]:
         if "patient_aid" in intents:
             if "patient aid" in title or "patient-aid" in title:
                 score += 0.40
+            if title.strip() == "patient aid" or title.startswith("patient aid"):
+                score += 0.10
 
         if "internship" in intents:
             if "internship" in title:
@@ -96,10 +122,19 @@ def pick_sources(hits: list[dict], intents: set[str]) -> list[dict]:
         url = h.get("url") or "/"
         category = (h.get("category") or "").lower()
 
-        if "fcra" in intents or "certificate" in intents:
+        if "fcra" in intents or "certificate" in intents or "bank" in intents or "pan" in intents:
             if category not in ("page", "legal") and not any(
                 k in title.lower()
-                for k in ("fcra", "80g", "12a", "csr", "darpan", "registration")
+                for k in (
+                    "fcra",
+                    "80g",
+                    "12a",
+                    "csr",
+                    "darpan",
+                    "registration",
+                    "pan",
+                    "bank",
+                )
             ):
                 continue
         if "trustees" in intents or "founder" in intents:

@@ -1,26 +1,34 @@
-import type { ReactNode } from "react";
-
-export interface Award {
-  /** Framed award image path (from /public), e.g. "/awardssection/award1.png" */
+export interface AwardItem {
+  id?: string;
+  /** Award image URL (CMS CDN) or path under /public */
   image: string;
-  /** Award title, e.g. "Bengaluru NGO's Leadership Award 2017" */
-  title: ReactNode;
-  /** Supporting description text */
-  description: ReactNode;
+  title: string;
+  description: string;
 }
 
-export const awards: Award[] = [
-  {
-    image: "/awardssection/award1.png",
-    title: "Bengaluru NGO's Leadership Award 2017",
-    description:
-      "HCG Foundation was conferred with the Bengaluru NGO's Leadership Award 2017 in recognition of its impactful contribution towards social development and cancer care.",
-  },
-  {
-    image: "/awardssection/award2.png",
-    title: "National CSR Leadership – Certificate of Merit 2016",
-    description:
-      "HCG Foundation received the National CSR Leadership – Certificate of Merit 2016 for its dedicated efforts in advancing healthcare and creating lasting community impact.",
-  },
-  
-];
+/**
+ * Exact CMS upload size for About Us awards.
+ * Website frame is always aspect 4/5 (`object-cover`) on mobile + desktop,
+ * so one portrait asset fits both — no separate mobile crop.
+ *
+ * Why 1920×2400:
+ * - 4:5 matches the on-page frame (no unexpected cut)
+ * - 1920 width covers a sharp 2× half-column on a 1920px desktop
+ * - Mobile (< md) uses the same ratio at a smaller box
+ */
+export const AWARD_IMAGE_SIZE = { width: 1920, height: 2400 } as const;
+
+/** Map a published CMS award → About Us awards carousel item. */
+export function mapCmsAwardToItem(award: {
+  id?: string;
+  title: string;
+  description?: string | null;
+  awardImageUrl?: string | null;
+}): AwardItem {
+  return {
+    id: award.id,
+    image: award.awardImageUrl?.trim() || "",
+    title: award.title?.trim() || "",
+    description: award.description?.trim() || "",
+  };
+}

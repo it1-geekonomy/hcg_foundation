@@ -23,6 +23,22 @@ def hard_rule_rewrite(message: str, history: list[dict]) -> str | None:
     t = (message or "").strip().lower()
     hist = " ".join(m.get("content", "") for m in history[-6:]).lower()
 
+    if re.fullmatch(r"(explain please|tell me more|more details|more info)\??", t):
+        if any(k in hist for k in ("donate", "donation", "80g")):
+            return "How can I donate to HCG Foundation and get an 80G receipt?"
+        if "internship" in hist or "intern" in hist:
+            return "Tell me more about the HCG Foundation internship program"
+        if any(k in hist for k in ("patient aid", "apply", "eligible")):
+            return "Tell me more about HCG Foundation Patient Aid and how to apply"
+        if any(k in hist for k in ("fcra", "foreign", "bank")):
+            return "Explain HCG Foundation FCRA registration and foreign donation process"
+        if history:
+            # Generic follow-up: expand using last assistant topic if possible
+            return (
+                "Please explain the previous HCG Foundation answer in more detail "
+                "using only published foundation information"
+            )
+
     if re.fullmatch(r"how do i apply\??", t):
         if "internship" in hist or "intern" in t:
             return "How do I apply for the HCG Foundation internship program?"
@@ -110,6 +126,12 @@ def build_multi_queries(rewritten: str, intents: set[str]) -> list[str]:
         queries.append("Who is the founder of HCG Foundation Dr B.S. Ajaikumar?")
     if "fcra" in intents:
         queries.append("HCG Foundation FCRA registration for foreign donations")
+    if "bank" in intents or "fcra" in intents:
+        queries.append(
+            "HCG Foundation FCRA bank account number IFSC SWIFT for foreign payment"
+        )
+    if "pan" in intents:
+        queries.append("What is HCG Foundation PAN card number?")
     if "patient_aid" in intents:
         queries.append("How does HCG Foundation Patient Aid work and how to apply?")
     if "internship" in intents:

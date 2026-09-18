@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { publicTeamsApi } from "@/domains/cms/lib/api";
-import TeamSection from "@/domains/about/components/teamsection";
+import TeamSection from "@/domains/about/components/team";
 import {
   mapTeamToPerson,
   type Person,
@@ -29,20 +29,46 @@ export default function AboutTeamSection() {
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    void (async () => {
       try {
-        const [trusteesRes, teamRes] = await Promise.all([
+        const [trusteesResult, teamResult] = await Promise.allSettled([
           publicTeamsApi.listPublished({ limit: 50, type: "trustee" }),
           publicTeamsApi.listPublished({ limit: 50, type: "team" }),
         ]);
 
         if (cancelled) return;
 
+        const trusteesOk = trusteesResult.status === "fulfilled";
+        const teamOk = teamResult.status === "fulfilled";
+
+        if (!trusteesOk && !teamOk) {
+          const reason =
+            trusteesResult.status === "rejected"
+              ? trusteesResult.reason
+              : teamResult.status === "rejected"
+                ? teamResult.reason
+                : null;
+          setTrustees([]);
+          setTeamMembers([]);
+          setError(
+            reason instanceof Error
+              ? reason.message
+              : "Unable to load team members"
+          );
+          return;
+        }
+
         setTrustees(
-          sortOldestFirst(trusteesRes.data ?? []).map(mapTeamToPerson)
+          trusteesOk
+            ? sortOldestFirst(trusteesResult.value.data ?? []).map(
+                mapTeamToPerson,
+              )
+            : [],
         );
         setTeamMembers(
-          sortOldestFirst(teamRes.data ?? []).map(mapTeamToPerson)
+          teamOk
+            ? sortOldestFirst(teamResult.value.data ?? []).map(mapTeamToPerson)
+            : [],
         );
         setError(null);
       } catch (err) {

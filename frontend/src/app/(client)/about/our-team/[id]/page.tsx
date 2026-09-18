@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { publicTeamsApi } from "@/domains/cms/lib/api";
-import CmsHtmlContent from "@/domains/cms/components/CmsHtmlContent";
+import CmsHtmlContent from "@/domains/cms/ui/CmsHtmlContent";
 import Typography from "@/lib/Typography";
 
 type Params = Promise<{ id: string }>;

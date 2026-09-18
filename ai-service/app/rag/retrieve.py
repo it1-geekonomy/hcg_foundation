@@ -12,9 +12,20 @@ AUTHORITY_KEYWORDS = {
     "privacy": ["privacy"],
     "terms": ["terms"],
     "founder": ["ajaikumar", "founder"],
-    "fcra": ["fcra"],
-    "certificate": ["80g", "12a", "csr", "darpan", "registration"],
-    "programs": ["mission", "program", "overview"],
+    "fcra": ["fcra", "bank", "ifsc", "swift"],
+    "bank": ["fcra", "bank", "ifsc", "swift", "account"],
+    "pan": ["pan"],
+    "certificate": [
+        "80g",
+        "12a",
+        "csr",
+        "darpan",
+        "registration",
+        "pan",
+        "urn",
+        "gst",
+    ],
+    "programs": ["mission", "program", "overview", "screening", "hpv", "ventilator"],
 }
 
 
