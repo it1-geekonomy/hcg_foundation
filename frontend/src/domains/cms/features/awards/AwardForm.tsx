@@ -4,6 +4,7 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 import type { Award, AwardFields, ContentStatus } from "@/domains/cms/lib/types";
+import { AWARD_IMAGE_SIZE } from "@/domains/about/constants/awards";
 import CmsImagePicker from "@/domains/cms/ui/CmsImagePicker";
 import { CmsFormField } from "@/domains/cms/ui/CmsFormField";
 import CmsSelect, { CONTENT_STATUS_OPTIONS } from "@/domains/cms/ui/CmsSelect";
@@ -150,7 +151,7 @@ export default function AwardForm({
         <CmsFormField
           label="Award image"
           htmlFor="awardImage"
-          hint="WebP or AVIF, required to create"
+          hint={`WebP or AVIF · exact size ${AWARD_IMAGE_SIZE.width} × ${AWARD_IMAGE_SIZE.height}px (4:5 portrait — same crop on mobile & desktop)`}
         >
           <CmsImagePicker
             label="award image"
@@ -162,6 +163,7 @@ export default function AwardForm({
                 awardImageUrl: url,
               })
             }
+            requiredSize={AWARD_IMAGE_SIZE}
             disabled={saving}
           />
         </CmsFormField>

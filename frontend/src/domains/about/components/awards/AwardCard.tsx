@@ -10,12 +10,10 @@ export function AwardCard({
   award,
   titleHeight,
   titleRef,
-  imageRef,
 }: {
   award: AwardItem;
   titleHeight?: number | null;
   titleRef?: (el: HTMLDivElement | null) => void;
-  imageRef?: (el: HTMLDivElement | null) => void;
 }) {
   const [imageFailed, setImageFailed] = useState(false);
   const showImage = Boolean(award.image?.trim()) && !imageFailed;
@@ -27,7 +25,7 @@ export function AwardCard({
   return (
     <div data-award-card className="min-w-0 w-full">
       <div
-        ref={imageRef}
+        data-award-image
         className="relative mx-auto aspect-[4/5] w-[80%] overflow-hidden sm:mx-0 sm:w-full"
       >
         {showImage ? (

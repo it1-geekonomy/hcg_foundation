@@ -48,8 +48,9 @@ export default function AwardCreatePage() {
         title="Add award"
         description={
           <>
-            Upload a WebP/AVIF image. Set status to{" "}
-            <strong>published</strong> to show on the website.
+            Award image must be exactly{" "}
+            <strong>1920 × 2400px</strong> (4:5 WebP/AVIF). Set status to{" "}
+            <strong>published</strong> to show on About Us.
           </>
         }
       />
