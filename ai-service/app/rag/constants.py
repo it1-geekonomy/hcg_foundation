@@ -7,6 +7,15 @@ OFFICIAL_ADDRESS = (
 FOUNDER_NAME = "Dr. B.S. Ajaikumar"
 FOUNDER_ROLE = "Founder and Managing Trustee"
 
+# Organisation compliance details (safe to share when visitors ask)
+OFFICIAL_PAN = "AAATH6254R"
+FCRA_BANK_NAME = "State Bank of India (SBI)"
+FCRA_ACCOUNT_HOLDER = "M/S HCG FOUNDATION"
+FCRA_ACCOUNT_NUMBER = "40676010670"
+FCRA_IFSC = "SBIN0000691"
+FCRA_SWIFT = "SBININBB104"
+FCRA_BRANCH = "New Delhi Main Branch — FCRA Cell, 11 Sansad Marg, New Delhi 110001"
+
 NO_ANSWER_TOKEN = "NO_ANSWER_FOUND"
 
 FALLBACK_ANSWER = (
