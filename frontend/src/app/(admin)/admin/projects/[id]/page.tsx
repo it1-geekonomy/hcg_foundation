@@ -1,4 +1,4 @@
-import ProjectViewPage from "@/domains/cms/components/ProjectViewPage";
+import ProjectViewPage from "@/domains/cms/features/projects/ProjectViewPage";
 
 export default function AdminProjectViewPage() {
   return <ProjectViewPage />;

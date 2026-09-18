@@ -1,4 +1,4 @@
-import LeadsContactViewPage from "@/domains/cms/components/LeadsContactViewPage";
+import LeadsContactViewPage from "@/domains/cms/features/leads-contact/LeadsContactViewPage";
 
 export default function AdminLeadsContactByIdPage() {
   return <LeadsContactViewPage />;

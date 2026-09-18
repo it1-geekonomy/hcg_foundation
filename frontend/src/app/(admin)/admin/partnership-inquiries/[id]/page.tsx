@@ -1,4 +1,4 @@
-import PartnershipInquiryViewPage from "@/domains/cms/components/PartnershipInquiryViewPage";
+import PartnershipInquiryViewPage from "@/domains/cms/features/partnership-inquiries/PartnershipInquiryViewPage";
 
 export default function AdminPartnershipInquiryByIdPage() {
   return <PartnershipInquiryViewPage />;

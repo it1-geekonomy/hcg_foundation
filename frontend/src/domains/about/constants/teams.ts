@@ -1,9 +1,66 @@
 export type Person = {
+  id?: string;
   name: string;
   role: string;
   img: string;
-   description: string[];
+  description: string[];
 };
+
+export const DUMMY_DESCRIPTION: string[] = [
+  "Some placeholder text for the first paragraph.",
+  "Some placeholder text for the second paragraph.",
+];
+
+/** Strip HTML and split into paragraphs for the flip-card back panel. */
+export function contentToDescription(html?: string | null): string[] {
+  if (!html?.trim()) return [];
+
+  const fromParagraphs = Array.from(
+    html.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)
+  )
+    .map((m) =>
+      m[1]
+        .replace(/<[^>]+>/g, " ")
+        .replace(/&nbsp;/g, " ")
+        .replace(/&amp;/g, "&")
+        .replace(/\s+/g, " ")
+        .trim()
+    )
+    .filter(Boolean);
+
+  if (fromParagraphs.length > 0) return fromParagraphs;
+
+  const plain = html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|li|h[1-6])>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/[ \t]+/g, " ")
+    .trim();
+
+  return plain
+    .split(/\n+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/** Map a published CMS team/trustee record → About Us Person card. */
+export function mapTeamToPerson(member: {
+  id?: string;
+  title: string;
+  designation?: string | null;
+  teamImage?: string | null;
+  content?: string | null;
+}): Person {
+  return {
+    id: member.id,
+    name: member.title,
+    role: member.designation?.trim() || "",
+    img: member.teamImage?.trim() || "",
+    description: contentToDescription(member.content),
+  };
+}
 
 export const trusteesRowOne: Person[] = [
   {
@@ -81,12 +138,18 @@ export const teamRow: Person[] = [
   },
 ];
 
-export const DUMMY_DESCRIPTION: string[] = [
-  "Some placeholder text for the first paragraph.",
-  "Some placeholder text for the second paragraph.",
-];
 export const CARD_W = 280;
 export const CARD_W_2XL = 340;
+
+/**
+ * Exact CMS upload size for About Us team / trustee photos.
+ * PersonCard frame is aspect 320/380 with object-cover (head/top-weighted).
+ *
+ * Why 960×1140:
+ * - Exact 320:380 ratio (same as the card)
+ * - 3× the design frame — sharp on desktop (up to 340px) and mobile
+ */
+export const TEAM_IMAGE_SIZE = { width: 960, height: 1140 } as const;
 
 export const XS_FIXED_CARD_WIDTH = "w-[260px]";
 

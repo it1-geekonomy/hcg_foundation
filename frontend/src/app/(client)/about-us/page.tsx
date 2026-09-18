@@ -3,8 +3,8 @@ import DonateForm from "@/shared/components/DonateForm";
 import OurMissionSection from "@/domains/about/components/ourmission";
 import Statsection from "@/domains/about/components/statsection";
 import WhatWeStandFor from "@/domains/about/components/whatwestand";
-import AwardsRecognition from "@/domains/about/components/awardssection";
-import TeamSection from "@/domains/about/components/teamsection";
+import AboutTeamSection from "@/domains/about/components/AboutTeamSection";
+import AboutAwardsSection from "@/domains/about/components/AboutAwardsSection";
 
 export default function OurTeamPage() {
   return (
@@ -13,12 +13,12 @@ export default function OurTeamPage() {
       <OurMissionSection />
       <Statsection />
       <WhatWeStandFor />
-      <TeamSection />
-      <AwardsRecognition />
+      <AboutTeamSection />
+      <AboutAwardsSection />
 
-      <div id="donate-form" className="pt-14 bg-[#FFF6D8]">
+      <div id="donate-form" className="bg-[#FFF6D8] pt-14">
         <DonateForm />
-        </div>
+      </div>
     </>
   );
 }

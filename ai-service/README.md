@@ -10,7 +10,9 @@ Quality RAG service modeled on the old PHP + FastAPI bot:
 6. Sources (max 3)
 
 CMS rows are pushed by NestJS (`POST /internal/sync`) for **published** content only.
-Static pages + `knowledge/public/` are refreshed by `POST /sync` (fingerprint; not on every chat).
+Static pages + `knowledge/public/` + whitelisted files under
+`knowledge/source-docs/` (PDF/DOCX/PPTX) are refreshed by `POST /sync`
+(fingerprint; not on every chat).
 
 Embeddings live in the same Postgres DB as the CMS (`document_chunks` + `pgvector`).
 

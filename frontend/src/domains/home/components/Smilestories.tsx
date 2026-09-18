@@ -18,31 +18,45 @@ function StoryCard({
   name,
   date,
   image,
+  objectPosition,
 }: {
   name: string;
   date: string;
   image: string;
+  objectPosition?: string;
 }) {
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl bg-[#8D8D8D66] p-6 backdrop-blur-xl">
-      {/* photo, inset inside the glass card */}
-      <div className="relative aspect-[8/9] w-full overflow-hidden rounded-xl">
+    <div className="group flex flex-col overflow-hidden rounded-2xl bg-[#8D8D8D66] p-4 sm:p-6 backdrop-blur-xl">
+      {/* photo, inset inside the glass card - aspect ratio is locked via
+         inline style (not just the Tailwind class) so every card's image
+         box is guaranteed the exact same size, regardless of the source
+         image's own dimensions or any Tailwind purge/build quirks */}
+      <div
+        className="relative w-full overflow-hidden rounded-xl bg-[#00000014]"
+        style={{ aspectRatio: "8 / 9" }}
+      >
         <Image
           src={image}
           alt={name}
           fill
           sizes="(max-width: 639px) clamp(240px, 65vw, 320px), (max-width: 767px) clamp(280px, 52vw - 34px, 360px), (max-width: 1023px) clamp(320px, 52vw - 42px, 400px), (max-width: 1279px) clamp(340px, 32vw - 20px, 430px), clamp(280px, 24vw - 6px, 460px)"
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          style={{ objectPosition: objectPosition ?? "center" }}
+          className="rounded-xl object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
       </div>
 
       {/* name / date / arrow, below the photo, inside the card */}
       <div className="flex items-center justify-between gap-2 pt-4">
         <div>
-          <Typography variant="heading-8" as="p" className="text-left text-white font-semibold font-manrope">
+          <Typography
+            variant="heading-8"
+            as="p"
+            className="text-left text-white font-semibold font-manrope"
+          >
             {name}
           </Typography>
-          <Typography variant="text-2"
+          <Typography
+            variant="text-2"
             as="p"
             className="mt-1 flex items-center gap-2 text-white text-nowrap font-normal font-manrope"
           >
@@ -84,6 +98,7 @@ export default function SmileStories() {
   const lastTsRef = useRef<number | null>(null);
   const lastSaveTsRef = useRef(0);
   const pointerIdRef = useRef<number | null>(null);
+  const measureRafRef = useRef<number | null>(null);
 
   const applyTransform = () => {
     if (!trackRef.current) return;
@@ -105,6 +120,18 @@ export default function SmileStories() {
     oneSetWidthRef.current = trackRef.current.scrollWidth / 3;
     offsetRef.current = wrap(offsetRef.current, oneSetWidthRef.current);
     applyTransform();
+  };
+
+  // Debounced measure: avoids layout thrash / jumpy transforms when the
+  // ResizeObserver fires multiple times in a row (e.g. during a viewport
+  // resize or an orientation change), which is what caused the visible
+  // stutter on some screens.
+  const scheduleMeasure = () => {
+    if (measureRafRef.current) cancelAnimationFrame(measureRafRef.current);
+    measureRafRef.current = requestAnimationFrame(() => {
+      measureRafRef.current = null;
+      measure();
+    });
   };
 
   // Restore last scroll position (e.g. user clicked a card, then hit back)
@@ -153,12 +180,13 @@ export default function SmileStories() {
 
   useEffect(() => {
     measure();
-    const ro = new ResizeObserver(() => measure());
+    const ro = new ResizeObserver(() => scheduleMeasure());
     if (viewportRef.current) ro.observe(viewportRef.current);
-    window.addEventListener("resize", measure);
+    window.addEventListener("resize", scheduleMeasure);
     return () => {
       ro.disconnect();
-      window.removeEventListener("resize", measure);
+      window.removeEventListener("resize", scheduleMeasure);
+      if (measureRafRef.current) cancelAnimationFrame(measureRafRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasEntered]);
@@ -168,7 +196,10 @@ export default function SmileStories() {
 
     const step = (ts: number) => {
       if (lastTsRef.current === null) lastTsRef.current = ts;
-      const dt = (ts - lastTsRef.current) / 1000;
+      // Clamp dt so a dropped/backgrounded frame (tab switch, slow device)
+      // doesn't cause a big visible jump when the animation resumes - this
+      // is what made the movement look "unsmooth" on some screens.
+      const dt = Math.min((ts - lastTsRef.current) / 1000, 0.05);
       lastTsRef.current = ts;
 
       const shouldMove =
@@ -265,15 +296,13 @@ export default function SmileStories() {
   const handleCardClick = (link: string) => {
     if (didDragRef.current) return; // it was a drag, not a click - don't navigate
     saveOffset();
-    window.location.href = "/";
+    window.location.href = link;
   };
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative w-full lg:py-20"
-    >
-      <Typography variant="heading-3"
+    <section ref={sectionRef} className="relative w-full lg:py-20">
+      <Typography
+        variant="heading-3"
         as="h2"
         className="mx-auto mb-14 text-center px-4 text-neutral-800 font-medium font-manrope pt-6"
       >
@@ -294,7 +323,7 @@ export default function SmileStories() {
             isPausedRef.current = true;
             scheduleResume();
           }}
-          className="flex w-max touch-pan-y cursor-grab flex-nowrap gap-3 select-none active:cursor-grabbing sm:gap-5 lg:gap-8"
+          className="flex w-max touch-pan-y cursor-grab flex-nowrap gap-3 select-none will-change-transform active:cursor-grabbing sm:gap-5 lg:gap-8"
         >
           {loopedStories.map((story, i) => (
             <div

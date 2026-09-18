@@ -1,4 +1,4 @@
-import EventsListPage from "@/domains/cms/components/EventsListPage";
+import EventsListPage from "@/domains/cms/features/events/EventsListPage";
 
 export default function AdminEventsPage() {
   return <EventsListPage />;
