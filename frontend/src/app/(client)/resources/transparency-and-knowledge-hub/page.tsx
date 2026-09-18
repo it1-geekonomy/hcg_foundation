@@ -1,11 +1,13 @@
-import Typography from "@/lib/Typography";
+import Bannersection from "@/domains/resources/Transparencyhub/components/banner";
+import DonateForm from "@/shared/components/DonateForm";
+import AnnualReportsSection from "@/domains/resources/Transparencyhub/components/annualreports";
 
-export default function TransparencyAndKnowledgeHubPage() {
+export default function OurTeamPage() {
   return (
-    <section className="flex min-h-screen items-center justify-center bg-slate-100">
-      <Typography variant="heading-3" as="h1" className="text-[#382E07]">
-        Transparency & Knowledge Hub
-      </Typography>
-    </section>
+    <>
+      <Bannersection />
+      <AnnualReportsSection />
+        <DonateForm />
+    </>
   );
 }

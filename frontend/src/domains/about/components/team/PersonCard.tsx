@@ -124,9 +124,13 @@ export function PersonCard({
           flipped && "pointer-events-none",
         )}
       >
-        <div className="absolute inset-0 rounded-md bg-[linear-gradient(to_bottom,_#FFE380_0%,_rgba(255,255,255,0)_100%)]" />
+        <div
+          data-yellow-bg
+          className="absolute inset-0 rounded-md bg-[linear-gradient(to_bottom,_#FFE380_0%,_rgba(255,255,255,0)_100%)]"
+        />
 
         <div
+          data-card-image
           className={cx(
             "absolute inset-x-0 overflow-hidden rounded-md",
             CARD_IMAGE_BOTTOM_INSET_CLASS,
