@@ -1,7 +1,7 @@
 "use client";
 
 import Typography from "@/lib/Typography";
-import type { Person } from "@/domains/about/constants/teams";
+import { CARD_W_2XL, type Person } from "@/domains/about/constants/teams";
 import { ArrowScrollCarousel } from "./ArrowScrollCarousel";
 import { PersonCard } from "./PersonCard";
 import { TeamCarousel } from "./TeamCarousel";
@@ -45,6 +45,8 @@ export default function TeamSection({
   const allTrustees = trustees ?? [];
   const teamPeople = teamMembers ?? [];
   const trusteeRowsLg = chunkPeople(allTrustees, 3);
+  // Only the 2xl grid layout needs to become a carousel when count > 4.
+  const teamNeeds2xlCarousel = teamPeople.length > 4;
 
   const { setRef: setTrusteeLabelRef, height: trusteeLabelHeight } =
     useSyncedLabelHeight(allTrustees.length);
@@ -114,16 +116,27 @@ export default function TeamSection({
           <div className="hidden lg:block 2xl:hidden">
             <TeamCarousel people={teamPeople} />
           </div>
-          <div className="hidden grid-cols-4 justify-items-center gap-30 px-20 2xl:grid 3xl:gap-20 3xl:px-50">
-            {teamPeople.map((p, i) => (
-              <PersonCard
-                key={personKey(p, i)}
-                {...p}
-                labelRef={setTeamGridLabelRef(i)}
-                labelHeight={teamGridLabelHeight}
+
+          {teamNeeds2xlCarousel ? (
+            <div className="hidden 2xl:block">
+              <TeamCarousel
+                people={teamPeople}
+                visibleCount={4}
+                cardWidthPx={CARD_W_2XL}
               />
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="hidden grid-cols-4 justify-items-center gap-30 px-20 2xl:grid 3xl:gap-20 3xl:px-50">
+              {teamPeople.map((p, i) => (
+                <PersonCard
+                  key={personKey(p, i)}
+                  {...p}
+                  labelRef={setTeamGridLabelRef(i)}
+                  labelHeight={teamGridLabelHeight}
+                />
+              ))}
+            </div>
+          )}
         </>
       ) : null}
     </section>
