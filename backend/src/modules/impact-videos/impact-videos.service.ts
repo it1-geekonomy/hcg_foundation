@@ -27,7 +27,6 @@ import { UpdateImpactVideoDto } from './dto/update-impact-video.dto';
 import { ImpactVideo } from './entities/impact-video.entity';
 
 const ALLOWED_VIDEO_TYPES = new Set(['video/mp4', 'video/webm']);
-const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50 MB
 
 export type ImpactVideoFiles = {
   videoFile?: CdnFile;
@@ -184,11 +183,6 @@ export class ImpactVideosService {
     if (!ALLOWED_VIDEO_TYPES.has(file.mimetype)) {
       throw new BadRequestException(
         'Only MP4 and WebM video formats are allowed.',
-      );
-    }
-    if (file.size > MAX_VIDEO_BYTES) {
-      throw new BadRequestException(
-        `Video file exceeds maximum allowed size of 50MB (received ${(file.size / (1024 * 1024)).toFixed(2)}MB).`,
       );
     }
   }

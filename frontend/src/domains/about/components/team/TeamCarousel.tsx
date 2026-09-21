@@ -15,6 +15,9 @@ import {
 } from "./team-utils";
 import { useSyncedLabelHeight } from "./useSyncedLabelHeight";
 
+/** Matches track `pt-20` so the arrow rail lines up with the portrait. */
+const TRACK_TOP_PAD = "5rem";
+
 /**
  * Desktop track carousel. `visibleCount` / `cardWidthPx` default to the
  * original lg/xl values (3 cards at CARD_W) so the same component can be
@@ -40,26 +43,22 @@ export function TeamCarousel({
   const dragStartXRef = useRef(0);
   const trackViewportRef = useRef<HTMLDivElement>(null);
   const wheelLockedRef = useRef(false);
+  const [stackHeight, setStackHeight] = useState<number | null>(null);
+  const [stackOverhang, setStackOverhang] = useState(0);
 
   const clampIndex = useCallback(
     (i: number) => Math.min(maxIndex, Math.max(0, i)),
     [maxIndex],
   );
 
-  // Keep the current index in range if the visible count / people length
-  // changes (e.g. responsive breakpoint swap).
   useEffect(() => {
     setIndex((i) => clampIndex(i));
   }, [clampIndex]);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!needsCarousel) return;
-
-    // Don't hijack pointer capture when the gesture starts on an
-    // interactive control (e.g. the card's flip button).
     const target = e.target as HTMLElement;
     if (target.closest("button")) return;
-
     setDragging(true);
     dragStartXRef.current = e.clientX;
     setDragDeltaPx(0);
@@ -83,24 +82,17 @@ export function TeamCarousel({
     setDragDeltaPx(0);
   };
 
-  // Horizontal wheel/trackpad only — vertical scrolls must pass through to the page.
   useEffect(() => {
     const el = trackViewportRef.current;
     if (!el || !needsCarousel) return;
 
     const handleWheel = (e: WheelEvent) => {
-      // Ignore vertical (and near-vertical) gestures so page scroll works
-      // when the cursor is over a team card.
       if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
       if (Math.abs(e.deltaX) < WHEEL_DELTA_THRESHOLD) return;
-
       e.preventDefault();
-
       if (wheelLockedRef.current) return;
       wheelLockedRef.current = true;
-
       setIndex((i) => clampIndex(i + (e.deltaX > 0 ? 1 : -1)));
-
       window.setTimeout(() => {
         wheelLockedRef.current = false;
       }, WHEEL_STEP_LOCK_MS);
@@ -113,18 +105,47 @@ export function TeamCarousel({
   const { setRef: setLabelRef, height: labelHeight } =
     useSyncedLabelHeight(people.length);
 
+  const measureStack = useCallback(() => {
+    const image =
+      trackViewportRef.current?.querySelector<HTMLElement>("[data-card-image]");
+    const yellow =
+      trackViewportRef.current?.querySelector<HTMLElement>("[data-yellow-bg]");
+    if (!image || !yellow) return;
+    const imageRect = image.getBoundingClientRect();
+    const yellowRect = yellow.getBoundingClientRect();
+    const top = Math.min(yellowRect.top, imageRect.top);
+    const bottom = Math.max(yellowRect.bottom, imageRect.bottom);
+    setStackHeight(bottom - top);
+    setStackOverhang(Math.max(0, yellowRect.top - imageRect.top));
+  }, []);
+
+  useEffect(() => {
+    const raf = window.requestAnimationFrame(() => measureStack());
+    const onResize = () => measureStack();
+    window.addEventListener("resize", onResize);
+    const image =
+      trackViewportRef.current?.querySelector<HTMLElement>("[data-card-image]");
+    const yellow =
+      trackViewportRef.current?.querySelector<HTMLElement>("[data-yellow-bg]");
+    const ro =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => measureStack())
+        : null;
+    if (ro && image) ro.observe(image);
+    if (ro && yellow) ro.observe(yellow);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener("resize", onResize);
+      ro?.disconnect();
+    };
+  }, [measureStack, people.length, labelHeight, cardWidthPx, visibleCount]);
+
   const atStart = index === 0;
   const atEnd = index >= maxIndex;
 
-  const goPrev = () => {
-    setIndex((i) => Math.max(0, i - 1));
-  };
+  const goPrev = () => setIndex((i) => Math.max(0, i - 1));
+  const goNext = () => setIndex((i) => Math.min(maxIndex, i + 1));
 
-  const goNext = () => {
-    setIndex((i) => Math.min(maxIndex, i + 1));
-  };
-
-  // Clamp the visual translate so the track can never be dragged past bounds.
   const minTranslateX = -(maxIndex * step);
   const maxTranslateX = 0;
   const baseTranslateX = -(index * step);
@@ -135,16 +156,37 @@ export function TeamCarousel({
       )
     : baseTranslateX;
 
+  const arrowRail = (side: "left" | "right") => (
+    <div className="flex flex-none flex-col">
+      <div
+        aria-hidden
+        style={{
+          height: `max(0px, calc(${TRACK_TOP_PAD} - ${stackOverhang}px))`,
+        }}
+      />
+      <div
+        className="flex items-center justify-center"
+        style={
+          stackHeight != null ? { height: stackHeight } : { height: "16rem" }
+        }
+      >
+        <ArrowButton
+          direction={side}
+          disabled={side === "left" ? atStart : atEnd}
+          onClick={side === "left" ? goPrev : goNext}
+        />
+      </div>
+    </div>
+  );
+
   return (
-    <div className="mx-auto flex w-fit max-w-full items-center gap-2">
-      {needsCarousel ? (
-        <ArrowButton direction="left" disabled={atStart} onClick={goPrev} />
-      ) : null}
+    <div className="mx-auto -mt-20 flex w-fit max-w-full items-start gap-2">
+      {needsCarousel ? arrowRail("left") : null}
 
       <div
         ref={trackViewportRef}
         className={cx(
-          "-mt-20 w-[var(--track-w)] max-w-full overflow-hidden pt-20",
+          "w-[var(--track-w)] max-w-full overflow-hidden pt-20",
           needsCarousel && "touch-pan-y select-none",
           dragging ? "cursor-grabbing" : needsCarousel && "cursor-grab",
         )}
@@ -175,9 +217,7 @@ export function TeamCarousel({
         </div>
       </div>
 
-      {needsCarousel ? (
-        <ArrowButton direction="right" disabled={atEnd} onClick={goNext} />
-      ) : null}
+      {needsCarousel ? arrowRail("right") : null}
     </div>
   );
 }
