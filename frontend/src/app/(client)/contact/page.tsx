@@ -66,7 +66,7 @@ export default function ClientContact() {
         <div className="relative mt-10 sm:mt-14 overflow-hidden rounded-[0.625rem] border border-[#EFEAD8] bg-white shadow-xs">
           <div className="absolute top-4 left-4 z-10 hidden sm:block max-w-[16.25rem] rounded-lg bg-white/95 p-4 shadow-md backdrop-blur-xs border border-black/5">
             <div className="flex items-center justify-between gap-2">
-              <Typography variant="body-8" as="span" className="font-manrope text-[#2E1C12]">
+              <Typography variant="body-8" as="span" className="font-manrope font-semibold text-[#2E1C12]">
                 HCG Foundation
               </Typography>
               <div className="flex items-center gap-2">
@@ -91,18 +91,22 @@ export default function ClientContact() {
               </div>
             </div>
             <div className="mt-1.5">
-              <Typography variant="body-8" as="p" className="font-manrope text-[#5F6368]">
+              <Typography variant="body-8" as="p" className="font-manrope font-normal text-[#5F6368]">
                 Ground Floor, Tower Block, UNITY BUILDING, Kalinga Rao Rd, Bengaluru, Karnataka 560027
               </Typography>
             </div>
             <div className="mt-2 flex items-center gap-1 text-[#5F6368]">
-              <span className="font-semibold text-[#E37400]">4.7</span>
+              <Typography variant="caption-1" as="span" className="font-manrope font-semibold text-[#E37400]">
+                4.7
+              </Typography>
               <div className="flex items-center text-[#F4B400]">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="size-3 fill-current" />
                 ))}
               </div>
-              <span className="text-[#70757A] ml-0.5">(29)</span>
+              <Typography variant="caption-1" as="span" className="font-manrope font-normal text-[#70757A] ml-0.5">
+                (29)
+              </Typography>
             </div>
           </div>
 

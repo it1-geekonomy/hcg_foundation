@@ -9,8 +9,13 @@ import type {
   ContentStatus,
 } from "@/domains/cms/lib/types";
 import { CmsFormField } from "@/domains/cms/ui/CmsFormField";
+import CmsImagePicker from "@/domains/cms/ui/CmsImagePicker";
 import CmsSelect, { CONTENT_STATUS_OPTIONS } from "@/domains/cms/ui/CmsSelect";
 import { SeoFieldsSection } from "@/domains/cms/ui/SeoFieldsSection";
+import {
+  ANNUAL_REPORT_BANNER_SIZE,
+  ANNUAL_REPORT_MOBILE_BANNER_SIZE,
+} from "@/domains/resources/Transparencyhub/constants/annualreport";
 
 export type AnnualReportFormValues = {
   title: string;
@@ -179,67 +184,45 @@ export default function AnnualReportForm({
         <CmsFormField
           label="Desktop / web banner"
           htmlFor="annualReportBanner"
-          hint="WebP or AVIF, max 5MB → annualReportBanner"
+          hint={`WebP or AVIF · recommended size ${ANNUAL_REPORT_BANNER_SIZE.width} × ${ANNUAL_REPORT_BANNER_SIZE.height}px (1920px desktop width banner)`}
         >
-          {bannerUrl ? (
-            <div className="mb-2 flex h-40 items-center justify-center overflow-hidden rounded-lg border border-black/5 bg-[#F0EEE9]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={bannerUrl}
-                alt="Current banner"
-                className="max-h-full max-w-full object-contain p-2"
-              />
-            </div>
-          ) : null}
-          <Input
-            id="annualReportBanner"
-            type="file"
-            accept="image/webp,image/avif,.webp,.avif"
-            onChange={(e) =>
+          <CmsImagePicker
+            label="desktop banner"
+            value={{
+              file: value.bannerFile,
+              url: bannerUrl,
+            }}
+            onChange={({ file }) =>
               onChange({
                 ...value,
-                bannerFile: e.target.files?.[0] ?? null,
+                bannerFile: file,
               })
             }
+            requiredSize={ANNUAL_REPORT_BANNER_SIZE}
+            disabled={saving}
           />
-          {value.bannerFile ? (
-            <Typography variant="caption-1" as="p" className="text-[#5C5C5C]">
-              Selected: {value.bannerFile.name}
-            </Typography>
-          ) : null}
         </CmsFormField>
 
         <CmsFormField
           label="Mobile banner"
           htmlFor="annualReportMobileBanner"
-          hint="WebP or AVIF, max 5MB → annualReportMobileBanner"
+          hint={`WebP or AVIF · recommended size ${ANNUAL_REPORT_MOBILE_BANNER_SIZE.width} × ${ANNUAL_REPORT_MOBILE_BANNER_SIZE.height}px (mobile banner)`}
         >
-          {mobileBannerUrl ? (
-            <div className="mb-2 flex h-40 items-center justify-center overflow-hidden rounded-lg border border-black/5 bg-[#F0EEE9]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={mobileBannerUrl}
-                alt="Current mobile banner"
-                className="max-h-full max-w-full object-contain p-2"
-              />
-            </div>
-          ) : null}
-          <Input
-            id="annualReportMobileBanner"
-            type="file"
-            accept="image/webp,image/avif,.webp,.avif"
-            onChange={(e) =>
+          <CmsImagePicker
+            label="mobile banner"
+            value={{
+              file: value.mobileBannerFile,
+              url: mobileBannerUrl,
+            }}
+            onChange={({ file }) =>
               onChange({
                 ...value,
-                mobileBannerFile: e.target.files?.[0] ?? null,
+                mobileBannerFile: file,
               })
             }
+            requiredSize={ANNUAL_REPORT_MOBILE_BANNER_SIZE}
+            disabled={saving}
           />
-          {value.mobileBannerFile ? (
-            <Typography variant="caption-1" as="p" className="text-[#5C5C5C]">
-              Selected: {value.mobileBannerFile.name}
-            </Typography>
-          ) : null}
         </CmsFormField>
 
         <CmsFormField

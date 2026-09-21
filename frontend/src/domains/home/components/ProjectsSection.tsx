@@ -812,10 +812,10 @@ export default function ProjectsSection({
               }`}
               style={{ willChange: "height" }}
             >
-              {card.image ? (
+              {card.mobileImage || card.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={card.image}
+                  src={card.mobileImage || card.image}
                   alt=""
                   aria-hidden="true"
                   className="m-card-image absolute inset-0 h-full w-full object-cover will-change-transform"

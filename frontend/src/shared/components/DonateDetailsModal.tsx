@@ -10,11 +10,15 @@ import {
   donorAvatars,
 } from "@/domains/home/constants/donate";
 import {
-  DEFAULT_COUNTRY_CODE,
   getDonationCountry,
   isIndiaCountry,
 } from "@/domains/home/constants/countries";
-import CountrySelect from "@/shared/components/CountrySelect";
+import {
+  type DonationCurrencyCode,
+  formatDonationAmount,
+  getDonationCurrency,
+} from "@/domains/home/constants/donation-currency";
+import CountryFlag from "@/shared/components/CountryFlag";
 import { donorsApi } from "@/shared/lib/donors-api";
 
 type RazorpaySuccess = {
@@ -42,6 +46,8 @@ const underlineInput =
 
 type Props = {
   amount: number;
+  currency: DonationCurrencyCode;
+  countryCode: string;
   onClose: () => void;
   onAmountChange?: (amount: number) => void;
 };
@@ -66,7 +72,11 @@ function FieldLabel({
 function nationalPhoneDigits(value: string, dialCode: string) {
   let digits = value.replace(/\D/g, "");
   const dialDigits = dialCode.replace(/\D/g, "");
-  if (dialDigits && digits.startsWith(dialDigits) && digits.length > dialDigits.length) {
+  if (
+    dialDigits &&
+    digits.startsWith(dialDigits) &&
+    digits.length > dialDigits.length
+  ) {
     digits = digits.slice(dialDigits.length);
   }
   const maxNational = Math.max(6, 15 - dialDigits.length);
@@ -75,11 +85,12 @@ function nationalPhoneDigits(value: string, dialCode: string) {
 
 export default function DonateDetailsModal({
   amount,
+  currency,
+  countryCode,
   onClose,
   onAmountChange,
 }: Props) {
   const [fullName, setFullName] = useState("");
-  const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
@@ -93,16 +104,10 @@ export default function DonateDetailsModal({
   const [editingAmount, setEditingAmount] = useState(false);
   const amountInputRef = useRef<HTMLInputElement>(null);
 
-  const formattedAmount = `₹${amountValue.toLocaleString("en-IN")}`;
+  const currencyMeta = getDonationCurrency(currency);
+  const formattedAmount = formatDonationAmount(amountValue, currency);
   const country = getDonationCountry(countryCode);
   const international = !isIndiaCountry(countryCode);
-
-  function changeCountry(code: string) {
-    setCountryCode(code);
-    setPhone((prev) =>
-      nationalPhoneDigits(prev, getDonationCountry(code).dialCode),
-    );
-  }
 
   function startAmountEdit() {
     setEditingAmount(true);
@@ -111,7 +116,7 @@ export default function DonateDetailsModal({
   }
 
   function commitAmount() {
-    const next = Number(amountDraft.replace(/[^\d]/g, ""));
+    const next = Number(amountDraft.replace(/[^\d.]/g, ""));
     if (!next || next < 1) {
       setError("Please enter a valid amount.");
       setAmountDraft(String(amountValue));
@@ -161,7 +166,12 @@ export default function DonateDetailsModal({
       return;
     }
 
-    const national = nationalPhoneDigits(phone, country.dialCode);
+    if (isIndiaCountry(countryCode) && currency !== "INR") {
+      setError("Indian donations must use INR.");
+      return;
+    }
+
+    const national = nationalPhoneDigits(phone, country.dial);
     if (international) {
       if (national.length < 6) {
         setError("Please enter a valid phone number.");
@@ -173,7 +183,9 @@ export default function DonateDetailsModal({
     }
 
     const payloadPhone = international
-      ? `${country.dialCode}${national}`
+      ? country.dial === "+"
+        ? national
+        : `${country.dial}${national}`
       : national;
 
     setLoading(true);
@@ -184,7 +196,9 @@ export default function DonateDetailsModal({
         email: email.trim(),
         city: city.trim() || undefined,
         country: country.name,
+        countryCode,
         isInternational: international,
+        currency,
         pan: international ? undefined : pan.replace(/\s/g, "") || undefined,
         message: message.trim() || undefined,
         amount: amountValue,
@@ -195,7 +209,6 @@ export default function DonateDetailsModal({
         throw new Error("Payment widget is still loading. Please try again.");
       }
 
-      const useInternationalCheckout = checkout.isInternational === true;
       const rzp = new window.Razorpay({
         key: checkout.keyId,
         amount: checkout.amountPaise,
@@ -207,31 +220,7 @@ export default function DonateDetailsModal({
           name: checkout.name,
           email: checkout.email,
           contact: checkout.phone,
-          method: useInternationalCheckout ? "card" : undefined,
         },
-        method: useInternationalCheckout
-          ? {
-              card: true,
-              netbanking: false,
-              upi: false,
-              wallet: false,
-              emi: false,
-              paylater: false,
-            }
-          : undefined,
-        config: useInternationalCheckout
-          ? {
-              display: {
-                hide: [
-                  { method: "upi" },
-                  { method: "netbanking" },
-                  { method: "wallet" },
-                  { method: "emi" },
-                  { method: "paylater" },
-                ],
-              },
-            }
-          : undefined,
         theme: { color: "#FCCC2D" },
         handler: async (response: RazorpaySuccess) => {
           try {
@@ -313,7 +302,7 @@ export default function DonateDetailsModal({
               as="p"
               className="mt-3 px-4 font-argestadisplay font-light leading-snug text-white/70"
             >
-              Your donation of {formattedAmount} was received.
+              Your donation of {formattedAmount} {currency} was received.
             </Typography>
             <Typography
               variant="body-8"
@@ -360,56 +349,76 @@ export default function DonateDetailsModal({
               </Typography>
             </div>
 
-            <Typography
-              variant="body-8"
-              as="p"
-              className="mb-2 font-manrope font-normal text-white"
-            >
-              Chosen Amount.
-            </Typography>
-            <div className="mb-8 flex items-stretch gap-3">
-              <div className="flex min-h-[44px] flex-1 items-center rounded border border-[#FCCC2D] bg-[#8A7A28] px-4">
-                {editingAmount ? (
-                  <div className="flex w-full min-w-0 items-center gap-1">
-                    <span className="shrink-0 font-manrope text-sm font-medium text-white">
-                      ₹
-                    </span>
-                    <input
-                      ref={amountInputRef}
-                      id="donate-amount"
-                      type="text"
-                      inputMode="numeric"
-                      value={amountDraft}
-                      onChange={(e) =>
-                        setAmountDraft(e.target.value.replace(/\D/g, ""))
-                      }
-                      onBlur={commitAmount}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          commitAmount();
-                        }
-                      }}
-                      className="w-full min-w-0 bg-transparent font-manrope text-sm font-medium text-white outline-none"
-                    />
-                  </div>
-                ) : (
-                  <Typography
-                    variant="body-8"
-                    as="span"
-                    className="font-manrope font-medium text-white"
-                  >
-                    {formattedAmount}
-                  </Typography>
-                )}
+            <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <Typography
+                  variant="body-8"
+                  as="p"
+                  className="mb-2 font-manrope font-normal text-white"
+                >
+                  Currency
+                </Typography>
+                <div className="flex min-h-[44px] items-center rounded border border-white/35 px-3 font-manrope text-sm text-white">
+                  {currencyMeta.label}
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={editingAmount ? commitAmount : startAmountEdit}
-                className="min-h-[44px] shrink-0 rounded border border-white/45 px-5 font-manrope text-xs font-semibold tracking-[0.12em] text-white transition hover:border-[#FCCC2D] hover:text-[#FCCC2D]"
-              >
-                {editingAmount ? "DONE" : "EDIT"}
-              </button>
+              <div>
+                <Typography
+                  variant="body-8"
+                  as="p"
+                  className="mb-2 font-manrope font-normal text-white"
+                >
+                  Chosen Amount
+                </Typography>
+                <div className="flex items-stretch gap-3">
+                  <div className="flex min-h-[44px] flex-1 items-center rounded border border-[#FCCC2D] bg-[#8A7A28] px-4">
+                    {editingAmount ? (
+                      <div className="flex w-full min-w-0 items-center gap-1">
+                        <span className="shrink-0 font-manrope text-sm font-medium text-white">
+                          {currencyMeta.symbol}
+                        </span>
+                        <input
+                          ref={amountInputRef}
+                          id="donate-amount"
+                          type="text"
+                          inputMode="decimal"
+                          value={amountDraft}
+                          onChange={(e) =>
+                            setAmountDraft(
+                              e.target.value
+                                .replace(/[^\d.]/g, "")
+                                .replace(/(\..*)\./g, "$1"),
+                            )
+                          }
+                          onBlur={commitAmount}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              commitAmount();
+                            }
+                          }}
+                          className="w-full min-w-0 bg-transparent font-manrope text-sm font-medium text-white outline-none"
+                        />
+                      </div>
+                    ) : (
+                      <Typography
+                        variant="body-8"
+                        as="span"
+                        className="font-manrope font-medium text-white"
+                      >
+                        {formattedAmount}
+                      </Typography>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={editingAmount ? commitAmount : startAmountEdit}
+                    className="min-h-[44px] shrink-0 rounded border border-white/45 px-5 font-manrope text-xs font-semibold tracking-[0.12em] text-white transition hover:border-[#FCCC2D] hover:text-[#FCCC2D]"
+                  >
+                    {editingAmount ? "DONE" : "EDIT"}
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
@@ -430,35 +439,39 @@ export default function DonateDetailsModal({
 
               <div className="min-w-0">
                 <FieldLabel htmlFor="donate-phone">Phone Number*</FieldLabel>
-                <div className="relative min-w-0">
-                  <div className="flex min-w-0 items-center gap-2 border-b border-white/35">
-                    <div className="shrink-0">
-                      <CountrySelect
-                        value={countryCode}
-                        onChange={changeCountry}
-                        variant="dial"
-                      />
-                    </div>
-                    <input
-                      id="donate-phone"
-                      required
-                      name="phone"
-                      type="tel"
-                      autoComplete="tel"
-                      inputMode="numeric"
-                      value={phone}
-                      onChange={(e) =>
-                        setPhone(
-                          nationalPhoneDigits(e.target.value, country.dialCode),
-                        )
-                      }
-                      className="min-w-0 flex-1 bg-transparent py-1.5 font-manrope text-sm text-white outline-none placeholder:text-white/30"
+                <div className="flex min-w-0 items-center gap-2 border-b border-white/35">
+                  <div
+                    className="flex shrink-0 items-center gap-1.5 py-1.5"
+                    title={country.name}
+                  >
+                    <CountryFlag
+                      code={country.code}
+                      title={country.name}
+                      className="h-3.5 w-5 shrink-0 rounded-[1px] object-cover sm:h-4 sm:w-6"
                     />
+                    <span className="font-manrope text-sm whitespace-nowrap text-white">
+                      {country.dial}
+                    </span>
                   </div>
+                  <input
+                    id="donate-phone"
+                    required
+                    name="phone"
+                    type="tel"
+                    autoComplete="tel"
+                    inputMode="numeric"
+                    value={phone}
+                    onChange={(e) =>
+                      setPhone(
+                        nationalPhoneDigits(e.target.value, country.dial),
+                      )
+                    }
+                    className="min-w-0 flex-1 bg-transparent py-1.5 font-manrope text-sm text-white outline-none placeholder:text-white/30"
+                  />
                 </div>
                 {international ? (
                   <p className="mt-1.5 font-manrope text-[11px] font-light text-white/60">
-                    International donor — card payment in INR
+                    International cards and wallets are supported via Razorpay.
                   </p>
                 ) : null}
               </div>
@@ -567,7 +580,9 @@ export default function DonateDetailsModal({
               className="mt-6 w-full rounded bg-[#FCCC2D] py-3.5 font-manrope font-bold text-[#3A2E00] disabled:opacity-60"
             >
               <Typography variant="button-1" as="span">
-                {loading ? "Please wait…" : `Pay Securely ${formattedAmount}`}
+                {loading
+                  ? "Please wait…"
+                  : `Pay Securely ${formattedAmount}`}
               </Typography>
             </button>
 

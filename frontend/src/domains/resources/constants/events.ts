@@ -7,6 +7,7 @@ export interface EventItem {
   summary: string;
   fullStory: string;
   imageUrl: string;
+  location?: string;
 }
 
 export const EVENTS_DATA: EventItem[] = [
