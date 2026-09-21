@@ -10,9 +10,14 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -21,7 +26,12 @@ import {
 } from '@nestjs/swagger';
 import { Public } from '../../common/decorators/public.decorator';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
+import { CdnFile } from '../../common/storage/cdn.service';
 import { CreateLeadsInternshipDto } from './dto/create-leads-internship.dto';
+import {
+  CreateLeadsInternshipMultipartDto,
+  UpdateLeadsInternshipMultipartDto,
+} from './dto/leads-internship-multipart.dto';
 import { UpdateLeadsInternshipDto } from './dto/update-leads-internship.dto';
 import { LeadsInternship } from './entities/leads-internship.entity';
 import  { LeadsInternshipService } from './leads-internship.service';
@@ -33,13 +43,19 @@ export class LeadsInternshipController {
 
   @Public()
   @Post()
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CreateLeadsInternshipMultipartDto })
+  @UseInterceptors(FileInterceptor('cv'))
   @ApiOperation({
     summary: 'Submit internship lead (website)',
-    description: 'Public endpoint for website internship form submissions.',
+    description: 'Public endpoint for website internship form submissions. Requires a CV file upload.',
   })
   @ApiCreatedResponse({ type: LeadsInternship })
-  async create(@Body() dto: CreateLeadsInternshipDto) {
-    const data = await this.service.create(dto);
+  async create(
+    @Body() dto: CreateLeadsInternshipDto,
+    @UploadedFile() file?: CdnFile,
+  ) {
+    const data = await this.service.create(dto, file);
     return {
       statusCode: HttpStatus.CREATED,
       message: 'Internship lead submitted successfully',
@@ -110,6 +126,9 @@ export class LeadsInternshipController {
 
   @Patch(':id')
   @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: UpdateLeadsInternshipMultipartDto })
+  @UseInterceptors(FileInterceptor('cv'))
   @ApiOperation({ summary: 'Update internship lead (CMS)' })
   @ApiOkResponse({ type: LeadsInternship })
   @ApiUnauthorizedResponse({
@@ -118,8 +137,9 @@ export class LeadsInternshipController {
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateLeadsInternshipDto,
+    @UploadedFile() file?: CdnFile,
   ) {
-    const data = await this.service.update(id, dto);
+    const data = await this.service.update(id, dto, file);
     return {
       statusCode: HttpStatus.OK,
       message: 'Internship lead updated successfully',

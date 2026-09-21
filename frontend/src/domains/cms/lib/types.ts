@@ -210,6 +210,7 @@ export type Donor = {
   email?: string | null;
   city?: string | null;
   country?: string | null;
+  countryCode?: string | null;
   isInternational: boolean;
   pan?: string | null;
   message?: string | null;

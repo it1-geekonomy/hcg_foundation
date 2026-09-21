@@ -6,30 +6,31 @@ import Script from "next/script";
 import { Check, Lock } from "lucide-react";
 import Typography from "@/lib/Typography";
 import DonateDetailsModal from "@/shared/components/DonateDetailsModal";
+import CountrySelect from "@/shared/components/CountrySelect";
 import {
   donateTheme,
-  donateAmountOptions,
   donateIcon,
   donateBgImage,
   donatemobileimg,
   donorAvatars,
 } from "@/domains/home/constants/donate";
-
-function parseSelectedAmount(
-  selectedAmount: string,
-  customAmount: string,
-  isCustom: boolean
-) {
-  const raw =
-    isCustom || !selectedAmount
-      ? customAmount
-      : selectedAmount.replace(/[^\d]/g, "");
-  return Number(raw);
-}
+import {
+  DEFAULT_COUNTRY_CODE,
+  getDonationCountry,
+} from "@/domains/home/constants/countries";
+import {
+  type DonationCurrencyCode,
+  formatDonationAmount,
+  getDonationCurrency,
+} from "@/domains/home/constants/donation-currency";
 
 export default function DonateSection() {
-  const [selectedAmount, setSelectedAmount] = useState<string>(
-    donateAmountOptions[donateAmountOptions.length - 1]
+  const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
+  const country = getDonationCountry(countryCode);
+  const currency: DonationCurrencyCode = country.currency;
+  const currencyMeta = getDonationCurrency(currency);
+  const [selectedPreset, setSelectedPreset] = useState<number | null>(
+    currencyMeta.presets[currencyMeta.presets.length - 1] ?? null,
   );
   const [isCustom, setIsCustom] = useState(false);
   const [customAmount, setCustomAmount] = useState("");
@@ -37,28 +38,41 @@ export default function DonateSection() {
   const [amountError, setAmountError] = useState<string | null>(null);
   const [agreedTo80G, setAgreedTo80G] = useState(false);
 
-  const pickPreset = (amount: string) => {
-    setSelectedAmount(amount);
+  const changeCountry = (nextCode: string) => {
+    const next = getDonationCountry(nextCode);
+    const meta = getDonationCurrency(next.currency);
+    setCountryCode(next.code);
     setIsCustom(false);
+    setCustomAmount("");
+    setSelectedPreset(meta.presets[meta.presets.length - 1] ?? null);
+    setAmountError(null);
+  };
+
+  const pickPreset = (amount: number) => {
+    setSelectedPreset(amount);
+    setIsCustom(false);
+    setCustomAmount("");
+    setAmountError(null);
   };
 
   const pickCustom = () => {
     setIsCustom(true);
-    setSelectedAmount("");
+    setSelectedPreset(null);
   };
 
-  const handleCustomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomAmount(e.target.value);
+  const handleCustomInputChange = (value: string) => {
+    setCustomAmount(value.replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1"));
     setIsCustom(true);
-    setSelectedAmount("");
+    setSelectedPreset(null);
     setAmountError(null);
   };
 
-  const donationAmount = parseSelectedAmount(
-    selectedAmount,
-    customAmount,
-    isCustom
-  );
+  const donationAmount = (() => {
+    if (isCustom || selectedPreset == null) {
+      return Number(customAmount);
+    }
+    return selectedPreset;
+  })();
 
   const openDetailsForm = () => {
     if (!donationAmount || donationAmount < 1) {
@@ -71,7 +85,6 @@ export default function DonateSection() {
 
   const cardContent = (
     <>
-      {/* Header */}
       <div className="flex flex-col items-center gap-2 text-center">
         <div className="flex items-center gap-2">
           <Image
@@ -100,7 +113,28 @@ export default function DonateSection() {
         </Typography>
       </div>
 
-      {/* Amount picker */}
+      <div className="flex flex-col gap-2 mb-4">
+        <Typography
+          variant="body-8"
+          as="span"
+          className="font-medium text-white font-manrope"
+        >
+          Country
+        </Typography>
+        <CountrySelect
+          value={countryCode}
+          onChange={changeCountry}
+          variant="name"
+        />
+        <Typography
+          variant="caption-1"
+          as="span"
+          className="font-manrope font-light text-white/55"
+        >
+          Currency: {currencyMeta.label}
+        </Typography>
+      </div>
+
       <div className="flex flex-col gap-3 mb-6 md:mb-0">
         <Typography
           variant="body-7"
@@ -111,23 +145,25 @@ export default function DonateSection() {
         </Typography>
 
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {donateAmountOptions.map((amount) => {
-            const active = selectedAmount === amount && !isCustom;
+          {currencyMeta.presets.map((amount) => {
+            const active = selectedPreset === amount && !isCustom;
             return (
               <button
-                key={amount}
+                key={`${currency}-${amount}`}
                 type="button"
-                onClick={() => {
-                  pickPreset(amount);
-                  setAmountError(null);
-                }}
-                className={`w-[88%] mx-auto rounded border py-2.5 font-semibold transition-colors ${active
-                  ? "bg-[#FCCC2D] border-[#FCCC2D] text-[#3A2E00]"
-                  : "bg-transparent border-white/35 text-white"
-                  }`}
+                onClick={() => pickPreset(amount)}
+                className={`w-[88%] mx-auto rounded border py-2.5 font-semibold transition-colors ${
+                  active
+                    ? "bg-[#FCCC2D] border-[#FCCC2D] text-[#3A2E00]"
+                    : "bg-transparent border-white/35 text-white"
+                }`}
               >
-                <Typography variant="body-8" as="span" className="text-inherit font-manrope">
-                  {amount}
+                <Typography
+                  variant="body-8"
+                  as="span"
+                  className="text-inherit font-manrope"
+                >
+                  {formatDonationAmount(amount, currency)}
                 </Typography>
               </button>
             );
@@ -135,15 +171,19 @@ export default function DonateSection() {
 
           {isCustom ? (
             <div className="flex w-[88%] mx-auto items-center justify-center gap-1 rounded border border-[#FCCC2D] bg-[#FCCC2D]/15 py-2.5 px-2 backdrop-blur-sm">
-              <Typography variant="body-8" as="span" className="text-[#FFFFFF] font-manrope">
-                ₹
+              <Typography
+                variant="body-8"
+                as="span"
+                className="text-[#FFFFFF] font-manrope"
+              >
+                {currencyMeta.symbol}
               </Typography>
               <input
                 type="text"
-                inputMode="numeric"
+                inputMode="decimal"
                 autoFocus
                 value={customAmount}
-                onChange={(e) => setCustomAmount(e.target.value.replace(/\D/g, ""))}
+                onChange={(e) => handleCustomInputChange(e.target.value)}
                 placeholder="0"
                 className="w-full min-w-0 bg-transparent font-semibold text-white placeholder-white/40 outline-none"
               />
@@ -154,7 +194,11 @@ export default function DonateSection() {
               onClick={pickCustom}
               className="w-[88%] mx-auto rounded border-1 border-[#FCCC2D] bg-[#FCCC2D]/15 py-2.5 text-white font-semibold backdrop-blur-sm transition-colors"
             >
-              <Typography variant="body-8" as="span" className="text-inherit font-manrope">
+              <Typography
+                variant="body-8"
+                as="span"
+                className="text-inherit font-manrope"
+              >
                 More
               </Typography>
             </button>
@@ -162,16 +206,18 @@ export default function DonateSection() {
         </div>
       </div>
 
-      {/* Divider */}
       <div className="hidden md:flex items-center gap-3 lg:mb-4">
         <span className="h-px flex-1 bg-white/15" />
-        <Typography variant="body-6" as="span" className="text-[#909299] font-manrope">
+        <Typography
+          variant="body-6"
+          as="span"
+          className="text-[#909299] font-manrope"
+        >
           or
         </Typography>
         <span className="h-px flex-1 bg-white/25" />
       </div>
 
-      {/* Custom amount */}
       <div className="flex flex-col gap-2">
         <Typography
           variant="body-8"
@@ -182,16 +228,18 @@ export default function DonateSection() {
         </Typography>
 
         <div className="flex items-center gap-2 border-b border-white/30 pb-2 mb-4 lg:mb-8">
-          <Typography variant="body-2" as="span" className="text-[#FFFFFF] font-manrope">
-            ₹
+          <Typography
+            variant="body-2"
+            as="span"
+            className="text-[#FFFFFF] font-manrope"
+          >
+            {currencyMeta.symbol}
           </Typography>
           <input
             type="text"
-            inputMode="numeric"
+            inputMode="decimal"
             value={customAmount}
-            onChange={(e) => handleCustomInputChange({
-              target: { value: e.target.value.replace(/\D/g, "") }
-            } as React.ChangeEvent<HTMLInputElement>)}
+            onChange={(e) => handleCustomInputChange(e.target.value)}
             className="w-full bg-transparent text-white placeholder-white/40 outline-none"
           />
         </div>
@@ -249,10 +297,11 @@ export default function DonateSection() {
         </Typography>
       </div>
 
-      {/* CTA */}
       <div className="flex flex-col items-center mb-4 md:mb-0">
         {amountError ? (
-          <p className="mb-2 font-manrope text-sm text-[#FFE08A]">{amountError}</p>
+          <p className="mb-2 font-manrope text-sm text-[#FFE08A]">
+            {amountError}
+          </p>
         ) : null}
         <button
           type="button"
@@ -265,13 +314,20 @@ export default function DonateSection() {
         </button>
       </div>
 
-      {/* Footer */}
       <div className="flex items-center justify-center gap-1.5">
         <Lock className="h-4 w-4 text-white/70" />
-        <Typography variant="caption-1" as="span" className="text-white/60 font-light font-manrope lg:hidden">
+        <Typography
+          variant="caption-1"
+          as="span"
+          className="text-white/60 font-light font-manrope lg:hidden"
+        >
           Secure Payment • Trusted by Thousands
         </Typography>
-        <Typography variant="brand-2" as="span" className="text-white/60 font-light font-manrope hidden lg:block">
+        <Typography
+          variant="brand-2"
+          as="span"
+          className="text-white/60 font-light font-manrope hidden lg:block"
+        >
           Secure Payment • Trusted by Thousands
         </Typography>
       </div>
@@ -287,17 +343,17 @@ export default function DonateSection() {
       {detailsOpen ? (
         <DonateDetailsModal
           amount={donationAmount}
+          currency={currency}
+          countryCode={countryCode}
           onClose={() => setDetailsOpen(false)}
           onAmountChange={(next) => {
             setIsCustom(true);
             setCustomAmount(String(next));
-            setSelectedAmount("");
+            setSelectedPreset(null);
           }}
         />
       ) : null}
       <div className="relative w-full">
-        {/* Below 768px (<md): fixed top offset to reveal the image above the
-            card, with equal 10px inset on the remaining sides. */}
         <div className="relative w-full overflow-hidden md:hidden">
           <Image
             src={donatemobileimg}
@@ -316,7 +372,6 @@ export default function DonateSection() {
           </div>
         </div>
 
-        {/* 768px and up (md, lg, xl...) */}
         <div className="relative hidden w-full overflow-hidden md:block">
           <Image
             src={donateBgImage}

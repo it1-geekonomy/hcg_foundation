@@ -1182,6 +1182,14 @@ export const publicAwardsApi = {
     ),
 };
 
+/** Public site: published annual reports */
+export const publicAnnualReportsApi = {
+  listPublished: (params?: Omit<ListQuery, "status">) =>
+    request<Paginated<AnnualReport>>(
+      `/annual-reports/published${toQuery({ page: 1, limit: 100, ...params })}`
+    ),
+};
+
 /** Public site: published projects */
 export const publicProjectsApi = {
   listPublished: (params?: Omit<ListQuery, "status">) =>

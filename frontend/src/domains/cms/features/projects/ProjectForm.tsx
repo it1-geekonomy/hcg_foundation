@@ -14,6 +14,10 @@ import CmsImagePicker from "@/domains/cms/ui/CmsImagePicker";
 import { CmsFormField } from "@/domains/cms/ui/CmsFormField";
 import CmsSelect, { CONTENT_STATUS_OPTIONS } from "@/domains/cms/ui/CmsSelect";
 import { SeoFieldsSection } from "@/domains/cms/ui/SeoFieldsSection";
+import {
+  PROJECT_BANNER_SIZE,
+  PROJECT_MOBILE_BANNER_SIZE,
+} from "@/domains/home/constants/project";
 
 const CmsRichTextEditor = dynamic(
   () => import("@/domains/cms/ui/CmsRichTextEditor"),
@@ -274,10 +278,11 @@ export default function ProjectForm({
         <CmsFormField
           label="Desktop / web banner"
           htmlFor="projectBanner"
-          hint="WebP or AVIF, max 5MB"
+          hint={`WebP or AVIF · exact size ${PROJECT_BANNER_SIZE.width} × ${PROJECT_BANNER_SIZE.height}px (~2:1 landscape — homepage accordion; keep subject centered for collapsed strips)`}
         >
           <CmsImagePicker
             label="desktop banner"
+            requiredSize={PROJECT_BANNER_SIZE}
             value={{
               file: value.projectBannerFile,
               url: value.projectBannerUrl,
@@ -296,10 +301,11 @@ export default function ProjectForm({
         <CmsFormField
           label="Mobile banner"
           htmlFor="projectMobileBanner"
-          hint="WebP or AVIF, max 5MB"
+          hint={`WebP or AVIF · exact size ${PROJECT_MOBILE_BANNER_SIZE.width} × ${PROJECT_MOBILE_BANNER_SIZE.height}px (portrait — mobile project stack)`}
         >
           <CmsImagePicker
             label="mobile banner"
+            requiredSize={PROJECT_MOBILE_BANNER_SIZE}
             value={{
               file: value.projectMobileBannerFile,
               url: value.projectMobileBannerUrl,
