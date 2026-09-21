@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Typography from "@/lib/Typography";
+import Banner from "@/shared/components/Herobannersection";
 import DonateForm from "@/shared/components/DonateForm";
 import PaginationControls from "@/shared/components/PaginationControls";
 import ProjectCard from "@/domains/resources/components/ProjectCard";
@@ -31,17 +31,18 @@ export default function ProjectsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FFFBEA] pt-24 sm:pt-28 lg:pt-32">
+    <main className="min-h-screen bg-[#FFFBEA]">
+      <Banner
+        bgImage="/Resources/Resources banner image.png"
+        bgImageAlt="Projects"
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Resources" },
+        ]}
+        title="Projects"
+      />
+
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
-        <div className="mb-8 sm:mb-12">
-          <Typography
-            variant="heading-2"
-            as="h1"
-            className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
-          >
-            Projects
-          </Typography>
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
           {currentProjects.map((projectItem) => (
