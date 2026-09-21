@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { PanInfo } from "framer-motion";
 import Typography from "@/lib/Typography";
+import Banner from "@/shared/components/Herobannersection";
 import DonateForm from "@/shared/components/DonateForm";
 import { PATIENT_TESTIMONIALS, PatientTestimonial } from "@/domains/journey-of-hope/constants/testimonials";
 import TestimonialCard from "@/domains/journey-of-hope/components/TestimonialCard";
@@ -38,8 +39,12 @@ export default function TestimonialsPage() {
   };
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
-    if (info.offset.x < -40) handleNext();
-    else if (info.offset.x > 40) handlePrev();
+    const swipeThreshold = 25;
+    if (info.offset.x < -swipeThreshold || info.velocity.x < -150) {
+      handleNext();
+    } else if (info.offset.x > swipeThreshold || info.velocity.x > 150) {
+      handlePrev();
+    }
   };
 
   // Compute circular cyclic offset relative to active center index
@@ -52,12 +57,16 @@ export default function TestimonialsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope pt-24 sm:pt-28 lg:pt-32 overflow-x-hidden">
-      {/* ========================================================================= */}
-      {/* TEAMMATE HERO BANNER SLOT                                                 */}
-      {/* Un-comment / import when teammate pushes their Hero Banner component:    */}
-      {/* <PatientTestimonialsHeroBanner />                                         */}
-      {/* ========================================================================= */}
+    <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope overflow-x-hidden">
+      <Banner
+        bgImage="/journey-of-hope/Journey of Hope banner image.png"
+        bgImageAlt="Patient Testimonials"
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Journey of Hope" },
+        ]}
+        title="Patient Testimonials"
+      />
 
       {/* Main Section matching Figma Node 1342:32240 */}
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
@@ -65,7 +74,7 @@ export default function TestimonialsPage() {
         <div className="w-full text-left">
           <Typography
             variant="heading-2"
-            as="h1"
+            as="h2"
             className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
           >
             Patient Testimonials

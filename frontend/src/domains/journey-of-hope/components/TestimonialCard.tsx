@@ -83,6 +83,29 @@ export default function TestimonialCard({
   onPlayVideo,
 }: TestimonialCardProps) {
   const isCenter = diff === 0;
+  const isDraggingRef = React.useRef(false);
+
+  const handleCardDragStart = () => {
+    isDraggingRef.current = false;
+  };
+
+  const handleCardDrag = () => {
+    isDraggingRef.current = true;
+  };
+
+  const handleCardDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    onDragEnd(event, info);
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 150);
+  };
+
+  const handleCardClick = () => {
+    if (isDraggingRef.current) return;
+    if (diff === 1) onNext();
+    else if (diff === -1) onPrev();
+    else if (diff === 0) onPlayVideo(item.videoUrl);
+  };
 
   return (
     <motion.div
@@ -94,21 +117,19 @@ export default function TestimonialCard({
         damping: 28,
         mass: 0.9,
       }}
-      drag={isCenter ? "x" : false}
+      drag="x"
       dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.2}
-      onDragEnd={onDragEnd}
-      onClick={() => {
-        if (diff === 1) onNext();
-        else if (diff === -1) onPrev();
-        else if (diff === 0) onPlayVideo(item.videoUrl);
-      }}
+      dragElastic={0.6}
+      onDragStart={handleCardDragStart}
+      onDrag={handleCardDrag}
+      onDragEnd={handleCardDragEnd}
+      onClick={handleCardClick}
       style={{
         width: isDesktop ? "43.678rem" : isTablet ? "32.5rem" : "calc(100vw - 2rem)",
         height: isDesktop ? "24.824rem" : isTablet ? "18.4375rem" : "13.75rem",
         transformOrigin: "center center",
       }}
-      className={`group absolute top-1/2 left-1/2 overflow-hidden rounded-[1.1rem] bg-[#EFEAD8] shadow-lg cursor-pointer transition-shadow duration-300 ${
+      className={`group absolute top-1/2 left-1/2 overflow-hidden rounded-[1.1rem] bg-[#EFEAD8] shadow-lg transition-shadow duration-300 cursor-grab active:cursor-grabbing ${
         isCenter ? "shadow-2xl ring-1 ring-black/5" : "hover:brightness-95"
       }`}
     >
