@@ -12,8 +12,8 @@ const OUR_MISSION_CONTENT = {
     </>
   ),
   paragraphs: [
-    "HCG Foundation is the philanthropic arm of HCG — India's largest cancer care network. Established to bridge the gap between world class oncology and accessible community support, we serve patients and families across India regardless of their financial means.",
-    "Our work spans financial assistance, awareness, early detection, education, and holistic patient support — addressing every dimension of the cancer journey, not just the clinical one.",
+    "HCG Foundation works to support cancer patients, families, and communities through initiatives focused on financial assistance, awareness, early detection, education, and holistic patient support.",
+    "Our work aims to make cancer care more accessible and extend support beyond clinical treatment — helping patients and families navigate different stages of the cancer journey with greater care, dignity, and hope. HCG Foundation supports cancer patients and families through financial assistance, awareness, early detection, and holistic care—bringing greater hope and support throughout their cancer journey.",
   ],
   image: "/aboutus/healingpatient.png",
   imageAlt: "A family greeting an elderly couple outdoors",

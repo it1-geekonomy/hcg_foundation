@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Script from "next/script";
-import { Lock } from "lucide-react";
+import { Check, Lock } from "lucide-react";
 import Typography from "@/lib/Typography";
 import DonateDetailsModal from "@/shared/components/DonateDetailsModal";
 import CountrySelect from "@/shared/components/CountrySelect";
@@ -36,6 +36,7 @@ export default function DonateSection() {
   const [customAmount, setCustomAmount] = useState("");
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [amountError, setAmountError] = useState<string | null>(null);
+  const [agreedTo80G, setAgreedTo80G] = useState(false);
 
   const changeCountry = (nextCode: string) => {
     const next = getDonationCountry(nextCode);
@@ -105,7 +106,7 @@ export default function DonateSection() {
         <Typography
           variant="body-7"
           as="p"
-          className="w-full leading-snug font-light text-white/70 px-8 sm:px-10 mb-8 lg:px-12 lg:mb-6 font-argestadisplay"
+          className="w-full leading-snug font-light text-white/70 px-8 sm:px-10 mb-8 lg:px-12 lg:mb-6 font-argestadisplay font-bold"
         >
           Your contribution helps us provide care, support and hope to those
           who need it most.
@@ -244,6 +245,35 @@ export default function DonateSection() {
         </div>
       </div>
 
+      {/* 80G terms */}
+      <label className="flex min-w-0 cursor-pointer items-center gap-3">
+        <span className="relative flex h-4 w-4 shrink-0">
+          <input
+            type="checkbox"
+            checked={agreedTo80G}
+            onChange={(e) => setAgreedTo80G(e.target.checked)}
+            className="peer h-4 w-4 cursor-pointer appearance-none rounded-[3px] border border-[#FCCC2D] bg-transparent transition-colors checked:bg-[#FCCC2D] focus-visible:ring-2 focus-visible:ring-[#FCCC2D]/50 focus-visible:outline-none"
+          />
+          <Check
+            strokeWidth={3}
+            className="pointer-events-none absolute inset-0 m-auto h-3 w-3 text-[#3A2E00] opacity-0 peer-checked:opacity-100"
+          />
+        </span>
+        <Typography
+          variant="caption-1"
+          as="span"
+          className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/80"
+        >
+          I have read and agree to the applicable{" "}
+          <span className="font-semibold text-[#FCCC2D]">
+            80G Terms &amp; Conditions
+          </span>{" "}
+          for this donation.
+        </Typography>
+      </label>
+ 
+
+      {/* Social proof */}
       <div className="mb-10 flex min-w-0 items-start gap-3 md:mb-0">
         <div className="flex shrink-0 -space-x-2 pt-0.5">
           {donorAvatars.map((src, i) => (

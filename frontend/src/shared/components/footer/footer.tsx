@@ -87,7 +87,7 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="col-span-2 md:col-span-3 lg:col-span-1 grid grid-cols-2 md:grid-cols-3 gap-x-6 md:gap-x-8 gap-y-10 lg:flex lg:flex-row lg:items-start lg:justify-end lg:gap-x-10 xl:gap-x-14 2xl:gap-x-28">
+          <div className="col-span-2 md:col-span-3 lg:col-span-1 grid grid-cols-[auto_auto] justify-evenly md:grid-cols-3 md:justify-normal gap-x-6 md:gap-x-8 gap-y-10 lg:flex lg:flex-row lg:items-start lg:justify-end lg:gap-x-10 xl:gap-x-14 2xl:gap-x-28">
           <div className="col-span-1">
             <FooterHeading>QUICK LINKS</FooterHeading>
             <ul className="mt-8 space-y-3">
@@ -156,9 +156,9 @@ export default function Footer() {
                     href={social.href}
                     className="w-10 h-10 bg-[#FDB723] rounded-full flex items-center justify-center hover:bg-yellow-500 transition-colors"
                   >
-                    {social.name === "Facebook" && <FacebookIcon />}
-                    {social.name === "LinkedIn" && <LinkedinIcon />}
                     {social.name === "Instagram" && <InstagramIcon />}
+                    {social.name === "LinkedIn" && <LinkedinIcon />}
+                    {social.name === "Facebook" && <FacebookIcon />}
                   </a>
                 ))}
               </div>

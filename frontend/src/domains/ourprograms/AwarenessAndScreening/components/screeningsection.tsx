@@ -74,11 +74,10 @@ function GalleryTile({
 }) {
   return (
     <div
-      className={`relative aspect-[4/3] shrink-0 overflow-hidden rounded-sm ${
-        fullWidth
+      className={`relative aspect-[4/3] shrink-0 overflow-hidden rounded-sm ${fullWidth
           ? "w-full"
           : "w-[calc((100%-1rem)/2)] sm:w-[calc((100%-2rem)/3)]"
-      }`}
+        }`}
     >
       <Image
         src={image.src}
@@ -205,11 +204,7 @@ export default function CancerScreeningSection() {
           as="p"
           className="mt-2 font-argestadisplay font-normal text-[#293239]"
         >
-          In 2014, the HCG Foundation, in partnership with the Infosys Foundation, launched a mobile
-          cancer bus. Staffed with a doctor, nurse, and paramedical staff, the clinic is equipped with
-          mammography, x-ray, ultrasound, pathology, and lab facilities. The mobile clinic serves remote
-          areas in north Karnataka, providing advanced cancer screening and early diagnosis. It also
-          educates the public about cancer through visual aids inside and outside the clinic.
+          Bringing cancer screening closer to communities, HCG Foundation’s mobile screening initiative takes essential diagnostic services directly to underserved and remote areas. Equipped with healthcare professionals and screening facilities, the mobile unit supports early detection, raises cancer awareness, and helps people access timely screening closer to home.
         </Typography>
 
         <div className="mt-6">
@@ -227,16 +222,23 @@ export default function CancerScreeningSection() {
           Student Outreach
         </Typography>
 
-        <Typography
-          variant="body-2"
-          as="p"
-          className="mt-2 font-argestadisplay font-normal text-[#293239]"
-        >
-          Since 2018, the HCG Foundation has conducted a healthy habits campaign for 4th, 5th, and 6th
-          graders in government schools. The program includes sessions on nutrition, yoga, art, and
-          interactions with healthcare professionals, aiming to teach students about peer pressure,
-          substance abuse, and the importance of a balanced life.
-        </Typography>
+        <div className="mt-2 space-y-4">
+          <Typography
+            variant="body-2"
+            as="p"
+            className="font-argestadisplay font-normal text-[#293239]"
+          >
+            Since 2018, HCG Foundation has conducted healthy habits campaigns for 4th, 5th, and 6th-grade students in government schools. The program includes interactive sessions on nutrition, yoga, art, HPV vaccination, and conversations with healthcare professionals, helping students understand healthy lifestyle choices, peer pressure, substance abuse, and the importance of maintaining a balanced diet.
+          </Typography>
+
+          <Typography
+            variant="body-2"
+            as="p"
+            className="font-argestadisplay font-normal text-[#293239]"
+          >
+            The initiative aims to build healthy habits and awareness from an early age, empowering children with practical knowledge that can support their physical, emotional, and overall well-being.
+          </Typography>
+        </div>
 
         <div className="mt-6">
           <StudentOutreachGrid />

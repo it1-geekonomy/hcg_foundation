@@ -27,6 +27,40 @@ function ArrowIcon({ className = "" }: { className?: string }) {
   );
 }
 
+function ChevronLeftIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.25"
+      className={`size-5 shrink-0 ${className}`}
+      aria-hidden="true"
+    >
+      <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ChevronRightIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.25"
+      className={`size-5 shrink-0 ${className}`}
+      aria-hidden="true"
+    >
+      <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function VerticalMarqueeTitle({ title }: { title: string }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLSpanElement>(null);
@@ -132,6 +166,13 @@ function MoreDetailsButton({
 const MOBILE_COLLAPSED_HEIGHT = 112;
 const MOBILE_EXPANDED_EXTRA = 200;
 const MOBILE_EXPANDED_MAX = 480;
+// How many project cards are visible at once. Once there are more
+// projects than this, the carousel arrows appear.
+const VISIBLE_COUNT = 4;
+// Gap between desktop cards in px (matches the old `gap-3`).
+const CARD_GAP = 12;
+// Duration of the arrow slide.
+const SLIDE_DURATION = 0.6;
 
 const SCROLL_DESC_CLASS =
   "min-h-0 overflow-y-auto overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden";
@@ -159,9 +200,18 @@ export default function ProjectsSection({
 
   const timelineRefs = useRef<(gsap.core.Timeline | null)[]>([]);
 
+  // Carousel window: which slice of `cards` is currently on screen.
+  const [windowStart, setWindowStart] = useState(0);
+  const maxWindowStart = Math.max(cards.length - VISIBLE_COUNT, 0);
+  const clampedWindowStart = Math.min(windowStart, maxWindowStart);
+  const hasCarousel = cards.length > VISIBLE_COUNT;
+  const visibleCards = hasCarousel
+    ? cards.slice(clampedWindowStart, clampedWindowStart + VISIBLE_COUNT)
+    : cards;
+
   const safeDefault = Math.min(
     Math.max(defaultActiveIndex, 0),
-    Math.max(cards.length - 1, 0)
+    Math.max(visibleCards.length - 1, 0)
   );
   const [activeIndex, setActiveIndex] = useState<number>(safeDefault);
 
@@ -176,13 +226,49 @@ export default function ProjectsSection({
     []
   );
 
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  // Desktop renders ALL cards in one track. The track is wider than the
+  // viewport by the width of the off-screen cards, so the active card
+  // keeps exactly the same width as before.
+  const trackExtra =
+    Math.max(cards.length - VISIBLE_COUNT, 0) * (COLLAPSED_WIDTH + CARD_GAP);
+  // Desktop activeIndex is an ABSOLUTE index into `cards`.
+  const resetIndex = clampedWindowStart + safeDefault;
+
+  const shift = (direction: 1 | -1) => {
+    const newStart =
+      direction === 1
+        ? Math.min(clampedWindowStart + 1, maxWindowStart)
+        : Math.max(clampedWindowStart - 1, 0);
+    if (newStart === clampedWindowStart) return;
+    setWindowStart(newStart);
+    setActiveIndex(newStart + safeDefault);
+  };
+
+  const handlePrev = () => shift(-1);
+  const handleNext = () => shift(1);
+
+  // One continuous slide of the track. No swapping, no second phase.
+  useLayoutEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    gsap.to(track, {
+      x: -clampedWindowStart * (COLLAPSED_WIDTH + CARD_GAP),
+      duration: reduceMotionRef.current ? 0.001 : SLIDE_DURATION,
+      ease: "power3.inOut",
+      overwrite: "auto",
+    });
+  }, [clampedWindowStart]);
+
   useEffect(() => {
     const next = Math.min(
       Math.max(defaultActiveIndex, 0),
-      Math.max(cards.length - 1, 0)
+      Math.max(Math.min(cards.length, VISIBLE_COUNT) - 1, 0)
     );
     setActiveIndex(next);
     setMobileActiveIndex(next);
+    setWindowStart(0);
     mobileHasMounted.current = false;
   }, [cards, defaultActiveIndex]);
 
@@ -221,33 +307,15 @@ export default function ProjectsSection({
       window.removeEventListener("resize", checkAll);
       ro.disconnect();
     };
-  }, [cards]);
+  }, [cards, windowStart]);
 
+  // Detect prefers-reduced-motion once on mount (still used by the
+  // hover/expand animations below). No entrance animation is played.
   useLayoutEffect(() => {
     reduceMotionRef.current = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-
-    const els = cardsRef.current.filter(
-      (c): c is HTMLDivElement => c !== null
-    );
-
-    if (!reduceMotionRef.current && els.length) {
-      gsap.from(els, {
-        opacity: 0,
-        y: 32,
-        duration: 0.7,
-        ease: "power3.out",
-        stagger: 0.08,
-        clearProps: "opacity,transform",
-      });
-    }
-
-    return () => {
-      gsap.killTweensOf(els);
-      els.forEach((card) => gsap.killTweensOf(card.querySelectorAll("*")));
-    };
-  }, [cards]);
+  }, []);
 
   useEffect(() => {
     const els = cardsRef.current.filter(
@@ -539,7 +607,7 @@ export default function ProjectsSection({
     return () => {
       mobileTimelineRefs.current.forEach((tl) => tl?.kill());
     };
-  }, [mobileActiveIndex, mobileContentHeights, cards]);
+  }, [mobileActiveIndex, mobileContentHeights, cards, windowStart]);
 
   if (!cards.length) {
     return (
@@ -598,17 +666,27 @@ export default function ProjectsSection({
 
         <div
           ref={containerRef}
-          className="hidden h-[480px] w-full gap-3 overflow-hidden rounded-2xl lg:flex xl:h-[600px]"
-          onMouseLeave={() => setActiveIndex(safeDefault)}
+          className="hidden h-[480px] w-full overflow-hidden rounded-2xl lg:block xl:h-[600px]"
+          onMouseLeave={() => setActiveIndex(resetIndex)}
         >
+          <div
+            ref={trackRef}
+            className="flex h-full will-change-transform"
+            style={{ gap: CARD_GAP, width: `calc(100% + ${trackExtra}px)` }}
+          >
           {cards.map((card, index) => (
             <div
-              key={card.id ?? `${card.number}-${card.title}`}
+              key={index}
               ref={(el) => {
                 cardsRef.current[index] = el;
               }}
               role="button"
-              tabIndex={0}
+              tabIndex={
+                index >= clampedWindowStart &&
+                index < clampedWindowStart + VISIBLE_COUNT
+                  ? 0
+                  : -1
+              }
               aria-expanded={index === activeIndex}
               aria-label={card.title}
               onMouseEnter={() => setActiveIndex(index)}
@@ -706,12 +784,13 @@ export default function ProjectsSection({
               </div>
             </div>
           ))}
+          </div>
         </div>
 
         <div className="flex flex-col gap-3 lg:hidden">
-          {cards.map((card, index) => (
+          {visibleCards.map((card, index) => (
             <div
-              key={card.id ?? `m-${card.number}-${card.title}`}
+              key={index}
               ref={(el) => {
                 mobileCardsRef.current[index] = el;
               }}
@@ -838,6 +917,29 @@ export default function ProjectsSection({
             </div>
           ))}
         </div>
+
+        {hasCarousel ? (
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={handlePrev}
+              disabled={clampedWindowStart === 0}
+              aria-label="Previous projects"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFD43B] text-neutral-900 transition-colors hover:bg-[#f0c527] disabled:cursor-not-allowed disabled:opacity-40 [&>svg]:size-4 sm:h-11 sm:w-11 sm:[&>svg]:size-5"
+            >
+              <ChevronLeftIcon />
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={clampedWindowStart >= maxWindowStart}
+              aria-label="Next projects"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFD43B] text-neutral-900 transition-colors hover:bg-[#f0c527] disabled:cursor-not-allowed disabled:opacity-40 [&>svg]:size-4 sm:h-11 sm:w-11 sm:[&>svg]:size-5"
+            >
+              <ChevronRightIcon />
+            </button>
+          </div>
+        ) : null}
       </div>
     </section>
   );

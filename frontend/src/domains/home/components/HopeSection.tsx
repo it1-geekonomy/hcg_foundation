@@ -22,7 +22,7 @@ export default function AboutSection() {
 
         <div className="flex flex-col gap-5">
           {ABOUT_CONTENT.paragraphs.map((paragraph) => (
-            <Typography key={paragraph} variant="body-2" as="p" className="text-[#293239] font-normal font-argestadisplay">
+            <Typography key={paragraph} variant="heading-8" as="p" className="text-[#293239] font-normal font-argestadisplay">
               {paragraph}
             </Typography>
           ))}
