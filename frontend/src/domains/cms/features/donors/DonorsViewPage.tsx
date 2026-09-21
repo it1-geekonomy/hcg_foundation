@@ -97,7 +97,14 @@ export default function DonorsViewPage() {
           <Row label="Email" value={donor.email} />
           <Row label="Phone" value={donor.phone} />
           <Row label="City" value={donor.city} />
-          <Row label="Country" value={donor.country || "India"} />
+          <Row
+            label="Country"
+            value={
+              donor.countryCode
+                ? `${donor.country || "—"} (${donor.countryCode})`
+                : donor.country || "India"
+            }
+          />
           <Row
             label="Donor type"
             value={donor.isInternational ? "International" : "India"}

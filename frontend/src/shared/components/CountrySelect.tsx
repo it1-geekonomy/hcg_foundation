@@ -34,7 +34,7 @@ export default function CountrySelect({
       (country) =>
         country.name.toLowerCase().includes(q) ||
         country.code.toLowerCase().includes(q) ||
-        country.dialCode.includes(q),
+        country.dial.includes(q),
     );
   }, [query]);
 
@@ -56,15 +56,17 @@ export default function CountrySelect({
   }, [open]);
 
   return (
-    <div ref={rootRef}>
+    <div ref={rootRef} className="relative">
       <button
         id={id}
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
-        className={`flex items-center gap-1.5 bg-transparent py-1.5 text-left font-manrope text-sm text-white outline-none ${
-          variant === "dial" ? "w-auto shrink-0" : "w-full min-w-0"
+        className={`flex items-center gap-1.5 bg-transparent text-left font-manrope text-sm text-white outline-none ${
+          variant === "dial"
+            ? "w-auto shrink-0 py-1.5"
+            : "w-full min-w-0 rounded border border-white/35 px-3 py-2.5"
         }`}
       >
         <CountryFlag
@@ -79,7 +81,7 @@ export default function CountrySelect({
               : "min-w-0 flex-1 truncate"
           }
         >
-          {variant === "dial" ? selected.dialCode : selected.name}
+          {variant === "dial" ? selected.dial : selected.name}
         </span>
         <ChevronDown className="h-3.5 w-3.5 shrink-0 text-white/70" />
       </button>
@@ -128,7 +130,7 @@ export default function CountrySelect({
                         {country.name}
                       </span>
                       <span className="shrink-0 font-manrope text-xs text-white/50">
-                        {country.dialCode}
+                        {country.dial}
                       </span>
                     </button>
                   </li>

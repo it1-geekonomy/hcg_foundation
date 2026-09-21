@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Calendar, Link as LinkIcon, ArrowUpRight } from "lucide-react";
 import Typography from "@/lib/Typography";
+import Banner from "@/shared/components/Herobannersection";
 import DonateForm from "@/shared/components/DonateForm";
 import PaginationControls from "@/shared/components/PaginationControls";
 import {
@@ -57,7 +58,17 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   };
 
   return (
-    <main className="min-h-screen bg-[#FFFBEA] pt-24 sm:pt-28 lg:pt-32">
+    <main className="min-h-screen bg-[#FFFBEA]">
+      <Banner
+        bgImage="/Resources/Resources banner image.png"
+        bgImageAlt="Projects"
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Resources" },
+        ]}
+        title="Projects"
+      />
+
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-12 sm:gap-10 lg:gap-14 items-start">
           <div className="sm:col-span-7 flex flex-col">
