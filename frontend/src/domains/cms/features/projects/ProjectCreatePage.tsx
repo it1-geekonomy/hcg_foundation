@@ -45,8 +45,10 @@ export default function ProjectCreatePage() {
         title="Add project"
         description={
           <>
-            Upload banner images (WebP/AVIF, max 5MB). Set status to{" "}
-            <strong>published</strong> to show on the website.
+            Desktop banner must be exactly{" "}
+            <strong>1105 × 560px</strong> (~2:1). Mobile banner must be exactly{" "}
+            <strong>780 × 960px</strong> (WebP/AVIF). Set status to{" "}
+            <strong>published</strong> to show on the homepage.
           </>
         }
       />

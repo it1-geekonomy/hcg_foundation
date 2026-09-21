@@ -1,13 +1,16 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ExternalLink, FileDown } from "lucide-react";
 import Typography from "@/lib/Typography";
-import { cmsApi } from "@/domains/cms/lib/api";
+import { cmsApi, publicAnnualReportsApi } from "@/domains/cms/lib/api";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import type { AnnualReport } from "@/domains/cms/lib/types";
+import AnnualReportsSection from "@/domains/resources/Transparencyhub/components/annualreports";
+import { mapAnnualReportToCard } from "@/domains/resources/Transparencyhub/constants/annualreport";
+import CmsWebsitePreview from "@/domains/cms/ui/CmsWebsitePreview";
 import {
   CmsBadge,
   CmsDetailCard,
@@ -69,6 +72,7 @@ export default function AnnualReportViewPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [report, setReport] = useState<AnnualReport | null>(null);
+  const [published, setPublished] = useState<AnnualReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -81,8 +85,14 @@ export default function AnnualReportViewPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await cmsApi.getAnnualReport(id);
-        if (!cancelled) setReport(res.data);
+        const [res, publishedRes] = await Promise.all([
+          cmsApi.getAnnualReport(id),
+          publicAnnualReportsApi.listPublished({ limit: 50 }).catch(() => null),
+        ]);
+        if (!cancelled) {
+          setReport(res.data);
+          setPublished(publishedRes?.data ?? []);
+        }
       } catch (err) {
         if (cancelled) return;
         const message = cmsErrorMessage(err, "Failed to load");
@@ -97,6 +107,12 @@ export default function AnnualReportViewPage() {
       cancelled = true;
     };
   }, [id]);
+
+  const previewReports = useMemo(() => {
+    if (!report) return [];
+    const others = published.filter((r) => r.id !== report.id);
+    return [report, ...others].map(mapAnnualReportToCard);
+  }, [report, published]);
 
   const onDelete = async () => {
     if (!report) return;
@@ -198,6 +214,13 @@ export default function AnnualReportViewPage() {
           />
         }
       />
+
+      <CmsWebsitePreview
+        label="Website preview · Transparency & Knowledge Hub"
+        className="bg-[#FFF8E2]"
+      >
+        <AnnualReportsSection previewReports={previewReports} />
+      </CmsWebsitePreview>
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(180px,220px)_minmax(0,1fr)]">
         <div className="self-start space-y-2">
