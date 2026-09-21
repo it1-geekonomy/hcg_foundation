@@ -20,6 +20,7 @@ import { CreateDonationDto } from './dto/create-donation.dto';
 import { ListDonorsQueryDto } from './dto/list-donors-query.dto';
 import { VerifyDonationDto } from './dto/verify-donation.dto';
 import { Donor } from './entities/donor.entity';
+import { EmailService } from '../email/email.service';
 
 export type DonationCheckout = {
   orderId: string;
@@ -42,6 +43,7 @@ export class DonorsService {
     @InjectRepository(Donor)
     private readonly repo: Repository<Donor>,
     private readonly razorpay: RazorpayService,
+    private readonly emailService: EmailService,
   ) {}
 
   async createOrder(dto: CreateDonationDto): Promise<DonationCheckout> {
@@ -138,6 +140,9 @@ export class DonorsService {
       this.logger.log(
         `Donation paid. donor=${saved.id} receipt=${saved.receiptNumber}`,
       );
+      this.emailService.sendDonationReceipt(saved).catch(err => {
+        this.logger.error(`Failed to send receipt for donor ${saved.id}: ${err.message}`);
+      });
       return saved;
     }
 
@@ -171,6 +176,9 @@ export class DonorsService {
     this.logger.log(
       `Donation paid. donor=${saved.id} receipt=${saved.receiptNumber}`,
     );
+    this.emailService.sendDonationReceipt(saved).catch(err => {
+      this.logger.error(`Failed to send receipt for donor ${saved.id}: ${err.message}`);
+    });
     return saved;
   }
 

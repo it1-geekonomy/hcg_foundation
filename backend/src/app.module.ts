@@ -29,6 +29,8 @@ import { HomeBannersModule } from './modules/home-banners/home-banners.module';
 import { TermsAndConditionsModule } from './modules/terms-and-conditions/terms-and-conditions.module';
 import { ImpactVideosModule } from './modules/impact-videos/impact-videos.module';
 
+import { EmailModule } from './modules/email/email.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -39,6 +41,7 @@ import { ImpactVideosModule } from './modules/impact-videos/impact-videos.module
     AuthModule,
     DatabaseModule,
     StorageModule,
+    EmailModule,
     EventsModule,
     AnnualReportsModule,
     BlogsModule,
