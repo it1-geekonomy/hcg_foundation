@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
+import { DonationCertificateService } from './donation-certificate.service';
 import { EmailService } from './email.service';
 
 @Module({
-  providers: [EmailService],
-  exports: [EmailService],
+  providers: [DonationCertificateService, EmailService],
+  exports: [EmailService, DonationCertificateService],
 })
 export class EmailModule {}
