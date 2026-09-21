@@ -37,6 +37,7 @@ export default function DonateSection() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [amountError, setAmountError] = useState<string | null>(null);
   const [agreedTo80G, setAgreedTo80G] = useState(false);
+  const [termsError, setTermsError] = useState(false);
 
   const changeCountry = (nextCode: string) => {
     const next = getDonationCountry(nextCode);
@@ -75,11 +76,13 @@ export default function DonateSection() {
   })();
 
   const openDetailsForm = () => {
-    if (!donationAmount || donationAmount < 1) {
-      setAmountError("Please choose or enter an amount.");
-      return;
-    }
-    setAmountError(null);
+    const amountInvalid = !donationAmount || donationAmount < 1;
+
+    setAmountError(amountInvalid ? "Please choose or enter an amount." : null);
+    setTermsError(!agreedTo80G);
+
+    if (amountInvalid || !agreedTo80G) return;
+
     setDetailsOpen(true);
   };
 
@@ -106,7 +109,7 @@ export default function DonateSection() {
         <Typography
           variant="body-7"
           as="p"
-          className="w-full leading-snug font-light text-white/70 px-8 sm:px-10 mb-8 lg:px-12 lg:mb-6 font-argestadisplay font-bold"
+          className="w-full leading-relaxed text-white/70 px-8 sm:px-10 mb-8 lg:px-12 lg:mb-6 font-argestadisplay font-bold"
         >
           Your contribution helps us provide care, support and hope to those
           who need it most.
@@ -144,7 +147,7 @@ export default function DonateSection() {
           Choose an Amount
         </Typography>
 
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="flex flex-wrap gap-2 sm:grid sm:grid-flow-col sm:auto-cols-fr sm:gap-2 md:grid-flow-row md:auto-cols-auto md:grid-cols-4">
           {currencyMeta.presets.map((amount) => {
             const active = selectedPreset === amount && !isCustom;
             return (
@@ -152,7 +155,7 @@ export default function DonateSection() {
                 key={`${currency}-${amount}`}
                 type="button"
                 onClick={() => pickPreset(amount)}
-                className={`w-[88%] mx-auto rounded border py-2.5 font-semibold transition-colors ${
+                className={`rounded border px-4 py-1.5 font-semibold transition-colors sm:w-[80%] sm:mx-auto sm:px-0 sm:py-2.5 md:w-[88%] ${
                   active
                     ? "bg-[#FCCC2D] border-[#FCCC2D] text-[#3A2E00]"
                     : "bg-transparent border-white/35 text-white"
@@ -170,7 +173,7 @@ export default function DonateSection() {
           })}
 
           {isCustom ? (
-            <div className="flex w-[88%] mx-auto items-center justify-center gap-1 rounded border border-[#FCCC2D] bg-[#FCCC2D]/15 py-2.5 px-2 backdrop-blur-sm">
+            <div className="flex items-center justify-center gap-1 rounded border border-[#FCCC2D] bg-[#FCCC2D]/15 px-3 py-1.5 backdrop-blur-sm sm:w-[80%] sm:mx-auto sm:px-1 sm:py-2.5 md:w-[88%] md:px-2">
               <Typography
                 variant="body-8"
                 as="span"
@@ -185,19 +188,19 @@ export default function DonateSection() {
                 value={customAmount}
                 onChange={(e) => handleCustomInputChange(e.target.value)}
                 placeholder="0"
-                className="w-full min-w-0 bg-transparent font-semibold text-white placeholder-white/40 outline-none"
+                className="w-16 min-w-0 bg-transparent font-semibold text-white placeholder-white/40 outline-none sm:w-full"
               />
             </div>
           ) : (
             <button
               type="button"
               onClick={pickCustom}
-              className="w-[88%] mx-auto rounded border-1 border-[#FCCC2D] bg-[#FCCC2D]/15 py-2.5 text-white font-semibold backdrop-blur-sm transition-colors"
+              className="rounded border-1 border-[#FCCC2D] bg-[#FCCC2D]/15 px-4 py-1.5 text-white font-semibold backdrop-blur-sm transition-colors sm:w-[80%] sm:mx-auto sm:px-0 sm:py-2.5 md:w-[88%]"
             >
               <Typography
                 variant="body-8"
                 as="span"
-                className="text-inherit font-manrope"
+                className="font-manrope"
               >
                 More
               </Typography>
@@ -246,35 +249,51 @@ export default function DonateSection() {
       </div>
 
       {/* 80G terms */}
-      <label className="flex min-w-0 cursor-pointer items-center gap-3">
-        <span className="relative flex h-4 w-4 shrink-0">
-          <input
-            type="checkbox"
-            checked={agreedTo80G}
-            onChange={(e) => setAgreedTo80G(e.target.checked)}
-            className="peer h-4 w-4 cursor-pointer appearance-none rounded-[3px] border border-[#FCCC2D] bg-transparent transition-colors checked:bg-[#FCCC2D] focus-visible:ring-2 focus-visible:ring-[#FCCC2D]/50 focus-visible:outline-none"
-          />
-          <Check
-            strokeWidth={3}
-            className="pointer-events-none absolute inset-0 m-auto h-3 w-3 text-[#3A2E00] opacity-0 peer-checked:opacity-100"
-          />
-        </span>
-        <Typography
-          variant="caption-1"
-          as="span"
-          className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/80"
-        >
-          I have read and agree to the applicable{" "}
-          <span className="font-semibold text-[#FCCC2D]">
-            80G Terms &amp; Conditions
-          </span>{" "}
-          for this donation.
-        </Typography>
-      </label>
- 
+      <div className="flex flex-col gap-1.5">
+        <label className="flex min-w-0 cursor-pointer items-center gap-3">
+          <span className="relative flex h-4 w-4 shrink-0">
+            <input
+              type="checkbox"
+              checked={agreedTo80G}
+              aria-invalid={termsError}
+              onChange={(e) => {
+                setAgreedTo80G(e.target.checked);
+                if (e.target.checked) setTermsError(false);
+              }}
+              className="peer h-4 w-4 cursor-pointer appearance-none rounded-[3px] border border-[#FCCC2D] bg-transparent transition-colors checked:bg-[#FCCC2D] focus-visible:ring-2 focus-visible:ring-[#FCCC2D]/50 focus-visible:outline-none"
+            />
+            <Check
+              strokeWidth={3}
+              className="pointer-events-none absolute inset-0 m-auto h-3 w-3 text-[#3A2E00] opacity-0 peer-checked:opacity-100"
+            />
+          </span>
+          <Typography
+            variant="caption-1"
+            as="span"
+            className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/80"
+          >
+            I have read and agree to the applicable{" "}
+            <span className="font-semibold text-[#FCCC2D]">
+              80G Terms &amp; Conditions
+            </span>{" "}
+            for this donation.
+          </Typography>
+        </label>
+
+        {termsError ? (
+          <Typography
+            variant="caption-1"
+            as="p"
+            role="alert"
+            className="pl-7 font-manrope font-light leading-snug text-[#FFE08A]"
+          >
+            Please agree to the 80G Terms &amp; Conditions to continue.
+          </Typography>
+        ) : null}
+      </div>
 
       {/* Social proof */}
-      <div className="mb-10 flex min-w-0 items-start gap-3 md:mb-0">
+      <div className="mb-2 flex min-w-0 items-start gap-3 md:mb-0">
         <div className="flex shrink-0 -space-x-2 pt-0.5">
           {donorAvatars.map((src, i) => (
             <Image
@@ -291,22 +310,22 @@ export default function DonateSection() {
         <Typography
           variant="body-8"
           as="p"
-          className="min-w-0 flex-1 font-manrope text-[11px] font-light leading-snug text-white/90 sm:text-sm"
+          className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/90"
         >
           126 kind donors have contributed this month. Join with them today.❤️
         </Typography>
       </div>
 
-      <div className="flex flex-col items-center mb-4 md:mb-0">
+      <div className="flex flex-col items-center mb-0">
         {amountError ? (
-          <p className="mb-2 font-manrope text-sm text-[#FFE08A]">
+          <p className="mb-2 font-manrope text-[#FFE08A]">
             {amountError}
           </p>
         ) : null}
         <button
           type="button"
           onClick={openDetailsForm}
-          className="rounded py-3 font-bold bg-[#FCCC2D] w-[300px] md:w-full font-manrope"
+          className="rounded py-3 font-bold bg-[#FCCC2D] w-[240px] sm:w-[300px] md:w-full font-manrope"
         >
           <Typography variant="button-1" as="span">
             Donate Now
@@ -362,7 +381,7 @@ export default function DonateSection() {
             priority
             className="object-cover object-top"
           />
-          <div className="relative z-10 px-8 py-8 sm:px-18 sm:py-18">
+          <div className="relative z-10 px-6 py-6 sm:px-10 sm:py-10">
             <div
               className="flex w-full flex-col gap-4 rounded border border-white/15 p-5 backdrop-blur-md"
               style={{ backgroundColor: donateTheme.glassBg }}
