@@ -3,12 +3,18 @@ import { R2StorageService } from './r2-storage.service';
 
 const IMAGE_TYPES = new Set(['image/webp', 'image/avif']);
 const DOCUMENT_TYPES = new Set(['application/pdf']);
+const CV_TYPES = new Set([
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+]);
 const VIDEO_TYPES = new Set(['video/mp4', 'video/webm']);
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_DOCUMENT_BYTES = 25 * 1024 * 1024;
+const MAX_CV_BYTES = 5 * 1024 * 1024;
 
-export type CdnFileKind = 'image' | 'document' | 'video';
+export type CdnFileKind = 'image' | 'document' | 'video' | 'cv';
 
 export type CdnFile = {
   originalname: string;
@@ -88,6 +94,16 @@ export class CdnService {
       }
       if (file.size > MAX_DOCUMENT_BYTES) {
         throw new BadRequestException('Document must be 25MB or smaller.');
+      }
+      return;
+    }
+
+    if (kind === 'cv') {
+      if (!CV_TYPES.has(file.mimetype)) {
+        throw new BadRequestException('Only PDF, DOC, or DOCX documents are allowed (max 5MB).');
+      }
+      if (file.size > MAX_CV_BYTES) {
+        throw new BadRequestException('CV must be 5MB or smaller.');
       }
       return;
     }

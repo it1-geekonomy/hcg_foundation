@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { 
-  IsBoolean, 
+  IsBoolean, IsNotEmpty,
   IsEmail, 
   IsOptional, 
   IsString, 
@@ -63,7 +64,12 @@ export class CreateLeadsInternshipDto {
   @IsString()
   message?: string;
 
-  @ApiProperty({ example: true, description: 'Terms and conditions accepted' })
+  @ApiPropertyOptional({ example: false, description: 'Terms and conditions accepted' })
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === '') return false;
+    return value === true || value === 'true' || value === '1';
+  })
+  @IsNotEmpty()
   @IsBoolean()
-  termsAccepted: boolean;
+  termsAccepted: boolean = false;
 }
