@@ -1,14 +1,60 @@
 import { getCountryCallingCode, isSupportedCountry } from "libphonenumber-js";
 import type { CountryCode } from "libphonenumber-js";
 import worldCountries from "world-countries";
+import type { DonationCurrencyCode } from "@/domains/home/constants/donation-currency";
 
 export type DonationCountry = {
   code: string;
   name: string;
-  dialCode: string;
+  dial: string;
+  currency: DonationCurrencyCode;
 };
 
-function toDialCode(cca2: string, root?: string, suffixes?: string[]) {
+/**
+ * Preferred currency by country for Razorpay-supported codes.
+ * Any other country falls back to USD.
+ */
+const CURRENCY_BY_COUNTRY: Record<string, DonationCurrencyCode> = {
+  IN: "INR",
+  US: "USD",
+  GB: "GBP",
+  AE: "AED",
+  SG: "SGD",
+  AU: "AUD",
+  CA: "CAD",
+  DE: "EUR",
+  FR: "EUR",
+  NL: "EUR",
+  IE: "EUR",
+  NZ: "AUD",
+  MY: "SGD",
+  QA: "AED",
+  SA: "AED",
+};
+
+/** Shown near the top of the country picker (before A–Z). */
+const PINNED_CODES = [
+  "IN",
+  "US",
+  "GB",
+  "AE",
+  "SG",
+  "AU",
+  "CA",
+  "DE",
+  "FR",
+  "NL",
+  "IE",
+  "NZ",
+  "MY",
+  "QA",
+  "SA",
+] as const;
+
+const DEFAULT_CURRENCY: DonationCurrencyCode = "USD";
+export const DEFAULT_COUNTRY_CODE = "IN";
+
+function toDial(cca2: string, root?: string, suffixes?: string[]) {
   let dial = "";
 
   if (isSupportedCountry(cca2 as CountryCode)) {
@@ -23,9 +69,11 @@ function toDialCode(cca2: string, root?: string, suffixes?: string[]) {
     }
   }
 
-  // NANP territories (Jamaica +1876, American Samoa +1684). US/CA stay +1.
+  // NANP territories (e.g. Jamaica +1876). US/CA stay +1.
   if (
     dial === "+1" &&
+    cca2 !== "US" &&
+    cca2 !== "CA" &&
     suffixes?.length === 1 &&
     /^\d{3}$/.test(suffixes[0])
   ) {
@@ -35,30 +83,43 @@ function toDialCode(cca2: string, root?: string, suffixes?: string[]) {
   return dial;
 }
 
-export const DONATION_COUNTRIES: DonationCountry[] = worldCountries
+function currencyForCountry(code: string): DonationCurrencyCode {
+  return CURRENCY_BY_COUNTRY[code] ?? DEFAULT_CURRENCY;
+}
+
+const worldList: DonationCountry[] = worldCountries
   .map((country) => ({
     code: country.cca2,
     name: country.name.common,
-    dialCode: toDialCode(
-      country.cca2,
-      country.idd?.root,
-      country.idd?.suffixes,
-    ),
+    dial: toDial(country.cca2, country.idd?.root, country.idd?.suffixes),
+    currency: currencyForCountry(country.cca2),
   }))
-  .filter((country) => country.code && country.dialCode)
-  .sort((a, b) => {
-    if (a.code === "IN") return -1;
-    if (b.code === "IN") return 1;
-    return a.name.localeCompare(b.name);
-  });
+  .filter((country) => country.code && country.dial);
 
-export const DEFAULT_COUNTRY_CODE = "IN";
+const pinnedSet = new Set<string>(PINNED_CODES);
+
+export const DONATION_COUNTRIES: DonationCountry[] = [
+  ...PINNED_CODES.map(
+    (code) => worldList.find((country) => country.code === code)!,
+  ).filter(Boolean),
+  ...worldList
+    .filter((country) => !pinnedSet.has(country.code))
+    .sort((a, b) => a.name.localeCompare(b.name)),
+];
+
+const BY_CODE = Object.fromEntries(
+  DONATION_COUNTRIES.map((country) => [country.code, country]),
+) as Record<string, DonationCountry>;
 
 export function getDonationCountry(code: string): DonationCountry {
-  return (
-    DONATION_COUNTRIES.find((country) => country.code === code) ??
-    DONATION_COUNTRIES.find((country) => country.code === DEFAULT_COUNTRY_CODE)!
-  );
+  if (BY_CODE[code]) return BY_CODE[code];
+  // Unknown / legacy "OTHER" → USD international
+  return {
+    code: code || "XX",
+    name: "Other / International",
+    dial: "+",
+    currency: DEFAULT_CURRENCY,
+  };
 }
 
 export function isIndiaCountry(code: string) {

@@ -12,6 +12,10 @@ import {
   buildPaginatedResult,
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
+import {
+  normalizeDonationCurrency,
+  toMinorUnits,
+} from './donation-currency';
 import { CreateDonationDto } from './dto/create-donation.dto';
 import { ListDonorsQueryDto } from './dto/list-donors-query.dto';
 import { VerifyDonationDto } from './dto/verify-donation.dto';
@@ -27,6 +31,7 @@ export type DonationCheckout = {
   email: string;
   phone: string;
   isInternational: boolean;
+  countryCode: string | null;
 };
 
 @Injectable()
@@ -41,23 +46,32 @@ export class DonorsService {
 
   async createOrder(dto: CreateDonationDto): Promise<DonationCheckout> {
     const amount = dto.amount.toFixed(2);
-    const amountPaise = Math.round(dto.amount * 100);
+    const amountMinor = toMinorUnits(dto.amount);
     const fullName = dto.fullName.trim();
     const phone = dto.phone;
     const email = dto.email.toLowerCase().trim();
     const city = dto.city?.trim() || '';
+    const countryCode = dto.countryCode?.trim().toUpperCase() || null;
     const country = dto.country?.trim() || 'India';
     const isInternational = this.resolveInternational(
       country,
+      countryCode,
       dto.isInternational,
     );
-    const pan = dto.pan?.trim() || '';
+    const currency = normalizeDonationCurrency(dto.currency, isInternational);
+    const pan = isInternational ? '' : dto.pan?.trim() || '';
     const message = dto.message?.trim() || '';
+
+    if (!isInternational && currency !== 'INR') {
+      throw new BadRequestException(
+        'Indian donations must use INR. Change country or currency.',
+      );
+    }
 
     try {
       const order = await this.razorpay.createOrder({
-        amountPaise,
-        currency: 'INR',
+        amountPaise: amountMinor,
+        currency,
         receipt: `hcg_${Date.now().toString(36)}`.slice(0, 40),
         notes: {
           fullName: this.note(fullName),
@@ -65,23 +79,26 @@ export class DonorsService {
           email: this.note(email),
           city: this.note(city),
           country: this.note(country, 100),
+          countryCode: this.note(countryCode || '', 8),
           international: isInternational ? 'true' : 'false',
           pan: this.note(pan, 20),
           message: this.note(message),
           amount,
+          currency,
         },
       });
 
       return {
         orderId: order.id,
         amount,
-        amountPaise,
-        currency: 'INR',
+        amountPaise: amountMinor,
+        currency,
         keyId: this.razorpay.getKeyId(),
         name: fullName,
         email,
         phone,
         isInternational,
+        countryCode,
       };
     } catch (err) {
       this.logger.error(
@@ -127,6 +144,7 @@ export class DonorsService {
     const order = await this.razorpay.fetchOrder(dto.razorpayOrderId);
     const notes = order.notes ?? {};
     const country = notes.country?.trim() || 'India';
+    const countryCode = notes.countryCode?.trim().toUpperCase() || null;
     const amount =
       notes.amount || (Number(order.amount) / 100).toFixed(2);
 
@@ -137,11 +155,12 @@ export class DonorsService {
         email: notes.email?.toLowerCase().trim() || null,
         city: notes.city?.trim() || null,
         country,
+        countryCode,
         isInternational: notes.international === 'true',
         pan: notes.pan?.trim() || null,
         message: notes.message?.trim() || null,
         amount,
-        currency: order.currency || 'INR',
+        currency: notes.currency || order.currency || 'INR',
         status: DonationStatus.PAID,
         razorpayOrderId: dto.razorpayOrderId,
         razorpayPaymentId: dto.razorpayPaymentId,
@@ -169,7 +188,7 @@ export class DonorsService {
 
     if (query.search) {
       qb.andWhere(
-        '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search OR donor.country ILIKE :search OR donor.city ILIKE :search)',
+        '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search OR donor.country ILIKE :search OR donor.countryCode ILIKE :search OR donor.city ILIKE :search)',
         { search: `%${query.search}%` },
       );
     }
@@ -198,9 +217,12 @@ export class DonorsService {
 
   private resolveInternational(
     country: string | null,
+    countryCode: string | null,
     flagged?: boolean,
   ): boolean {
-    if (flagged) return true;
+    if (flagged === true) return true;
+    if (flagged === false) return false;
+    if (countryCode) return countryCode !== 'IN';
     if (!country) return false;
     return !/^india$/i.test(country);
   }

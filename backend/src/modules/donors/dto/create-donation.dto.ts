@@ -3,6 +3,7 @@ import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
+  IsIn,
   IsNumber,
   IsOptional,
   IsString,
@@ -11,6 +12,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { DONATION_CURRENCIES } from '../donation-currency';
 
 export class CreateDonationDto {
   @ApiProperty({ example: 'Anita Sharma' })
@@ -46,6 +48,18 @@ export class CreateDonationDto {
   country?: string;
 
   @ApiPropertyOptional({
+    example: 'US',
+    description: 'ISO 3166-1 alpha-2 country code',
+  })
+  @IsOptional()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toUpperCase() : value,
+  )
+  @IsString()
+  @MaxLength(8)
+  countryCode?: string;
+
+  @ApiPropertyOptional({
     example: true,
     description: 'True if the donor is paying from outside India',
   })
@@ -58,8 +72,21 @@ export class CreateDonationDto {
   isInternational?: boolean;
 
   @ApiPropertyOptional({
+    example: 'USD',
+    description: 'Donation currency (INR for India; USD/EUR/… for international)',
+    enum: DONATION_CURRENCIES,
+  })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === '') return undefined;
+    return typeof value === 'string' ? value.trim().toUpperCase() : value;
+  })
+  @IsIn([...DONATION_CURRENCIES])
+  currency?: string;
+
+  @ApiPropertyOptional({
     example: 'ABCDE1234F',
-    description: 'PAN or Aadhaar — only if 80G certificate is needed',
+    description: 'PAN or Aadhaar — only if 80G certificate is needed (India)',
   })
   @IsOptional()
   @Transform(({ value }) =>
@@ -75,8 +102,8 @@ export class CreateDonationDto {
   message?: string;
 
   @ApiProperty({
-    example: 3000,
-    description: 'Donation amount in INR (3000, 5000, or custom Other amount)',
+    example: 50,
+    description: 'Donation amount in the selected currency major units',
   })
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })

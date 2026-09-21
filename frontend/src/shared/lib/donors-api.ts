@@ -12,6 +12,7 @@ export type DonationCheckout = {
   email: string;
   phone: string;
   isInternational: boolean;
+  countryCode?: string | null;
 };
 
 export type DonorRecord = {
@@ -29,7 +30,9 @@ export type CreateDonationPayload = {
   email: string;
   city?: string;
   country?: string;
+  countryCode?: string;
   isInternational?: boolean;
+  currency?: string;
   pan?: string;
   message?: string;
   amount: number;
