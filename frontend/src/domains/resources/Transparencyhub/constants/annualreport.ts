@@ -6,6 +6,10 @@ export interface Report {
   pdfUrl: string;
 }
 
+/** Standard recommended banner dimensions for Annual Reports & Transparency Hub */
+export const ANNUAL_REPORT_BANNER_SIZE = { width: 1920, height: 600 } as const;
+export const ANNUAL_REPORT_MOBILE_BANNER_SIZE = { width: 750, height: 600 } as const;
+
 function formatReportYear(value?: string | null) {
   const year = value?.trim();
   if (!year) return "";

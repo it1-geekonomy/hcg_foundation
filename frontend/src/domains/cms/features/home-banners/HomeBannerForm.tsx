@@ -12,6 +12,10 @@ import CmsImagePicker from "@/domains/cms/ui/CmsImagePicker";
 import { CmsFormField } from "@/domains/cms/ui/CmsFormField";
 import CmsSelect, { ACTIVE_STATUS_OPTIONS } from "@/domains/cms/ui/CmsSelect";
 
+export const HOME_BANNER_SIZE = { width: 1920, height: 750 } as const;
+export const HOME_MOBILE_BANNER_SIZE = { width: 750, height: 800 } as const;
+export const HOME_PROFILE_IMAGE_SIZE = { width: 400, height: 400 } as const;
+
 export type HomeBannerFormValues = {
   name: string;
   title: string;
@@ -210,7 +214,7 @@ export default function HomeBannerForm({
         <CmsFormField
           label="Banner image"
           htmlFor="bannerImage"
-          hint="Required desktop banner (WebP or AVIF, max 5MB)"
+          hint={`WebP or AVIF · recommended size ${HOME_BANNER_SIZE.width} × ${HOME_BANNER_SIZE.height}px (1920px desktop width banner)`}
         >
           <CmsImagePicker
             label="banner image"
@@ -225,13 +229,15 @@ export default function HomeBannerForm({
                 bannerImageUrl: next.url,
               })
             }
+            requiredSize={HOME_BANNER_SIZE}
+            disabled={saving}
           />
         </CmsFormField>
 
         <CmsFormField
           label="Mobile banner"
           htmlFor="mobileBannerImage"
-          hint="Optional mobile banner (WebP or AVIF, max 5MB)"
+          hint={`WebP or AVIF · recommended size ${HOME_MOBILE_BANNER_SIZE.width} × ${HOME_MOBILE_BANNER_SIZE.height}px (mobile banner)`}
         >
           <CmsImagePicker
             label="mobile banner"
@@ -246,13 +252,15 @@ export default function HomeBannerForm({
                 mobileBannerImageUrl: next.url,
               })
             }
+            requiredSize={HOME_MOBILE_BANNER_SIZE}
+            disabled={saving}
           />
         </CmsFormField>
 
         <CmsFormField
           label="Profile image"
           htmlFor="profileImage"
-          hint="Optional profile image (WebP or AVIF, max 5MB)"
+          hint={`WebP or AVIF · recommended size ${HOME_PROFILE_IMAGE_SIZE.width} × ${HOME_PROFILE_IMAGE_SIZE.height}px (square profile avatar)`}
         >
           <CmsImagePicker
             label="profile image"
@@ -267,6 +275,8 @@ export default function HomeBannerForm({
                 profileImageUrl: next.url,
               })
             }
+            requiredSize={HOME_PROFILE_IMAGE_SIZE}
+            disabled={saving}
           />
         </CmsFormField>
 
