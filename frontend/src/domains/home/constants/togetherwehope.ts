@@ -25,7 +25,6 @@ export interface TogetherContent {
 
 export interface CarouselSlide {
   id?: string;
-  location: string;
   image: string;
   title: string;
   description: string;
@@ -47,7 +46,6 @@ export function mapEventToCarouselSlide(event: {
 }): CarouselSlide {
   return {
     id: event.id,
-    location: event.eventLocation?.trim() || "—",
     image:
       event.eventBanner?.trim() ||
       event.eventMobileBanner?.trim() ||
@@ -63,7 +61,7 @@ export function mapEventToCarouselSlide(event: {
 export const TOGETHER_CONTENT: TogetherContent = {
   heading: "Together We Create Hope",
   description:
-    "Every event brings people together to spread awareness, support patients, and build healthier communities through compassion and meaningful action.",
+    "From awareness events to art and creative activities, every initiative brings people together to spread hope, support patients, and build stronger communities.",
   stat: {
     value: "482+",
     label: "Community Events",
@@ -83,21 +81,18 @@ export const TOGETHER_CONTENT: TogetherContent = {
 
 export const CAROUSEL_SLIDES: CarouselSlide[] = [
   {
-    location: "Bengaluru",
     image: "/Togethercreatehope/carousal1.png",
     title: "Cancer Awareness & Screening Camps",
     description:
       "Through community outreach programs, free screenings, and educational initiatives, we empower individuals with knowledge and encourage early detection.",
   },
   {
-    location: "Bengaluru",
     image: "/Togethercreatehope/carousal2.png",
     title: "Christmas and New Year Celebration",
     description:
       "Christmas and New Year Celebration at Swasti Gallery, the New Year and Christmas celebrations were nothing short of heartwarming.",
   },
   {
-    location: "Bengaluru",
     image: "/Togethercreatehope/carousal3.png",
     title: "Cancer Awareness & Screening Camps",
     description:

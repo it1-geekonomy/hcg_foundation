@@ -67,24 +67,6 @@ function TogetherCarousel({ slides }: { slides: CarouselSlide[] }) {
 
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-transparent" />
 
-      <div className="absolute left-[clamp(1.5rem,4vw,3rem)] top-[clamp(0.75rem,2vw,2rem)] flex items-center gap-2 bg-[#FCCC2D] px-2.5 py-1.5 rounded">
-        <div className="relative h-4 w-4">
-          <Image
-            src="/location1.png"
-            alt=""
-            fill
-            className="object-contain"
-          />
-        </div>
-        <Typography
-          variant="body-9"
-          as="span"
-          className="font-semibold text-[#090909] font-manrope"
-        >
-          {current.location}
-        </Typography>
-      </div>
-
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-6 p-[clamp(1.25rem,3vw,2rem)] xl:px-16">
         <Typography
           variant="heading-2"
