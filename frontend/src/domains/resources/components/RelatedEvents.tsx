@@ -76,7 +76,7 @@ export default function RelatedEvents({ currentEventId }: RelatedEventsProps) {
       {/* Animated Horizontal Sliding Track matching Figma Frame 36 */}
       <div className="overflow-hidden w-full">
         <div
-          className="flex transition-transform duration-500 ease-out gap-6 sm:gap-8"
+          className="flex transition-transform duration-500 ease-out gap-6 lg:gap-8"
           style={{ transform: getTransformStyle() }}
         >
           {allRelatedEvents.map((item) => (
