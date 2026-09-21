@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Resend } from 'resend';
 import { Donor } from '../donors/entities/donor.entity';
 import { DonationCertificateService } from './donation-certificate.service';
+import { DonationReceiptService } from './donation-receipt.service';
 
 @Injectable()
 export class EmailService {
@@ -10,7 +11,10 @@ export class EmailService {
   private readonly fromEmail =
     process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 
-  constructor(private readonly certificates: DonationCertificateService) {
+  constructor(
+    private readonly certificates: DonationCertificateService,
+    private readonly receipts: DonationReceiptService
+  ) {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
       this.logger.warn(
@@ -36,16 +40,21 @@ export class EmailService {
       return;
     }
 
-    let certificate: Buffer;
+    let certPdf: Buffer;
+    let receiptPdf: Buffer;
     try {
-      certificate = await this.certificates.buildCertificate(donor);
+      [certPdf, receiptPdf] = await Promise.all([
+        this.certificates.buildPdf(donor),
+        this.receipts.buildPdf(donor),
+      ]);
     } catch (err) {
       this.logger.error(
-        `Could not build donation certificate: ${
+        `Could not build donation PDFs: ${
           err instanceof Error ? err.message : 'unknown error'
         }`,
       );
-      certificate = Buffer.alloc(0);
+      certPdf = Buffer.alloc(0);
+      receiptPdf = Buffer.alloc(0);
     }
 
     const amountLabel = this.formatAmount(donor.amount, donor.currency);
@@ -54,12 +63,16 @@ export class EmailService {
       'en-IN',
       { day: '2-digit', month: 'short', year: 'numeric' },
     );
-    const filename = `HCG-Donation-Certificate-${receipt}.pdf`;
-    const hasCert = certificate.length > 0;
+    const certFilename = `HCG-Donation-Certificate-${receipt}.pdf`;
+    const receiptFilename = `HCG-Donation-Receipt-${receipt}.pdf`;
+    const hasPdf = certPdf.length > 0 && receiptPdf.length > 0;
 
     try {
-      const attachments = hasCert
-        ? [{ filename, content: certificate.toString('base64') }]
+      const attachments = hasPdf
+        ? [
+            { filename: certFilename, content: certPdf.toString('base64') },
+            { filename: receiptFilename, content: receiptPdf.toString('base64') }
+          ]
         : undefined;
 
       const { data, error } = await this.resend.emails.send({
@@ -107,8 +120,8 @@ export class EmailService {
     const receipt = this.escape(params.receipt);
     const date = this.escape(params.dateLabel);
     const certNote = params.hasPdf
-      ? 'Your official <strong>Donation Certificate of Appreciation</strong> is attached as a PDF. Please keep it for your records.'
-      : 'Your donation has been recorded. If you need a certificate copy, reply to this email and we will gladly help.';
+      ? 'Your official <strong>Donation Certificate of Appreciation</strong> and <strong>Donation Receipt</strong> are attached as PDFs. Please keep them for your records.'
+      : 'Your donation has been recorded. If you need a certificate or receipt copy, reply to this email and we will gladly help.';
 
     return `<!DOCTYPE html>
 <html lang="en">
