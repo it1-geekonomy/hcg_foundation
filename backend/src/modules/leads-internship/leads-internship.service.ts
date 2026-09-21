@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
@@ -6,6 +6,7 @@ import {
   buildPaginatedResult,
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
+import { CdnFile, CdnService } from '../../common/storage/cdn.service';
 import {
   applyDeletedFilter,
   restoreSoftDeleted,
@@ -14,16 +15,30 @@ import { CreateLeadsInternshipDto } from './dto/create-leads-internship.dto';
 import { UpdateLeadsInternshipDto } from './dto/update-leads-internship.dto';
 import { LeadsInternship } from './entities/leads-internship.entity';
 
+const CDN_FOLDER = 'leads-internship';
+
 @Injectable()
 export class LeadsInternshipService {
   constructor(
     @InjectRepository(LeadsInternship)
     private readonly repo: Repository<LeadsInternship>,
+    private readonly cdn: CdnService,
   ) {}
 
-  async create(dto: CreateLeadsInternshipDto): Promise<LeadsInternship> {
-    const entity = this.repo.create(dto);
-    return await this.repo.save(entity);
+  async create(dto: CreateLeadsInternshipDto, file?: CdnFile): Promise<LeadsInternship> {
+    if (!file) {
+      throw new BadRequestException('CV file is required');
+    }
+
+    const cvUrl = await this.cdn.upload(file, CDN_FOLDER, 'cv');
+
+    try {
+      const entity = this.repo.create({ ...dto, cv: cvUrl });
+      return await this.repo.save(entity);
+    } catch (err) {
+      await this.cdn.delete(cvUrl);
+      throw err;
+    }
   }
 
   async findAll(query: PaginationQueryDto): Promise<PaginatedResult<LeadsInternship>> {
@@ -66,9 +81,14 @@ export class LeadsInternshipService {
     return entity;
   }
 
-  async update(id: string, dto: UpdateLeadsInternshipDto): Promise<LeadsInternship> {
+  async update(id: string, dto: UpdateLeadsInternshipDto, file?: CdnFile): Promise<LeadsInternship> {
     const entity = await this.findOne(id);
     Object.assign(entity, dto);
+    
+    if (file) {
+      entity.cv = (await this.cdn.replace(entity.cv, file, CDN_FOLDER, 'cv')) ?? entity.cv;
+    }
+    
     return await this.repo.save(entity);
   }
 

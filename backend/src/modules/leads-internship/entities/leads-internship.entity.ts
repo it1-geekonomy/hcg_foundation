@@ -37,6 +37,9 @@ export class LeadsInternship extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   message?: string | null;
 
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  cv: string;
+
   @Column({ name: 'terms_accepted', type: 'boolean', nullable: false, default: false })
   termsAccepted: boolean;
 }
