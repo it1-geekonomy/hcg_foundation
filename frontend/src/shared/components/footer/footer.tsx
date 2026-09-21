@@ -156,9 +156,9 @@ export default function Footer() {
                     href={social.href}
                     className="w-10 h-10 bg-[#FDB723] rounded-full flex items-center justify-center hover:bg-yellow-500 transition-colors"
                   >
-                    {social.name === "Facebook" && <FacebookIcon />}
-                    {social.name === "LinkedIn" && <LinkedinIcon />}
                     {social.name === "Instagram" && <InstagramIcon />}
+                    {social.name === "LinkedIn" && <LinkedinIcon />}
+                    {social.name === "Facebook" && <FacebookIcon />}
                   </a>
                 ))}
               </div>

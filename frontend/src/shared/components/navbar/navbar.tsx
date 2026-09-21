@@ -92,13 +92,17 @@ export default function Navbar() {
       <nav className="w-full border border-white/10 bg-black/[0.18] backdrop-blur-[60px] px-[clamp(1rem,2vw,1.5rem)] xl:px-0">
         <div className="flex items-center justify-between h-[clamp(3.5rem,6vw,4.5rem)] xl:ml-8">
           {/* Logo */}
-          <Link href="/" onClick={handleHomeNav} className="shrink-0 transition-transform duration-300 hover:scale-105">
+          <Link
+            href="/"
+            onClick={handleHomeNav}
+            className="flex h-full shrink-0 items-center py-2 transition-transform duration-300 hover:scale-105"
+          >
             <Image
               src={navbarContent.logo.src}
               alt={navbarContent.logo.alt}
               width={140}
               height={40}
-              className="h-[clamp(2rem,4vw,2.5rem)] w-auto"
+              className="h-full w-auto"
               priority
             />
           </Link>

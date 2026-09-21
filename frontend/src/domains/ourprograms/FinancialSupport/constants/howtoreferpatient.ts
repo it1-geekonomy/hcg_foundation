@@ -38,14 +38,14 @@ export const referralSteps: ReferralStep[] = [
     id: "05",
     title: "Committee Review",
     description:
-      "The Patient Care Coordinator shares the patient's file for review, verifies the details, and conducts a background assessment.",
+      "The Patient Care Coordinator meets the patient and family, verifies their financial situation, and conducts a background assessment.",
     icon: "/financialbanner/reviewicon.png",
   },
   {
     id: "06",
     title: "Fundraising Support",
     description:
-      "If additional support is required, the HCG Foundation team assists in bridging the treatment gap.",
+      "If additional support is required, the HCG Foundation team raises funds to bridge the treatment gap.",
     icon: "/financialbanner/fundicon.png",
   },
   {

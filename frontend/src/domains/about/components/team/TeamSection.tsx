@@ -72,9 +72,7 @@ export default function TeamSection({
           as="p"
           className="w-full font-argestadisplay text-[#596D79] lg:max-w-md"
         >
-          A dedicated team working together to advance cancer awareness,
-          support patients, and build healthier communities through compassion,
-          collaboration, and meaningful impact.
+          A dedicated team working together to advance cancer awareness, support patients, and build healthier communities through compassion, collaboration, and meaningful impact.
         </Typography>
       </div>
 

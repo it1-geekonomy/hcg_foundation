@@ -14,7 +14,8 @@ const FINANCIALSUPPORT_BANNER = {
     <>
       Financial Support for 
       <br />
-      Pediatric Patients
+      Patients
+
     </>
   ),
 };
