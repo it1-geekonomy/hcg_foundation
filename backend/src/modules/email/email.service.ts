@@ -36,16 +36,16 @@ export class EmailService {
       return;
     }
 
-    let pdf: Buffer;
+    let certificate: Buffer;
     try {
-      pdf = await this.certificates.buildPdf(donor);
+      certificate = await this.certificates.buildCertificate(donor);
     } catch (err) {
       this.logger.error(
-        `Could not build donation certificate PDF: ${
+        `Could not build donation certificate: ${
           err instanceof Error ? err.message : 'unknown error'
         }`,
       );
-      pdf = Buffer.alloc(0);
+      certificate = Buffer.alloc(0);
     }
 
     const amountLabel = this.formatAmount(donor.amount, donor.currency);
@@ -55,11 +55,11 @@ export class EmailService {
       { day: '2-digit', month: 'short', year: 'numeric' },
     );
     const filename = `HCG-Donation-Certificate-${receipt}.pdf`;
-    const hasPdf = pdf.length > 0;
+    const hasCert = certificate.length > 0;
 
     try {
-      const attachments = hasPdf
-        ? [{ filename, content: pdf.toString('base64') }]
+      const attachments = hasCert
+        ? [{ filename, content: certificate.toString('base64') }]
         : undefined;
 
       const { data, error } = await this.resend.emails.send({
@@ -71,7 +71,7 @@ export class EmailService {
           amountLabel,
           receipt,
           dateLabel,
-          hasPdf,
+          hasPdf: hasCert,
         }),
         attachments,
       });

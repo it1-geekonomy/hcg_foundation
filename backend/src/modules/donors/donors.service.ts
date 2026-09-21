@@ -140,10 +140,9 @@ export class DonorsService {
       this.logger.log(
         `Donation paid. donor=${saved.id} receipt=${saved.receiptNumber}`,
       );
-      // Email sending temporarily disabled
-      // this.emailService.sendDonationReceipt(saved).catch(err => {
-      //   this.logger.error(`Failed to send receipt for donor ${saved.id}: ${err.message}`);
-      // });
+      this.emailService.sendDonationReceipt(saved).catch(err => {
+        this.logger.error(`Failed to send receipt for donor ${saved.id}: ${err.message}`);
+      });
       return saved;
     }
 
@@ -177,10 +176,9 @@ export class DonorsService {
     this.logger.log(
       `Donation paid. donor=${saved.id} receipt=${saved.receiptNumber}`,
     );
-    // Email sending temporarily disabled
-    // this.emailService.sendDonationReceipt(saved).catch(err => {
-    //   this.logger.error(`Failed to send receipt for donor ${saved.id}: ${err.message}`);
-    // });
+    this.emailService.sendDonationReceipt(saved).catch(err => {
+      this.logger.error(`Failed to send receipt for donor ${saved.id}: ${err.message}`);
+    });
     return saved;
   }
 
