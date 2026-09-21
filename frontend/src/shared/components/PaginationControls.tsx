@@ -9,6 +9,7 @@ export interface PaginationControlsProps {
   onPageChange: (page: number) => void;
   className?: string;
   showDots?: boolean;
+  showArrows?: boolean;
 }
 
 export default function PaginationControls({
@@ -17,6 +18,7 @@ export default function PaginationControls({
   onPageChange,
   className = "",
   showDots = true,
+  showArrows = true,
 }: PaginationControlsProps) {
   if (totalPages <= 1) {
     return null;
@@ -37,7 +39,8 @@ export default function PaginationControls({
   return (
     <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
       {/* Arrow Buttons */}
-      <div className="flex items-center justify-center gap-3">
+      {showArrows && (
+        <div className="flex items-center justify-center gap-3">
         <button
           type="button"
           onClick={handlePrev}
@@ -66,6 +69,7 @@ export default function PaginationControls({
           <ChevronRight className="size-5" />
         </button>
       </div>
+      )}
 
       {/* Page Indicator Dots */}
       {showDots && totalPages > 1 && (

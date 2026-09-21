@@ -16,7 +16,7 @@ export const PATIENT_TESTIMONIALS: PatientTestimonial[] = [
     role: "Parent",
     date: "2025",
     quote: "HCG Foundation gave our family strength and financial support when we needed it the most. Their care saved my child.",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    videoUrl: "/journey-of-hope/testing video.mp4",
     thumbnailUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop",
     featured: true,
   },
