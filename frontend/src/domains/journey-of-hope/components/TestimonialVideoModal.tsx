@@ -14,6 +14,8 @@ export default function TestimonialVideoModal({
 }: TestimonialVideoModalProps) {
   if (!videoUrl) return null;
 
+  const isMp4 = videoUrl.endsWith(".mp4") || videoUrl.includes(".mp4");
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-xs">
       <div className="relative w-full max-w-4xl aspect-video rounded-2xl bg-black overflow-hidden shadow-2xl">
@@ -24,13 +26,23 @@ export default function TestimonialVideoModal({
         >
           <X className="size-6" />
         </button>
-        <iframe
-          src={`${videoUrl}?autoplay=1`}
-          title="Patient Testimonial Video"
-          className="w-full h-full border-0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
+        {isMp4 ? (
+          <video
+            src={videoUrl}
+            controls
+            autoPlay
+            playsInline
+            className="w-full h-full object-contain"
+          />
+        ) : (
+          <iframe
+            src={`${videoUrl}?autoplay=1`}
+            title="Patient Testimonial Video"
+            className="w-full h-full border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        )}
       </div>
     </div>
   );
