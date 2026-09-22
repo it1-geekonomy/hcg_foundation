@@ -2,17 +2,33 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Calendar } from "lucide-react";
 import Typography from "@/lib/Typography";
 import {
   AUTO_SCROLL_SPEED,
   DRAG_THRESHOLD,
-  loopedStories,
   RESUME_DELAY,
   SAVE_INTERVAL,
   STORAGE_KEY,
   wrap,
 } from "@/domains/home/constants/smile";
+import { publicPatientStoriesApi } from "@/domains/cms/lib/api";
+
+function formatStoryDate(dateStr?: string | null): string {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
 
 function StoryCard({
   name,
@@ -78,10 +94,58 @@ function StoryCard({
 }
 
 export default function SmileStories() {
+  const [apiStories, setApiStories] = useState<any[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await publicPatientStoriesApi.listPublished({
+          page: 1,
+          limit: 12,
+        });
+        if (cancelled) return;
+        if (res.data && res.data.length > 0) {
+          const mapped = res.data.map((item) => ({
+            name: item.title,
+            date: formatStoryDate(item.storyDate),
+            image: item.patientImage || "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=800&auto=format&fit=crop",
+            link: `/journey-of-hope/patient-stories/${item.slug || item.id}`,
+          }));
+          setApiStories(mapped);
+        } else {
+          setApiStories([]);
+        }
+      } catch (err: any) {
+        if (!cancelled) {
+          setApiStories([]);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (apiStories === null) {
+    return <div className="min-h-[400px]"></div>;
+  }
+
+  if (apiStories.length === 0) {
+    return null;
+  }
+
+  return <SmileStoriesCarousel apiStories={apiStories} />;
+}
+
+function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
+  const router = useRouter();
+  const isInfinite = apiStories.length >= 4;
+  const displayStories = isInfinite ? [...apiStories, ...apiStories, ...apiStories] : apiStories;
+
   const sectionRef = useRef<HTMLElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-
   const [hasEntered, setHasEntered] = useState(false);
 
   const offsetRef = useRef(0); // kept wrapped inside [0, oneSetWidth)
@@ -99,6 +163,7 @@ export default function SmileStories() {
   const lastSaveTsRef = useRef(0);
   const pointerIdRef = useRef<number | null>(null);
   const measureRafRef = useRef<number | null>(null);
+  const clickedLinkRef = useRef<string | null>(null);
 
   const applyTransform = () => {
     if (!trackRef.current) return;
@@ -116,7 +181,7 @@ export default function SmileStories() {
   };
 
   const measure = () => {
-    if (!trackRef.current) return;
+    if (!trackRef.current || !isInfinite) return;
     oneSetWidthRef.current = trackRef.current.scrollWidth / 3;
     offsetRef.current = wrap(offsetRef.current, oneSetWidthRef.current);
     applyTransform();
@@ -192,7 +257,7 @@ export default function SmileStories() {
   }, [hasEntered]);
 
   useEffect(() => {
-    if (!hasEntered) return;
+    if (!hasEntered || !isInfinite) return;
 
     const step = (ts: number) => {
       if (lastTsRef.current === null) lastTsRef.current = ts;
@@ -247,6 +312,7 @@ export default function SmileStories() {
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isInfinite) return;
     isPausedRef.current = true;
     didDragRef.current = false;
     clearResumeTimer();
@@ -258,13 +324,14 @@ export default function SmileStories() {
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (pointerIdRef.current === null || oneSetWidthRef.current === 0) return;
+    if (!isInfinite || pointerIdRef.current === null || oneSetWidthRef.current === 0) return;
     const dx = dragStartXRef.current - e.clientX;
 
     if (!isDraggingRef.current) {
       if (Math.abs(dx) < DRAG_THRESHOLD) return; // ignore tiny jitters / clicks
       isDraggingRef.current = true;
       didDragRef.current = true;
+      clickedLinkRef.current = null;
     }
 
     offsetRef.current = wrap(dragStartOffsetRef.current + dx, oneSetWidthRef.current);
@@ -272,6 +339,7 @@ export default function SmileStories() {
   };
 
   const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isInfinite) return;
     if (pointerIdRef.current !== null) {
       try {
         e.currentTarget.releasePointerCapture(pointerIdRef.current);
@@ -290,13 +358,18 @@ export default function SmileStories() {
       // simple click/tap - resume immediately, no delay
       clearResumeTimer();
       isPausedRef.current = false;
+      if (clickedLinkRef.current) {
+        saveOffset();
+        router.push(clickedLinkRef.current);
+        clickedLinkRef.current = null;
+      }
     }
   };
 
   const handleCardClick = (link: string) => {
-    if (didDragRef.current) return; // it was a drag, not a click - don't navigate
-    saveOffset();
-    window.location.href = link;
+    if (isInfinite && didDragRef.current) return; // it was a drag, not a click - don't navigate
+    if (isInfinite) saveOffset();
+    router.push(link);
   };
 
   return (
@@ -311,7 +384,7 @@ export default function SmileStories() {
 
       <div
         ref={viewportRef}
-        className="mx-auto w-full overflow-hidden px-4 sm:px-6 md:px-8 lg:px-12"
+        className={`mx-auto w-full px-4 sm:px-6 md:px-8 lg:px-12 ${isInfinite ? 'overflow-hidden' : 'overflow-x-auto snap-x no-scrollbar'}`}
       >
         <div
           ref={trackRef}
@@ -320,12 +393,17 @@ export default function SmileStories() {
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
           onWheel={() => {
+            if (!isInfinite) return;
             isPausedRef.current = true;
             scheduleResume();
           }}
-          className="flex w-max touch-pan-y cursor-grab flex-nowrap gap-3 select-none will-change-transform active:cursor-grabbing sm:gap-5 lg:gap-8"
+          className={`flex w-max flex-nowrap gap-3 sm:gap-5 lg:gap-8 ${
+            isInfinite 
+              ? 'touch-pan-y cursor-grab select-none will-change-transform active:cursor-grabbing' 
+              : 'touch-pan-x snap-mandatory'
+          }`}
         >
-          {loopedStories.map((story, i) => (
+          {displayStories.map((story, i) => (
             <div
               key={`${story.name}-${i}`}
               className="shrink-0 basis-[clamp(240px,65vw,320px)] cursor-pointer sm:basis-[clamp(280px,52vw-34px,360px)] md:basis-[clamp(320px,52vw-42px,400px)] lg:basis-[clamp(340px,32vw-20px,430px)] xl:basis-[clamp(280px,24vw-6px,460px)]"
@@ -340,7 +418,13 @@ export default function SmileStories() {
                 }
               }}
               onDragStart={(e) => e.preventDefault()}
-              onClick={() => handleCardClick(story.link)}
+              onPointerDown={() => {
+                clickedLinkRef.current = story.link;
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                handleCardClick(story.link);
+              }}
             >
               <StoryCard {...story} />
             </div>
