@@ -349,19 +349,7 @@ export default function DonateDetailsModal({
               </Typography>
             </div>
 
-            <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <Typography
-                  variant="body-8"
-                  as="p"
-                  className="mb-2 font-manrope font-normal text-white"
-                >
-                  Currency
-                </Typography>
-                <div className="flex min-h-[44px] items-center rounded border border-white/35 px-3 font-manrope text-sm text-white">
-                  {currencyMeta.label}
-                </div>
-              </div>
+            <div className="mb-6">
               <div>
                 <Typography
                   variant="body-8"
