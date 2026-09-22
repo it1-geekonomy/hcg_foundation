@@ -1,36 +1,50 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Calendar } from "lucide-react";
 import Typography from "@/lib/Typography";
 import { PatientStory } from "../constants/stories";
 
 export function RelatedPatientStories({ stories }: { stories: PatientStory[] }) {
-  const [columns, setColumns] = useState<number>(4);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const clickedLinkRef = useRef<boolean>(false);
 
-  useEffect(() => {
-    const updateColumns = () => {
-      const width = window.innerWidth;
-      if (width >= 1280) {
-        setColumns(4);
-      } else if (width >= 768) {
-        setColumns(3);
-      } else if (width >= 640) {
-        setColumns(2);
-      } else {
-        setColumns(2);
-      }
-    };
+  if (stories.length === 0) return null;
 
-    updateColumns();
-    window.addEventListener("resize", updateColumns);
-    return () => window.removeEventListener("resize", updateColumns);
-  }, []);
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (!scrollContainerRef.current) return;
+    setIsDragging(true);
+    clickedLinkRef.current = false;
+    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+    scrollContainerRef.current.setPointerCapture(e.pointerId);
+  };
 
-  const visibleStories = stories.slice(0, columns);
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    e.preventDefault();
+    clickedLinkRef.current = true;
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
 
-  if (visibleStories.length === 0) return null;
+  const handlePointerUp = (e: React.PointerEvent) => {
+    setIsDragging(false);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.releasePointerCapture(e.pointerId);
+    }
+  };
+
+  const handleLinkClick = (e: React.MouseEvent) => {
+    if (clickedLinkRef.current) {
+      e.preventDefault();
+    }
+  };
 
   return (
     <div>
@@ -49,26 +63,34 @@ export function RelatedPatientStories({ stories }: { stories: PatientStory[] }) 
         </Link>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-7">
-        {visibleStories.map((relStory) => (
+      <div 
+        ref={scrollContainerRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        className={`mt-6 flex overflow-x-auto snap-x snap-mandatory gap-4 sm:gap-6 md:gap-7 no-scrollbar pb-4 sm:pb-0 ${isDragging ? "cursor-grabbing snap-none" : "cursor-grab"}`}
+      >
+        {stories.map((relStory) => (
           <Link
             key={relStory.id}
-            href={`/journey-of-hope/patient-stories/${relStory.id}`}
-            className="group relative flex flex-col justify-between aspect-[385/493] w-full overflow-hidden rounded-[1.375rem] border border-white/50 bg-[#EFEAD8] p-[1.1rem] sm:p-[1.35rem] pb-0 sm:pb-0 shadow-sm transition duration-300 hover:shadow-md hover:border-white/70"
+            href={`/journey-of-hope/patient-stories/${relStory.slug || relStory.id}`}
+            onClick={handleLinkClick}
+            className="shrink-0 w-[280px] sm:w-[320px] md:w-[350px] lg:w-[385px] snap-center group relative flex flex-col justify-between aspect-[385/493] overflow-hidden rounded-[1.375rem] border border-white/50 bg-[#EFEAD8] p-[1.1rem] sm:p-[1.35rem] pb-0 sm:pb-0 shadow-sm transition duration-300 hover:shadow-md hover:border-white/70 select-none"
           >
             {/* 1. Full-bleed background photo (Figma SHADETT layer: blurred 0.75rem to let natural colors bleed through) */}
             <img
               src={relStory.imageUrl}
               alt=""
               aria-hidden="true"
-              className="absolute inset-0 h-full w-full object-cover scale-110 filter blur-[0.75rem] opacity-90 transition duration-500 group-hover:scale-115"
+              className="absolute inset-0 h-full w-full object-cover scale-110 filter blur-[0.75rem] opacity-90 transition duration-500 group-hover:scale-115 pointer-events-none"
             />
 
             {/* 2. Soft translucent glass tint over outer card matching Figma Subtract fill */}
-            <div className="absolute inset-0 bg-white/20 backdrop-blur-md transition duration-300 group-hover:bg-white/25" />
+            <div className="absolute inset-0 bg-white/20 backdrop-blur-md transition duration-300 group-hover:bg-white/25 pointer-events-none" />
 
             {/* 3. Inner Card matching Figma Rectangle 31 (339x368, Radius: 1.25rem) */}
-            <div className="relative z-10 w-full aspect-[339/368] overflow-hidden rounded-[1.25rem] shadow-xs">
+            <div className="relative z-10 w-full aspect-[339/368] overflow-hidden rounded-[1.25rem] shadow-xs pointer-events-none">
               <img
                 src={relStory.imageUrl}
                 alt={relStory.patientName}
@@ -78,7 +100,7 @@ export function RelatedPatientStories({ stories }: { stories: PatientStory[] }) 
             </div>
 
             {/* 4. Bottom Info Bar matching Figma Frame 97 (Height: 6.375rem): Name & Date (Left) + Circular Arrow Button (Right) */}
-            <div className="relative z-10 h-[5.5rem] sm:h-[6.375rem] px-1 flex items-center justify-between gap-3">
+            <div className="relative z-10 h-[5.5rem] sm:h-[6.375rem] px-1 flex items-center justify-between gap-3 pointer-events-none">
               {/* Left: Patient Name & Date */}
               <div className="flex flex-col text-white min-w-0">
                 <div className="truncate">
@@ -90,7 +112,7 @@ export function RelatedPatientStories({ stories }: { stories: PatientStory[] }) 
                     {relStory.patientName}
                   </Typography>
                 </div>
-                <div className="mt-1 flex items-center gap-1.5 text-[#FFFFFF]">
+                <div className="mt-1 flex items-center gap-1.5 text-[#FFFFFF] whitespace-nowrap">
                   <Calendar className="size-3.5 sm:size-4 text-[#FFFFFF] shrink-0" />
                   <Typography
                     variant="body-8"

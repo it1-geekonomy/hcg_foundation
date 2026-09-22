@@ -10,6 +10,7 @@ export interface PaginationControlsProps {
   className?: string;
   showDots?: boolean;
   showArrows?: boolean;
+  showNumbers?: boolean;
 }
 
 export default function PaginationControls({
@@ -19,6 +20,7 @@ export default function PaginationControls({
   className = "",
   showDots = true,
   showArrows = true,
+  showNumbers = false,
 }: PaginationControlsProps) {
   if (totalPages <= 1) {
     return null;
@@ -36,11 +38,23 @@ export default function PaginationControls({
     }
   };
 
+  const getPageNumbers = () => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 3) {
+      return [1, 2, 3, 4, '...', totalPages];
+    }
+    if (currentPage >= totalPages - 2) {
+      return [1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+  };
+
   return (
-    <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
-      {/* Arrow Buttons */}
+    <div className={`flex items-center justify-center gap-2 sm:gap-3 ${className}`}>
+      {/* Previous Arrow */}
       {showArrows && (
-        <div className="flex items-center justify-center gap-3">
         <button
           type="button"
           onClick={handlePrev}
@@ -54,26 +68,11 @@ export default function PaginationControls({
         >
           <ChevronLeft className="size-5" />
         </button>
-
-        <button
-          type="button"
-          onClick={handleNext}
-          disabled={currentPage === totalPages}
-          aria-label="Next page"
-          className={`flex size-9 sm:size-10 items-center justify-center rounded-full shadow-xs transition active:scale-95 cursor-pointer ${
-            currentPage === totalPages
-              ? "bg-[#EFE4C8] text-[#8C826B] opacity-60 cursor-not-allowed"
-              : "bg-[#FDC61D] text-[#382E07] hover:bg-[#E9B510]"
-          }`}
-        >
-          <ChevronRight className="size-5" />
-        </button>
-      </div>
       )}
 
       {/* Page Indicator Dots */}
-      {showDots && totalPages > 1 && (
-        <div className="mt-1 flex items-center justify-center gap-2">
+      {showDots && !showNumbers && totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 px-1">
           {Array.from({ length: totalPages }).map((_, idx) => {
             const pageNum = idx + 1;
             const isActive = pageNum === currentPage;
@@ -92,6 +91,55 @@ export default function PaginationControls({
             );
           })}
         </div>
+      )}
+
+      {/* Numbered Pagination */}
+      {showNumbers && totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2 px-1">
+          {getPageNumbers().map((item, index) => {
+            if (item === '...') {
+              return (
+                <span key={`dots-${index}`} className="px-1 text-[#8C826B] font-medium">
+                  ...
+                </span>
+              );
+            }
+            const pageNum = item as number;
+            const isActive = pageNum === currentPage;
+            return (
+              <button
+                key={pageNum}
+                type="button"
+                onClick={() => onPageChange(pageNum)}
+                aria-label={`Go to page ${pageNum}`}
+                className={`flex size-8 sm:size-10 items-center justify-center rounded-full font-manrope font-semibold text-sm sm:text-base transition cursor-pointer ${
+                  isActive
+                    ? "bg-[#FDC61D] text-[#382E07] shadow-sm"
+                    : "bg-transparent text-[#2D2D2D] hover:bg-[#EFE4C8]"
+                }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Next Arrow */}
+      {showArrows && (
+        <button
+          type="button"
+          onClick={handleNext}
+          disabled={currentPage === totalPages}
+          aria-label="Next page"
+          className={`flex size-9 sm:size-10 items-center justify-center rounded-full shadow-xs transition active:scale-95 cursor-pointer ${
+            currentPage === totalPages
+              ? "bg-[#EFE4C8] text-[#8C826B] opacity-60 cursor-not-allowed"
+              : "bg-[#FDC61D] text-[#382E07] hover:bg-[#E9B510]"
+          }`}
+        >
+          <ChevronRight className="size-5" />
+        </button>
       )}
     </div>
   );

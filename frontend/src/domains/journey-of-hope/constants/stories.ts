@@ -1,3 +1,5 @@
+export const PATIENT_STORY_IMAGE_SIZE = { width: 678, height: 736 } as const;
+
 export interface PatientStory {
   id: string;
   slug: string;

@@ -11,3 +11,4 @@ export * from "./campaigns";
 export * from "./partnership-inquiries";
 export * from "./leads-contact";
 export * from "./leads-internship";
+export * from "./patient-stories";
