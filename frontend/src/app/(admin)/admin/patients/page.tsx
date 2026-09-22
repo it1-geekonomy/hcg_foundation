@@ -1,14 +1,5 @@
-﻿import Typography from "@/lib/Typography";
+import PatientStoriesListPage from "@/domains/cms/features/patient-stories/PatientStoriesListPage";
 
-export default function Page() {
-  return (
-    <div className="p-6">
-      <Typography variant="heading-8" as="h1" className="font-semibold">
-        Admin Patients
-      </Typography>
-      <Typography variant="label-1" as="p" className="text-muted-foreground">
-        TODO: implement admin patients screen.
-      </Typography>
-    </div>
-  );
+export default function AdminPatientsPage() {
+  return <PatientStoriesListPage />;
 }

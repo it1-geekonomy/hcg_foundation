@@ -181,6 +181,31 @@ export type ProjectFields = SeoFields & {
   status?: ContentStatus;
 };
 
+export type PatientStory = SeoFields & {
+  id: string;
+  title: string;
+  slug: string;
+  patientImage?: string | null;
+  storyDate?: string | null;
+  donationState?: string | null;
+  content?: string | null;
+  shortDescription?: string | null;
+  status: ContentStatus;
+  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PatientStoryFields = SeoFields & {
+  title: string;
+  slug: string;
+  storyDate?: string;
+  donationState?: string;
+  content?: string;
+  shortDescription?: string;
+  status?: ContentStatus;
+};
+
 export type LegalPageType = "privacy_policy" | "terms_and_conditions";
 
 export type LegalPage = SeoFields & {

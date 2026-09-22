@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { Link as LinkIcon } from "lucide-react";
+import React, { useState } from "react";
+import { Link as LinkIcon, Check } from "lucide-react";
 import Typography from "@/lib/Typography";
 import {
   FacebookIcon,
@@ -18,10 +18,36 @@ export default function ShareStory({
   title = "Share this story",
   className = "",
 }: ShareStoryProps) {
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedInsta, setCopiedInsta] = useState(false);
+
   const handleCopyLink = () => {
     if (typeof window !== "undefined") {
       navigator.clipboard.writeText(window.location.href);
-      alert("Link copied to clipboard!");
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    }
+  };
+
+  const handleShareFacebook = () => {
+    if (typeof window !== "undefined") {
+      const url = encodeURIComponent(window.location.href);
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+    }
+  };
+
+  const handleShareWhatsapp = () => {
+    if (typeof window !== "undefined") {
+      const url = encodeURIComponent(window.location.href);
+      window.open(`https://api.whatsapp.com/send?text=${url}`, '_blank');
+    }
+  };
+
+  const handleShareInstagram = () => {
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(window.location.href);
+      setCopiedInsta(true);
+      setTimeout(() => setCopiedInsta(false), 2000);
     }
   };
 
@@ -33,6 +59,7 @@ export default function ShareStory({
       <div className="flex items-center gap-2">
         <button
           type="button"
+          onClick={handleShareFacebook}
           title="Share on Facebook"
           className="flex size-8 sm:size-9 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer"
         >
@@ -40,13 +67,19 @@ export default function ShareStory({
         </button>
         <button
           type="button"
+          onClick={handleShareInstagram}
           title="Share on Instagram"
           className="flex size-8 sm:size-9 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer"
         >
-          <InstagramIcon className="size-4 fill-current" />
+          {copiedInsta ? (
+            <Check className="size-4" />
+          ) : (
+            <InstagramIcon className="size-4 fill-current" />
+          )}
         </button>
         <button
           type="button"
+          onClick={handleShareWhatsapp}
           title="Share on WhatsApp"
           className="flex size-8 sm:size-9 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer"
         >
@@ -58,7 +91,11 @@ export default function ShareStory({
           title="Copy Link"
           className="flex size-8 sm:size-9 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer"
         >
-          <LinkIcon className="size-4 text-[#382E07]" />
+          {copiedLink ? (
+            <Check className="size-4 text-[#382E07]" />
+          ) : (
+            <LinkIcon className="size-4 text-[#382E07]" />
+          )}
         </button>
       </div>
     </div>

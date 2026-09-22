@@ -20,6 +20,8 @@ import type {
   LegalPageType,
   Paginated,
   PartnershipInquiry,
+  PatientStory,
+  PatientStoryFields,
   ProjectFields,
   Team,
   TeamFields,
@@ -512,6 +514,60 @@ function projectPatchFormData(
       files.projectMobileBanner,
       files.projectMobileBanner.name
     );
+  }
+  return fd;
+}
+
+function patientStoryFormData(
+  fields: PatientStoryFields,
+  patientImageFile?: File | null
+) {
+  const fd = new FormData();
+  fd.append("title", fields.title.trim());
+  fd.append("slug", fields.slug.trim());
+  if (fields.storyDate?.trim()) fd.append("storyDate", fields.storyDate.trim());
+  if (fields.donationState?.trim()) {
+    fd.append("donationState", fields.donationState.trim());
+  }
+  if (fields.content?.trim()) fd.append("content", fields.content);
+  if (fields.shortDescription?.trim()) {
+    fd.append("shortDescription", fields.shortDescription.trim());
+  }
+  if (fields.status) fd.append("status", fields.status);
+  if (fields.metaTitle?.trim()) fd.append("metaTitle", fields.metaTitle.trim());
+  if (fields.metaDescription?.trim()) {
+    fd.append("metaDescription", fields.metaDescription.trim());
+  }
+  if (fields.schemaCode?.trim()) {
+    fd.append("schemaCode", fields.schemaCode.trim());
+  }
+  if (patientImageFile instanceof File) {
+    fd.append("patientImage", patientImageFile, patientImageFile.name);
+  }
+  return fd;
+}
+
+function patientStoryPatchFormData(
+  fields: Partial<PatientStoryFields>,
+  patientImageFile?: File | null
+) {
+  const fd = new FormData();
+  const append = (key: string, value?: string | null) => {
+    if (value === undefined) return;
+    fd.append(key, value ?? "");
+  };
+  append("title", fields.title);
+  append("slug", fields.slug);
+  append("storyDate", fields.storyDate);
+  append("donationState", fields.donationState);
+  append("content", fields.content);
+  append("shortDescription", fields.shortDescription);
+  append("status", fields.status);
+  append("metaTitle", fields.metaTitle);
+  append("metaDescription", fields.metaDescription);
+  append("schemaCode", fields.schemaCode);
+  if (patientImageFile instanceof File) {
+    fd.append("patientImage", patientImageFile, patientImageFile.name);
   }
   return fd;
 }
@@ -1162,6 +1218,68 @@ export const cmsApi = {
     request<ApiEnvelope<LeadsContact>>(`/leads-contact/${id}/restore`, {
       method: "POST",
     }),
+
+  listPatientStories: (params?: ListQuery) =>
+    request<Paginated<PatientStory>>(
+      `/patient-stories${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedPatientStories: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<PatientStory>>(
+      `/patient-stories/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getPatientStory: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<PatientStory>>(`/patient-stories/${id}`);
+    } catch (err) {
+      const deleted = await request<Paginated<PatientStory>>(
+        `/patient-stories/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  createPatientStory: (
+    fields: PatientStoryFields,
+    patientImageFile?: File | null
+  ) =>
+    requestFormData<ApiEnvelope<PatientStory>>(
+      "/patient-stories",
+      "POST",
+      patientStoryFormData(fields, patientImageFile)
+    ),
+
+  updatePatientStory: (
+    id: string,
+    fields: Partial<PatientStoryFields>,
+    patientImageFile?: File | null
+  ) =>
+    requestFormData<ApiEnvelope<PatientStory>>(
+      `/patient-stories/${id}`,
+      "PATCH",
+      patientStoryPatchFormData(fields, patientImageFile)
+    ),
+
+  deletePatientStory: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(
+      `/patient-stories/${id}`,
+      { method: "DELETE" }
+    ),
+
+  restorePatientStory: (id: string) =>
+    request<ApiEnvelope<PatientStory>>(
+      `/patient-stories/${id}/restore`,
+      { method: "POST" }
+    ),
 };
 
 /** Public site: published people */
@@ -1240,4 +1358,17 @@ export const publicLegalApi = {
     );
     return res.data ?? null;
   },
+};
+
+/** Public site: published patient stories */
+export const publicPatientStoriesApi = {
+  listPublished: (params?: Omit<ListQuery, "status">) =>
+    request<Paginated<PatientStory>>(
+      `/patient-stories/published${toQuery({ page: 1, limit: 12, ...params })}`
+    ),
+
+  getBySlug: (slug: string, limit = 6, page = 1) =>
+    request<ApiEnvelope<{ detail: PatientStory; related: Paginated<PatientStory> }>>(
+      `/patient-stories/published/slug/${encodeURIComponent(slug)}?limit=${limit}&page=${page}`
+    ),
 };

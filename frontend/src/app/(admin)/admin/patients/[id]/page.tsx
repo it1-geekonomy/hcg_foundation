@@ -1,14 +1,5 @@
-import Typography from "@/lib/Typography";
+import PatientStoryViewPage from "@/domains/cms/features/patient-stories/PatientStoryViewPage";
 
-export default function AdminPatientsByIdPage() {
-  return (
-    <div className="p-6">
-      <Typography variant="heading-8" as="h1" className="font-semibold">
-        Admin Patients Id
-      </Typography>
-      <Typography variant="label-1" as="p" className="text-muted-foreground">
-        TODO: implement admin patients id screen.
-      </Typography>
-    </div>
-  );
+export default function AdminPatientViewPage() {
+  return <PatientStoryViewPage />;
 }
