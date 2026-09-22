@@ -2,8 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { ExternalLink, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import Typography from "@/lib/Typography";
 import { cmsApi } from "@/domains/cms/lib/api";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
@@ -11,17 +10,15 @@ import { cmsToast } from "@/domains/cms/lib/toast";
 import type { PatientStory } from "@/domains/cms/lib/types";
 import {
   CmsBadge,
-  CmsDetailCard,
-  CmsDetailField,
-  CmsHtmlContentCard,
   CmsRecordActions,
   CmsSeoCard,
   CmsViewError,
   CmsViewHeader,
   CmsViewLoading,
   cmsErrorMessage,
-  formatCmsDateTime,
 } from "@/domains/cms/ui/CmsViewChrome";
+import CmsWebsitePreview from "@/domains/cms/ui/CmsWebsitePreview";
+import { PatientStoryDetailPreview } from "@/domains/journey-of-hope/components/PatientStoryDetailPreview";
 
 const LIST_HREF = "/admin/patients";
 
@@ -111,6 +108,24 @@ export default function PatientStoryViewPage() {
 
   const isDeleted = Boolean(story.deletedAt);
 
+  const previewStory = story
+    ? {
+        id: story.id,
+        slug: story.slug,
+        patientName: story.title,
+        date: story.storyDate ? String(story.storyDate).slice(0, 10) : "",
+        conditionTag: story.donationState || "Patient Journey",
+        excerpt: story.shortDescription || "",
+        fullStory: story.content || "",
+        imageUrl:
+          story.patientImage ||
+          "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=800&auto=format&fit=crop",
+        heroImageUrl:
+          story.patientImage ||
+          "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=1600&auto=format&fit=crop",
+      }
+    : null;
+
   return (
     <div className="space-y-6">
       <CmsViewHeader
@@ -157,17 +172,6 @@ export default function PatientStoryViewPage() {
         }
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            {!isDeleted && story.status === "published" ? (
-              <Link
-                href={`/journey-of-hope/patient-stories/${story.slug}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-input bg-background px-3 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-              >
-                <ExternalLink className="size-4" />
-                View on website
-              </Link>
-            ) : null}
             <CmsRecordActions
               isDeleted={isDeleted}
               busy={busy}
@@ -179,92 +183,20 @@ export default function PatientStoryViewPage() {
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-12">
-        {/* Left Column: Photo & Core Details */}
-        <div className="space-y-6 lg:col-span-4">
-          <CmsDetailCard title="Patient Photo">
-            {story.patientImage ? (
-              <div className="relative aspect-[339/368] w-full overflow-hidden rounded-xl border border-black/10 bg-[#f4ebd0]/30 shadow-xs">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={story.patientImage}
-                  alt={story.title}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="flex aspect-[339/368] w-full flex-col items-center justify-center rounded-xl border border-dashed border-black/15 bg-black/[0.02] text-muted-foreground">
-                <Users className="size-10 mb-2 stroke-1" />
-                <Typography variant="label-1" as="span">
-                  No image uploaded
-                </Typography>
-              </div>
-            )}
-          </CmsDetailCard>
-
-          <CmsDetailCard title="Metadata">
-            <dl className="space-y-3">
-              <CmsDetailField
-                label="Story Date"
-                value={
-                  story.storyDate
-                    ? String(story.storyDate).slice(0, 10)
-                    : undefined
-                }
-              />
-
-              <CmsDetailField
-                label="State / Location"
-                value={story.donationState}
-              />
-
-              <CmsDetailField
-                label="Status"
-                value={story.status}
-              />
-
-              <CmsDetailField
-                label="Created at"
-                value={formatCmsDateTime(story.createdAt)}
-              />
-
-              <CmsDetailField
-                label="Updated at"
-                value={formatCmsDateTime(story.updatedAt)}
-              />
-
-              {isDeleted ? (
-                <CmsDetailField
-                  label="Deleted at"
-                  value={formatCmsDateTime(story.deletedAt)}
-                />
-              ) : null}
-            </dl>
-          </CmsDetailCard>
+      <CmsWebsitePreview
+        label="Website preview · Patient Story Detail"
+        className="bg-[#FFFBEA]"
+      >
+        <div className="max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+          {previewStory ? <PatientStoryDetailPreview story={previewStory} /> : null}
         </div>
+      </CmsWebsitePreview>
 
-        {/* Right Column: Narrative & SEO */}
-        <div className="space-y-6 lg:col-span-8">
-          {story.shortDescription ? (
-            <CmsDetailCard title="Short Description">
-              <Typography variant="body-6" as="p" className="text-[#343E43] leading-relaxed">
-                {story.shortDescription}
-              </Typography>
-            </CmsDetailCard>
-          ) : null}
-
-          <CmsHtmlContentCard
-            title="Full Story Narrative"
-            html={story.content}
-          />
-
-          <CmsSeoCard
-            metaTitle={story.metaTitle}
-            metaDescription={story.metaDescription}
-            schemaCode={story.schemaCode}
-          />
-        </div>
-      </div>
+      <CmsSeoCard
+        metaTitle={story.metaTitle}
+        metaDescription={story.metaDescription}
+        schemaCode={story.schemaCode}
+      />
     </div>
   );
 }
