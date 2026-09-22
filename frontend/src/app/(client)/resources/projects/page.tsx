@@ -1,28 +1,60 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Banner from "@/shared/components/Herobannersection";
 import DonateForm from "@/shared/components/DonateForm";
 import PaginationControls from "@/shared/components/PaginationControls";
 import ProjectCard from "@/domains/resources/components/ProjectCard";
-import { PROJECTS_DATA, ProjectItem } from "@/domains/resources/constants/projects";
+import { ProjectItem } from "@/domains/resources/constants/projects";
+import { publicProjectsApi } from "@/domains/cms/lib/api";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 const CARDS_PER_PAGE = 6;
 
 export default function ProjectsPage() {
-  const [projects] = useState<ProjectItem[]>(PROJECTS_DATA);
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const res = await publicProjectsApi.listPublished({
+          page: currentPage,
+          limit: CARDS_PER_PAGE,
+        });
+        if (!cancelled) {
+          const mapped: ProjectItem[] = (res.data ?? []).map((p) => ({
+            id: p.id ?? "",
+            slug: p.slug ?? "",
+            title: p.title ?? "",
+            date: p.projectDate ? new Date(p.projectDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "",
+            category: "Projects",
+            summary: p.shortDescription ?? "",
+            fullStory: p.content ?? "",
+            imageUrl: p.projectBanner || p.projectMobileBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+          }));
+          setProjects(mapped);
+          setTotalPages(res.meta?.totalPages ?? 1);
+        }
+      } catch (err) {
+        if (!cancelled) setProjects([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentPage]);
 
   // Group projects into pages of CARDS_PER_PAGE cards each
-  const totalPages = Math.ceil(projects.length / CARDS_PER_PAGE);
-  const pages = Array.from({ length: totalPages }, (_, pageIndex) => {
-    const start = pageIndex * CARDS_PER_PAGE;
-    if (start + CARDS_PER_PAGE > projects.length && projects.length >= CARDS_PER_PAGE) {
-      return projects.slice(-CARDS_PER_PAGE);
-    }
-    return projects.slice(start, start + CARDS_PER_PAGE);
-  });
+  // The API directly returns the correct page of items, so we just use `projects`
+  // We still keep the same layout (mapping through rows if needed, or just rendering the grid)
+  const pages = [projects]; 
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -43,24 +75,21 @@ export default function ProjectsPage() {
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         {/* Smooth Horizontal Sliding Track */}
         <div className="overflow-hidden w-full">
-          <div
-            className="flex transition-transform duration-500 ease-in-out"
-            style={{ transform: `translateX(-${(currentPage - 1) * 100}%)` }}
-          >
-            {pages.map((pageProjects, pageIdx) => (
-              <div
-                key={pageIdx}
-                className="w-full shrink-0 grid grid-cols-1 md:grid-cols-2 gap-[1.5rem] sm:gap-[2rem] lg:gap-[2.5rem]"
-              >
-                {pageProjects.map((projectItem) => (
-                  <ProjectCard
-                    key={`${pageIdx}-${projectItem.id}`}
-                    project={projectItem}
-                    headingTag="h2"
-                  />
-                ))}
-              </div>
-            ))}
+          <div className={`flex transition-opacity duration-500 ease-in-out ${loading ? "opacity-50" : "opacity-100"}`}>
+            <div className="w-full shrink-0 grid grid-cols-1 md:grid-cols-2 gap-[1.5rem] sm:gap-[2rem] lg:gap-[2.5rem]">
+              {projects.map((projectItem) => (
+                <ProjectCard
+                  key={projectItem.id}
+                  project={projectItem}
+                  headingTag="h2"
+                />
+              ))}
+              {!loading && projects.length === 0 && (
+                <div className="col-span-full py-12 text-center text-neutral-500">
+                  No projects available at the moment.
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

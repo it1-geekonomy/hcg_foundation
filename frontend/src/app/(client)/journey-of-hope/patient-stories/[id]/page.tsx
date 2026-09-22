@@ -9,6 +9,7 @@ import { PATIENT_STORIES, PatientStory } from "@/domains/journey-of-hope/constan
 import ShareStory from "@/shared/components/ShareStory";
 import { RelatedPatientStories } from "@/domains/journey-of-hope/components/RelatedPatientStories";
 import { publicPatientStoriesApi } from "@/domains/cms/lib/api";
+import { DetailTracker } from "@/shared/components/DetailTracker";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
@@ -87,11 +88,12 @@ export default async function StoryDetailPage({
 
   return (
     <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope">
+      <DetailTracker type="smilestories" />
       <Banner
         bgImage="/journey-of-hope/Journey of Hope banner image.png"
         bgImageAlt="Patient Stories"
         breadcrumbs={[
-          { label: "Home", href: "/" },
+          { label: "Home", href: "/#smilestories" },
           { label: "Journey of Hope", href: "/journey-of-hope/patient-stories" },
         ]}
         title="Patient Stories"
@@ -147,7 +149,7 @@ export default async function StoryDetailPage({
             <div className="mt-4 sm:mt-5 max-h-[25rem] sm:max-h-[30rem] lg:max-h-[35rem] xl:max-h-[40rem] overflow-y-auto no-scrollbar pr-2 sm:pr-4">
               {story.fullStory.includes("<") ? (
                 <div
-                  className="prose prose-stone max-w-none text-justify text-[#343E43]"
+                  className="prose prose-stone max-w-none text-justify text-[#343E43] prose-headings:!text-[#0D2838] prose-a:!text-[#FCCC2D] [&_*]:!bg-transparent [&_p]:!text-[#343E43] [&_span]:!text-[#343E43] [&_div]:!text-[#343E43] [&_strong]:!text-[#343E43] [&_h1]:!text-[#0D2838] [&_h2]:!text-[#0D2838] [&_h3]:!text-[#0D2838] [&_h4]:!text-[#0D2838] [&_h5]:!text-[#0D2838] [&_h6]:!text-[#0D2838] [&_li]:!text-[#343E43] [&_td]:!text-[#343E43] [&_th]:!text-[#0D2838]"
                   dangerouslySetInnerHTML={{ __html: story.fullStory }}
                 />
               ) : (

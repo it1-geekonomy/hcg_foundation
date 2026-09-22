@@ -1316,7 +1316,7 @@ export const publicProjectsApi = {
     ),
 
   getBySlug: (slug: string) =>
-    request<ApiEnvelope<CmsProject>>(
+    request<ApiEnvelope<{ detail: CmsProject; related: Paginated<CmsProject> }>>(
       `/projects/published/slug/${encodeURIComponent(slug)}`
     ),
 };
@@ -1329,7 +1329,7 @@ export const publicEventsApi = {
     ),
 
   getBySlug: (slug: string) =>
-    request<ApiEnvelope<CmsEvent>>(
+    request<ApiEnvelope<{ detail: CmsEvent; related: Paginated<CmsEvent> }>>(
       `/events/published/slug/${encodeURIComponent(slug)}`
     ),
 };

@@ -615,7 +615,7 @@ export default function ProjectsSection({
         className={`bg-[#FFF6D8] px-8 py-8 text-black sm:px-12 md:px-16 lg:px-6 lg:py-14 xl:px-6 xl:py-30 2xl:px-40 ${className}`}
       >
         {showHeader ? (
-          <div className="mb-6">
+          <div id="projects" className="mb-6 scroll-mt-24">
             <Typography
               variant="heading-2"
               as="h2"
@@ -643,7 +643,7 @@ export default function ProjectsSection({
     >
       <div className="max-w-full">
         {showHeader ? (
-          <div className="mb-10 flex flex-col gap-4 lg:mb-14 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+          <div id="projects" className="mb-10 flex flex-col gap-4 lg:mb-14 lg:flex-row lg:items-start lg:justify-between lg:gap-8 scroll-mt-24">
             <Typography
               variant="heading-2"
               as="h2"
@@ -776,7 +776,7 @@ export default function ProjectsSection({
                   </Typography>
 
                   <MoreDetailsButton
-                    className="panel-cta shrink-0 font-manrope font-semibold"
+                    className="panel-cta shrink-0 font-manrope font-semibold pointer-events-auto"
                     href={card.href}
                     previewMode={previewMode}
                   />

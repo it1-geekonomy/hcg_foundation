@@ -69,7 +69,8 @@ export function RelatedPatientStories({ stories }: { stories: PatientStory[] }) 
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        className={`mt-6 flex overflow-x-auto snap-x snap-mandatory gap-4 sm:gap-6 md:gap-7 no-scrollbar pb-4 sm:pb-0 ${isDragging ? "cursor-grabbing snap-none" : "cursor-grab"}`}
+        onDragStart={(e) => e.preventDefault()}
+        className={`mt-6 flex overflow-x-auto gap-4 sm:gap-6 md:gap-7 no-scrollbar pb-4 sm:pb-0 touch-pan-y ${isDragging ? "cursor-grabbing scroll-auto" : "cursor-grab snap-x snap-mandatory scroll-smooth"}`}
       >
         {stories.map((relStory) => (
           <Link
