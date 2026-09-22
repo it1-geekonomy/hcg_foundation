@@ -27,7 +27,8 @@ export default function TestimonialsPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const isDesktop = windowWidth >= 1024;
+  const isLargeDesktop = windowWidth >= 1340;
+  const isSmallDesktop = windowWidth >= 1024 && windowWidth < 1340;
   const isTablet = windowWidth >= 640 && windowWidth < 1024;
 
   const handleNext = () => {
@@ -91,14 +92,13 @@ export default function TestimonialsPage() {
         </div>
 
         {/* Horizontal 3D Carousel Stage with Hardware-Accelerated 60fps Motion */}
-        <div className="relative mt-10 sm:mt-14 w-full h-[16.25rem] sm:h-[21.25rem] lg:h-[26.25rem] overflow-visible flex items-center justify-center">
+        <div className="relative mt-8 sm:mt-12 w-full h-[16rem] sm:h-[18.5rem] lg:h-[16.5rem] xl:h-[19.5rem] 2xl:h-[22.5rem] overflow-visible flex items-center justify-center">
           {testimonials.map((item, idx) => (
             <TestimonialCard
               key={item.id}
               item={item}
               diff={getRelativeOffset(idx)}
-              isDesktop={isDesktop}
-              isTablet={isTablet}
+              windowWidth={windowWidth}
               onDragEnd={handleDragEnd}
               onNext={handleNext}
               onPrev={handlePrev}

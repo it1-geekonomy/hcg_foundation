@@ -14,8 +14,11 @@ import {
   Award,
   Target,
   ChevronDown,
+  FileText,
+  Wrench,
 } from "lucide-react";
 import PhoneInputField from "@/shared/forms/PhoneInputField";
+import SearchableLanguageSelect from "@/shared/forms/SearchableLanguageSelect";
 import Typography from "@/lib/Typography";
 
 export type ParticipateModalType = "intern" | "fundraise" | "volunteer" | null;
@@ -32,6 +35,13 @@ export default function ParticipateModal({
   onClose,
 }: ParticipateModalProps) {
   const [submitted, setSubmitted] = useState(false);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [errors, setErrors] = useState<{
+    fullName?: string;
+    email?: string;
+  }>({});
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   // Form State
   const [formData, setFormData] = useState({
@@ -52,6 +62,38 @@ export default function ParticipateModal({
     message: "",
     agreeTerms: false,
   });
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (/\d/.test(val)) {
+      setErrors((prev) => ({
+        ...prev,
+        fullName: "Numbers are not allowed in name",
+      }));
+      return;
+    }
+    setErrors((prev) => ({ ...prev, fullName: undefined }));
+    setFormData((prev) => ({ ...prev, fullName: val }));
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (errors.email && emailRegex.test(val.trim())) {
+      setErrors((prev) => ({ ...prev, email: undefined }));
+    }
+    setFormData((prev) => ({ ...prev, email: val }));
+  };
+
+  const handleEmailBlur = () => {
+    if (formData.email.trim() && !emailRegex.test(formData.email.trim())) {
+      setErrors((prev) => ({
+        ...prev,
+        email: "Please enter a valid email address",
+      }));
+    } else if (formData.email.trim() && emailRegex.test(formData.email.trim())) {
+      setErrors((prev) => ({ ...prev, email: undefined }));
+    }
+  };
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -82,6 +124,29 @@ export default function ParticipateModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const newErrors: { fullName?: string; email?: string } = {};
+
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = "Full name is required";
+    } else if (/\d/.test(formData.fullName)) {
+      newErrors.fullName = "Numbers are not allowed in name";
+    } else if (formData.fullName.trim().length < 2) {
+      newErrors.fullName = "Name must be at least 2 characters";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email address is required";
+    } else if (!emailRegex.test(formData.email.trim())) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
@@ -115,12 +180,12 @@ export default function ParticipateModal({
       {/* Backdrop overlay click to close */}
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
-      {/* Main Modal Container with exact Figma styling & fluid responsive height for all screens */}
+      {/* Main Modal Container with exact Figma styling: width 640px (40rem), height 860px (53.75rem) for Intern (Frame 556), 736px (46rem) for Fundraise/Volunteer */}
       <div
         className={`relative z-10 w-full max-w-[40rem] bg-white shadow-2xl overflow-hidden my-auto flex flex-col ${
           isIntern
-            ? "max-h-[92vh] lg:h-auto lg:max-h-[53.75rem] rounded-md"
-            : "max-h-[90vh] lg:h-auto lg:max-h-[46rem] rounded-md"
+            ? "max-h-[96vh] sm:h-[53.75rem] rounded-md"
+            : "max-h-[95vh] sm:h-[46rem] rounded-md"
         }`}
       >
         {/* Full Modal Watermark Background Image matching Figma */}
@@ -134,38 +199,74 @@ export default function ParticipateModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 sm:top-5 sm:right-5 z-20 p-2 text-[#6C6048] hover:text-[#2E1C12] transition-colors rounded-full hover:bg-black/5 cursor-pointer"
+          className="absolute top-4 right-4 sm:top-5 sm:right-5 z-20 p-2 text-[#6C6048] hover:text-[#2E1C12] transition-colors rounded-full hover:bg-black/5 cursor-pointer"
           aria-label="Close modal"
         >
           <X className="size-5 sm:size-6" />
         </button>
 
         {/* Modal Scrollable Body */}
-        <div className="relative z-10 p-5 sm:p-8 md:p-10 overflow-y-auto max-h-[85vh] sm:max-h-[88vh] flex flex-col justify-between">
+        <div className="relative z-10 p-6 sm:p-9 md:p-10 overflow-y-auto h-full flex flex-col justify-between">
           {/* Header Title & Subtitle matching Figma 100% */}
           <div className="text-center max-w-xl mx-auto mb-6 sm:mb-8">
             <div className="mb-1">
-              <Typography variant="heading-5" as="h2" className="font-tiempos-headline font-normal italic text-[#2E1C12]">
+              <Typography
+                variant="heading-5"
+                as="h2"
+                className="font-tiempos-headline font-normal italic text-[#0D2838]"
+              >
                 {isIntern && "Apply for Internship at"}
                 {isFundraise && "Start a Fundraising Campaign at"}
                 {!isIntern && !isFundraise && "Become a Volunteer at"}
               </Typography>
             </div>
             <div className="mb-3">
-              <Typography variant="heading-5" as="div" className="font-tiempos-headline font-normal italic">
-                <span className="text-[#0083B0]">HCG </span>
-                <span className="text-[#DF6A4B]">Foundation</span>
+              <Typography
+                variant="heading-8"
+                as="div"
+                className="font-manrope font-bold bg-gradient-to-r from-[#208CCC] via-[#FABE3B] to-[#9D0037] bg-clip-text text-transparent inline-block"
+              >
+                HCG Foundation
               </Typography>
             </div>
-            <Typography variant="body-8" as="p" className="font-manrope font-normal text-[#6C6048]">
-              {isIntern &&
-                "Passionate about making a difference? Join the HCG Foundation Internship Program to gain hands-on experience, learn from experts, and build skills for your future career."}
-              {isFundraise &&
-                "Turn your network into meaningful support for cancer patients and families. Fill in the details below to start your fundraising journey with us."}
-              {!isIntern &&
-                !isFundraise &&
-                "Join our team of dedicated volunteers and help support patient care initiatives, screening camps, administrative work, and community outreach."}
-            </Typography>
+            <div className="max-w-[34rem] mx-auto">
+              <Typography
+                variant="caption-1"
+                as="p"
+                className="font-manrope font-normal text-[#596D79] text-center leading-relaxed"
+              >
+                {isIntern && (
+                  <>
+                    <span className="block">
+                      Passionate about making a difference? Join the HCG Foundation Internship Program to
+                    </span>
+                    <span className="block">
+                      gain hands-on experience, learn from experts, and build skills for your future career.
+                    </span>
+                  </>
+                )}
+                {isFundraise && (
+                  <>
+                    <span className="block">
+                      Turn your network into meaningful support for cancer patients and families.
+                    </span>
+                    <span className="block">
+                      Fill in the details below to start your fundraising journey with us.
+                    </span>
+                  </>
+                )}
+                {!isIntern && !isFundraise && (
+                  <>
+                    <span className="block">
+                      Join our team of dedicated volunteers and help support patient care initiatives,
+                    </span>
+                    <span className="block">
+                      screening camps, administrative work, and community outreach.
+                    </span>
+                  </>
+                )}
+              </Typography>
+            </div>
           </div>
 
           {submitted ? (
@@ -180,27 +281,42 @@ export default function ParticipateModal({
               </Typography>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 lg:space-y-6 font-manrope">
-              {/* Row 1: Full Name & Phone Number */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <form onSubmit={handleSubmit} className="w-full max-w-[34rem] mx-auto flex-1 flex flex-col justify-between font-manrope space-y-4 sm:space-y-5">
+              {/* Row 1: Full Name & Phone Number (Figma Frame 560: 544.45px x 41.14px, Gap: 51px) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                 <div className="relative">
-                  <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                    <User className="size-4 text-[#A09578] shrink-0 mr-3" />
+                  <div
+                    className={`h-[2.57rem] flex items-start pt-0.5 border-b transition-colors ${errors.fullName
+                        ? "border-red-500"
+                        : "border-[#E5E0D0] focus-within:border-[#FCCC2D]"
+                      }`}
+                  >
+                    <User className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
                     <input
                       type="text"
                       required
                       placeholder="Full Name*"
                       value={formData.fullName}
-                      onChange={(e) =>
-                        setFormData({ ...formData, fullName: e.target.value })
-                      }
-                      className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden placeholder:text-[#A09578] font-manrope"
+                      onChange={handleNameChange}
+                      className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                     />
                   </div>
+                  {errors.fullName && (
+                    <div className="mt-1">
+                      <Typography
+                        variant="caption-1"
+                        as="p"
+                        className="font-manrope text-xs text-red-500"
+                      >
+                        {errors.fullName}
+                      </Typography>
+                    </div>
+                  )}
                 </div>
 
                 <PhoneInputField
                   label="Phone Number"
+                  hideLabel
                   required
                   value={formData.phone}
                   onChange={(val) =>
@@ -210,34 +326,49 @@ export default function ParticipateModal({
               </div>
 
               {/* Row 2: Email & Gender (Intern) / Location (Fundraise/Volunteer) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                 <div className="relative">
-                  <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                    <Mail className="size-4 text-[#A09578] shrink-0 mr-3" />
+                  <div
+                    className={`flex items-center border-b py-2.5 transition-colors ${errors.email
+                        ? "border-red-500"
+                        : "border-[#E5E0D0] focus-within:border-[#FCCC2D]"
+                      }`}
+                  >
+                    <Mail className="size-4 text-[#0D2838] shrink-0 mr-3" />
                     <input
                       type="email"
                       required
                       placeholder="Email Address*"
                       value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden placeholder:text-[#A09578] font-manrope"
+                      onChange={handleEmailChange}
+                      onBlur={handleEmailBlur}
+                      className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                     />
                   </div>
+                  {errors.email && (
+                    <div className="mt-1">
+                      <Typography
+                        variant="caption-1"
+                        as="p"
+                        className="font-manrope text-xs text-red-500"
+                      >
+                        {errors.email}
+                      </Typography>
+                    </div>
+                  )}
                 </div>
 
                 {isIntern ? (
                   <div className="relative">
                     <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                      <User className="size-4 text-[#A09578] shrink-0 mr-3" />
+                      <User className="size-4 text-[#0D2838] shrink-0 mr-3" />
                       <select
                         required
                         value={formData.gender}
                         onChange={(e) =>
                           setFormData({ ...formData, gender: e.target.value })
                         }
-                        className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden font-manrope cursor-pointer appearance-none"
+                        className="w-full bg-transparent pl-[0.75rem] text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden font-manrope cursor-pointer appearance-none"
                       >
                         <option value="" disabled>
                           Select your gender*
@@ -246,13 +377,13 @@ export default function ParticipateModal({
                         <option value="Female">Female</option>
                         <option value="Other">Other</option>
                       </select>
-                      <ChevronDown className="size-4 text-[#A09578] shrink-0 ml-1 pointer-events-none" />
+                      <ChevronDown className="size-4 text-[#0D2838] shrink-0 ml-1 pointer-events-none" />
                     </div>
                   </div>
                 ) : (
                   <div className="relative">
                     <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                      <User className="size-4 text-[#A09578] shrink-0 mr-3" />
+                      <User className="size-4 text-[#0D2838] shrink-0 mr-3" />
                       <input
                         type="text"
                         required
@@ -261,9 +392,9 @@ export default function ParticipateModal({
                         onChange={(e) =>
                           setFormData({ ...formData, location: e.target.value })
                         }
-                        className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden placeholder:text-[#A09578] font-manrope"
+                        className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                       />
-                      <ChevronDown className="size-4 text-[#A09578] shrink-0 ml-1 pointer-events-none" />
+                      <ChevronDown className="size-4 text-[#0D2838] shrink-0 ml-1 pointer-events-none" />
                     </div>
                   </div>
                 )}
@@ -272,10 +403,10 @@ export default function ParticipateModal({
               {/* Row 3 (Specific to Intern vs Fundraise/Volunteer) */}
               {isIntern ? (
                 <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                     <div className="relative">
                       <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                        <Calendar className="size-4 text-[#A09578] shrink-0 mr-3" />
+                        <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3" />
                         <input
                           type="text"
                           placeholder="DOB (DD/MM/YYYY)"
@@ -283,14 +414,14 @@ export default function ParticipateModal({
                           onChange={(e) =>
                             setFormData({ ...formData, dob: e.target.value })
                           }
-                          className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden placeholder:text-[#A09578] font-manrope"
+                          className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                         />
                       </div>
                     </div>
 
                     <div className="relative">
                       <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                        <BookOpen className="size-4 text-[#A09578] shrink-0 mr-3" />
+                        <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3" />
                         <input
                           type="text"
                           required
@@ -299,7 +430,7 @@ export default function ParticipateModal({
                           onChange={(e) =>
                             setFormData({ ...formData, course: e.target.value })
                           }
-                          className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden placeholder:text-[#A09578] font-manrope"
+                          className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                         />
                       </div>
                     </div>
@@ -308,7 +439,7 @@ export default function ParticipateModal({
                   {/* Address */}
                   <div className="relative">
                     <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                      <MapPin className="size-4 text-[#A09578] shrink-0 mr-3" />
+                      <MapPin className="size-4 text-[#0D2838] shrink-0 mr-3" />
                       <input
                         type="text"
                         required
@@ -317,45 +448,28 @@ export default function ParticipateModal({
                         onChange={(e) =>
                           setFormData({ ...formData, address: e.target.value })
                         }
-                        className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden placeholder:text-[#A09578] font-manrope"
+                        className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                       />
                     </div>
                   </div>
 
-                  {/* Languages & Computer Skills */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                    <div className="relative">
-                      <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                        <Globe className="size-4 text-[#A09578] shrink-0 mr-3" />
-                        <select
-                          required
-                          value={formData.languages}
-                          onChange={(e) =>
-                            setFormData({ ...formData, languages: e.target.value })
-                          }
-                          className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden font-manrope cursor-pointer appearance-none"
-                        >
-                          <option value="" disabled>
-                            Languages Known*
-                          </option>
-                          <option value="English, Hindi">English, Hindi</option>
-                          <option value="English, Kannada">English, Kannada</option>
-                          <option value="English, Hindi, Kannada">
-                            English, Hindi, Kannada
-                          </option>
-                          <option value="Other">Other</option>
-                        </select>
-                        <ChevronDown className="size-4 text-[#A09578] shrink-0 ml-1 pointer-events-none" />
-                      </div>
-                    </div>
+                  {/* Languages & Skills */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
+                    <SearchableLanguageSelect
+                      value={formData.languages}
+                      onChange={(val) =>
+                        setFormData((prev) => ({ ...prev, languages: val }))
+                      }
+                      required
+                    />
 
                     <div className="relative">
                       <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                        <Laptop className="size-4 text-[#A09578] shrink-0 mr-3" />
+                        <Wrench className="size-4 text-[#0D2838] shrink-0 mr-3" />
                         <input
                           type="text"
                           required
-                          placeholder="Computer Skills*"
+                          placeholder="Skills*"
                           value={formData.computerSkills}
                           onChange={(e) =>
                             setFormData({
@@ -363,18 +477,18 @@ export default function ParticipateModal({
                               computerSkills: e.target.value,
                             })
                           }
-                          className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden placeholder:text-[#A09578] font-manrope"
+                          className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                         />
                       </div>
                     </div>
                   </div>
                 </>
               ) : (
-                /* Specific to Fundraise / Volunteer */
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                /* Specific to Fundraise / Volunteer (Frame 582: Gap 51px) */
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                   <div className="relative">
                     <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                      <Calendar className="size-4 text-[#A09578] shrink-0 mr-3" />
+                      <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3" />
                       <input
                         type="text"
                         required
@@ -391,22 +505,22 @@ export default function ParticipateModal({
                         onChange={(e) =>
                           isFundraise
                             ? setFormData({
-                                ...formData,
-                                fundraisingGoal: e.target.value,
-                              })
+                              ...formData,
+                              fundraisingGoal: e.target.value,
+                            })
                             : setFormData({
-                                ...formData,
-                                volunteerInterest: e.target.value,
-                              })
+                              ...formData,
+                              volunteerInterest: e.target.value,
+                            })
                         }
-                        className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden placeholder:text-[#A09578] font-manrope"
+                        className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                       />
                     </div>
                   </div>
 
                   <div className="relative">
                     <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                      <BookOpen className="size-4 text-[#A09578] shrink-0 mr-3" />
+                      <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3" />
                       <input
                         type="text"
                         required
@@ -421,39 +535,70 @@ export default function ParticipateModal({
                         onChange={(e) =>
                           isFundraise
                             ? setFormData({
-                                ...formData,
-                                reason: e.target.value,
-                              })
+                              ...formData,
+                              reason: e.target.value,
+                            })
                             : setFormData({
-                                ...formData,
-                                availability: e.target.value,
-                              })
+                              ...formData,
+                              availability: e.target.value,
+                            })
                         }
-                        className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden placeholder:text-[#A09578] font-manrope"
+                        className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                       />
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Your Message */}
-              <div className="relative">
-                <div className="flex items-start border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                  <MessageSquare className="size-4 text-[#A09578] shrink-0 mr-3 mt-1" />
-                  <textarea
-                    rows={2}
-                    placeholder="Your Message*"
-                    value={formData.message}
-                    onChange={(e) =>
-                      setFormData({ ...formData, message: e.target.value })
-                    }
-                    className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden placeholder:text-[#A09578] font-manrope resize-none"
+              {/* Bottom section: Attach Resume for Intern (Figma Frame 622: 545px x 99px, Radius 8px, Dashed #A3A3A3, Fill #FFFFFF 65%), Your Message for Fundraise/Volunteer */}
+              {isIntern ? (
+                <div className="relative">
+                  <input
+                    type="file"
+                    id="intern-resume"
+                    accept=".pdf,.doc,.docx"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setResumeFile(file);
+                    }}
                   />
+                  <label
+                    htmlFor="intern-resume"
+                    className="w-full h-[6.19rem] flex flex-col items-center justify-center gap-[0.625rem] border border-dashed border-[#A3A3A3] rounded-[0.5rem] bg-white/65 cursor-pointer hover:border-[#FCCC2D] transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <FileText className="size-4 text-[#7C8B93]" />
+                      <span className="font-manrope font-medium text-[0.78rem] leading-[150%] tracking-[0.03em] text-[#0D2838]">
+                        {resumeFile ? resumeFile.name : "Attach Resume*"}
+                      </span>
+                    </div>
+                    <span className="font-manrope font-medium text-[0.5rem] leading-[150%] tracking-[0.01em] text-[#7C8B93]">
+                      {resumeFile
+                        ? `${(resumeFile.size / 1024 / 1024).toFixed(2)} MB`
+                        : "Upload your resume(PDF,DOC) - Max 5 MB"}
+                    </span>
+                  </label>
                 </div>
-              </div>
+              ) : (
+                /* Your Message (Height: 88.67px matching Figma Frame 298) */
+                <div className="relative">
+                  <div className="flex items-start border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
+                    <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3 mt-1" />
+                    <textarea
+                      placeholder="Your Message*"
+                      value={formData.message}
+                      onChange={(e) =>
+                        setFormData({ ...formData, message: e.target.value })
+                      }
+                      className="w-full h-[5.54rem] bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Terms and Conditions Checkbox */}
-              <div className="flex items-center gap-2 pt-2">
+              <div className="flex items-center gap-2 pt-1">
                 <input
                   type="checkbox"
                   id="participate-terms"
@@ -468,16 +613,16 @@ export default function ParticipateModal({
                   htmlFor="participate-terms"
                   className="cursor-pointer"
                 >
-                  <Typography variant="caption-1" as="span" className="font-manrope font-normal text-[#6C6048]">
+                  <Typography variant="caption-1" as="span" className="font-manrope font-normal text-[#596D79]">
                     I have read and agree to the{" "}
                   </Typography>
                   <a
                     href="/terms"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline hover:opacity-80 transition-opacity"
+                    className="hover:underline transition-opacity"
                   >
-                    <Typography variant="caption-1" as="span" className="font-manrope font-medium text-[#D99A00]">
+                    <Typography variant="caption-1" as="span" className="font-manrope font-medium text-[#E5A810]">
                       Terms & Conditions
                     </Typography>
                   </a>
@@ -487,9 +632,9 @@ export default function ParticipateModal({
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#382E07] rounded-lg shadow-xs transition duration-300 hover:bg-[#E9B510] hover:shadow-md cursor-pointer"
+                className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#2E1C12] rounded-md transition duration-200 hover:bg-[#F5C21B] active:scale-[0.99] cursor-pointer"
               >
-                <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#382E07]">
+                <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#2E1C12]">
                   Submit Application
                 </Typography>
               </button>

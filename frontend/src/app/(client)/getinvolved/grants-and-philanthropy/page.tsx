@@ -6,6 +6,7 @@ import Typography from "@/lib/Typography";
 import DonateForm from "@/shared/components/DonateForm";
 import PartnerWithUsModal from "@/shared/components/PartnerWithUsModal";
 import { PHILANTHROPY_CARDS } from "@/domains/getinvolved/constants/grants-and-philanthropy";
+import Banner from "@/shared/components/Herobannersection";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
@@ -13,7 +14,17 @@ export default function GrantsAndPhilanthropyPage() {
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
 
   return (
-    <main className="min-h-screen bg-[#FFFBEA] pt-24 sm:pt-28 lg:pt-32">
+    <main className="min-h-screen bg-[#FFFBEA]">
+      <Banner
+        bgImage="/Get Involved/Get Involved banner image.png"
+        bgImageAlt="Grants & Philanthropy"
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Get Involved" },
+        ]}
+        title="Grants & Philanthropy"
+      />
+
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         {/* Header Section */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 lg:gap-12 items-start mb-10 sm:mb-14">

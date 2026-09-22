@@ -11,6 +11,8 @@ interface PhoneInputFieldProps {
   value: string;
   onChange: (value: string | undefined) => void;
   error?: string;
+  hideLabel?: boolean;
+  placeholder?: string;
 }
 
 export default function PhoneInputField({
@@ -19,7 +21,34 @@ export default function PhoneInputField({
   value,
   onChange,
   error,
+  hideLabel = false,
+  placeholder,
 }: PhoneInputFieldProps) {
+  if (hideLabel) {
+    return (
+      <div className="relative">
+        <div className="h-[2.57rem] flex flex-col justify-between border-b border-[#E5E0D0] pb-0.5 focus-within:border-[#FCCC2D] transition-colors [&_.PhoneInputInput]:bg-transparent [&_.PhoneInputInput]:border-none [&_.PhoneInputInput]:outline-none [&_.PhoneInputInput]:text-[#0D2838] [&_.PhoneInputInput]:w-full [&_.PhoneInputInput]:text-[0.78rem] [&_.PhoneInputInput]:leading-[150%] [&_.PhoneInputInput]:tracking-[0.03em] [&_.PhoneInputInput]:font-medium [&_.PhoneInputInput]:placeholder:text-[#0D2838] [&_input::placeholder]:text-[#0D2838] [&_input::placeholder]:opacity-100 [&_.PhoneInputInput]:font-manrope [&_.PhoneInputCountrySelect]:bg-[#FFF4D4] [&_.PhoneInputCountrySelect]:border-none [&_.PhoneInputCountrySelect]:outline-none [&_.PhoneInputCountrySelect]:text-[#0D2838] [&_.PhoneInputCountrySelect]:cursor-pointer [&_.PhoneInputCountrySelectArrow]:text-[#0D2838] [&_.PhoneInputCountrySelectArrow]:border-[#0D2838] [&_.PhoneInputCountryIcon]:w-6 [&_.PhoneInputCountryIcon]:h-4 [&_.PhoneInputCountryIcon]:rounded-xs [&_.PhoneInputCountryIcon]:shadow-xs">
+          <label className="block text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838]">
+            {label}{required ? "*" : ""}
+          </label>
+          <PhoneInput
+            international
+            defaultCountry="IN"
+            value={value || undefined}
+            onChange={onChange}
+            className="flex items-center gap-2 bg-transparent focus:outline-none w-full"
+          />
+        </div>
+        {error && (
+          <div className="mt-0.5">
+            <Typography variant="caption-1" as="span" className="font-manrope font-normal text-red-500">
+              {error}
+            </Typography>
+          </div>
+        )}
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col gap-1">
       <label className="block">
@@ -38,7 +67,8 @@ export default function PhoneInputField({
         <PhoneInput
           international
           defaultCountry="IN"
-          value={value}
+          placeholder={placeholder ?? `${label}${required ? "*" : ""}`}
+          value={value || undefined}
           onChange={onChange}
           className="flex items-center gap-2 bg-transparent focus:outline-none"
         />

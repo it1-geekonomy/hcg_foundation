@@ -6,6 +6,7 @@ import Typography from "@/lib/Typography";
 import DonateForm from "@/shared/components/DonateForm";
 import PartnerWithUsModal from "@/shared/components/PartnerWithUsModal";
 import { CSR_PARTNER_CARDS } from "@/domains/getinvolved/constants/csr-partner";
+import Banner from "@/shared/components/Herobannersection";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
@@ -13,7 +14,17 @@ export default function CsrPartnerPage() {
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
 
   return (
-    <main className="min-h-screen bg-[#FFFBEA] pt-24 sm:pt-28 lg:pt-32">
+    <main className="min-h-screen bg-[#FFFBEA]">
+      <Banner
+        bgImage="/Get Involved/Get Involved banner image.png"
+        bgImageAlt="CSR Partner"
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Get Involved" },
+        ]}
+        title="CSR Partner"
+      />
+
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         {/* Top Header Section aligned 100% with Navbar */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start mb-10 sm:mb-14">

@@ -9,18 +9,67 @@ import { PatientTestimonial } from "@/domains/journey-of-hope/constants/testimon
 interface TestimonialCardProps {
   item: PatientTestimonial;
   diff: number;
-  isDesktop: boolean;
-  isTablet: boolean;
+  windowWidth: number;
   onDragEnd: (_: unknown, info: PanInfo) => void;
   onNext: () => void;
   onPrev: () => void;
   onPlayVideo: (url: string) => void;
 }
 
-// Hardware-accelerated GPU scale & translate transform variants for 60fps smooth sliding
-const getCardStyles = (diff: number, isDesktop: boolean, isTablet: boolean) => {
+const getCardDimensions = (windowWidth: number) => {
+  if (windowWidth >= 1536) {
+    return {
+      width: "36rem",
+      height: "20.25rem",
+      offset: "31.5rem",
+      scale: 0.65,
+    };
+  }
+  if (windowWidth >= 1366) {
+    return {
+      width: "32rem",
+      height: "18rem",
+      offset: "28rem",
+      scale: 0.62,
+    };
+  }
+  if (windowWidth >= 1200) {
+    return {
+      width: "28rem",
+      height: "15.75rem",
+      offset: "24.5rem",
+      scale: 0.62,
+    };
+  }
+  if (windowWidth >= 1024) {
+    return {
+      width: "23.5rem",
+      height: "13.25rem",
+      offset: "20.625rem",
+      scale: 0.62,
+    };
+  }
+  if (windowWidth >= 640) {
+    return {
+      width: "28rem",
+      height: "15.75rem",
+      offset: "24rem",
+      scale: 0.58,
+    };
+  }
+  return {
+    width: "calc(100vw - 2rem)",
+    height: "13.75rem",
+    offset: "82%",
+    scale: 0.75,
+  };
+};
+
+const getCardStyles = (diff: number, windowWidth: number) => {
+  const { offset, scale } = getCardDimensions(windowWidth);
+  const isMobile = windowWidth < 640;
+
   if (diff === 0) {
-    // CENTER ACTIVE CARD (Figma: 698.85px x 397.19px)
     return {
       x: "-50%",
       y: "-50%",
@@ -33,12 +82,11 @@ const getCardStyles = (diff: number, isDesktop: boolean, isTablet: boolean) => {
   }
 
   if (diff === 1) {
-    // RIGHT CARD (Figma: 415px x 236px with exact ~33px gap)
     return {
-      x: isDesktop ? "calc(-50% + 36.875rem)" : isTablet ? "calc(-50% + 26.875rem)" : "calc(-50% + 82%)",
+      x: `calc(-50% + ${offset})`,
       y: "-50%",
-      scale: isDesktop ? 0.594 : isTablet ? 0.6 : 0.75,
-      opacity: isDesktop || isTablet ? 0.85 : 0.35,
+      scale,
+      opacity: isMobile ? 0.35 : 0.85,
       zIndex: 20,
       filter: "brightness(0.85)",
       pointerEvents: "auto" as const,
@@ -46,23 +94,19 @@ const getCardStyles = (diff: number, isDesktop: boolean, isTablet: boolean) => {
   }
 
   if (diff === -1) {
-    // LEFT CARD (Figma: 415px x 236px with exact ~33px gap)
     return {
-      x: isDesktop ? "calc(-50% - 36.875rem)" : isTablet ? "calc(-50% - 26.875rem)" : "calc(-50% - 82%)",
+      x: `calc(-50% - ${offset})`,
       y: "-50%",
-      scale: isDesktop ? 0.594 : isTablet ? 0.6 : 0.75,
-      opacity: isDesktop || isTablet ? 0.85 : 0.35,
+      scale,
+      opacity: isMobile ? 0.35 : 0.85,
       zIndex: 20,
       filter: "brightness(0.85)",
       pointerEvents: "auto" as const,
     };
   }
 
-  // HIDDEN / OFF-SCREEN CARDS SLIDING IN/OUT
   return {
-    x: diff > 0
-      ? isDesktop ? "calc(-50% + 65rem)" : "calc(-50% + 50rem)"
-      : isDesktop ? "calc(-50% - 65rem)" : "calc(-50% - 50rem)",
+    x: diff > 0 ? "calc(-50% + 55rem)" : "calc(-50% - 55rem)",
     y: "-50%",
     scale: 0.5,
     opacity: 0,
@@ -75,8 +119,7 @@ const getCardStyles = (diff: number, isDesktop: boolean, isTablet: boolean) => {
 export default function TestimonialCard({
   item,
   diff,
-  isDesktop,
-  isTablet,
+  windowWidth,
   onDragEnd,
   onNext,
   onPrev,
@@ -84,6 +127,7 @@ export default function TestimonialCard({
 }: TestimonialCardProps) {
   const isCenter = diff === 0;
   const isDraggingRef = React.useRef(false);
+  const { width, height } = getCardDimensions(windowWidth);
 
   const handleCardDragStart = () => {
     isDraggingRef.current = false;
@@ -102,15 +146,25 @@ export default function TestimonialCard({
 
   const handleCardClick = () => {
     if (isDraggingRef.current) return;
-    if (diff === 1) onNext();
-    else if (diff === -1) onPrev();
-    else if (diff === 0) onPlayVideo(item.videoUrl);
+    if (diff === 1) {
+      onNext();
+      setTimeout(() => {
+        onPlayVideo(item.videoUrl);
+      }, 300);
+    } else if (diff === -1) {
+      onPrev();
+      setTimeout(() => {
+        onPlayVideo(item.videoUrl);
+      }, 300);
+    } else if (diff === 0) {
+      onPlayVideo(item.videoUrl);
+    }
   };
 
   return (
     <motion.div
       initial={false}
-      animate={getCardStyles(diff, isDesktop, isTablet)}
+      animate={getCardStyles(diff, windowWidth)}
       transition={{
         type: "spring",
         stiffness: 260,
@@ -125,8 +179,8 @@ export default function TestimonialCard({
       onDragEnd={handleCardDragEnd}
       onClick={handleCardClick}
       style={{
-        width: isDesktop ? "43.678rem" : isTablet ? "32.5rem" : "calc(100vw - 2rem)",
-        height: isDesktop ? "24.824rem" : isTablet ? "18.4375rem" : "13.75rem",
+        width,
+        height,
         transformOrigin: "center center",
       }}
       className={`group absolute top-1/2 left-1/2 overflow-hidden rounded-[1.1rem] bg-[#EFEAD8] shadow-lg transition-shadow duration-300 cursor-grab active:cursor-grabbing ${
@@ -148,20 +202,20 @@ export default function TestimonialCard({
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div
           className={`flex items-center justify-center rounded-full bg-white/35 backdrop-blur-xs text-white shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:bg-white/50 ${
-            isCenter ? "size-16 sm:size-20" : "size-14 sm:size-16"
+            isCenter ? "size-13 sm:size-16 lg:size-18" : "size-10 sm:size-12 lg:size-13"
           }`}
         >
           <Play
             className={`fill-current text-white ml-0.5 ${
-              isCenter ? "size-8 sm:size-10" : "size-7 sm:size-8"
+              isCenter ? "size-6 sm:size-8 lg:size-9" : "size-5 sm:size-6"
             }`}
           />
         </div>
       </div>
 
       {/* Bottom Overlay: Yellow Accent Bar + Patient Name & Role */}
-      <div className="absolute left-6 right-6 bottom-6 flex items-center gap-3.5 z-10 pointer-events-none">
-        <div className="w-1.5 h-10 sm:h-12 bg-[#FCCC2D] rounded-full shrink-0" />
+      <div className="absolute left-4 sm:left-5 lg:left-6 right-4 sm:right-5 lg:right-6 bottom-4 sm:bottom-5 lg:bottom-6 flex items-center gap-3 z-10 pointer-events-none">
+        <div className="w-1.5 h-8 sm:h-10 lg:h-11 bg-[#FCCC2D] rounded-full shrink-0" />
         <div className="flex flex-col text-white min-w-0">
           <div className="truncate">
             <Typography
