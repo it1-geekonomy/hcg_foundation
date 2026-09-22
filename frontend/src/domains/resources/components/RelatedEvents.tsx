@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import Typography from "@/lib/Typography";
@@ -16,41 +16,22 @@ interface RelatedEventsProps {
 
 export default function RelatedEvents({ currentEventId }: RelatedEventsProps) {
   const allRelatedEvents = EVENTS_DATA.filter((e) => e.id !== currentEventId);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [visibleCount, setVisibleCount] = useState(3);
+  const [relatedPage, setRelatedPage] = useState(1);
+  const RELATED_PER_PAGE = 2;
+  const totalRelatedPages = Math.ceil(allRelatedEvents.length / RELATED_PER_PAGE);
 
-  useEffect(() => {
-    const updateVisible = () => {
-      if (window.innerWidth < 640) {
-        setVisibleCount(1);
-      } else if (window.innerWidth < 1024) {
-        setVisibleCount(2);
-      } else {
-        setVisibleCount(3);
-      }
-    };
-    updateVisible();
-    window.addEventListener("resize", updateVisible);
-    return () => window.removeEventListener("resize", updateVisible);
-  }, []);
+  // Group related events into pages of RELATED_PER_PAGE cards each (1 row = 2 cards)
+  const relatedPages = Array.from({ length: totalRelatedPages }, (_, pageIndex) => {
+    const start = pageIndex * RELATED_PER_PAGE;
+    if (start + RELATED_PER_PAGE > allRelatedEvents.length && allRelatedEvents.length >= RELATED_PER_PAGE) {
+      return allRelatedEvents.slice(-RELATED_PER_PAGE);
+    }
+    return allRelatedEvents.slice(start, start + RELATED_PER_PAGE);
+  });
 
   if (allRelatedEvents.length === 0) {
     return null;
   }
-
-  const maxIndex = Math.max(0, allRelatedEvents.length - visibleCount);
-  const safeIndex = Math.min(currentIndex, maxIndex);
-  const totalPages = maxIndex + 1;
-
-  const getTransformStyle = () => {
-    if (visibleCount === 1) {
-      return `translateX(calc(-${safeIndex} * (100% + 1.5rem)))`;
-    }
-    if (visibleCount === 2) {
-      return `translateX(calc(-${safeIndex} * ((100% + 1.5rem) / 2)))`;
-    }
-    return `translateX(calc(-${safeIndex} * ((100% + 2rem) / 3)))`;
-  };
 
   return (
     <section className={`${CONTAINER} py-8 sm:py-12 border-t border-[#E8DFC5]`}>
@@ -73,29 +54,37 @@ export default function RelatedEvents({ currentEventId }: RelatedEventsProps) {
         </Link>
       </div>
 
-      {/* Animated Horizontal Sliding Track matching Figma Frame 36 */}
+      {/* Smooth Horizontal Sliding Track */}
       <div className="overflow-hidden w-full">
         <div
-          className="flex transition-transform duration-500 ease-out gap-6 lg:gap-8"
-          style={{ transform: getTransformStyle() }}
+          className="flex transition-transform duration-500 ease-in-out"
+          style={{ transform: `translateX(-${(relatedPage - 1) * 100}%)` }}
         >
-          {allRelatedEvents.map((item) => (
+          {relatedPages.map((pageEvents, pageIdx) => (
             <div
-              key={item.id}
-              className="shrink-0 w-full sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-4rem)/3)]"
+              key={pageIdx}
+              className="w-full shrink-0 grid grid-cols-1 md:grid-cols-2 gap-[1.5rem] sm:gap-[2rem]"
             >
-              <EventCard event={item} headingTag="h3" />
+              {pageEvents.map((item) => (
+                <EventCard
+                  key={`${pageIdx}-${item.id}`}
+                  event={item}
+                  headingTag="h3"
+                />
+              ))}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Bottom Centered Pagination Controls */}
+      {/* Bottom Centered Pagination Navigation Dots Only */}
       <PaginationControls
-        currentPage={safeIndex + 1}
-        totalPages={totalPages}
-        onPageChange={(page) => setCurrentIndex(page - 1)}
-        className="mt-8 sm:mt-10"
+        currentPage={relatedPage}
+        totalPages={totalRelatedPages}
+        onPageChange={(page) => setRelatedPage(page)}
+        className="mt-[2rem] sm:mt-[2.5rem]"
+        showArrows={false}
+        showDots={true}
       />
     </section>
   );

@@ -9,37 +9,23 @@ import { EVENTS_DATA } from "@/domains/resources/constants/events";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
+const CARDS_PER_PAGE = 2;
+
 export default function EventsPage() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [visibleCount, setVisibleCount] = useState(3);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  useEffect(() => {
-    const updateVisible = () => {
-      if (window.innerWidth < 640) {
-        setVisibleCount(1);
-      } else if (window.innerWidth < 1024) {
-        setVisibleCount(2);
-      } else {
-        setVisibleCount(3);
-      }
-    };
-    updateVisible();
-    window.addEventListener("resize", updateVisible);
-    return () => window.removeEventListener("resize", updateVisible);
-  }, []);
-
-  const maxIndex = Math.max(0, EVENTS_DATA.length - visibleCount);
-  const safeIndex = Math.min(currentIndex, maxIndex);
-  const totalPages = maxIndex + 1;
-
-  const getTransformStyle = () => {
-    if (visibleCount === 1) {
-      return `translateX(calc(-${safeIndex} * (100% + 1.5rem)))`;
+  // Group events into pages of CARDS_PER_PAGE (1 row x 2 columns = 2 cards)
+  const totalPages = Math.ceil(EVENTS_DATA.length / CARDS_PER_PAGE);
+  const pages = Array.from({ length: totalPages }, (_, pageIndex) => {
+    const start = pageIndex * CARDS_PER_PAGE;
+    if (start + CARDS_PER_PAGE > EVENTS_DATA.length && EVENTS_DATA.length >= CARDS_PER_PAGE) {
+      return EVENTS_DATA.slice(-CARDS_PER_PAGE);
     }
-    if (visibleCount === 2) {
-      return `translateX(calc(-${safeIndex} * ((100% + 1.5rem) / 2)))`;
-    }
-    return `translateX(calc(-${safeIndex} * ((100% + 2rem) / 3)))`;
+    return EVENTS_DATA.slice(start, start + CARDS_PER_PAGE);
+  });
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -55,29 +41,37 @@ export default function EventsPage() {
       />
 
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
-        {/* Animated Horizontal Sliding Track matching Figma Frame 35 */}
+        {/* Smooth Horizontal Sliding Track matching Projects */}
         <div className="overflow-hidden w-full">
           <div
-            className="flex transition-transform duration-500 ease-out gap-6 lg:gap-8"
-            style={{ transform: getTransformStyle() }}
+            className="flex transition-transform duration-500 ease-in-out"
+            style={{ transform: `translateX(-${(currentPage - 1) * 100}%)` }}
           >
-            {EVENTS_DATA.map((eventItem) => (
+            {pages.map((pageEvents, pageIdx) => (
               <div
-                key={eventItem.id}
-                className="shrink-0 w-full sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-4rem)/3)]"
+                key={pageIdx}
+                className="w-full shrink-0 grid grid-cols-1 md:grid-cols-2 gap-[1.5rem] sm:gap-[2rem] lg:gap-[2.5rem]"
               >
-                <EventCard event={eventItem} headingTag="h2" />
+                {pageEvents.map((eventItem) => (
+                  <EventCard
+                    key={`${pageIdx}-${eventItem.id}`}
+                    event={eventItem}
+                    headingTag="h2"
+                  />
+                ))}
               </div>
             ))}
           </div>
         </div>
 
-        {/* Bottom Centered Pagination Navigation Controls */}
+        {/* Bottom Centered Pagination Navigation Dots Only */}
         <PaginationControls
-          currentPage={safeIndex + 1}
+          currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={(page) => setCurrentIndex(page - 1)}
-          className="mt-8 sm:mt-10"
+          onPageChange={handlePageChange}
+          className="mt-[2rem] sm:mt-[2.5rem]"
+          showArrows={false}
+          showDots={true}
         />
       </section>
 
