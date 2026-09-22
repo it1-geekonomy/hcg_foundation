@@ -1,3 +1,4 @@
+
 import Image from "next/image";
 import Typography from "@/lib/Typography";
 import {
@@ -10,15 +11,14 @@ export default function SustainableGoalsSection() {
     <section className="w-full bg-[#FFF6D8] px-4 md:px-4 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
 
       <div
-        className="flex w-full flex-col overflow-hidden rounded-sm lg:flex-row lg:items-center"
-        style={{ backgroundColor: sustainableGoalsTheme.panelBg }}
+        className="flex w-full flex-col overflow-hidden rounded-sm lg:flex-row bg-gradient-to-r from-[#4B4B4B] to-[#B1B1B1] lg:flex-row lg:items-center lg:items-center"
       >
         {/* Box heading: rendered below lg (centered) and at lg+ (left-aligned) */}
         <div className="flex-1 items-center justify-center px-6 py-8 lg:justify-start lg:px-6 lg:py-16 xl:px-14 xl:py-16 2xl:px-20">
           <Typography
-            variant="heading-3"
+            variant="heading-4"
             as="h2"
-            className="max-w-full font-tiempos-headline font-light text-white text-center lg:!text-left lg:heading-4"
+            className="max-w-full font-tiempos-headline font-light text-white text-center lg:!text-left"
           >
             Sustainable Development Goals
           </Typography>
@@ -30,7 +30,7 @@ export default function SustainableGoalsSection() {
           {sustainableGoals.map((goal) => (
             <div
               key={goal.number}
-              className="relative flex aspect-square w-full flex-col px-1 lg:w-36 xl:w-44 2xl:w-48"
+              className="relative flex aspect-square w-full flex-col px-1 lg:w-40 xl:w-48 2xl:w-52"
               style={{ backgroundColor: goal.bg }}
             >
               <Typography
@@ -55,7 +55,7 @@ export default function SustainableGoalsSection() {
                 <Typography
                   variant="caption-1"
                   as="span"
-                  className="line-clamp-4 text-center font-manrope font-light uppercase leading-tight tracking-wide text-white"
+                  className="line-clamp-4 text-center font-manrope font-bold uppercase leading-tight tracking-wide text-white"
                 >
                   {goal.title}
                 </Typography>

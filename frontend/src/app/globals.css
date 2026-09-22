@@ -287,3 +287,19 @@
 @theme {
   --breakpoint-3xl: 120rem;
 }
+/* Hide vertical scrollbar globally */
+html {
+  scrollbar-width: none; /* Firefox */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Edge, Safari */
+}
+
+body {
+  -ms-overflow-style: none; /* IE/old Edge */
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}

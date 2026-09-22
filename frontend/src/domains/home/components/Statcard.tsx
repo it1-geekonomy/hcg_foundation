@@ -20,18 +20,18 @@ export default function StatCard({ stat, active, id }: { stat: Stat; active: boo
       <div className="relative h-72 w-[202px]">
         <Ribbon id={id} delay={stat.delay} active={active} />
 
-        <Typography variant="display-2"
+        <Typography variant="heading-7"
           as="span"
           className="pointer-events-none absolute top-[30%] whitespace-nowrap px-1 text-[#2E1C12] drop-shadow-sm font-bold lg:hidden"
-          style={{ left: "47%", transform: "translateX(-50%) translateY(-50%)" }}
+          style={{ left: "45%", transform: "translateX(-50%) translateY(-50%)" }}
         >
           {count.toLocaleString()}
           {stat.suffix}
         </Typography>
-        <Typography variant="heading-7"
+        <Typography variant="body-2"
           as="span"
           className="pointer-events-none absolute top-[30%] whitespace-nowrap px-1 text-[#2E1C12] drop-shadow-sm font-bold hidden lg:block"
-          style={{ left: "47%", transform: "translateX(-50%) translateY(-50%)" }}
+          style={{ left: "45%", transform: "translateX(-50%) translateY(-50%)" }}
         >
           {count.toLocaleString()}
           {stat.suffix}
