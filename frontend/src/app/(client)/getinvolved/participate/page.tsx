@@ -12,6 +12,7 @@ import {
   PARTICIPATE_CARDS,
   PARTICIPATE_BENEFITS,
 } from "@/domains/getinvolved/constants/participate";
+import Banner from "@/shared/components/Herobannersection";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
@@ -21,31 +22,45 @@ export default function ParticipatePage() {
     useState<ParticipateModalType>(null);
 
   return (
-    <main className="min-h-screen bg-[#FFFBEA] pt-24 sm:pt-28 lg:pt-32">
+    <main className="min-h-screen bg-[#FFFBEA]">
+      <Banner
+        bgImage="/Get Involved/Get Involved banner image.png"
+        bgImageAlt="Participate"
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Get Involved" },
+        ]}
+        title="Participate"
+      />
+
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
-        {/* Header Section matching Figma */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 lg:gap-12 items-start mb-10 sm:mb-14">
-          <div className="md:col-span-6 max-w-xl">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="inline-block size-2 rounded-full bg-[#6F5E09]" />
-              <Typography variant="body-8" as="span" className="font-manrope font-normal text-[#6F5E09]">
-                Our Mission
-              </Typography>
-            </div>
+        {/* Eyebrow: Our Mission a little up */}
+        <div className="flex items-center gap-2 mb-2 sm:mb-2.5">
+          <span className="inline-block size-2.5 rounded-full bg-[#FCCC2D]" />
+          <Typography variant="body-8" as="span" className="font-manrope font-normal text-[#8F5E09]">
+            Our Mission
+          </Typography>
+        </div>
+
+        {/* Equal Level Row: Title on Left, Paragraph on Right */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-10 sm:mb-14 items-center">
+          <div className="md:col-span-2">
             <Typography
-              variant="heading-1"
+              variant="heading-2"
               as="h1"
-              className="font-tiempos-headline font-normal text-left text-[#0D2838]"
+              className="font-tiempos-headline font-normal italic text-left text-[#0D2838] lg:whitespace-nowrap"
             >
               Art Gallery & Art Therapy Sessions
             </Typography>
           </div>
-          <div className="md:col-span-6 md:pt-7 flex justify-start md:justify-end">
-            <div className="max-w-[35.5rem] text-left">
-              <Typography variant="body-10" as="p" className="font-argestadisplay font-normal text-[#596D79]">
-                Your time, skills and support can bring hope to patients and families. Explore the different ways you can get involved with HCG Foundation.
-              </Typography>
-            </div>
+          <div className="md:col-span-1">
+            <Typography
+              variant="body-10"
+              as="p"
+              className="font-argestadisplay font-normal text-[#596D79] text-justify"
+            >
+              Your time, skills and support can bring hope to patients and families. Explore the different ways you can get involved with HCG Foundation.
+            </Typography>
           </div>
         </div>
 
@@ -110,27 +125,31 @@ export default function ParticipatePage() {
         </div>
 
         {/* Bottom Benefits Banner matching Figma Frame 577 */}
-        <div className="rounded-md bg-[#FFF4CF] p-6 sm:p-10 lg:p-12 border border-[#F3E3B6] grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-10 items-center">
+        <div className="bg-[#FFF4CF] py-6 sm:py-8 lg:pt-[1.9375rem] lg:pb-[2.25rem] px-5 sm:px-8 lg:px-6 grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-center">
           {PARTICIPATE_BENEFITS.map((benefit) => (
-            <div key={benefit.id} className="flex items-center gap-4 lg:gap-5">
-              <div className="size-14 lg:size-16 rounded-full bg-[#FFF3CC] flex items-center justify-center border border-[#E4CD72] shrink-0 p-3 lg:p-3.5">
+            <div key={benefit.id} className="flex items-center gap-3.5 sm:gap-4 lg:gap-5">
+              <div className="size-13 lg:size-14 rounded-full border border-[#C2A947] flex items-center justify-center shrink-0 p-3 bg-transparent">
                 <img
                   src={benefit.iconUrl}
                   alt={benefit.title}
                   className="w-full h-full object-contain"
                 />
               </div>
-              <div>
-                <div className="mb-1.5">
+              <div className="text-left">
+                <div className="mb-0.5 sm:mb-1">
                   <Typography
-                    variant="body-1"
+                    variant="body-2"
                     as="h3"
                     className="font-argestadisplay font-normal text-left text-[#2C2C2C]"
                   >
                     {benefit.title}
                   </Typography>
                 </div>
-                <Typography variant="body-9" as="p" className="font-manrope font-normal text-[#6C6C6C]">
+                <Typography
+                  variant="body-9"
+                  as="p"
+                  className="font-manrope font-normal text-left text-[#2C2C2C]"
+                >
                   {benefit.description}
                 </Typography>
               </div>

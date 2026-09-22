@@ -6,14 +6,23 @@ import { CONTACT_INFO } from "@/domains/contact/constants/contact";
 import Typography from "@/lib/Typography";
 import DonateForm from "@/shared/components/DonateForm";
 import ContactForm from "@/shared/components/ContactForm";
+import Banner from "@/shared/components/Herobannersection";
 
 const CONTAINER = "max-w-[75rem] 2xl:max-w-[100rem] mx-auto px-4 sm:px-6";
 
-
-
 export default function ClientContact() {
   return (
-    <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope pt-24 sm:pt-28 lg:pt-32">
+    <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope">
+      <Banner
+        bgImage="/Contact us/Contact Us banner image.png"
+        bgImageAlt="Contact Us"
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Contact Us" },
+        ]}
+        title="Contact Us"
+      />
+
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         <div className="w-full text-left">
           <Typography
@@ -37,8 +46,8 @@ export default function ClientContact() {
           </div>
         </div>
 
-        <div className="mt-8 sm:mt-12 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-12 items-start">
-          <div className="flex flex-col justify-between gap-6 lg:gap-0 lg:h-[32.481rem] lg:py-1 lg:col-span-5 w-full">
+        <div className="mt-8 sm:mt-12 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-12 items-start lg:items-stretch">
+          <div className="flex flex-col justify-between gap-[1.5rem] lg:gap-0 lg:h-full lg:col-span-5 w-full">
             {CONTACT_INFO.map((item, index) => (
               <div key={index} className="flex items-start gap-4 sm:gap-5">
                 <div className="flex size-14 sm:size-16 shrink-0 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs">

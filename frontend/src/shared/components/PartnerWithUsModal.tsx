@@ -24,6 +24,44 @@ export default function PartnerWithUsModal({
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState<{
+    fullName?: string;
+    email?: string;
+  }>({});
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (/\d/.test(val)) {
+      setErrors((prev) => ({
+        ...prev,
+        fullName: "Numbers are not allowed in name",
+      }));
+      return;
+    }
+    setErrors((prev) => ({ ...prev, fullName: undefined }));
+    setFormData((prev) => ({ ...prev, fullName: val }));
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (errors.email && emailRegex.test(val.trim())) {
+      setErrors((prev) => ({ ...prev, email: undefined }));
+    }
+    setFormData((prev) => ({ ...prev, email: val }));
+  };
+
+  const handleEmailBlur = () => {
+    if (formData.email.trim() && !emailRegex.test(formData.email.trim())) {
+      setErrors((prev) => ({
+        ...prev,
+        email: "Please enter a valid email address",
+      }));
+    } else if (formData.email.trim() && emailRegex.test(formData.email.trim())) {
+      setErrors((prev) => ({ ...prev, email: undefined }));
+    }
+  };
 
   // Lock body scroll when modal is active
   useEffect(() => {
@@ -54,6 +92,29 @@ export default function PartnerWithUsModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const newErrors: { fullName?: string; email?: string } = {};
+
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = "Full name is required";
+    } else if (/\d/.test(formData.fullName)) {
+      newErrors.fullName = "Numbers are not allowed in name";
+    } else if (formData.fullName.trim().length < 2) {
+      newErrors.fullName = "Name must be at least 2 characters";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email address is required";
+    } else if (!emailRegex.test(formData.email.trim())) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
@@ -118,41 +179,74 @@ export default function PartnerWithUsModal({
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Full Name */}
                 <div className="relative">
-                  <div className="flex items-center border-b border-[#E5E0D0] py-2 focus-within:border-[#FCCC2D] transition-colors">
-                    <User className="size-4 text-[#A09578] shrink-0 mr-3" />
+                  <div
+                    className={`flex items-center border-b py-2 transition-colors ${
+                      errors.fullName
+                        ? "border-red-500"
+                        : "border-[#E5E0D0] focus-within:border-[#FCCC2D]"
+                    }`}
+                  >
+                    <User className="size-4 text-[#0D2838] shrink-0 mr-3" />
                     <input
                       type="text"
                       required
                       placeholder="Full Name*"
                       value={formData.fullName}
-                      onChange={(e) =>
-                        setFormData({ ...formData, fullName: e.target.value })
-                      }
-                      className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden placeholder:text-[#A09578] font-manrope"
+                      onChange={handleNameChange}
+                      className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                     />
                   </div>
+                  {errors.fullName && (
+                    <div className="mt-1">
+                      <Typography
+                        variant="caption-1"
+                        as="p"
+                        className="font-manrope text-xs text-red-500"
+                      >
+                        {errors.fullName}
+                      </Typography>
+                    </div>
+                  )}
                 </div>
 
                 {/* Email Address */}
                 <div className="relative">
-                  <div className="flex items-center border-b border-[#E5E0D0] py-2 focus-within:border-[#FCCC2D] transition-colors">
-                    <Mail className="size-4 text-[#A09578] shrink-0 mr-3" />
+                  <div
+                    className={`flex items-center border-b py-2 transition-colors ${
+                      errors.email
+                        ? "border-red-500"
+                        : "border-[#E5E0D0] focus-within:border-[#FCCC2D]"
+                    }`}
+                  >
+                    <Mail className="size-4 text-[#0D2838] shrink-0 mr-3" />
                     <input
                       type="email"
                       required
                       placeholder="Email Address*"
                       value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden placeholder:text-[#A09578] font-manrope"
+                      onChange={handleEmailChange}
+                      onBlur={handleEmailBlur}
+                      className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                     />
                   </div>
+                  {errors.email && (
+                    <div className="mt-1">
+                      <Typography
+                        variant="caption-1"
+                        as="p"
+                        className="font-manrope text-xs text-red-500"
+                      >
+                        {errors.email}
+                      </Typography>
+                    </div>
+                  )}
                 </div>
 
                 {/* Phone Number using standard PhoneInputField */}
                 <PhoneInputField
                   label="Phone Number"
+                  placeholder="Phone Number*"
+                  hideLabel
                   required
                   value={formData.phone}
                   onChange={(val) =>
@@ -163,7 +257,7 @@ export default function PartnerWithUsModal({
                 {/* Organization Name (Optional) */}
                 <div className="relative">
                   <div className="flex items-center border-b border-[#E5E0D0] py-2 focus-within:border-[#FCCC2D] transition-colors">
-                    <Building2 className="size-4 text-[#A09578] shrink-0 mr-3" />
+                    <Building2 className="size-4 text-[#0D2838] shrink-0 mr-3" />
                     <input
                       type="text"
                       placeholder="Organization Name (Optional)"
@@ -171,7 +265,7 @@ export default function PartnerWithUsModal({
                       onChange={(e) =>
                         setFormData({ ...formData, organization: e.target.value })
                       }
-                      className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden placeholder:text-[#A09578] font-manrope"
+                      className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                     />
                   </div>
                 </div>
@@ -179,7 +273,7 @@ export default function PartnerWithUsModal({
                 {/* Your Message */}
                 <div className="relative">
                   <div className="flex items-start border-b border-[#E5E0D0] py-2 focus-within:border-[#FCCC2D] transition-colors">
-                    <MessageSquare className="size-4 text-[#A09578] shrink-0 mr-3 mt-1" />
+                    <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3 mt-1" />
                     <textarea
                       required
                       rows={2}
@@ -188,7 +282,7 @@ export default function PartnerWithUsModal({
                       onChange={(e) =>
                         setFormData({ ...formData, message: e.target.value })
                       }
-                      className="w-full bg-transparent text-sm text-[#2E1C12] focus:outline-hidden placeholder:text-[#A09578] font-manrope resize-none"
+                      className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none"
                     />
                   </div>
                 </div>
