@@ -28,6 +28,7 @@ import { UsersModule } from './modules/users/users.module';
 import { HomeBannersModule } from './modules/home-banners/home-banners.module';
 import { TermsAndConditionsModule } from './modules/terms-and-conditions/terms-and-conditions.module';
 import { ImpactVideosModule } from './modules/impact-videos/impact-videos.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 import { EmailModule } from './modules/email/email.module';
 
@@ -56,13 +57,12 @@ import { EmailModule } from './modules/email/email.module';
     PartnershipInquiriesModule,
     UsersModule,
     ImpactVideosModule,
-    AuthModule,
     PrivacyPolicyModule,
     HomeBannersModule,
     TermsAndConditionsModule,
     AwardsModule,
     RecentlyDeletedModule,
-
+    DashboardModule,
     ChatbotModule,
   ],
   controllers: [AppController],
