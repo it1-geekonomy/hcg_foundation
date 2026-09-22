@@ -87,8 +87,13 @@ export default function CountrySelect({
       </button>
 
       {open ? (
-        <div className="absolute inset-x-0 top-full z-[70] mt-1 overflow-hidden rounded border border-white/20 bg-[#2a2a2a] shadow-xl">
-          <input
+<div
+  className={`absolute top-full z-[70] mt-1 overflow-hidden rounded border border-white/20 bg-[#2a2a2a] shadow-xl ${
+    variant === "dial"
+      ? "left-0 w-[250px]"
+      : "inset-x-0"
+  }`}
+>          <input
             ref={searchRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}

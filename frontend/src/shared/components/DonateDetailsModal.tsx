@@ -20,6 +20,7 @@ import {
 } from "@/domains/home/constants/donation-currency";
 import CountryFlag from "@/shared/components/CountryFlag";
 import { donorsApi } from "@/shared/lib/donors-api";
+import CountrySelect from "@/shared/components/CountrySelect";
 
 type RazorpaySuccess = {
   razorpay_order_id: string;
@@ -106,8 +107,10 @@ export default function DonateDetailsModal({
 
   const currencyMeta = getDonationCurrency(currency);
   const formattedAmount = formatDonationAmount(amountValue, currency);
-  const country = getDonationCountry(countryCode);
-  const international = !isIndiaCountry(countryCode);
+const [selectedCountryCode, setSelectedCountryCode] = useState(countryCode);
+
+const country = getDonationCountry(selectedCountryCode);
+const international = !isIndiaCountry(selectedCountryCode);
 
   function startAmountEdit() {
     setEditingAmount(true);
@@ -166,7 +169,7 @@ export default function DonateDetailsModal({
       return;
     }
 
-    if (isIndiaCountry(countryCode) && currency !== "INR") {
+    if (isIndiaCountry(selectedCountryCode) && currency !== "INR") {
       setError("Indian donations must use INR.");
       return;
     }
@@ -196,7 +199,7 @@ export default function DonateDetailsModal({
         email: email.trim(),
         city: city.trim() || undefined,
         country: country.name,
-        countryCode,
+        countryCode: selectedCountryCode,
         isInternational: international,
         currency,
         pan: international ? undefined : pan.replace(/\s/g, "") || undefined,
@@ -425,44 +428,42 @@ export default function DonateDetailsModal({
                 </div>
               </div>
 
-              <div className="min-w-0">
-                <FieldLabel htmlFor="donate-phone">Phone Number*</FieldLabel>
-                <div className="flex min-w-0 items-center gap-2 border-b border-white/35">
-                  <div
-                    className="flex shrink-0 items-center gap-1.5 py-1.5"
-                    title={country.name}
-                  >
-                    <CountryFlag
-                      code={country.code}
-                      title={country.name}
-                      className="h-3.5 w-5 shrink-0 rounded-[1px] object-cover sm:h-4 sm:w-6"
-                    />
-                    <span className="font-manrope text-sm whitespace-nowrap text-white">
-                      {country.dial}
-                    </span>
-                  </div>
-                  <input
-                    id="donate-phone"
-                    required
-                    name="phone"
-                    type="tel"
-                    autoComplete="tel"
-                    inputMode="numeric"
-                    value={phone}
-                    onChange={(e) =>
-                      setPhone(
-                        nationalPhoneDigits(e.target.value, country.dial),
-                      )
-                    }
-                    className="min-w-0 flex-1 bg-transparent py-1.5 font-manrope text-sm text-white outline-none placeholder:text-white/30"
-                  />
-                </div>
-                {international ? (
-                  <p className="mt-1.5 font-manrope text-[11px] font-light text-white/60">
-                    International cards and wallets are supported via Razorpay.
-                  </p>
-                ) : null}
-              </div>
+<div className="min-w-0">
+  <FieldLabel htmlFor="donate-phone">Phone Number*</FieldLabel>
+
+  <div className="flex items-center border-b border-white/35">
+ <CountrySelect
+  value={selectedCountryCode}
+  onChange={(nextCode) => {
+    setSelectedCountryCode(nextCode);
+    setPhone("");
+  }}
+  variant="dial"
+/>
+
+    <input
+      id="donate-phone"
+      required
+      name="phone"
+      type="tel"
+      autoComplete="tel"
+      inputMode="numeric"
+      value={phone}
+      onChange={(e) =>
+        setPhone(
+          nationalPhoneDigits(e.target.value, country.dial)
+        )
+      }
+      className="min-w-0 flex-1 bg-transparent py-1.5 font-manrope text-sm text-white outline-none placeholder:text-white/30"
+    />
+  </div>
+
+  {international ? (
+    <p className="mt-1.5 font-manrope text-[11px] font-light text-white/60">
+      International cards and wallets are supported via Razorpay.
+    </p>
+  ) : null}
+</div>
 
               <div className="min-w-0">
                 <FieldLabel htmlFor="donate-email">Email Address*</FieldLabel>
