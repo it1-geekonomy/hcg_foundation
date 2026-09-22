@@ -7,7 +7,7 @@ const OUR_MISSION_CONTENT = {
   heading: (
     <>
       Cancer Screening and {" "}
-      <br className="hidden lg:block"/>
+      <br className="hidden min-[1920px]:block"/>
       Awareness Programs
     </>
   ),
