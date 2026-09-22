@@ -84,7 +84,7 @@ export class EmailService {
           amountLabel,
           receipt,
           dateLabel,
-          hasPdf: hasPdf,
+          hasPdf,
         }),
         attachments,
       });

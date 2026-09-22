@@ -70,8 +70,7 @@ export class DonationReceiptService {
           .toBuffer();
       } catch (err) {
         this.logger.warn(
-          `Could not load ${file}: ${
-            err instanceof Error ? err.message : 'unknown'
+          `Could not load ${file}: ${err instanceof Error ? err.message : 'unknown'
           }`,
         );
       }
@@ -97,7 +96,7 @@ export class DonationReceiptService {
     const city = donor.city?.trim() || '—';
     const pan = donor.pan?.trim() || '—';
     const amountWords = numberToWords(amount, donor.currency || 'INR');
-    
+
     return new Promise<Buffer>((resolve, reject) => {
       const doc = new PDFDocument({
         size: [PAGE.width, PAGE.height],
@@ -124,7 +123,7 @@ export class DonationReceiptService {
       doc.font('SansBold').fontSize(14).text('DONATION RECEIPT', { align: 'center' });
       doc.moveDown(0.5);
       doc.fontSize(12).text(`PAN-AAATH6254R`, { align: 'center' });
-      
+
       doc.moveDown(1.5);
       doc.font('Sans').fontSize(11).text(
         `We confirm the receipt of donation from Mr/Mrs ${donorName} ONLINE Rs.${amount.toFixed(2)}/-`,
@@ -154,26 +153,34 @@ export class DonationReceiptService {
       ];
 
       doc.lineWidth(1).strokeColor('#000000');
-      
+
       let currentY = tableTop;
-      
+
       // Draw top border
       doc.moveTo(leftColX, currentY).lineTo(PAGE.width - 40, currentY).stroke();
 
       for (let i = 0; i < rows.length; i++) {
         const [label, value] = rows[i];
-        
+
+        doc.font('Sans').fontSize(11);
+        const textOptionsLeft = { width: colWidthLeft - 20, align: 'left' as const };
+        const textOptionsRight = { width: colWidthRight - 20, align: 'left' as const };
+
+        const labHeight = doc.heightOfString(label, textOptionsLeft);
+        const valHeight = doc.heightOfString(value, textOptionsRight);
+        const currentRowHeight = Math.max(35, labHeight + 20, valHeight + 20);
+
         // Draw vertical lines
-        doc.moveTo(leftColX, currentY).lineTo(leftColX, currentY + rowHeight).stroke();
-        doc.moveTo(rightColX, currentY).lineTo(rightColX, currentY + rowHeight).stroke();
-        doc.moveTo(PAGE.width - 40, currentY).lineTo(PAGE.width - 40, currentY + rowHeight).stroke();
+        doc.moveTo(leftColX, currentY).lineTo(leftColX, currentY + currentRowHeight).stroke();
+        doc.moveTo(rightColX, currentY).lineTo(rightColX, currentY + currentRowHeight).stroke();
+        doc.moveTo(PAGE.width - 40, currentY).lineTo(PAGE.width - 40, currentY + currentRowHeight).stroke();
 
-        // Text
-        doc.font('Sans').fontSize(11).text(label, leftColX + 10, currentY + 12, { width: colWidthLeft - 20, align: 'left' });
-        doc.font('Sans').text(value, rightColX + 10, currentY + 12, { width: colWidthRight - 20, align: 'left' });
+        // Text (vertically centered)
+        doc.text(label, leftColX + 10, currentY + (currentRowHeight - labHeight) / 2, textOptionsLeft);
+        doc.text(value, rightColX + 10, currentY + (currentRowHeight - valHeight) / 2, textOptionsRight);
 
-        currentY += rowHeight;
-        
+        currentY += currentRowHeight;
+
         // Draw bottom border
         doc.moveTo(leftColX, currentY).lineTo(PAGE.width - 40, currentY).stroke();
       }
@@ -183,11 +190,11 @@ export class DonationReceiptService {
       // Note section
       doc.x = 40;
       doc.y = currentY + 30;
-      
+
       // Dashed line
       doc.lineWidth(0.5).dash(3, { space: 3 }).moveTo(40, doc.y).lineTo(PAGE.width - 40, doc.y).stroke();
       doc.undash();
-      
+
       doc.moveDown(1.5);
       doc.font('SansBold').fontSize(11).text('Note:');
       doc.moveDown(0.5);
@@ -199,11 +206,11 @@ export class DonationReceiptService {
       );
 
       doc.moveDown(3);
-      
+
       // Authorized Signatory
       const authY = doc.y;
       doc.font('Sans').fontSize(11).text('Authorized Signatory', 40, authY);
-      
+
       doc.image(sealBuf, 40, authY + 15, { height: 60 });
 
       doc.moveDown(5);
@@ -213,8 +220,8 @@ export class DonationReceiptService {
       const footerY = PAGE.height - 70; // Moved up slightly to prevent page break
       doc.font('Sans').fontSize(9).text('https://www.hcgfoundation.org', 40, footerY, { lineBreak: false });
       doc.font('Sans').text(
-        'Ground Floor, Tower Block Unity Building Complex, Mission Road, Bangalore 560027, Karnataka, India', 
-        200, footerY, 
+        'Ground Floor, Tower Block Unity Building Complex, Mission Road, Bangalore 560027, Karnataka, India',
+        200, footerY,
         { width: PAGE.width - 240, align: 'right' }
       );
 
