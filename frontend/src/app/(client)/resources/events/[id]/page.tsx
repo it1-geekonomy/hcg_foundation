@@ -51,17 +51,14 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
             </Typography>
 
             {/* Metadata: Date and Location matching Figma Frame 36 */}
-            <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-1.5">
+            <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-4 sm:gap-6">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <Calendar className="size-4 text-[#C08600] shrink-0" />
                 <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
-                  Event Date: {eventItem.date}
+                  {eventItem.date}
                 </Typography>
               </div>
-              <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
-                •
-              </Typography>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <MapPin className="size-4 text-[#C08600] shrink-0" />
                 <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
                   {eventItem.location || "Bangalore"}

@@ -20,7 +20,7 @@ export default function EventCard({
   return (
     <Link
       href={`/resources/events/${event.id}`}
-      className={`group relative block aspect-[14/10] w-full overflow-hidden rounded-xl bg-[#EFEAD8] shadow-xs transition duration-300 hover:shadow-md hover:-translate-y-1 ${className}`}
+      className={`group relative block aspect-[788/454] w-full overflow-hidden rounded-[0.375rem] bg-[#EFEAD8] shadow-xs transition duration-300 hover:shadow-md hover:-translate-y-1 ${className}`}
     >
       <img
         src={event.imageUrl}
@@ -29,22 +29,22 @@ export default function EventCard({
         loading="lazy"
       />
 
-      {/* Glassmorphic Overlay matching Figma Frame 611 */}
-      <div className="absolute inset-x-3 bottom-3 sm:inset-x-3.5 sm:bottom-3.5 p-3.5 sm:p-4 flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-[#8D8D8D]/40 backdrop-blur-md text-white transition duration-300 group-hover:bg-[#8D8D8D]/50">
-        <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
-          <div className="truncate drop-shadow-xs">
+      {/* Glassmorphic Overlay matching Figma Frame 9 & 10 */}
+      <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-[0.58rem] pl-[1.1rem] pr-[1.28rem] pb-[1.16rem] pt-[1.16rem] border-t border-white/10 bg-[#8D8D8D]/40 backdrop-blur-md text-white transition duration-300 group-hover:bg-[#8D8D8D]/50">
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-[0.38rem] text-left">
+          <div className="truncate drop-shadow-xs text-left">
             <Typography
-              variant="body-1"
+              variant="body-2"
               as={headingTag}
-              className="font-argestadisplay font-normal text-left text-white"
+              className="font-argestadisplay font-normal text-left text-white block truncate"
             >
               {event.title}
             </Typography>
           </div>
 
-          <div className="flex items-center gap-1.5 min-w-0">
-            <Calendar className="size-4 text-white shrink-0" />
-            <div className="truncate">
+          <div className="flex items-center gap-[0.5rem] min-w-0 text-left">
+            <Calendar className="size-[1rem] text-white shrink-0" />
+            <div className="truncate text-left">
               <Typography variant="body-8" as="span" className="font-manrope font-medium text-white">
                 Event Date: {event.date}
               </Typography>
@@ -53,11 +53,11 @@ export default function EventCard({
         </div>
 
         <div className="shrink-0">
-          <span className="flex items-center justify-center whitespace-nowrap gap-1.5 px-3.5 py-2 rounded-md border border-white/10 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs transition duration-300 group-hover:bg-[#E9B510] group-hover:scale-105 cursor-pointer">
-            <Typography variant="button-3" as="span" className="font-manrope font-semibold text-[#2D2D2D]">
+          <span className="flex items-center justify-between whitespace-nowrap w-[11rem] h-[3.5625rem] pl-[1.1rem] pr-[0.58rem] py-[0.58rem] gap-[0.58rem] rounded-[0.375rem] border border-white/10 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs transition duration-300 group-hover:bg-[#E9B510] group-hover:scale-105 cursor-pointer">
+            <Typography variant="button-3" as="span" className="text-[#2D2D2D]">
               Read More
             </Typography>
-            <ArrowUpRight className="size-4 text-[#2D2D2D] shrink-0" />
+            <ArrowUpRight className="w-[1.29rem] h-[1.03rem] text-[#2D2D2D] shrink-0" />
           </span>
         </div>
       </div>

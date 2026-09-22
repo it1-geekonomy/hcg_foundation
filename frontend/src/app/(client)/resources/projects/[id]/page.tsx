@@ -3,16 +3,12 @@
 import React, { use, useState } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calendar, Link as LinkIcon, ArrowUpRight, Check } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Typography from "@/lib/Typography";
 import Banner from "@/shared/components/Herobannersection";
 import DonateForm from "@/shared/components/DonateForm";
 import PaginationControls from "@/shared/components/PaginationControls";
-import {
-  FacebookIcon,
-  InstagramIcon,
-  WhatsappIcon,
-} from "@/shared/components/icons/SocialIcons";
+import ShareStory from "@/shared/components/ShareStory";
 import ProjectCard from "@/domains/resources/components/ProjectCard";
 import { PROJECTS_DATA } from "@/domains/resources/constants/projects";
 
@@ -35,53 +31,18 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const allRelatedProjects = PROJECTS_DATA.filter((e) => e.id !== projectItem.id);
   const [relatedPage, setRelatedPage] = useState(1);
   const RELATED_PER_PAGE = 2;
-  const RELATED_STEP = 2;
+  const totalRelatedPages = Math.ceil(allRelatedProjects.length / RELATED_PER_PAGE);
 
-  // Sliding window ensures a full 2-card grid on every page (never leaves a single lonely card)
-  const maxRelatedStartIndex = Math.max(0, allRelatedProjects.length - RELATED_PER_PAGE);
-  const totalRelatedPages =
-    allRelatedProjects.length <= RELATED_PER_PAGE
-      ? 1
-      : Math.ceil((allRelatedProjects.length - RELATED_PER_PAGE) / RELATED_STEP) + 1;
-
-  const relatedStartIndex = Math.min((relatedPage - 1) * RELATED_STEP, maxRelatedStartIndex);
-  const currentRelated = allRelatedProjects.slice(
-    relatedStartIndex,
-    relatedStartIndex + RELATED_PER_PAGE
-  );
-
-  const [copiedLink, setCopiedLink] = useState(false);
-  const [copiedInsta, setCopiedInsta] = useState(false);
-
-  const handleCopyLink = () => {
-    if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
+  // Group related projects into pages of RELATED_PER_PAGE cards each
+  const relatedPages = Array.from({ length: totalRelatedPages }, (_, pageIndex) => {
+    const start = pageIndex * RELATED_PER_PAGE;
+    if (start + RELATED_PER_PAGE > allRelatedProjects.length && allRelatedProjects.length >= RELATED_PER_PAGE) {
+      return allRelatedProjects.slice(-RELATED_PER_PAGE);
     }
-  };
+    return allRelatedProjects.slice(start, start + RELATED_PER_PAGE);
+  });
 
-  const handleShareFacebook = () => {
-    if (typeof window !== "undefined") {
-      const url = encodeURIComponent(window.location.href);
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
-    }
-  };
 
-  const handleShareWhatsapp = () => {
-    if (typeof window !== "undefined") {
-      const url = encodeURIComponent(window.location.href);
-      window.open(`https://api.whatsapp.com/send?text=${url}`, '_blank');
-    }
-  };
-
-  const handleShareInstagram = () => {
-    if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href);
-      setCopiedInsta(true);
-      setTimeout(() => setCopiedInsta(false), 2000);
-    }
-  };
 
   return (
     <main className="min-h-screen bg-[#FFFBEA]">
@@ -106,13 +67,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               {projectItem.title}
             </Typography>
 
-            <div className="mt-3 sm:mt-4 flex items-center gap-2">
-              <Calendar className="size-4 text-[#C08600] shrink-0" />
-              <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
-                Project Date: {projectItem.date}
-              </Typography>
-            </div>
-
             <div className="mt-5 sm:mt-6 space-y-4 text-left">
               {projectItem.fullStory.split("\n\n").map((paragraph, index) => (
                 <Typography
@@ -126,53 +80,8 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               ))}
             </div>
 
-            <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-2.5 sm:gap-3">
-              <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
-                Share this story
-              </Typography>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleShareFacebook}
-                  title="Share on Facebook"
-                  className="flex size-8 sm:size-9 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer"
-                >
-                  <FacebookIcon className="size-4 fill-current" />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleShareInstagram}
-                  title="Share on Instagram"
-                  className="flex size-8 sm:size-9 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer"
-                >
-                  {copiedInsta ? (
-                    <Check className="size-4" />
-                  ) : (
-                    <InstagramIcon className="size-4 fill-current" />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleShareWhatsapp}
-                  title="Share on WhatsApp"
-                  className="flex size-8 sm:size-9 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer"
-                >
-                  <WhatsappIcon className="size-4 fill-current" />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  title="Copy Link"
-                  className="flex size-8 sm:size-9 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer"
-                >
-                  {copiedLink ? (
-                    <Check className="size-4 text-[#382E07]" />
-                  ) : (
-                    <LinkIcon className="size-4 text-[#382E07]" />
-                  )}
-                </button>
-              </div>
-            </div>
+            {/* Reusable Social Share Buttons */}
+            <ShareStory />
           </div>
 
           <div className="sm:col-span-5 flex flex-col items-start w-full order-first sm:order-last">
@@ -208,22 +117,37 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-          {currentRelated.map((item) => (
-            <ProjectCard
-              key={item.id}
-              project={item}
-              headingTag="h3"
-            />
-          ))}
+        {/* Smooth Horizontal Sliding Track */}
+        <div className="overflow-hidden w-full">
+          <div
+            className="flex transition-transform duration-500 ease-in-out"
+            style={{ transform: `translateX(-${(relatedPage - 1) * 100}%)` }}
+          >
+            {relatedPages.map((pageProjects, pageIdx) => (
+              <div
+                key={pageIdx}
+                className="w-full shrink-0 grid grid-cols-1 md:grid-cols-2 gap-[1.5rem] sm:gap-[2rem]"
+              >
+                {pageProjects.map((item) => (
+                  <ProjectCard
+                    key={`${pageIdx}-${item.id}`}
+                    project={item}
+                    headingTag="h3"
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Bottom Centered Pagination Navigation Arrows */}
+        {/* Bottom Centered Pagination Navigation Dots */}
         <PaginationControls
           currentPage={relatedPage}
           totalPages={totalRelatedPages}
           onPageChange={(page) => setRelatedPage(page)}
-          className="mt-8 sm:mt-10"
+          className="mt-[2rem] sm:mt-[2.5rem]"
+          showArrows={false}
+          showDots={true}
         />
       </section>
 

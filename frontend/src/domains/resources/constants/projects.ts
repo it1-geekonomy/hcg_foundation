@@ -104,4 +104,76 @@ HCG Foundation stands beside every child and family, ensuring no young warrior w
     imageUrl:
       "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=800&auto=format&fit=crop",
   },
+  {
+    id: "7",
+    slug: "art-therapy-wellness-session",
+    title: "Art Therapy & Wellness",
+    date: "19 Dec 2025",
+    category: "Wellness",
+    summary:
+      "Expressive art workshops providing oncology patients a creative sanctuary for healing and emotional well-being.",
+    fullStory: `Healing encompasses mind, body, and spirit. The Art Therapy & Wellness gathering brought together oncology patients, survivors, caregivers, and medical staff for a day of rejuvenation and mutual encouragement.`,
+    imageUrl:
+      "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: "8",
+    slug: "cancer-awareness-screening-drive",
+    title: "Cancer Awareness & Screening",
+    date: "19 Dec 2025",
+    category: "Awareness",
+    summary:
+      "Comprehensive cancer screening and early detection camps organized for community healthcare access.",
+    fullStory: `Early detection saves lives. HCG Foundation organized a comprehensive Cancer Awareness & Screening camp aimed at providing accessible health checks and early diagnostic support to vulnerable communities.`,
+    imageUrl:
+      "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: "9",
+    slug: "hpv-vaccination-community-drive",
+    title: "HPV Vaccination Program",
+    date: "19 Dec 2025",
+    category: "Community Event",
+    summary:
+      "Protecting young women through subsidized and free Cervical Cancer HPV vaccination drives in partnership with local schools and healthcare workers.",
+    fullStory: `Cervical cancer is one of the few cancers that can be effectively prevented through timely vaccination. As part of its preventive health campaign, HCG Foundation launched the HPV Vaccination Drive dedicated to safeguarding young girls and women.`,
+    imageUrl:
+      "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: "10",
+    slug: "swasti-art-therapy-and-wellness",
+    title: "Art Therapy & Wellness",
+    date: "19 Dec 2025",
+    category: "Wellness",
+    summary:
+      "Interactive group healing sessions, music therapy, and guided meditation sessions designed for oncology patients and caregivers.",
+    fullStory: `Healing encompasses mind, body, and spirit. The Art Therapy & Wellness gathering brought together oncology patients, survivors, caregivers, and medical staff for a day of rejuvenation and mutual encouragement.`,
+    imageUrl:
+      "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: "11",
+    slug: "cancer-awareness-rural-screening",
+    title: "Cancer Awareness & Screening",
+    date: "19 Dec 2025",
+    category: "Awareness",
+    summary:
+      "Free early detection screening camps and educational sessions organized across underserved rural and urban communities.",
+    fullStory: `Early detection saves lives. HCG Foundation organized a comprehensive Cancer Awareness & Screening camp aimed at providing accessible health checks and early diagnostic support to vulnerable communities.`,
+    imageUrl:
+      "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: "12",
+    slug: "art-therapy-caregivers-wellness",
+    title: "Art Therapy & Wellness",
+    date: "19 Dec 2025",
+    category: "Wellness",
+    summary:
+      "Creative workshops and therapeutic art sessions providing cancer patients and their families a safe space to express emotions, reduce anxiety, and find hope.",
+    fullStory: `Art has the power to heal beyond words. Through creative workshops and therapeutic art sessions, HCG Foundation provides cancer patients and their families with a safe space to express emotions, reduce stress, and rediscover hope during their treatment journey.`,
+    imageUrl:
+      "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+  },
 ];
