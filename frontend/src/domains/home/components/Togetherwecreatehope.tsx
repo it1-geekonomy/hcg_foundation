@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import Typography from "@/lib/Typography";
 import { publicEventsApi } from "@/domains/cms/lib/api";
@@ -129,7 +130,7 @@ export default function TogetherWeCreateHope() {
 
   return (
     <section className="w-full py-10 md:py-10 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
-      <div className="flex flex-col items-center gap-2 text-center mb-[clamp(2rem,4vw,3.5rem)]">
+      <div id="events" className="flex flex-col items-center gap-2 text-center mb-[clamp(2rem,4vw,3.5rem)] scroll-mt-24">
         <Typography
           variant="heading-1"
           as="h2"
@@ -208,7 +209,7 @@ export default function TogetherWeCreateHope() {
               {TOGETHER_CONTENT.content.description}
             </Typography>
 
-            <a
+            <Link
               href={TOGETHER_CONTENT.content.cta.href}
               className="mt-2 mb-4 inline-flex h-12 w-fit shrink-0 items-stretch overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D] lg:mb-0"
             >
@@ -225,7 +226,7 @@ export default function TogetherWeCreateHope() {
               <span className="flex h-full w-12 shrink-0 items-center justify-center border-[3px] border-[#FCCC2D] bg-black">
                 <ArrowUpRight className="h-4 w-4 text-[#FFFFFF]" />
               </span>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

@@ -74,7 +74,7 @@ export const TOGETHER_CONTENT: TogetherContent = {
       "Through community outreach programs, free screenings, and educational initiatives, we empower individuals with knowledge and encourage early detection.",
     cta: {
       label: "View All Events",
-      href: "/",
+      href: "/resources/events",
     },
   },
 };

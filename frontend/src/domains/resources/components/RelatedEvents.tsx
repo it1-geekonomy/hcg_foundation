@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import Typography from "@/lib/Typography";
 import PaginationControls from "@/shared/components/PaginationControls";
 import EventCard from "@/domains/resources/components/EventCard";
-import { EVENTS_DATA } from "@/domains/resources/constants/events";
+import { EventItem } from "@/domains/resources/constants/events";
+import { publicEventsApi } from "@/domains/cms/lib/api";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
@@ -15,21 +16,84 @@ interface RelatedEventsProps {
 }
 
 export default function RelatedEvents({ currentEventId }: RelatedEventsProps) {
-  const allRelatedEvents = EVENTS_DATA.filter((e) => e.id !== currentEventId);
-  const [relatedPage, setRelatedPage] = useState(1);
-  const RELATED_PER_PAGE = 2;
-  const totalRelatedPages = Math.ceil(allRelatedEvents.length / RELATED_PER_PAGE);
+  const [allRelatedEvents, setAllRelatedEvents] = useState<EventItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Group related events into pages of RELATED_PER_PAGE cards each (1 row = 2 cards)
-  const relatedPages = Array.from({ length: totalRelatedPages }, (_, pageIndex) => {
-    const start = pageIndex * RELATED_PER_PAGE;
-    if (start + RELATED_PER_PAGE > allRelatedEvents.length && allRelatedEvents.length >= RELATED_PER_PAGE) {
-      return allRelatedEvents.slice(-RELATED_PER_PAGE);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const clickedLinkRef = useRef<boolean>(false);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (!scrollContainerRef.current) return;
+    setIsDragging(true);
+    clickedLinkRef.current = false;
+    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+    scrollContainerRef.current.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    e.preventDefault();
+    clickedLinkRef.current = true;
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    setIsDragging(false);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.releasePointerCapture(e.pointerId);
     }
-    return allRelatedEvents.slice(start, start + RELATED_PER_PAGE);
-  });
+  };
 
-  if (allRelatedEvents.length === 0) {
+  const handleLinkClick = (e: React.MouseEvent) => {
+    if (clickedLinkRef.current) {
+      e.preventDefault();
+    }
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const res = await publicEventsApi.listPublished({ limit: 10 });
+        if (!cancelled) {
+          const mapped = (res.data ?? [])
+            .filter((e) => (e.slug || e.id) !== currentEventId)
+            .map((e) => ({
+              id: e.id ?? "",
+              slug: e.slug ?? "",
+              title: e.title ?? "",
+              date: e.eventDate ? new Date(e.eventDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "",
+              category: "Community Event" as const,
+              summary: e.shortDescription ?? "",
+              fullStory: e.content ?? "",
+              imageUrl: e.eventBanner || e.eventMobileBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+              location: e.eventLocation ?? "",
+            }));
+          setAllRelatedEvents(mapped);
+        }
+      } catch {
+        // ignore
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentEventId]);
+
+
+
+
+
+  if (!loading && allRelatedEvents.length === 0) {
     return null;
   }
 
@@ -54,38 +118,21 @@ export default function RelatedEvents({ currentEventId }: RelatedEventsProps) {
         </Link>
       </div>
 
-      {/* Smooth Horizontal Sliding Track */}
-      <div className="overflow-hidden w-full">
-        <div
-          className="flex transition-transform duration-500 ease-in-out"
-          style={{ transform: `translateX(-${(relatedPage - 1) * 100}%)` }}
-        >
-          {relatedPages.map((pageEvents, pageIdx) => (
-            <div
-              key={pageIdx}
-              className="w-full shrink-0 grid grid-cols-1 md:grid-cols-2 gap-[1.5rem] sm:gap-[2rem]"
-            >
-              {pageEvents.map((item) => (
-                <EventCard
-                  key={`${pageIdx}-${item.id}`}
-                  event={item}
-                  headingTag="h3"
-                />
-              ))}
-            </div>
-          ))}
-        </div>
+      <div 
+        ref={scrollContainerRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onDragStart={(e) => e.preventDefault()}
+        className={`mt-6 sm:mt-8 flex overflow-x-auto gap-6 sm:gap-8 no-scrollbar pb-4 sm:pb-0 touch-pan-y ${isDragging ? "cursor-grabbing scroll-auto" : "cursor-grab snap-x snap-mandatory scroll-smooth"}`}
+      >
+        {allRelatedEvents.map((item) => (
+          <div key={item.id} className={`shrink-0 w-[calc(100%-1rem)] md:w-[calc(50%-1rem)] xl:w-[calc(50%-1.5rem)] snap-center flex select-none [&_img]:pointer-events-none ${loading ? "opacity-50" : "opacity-100"}`} onClickCapture={handleLinkClick}>
+            <EventCard event={item} headingTag="h3" />
+          </div>
+        ))}
       </div>
-
-      {/* Bottom Centered Pagination Navigation Dots Only */}
-      <PaginationControls
-        currentPage={relatedPage}
-        totalPages={totalRelatedPages}
-        onPageChange={(page) => setRelatedPage(page)}
-        className="mt-[2rem] sm:mt-[2.5rem]"
-        showArrows={false}
-        showDots={true}
-      />
     </section>
   );
 }

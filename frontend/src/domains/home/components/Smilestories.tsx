@@ -375,9 +375,10 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
   return (
     <section ref={sectionRef} className="relative w-full lg:py-20">
       <Typography
+        id="smilestories"
         variant="heading-3"
         as="h2"
-        className="mx-auto mb-14 text-center px-4 text-neutral-800 font-medium font-manrope pt-6"
+        className="mx-auto mb-14 text-center px-4 text-neutral-800 font-medium font-manrope pt-6 scroll-mt-24"
       >
         Behind Every <em className="text-neutral-900 font-tiempos-headline">Smile Is a Story</em>
       </Typography>

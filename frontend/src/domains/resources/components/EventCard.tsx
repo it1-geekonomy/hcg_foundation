@@ -19,7 +19,7 @@ export default function EventCard({
 }: EventCardProps) {
   return (
     <Link
-      href={`/resources/events/${event.id}`}
+      href={`/resources/events/${event.slug || event.id}`}
       className={`group relative block aspect-[788/454] w-full overflow-hidden rounded-[0.375rem] bg-[#EFEAD8] shadow-xs transition duration-300 hover:shadow-md hover:-translate-y-1 ${className}`}
     >
       <img
