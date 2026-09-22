@@ -59,10 +59,9 @@ export class DonationCertificateService {
 
     // Landscape A4 — positions calibrated to Word → certificate-base.pdf
     const nameSize = 36;
-    const nameWidth = scriptFont.widthOfTextAtSize(donorName, nameSize);
     page.drawText(donorName, {
-      x: (width - nameWidth) / 2,
-      y: height - 268,
+      x: 100,
+      y: height - 310,
       size: nameSize,
       font: scriptFont,
       color: NAVY,
