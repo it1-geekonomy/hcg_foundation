@@ -458,11 +458,11 @@ const international = !isIndiaCountry(selectedCountryCode);
     />
   </div>
 
-  {international ? (
+  {/* {international ? (
     <p className="mt-1.5 font-manrope text-[11px] font-light text-white/60">
       International cards and wallets are supported via Razorpay.
     </p>
-  ) : null}
+  ) : null} */}
 </div>
 
               <div className="min-w-0">
