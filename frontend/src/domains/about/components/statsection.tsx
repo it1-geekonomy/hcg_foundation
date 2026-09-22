@@ -13,7 +13,7 @@ export interface StatsHighlightProps {
 export default function StatsHighlight({ className = "" }: StatsHighlightProps) {
   return (
     <section
-      className={`w-full overflow-x-hidden bg-[#FFF8E2] pb-8 pt-8 lg:pt-0 lg:pb-14 xl:pb-20 px-8 sm:px-12 md:px-16 lg:px-6 xl:px-6 2xl:pl-40 2xl:pr-40 min-[1536px]:max-[1800px]:!pr-16 ${className}`}
+      className={`w-full overflow-x-hidden bg-[#FFF8E2] pb-8 pt-0 lg:pt-0 lg:pb-14 xl:pb-20 px-8 sm:px-12 md:px-16 lg:px-6 xl:px-6 2xl:pl-40 2xl:pr-40 min-[1536px]:max-[1800px]:!pr-16 ${className}`}
     >
       <div className="grid grid-cols-2 sm:grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
         {stats.map((stat, index) => (
