@@ -139,33 +139,41 @@ export default function PartnerWithUsModal({
         aria-hidden="true"
       />
 
-      {/* Modal Card Container */}
-      <div className="relative z-10 w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row my-auto max-h-[90vh]">
+      {/* Modal Card Container (Frame 601: 709px x 815px) */}
+      <div className="relative z-10 w-full max-w-[44.3125rem] bg-[#FDF9F3] rounded-[0.415rem] shadow-2xl overflow-hidden flex flex-col md:flex-row my-auto max-h-[calc(100dvh-2rem)] md:h-[50.9375rem]">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 p-2 text-[#6C6048] hover:text-[#2E1C12] transition-colors rounded-full hover:bg-black/5"
+          className="absolute top-[1rem] right-[1rem] sm:top-[1.25rem] sm:right-[1.25rem] z-30 size-[1.95rem] flex items-center justify-center text-[#586D79] hover:text-[#0D2838] transition-colors rounded-full hover:bg-black/5 cursor-pointer"
           aria-label="Close modal"
         >
-          <X className="size-5 sm:size-6" />
+          <X className="size-[1.125rem] stroke-[2.2]" />
         </button>
 
         {/* Left Column: Form Content */}
-        <div className="w-full md:w-1/2 p-6 sm:p-8 md:p-10 flex flex-col justify-between overflow-y-auto max-h-[90vh] md:max-h-none">
+        <div className="w-full md:w-[21.9375rem] shrink-0 p-[1.25rem] sm:p-[2.1875rem] pb-[2rem] sm:pb-[2.1875rem] flex flex-col justify-between overflow-y-auto md:overflow-y-hidden min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <div>
-            <div className="mb-2">
-              <Typography variant="heading-5" as="h2" className="font-tiempos-headline font-normal italic text-[#2E1C12]">
+            <div className="mb-[0.5rem]">
+              <Typography
+                variant="heading-5"
+                as="h2"
+                className="font-tiempos-headline font-normal italic text-[#0D2838]"
+              >
                 Be a Part of Someone&apos;s Cancer Journey
               </Typography>
             </div>
-            <div className="mb-6">
-              <Typography variant="body-8" as="p" className="font-manrope font-normal text-[#6C6048]">
+            <div className="mb-[1.5rem]">
+              <Typography
+                variant="caption-1"
+                as="p"
+                className="font-manrope font-normal text-[#596D79]"
+              >
                 Share a few details and our team will get in touch with you to explore partnership opportunities.
               </Typography>
             </div>
 
             {submitted ? (
-              <div className="my-8 p-6 bg-[#FFF9EA] border border-[#F3E3B6] rounded-lg text-center">
+              <div className="my-8 p-6 bg-[#FFF9EA] border border-[#F3E3B6] rounded-[0.415rem] text-center">
                 <div className="mb-2">
                   <Typography variant="heading-3" as="h3" className="font-manrope font-medium text-[#2E1C12]">
                     Thank You!
@@ -176,24 +184,23 @@ export default function PartnerWithUsModal({
                 </Typography>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-[1.5rem]">
                 {/* Full Name */}
                 <div className="relative">
                   <div
-                    className={`flex items-center border-b py-2 transition-colors ${
-                      errors.fullName
+                    className={`flex items-center border-b pb-[1.5rem] pt-[0.25rem] transition-colors ${errors.fullName
                         ? "border-red-500"
-                        : "border-[#E5E0D0] focus-within:border-[#FCCC2D]"
-                    }`}
+                        : "border-[#E5E0D0] focus-within:border-[#FED034]"
+                      }`}
                   >
-                    <User className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                    <User className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.75rem]" />
                     <input
                       type="text"
                       required
                       placeholder="Full Name*"
                       value={formData.fullName}
                       onChange={handleNameChange}
-                      className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
+                      className="w-full bg-transparent text-[0.8625rem] leading-[150%] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                     />
                   </div>
                   {errors.fullName && (
@@ -212,13 +219,12 @@ export default function PartnerWithUsModal({
                 {/* Email Address */}
                 <div className="relative">
                   <div
-                    className={`flex items-center border-b py-2 transition-colors ${
-                      errors.email
+                    className={`flex items-center border-b pb-[1.5rem] pt-[0.25rem] transition-colors ${errors.email
                         ? "border-red-500"
-                        : "border-[#E5E0D0] focus-within:border-[#FCCC2D]"
-                    }`}
+                        : "border-[#E5E0D0] focus-within:border-[#FED034]"
+                      }`}
                   >
-                    <Mail className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                    <Mail className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.75rem]" />
                     <input
                       type="email"
                       required
@@ -226,7 +232,7 @@ export default function PartnerWithUsModal({
                       value={formData.email}
                       onChange={handleEmailChange}
                       onBlur={handleEmailBlur}
-                      className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
+                      className="w-full bg-transparent text-[0.8625rem] leading-[150%] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                     />
                   </div>
                   {errors.email && (
@@ -248,6 +254,7 @@ export default function PartnerWithUsModal({
                   placeholder="Phone Number*"
                   hideLabel
                   required
+                  containerClassName="!h-[3.25rem] !pb-[0.625rem]"
                   value={formData.phone}
                   onChange={(val) =>
                     setFormData((prev) => ({ ...prev, phone: val || "" }))
@@ -256,8 +263,8 @@ export default function PartnerWithUsModal({
 
                 {/* Organization Name (Optional) */}
                 <div className="relative">
-                  <div className="flex items-center border-b border-[#E5E0D0] py-2 focus-within:border-[#FCCC2D] transition-colors">
-                    <Building2 className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                  <div className="flex items-center border-b border-[#E5E0D0] pb-[1.5rem] pt-[0.25rem] focus-within:border-[#FED034] transition-colors">
+                    <Building2 className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.75rem]" />
                     <input
                       type="text"
                       placeholder="Organization Name (Optional)"
@@ -265,15 +272,15 @@ export default function PartnerWithUsModal({
                       onChange={(e) =>
                         setFormData({ ...formData, organization: e.target.value })
                       }
-                      className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
+                      className="w-full bg-transparent text-[0.8625rem] leading-[150%] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                     />
                   </div>
                 </div>
 
                 {/* Your Message */}
                 <div className="relative">
-                  <div className="flex items-start border-b border-[#E5E0D0] py-2 focus-within:border-[#FCCC2D] transition-colors">
-                    <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3 mt-1" />
+                  <div className="flex items-start border-b border-[#E5E0D0] pb-[2.75rem] pt-[0.25rem] focus-within:border-[#FED034] transition-colors">
+                    <MessageSquare className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.75rem] mt-1" />
                     <textarea
                       required
                       rows={2}
@@ -282,13 +289,13 @@ export default function PartnerWithUsModal({
                       onChange={(e) =>
                         setFormData({ ...formData, message: e.target.value })
                       }
-                      className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none"
+                      className="w-full bg-transparent text-[0.8625rem] leading-[150%] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none"
                     />
                   </div>
                 </div>
 
                 {/* Terms and Conditions Checkbox */}
-                <div className="flex items-center gap-2 pt-2">
+                <div className="flex items-center gap-[0.5rem] pt-[0.25rem]">
                   <input
                     type="checkbox"
                     id="modal-terms"
@@ -297,34 +304,34 @@ export default function PartnerWithUsModal({
                     onChange={(e) =>
                       setFormData({ ...formData, agreeTerms: e.target.checked })
                     }
-                    className="size-4 accent-[#FCCC2D] rounded-sm cursor-pointer"
+                    className="size-[1rem] accent-[#FED034] rounded-[0.28rem] cursor-pointer"
                   />
                   <label
                     htmlFor="modal-terms"
-                    className="cursor-pointer"
+                    className="cursor-pointer text-[0.75rem] font-manrope font-medium text-[#7C8B93] leading-[150%]"
                   >
-                    <Typography variant="caption-1" as="span" className="font-manrope font-normal text-[#6C6048]">
-                      I have read and agree to the{" "}
-                    </Typography>
+                    <span>I have read and agree to the </span>
                     <a
                       href="/terms"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="underline hover:opacity-80 transition-opacity"
+                      className="underline text-[#FED034] hover:opacity-80 transition-opacity"
                     >
-                      <Typography variant="caption-1" as="span" className="font-manrope font-medium text-[#D99A00]">
-                        Terms & Conditions
-                      </Typography>
+                      Terms & Conditions
                     </a>
                   </label>
                 </div>
 
-                {/* Submit Button */}
+                {/* Submit Button (Frame 138: 309px x 49px, #FED034) */}
                 <button
                   type="submit"
-                  className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#382E07] rounded-lg shadow-xs transition duration-300 hover:bg-[#E9B510] hover:shadow-md cursor-pointer"
+                  className="w-full h-[3.0625rem] mt-[0.75rem] mb-[1rem] bg-[#FED034] text-[#111A10] rounded-[0.415rem] transition duration-300 hover:bg-[#E5BC2F] hover:shadow-xs cursor-pointer flex items-center justify-center shrink-0"
                 >
-                  <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#382E07]">
+                  <Typography
+                    variant="button-1"
+                    as="span"
+                    className="font-manrope font-semibold text-[0.833rem] text-[#111A10]"
+                  >
                     Submit
                   </Typography>
                 </button>
@@ -333,12 +340,12 @@ export default function PartnerWithUsModal({
           </div>
         </div>
 
-        {/* Right Column: Hero Image Asset */}
-        <div className="hidden md:block md:w-1/2 relative bg-[#FAF6EA]">
+        {/* Right Column: Hero Image Asset (image 67: 358px x 815px) */}
+        <div className="hidden md:block w-[22.375rem] h-full relative shrink-0 bg-[#FDF9F3]">
           <img
             src="/Get Involved/Partner With Us form/Partner With Us.png"
             alt="Be a Part of Someone's Cancer Journey"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover rounded-r-[0.415rem]"
           />
         </div>
       </div>

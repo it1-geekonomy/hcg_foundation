@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowUpRight } from "lucide-react";
 import Typography from "@/lib/Typography";
 import DonateForm from "@/shared/components/DonateForm";
 import PartnerWithUsModal from "@/shared/components/PartnerWithUsModal";
 import { PHILANTHROPY_CARDS } from "@/domains/getinvolved/constants/grants-and-philanthropy";
 import Banner from "@/shared/components/Herobannersection";
+import { DiagonalArrowIcon } from "@/shared/components/icons/ArrowIcons";
 
-const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
+const CONTAINER = "mx-[clamp(1rem,8vw,8rem)] xl:mx-[clamp(0.5rem,3vw,4rem)] 2xl:mx-[clamp(1rem,10vw,10rem)]";
 
 export default function GrantsAndPhilanthropyPage() {
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
@@ -28,16 +28,22 @@ export default function GrantsAndPhilanthropyPage() {
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
         {/* Header Section */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 lg:gap-12 items-start mb-10 sm:mb-14">
-          <div className="md:col-span-6 max-w-xl">
+          <div className="md:col-span-6 lg:col-span-7">
             <Typography
               variant="heading-1"
               as="h1"
-              className="font-tiempos-headline font-normal text-left text-[#0D2838]"
+              style={{ textAlign: "left" }}
+              className="font-tiempos-headline font-normal !text-left text-[#0D2838] text-[clamp(1.5rem,2.8vw,2.875rem)]"
             >
-              Creating Lasting Change Through Partnership
+              <span className="block whitespace-nowrap">
+                Creating Lasting Change <span className="hidden 2xl:inline">Through</span>
+              </span>
+              <span className="block whitespace-nowrap">
+                <span className="2xl:hidden">Through </span>Partnership
+              </span>
             </Typography>
           </div>
-          <div className="md:col-span-6 flex justify-start md:justify-end">
+          <div className="md:col-span-6 lg:col-span-5 flex justify-start md:justify-end">
             <div className="max-w-[35.5rem] text-left">
               <Typography variant="body-10" as="p" className="font-argestadisplay font-normal text-[#596D79]">
                 HCG Foundation welcomes partnerships with grant-making foundations, trusts, and philanthropic organizations aligned with our mission of equitable cancer care.
@@ -55,7 +61,7 @@ export default function GrantsAndPhilanthropyPage() {
             >
               {/* Card Top: Circular Icon Badge + Title + Description */}
               <div className="p-5 sm:p-6 lg:p-8 flex items-start gap-3.5 sm:gap-4 lg:gap-5 min-h-[9rem] sm:min-h-[10.5rem] lg:min-h-[11.25rem]">
-                <div className="size-11 sm:size-12 lg:size-14 shrink-0 rounded-full bg-[#FDE599]/70 flex items-center justify-center border border-[#FCCC2D]/40 p-2.5 sm:p-3">
+                <div className="w-[3.5rem] h-[3.5rem] sm:w-[5rem] sm:h-[5rem] lg:w-[6.6875rem] lg:h-[6.6875rem] shrink-0 rounded-full bg-[#FFF3CC] flex items-center justify-center p-[0.875rem] sm:p-[1.25rem] lg:pt-[2rem] lg:pb-[1.7rem] lg:pl-[1.9375rem] lg:pr-[1.7rem]">
                   <img
                     src={card.iconUrl}
                     alt={card.title}
@@ -94,7 +100,7 @@ export default function GrantsAndPhilanthropyPage() {
               <Typography
                 variant="heading-1"
                 as="h2"
-                className="font-tiempos-headline font-normal text-left text-[#0D2838]"
+                className="font-tiempos-headline font-normal max-lg:!text-left text-left text-[#0D2838]"
               >
                 Creating Lasting Change Through Partnership
               </Typography>
@@ -109,12 +115,12 @@ export default function GrantsAndPhilanthropyPage() {
             <button
               type="button"
               onClick={() => setIsPartnerModalOpen(true)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 lg:px-8 lg:py-4 bg-[#FCCC2D] text-[#2D2D2D] rounded-md shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
+              className="w-full sm:w-[13.1875rem] h-[3rem] sm:h-[3.5625rem] inline-flex items-center justify-center pl-[1.1025rem] pr-[0.58rem] py-[0.58rem] gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 backdrop-blur-[42px] transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer shrink-0"
             >
               <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#2D2D2D]">
                 Partner With Us
               </Typography>
-              <ArrowUpRight className="size-4 sm:size-5 lg:size-6 text-[#2D2D2D]" />
+              <DiagonalArrowIcon className="w-[1rem] h-[0.8rem] sm:w-[1.2925rem] sm:h-[1.034rem] shrink-0 text-[#2D2D2D]" />
             </button>
           </div>
         </div>

@@ -28,7 +28,7 @@ export const CSR_PARTNER_CARDS: CsrPartnerCard[] = [
     id: "event-sponsorships",
     title: "Event Sponsorships & Participation",
     description:
-      "HCG Foundation runs cancer patient aid, early-detection screening camps, Equipment & Mobile clinic Support and HPV vaccination drives through HCG's pan-India hospital network. You can adopt one or more of our programs that fit your CSR needs in terms of geographical location and area of intervention. HCG Foundation will be responsible for monitoring the program, providing clinical direction and medical expertise through our hospital partners, and sending quarterly impact reports.",
+      "HCG Foundation organizes cultural charity events like Arambh in Ahemdabad, Sur Sandhya in Bengaluru throughout to raise awareness about early detection and prevention. You can come on board as one of the event sponsors to support the cause and get visibility for your brand, or include a set number of your employees as participants and raise funds through tickets.",
     imageUrl: "/Get Involved/CSR Partner/Event Sponsorships & Participation.png",
   },
   {

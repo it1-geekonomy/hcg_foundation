@@ -13,6 +13,7 @@ interface PhoneInputFieldProps {
   error?: string;
   hideLabel?: boolean;
   placeholder?: string;
+  containerClassName?: string;
 }
 
 export default function PhoneInputField({
@@ -23,11 +24,12 @@ export default function PhoneInputField({
   error,
   hideLabel = false,
   placeholder,
+  containerClassName = "",
 }: PhoneInputFieldProps) {
   if (hideLabel) {
     return (
       <div className="relative">
-        <div className="h-[2.57rem] flex flex-col justify-between border-b border-[#E5E0D0] pb-0.5 focus-within:border-[#FCCC2D] transition-colors [&_.PhoneInputInput]:bg-transparent [&_.PhoneInputInput]:border-none [&_.PhoneInputInput]:outline-none [&_.PhoneInputInput]:text-[#0D2838] [&_.PhoneInputInput]:w-full [&_.PhoneInputInput]:text-[0.78rem] [&_.PhoneInputInput]:leading-[150%] [&_.PhoneInputInput]:tracking-[0.03em] [&_.PhoneInputInput]:font-medium [&_.PhoneInputInput]:placeholder:text-[#0D2838] [&_input::placeholder]:text-[#0D2838] [&_input::placeholder]:opacity-100 [&_.PhoneInputInput]:font-manrope [&_.PhoneInputCountrySelect]:bg-[#FFF4D4] [&_.PhoneInputCountrySelect]:border-none [&_.PhoneInputCountrySelect]:outline-none [&_.PhoneInputCountrySelect]:text-[#0D2838] [&_.PhoneInputCountrySelect]:cursor-pointer [&_.PhoneInputCountrySelectArrow]:text-[#0D2838] [&_.PhoneInputCountrySelectArrow]:border-[#0D2838] [&_.PhoneInputCountryIcon]:w-6 [&_.PhoneInputCountryIcon]:h-4 [&_.PhoneInputCountryIcon]:rounded-xs [&_.PhoneInputCountryIcon]:shadow-xs">
+        <div className={`h-[2.57rem] flex flex-col justify-between border-b border-[#E5E0D0] pb-0.5 focus-within:border-[#FED034] transition-colors [&_.PhoneInputInput]:bg-transparent [&_.PhoneInputInput]:border-none [&_.PhoneInputInput]:outline-none [&_.PhoneInputInput]:text-[#0D2838] [&_.PhoneInputInput]:w-full [&_.PhoneInputInput]:text-[0.78rem] [&_.PhoneInputInput]:leading-[150%] [&_.PhoneInputInput]:tracking-[0.03em] [&_.PhoneInputInput]:font-medium [&_.PhoneInputInput]:placeholder:text-[#0D2838] [&_input::placeholder]:text-[#0D2838] [&_input::placeholder]:opacity-100 [&_.PhoneInputInput]:font-manrope [&_.PhoneInputCountrySelect]:bg-[#FFF4D4] [&_.PhoneInputCountrySelect]:border-none [&_.PhoneInputCountrySelect]:outline-none [&_.PhoneInputCountrySelect]:text-[#0D2838] [&_.PhoneInputCountrySelect]:cursor-pointer [&_.PhoneInputCountrySelectArrow]:text-[#0D2838] [&_.PhoneInputCountrySelectArrow]:border-[#0D2838] [&_.PhoneInputCountryIcon]:w-6 [&_.PhoneInputCountryIcon]:h-4 [&_.PhoneInputCountryIcon]:rounded-xs [&_.PhoneInputCountryIcon]:shadow-xs ${containerClassName}`}>
           <label className="block text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838]">
             {label}{required ? "*" : ""}
           </label>
