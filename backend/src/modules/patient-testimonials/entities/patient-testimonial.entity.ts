@@ -10,6 +10,9 @@ export class PatientTestimonial extends SeoContentEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
   title?: string;
 
+  @Column({ name: 'short_description', type: 'text', nullable: true })
+  shortDescription?: string | null;
+
   @Column({ name: 'patient_testimonial_banner', type: 'text', nullable: true })
   patientTestimonialBanner?: string | null;
 
