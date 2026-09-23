@@ -4,7 +4,7 @@ import { REFERRAL_PROCESS_ITEMS } from "@/domains/ourprograms/AwarenessAndScreen
 
 export default function ReferralProcess() {
   return (
-    <section className="w-full overflow-x-hidden bg-[#FFF8E2] pt-6 pb-8 px-8 sm:px-12 md:px-16 lg:py-12 lg:px-6 xl:px-6 2xl:px-40">
+    <section className="w-full overflow-x-hidden bg-[#FFF8E2] pt-0 pb-8 px-8 sm:px-12 md:px-16 lg:py-12 lg:px-6 xl:px-6 2xl:px-40">
       <Typography
         variant="heading-7"
         as="h2"

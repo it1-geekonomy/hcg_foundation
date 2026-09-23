@@ -49,11 +49,11 @@ export default function MissionHighlight({
 }: MissionHighlightProps) {
   return (
     <section
-      className={`w-full overflow-x-hidden bg-[#FFF8E2] pt-8 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-20 lg:px-6 xl:px-6 2xl:px-40 ${className}`}
+      className={`w-full overflow-x-hidden bg-[#FFF8E2] pt-8 pb-8 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-20 lg:px-6 xl:px-6 2xl:px-40 ${className}`}
     >
       <div className="grid w-full grid-cols-1 items-center lg:grid-cols-2 lg:items-stretch lg:gap-x-4 xl:gap-x-20">
         {/* Label */}
-        <div className="mb-6 flex items-center gap-2 lg:col-span-2 lg:row-start-1">
+        <div className="order-1 mb-6 flex items-center gap-2 lg:order-none lg:col-span-2 lg:row-start-1">
           <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#FCCC2D]" />
           <Typography variant="text-1" as="span" className="font-light font-manrope text-[#6F5E09]">
             {label}
@@ -61,7 +61,7 @@ export default function MissionHighlight({
         </div>
 
         {/* Heading */}
-        <div className="min-w-0 lg:col-start-1 lg:row-start-2">
+        <div className="order-2 min-w-0 lg:order-none lg:col-start-1 lg:row-start-2">
           <Typography
             variant="heading-2"
             as="h2"
@@ -71,8 +71,26 @@ export default function MissionHighlight({
           </Typography>
         </div>
 
+        {/* Image — row placement:
+            - below lg (<1024px): reordered to appear right after the heading (order-3)
+            - lg to <1920px: starts at the content/description row
+            - 1920px+: starts at the heading row (spans heading+content), regardless of bullet list */}
+        <div
+          className="relative order-3 mt-6 aspect-[4/3] max-h-64 w-full min-w-0 overflow-hidden bg-[#FFF8E2] sm:max-h-72 md:max-h-80
+            lg:order-none lg:col-start-2 lg:mt-0 lg:aspect-auto lg:h-full lg:max-h-none lg:min-h-0 lg:self-stretch lg:justify-self-stretch
+            lg:row-start-3 lg:row-span-1
+            min-[1920px]:!row-start-2 min-[1920px]:!row-span-2"
+        >
+          <Image
+            src={image}
+            alt={imageAlt}
+            fill
+            className="object-contain object-top lg:object-center"
+          />
+        </div>
+
         {/* Content / paragraphs */}
-        <div className="mt-8 min-w-0 space-y-6 lg:col-start-1 lg:row-start-3">
+        <div className="order-4 mt-8 min-w-0 space-y-6 lg:order-none lg:col-start-1 lg:row-start-3">
           {paragraphs.map((block, index) => {
             if (isListBlock(block)) {
               return (
@@ -113,24 +131,6 @@ export default function MissionHighlight({
               </Typography>
             );
           })}
-        </div>
-
-        {/* Image — row placement:
-            - below lg (<1024px): unchanged, stacked layout
-            - lg to <1920px: starts at the content/description row
-            - 1920px+: starts at the heading row (spans heading+content), regardless of bullet list */}
-                <div
-          className="relative mt-6 aspect-[4/3] max-h-64 w-full min-w-0 overflow-hidden bg-[#FFF8E2] sm:max-h-72 md:max-h-80
-            lg:col-start-2 lg:mt-0 lg:aspect-auto lg:h-full lg:max-h-none lg:min-h-0 lg:self-stretch lg:justify-self-stretch
-            lg:row-start-3 lg:row-span-1
-            min-[1920px]:!row-start-2 min-[1920px]:!row-span-2"
-        >
-          <Image
-            src={image}
-            alt={imageAlt}
-            fill
-            className="object-contain object-top lg:object-center"
-          />
         </div>
       </div>
     </section>
