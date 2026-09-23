@@ -7,6 +7,7 @@ export interface EventItem {
   summary: string;
   fullStory: string;
   imageUrl: string;
+  mobileImageUrl?: string;
   location?: string;
 }
 

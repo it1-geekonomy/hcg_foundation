@@ -39,34 +39,28 @@ export default function PaginationControls({
   };
 
   const getPageNumbers = () => {
-    if (totalPages <= 5) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (totalPages <= 1) return [1];
+    if (totalPages === 2) {
+      return [1, '..', 2];
     }
-    if (currentPage <= 3) {
-      return [1, 2, 3, 4, '...', totalPages];
+    if (currentPage === 1 || currentPage === totalPages) {
+      return [1, '..', totalPages];
     }
-    if (currentPage >= totalPages - 2) {
-      return [1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
-    }
-    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+    return [1, '..', currentPage, '..', totalPages];
   };
 
   return (
-    <div className={`flex items-center justify-center gap-2 sm:gap-3 ${className}`}>
-      {/* Previous Arrow */}
-      {showArrows && (
+    <div className={`flex items-center justify-center gap-1 sm:gap-1.5 ${className}`}>
+      {/* Previous Arrow (<) */}
+      {showArrows && totalPages > 1 && (
         <button
           type="button"
           onClick={handlePrev}
-          disabled={currentPage === 1}
+          disabled={currentPage <= 1}
           aria-label="Previous page"
-          className={`flex size-9 sm:size-10 items-center justify-center rounded-full shadow-xs transition active:scale-95 cursor-pointer ${
-            currentPage === 1
-              ? "bg-[#EFE4C8] text-[#8C826B] opacity-60 cursor-not-allowed"
-              : "bg-[#FDC61D] text-[#382E07] hover:bg-[#E9B510]"
-          }`}
+          className="flex size-6 sm:size-7 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#FDC61D] mr-0.5 sm:mr-1"
         >
-          <ChevronLeft className="size-5" />
+          <ChevronLeft className="size-3.5 sm:size-4" />
         </button>
       )}
 
@@ -82,10 +76,10 @@ export default function PaginationControls({
                 type="button"
                 onClick={() => onPageChange(pageNum)}
                 aria-label={`Go to page ${pageNum}`}
-                className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
                   isActive
-                    ? "w-8 bg-[#FDC61D]"
-                    : "w-2.5 bg-[#EFE4C8] hover:bg-[#E9B510]/60"
+                    ? "w-7 bg-[#FDC61D]"
+                    : "w-2 bg-[#EFE4C8] hover:bg-[#E9B510]/60"
                 }`}
               />
             );
@@ -93,14 +87,17 @@ export default function PaginationControls({
         </div>
       )}
 
-      {/* Numbered Pagination */}
+      {/* Numbered Pagination (Small & Compact: 1 .. last) */}
       {showNumbers && totalPages > 1 && (
-        <div className="flex items-center justify-center gap-1.5 sm:gap-2 px-1">
+        <div className="flex items-center justify-center gap-1 sm:gap-1.5 px-0.5">
           {getPageNumbers().map((item, index) => {
-            if (item === '...') {
+            if (item === '..') {
               return (
-                <span key={`dots-${index}`} className="px-1 text-[#8C826B] font-medium">
-                  ...
+                <span
+                  key={`dots-${index}`}
+                  className="px-0.5 text-[#8C826B] font-bold text-xs select-none tracking-wider"
+                >
+                  ..
                 </span>
               );
             }
@@ -108,13 +105,13 @@ export default function PaginationControls({
             const isActive = pageNum === currentPage;
             return (
               <button
-                key={pageNum}
+                key={`${pageNum}-${index}`}
                 type="button"
                 onClick={() => onPageChange(pageNum)}
                 aria-label={`Go to page ${pageNum}`}
-                className={`flex size-8 sm:size-10 items-center justify-center rounded-full font-manrope font-semibold text-sm sm:text-base transition cursor-pointer ${
+                className={`flex size-6 sm:size-7 items-center justify-center rounded-full font-manrope font-semibold text-xs transition cursor-pointer ${
                   isActive
-                    ? "bg-[#FDC61D] text-[#382E07] shadow-sm"
+                    ? "bg-[#FDC61D] text-[#382E07] shadow-xs"
                     : "bg-transparent text-[#2D2D2D] hover:bg-[#EFE4C8]"
                 }`}
               >
@@ -125,20 +122,16 @@ export default function PaginationControls({
         </div>
       )}
 
-      {/* Next Arrow */}
-      {showArrows && (
+      {/* Next Arrow (>) */}
+      {showArrows && totalPages > 1 && (
         <button
           type="button"
           onClick={handleNext}
-          disabled={currentPage === totalPages}
+          disabled={currentPage >= totalPages}
           aria-label="Next page"
-          className={`flex size-9 sm:size-10 items-center justify-center rounded-full shadow-xs transition active:scale-95 cursor-pointer ${
-            currentPage === totalPages
-              ? "bg-[#EFE4C8] text-[#8C826B] opacity-60 cursor-not-allowed"
-              : "bg-[#FDC61D] text-[#382E07] hover:bg-[#E9B510]"
-          }`}
+          className="flex size-6 sm:size-7 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#FDC61D] ml-0.5 sm:ml-1"
         >
-          <ChevronRight className="size-5" />
+          <ChevronRight className="size-3.5 sm:size-4" />
         </button>
       )}
     </div>

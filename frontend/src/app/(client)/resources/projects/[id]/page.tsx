@@ -88,7 +88,14 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             category: "Projects",
             summary: p.shortDescription ?? "",
             fullStory: p.content ?? "",
-            imageUrl: p.projectBanner || p.projectMobileBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+            imageUrl:
+              p.projectBanner ||
+              p.projectMobileBanner ||
+              "/Resources/Resources banner image.png",
+            mobileImageUrl:
+              p.projectMobileBanner ||
+              p.projectBanner ||
+              "/Resources/Resources banner image.png",
           });
         }
       } catch (err) {
@@ -119,7 +126,14 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 category: "Projects",
                 summary: p.shortDescription ?? "",
                 fullStory: p.content ?? "",
-                imageUrl: p.projectBanner || p.projectMobileBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+                imageUrl:
+                  p.projectBanner ||
+                  p.projectMobileBanner ||
+                  "/Resources/Resources banner image.png",
+                mobileImageUrl:
+                  p.projectMobileBanner ||
+                  p.projectBanner ||
+                  "/Resources/Resources banner image.png",
               }));
             setAllRelatedProjects(related);
           }

@@ -7,6 +7,7 @@ export interface ProjectItem {
   summary?: string;
   fullStory: string;
   imageUrl: string;
+  mobileImageUrl?: string;
 }
 
 export const PROJECTS_DATA: ProjectItem[] = [
