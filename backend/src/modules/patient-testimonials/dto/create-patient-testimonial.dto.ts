@@ -9,11 +9,6 @@ export class CreatePatientTestimonialDto extends SeoFieldsDto {
   @MaxLength(255)
   title: string;
 
-  @ApiPropertyOptional({ description: 'Full testimonial body (HTML / rich text)' })
-  @IsOptional()
-  @IsString()
-  content?: string;
-
   @ApiPropertyOptional({ description: 'Short blurb for cards' })
   @IsOptional()
   @IsString()
