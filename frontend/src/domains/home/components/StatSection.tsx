@@ -93,17 +93,17 @@ export default function StatSection() {
     };
   }, [onScroll, updateProgress]);
 
-  // stat cards reveal (unchanged from your original)
+  // stat cards reveal — no longer disconnects after the first hit, so
+  // `active` toggles true/false on every enter/exit. This lets each
+  // StatCard's gif reload every time the section re-enters view, in
+  // either scroll direction (down into it, or back up into it).
   useEffect(() => {
     const node = sectionRef.current;
     if (!node) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setActive(true);
-          observer.disconnect();
-        }
+        setActive(entries[0]?.isIntersecting ?? false);
       },
       { threshold: 0.25 },
     );
@@ -125,16 +125,16 @@ export default function StatSection() {
   }
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden px-6 pt-6 lg:py-10">
+    <section ref={sectionRef} className="relative overflow-hidden px-6 pt-4 lg:pt-6 lg:pb-10">
       <div className="relative max-w-full text-center">
         <Typography variant="heading-1" as="h2" className="text-[#382E07]">
           Our Journey of Impact
         </Typography>
       </div>
 
-      <div className="relative mx-auto mt-16 grid max-w-5xl grid-cols-2 gap-6 md:grid-cols-[repeat(2,max-content)] md:justify-center md:gap-1 lg:grid-cols-4 lg:gap-10">
-        {STATS.map((stat, i) => (
-          <StatCard key={stat.label} stat={stat} active={active} id={`r${i}`} />
+      <div className="relative mx-auto mt-4 grid max-w-5xl grid-cols-2 gap-6 md:grid-cols-[repeat(2,max-content)] md:justify-center md:gap-1 lg:mt-6 lg:grid-cols-4 lg:gap-10">
+        {STATS.map((stat) => (
+          <StatCard key={stat.label} stat={stat} active={active} />
         ))}
       </div>
 
