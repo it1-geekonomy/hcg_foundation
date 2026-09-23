@@ -46,6 +46,7 @@ export class JwtAuthGuard implements CanActivate {
       method === 'GET' &&
       (this.matches(path, '/users') ||
         this.matches(path, '/dashboard') ||
+        this.matches(path, '/storage/metrics') ||
         this.matches(path, '/auth/me') ||
         this.matches(path, '/leads-contact') ||
         this.matches(path, '/leads-internship') ||
