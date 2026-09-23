@@ -55,14 +55,13 @@ export const FOOTER_QUICK_LINKS = [
   { label: "About Us", href: "/about-us" },
   { label: "Patient Stories", href: "/journey-of-hope/patient-stories" },
   { label: "Patient Testimonials", href: "/journey-of-hope/testimonials" },
-  { label: "Patient Aid", href: "/our-programs/financial-support-for-pediatric-patients" },
   { label: "Donate Now", href: "#donate-form" },
   { label: "Contact Us", href: "/contact" },
 ] as const;
 
 export const FOOTER_INNER_PAGES = [
-  { label: "Team", href: "/about-us" },
-  { label: "Trustees", href: "/about-us" },
+  { label: "Team", href: "/about-us", scrollTo: "team" },
+  { label: "Trustees", href: "/about-us", scrollTo: "trustees" },
   { label: "Events", href: "/resources/events" },
   { label: "Projects", href: "/resources/projects" },
   { label: "Privacy Policy", href: "/privacy" },

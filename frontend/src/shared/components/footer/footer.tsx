@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Mail, MapPin, Phone, ArrowUpRight } from "lucide-react";
 import {
@@ -93,8 +95,8 @@ export default function Footer() {
             <ul className="mt-8 space-y-3">
               {FOOTER_QUICK_LINKS.map((item) => (
                 <li key={item.label}>
-                  <Link href={item.href} className="hover:text-[#FDB723] transition-colors">
-                    <Typography variant="body-9" as="span" className="text-white">
+                  <Link href={item.href} className="hover:text-[#FDB723] transition-colors text-white">
+                    <Typography variant="body-9" as="span" className="text-inherit">
                       {item.label}
                     </Typography>
                   </Link>
@@ -110,9 +112,22 @@ export default function Footer() {
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    className="hover:text-[#FDB723] transition-colors"
+                    className="hover:text-[#FDB723] transition-colors text-white"
+                    onClick={(e) => {
+                      if ("scrollTo" in item && item.scrollTo) {
+                        // If already on the page, scroll smoothly.
+                        if (window.location.pathname === item.href) {
+                          e.preventDefault();
+                          const el = document.getElementById(item.scrollTo);
+                          if (el) el.scrollIntoView({ behavior: "smooth" });
+                        } else {
+                          // Navigating to the page, set session storage so the target page can scroll to it
+                          sessionStorage.setItem("pendingScroll", item.scrollTo);
+                        }
+                      }
+                    }}
                   >
-                    <Typography variant="body-9" as="span" className="text-white">
+                    <Typography variant="body-9" as="span" className="text-inherit">
                       {item.label}
                     </Typography>
                   </Link>
