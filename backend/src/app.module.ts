@@ -31,6 +31,7 @@ import { ImpactVideosModule } from './modules/impact-videos/impact-videos.module
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 import { EmailModule } from './modules/email/email.module';
+import { VolunteerModule } from './modules/volunteer/volunteer.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { EmailModule } from './modules/email/email.module';
     RecentlyDeletedModule,
     DashboardModule,
     ChatbotModule,
+    VolunteerModule,
   ],
   controllers: [AppController],
   providers: [
