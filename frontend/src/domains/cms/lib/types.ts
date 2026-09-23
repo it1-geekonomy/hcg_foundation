@@ -398,3 +398,21 @@ export type ApiEnvelope<T> = {
   message?: string;
   statusCode?: number;
 };
+
+export type DashboardStats = {
+  totalDonors: number;
+  totalDonationsAmount: number;
+  activeProjects: number;
+  activeCampaigns: number;
+  activeEvents: number;
+  pendingPartnerships: number;
+  totalUsers: number;
+  recentDonations: any[]; // Or a specific Donor type if available
+  topDonors: any[];
+  recentContacts: {
+    id: string;
+    createdAt: string;
+    fullName: string;
+    email: string;
+  }[];
+};
