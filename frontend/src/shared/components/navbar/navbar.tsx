@@ -94,7 +94,10 @@ export default function Navbar() {
           {/* Logo */}
           <Link
             href="/"
-            onClick={handleHomeNav}
+            onClick={() => {
+              sessionStorage.setItem("nav_action", "logo");
+              window.dispatchEvent(new Event("nav_action_event"));
+            }}
             className="flex h-full shrink-0 items-center py-2 transition-transform duration-300 hover:scale-105"
           >
             <Image
@@ -121,7 +124,15 @@ export default function Navbar() {
                   <Link
                     key={i}
                     href={link.href}
-                    onClick={link.href === "/" ? handleHomeNav : undefined}
+                    onClick={(e) => {
+                      if (link.href === "/") {
+                        sessionStorage.setItem("nav_action", "navbar_home");
+                        window.dispatchEvent(new Event("nav_action_event"));
+                        if (pathname === "/") {
+                          e.preventDefault();
+                        }
+                      }
+                    }}
                     className="relative flex items-center gap-1 py-1"
                   >
                     <Typography

@@ -76,6 +76,6 @@ export function mapProjectToCard(
     description: project.shortDescription?.trim() || "No description yet.",
     image: desktop,
     mobileImage: mobile,
-    href: project.slug ? `/resources/projects/${project.slug}` : undefined,
+    href: project.slug ? `/resources/projects/${project.slug}?from=home` : undefined,
   };
 }

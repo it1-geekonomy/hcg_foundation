@@ -63,8 +63,13 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     }
   };
 
+  const [fromHome, setFromHome] = useState(false);
+
   useEffect(() => {
-    sessionStorage.setItem("came_from_details", "projects");
+    if (typeof window !== "undefined" && window.location.search.includes("from=home")) {
+      setFromHome(true);
+      sessionStorage.setItem("came_from_details", "projects");
+    }
   }, []);
 
   useEffect(() => {
@@ -144,7 +149,14 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
         bgImage="/Resources/Resources banner image.png"
         bgImageAlt="Projects"
         breadcrumbs={[
-          { label: "Home", href: "/#projects" },
+          {
+            label: "Home",
+            href: "/",
+            onClick: (e) => {
+              sessionStorage.setItem("nav_action", fromHome ? "banner_home_section" : "banner_home_top");
+              window.dispatchEvent(new Event("nav_action_event"));
+            }
+          },
           { label: "Resources" },
         ]}
         title="Projects"
