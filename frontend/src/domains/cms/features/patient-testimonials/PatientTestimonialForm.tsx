@@ -15,6 +15,9 @@ import CmsSelect, { CONTENT_STATUS_OPTIONS } from "@/domains/cms/ui/CmsSelect";
 import { SeoFieldsSection } from "@/domains/cms/ui/SeoFieldsSection";
 import CmsRichTextEditor from "@/domains/cms/ui/CmsRichTextEditor";
 
+export const PATIENT_TESTIMONIAL_BANNER_SIZE = { width: 1280, height: 720 } as const;
+export const PATIENT_TESTIMONIAL_MOBILE_BANNER_SIZE = { width: 750, height: 800 } as const;
+
 export type PatientTestimonialFormValues = {
   title: string;
   shortDescription: string;
@@ -191,7 +194,7 @@ export default function PatientTestimonialForm({
         <CmsFormField
           label="Desktop Banner"
           htmlFor="patientTestimonialBanner"
-          hint="Recommended: 1280x720 (16:9) WebP or AVIF (Max 5MB)"
+          hint={`WebP or AVIF · required size ${PATIENT_TESTIMONIAL_BANNER_SIZE.width} × ${PATIENT_TESTIMONIAL_BANNER_SIZE.height}px`}
         >
           <CmsImagePicker
             label="desktop banner"
@@ -206,6 +209,7 @@ export default function PatientTestimonialForm({
                 patientTestimonialBannerUrl: url,
               })
             }
+            requiredSize={PATIENT_TESTIMONIAL_BANNER_SIZE}
             disabled={saving}
           />
         </CmsFormField>
@@ -213,7 +217,7 @@ export default function PatientTestimonialForm({
         <CmsFormField
           label="Mobile Banner"
           htmlFor="patientTestimonialMobileBanner"
-          hint="Recommended: 1280x720 (16:9) WebP or AVIF (Max 5MB)"
+          hint={`WebP or AVIF · required size ${PATIENT_TESTIMONIAL_MOBILE_BANNER_SIZE.width} × ${PATIENT_TESTIMONIAL_MOBILE_BANNER_SIZE.height}px`}
         >
           <CmsImagePicker
             label="mobile banner"
@@ -228,6 +232,7 @@ export default function PatientTestimonialForm({
                 patientTestimonialMobileBannerUrl: url,
               })
             }
+            requiredSize={PATIENT_TESTIMONIAL_MOBILE_BANNER_SIZE}
             disabled={saving}
           />
         </CmsFormField>
