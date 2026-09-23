@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { publicLegalApi } from "@/domains/cms/lib/api";
 import LegalDocumentPage from "@/domains/legal/components/LegalDocumentPage";
+import DonateForm from "@/shared/components/DonateForm";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -29,10 +30,15 @@ export default async function TermsAndConditionsPage() {
   }
 
   return (
+     <>
     <LegalDocumentPage
       document={document}
       fallbackTitle="Terms & Conditions"
       emptyMessage="We are currently updating our Terms & Conditions. Please check back soon, or contact us at hcgfoundation@gmail.com if you have any questions."
     />
+    <div id="donate-form" >
+          <DonateForm />
+          </div>
+        </>
   );
 }

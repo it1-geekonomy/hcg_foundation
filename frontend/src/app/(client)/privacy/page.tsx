@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { publicLegalApi } from "@/domains/cms/lib/api";
 import LegalDocumentPage from "@/domains/legal/components/LegalDocumentPage";
+import DonateForm from "@/shared/components/DonateForm";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -28,10 +29,15 @@ export default async function PrivacyPolicyPage() {
   }
 
   return (
-    <LegalDocumentPage
-      document={document}
-      fallbackTitle="Privacy Policy"
-      emptyMessage="We are currently updating our Privacy Policy. Please check back soon, or contact us at hcgfoundation@gmail.com if you have any questions about how we handle your information."
-    />
+    <>
+      <LegalDocumentPage
+        document={document}
+        fallbackTitle="Privacy Policy"
+        emptyMessage="We are currently updating our Privacy Policy. Please check back soon, or contact us at hcgfoundation@gmail.com if you have any questions about how we handle your information."
+      />
+      <div id="donate-form" >
+      <DonateForm />
+      </div>
+    </>
   );
 }

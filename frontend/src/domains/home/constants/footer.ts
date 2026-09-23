@@ -78,7 +78,7 @@ export const FOOTER_CONTACT_INFO = {
 } as const;
 
 export const FOOTER_SOCIAL_LINKS = [
-  { name: "Instagram", href: "" },
+  { name: "Instagram", href: "https://www.instagram.com/hcg_foundation/" },
   { name: "LinkedIn", href: "" },
   { name: "Facebook", href: "" },
 ] as const;

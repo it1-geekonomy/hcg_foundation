@@ -164,11 +164,13 @@ export default function Footer() {
                 </a>
               </div>
 
-              <div className="flex space-x-4 pt-2">
+                           <div className="flex space-x-4 pt-2">
                 {FOOTER_SOCIAL_LINKS.map((social) => (
                   <a
                     key={social.name}
                     href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="w-10 h-10 bg-[#FDB723] rounded-full flex items-center justify-center hover:bg-yellow-500 transition-colors"
                   >
                     {social.name === "Instagram" && <InstagramIcon />}
