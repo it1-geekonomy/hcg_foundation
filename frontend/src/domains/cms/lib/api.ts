@@ -635,6 +635,8 @@ function patientTestimonialPatchFormData(
 }
 
 export const cmsApi = {
+  getDashboardStats: () => request<ApiEnvelope<DashboardStats>>(`/dashboard/stats`),
+
   listPatientTestimonials: (params?: ListQuery) =>
     request<Paginated<PatientTestimonial>>(
       `/patient-testimonials${toQuery({ page: 1, limit: 20, ...params })}`
