@@ -5,17 +5,26 @@ import { PanInfo } from "framer-motion";
 import Typography from "@/lib/Typography";
 import Banner from "@/shared/components/Herobannersection";
 import DonateForm from "@/shared/components/DonateForm";
-import { PATIENT_TESTIMONIALS, PatientTestimonial } from "@/domains/journey-of-hope/constants/testimonials";
 import TestimonialCard from "@/domains/journey-of-hope/components/TestimonialCard";
 import TestimonialControls from "@/domains/journey-of-hope/components/TestimonialControls";
 import TestimonialVideoModal from "@/domains/journey-of-hope/components/TestimonialVideoModal";
+import { publicPatientTestimonialsApi } from "@/domains/cms/lib/api";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8";
 
+type CardItem = {
+  id: string;
+  patientName: string;
+  role: string;
+  thumbnailUrl: string;
+  videoUrl: string;
+};
+
 export default function TestimonialsPage() {
-  const [testimonials] = useState<PatientTestimonial[]>(PATIENT_TESTIMONIALS);
+  const [testimonials, setTestimonials] = useState<CardItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Screen size detection for responsive transform values
   const [windowWidth, setWindowWidth] = useState<number>(1200);
@@ -27,15 +36,40 @@ export default function TestimonialsPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const isLargeDesktop = windowWidth >= 1340;
-  const isSmallDesktop = windowWidth >= 1024 && windowWidth < 1340;
-  const isTablet = windowWidth >= 640 && windowWidth < 1024;
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const res = await publicPatientTestimonialsApi.listPublished({ limit: 50 });
+        if (!cancelled && res.data) {
+          const items: CardItem[] = res.data.map((t) => ({
+            id: t.id,
+            patientName: t.title,
+            role: t.shortDescription || "Patient",
+            thumbnailUrl: t.patientTestimonialBanner || "",
+            videoUrl: t.patientTestimonialFile || "",
+          }));
+          setTestimonials(items);
+        }
+      } catch (err) {
+        console.error("Failed to load testimonials", err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleNext = () => {
+    if (testimonials.length === 0) return;
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
   };
 
   const handlePrev = () => {
+    if (testimonials.length === 0) return;
     setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
@@ -51,6 +85,7 @@ export default function TestimonialsPage() {
   // Compute circular cyclic offset relative to active center index
   const getRelativeOffset = (index: number) => {
     const total = testimonials.length;
+    if (total === 0) return 0;
     let diff = index - currentIndex;
     if (diff > total / 2) diff -= total;
     if (diff < -total / 2) diff += total;
@@ -93,28 +128,42 @@ export default function TestimonialsPage() {
 
         {/* Horizontal 3D Carousel Stage with Hardware-Accelerated 60fps Motion */}
         <div className="relative mt-8 sm:mt-12 w-full h-[16rem] sm:h-[18.5rem] lg:h-[16.5rem] xl:h-[19.5rem] 2xl:h-[22.5rem] overflow-visible flex items-center justify-center">
-          {testimonials.map((item, idx) => (
-            <TestimonialCard
-              key={item.id}
-              item={item}
-              diff={getRelativeOffset(idx)}
-              windowWidth={windowWidth}
-              onDragEnd={handleDragEnd}
-              onNext={handleNext}
-              onPrev={handlePrev}
-              onPlayVideo={(url) => setActiveVideoUrl(url)}
-            />
-          ))}
+          {loading ? (
+            <div className="animate-pulse flex gap-4 w-full justify-center">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="w-[30%] h-64 bg-black/10 rounded-xl" />
+              ))}
+            </div>
+          ) : testimonials.length > 0 ? (
+            testimonials.map((item, idx) => (
+              <TestimonialCard
+                key={item.id}
+                item={item as any}
+                diff={getRelativeOffset(idx)}
+                windowWidth={windowWidth}
+                onDragEnd={handleDragEnd}
+                onNext={handleNext}
+                onPrev={handlePrev}
+                onPlayVideo={(url) => setActiveVideoUrl(url)}
+              />
+            ))
+          ) : (
+            <Typography variant="body-9" as="p" className="text-[#596D79]">
+              No testimonials available at this time.
+            </Typography>
+          )}
         </div>
 
         {/* Bottom Centered Pagination Navigation Arrows + Dots matching Figma */}
-        <TestimonialControls
-          currentIndex={currentIndex}
-          total={testimonials.length}
-          onPrev={handlePrev}
-          onNext={handleNext}
-          onSelect={setCurrentIndex}
-        />
+        {testimonials.length > 0 && (
+          <TestimonialControls
+            currentIndex={currentIndex}
+            total={testimonials.length}
+            onPrev={handlePrev}
+            onNext={handleNext}
+            onSelect={setCurrentIndex}
+          />
+        )}
       </section>
 
       {/* Video Modal Player */}

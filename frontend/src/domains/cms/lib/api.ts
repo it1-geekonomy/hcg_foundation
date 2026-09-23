@@ -572,7 +572,137 @@ function patientStoryPatchFormData(
   return fd;
 }
 
+function patientTestimonialFormData(
+  fields: PatientTestimonialFields,
+  files?: {
+    patientTestimonialBanner?: File | null;
+    patientTestimonialMobileBanner?: File | null;
+    patientTestimonialFile?: File | null;
+  }
+) {
+  const fd = new FormData();
+  fd.append("title", fields.title.trim());
+  if (fields.shortDescription?.trim()) {
+    fd.append("shortDescription", fields.shortDescription.trim());
+  }
+  if (fields.status) fd.append("status", fields.status);
+  if (fields.metaTitle?.trim()) fd.append("metaTitle", fields.metaTitle.trim());
+  if (fields.metaDescription?.trim()) fd.append("metaDescription", fields.metaDescription.trim());
+  if (fields.schemaCode?.trim()) fd.append("schemaCode", fields.schemaCode.trim());
+
+  if (files?.patientTestimonialBanner instanceof File) {
+    fd.append("patientTestimonialBanner", files.patientTestimonialBanner, files.patientTestimonialBanner.name);
+  }
+  if (files?.patientTestimonialMobileBanner instanceof File) {
+    fd.append("patientTestimonialMobileBanner", files.patientTestimonialMobileBanner, files.patientTestimonialMobileBanner.name);
+  }
+  if (files?.patientTestimonialFile instanceof File) {
+    fd.append("patientTestimonialFile", files.patientTestimonialFile, files.patientTestimonialFile.name);
+  }
+  return fd;
+}
+
+function patientTestimonialPatchFormData(
+  fields: Partial<PatientTestimonialFields>,
+  files?: {
+    patientTestimonialBanner?: File | null;
+    patientTestimonialMobileBanner?: File | null;
+    patientTestimonialFile?: File | null;
+  }
+) {
+  const fd = new FormData();
+  const append = (key: string, value?: string | null) => {
+    if (value === undefined) return;
+    fd.append(key, value ?? "");
+  };
+  append("title", fields.title);
+  append("shortDescription", fields.shortDescription);
+  append("status", fields.status);
+  append("metaTitle", fields.metaTitle);
+  append("metaDescription", fields.metaDescription);
+  append("schemaCode", fields.schemaCode);
+
+  if (files?.patientTestimonialBanner instanceof File) {
+    fd.append("patientTestimonialBanner", files.patientTestimonialBanner, files.patientTestimonialBanner.name);
+  }
+  if (files?.patientTestimonialMobileBanner instanceof File) {
+    fd.append("patientTestimonialMobileBanner", files.patientTestimonialMobileBanner, files.patientTestimonialMobileBanner.name);
+  }
+  if (files?.patientTestimonialFile instanceof File) {
+    fd.append("patientTestimonialFile", files.patientTestimonialFile, files.patientTestimonialFile.name);
+  }
+  return fd;
+}
+
 export const cmsApi = {
+  listPatientTestimonials: (params?: ListQuery) =>
+    request<Paginated<PatientTestimonial>>(
+      `/patient-testimonials${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedPatientTestimonials: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<PatientTestimonial>>(
+      `/patient-testimonials/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getPatientTestimonial: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<PatientTestimonial>>(`/patient-testimonials/${id}`);
+    } catch (err) {
+      const deleted = await request<Paginated<PatientTestimonial>>(
+        `/patient-testimonials/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  createPatientTestimonial: (
+    fields: PatientTestimonialFields,
+    files?: {
+      patientTestimonialBanner?: File | null;
+      patientTestimonialMobileBanner?: File | null;
+      patientTestimonialFile?: File | null;
+    }
+  ) =>
+    requestFormData<ApiEnvelope<PatientTestimonial>>(
+      "/patient-testimonials",
+      "POST",
+      patientTestimonialFormData(fields, files)
+    ),
+
+  updatePatientTestimonial: (
+    id: string,
+    fields: Partial<PatientTestimonialFields>,
+    files?: {
+      patientTestimonialBanner?: File | null;
+      patientTestimonialMobileBanner?: File | null;
+      patientTestimonialFile?: File | null;
+    }
+  ) =>
+    requestFormData<ApiEnvelope<PatientTestimonial>>(
+      `/patient-testimonials/${id}`,
+      "PATCH",
+      patientTestimonialPatchFormData(fields, files)
+    ),
+
+  deletePatientTestimonial: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(`/patient-testimonials/${id}`, {
+      method: "DELETE",
+    }),
+
+  restorePatientTestimonial: (id: string) =>
+    request<ApiEnvelope<PatientTestimonial>>(`/patient-testimonials/${id}/restore`, {
+      method: "POST",
+    }),
+
   listTeams: (params?: ListQuery) =>
     request<Paginated<Team>>(`/teams${toQuery({ page: 1, limit: 20, ...params })}`),
 
@@ -1370,5 +1500,13 @@ export const publicPatientStoriesApi = {
   getBySlug: (slug: string, limit = 6, page = 1) =>
     request<ApiEnvelope<{ detail: PatientStory; related: Paginated<PatientStory> }>>(
       `/patient-stories/published/slug/${encodeURIComponent(slug)}?limit=${limit}&page=${page}`
+    ),
+};
+
+/** Public site: published patient testimonials */
+export const publicPatientTestimonialsApi = {
+  listPublished: (params?: Omit<ListQuery, "status">) =>
+    request<Paginated<PatientTestimonial>>(
+      `/patient-testimonials/published${toQuery({ page: 1, limit: 20, ...params })}`
     ),
 };

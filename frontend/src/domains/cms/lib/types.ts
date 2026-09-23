@@ -206,6 +206,25 @@ export type PatientStoryFields = SeoFields & {
   status?: ContentStatus;
 };
 
+export type PatientTestimonial = SeoFields & {
+  id: string;
+  title: string;
+  shortDescription?: string | null;
+  patientTestimonialBanner?: string | null;
+  patientTestimonialMobileBanner?: string | null;
+  patientTestimonialFile?: string | null;
+  status: ContentStatus;
+  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PatientTestimonialFields = SeoFields & {
+  title: string;
+  shortDescription?: string;
+  status?: ContentStatus;
+};
+
 export type LegalPageType = "privacy_policy" | "terms_and_conditions";
 
 export type LegalPage = SeoFields & {
