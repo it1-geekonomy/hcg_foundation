@@ -172,9 +172,9 @@ export default function Navbar() {
                 event.preventDefault();
                 scrollToDonateForm();
               }}
-              className="hidden xl:inline-block shrink-0 px-5 py-2.5 bg-[#FED034] hover:bg-[#e6bc2e] transition-all duration-300 hover:shadow-[0_0_20px_rgba(254,208,52,0.5)] mr-6"
+              className="hidden xl:inline-block shrink-0 px-5 py-2.5 bg-[#FED034] mr-6"
             >
-              <Typography variant="button-4" as="span" className="text-[#262626] font-manrope font-light">
+              <Typography variant="button-4" as="span" className="text-[#262626] font-manrope font-bold">
                 {navbarContent.donateButton.label}
               </Typography>
             </Link>
@@ -186,9 +186,9 @@ export default function Navbar() {
                 event.preventDefault();
                 scrollToDonateForm();
               }}
-              className="hidden sm:inline-block xl:hidden shrink-0 px-5 py-2.5 bg-[#FED034] hover:bg-[#e6bc2e] transition-all duration-300 hover:shadow-[0_0_20px_rgba(254,208,52,0.5)]"
+              className="hidden sm:inline-block xl:hidden shrink-0 px-5 py-2.5 bg-[#FED034]"
             >
-              <Typography variant="button-4" as="span" className="text-[#262626]">
+              <Typography variant="button-4" as="span" className="text-[#262626] font-bold">
                 {navbarContent.donateButton.label}
               </Typography>
             </Link>

@@ -190,7 +190,7 @@ export function MobileMenuPanel({
               setIsMenuOpen(false);
               onDonate();
             }}
-            className={`sm:hidden mt-3 inline-flex justify-center px-5 py-2.5 bg-[#FED034] hover:bg-[#e6bc2e] transition-all duration-300 ease-in-out delay-[var(--stagger-delay)] ${
+            className={`sm:hidden mt-3 inline-flex justify-center px-5 py-2.5 bg-[#FED034] ${
               isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
             }`}
             style={
@@ -199,7 +199,7 @@ export function MobileMenuPanel({
               } as React.CSSProperties
             }
           >
-            <Typography variant="button-4" as="span" className="text-[#262626]">
+            <Typography variant="button-4" as="span" className="text-[#262626] font-bold">
               {donateButton.label}
             </Typography>
           </Link>

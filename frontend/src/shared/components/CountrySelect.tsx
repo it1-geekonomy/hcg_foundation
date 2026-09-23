@@ -13,6 +13,9 @@ type Props = {
   value: string;
   onChange: (code: string) => void;
   variant?: "name" | "dial";
+  borderClassName?: string;
+  chevronClassName?: string;
+  textClassName?: string;
 };
 
 export default function CountrySelect({
@@ -20,6 +23,9 @@ export default function CountrySelect({
   value,
   onChange,
   variant = "name",
+  borderClassName = "border-white/35",
+  chevronClassName = "text-white/70",
+  textClassName = "text-white",
 }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -63,10 +69,10 @@ export default function CountrySelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
-        className={`flex items-center gap-1.5 bg-transparent text-left font-manrope text-sm text-white outline-none ${
+        className={`flex items-center gap-1.5 bg-transparent text-left font-manrope text-sm ${textClassName} outline-none ${
           variant === "dial"
             ? "w-auto shrink-0 py-1.5"
-            : "w-full min-w-0 rounded border border-white/35 px-3 py-2.5"
+            : `w-full min-w-0 rounded border px-3 py-2.5 ${borderClassName}`
         }`}
       >
         <CountryFlag
@@ -83,17 +89,16 @@ export default function CountrySelect({
         >
           {variant === "dial" ? selected.dial : selected.name}
         </span>
-        <ChevronDown className="h-3.5 w-3.5 shrink-0 text-white/70" />
+        <ChevronDown className={`h-3.5 w-3.5 shrink-0 ${chevronClassName}`} />
       </button>
 
       {open ? (
-<div
-  className={`absolute top-full z-[70] mt-1 overflow-hidden rounded border border-white/20 bg-[#2a2a2a] shadow-xl ${
-    variant === "dial"
-      ? "left-0 w-[250px]"
-      : "inset-x-0"
-  }`}
->          <input
+        <div
+          className={`absolute top-full z-[70] mt-1 overflow-hidden rounded border border-white/20 bg-[#2a2a2a] shadow-xl ${
+            variant === "dial" ? "left-0 w-[250px]" : "inset-x-0"
+          }`}
+        >
+          <input
             ref={searchRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
