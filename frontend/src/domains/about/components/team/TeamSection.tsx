@@ -22,9 +22,9 @@ function chunkPeople(people: Person[], size: number): Person[][] {
   return rows;
 }
 
-function SectionLabel({ label }: { label: string }) {
+function SectionLabel({ label, id }: { label: string; id?: string }) {
   return (
-    <div className="mx-auto mb-4 flex max-w-[1260px] items-center justify-center gap-4 md:gap-[22px] lg:mb-24">
+    <div id={id} className="mx-auto mb-4 flex max-w-[1260px] items-center justify-center gap-4 md:gap-[22px] lg:mb-24 scroll-mt-24">
       <span className="h-px w-full max-w-[3.75rem] bg-gradient-to-l from-[#635612] to-[#FEF2C9]/[0.41] md:max-w-[16.25rem]" />
       <Typography
         variant="heading-6"
@@ -78,7 +78,7 @@ export default function TeamSection({
 
       {allTrustees.length > 0 ? (
         <>
-          <SectionLabel label="Trustees" />
+          <SectionLabel label="Trustees" id="trustees" />
           <div className="mb-4 lg:hidden">
             <ArrowScrollCarousel people={allTrustees} />
           </div>
@@ -107,7 +107,7 @@ export default function TeamSection({
 
       {teamPeople.length > 0 ? (
         <>
-          <SectionLabel label="Teams" />
+          <SectionLabel label="Teams" id="team" />
           <div className="lg:hidden">
             <ArrowScrollCarousel people={teamPeople} />
           </div>

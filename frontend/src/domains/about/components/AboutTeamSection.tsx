@@ -90,6 +90,28 @@ export default function AboutTeamSection() {
     };
   }, []);
 
+  useEffect(() => {
+    if (loaded && typeof window !== "undefined") {
+      const pendingScroll = sessionStorage.getItem("pendingScroll");
+      const hashId = window.location.hash ? window.location.hash.substring(1) : null;
+      const targetId = pendingScroll || hashId;
+
+      if (targetId) {
+        // Small delay to ensure DOM is fully painted after state change
+        const timeoutId = setTimeout(() => {
+          const el = document.getElementById(targetId);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth" });
+          }
+          if (pendingScroll) {
+            sessionStorage.removeItem("pendingScroll");
+          }
+        }, 100);
+        return () => clearTimeout(timeoutId);
+      }
+    }
+  }, [loaded]);
+
   if (!loaded) {
     return (
       <section className="bg-[#FFF6D8] px-8 py-16 sm:px-12 md:px-16 lg:px-6 xl:px-6">
