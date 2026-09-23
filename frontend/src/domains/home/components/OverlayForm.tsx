@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import {
-  AMOUNTS,
   IMPACT_ITEMS,
   TRUST_ITEMS,
 } from "@/domains/home/constants/overlayform";
@@ -17,6 +16,7 @@ import {
 } from "@/domains/home/constants/countries";
 import {
   type DonationCurrencyCode,
+  formatDonationAmount,
   getDonationCurrency,
 } from "@/domains/home/constants/donation-currency";
 
@@ -25,17 +25,20 @@ import {
 /* ------------------------------------------------------------------ */
 
 export default function OverlayForm({ onClose }: { onClose: () => void }) {
-  const [selectedAmount, setSelectedAmount] = useState("₹3000");
-  const [showCustomInput, setShowCustomInput] = useState(false);
-  const [customAmount, setCustomAmount] = useState("");
   const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
-  const [agreedTo80G, setAgreedTo80G] = useState(false);
-  const [termsError, setTermsError] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-
   const country = getDonationCountry(countryCode);
   const currency: DonationCurrencyCode = country.currency;
   const currencyMeta = getDonationCurrency(currency);
+
+  // Default to the FIRST preset amount for the current currency.
+  const [selectedPreset, setSelectedPreset] = useState<number | null>(
+    currencyMeta.presets[0] ?? null,
+  );
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customAmount, setCustomAmount] = useState("");
+  const [agreedTo80G, setAgreedTo80G] = useState(false);
+  const [termsError, setTermsError] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   useEffect(() => {
     const scrollY = window.scrollY;
@@ -60,14 +63,30 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
     };
   }, []);
 
+  // Changing country updates currency + resets the amount selection to the
+  // new currency's first preset (mirrors DonateSection's behaviour).
   const changeCountry = (nextCode: string) => {
     const next = getDonationCountry(nextCode);
+    const meta = getDonationCurrency(next.currency);
     setCountryCode(next.code);
+    setShowCustomInput(false);
+    setCustomAmount("");
+    setSelectedPreset(meta.presets[0] ?? null);
+    setTermsError(false);
+  };
+
+  const pickPreset = (amount: number) => {
+    setSelectedPreset(amount);
+    setShowCustomInput(false);
+    setCustomAmount("");
   };
 
   const commitCustomAmount = () => {
     const numeric = customAmount.trim().replace(/[^\d]/g, "");
-    if (numeric) setSelectedAmount(`₹${numeric}`);
+    if (numeric) {
+      setCustomAmount(numeric);
+      setSelectedPreset(null);
+    }
     setShowCustomInput(false);
   };
 
@@ -81,7 +100,7 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const donationAmount = Number(selectedAmount.replace(/[^\d.]/g, "")) || 0;
+  const donationAmount = selectedPreset ?? (Number(customAmount) || 0);
 
   const openDetailsForm = () => {
     setTermsError(!agreedTo80G);
@@ -90,8 +109,8 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
   };
 
   const amountProps: AmountProps = {
-    selectedAmount,
-    onSelectAmount: setSelectedAmount,
+    selectedPreset,
+    onSelectPreset: pickPreset,
     showCustomInput,
     customAmount,
     onCustomAmountChange: setCustomAmount,
@@ -100,6 +119,7 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
     onCustomAmountBlur: commitCustomAmount,
     countryCode,
     changeCountry,
+    currency,
     currencyMeta,
     agreedTo80G,
     setAgreedTo80G,
@@ -131,7 +151,8 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
           countryCode={countryCode}
           onClose={() => setDetailsOpen(false)}
           onAmountChange={(next) => {
-            setSelectedAmount(`₹${next}`);
+            setCustomAmount(String(next));
+            setSelectedPreset(null);
           }}
         />
       ) : null}
@@ -144,8 +165,8 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
 /* ------------------------------------------------------------------ */
 
 type AmountProps = {
-  selectedAmount: string;
-  onSelectAmount: (amount: string) => void;
+  selectedPreset: number | null;
+  onSelectPreset: (amount: number) => void;
   showCustomInput: boolean;
   customAmount: string;
   onCustomAmountChange: (value: string) => void;
@@ -154,6 +175,7 @@ type AmountProps = {
   onCustomAmountBlur: () => void;
   countryCode: string;
   changeCountry: (nextCode: string) => void;
+  currency: DonationCurrencyCode;
   currencyMeta: ReturnType<typeof getDonationCurrency>;
   agreedTo80G: boolean;
   setAgreedTo80G: (value: boolean) => void;
@@ -280,14 +302,16 @@ const pillInactive =
   "border-gray-200 bg-white text-gray-700 hover:border-gray-400";
 
 function AmountPicker({
-  selectedAmount,
-  onSelectAmount,
+  selectedPreset,
+  onSelectPreset,
   showCustomInput,
   customAmount,
   onCustomAmountChange,
   onMoreClick,
   onCustomAmountKeyDown,
   onCustomAmountBlur,
+  currency,
+  currencyMeta,
   gridClassName,
   pillWidthClassName = "",
   inputSpanClassName = "",
@@ -297,7 +321,7 @@ function AmountPicker({
   inputSpanClassName?: string;
 }) {
   const customInputRef = useRef<HTMLInputElement>(null);
-  const isCustom = !AMOUNTS.includes(selectedAmount);
+  const isCustom = selectedPreset === null;
 
   useEffect(() => {
     if (showCustomInput) customInputRef.current?.focus();
@@ -314,15 +338,15 @@ function AmountPicker({
       </Typography>
 
       <div className={gridClassName}>
-        {AMOUNTS.map((amount) => (
+        {currencyMeta.presets.map((amount) => (
           <button
-            key={amount}
-            onClick={() => onSelectAmount(amount)}
-            className={`${pillWidthClassName} ${pillBase} ${amount === selectedAmount ? pillActive : pillInactive
+            key={`${currency}-${amount}`}
+            onClick={() => onSelectPreset(amount)}
+            className={`${pillWidthClassName} ${pillBase} ${amount === selectedPreset ? pillActive : pillInactive
               }`}
           >
             <Typography variant="body-8" as="span" className="font-semibold font-manrope">
-              {amount}
+              {formatDonationAmount(amount, currency)}
             </Typography>
           </button>
         ))}
@@ -332,7 +356,7 @@ function AmountPicker({
             className={`${inputSpanClassName} flex items-center gap-1 rounded-xl border border-gray-900 bg-white px-3 py-2`}
           >
             <Typography variant="body-8" as="span" className="font-semibold font-manrope text-gray-700">
-              ₹
+              {currencyMeta.symbol}
             </Typography>
             <input
               ref={customInputRef}
@@ -353,7 +377,9 @@ function AmountPicker({
               }`}
           >
             <Typography variant="body-8" as="span" className="font-semibold font-manrope">
-              {isCustom ? selectedAmount : "More"}
+              {isCustom && customAmount
+                ? formatDonationAmount(Number(customAmount), currency)
+                : "More"}
             </Typography>
           </button>
         )}

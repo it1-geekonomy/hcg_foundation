@@ -76,21 +76,31 @@ export default function MissionHighlight({
             - lg to <1920px: starts at the content/description row
             - 1920px+: starts at the heading row (spans heading+content), regardless of bullet list */}
         <div
-          className="relative order-3 mt-6 aspect-[4/3] max-h-64 w-full min-w-0 overflow-hidden bg-[#FFF8E2] sm:max-h-72 md:max-h-80
-            lg:order-none lg:col-start-2 lg:mt-0 lg:aspect-auto lg:h-full lg:max-h-none lg:min-h-0 lg:self-stretch lg:justify-self-stretch
+          className="relative order-3 mt-6 w-full min-w-0 overflow-hidden bg-[#FFF8E2]
+            lg:aspect-auto lg:h-full lg:max-h-none lg:min-h-0 lg:self-stretch lg:justify-self-stretch
+            lg:order-none lg:col-start-2 lg:mt-0
             lg:row-start-3 lg:row-span-1
             min-[1920px]:!row-start-2 min-[1920px]:!row-span-2"
         >
+          {/* Mobile/tablet: natural aspect ratio, no crop, no leftover space */}
+          <Image
+            src={image}
+            alt={imageAlt}
+            width={800}
+            height={600}
+            className="block h-auto w-full max-h-64 object-contain object-top sm:max-h-72 md:max-h-80 lg:hidden"
+          />
+          {/* Desktop (lg+): fills the stretched grid cell */}
           <Image
             src={image}
             alt={imageAlt}
             fill
-            className="object-contain object-top lg:object-center"
+            className="hidden object-contain object-center lg:block"
           />
         </div>
 
         {/* Content / paragraphs */}
-        <div className="order-4 mt-8 min-w-0 space-y-6 lg:order-none lg:col-start-1 lg:row-start-3">
+        <div className="order-4 mt-2 sm:mt-8 min-w-0 space-y-6 lg:order-none lg:col-start-1 lg:row-start-3">
           {paragraphs.map((block, index) => {
             if (isListBlock(block)) {
               return (
