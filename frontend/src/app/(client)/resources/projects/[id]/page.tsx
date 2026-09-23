@@ -137,12 +137,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     notFound();
   }
 
-
-
-
-
-
-
   return (
     <main className="min-h-screen bg-[#FFFBEA]">
       <Banner

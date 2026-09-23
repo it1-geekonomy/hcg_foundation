@@ -17,6 +17,7 @@ import {
   Handshake,
   GraduationCap,
   Mail,
+  MessageSquareQuote,
 } from "lucide-react";
 
 export type AdminMenuItem = {
@@ -75,6 +76,11 @@ export const adminMenuGroups: AdminMenuGroup[] = [
         icon: FolderKanban,
       },
       {
+        label: "Patient Testimonials",
+        href: "/admin/patient-testimonials",
+        icon: MessageSquareQuote,
+      },
+      {
         label: "Privacy Policy",
         href: "/admin/privacy-policy",
         icon: Shield,
@@ -128,16 +134,6 @@ export const adminMenuGroups: AdminMenuGroup[] = [
         label: "Donations",
         href: "/admin/donations",
         icon: HeartHandshake,
-      },
-    ],
-  },
-  {
-    label: "System",
-    items: [
-      {
-        label: "Settings",
-        href: "/admin/settings/general",
-        icon: Settings,
       },
     ],
   },
