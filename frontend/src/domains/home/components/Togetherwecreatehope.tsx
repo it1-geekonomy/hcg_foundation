@@ -129,7 +129,7 @@ export default function TogetherWeCreateHope() {
   }, []);
 
   return (
-    <section className="w-full py-10 md:py-10 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
+    <section className="w-full py-10 md:py-6 px-8 sm:px-12 md:px-16 lg:py-10 xl:py-14 lg:px-6 xl:px-6 2xl:px-40">
       <div id="events" className="flex flex-col items-center gap-2 text-center mb-[clamp(2rem,4vw,3.5rem)] scroll-mt-24">
         <Typography
           variant="heading-1"
