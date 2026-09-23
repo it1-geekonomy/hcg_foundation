@@ -22,8 +22,6 @@ interface DesktopDropdownProps {
   isActive: boolean;
   isOpen: boolean;
   onToggle: () => void;
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
   onItemClick?: () => void;
 }
 
@@ -32,18 +30,12 @@ export default function DesktopDropdown({
   isActive,
   isOpen,
   onToggle,
-  onMouseEnter,
-  onMouseLeave,
   onItemClick,
 }: DesktopDropdownProps) {
   const pathname = usePathname();
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-    >
+    <div className="relative">
       <button
         onClick={onToggle}
         aria-expanded={isOpen}

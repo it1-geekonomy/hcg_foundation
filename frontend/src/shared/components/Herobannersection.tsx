@@ -35,26 +35,26 @@ export default function Banner({
     <section
       className={`relative isolate grid w-full ${className}`}
     >
-      {/* Below 1024px */}
-      <Image
-        src={bgImageMobile ?? bgImage}
-        alt={bgImageAlt}
-        width={1920}
-        height={1080}
-        priority
-        sizes="100vw"
-        className="col-start-1 row-start-1 block h-auto w-full lg:hidden"
-      />
-      {/* 1024px and up */}
-      <Image
-        src={bgImage}
-        alt={bgImageAlt}
-        width={1920}
-        height={1080}
-        priority
-        sizes="100vw"
-        className="col-start-1 row-start-1 hidden h-auto w-full lg:block"
-      />
+     {/* Below 1024px */}
+<Image
+  src={bgImageMobile ?? bgImage}
+  alt={bgImageAlt}
+  width={1920}
+  height={1080}
+  priority
+  sizes="100vw"
+  className="col-start-1 row-start-1 block h-[420px] w-full object-cover sm:h-auto sm:object-fill lg:hidden"
+/>
+{/* 1024px and up */}
+<Image
+  src={bgImage}
+  alt={bgImageAlt}
+  width={1920}
+  height={1080}
+  priority
+  sizes="100vw"
+  className="col-start-1 row-start-1 hidden h-auto w-full lg:block"
+/>
 <div className="relative col-start-1 row-start-1 z-10 flex items-end sm:items-center py-6 px-8 sm:px-12 sm:py-8 md:px-16 lg:py-14 xl:py-20 lg:px-6 xl:px-6 2xl:px-40">
   <div className="w-full">
     {breadcrumbs && breadcrumbs.length > 0 && (
@@ -65,7 +65,7 @@ export default function Banner({
             const isLast = index === breadcrumbs.length - 1;
             const label = (
               <>
-                <Typography variant="caption-1" as="span" className="sm:hidden font-light font-manrope">
+                <Typography variant="caption-2" as="span" className="sm:hidden font-light font-manrope">
                   {crumb.label}
                 </Typography>
                 <Typography variant="text-1" as="span" className="hidden sm:inline font-light font-manrope">
@@ -92,7 +92,7 @@ export default function Banner({
       </nav>
     )}
 
-    <Typography variant="body-2" as="h1" className="sm:hidden font-tiempos-headline text-white font-normal">
+    <Typography variant="heading-4" as="h1" className="sm:hidden font-tiempos-headline text-white font-normal">
       {title}
     </Typography>
     <Typography variant="heading-2" as="h1" className="hidden sm:block font-tiempos-headline text-white font-normal">

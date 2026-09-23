@@ -18,7 +18,6 @@ export default function Navbar() {
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const [openDesktopDropdown, setOpenDesktopDropdown] = useState<number | null>(null);
   const desktopNavRef = useRef<HTMLDivElement>(null);
-  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,17 +59,6 @@ export default function Navbar() {
 
   const toggleDesktopDropdown = (index: number) => {
     setOpenDesktopDropdown((prev) => (prev === index ? null : index));
-  };
-
-  const handleDesktopEnter = (index: number) => {
-    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
-    setOpenDesktopDropdown(index);
-  };
-
-  const handleDesktopLeave = () => {
-    closeTimeoutRef.current = setTimeout(() => {
-      setOpenDesktopDropdown(null);
-    }, 150);
   };
 
   const scrollToDonateForm = () => {
@@ -155,8 +143,6 @@ export default function Navbar() {
                   isActive={isActive}
                   isOpen={openDesktopDropdown === i}
                   onToggle={() => toggleDesktopDropdown(i)}
-                  onMouseEnter={() => handleDesktopEnter(i)}
-                  onMouseLeave={handleDesktopLeave}
                   onItemClick={() => setOpenDesktopDropdown(null)}
                 />
               );
