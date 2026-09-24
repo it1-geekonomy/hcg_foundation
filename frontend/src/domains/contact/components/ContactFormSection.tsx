@@ -230,6 +230,9 @@ export default function ContactFormSection() {
                     setFormData((prev) => ({ ...prev, phone: "" }));
                   }}
                   variant="dial"
+                  textClassName="text-[#505050]"
+                  chevronClassName="text-[#505050]/70"
+                  borderClassName="border-[#505050]/35"
                 />
                 <TypographyField
                   variant="body-8"
