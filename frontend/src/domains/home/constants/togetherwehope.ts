@@ -31,8 +31,9 @@ export interface CarouselSlide {
   href?: string;
 }
 
-/** Homepage carousel / CMS desktop banner — matches Figma export */
-export const EVENT_BANNER_SIZE = { width: 849, height: 984 } as const;
+/** Homepage carousel / CMS desktop banner (4:3) */
+export const EVENT_BANNER_SIZE = { width: 800, height: 600 } as const;
+export const EVENT_MOBILE_BANNER_SIZE = { width: 800, height: 600 } as const;
 
 /** Map a published CMS event → homepage carousel slide (image design). */
 export function mapEventToCarouselSlide(event: {

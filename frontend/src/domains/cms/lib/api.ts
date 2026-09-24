@@ -123,7 +123,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       cache: "no-store",
     });
 
-    if (!res.ok) throw new Error(await parseError(res));
+    if (!res.ok) {
+      if (res.status === 401 && typeof window !== "undefined") {
+        localStorage.removeItem("hcg-admin-auth");
+        window.location.href = "/login";
+      }
+      throw new Error(await parseError(res));
+    }
     if (res.status === 204) return undefined as T;
     return res.json() as Promise<T>;
   })();
@@ -153,7 +159,13 @@ async function requestFormData<T>(
     cache: "no-store",
   });
 
-  if (!res.ok) throw new Error(await parseError(res));
+  if (!res.ok) {
+    if (res.status === 401 && typeof window !== "undefined") {
+      localStorage.removeItem("hcg-admin-auth");
+      window.location.href = "/login";
+    }
+    throw new Error(await parseError(res));
+  }
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }

@@ -6,14 +6,14 @@ export class CreateProjectMultipartDto extends CreateProjectDto {
   @ApiPropertyOptional({
     type: 'string',
     format: 'binary',
-    description: 'Desktop / web banner (WebP or AVIF, max 5MB)',
+    description: 'Desktop / web banner (4:3 aspect ratio, e.g. 800x600px, WebP or AVIF, max 5MB)',
   })
   projectBanner?: unknown;
 
   @ApiPropertyOptional({
     type: 'string',
     format: 'binary',
-    description: 'Mobile banner (WebP or AVIF, max 5MB)',
+    description: 'Mobile banner (4:3 aspect ratio, e.g. 800x600px, WebP or AVIF, max 5MB)',
   })
   projectMobileBanner?: unknown;
 }

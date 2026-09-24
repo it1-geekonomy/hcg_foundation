@@ -10,23 +10,17 @@ interface EventCardProps {
   event: EventItem;
   headingTag?: "h2" | "h3";
   className?: string;
-  aspectRatio?: string;
 }
 
 export default function EventCard({
   event,
   headingTag = "h2",
   className = "",
-  aspectRatio,
 }: EventCardProps) {
-  const cardAspectRatio =
-    aspectRatio ||
-    "aspect-[16/11] sm:aspect-[530.16/374.62]";
-
   return (
     <Link
       href={`/resources/events/${event.slug || event.id}`}
-      className={`group relative block ${cardAspectRatio} w-full overflow-hidden rounded-[6px] sm:rounded-[0.75rem] bg-[#EFEAD8] shadow-xs transition duration-300 hover:shadow-md hover:-translate-y-1 ${className}`}
+      className={`group relative block aspect-[4/3.5] sm:aspect-[4/3] xl:aspect-[4/3] w-full overflow-hidden rounded-[6px] bg-[#EFEAD8] shadow-xs transition duration-300 hover:shadow-md hover:-translate-y-1 ${className}`}
     >
       <picture className="h-full w-full block">
         {event.mobileImageUrl && (
@@ -39,29 +33,26 @@ export default function EventCard({
           loading="lazy"
         />
       </picture>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent pointer-events-none" />
 
-      {/* Floating Glassmorphic Overlay:
-          - Desktop & Tablet (sm:): Side-by-side matching Figma Frame 811
-          - Mobile (< sm:): Stacked layout with Read More button lower than event date
-      */}
-      <div className="absolute left-[0.75rem] right-[0.75rem] bottom-[0.75rem] sm:left-[0.8125rem] sm:right-[0.875rem] sm:bottom-[1.125rem] h-auto sm:h-[6.25rem] flex flex-col sm:flex-row sm:items-center justify-between gap-[0.5rem] sm:gap-[0.75rem] p-[0.75rem] sm:px-[1rem] sm:py-[0.75rem] rounded-[6px] sm:rounded-[0.625rem] border border-white/20 bg-[#8D8D8D]/40 backdrop-blur-md text-white transition duration-300 group-hover:bg-[#8D8D8D]/50">
+      <div className="absolute left-[0.75rem] right-[0.75rem] bottom-[0.75rem] xl:left-[1.1rem] xl:right-[1.28rem] xl:bottom-[1.51rem] h-auto lg:h-[9.5rem] xl:h-[11rem] flex flex-col lg:flex-row lg:items-center justify-between gap-[0.75rem] lg:gap-[1rem] p-[1rem] lg:py-[1rem] lg:px-[1.5rem] xl:pl-[1.74rem] xl:pr-[2.61rem] rounded-[6px] border border-white/10 bg-[#838383]/40 backdrop-blur-[55px] text-white transition duration-300 group-hover:bg-[#838383]/50">
         {/* Left: Title + Date stacked */}
-        <div className="flex flex-col justify-center items-start min-w-0 flex-1 text-left gap-[0.35rem] sm:gap-[0.5rem] w-full">
-          <div className="w-full drop-shadow-xs text-left min-w-0 overflow-hidden">
+        <div className="flex flex-col justify-center items-start min-w-0 flex-1 text-left gap-[0.5rem] lg:gap-[0.65rem]">
+          <div className="w-full drop-shadow-xs text-left min-w-0 h-auto">
             <Typography
-              variant="body-2"
+              variant="heading-8"
               as={headingTag}
               title={event.title}
-              className="text-left text-white block truncate w-full"
+              className="font-argestadisplay font-normal text-white block w-full !leading-[1.15]"
             >
               {event.title}
             </Typography>
           </div>
-          <div className="flex items-center gap-[0.35rem] sm:gap-[0.5rem] min-w-0 text-left">
+          <div className="flex items-center gap-[0.35rem] sm:gap-[0.5rem] xl:gap-[0.7rem] min-w-0 text-left pt-1">
             <img
               src="/Resources/calendar.png"
               alt="Calendar"
-              className="size-[0.8125rem] sm:size-[1rem] shrink-0 object-contain"
+              className="size-[0.875rem] sm:size-[1.15rem] xl:size-[1.39rem] shrink-0 object-contain"
             />
             <div className="text-left min-w-0 overflow-hidden">
               <Typography variant="body-8" as="span" className="text-white block truncate">
@@ -71,13 +62,13 @@ export default function EventCard({
           </div>
         </div>
 
-        {/* Read More Button: Lower than event date on mobile, side-by-side on sm+ */}
-        <div className="shrink-0 flex items-center self-start sm:self-center pt-[0.25rem] sm:pt-0">
-          <span className="inline-flex items-center justify-center whitespace-nowrap h-[2rem] sm:h-[2.375rem] px-[0.75rem] sm:px-[1rem] gap-[0.35rem] sm:gap-[0.5rem] rounded-[6px] sm:rounded-[0.3125rem] border border-white/10 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs cursor-pointer shrink-0 transition duration-300 group-hover:bg-[#E9B510]">
-            <Typography variant="button-3" as="span" className="text-[#2D2D2D]">
+        {/* Read More button: Lower than event date on mobile, side-by-side and shifted right on xl+ */}
+        <div className="shrink-0 flex items-center self-center lg:self-auto pt-[0.5rem] lg:pt-0">
+          <span className="inline-flex items-center justify-center whitespace-nowrap h-[1.75rem] lg:h-[2.5rem] xl:h-[3rem] w-auto xl:w-[9.5rem] px-[0.75rem] lg:px-[1.25rem] gap-[0.45rem] rounded-[6px] border border-white/10 bg-[#FCCC2D] text-[#2D2D2D] backdrop-blur-[42px] shadow-xs cursor-pointer shrink-0 transition duration-300 group-hover:bg-[#E9B510] group-hover:scale-105">
+            <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
               Read More
             </Typography>
-            <DiagonalArrowIcon className="w-[1rem] h-[0.85rem] sm:w-[1.375rem] sm:h-[1.1rem] text-[#2D2D2D] shrink-0" />
+            <DiagonalArrowIcon className="w-[1rem] h-[0.85rem] sm:w-[1.2rem] sm:h-[0.95rem] xl:w-[1.375rem] xl:h-[1.1rem] text-[#2D2D2D] shrink-0" />
           </span>
         </div>
       </div>

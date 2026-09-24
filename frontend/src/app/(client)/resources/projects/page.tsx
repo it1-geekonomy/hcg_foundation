@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Banner from "@/shared/components/Herobannersection";
 import DonateForm from "@/shared/components/DonateForm";
 import PaginationControls from "@/shared/components/PaginationControls";
@@ -10,39 +10,22 @@ import { publicProjectsApi } from "@/domains/cms/lib/api";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
-function chunkIntoPages<T>(items: T[], pageSize: number): T[][] {
-  if (items.length === 0) return [];
-  if (items.length <= pageSize) return [items];
-
-  const totalPages = Math.ceil(items.length / pageSize);
-  const result: T[][] = [];
-
-  for (let i = 0; i < totalPages; i++) {
-    if (i === totalPages - 1) {
-      // Last page: always take the last `pageSize` items so 3 rows x 2 cols is completely filled and never left empty!
-      result.push(items.slice(-pageSize));
-    } else {
-      result.push(items.slice(i * pageSize, (i + 1) * pageSize));
-    }
-  }
-
-  return result;
-}
-
 export default function ProjectsPage() {
   const [allProjects, setAllProjects] = useState<ProjectItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(6);
+  const [itemsPerPage, setItemsPerPage] = useState<number | null>(null);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Touch swipe support
-  const touchStartXRef = useRef<number | null>(null);
-
-  // Responsive itemsPerPage: 6 on desktop (1024px+), 3 on tablet/mobile (< 1024px)
+  // Responsive itemsPerPage
   useEffect(() => {
     const updateItemsPerPage = () => {
       if (window.innerWidth < 1024) {
-        setItemsPerPage(3);
+        setItemsPerPage(4);
+      } else if (window.innerWidth < 1280) {
+        setItemsPerPage(4);
       } else {
         setItemsPerPage(6);
       }
@@ -52,18 +35,28 @@ export default function ProjectsPage() {
     return () => window.removeEventListener("resize", updateItemsPerPage);
   }, []);
 
-  // Fetch all published projects once so smooth horizontal sliding works instantly with 0 latency
+  // Fetch projects page
   useEffect(() => {
+    if (itemsPerPage === null) return;
     let cancelled = false;
-    setLoading(true);
-
+    
+    if (allProjects.length === 0) {
+      setLoading(true);
+    } else {
+      setIsFetching(true);
+    }
+    
+    setError(null);
     (async () => {
       try {
         const res = await publicProjectsApi.listPublished({
-          limit: 100,
+          page: currentPage,
+          limit: itemsPerPage,
         });
-        if (!cancelled) {
-          const mapped: ProjectItem[] = (res.data ?? []).map((p) => ({
+        if (cancelled) return;
+        
+        if (res.data && res.data.length > 0) {
+          const mapped: ProjectItem[] = res.data.map((p) => ({
             id: p.id ?? "",
             slug: p.slug ?? "",
             title: p.title ?? "",
@@ -87,44 +80,39 @@ export default function ProjectsPage() {
               "/Resources/Resources banner image.png",
           }));
           setAllProjects(mapped);
+          setTotalCount(res.meta.total);
+        } else {
+          setAllProjects([]);
+          setTotalCount(0);
         }
-      } catch (err) {
-        if (!cancelled) setAllProjects([]);
+      } catch (err: any) {
+        if (!cancelled) {
+          setAllProjects([]);
+          setTotalCount(0);
+          setError(err.message || "Failed to load projects.");
+        }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+          setIsFetching(false);
+        }
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [currentPage, itemsPerPage]);
 
-  // Compute pages with full items (last page is never left empty!)
-  const pages = useMemo(() => {
-    return chunkIntoPages(allProjects, itemsPerPage);
-  }, [allProjects, itemsPerPage]);
-
-  const totalPages = Math.max(1, pages.length);
+  const totalItems = totalCount ?? 0;
+  const itemsPerPg = itemsPerPage || 6;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPg));
   const safePage = Math.min(currentPage, totalPages);
+  
+  const currentProjects = allProjects;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartXRef.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartXRef.current === null) return;
-    const diff = touchStartXRef.current - e.changedTouches[0].clientX;
-    if (diff > 50 && safePage < totalPages) {
-      setCurrentPage((p) => Math.min(totalPages, p + 1));
-    } else if (diff < -50 && safePage > 1) {
-      setCurrentPage((p) => Math.max(1, p - 1));
-    }
-    touchStartXRef.current = null;
   };
 
   return (
@@ -140,35 +128,41 @@ export default function ProjectsPage() {
       />
 
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
-        {/* Smooth Horizontal Sliding Track */}
-        <div
-          className="overflow-hidden w-full touch-pan-y"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
+        <div className="w-full">
           <div
-            className="flex w-full transition-transform duration-500 ease-out"
-            style={{ transform: `translateX(-${(safePage - 1) * 100}%)` }}
+            key={`${safePage}-${itemsPerPage}`}
+            className={`flex flex-col gap-16 pb-4 lg:pb-0 lg:grid lg:grid-cols-2 lg:gap-x-[2rem] lg:gap-y-[2.5rem] transition-all duration-500 ease-in-out ${
+              isFetching ? "opacity-40 scale-[0.98] blur-[1px] pointer-events-none" : "opacity-100 scale-100 blur-0"
+            }`}
           >
-            {pages.map((pageItems, pageIdx) => (
+            {currentProjects.map((projectItem, itemIdx) => (
               <div
-                key={pageIdx}
-                className="w-full shrink-0 grid grid-cols-1 lg:grid-cols-2 gap-x-[1.5rem] xl:gap-x-[2rem] gap-y-[1.5rem] sm:gap-y-[2rem] lg:gap-y-[2.5rem]"
+                key={`${projectItem.id}-${itemIdx}`}
+                className="sticky top-[var(--mobile-top)] lg:top-auto lg:relative w-full"
+                style={
+                  {
+                    "--mobile-top": `calc(6rem + ${itemIdx * 1.5}rem)`,
+                    zIndex: itemIdx,
+                  } as React.CSSProperties
+                }
               >
-                {pageItems.map((projectItem, itemIdx) => (
-                  <ProjectCard
-                    key={`${projectItem.id}-${pageIdx}-${itemIdx}`}
-                    project={projectItem}
-                    headingTag="h2"
-                  />
-                ))}
+                <ProjectCard
+                  project={projectItem}
+                  headingTag="h2"
+                  className="w-full shadow-2xl shadow-black/10 lg:shadow-xs transition-all duration-500"
+                />
               </div>
             ))}
           </div>
 
-          {!loading && allProjects.length === 0 && (
+          {!loading && !error && currentProjects.length === 0 && (
             <div className="py-12 text-center text-neutral-500">
               No projects available at the moment.
+            </div>
+          )}
+          {error && (
+            <div className="py-12 text-center text-red-500">
+              {error}
             </div>
           )}
         </div>

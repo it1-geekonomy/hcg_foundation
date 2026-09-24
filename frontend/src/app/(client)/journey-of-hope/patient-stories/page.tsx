@@ -194,7 +194,7 @@ export default function PatientStoriesPage() {
         ) : (
           <div
             key={`${safePage}-${itemsPerPage}`}
-            className={`flex flex-col gap-16 pb-16 md:pb-0 md:grid md:grid-cols-3 xl:grid-cols-4 md:gap-7 transition-all duration-500 ease-in-out ${
+            className={`flex flex-col gap-16 pb-4 lg:pb-0 lg:grid lg:grid-cols-3 xl:grid-cols-4 lg:gap-7 transition-all duration-500 ease-in-out ${
               isFetching ? "opacity-40 scale-[0.98] blur-[1px] pointer-events-none" : "opacity-100 scale-100 blur-0"
             }`}
           >
@@ -202,7 +202,7 @@ export default function PatientStoriesPage() {
               <Link
               key={story.id}
               href={`/journey-of-hope/patient-stories/${story.slug || story.id}`}
-              className="group sticky top-[var(--mobile-top)] md:top-auto md:relative flex flex-col justify-between aspect-[385/493] w-full overflow-hidden rounded-[1.375rem] border border-white/50 bg-[#EFEAD8] p-[1.1rem] sm:p-[1.35rem] pb-0 sm:pb-0 shadow-2xl shadow-black/10 md:shadow-sm transition-all duration-500 hover:shadow-3xl hover:border-white/70"
+              className="group sticky top-[var(--mobile-top)] lg:top-auto lg:relative flex flex-col justify-between aspect-[385/493] w-full max-w-[28rem] mx-auto lg:max-w-none overflow-hidden rounded-[1.375rem] border border-white/50 bg-[#EFEAD8] p-[1.1rem] sm:p-[1.35rem] pb-0 sm:pb-0 shadow-2xl shadow-black/10 lg:shadow-sm transition-all duration-500 hover:shadow-3xl hover:border-white/70"
               style={{
                 "--mobile-top": `calc(6rem + ${index * 1.5}rem)`,
                 zIndex: index,
