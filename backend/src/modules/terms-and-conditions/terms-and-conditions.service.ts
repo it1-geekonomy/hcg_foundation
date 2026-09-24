@@ -1,6 +1,7 @@
 import {
   Injectable,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -30,6 +31,12 @@ export class TermsAndConditionsService {
       ...dto,
       status: dto.status ?? ContentStatus.DRAFT,
     });
+    if (entity.status === ContentStatus.PUBLISHED) {
+      const existing = await this.findPublished();
+      if (existing && existing.id !== entity.id) {
+        throw new ConflictException('A published version already exists. Please archive it before publishing a new one.');
+      }
+    }
     return await this.repo.save(entity);
   }
 
@@ -92,6 +99,12 @@ export class TermsAndConditionsService {
   ): Promise<TermsAndCondition> {
     const entity = await this.findOne(id);
     Object.assign(entity, dto);
+    if (entity.status === ContentStatus.PUBLISHED) {
+      const existing = await this.findPublished();
+      if (existing && existing.id !== entity.id) {
+        throw new ConflictException('A published version already exists. Please archive it before publishing a new one.');
+      }
+    }
     return await this.repo.save(entity);
   }
 
