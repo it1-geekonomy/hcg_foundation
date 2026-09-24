@@ -49,31 +49,42 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const file = formData.get("file") as File | null;
+    const files = formData.getAll("file") as File[];
     
-    if (!file) {
-      return NextResponse.json({ error: "File is required" }, { status: 400 });
+    if (!files || files.length === 0) {
+      return NextResponse.json({ error: "At least one file is required" }, { status: 400 });
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/-+/g, "-");
-    const key = `website/${Date.now()}-${safeName}`;
+    const uploaded = await Promise.all(
+      files.map(async (file) => {
+        const ext = file.name.split('.').pop()?.toLowerCase();
+        if (!["webp", "avif"].includes(ext || "") && !["image/webp", "image/avif"].includes(file.type)) {
+          throw new Error(`Invalid file type for ${file.name}. Only WEBP and AVIF are allowed.`);
+        }
 
-    await client.send(
-      new PutObjectCommand({
-        Bucket: bucket,
-        Key: key,
-        Body: buffer,
-        ContentType: file.type,
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/-+/g, "-");
+        const key = `website/${Date.now()}-${Math.random().toString(36).slice(2, 7)}-${safeName}`;
+
+        await client.send(
+          new PutObjectCommand({
+            Bucket: bucket,
+            Key: key,
+            Body: buffer,
+            ContentType: file.type,
+          })
+        );
+
+        return {
+          key,
+          url: `${publicUrl}/${key}`,
+          size: buffer.length,
+          contentType: file.type,
+        };
       })
     );
 
-    return NextResponse.json({
-      key,
-      url: `${publicUrl}/${key}`,
-      size: buffer.length,
-      contentType: file.type,
-    });
+    return NextResponse.json({ uploaded });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -81,20 +92,34 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const { url } = await req.json();
-    if (!url || !url.startsWith(publicUrl)) {
-      return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
+    const body = await req.json();
+    const urls = Array.isArray(body.urls) ? body.urls : body.url ? [body.url] : [];
+    
+    if (urls.length === 0) {
+      return NextResponse.json({ error: "URL or URLs array is required" }, { status: 400 });
     }
     
-    const key = url.slice(publicUrl.length + 1);
+    const objectsToDelete = urls.map((url: string) => {
+      if (!url.startsWith(publicUrl)) {
+        throw new Error(`Invalid URL: ${url}`);
+      }
+      return { Key: url.slice(publicUrl.length + 1) };
+    });
+    
+    // AWS SDK DeleteObjectsCommand is more efficient for bulk delete
+    const { DeleteObjectsCommand } = await import("@aws-sdk/client-s3");
+    
     await client.send(
-      new DeleteObjectCommand({
+      new DeleteObjectsCommand({
         Bucket: bucket,
-        Key: key,
+        Delete: {
+          Objects: objectsToDelete,
+          Quiet: false,
+        },
       })
     );
     
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, deletedCount: objectsToDelete.length });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

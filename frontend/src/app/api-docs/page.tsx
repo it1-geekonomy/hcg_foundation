@@ -23,7 +23,8 @@ const spec = {
         },
       },
       post: {
-        summary: "Upload a website image",
+        summary: "Upload website image(s)",
+        description: "You can upload one or multiple files at once by appending multiple 'file' fields to the FormData. Note: ONLY .webp and .avif files are allowed.",
         requestBody: {
           required: true,
           content: {
@@ -32,8 +33,12 @@ const spec = {
                 type: "object",
                 properties: {
                   file: {
-                    type: "string",
-                    format: "binary",
+                    type: "array",
+                    items: {
+                      type: "string",
+                      format: "binary",
+                    },
+                    description: "One or more image files to upload."
                   },
                 },
               },
@@ -47,7 +52,8 @@ const spec = {
         },
       },
       delete: {
-        summary: "Delete a website image",
+        summary: "Delete website image(s)",
+        description: "You can pass a single 'url' or an array of 'urls' to delete them in bulk.",
         requestBody: {
           required: true,
           content: {
@@ -57,6 +63,14 @@ const spec = {
                 properties: {
                   url: {
                     type: "string",
+                    description: "Single URL to delete (optional if urls is provided)",
+                  },
+                  urls: {
+                    type: "array",
+                    items: {
+                      type: "string",
+                    },
+                    description: "Array of URLs to delete in bulk",
                   },
                 },
               },
