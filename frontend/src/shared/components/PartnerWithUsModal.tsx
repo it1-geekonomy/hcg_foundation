@@ -155,8 +155,8 @@ export default function PartnerWithUsModal({
       {/* Click outside backdrop to close */}
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
-      {/* Modal Card Container (Frame 601: 709px x 815.35px -> 44.3125rem x 50.959rem on desktop, bg #FDF9F3) */}
-      <div className="relative z-10 w-full max-w-[44.3125rem] bg-[#FDF9F3] rounded-[0.415rem] shadow-2xl overflow-hidden flex flex-col md:flex-row my-auto max-h-[calc(100dvh-2rem)] md:h-[50.959rem]">
+      {/* Modal Card Container (Frame 601: 709px x 815.35px -> 44.3125rem x 50.959rem on desktop, compact on mobile) */}
+      <div className="relative z-10 w-full max-w-[22.5rem] sm:max-w-[24rem] md:max-w-[44.3125rem] bg-[#FDF9F3] rounded-[0.415rem] shadow-2xl overflow-hidden flex flex-col md:flex-row my-auto max-h-[calc(100dvh-2rem)] md:h-[50.959rem]">
         {/* Close Button placed at top right of the modal container */}
         <button
           type="button"
@@ -167,11 +167,11 @@ export default function PartnerWithUsModal({
           <X className="size-[1.125rem] stroke-[2.2]" />
         </button>
 
-        {/* Left Column: Form Content (Frame 603: Left: 47.64px -> 2.9775rem, Top: 38.77px -> 2.423rem, Bottom: 46.8px -> 2.925rem, Width: 309.08px -> 19.3175rem on desktop) */}
-        <div className="relative w-full md:w-[22.3rem] shrink-0 px-[1.25rem] sm:px-0 sm:pl-[2.9775rem] sm:pr-0 pt-[1.75rem] sm:pt-[2.423rem] pb-[1.75rem] sm:pb-[2.925rem] flex flex-col justify-between overflow-y-auto md:overflow-y-hidden min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        {/* Left Column: Form Content */}
+        <div className="relative w-full md:w-[22.3rem] shrink-0 px-[1.25rem] sm:px-[1.5rem] md:pl-[2.9775rem] md:pr-0 pt-[1.75rem] sm:pt-[2.423rem] pb-[1.75rem] sm:pb-[2.925rem] flex flex-col justify-between overflow-y-auto md:overflow-y-hidden min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <div>
             {/* Frame 298: Title + Subtitle using design-system Typography */}
-            <div className="w-full max-w-[19.3175rem] space-y-[0.5rem]">
+            <div className="w-full max-w-[19.3175rem] mx-auto md:mx-0 space-y-[0.5rem]">
               <Typography
                 variant="heading-5"
                 as="h2"
@@ -196,7 +196,7 @@ export default function PartnerWithUsModal({
             </div>
 
             {submitted ? (
-              <div className="my-[2rem] p-[1.5rem] bg-[#FFF9EA] border border-[#F3E3B6] rounded-[0.415rem] text-center w-full max-w-[17.0625rem] space-y-[0.5rem]">
+              <div className="my-[2rem] p-[1.5rem] bg-[#FFF9EA] border border-[#F3E3B6] rounded-[0.415rem] text-center w-full max-w-[17.0625rem] mx-auto md:mx-0 space-y-[0.5rem]">
                 <Typography
                   variant="heading-3"
                   as="h3"
@@ -213,7 +213,7 @@ export default function PartnerWithUsModal({
                 </Typography>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="w-full max-w-[17.0625rem]">
+              <form onSubmit={handleSubmit} className="w-full max-w-[17.0625rem] mx-auto md:mx-0">
                 {/* Inputs Group: Frame 560 fields with exact gap of 24px (1.5rem) on desktop */}
                 <div className="flex flex-col gap-[1.25rem] sm:gap-[1.5rem] mt-[1.5rem] sm:mt-[1.875rem]">
                   {/* 1. Full Name (Auto-resizing textarea with dynamic underline) */}
