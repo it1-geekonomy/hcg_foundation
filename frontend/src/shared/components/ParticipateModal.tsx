@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   X,
   User,
@@ -16,9 +16,14 @@ import {
   ChevronDown,
   FileText,
   Wrench,
+  Trash2,
 } from "lucide-react";
 import PhoneInputField from "@/shared/forms/PhoneInputField";
 import SearchableLanguageSelect from "@/shared/forms/SearchableLanguageSelect";
+import LocationSelect from "@/shared/forms/LocationSelect";
+import VolunteerInterestSelect from "@/shared/forms/VolunteerInterestSelect";
+import GenderSelect from "@/shared/forms/GenderSelect";
+import DobDatePicker from "@/shared/forms/DobDatePicker";
 import Typography from "@/lib/Typography";
 
 export type ParticipateModalType = "intern" | "fundraise" | "volunteer" | null;
@@ -65,7 +70,9 @@ export default function ParticipateModal({
     agreeTerms: false,
   });
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNameChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const val = e.target.value;
     if (/\d/.test(val)) {
       setErrors((prev) => ({
@@ -78,7 +85,9 @@ export default function ParticipateModal({
     setFormData((prev) => ({ ...prev, fullName: val }));
   };
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEmailChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const val = e.target.value;
     if (errors.email && emailRegex.test(val.trim())) {
       setErrors((prev) => ({ ...prev, email: undefined }));
@@ -97,17 +106,49 @@ export default function ParticipateModal({
     }
   };
 
+  const handleAutoResize = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    const el = e.currentTarget;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Lock body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      // Fresh clean state every time modal is opened
+      setSubmitted(false);
+      setErrors({});
+      setResumeFile(null);
+      setFormData({
+        fullName: "",
+        phone: "",
+        email: "",
+        gender: "",
+        dob: "",
+        course: "",
+        address: "",
+        languages: "",
+        computerSkills: "",
+        location: "",
+        educationalQualification: "",
+        fundraisingGoal: "",
+        reason: "",
+        volunteerInterest: "",
+        availability: "",
+        whyVolunteer: "",
+        message: "",
+        agreeTerms: false,
+      });
     } else {
       document.body.style.overflow = "unset";
     }
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [isOpen]);
+  }, [isOpen, type]);
 
   // Close on Escape key press
   useEffect(() => {
@@ -189,8 +230,8 @@ export default function ParticipateModal({
       <div
         className={`relative z-10 w-full max-w-[40rem] bg-white shadow-2xl overflow-hidden my-auto flex flex-col ${
           isIntern
-            ? "max-h-[96vh] sm:h-[53.75rem] rounded-md"
-            : "max-h-[95vh] sm:h-[46rem] rounded-md"
+            ? "max-h-[96vh] sm:h-[53.75rem] rounded-[0.625rem]"
+            : "max-h-[95vh] sm:h-[46rem] rounded-[0.625rem]"
         }`}
       >
         {/* Full Modal Watermark Background Image matching Figma */}
@@ -211,61 +252,54 @@ export default function ParticipateModal({
         </button>
 
         {/* Modal Scrollable Body */}
-        <div className="relative z-10 p-6 sm:p-9 md:p-10 overflow-y-auto h-full flex flex-col justify-between">
+        <div className="relative z-10 p-6 sm:px-12 sm:py-9 overflow-y-auto h-full flex flex-col justify-between">
           {/* Header Title & Subtitle matching Figma 100% */}
-          <div className="text-center max-w-xl mx-auto mb-6 sm:mb-8">
+          <div className="text-center mx-auto mb-6 sm:mb-8">
             <div className="mb-1">
-              <Typography
-                variant="heading-5"
-                as="h2"
-                className="font-tiempos-headline font-normal italic text-[#0D2838]"
-              >
+              <h2 className="font-tiempos-headline font-normal italic text-[#0D2838] text-[1.4275rem] leading-[100%] tracking-[0.03em] text-center">
                 {isIntern && "Apply for Internship at"}
                 {isFundraise && "Start a Fundraising Campaign at"}
                 {!isIntern && !isFundraise && "Become a Volunteer at"}
-              </Typography>
+              </h2>
             </div>
             <div className="mb-3">
-              <Typography
-                variant="heading-8"
-                as="div"
-                className="font-manrope font-bold bg-gradient-to-r from-[#208CCC] via-[#FABE3B] to-[#9D0037] bg-clip-text text-transparent inline-block"
+              <span
+                style={{
+                  backgroundImage: "linear-gradient(90deg, #208CCC 0%, #FABE3B 50%, #9D0037 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+                className="font-manrope font-bold text-[1.4275rem] leading-[100%] tracking-[0.01em] inline-block text-center select-none"
               >
                 HCG Foundation
-              </Typography>
+              </span>
             </div>
-            <div className="max-w-[34rem] mx-auto">
-              <Typography
-                variant="caption-1"
-                as="p"
-                className="font-manrope font-normal text-[#596D79] text-center leading-relaxed"
-              >
+            <div
+              className={`${
+                isFundraise
+                  ? "w-full max-w-[26.125rem]"
+                  : isVolunteer
+                  ? "w-full max-w-[18.6875rem]"
+                  : "w-full max-w-[28.125rem]"
+              } mx-auto`}
+            >
+              <p className="font-manrope font-normal text-[0.677rem] leading-[150%] tracking-[0.01em] text-[#596D79] text-center">
                 {isIntern && (
                   <>
-                    <span className="block">
-                      Passionate about making a difference? Join the HCG Foundation Internship Program to
-                    </span>
-                    <span className="block">
-                      gain hands-on experience, learn from experts, and build skills for your future career.
-                    </span>
+                    Passionate about making a difference? Join the HCG Foundation Internship Program to gain hands-on experience, learn from experts, and build skills for your future career.
                   </>
                 )}
                 {isFundraise && (
                   <>
-                    <span className="block">
-                      Turn your network into meaningful support for cancer patients and families.
-                    </span>
-                    <span className="block">
-                      Fill in the details below to start your fundraising journey with us.
-                    </span>
+                    Turn your network into meaningful support for cancer patients and families. Fill in the details below to start your fundraising journey with us.
                   </>
                 )}
                 {isVolunteer && (
-                  <span className="block text-[#596D79]">
+                  <>
                     &ldquo;Share your time, skills, and energy to support cancer patients, families, and communities.&rdquo;
-                  </span>
+                  </>
                 )}
-              </Typography>
+              </p>
             </div>
           </div>
 
@@ -286,19 +320,31 @@ export default function ParticipateModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                 <div className="relative">
                   <div
-                    className={`h-[2.57rem] flex items-start pt-0.5 border-b transition-colors ${errors.fullName
+                    className={`${
+                      formData.fullName.trim()
+                        ? "min-h-[2.2rem] h-auto pb-1"
+                        : "h-[41.14px] pb-[21.66px]"
+                    } flex items-start border-b transition-all ${
+                      errors.fullName
                         ? "border-red-500"
-                        : "border-[#E5E0D0] focus-within:border-[#FCCC2D]"
-                      }`}
+                        : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                    }`}
                   >
                     <User className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
-                    <input
-                      type="text"
+                    <textarea
+                      rows={1}
                       required
                       placeholder="Full Name*"
                       value={formData.fullName}
-                      onChange={handleNameChange}
-                      className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
+                      onInput={handleAutoResize}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") e.preventDefault();
+                      }}
+                      onChange={(e) => {
+                        handleNameChange(e);
+                        handleAutoResize(e);
+                      }}
+                      className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
                     />
                   </div>
                   {errors.fullName && (
@@ -329,20 +375,32 @@ export default function ParticipateModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                 <div className="relative">
                   <div
-                    className={`flex items-start pt-1 pb-7 border-b transition-colors ${errors.email
+                    className={`${
+                      formData.email.trim()
+                        ? "min-h-[2.2rem] h-auto pb-1.5"
+                        : "h-[41.14px] pb-[21.66px]"
+                    } flex items-start border-b transition-all ${
+                      errors.email
                         ? "border-red-500"
-                        : "border-[#E5E0D0] focus-within:border-[#FCCC2D]"
-                      }`}
+                        : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                    }`}
                   >
                     <Mail className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
-                    <input
-                      type="email"
+                    <textarea
+                      rows={1}
                       required
                       placeholder="Email Address*"
                       value={formData.email}
-                      onChange={handleEmailChange}
+                      onInput={handleAutoResize}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") e.preventDefault();
+                      }}
+                      onChange={(e) => {
+                        handleEmailChange(e);
+                        handleAutoResize(e);
+                      }}
                       onBlur={handleEmailBlur}
-                      className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
+                      className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
                     />
                   </div>
                   {errors.email && (
@@ -359,55 +417,21 @@ export default function ParticipateModal({
                 </div>
 
                 {isIntern ? (
-                  <div className="relative">
-                    <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                      <User className="size-4 text-[#0D2838] shrink-0 mr-3" />
-                      <select
-                        required
-                        value={formData.gender}
-                        onChange={(e) =>
-                          setFormData({ ...formData, gender: e.target.value })
-                        }
-                        className="w-full bg-transparent pl-[0.75rem] text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden font-manrope cursor-pointer appearance-none"
-                      >
-                        <option value="" disabled>
-                          Select your gender*
-                        </option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                      </select>
-                      <ChevronDown className="size-4 text-[#0D2838] shrink-0 ml-1 pointer-events-none" />
-                    </div>
-                  </div>
+                  <GenderSelect
+                    value={formData.gender}
+                    onChange={(val) =>
+                      setFormData((prev) => ({ ...prev, gender: val }))
+                    }
+                    required
+                  />
                 ) : (
-                  <div className="relative">
-                    <div className="flex items-start pt-1 pb-7 border-b border-[#E5E0D0] focus-within:border-[#FCCC2D] transition-colors">
-                      <User className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
-                      <select
-                        required
-                        value={formData.location}
-                        onChange={(e) =>
-                          setFormData({ ...formData, location: e.target.value })
-                        }
-                        className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden font-manrope cursor-pointer appearance-none"
-                      >
-                        <option value="" disabled>
-                          City / Location*
-                        </option>
-                        <option value="Bengaluru">Bengaluru</option>
-                        <option value="Mumbai">Mumbai</option>
-                        <option value="Delhi NCR">Delhi NCR</option>
-                        <option value="Ahmedabad">Ahmedabad</option>
-                        <option value="Chennai">Chennai</option>
-                        <option value="Hyderabad">Hyderabad</option>
-                        <option value="Kolkata">Kolkata</option>
-                        <option value="Pune">Pune</option>
-                        <option value="Other">Other</option>
-                      </select>
-                      <ChevronDown className="size-4 text-[#0D2838] shrink-0 ml-1 mt-0.5 pointer-events-none" />
-                    </div>
-                  </div>
+                  <LocationSelect
+                    value={formData.location}
+                    onChange={(val) =>
+                      setFormData((prev) => ({ ...prev, location: val }))
+                    }
+                    required
+                  />
                 )}
               </div>
 
@@ -415,33 +439,36 @@ export default function ParticipateModal({
               {isIntern ? (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
-                    <div className="relative">
-                      <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                        <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3" />
-                        <input
-                          type="text"
-                          placeholder="DOB (DD/MM/YYYY)"
-                          value={formData.dob}
-                          onChange={(e) =>
-                            setFormData({ ...formData, dob: e.target.value })
-                          }
-                          className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
-                        />
-                      </div>
-                    </div>
+                    <DobDatePicker
+                      value={formData.dob}
+                      onChange={(val) =>
+                        setFormData((prev) => ({ ...prev, dob: val }))
+                      }
+                    />
 
                     <div className="relative">
-                      <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                        <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3" />
-                        <input
-                          type="text"
+                      <div
+                        className={`${
+                          formData.course.trim()
+                            ? "min-h-[2.2rem] h-auto pb-1.5"
+                            : "h-[41.14px] pb-[21.66px]"
+                        } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                      >
+                        <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
+                        <textarea
+                          rows={1}
                           required
                           placeholder="Current Course*"
                           value={formData.course}
-                          onChange={(e) =>
-                            setFormData({ ...formData, course: e.target.value })
-                          }
-                          className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
+                          onInput={handleAutoResize}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.preventDefault();
+                          }}
+                          onChange={(e) => {
+                            setFormData({ ...formData, course: e.target.value });
+                            handleAutoResize(e);
+                          }}
+                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
                         />
                       </div>
                     </div>
@@ -449,17 +476,28 @@ export default function ParticipateModal({
 
                   {/* Address */}
                   <div className="relative">
-                    <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                      <MapPin className="size-4 text-[#0D2838] shrink-0 mr-3" />
-                      <input
-                        type="text"
+                    <div
+                      className={`${
+                        formData.address.trim()
+                          ? "min-h-[2.2rem] h-auto pb-1.5"
+                          : "h-[41.14px] pb-[21.66px]"
+                      } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                    >
+                      <MapPin className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
+                      <textarea
+                        rows={1}
                         required
                         placeholder="Your Address*"
                         value={formData.address}
-                        onChange={(e) =>
-                          setFormData({ ...formData, address: e.target.value })
-                        }
-                        className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
+                        onInput={handleAutoResize}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") e.preventDefault();
+                        }}
+                        onChange={(e) => {
+                          setFormData({ ...formData, address: e.target.value });
+                          handleAutoResize(e);
+                        }}
+                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
                       />
                     </div>
                   </div>
@@ -475,20 +513,31 @@ export default function ParticipateModal({
                     />
 
                     <div className="relative">
-                      <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                        <Wrench className="size-4 text-[#0D2838] shrink-0 mr-3" />
-                        <input
-                          type="text"
+                      <div
+                        className={`${
+                          formData.computerSkills.trim()
+                            ? "min-h-[2.2rem] h-auto pb-1.5"
+                            : "h-[41.14px] pb-[21.66px]"
+                        } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                      >
+                        <Wrench className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
+                        <textarea
+                          rows={1}
                           required
                           placeholder="Skills*"
                           value={formData.computerSkills}
-                          onChange={(e) =>
+                          onInput={handleAutoResize}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.preventDefault();
+                          }}
+                          onChange={(e) => {
                             setFormData({
                               ...formData,
                               computerSkills: e.target.value,
-                            })
-                          }
-                          className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
+                            });
+                            handleAutoResize(e);
+                          }}
+                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
                         />
                       </div>
                     </div>
@@ -498,90 +547,105 @@ export default function ParticipateModal({
                 /* Volunteer Row 3: Educational Qualification & Areas of Interest */
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                   <div className="relative">
-                    <div className="flex items-start pt-1 pb-7 border-b border-[#E5E0D0] focus-within:border-[#FCCC2D] transition-colors">
+                    <div
+                      className={`${
+                        formData.educationalQualification.trim()
+                          ? "min-h-[2.2rem] h-auto pb-1.5"
+                          : "h-[41.14px] pb-[21.66px]"
+                      } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                    >
                       <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
-                      <input
-                        type="text"
+                      <textarea
+                        rows={1}
                         required
                         placeholder="Educational Qualification*"
                         value={formData.educationalQualification}
-                        onChange={(e) =>
+                        onInput={handleAutoResize}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") e.preventDefault();
+                        }}
+                        onChange={(e) => {
                           setFormData({
                             ...formData,
                             educationalQualification: e.target.value,
-                          })
-                        }
-                        className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
+                          });
+                          handleAutoResize(e);
+                        }}
+                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
                       />
                     </div>
                   </div>
 
-                  <div className="relative">
-                    <div className="flex items-start pt-1 pb-7 border-b border-[#E5E0D0] focus-within:border-[#FCCC2D] transition-colors">
-                      <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
-                      <select
-                        required
-                        value={formData.volunteerInterest}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            volunteerInterest: e.target.value,
-                          })
-                        }
-                        className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden font-manrope cursor-pointer appearance-none"
-                      >
-                        <option value="" disabled>
-                          Areas of Interest*
-                        </option>
-                        <option value="Patient Support & Care">Patient Support & Care</option>
-                        <option value="Screening & Medical Camps">Screening & Medical Camps</option>
-                        <option value="Community Outreach & Awareness">Community Outreach & Awareness</option>
-                        <option value="Art Therapy & Creative Sessions">Art Therapy & Creative Sessions</option>
-                        <option value="Administrative & Operations">Administrative & Operations</option>
-                        <option value="Fundraising & Event Support">Fundraising & Event Support</option>
-                        <option value="Other">Other</option>
-                      </select>
-                      <ChevronDown className="size-4 text-[#0D2838] shrink-0 ml-1 mt-0.5 pointer-events-none" />
-                    </div>
-                  </div>
+                  <VolunteerInterestSelect
+                    value={formData.volunteerInterest}
+                    onChange={(val) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        volunteerInterest: val,
+                      }))
+                    }
+                    required
+                  />
                 </div>
               ) : (
                 /* Specific to Fundraise (Frame 582: Gap 51px) */
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                   <div className="relative">
-                    <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                      <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3" />
-                      <input
-                        type="text"
+                    <div
+                      className={`${
+                        formData.fundraisingGoal.trim()
+                          ? "min-h-[2.2rem] h-auto pb-1.5"
+                          : "h-[41.14px] pb-[21.66px]"
+                      } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                    >
+                      <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
+                      <textarea
+                        rows={1}
                         required
                         placeholder="Fundraising Goal*"
                         value={formData.fundraisingGoal}
-                        onChange={(e) =>
+                        onInput={handleAutoResize}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") e.preventDefault();
+                        }}
+                        onChange={(e) => {
                           setFormData({
                             ...formData,
                             fundraisingGoal: e.target.value,
-                          })
-                        }
-                        className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
+                          });
+                          handleAutoResize(e);
+                        }}
+                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
                       />
                     </div>
                   </div>
 
                   <div className="relative">
-                    <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                      <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3" />
-                      <input
-                        type="text"
+                    <div
+                      className={`${
+                        formData.reason.trim()
+                          ? "min-h-[2.2rem] h-auto pb-1.5"
+                          : "h-[41.14px] pb-[21.66px]"
+                      } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                    >
+                      <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
+                      <textarea
+                        rows={1}
                         required
                         placeholder="Why are you fundraising?*"
                         value={formData.reason}
-                        onChange={(e) =>
+                        onInput={handleAutoResize}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") e.preventDefault();
+                        }}
+                        onChange={(e) => {
                           setFormData({
                             ...formData,
                             reason: e.target.value,
-                          })
-                        }
-                        className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
+                          });
+                          handleAutoResize(e);
+                        }}
+                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
                       />
                     </div>
                   </div>
@@ -592,6 +656,7 @@ export default function ParticipateModal({
               {isIntern ? (
                 <div className="relative">
                   <input
+                    ref={fileInputRef}
                     type="file"
                     id="intern-resume"
                     accept=".pdf,.doc,.docx"
@@ -601,55 +666,120 @@ export default function ParticipateModal({
                       if (file) setResumeFile(file);
                     }}
                   />
-                  <label
-                    htmlFor="intern-resume"
-                    className="w-full h-[6.19rem] flex flex-col items-center justify-center gap-[0.625rem] border border-dashed border-[#A3A3A3] rounded-[0.5rem] bg-white/65 cursor-pointer hover:border-[#FCCC2D] transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <FileText className="size-4 text-[#7C8B93]" />
-                      <span className="font-manrope font-medium text-[0.78rem] leading-[150%] tracking-[0.03em] text-[#0D2838]">
-                        {resumeFile ? resumeFile.name : "Attach Resume*"}
-                      </span>
+                  {resumeFile ? (
+                    <div className="w-full h-[6.19rem] flex items-center justify-between px-4 sm:px-5 border border-solid border-[#FCCC2D] rounded-[0.5rem] bg-[#FFFBF0] transition-colors">
+                      <div className="flex items-center gap-3 min-w-0 mr-3">
+                        <FileText className="size-5 text-[#B87A00] shrink-0" />
+                        <div className="min-w-0">
+                          <p className="font-manrope font-semibold text-[0.82rem] text-[#0D2838] truncate">
+                            {resumeFile.name}
+                          </p>
+                          <p className="font-manrope text-[0.7rem] text-[#7C8B93]">
+                            {(resumeFile.size / 1024 / 1024).toFixed(2)} MB • Ready to submit
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setResumeFile(null);
+                          if (fileInputRef.current) fileInputRef.current.value = "";
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-md border border-red-200 transition-colors shrink-0 cursor-pointer shadow-2xs"
+                        title="Remove resume"
+                      >
+                        <Trash2 className="size-3.5" />
+                        <span>Delete</span>
+                      </button>
                     </div>
-                    <span className="font-manrope font-medium text-[0.5rem] leading-[150%] tracking-[0.01em] text-[#7C8B93]">
-                      {resumeFile
-                        ? `${(resumeFile.size / 1024 / 1024).toFixed(2)} MB`
-                        : "Upload your resume(PDF,DOC) - Max 5 MB"}
-                    </span>
-                  </label>
+                  ) : (
+                    <label
+                      htmlFor="intern-resume"
+                      className="w-full h-[6.19rem] flex flex-col items-center justify-center gap-[0.625rem] border border-dashed border-[#A3A3A3] rounded-[0.5rem] bg-white/65 cursor-pointer hover:border-[#FCCC2D] transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <FileText className="size-4 text-[#7C8B93]" />
+                        <span className="font-manrope font-medium text-[0.78rem] leading-[150%] tracking-[0.03em] text-[#0D2838]">
+                          Attach Resume*
+                        </span>
+                      </div>
+                      <span className="font-manrope font-medium text-[0.5rem] leading-[150%] tracking-[0.01em] text-[#7C8B93]">
+                        Upload your resume(PDF,DOC) - Max 5 MB
+                      </span>
+                    </label>
+                  )}
                 </div>
               ) : isVolunteer ? (
-                /* Why would you like to volunteer?* for Volunteer */
+                /* Why would you like to volunteer?* for Volunteer - Figma 5.54rem initial space, hugs text when typed */
                 <div className="relative">
-                  <div className="flex items-start border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                    <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3 mt-1" />
+                  <div
+                    className={`${
+                      (formData.whyVolunteer || formData.message).trim()
+                        ? "min-h-[2.75rem] h-auto pb-1.5"
+                        : "h-[5.54rem] pb-2"
+                    } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                  >
+                    <MessageSquare
+                      className={`size-4 text-[#0D2838] shrink-0 mr-3 ${
+                        (formData.whyVolunteer || formData.message).trim()
+                          ? "mt-1.5"
+                          : "mt-0.5"
+                      }`}
+                    />
                     <textarea
+                      rows={1}
                       required
                       placeholder="Why would you like to volunteer?*"
                       value={formData.whyVolunteer || formData.message}
-                      onChange={(e) =>
+                      onInput={handleAutoResize}
+                      onChange={(e) => {
                         setFormData({
                           ...formData,
                           whyVolunteer: e.target.value,
                           message: e.target.value,
-                        })
-                      }
-                      className="w-full h-[5.54rem] bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none"
+                        });
+                        handleAutoResize(e);
+                      }}
+                      className={`w-full bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none ${
+                        (formData.whyVolunteer || formData.message).trim()
+                          ? "min-h-[1.5rem] max-h-[8rem] leading-normal py-1 overflow-y-auto"
+                          : "h-full leading-[150%] p-0 overflow-hidden"
+                      }`}
                     />
                   </div>
                 </div>
               ) : (
-                /* Your Message (Height: 88.67px matching Figma Frame 298) */
+                /* Your Message for Fundraise - Figma 5.54rem initial space, hugs text when typed */
                 <div className="relative">
-                  <div className="flex items-start border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                    <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3 mt-1" />
+                  <div
+                    className={`${
+                      formData.message.trim()
+                        ? "min-h-[2.75rem] h-auto pb-1.5"
+                        : "h-[5.54rem] pb-2"
+                    } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                  >
+                    <MessageSquare
+                      className={`size-4 text-[#0D2838] shrink-0 mr-3 ${
+                        formData.message.trim() ? "mt-1.5" : "mt-0.5"
+                      }`}
+                    />
                     <textarea
+                      rows={1}
+                      required
                       placeholder="Your Message*"
                       value={formData.message}
-                      onChange={(e) =>
-                        setFormData({ ...formData, message: e.target.value })
-                      }
-                      className="w-full h-[5.54rem] bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none"
+                      onInput={handleAutoResize}
+                      onChange={(e) => {
+                        setFormData({ ...formData, message: e.target.value });
+                        handleAutoResize(e);
+                      }}
+                      className={`w-full bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none ${
+                        formData.message.trim()
+                          ? "min-h-[1.5rem] max-h-[8rem] leading-normal py-1 overflow-y-auto"
+                          : "h-full leading-[150%] p-0 overflow-hidden"
+                      }`}
                     />
                   </div>
                 </div>

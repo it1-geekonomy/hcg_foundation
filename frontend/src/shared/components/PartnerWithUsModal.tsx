@@ -67,6 +67,16 @@ export default function PartnerWithUsModal({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
+      setSubmitted(false);
+      setErrors({});
+      setFormData({
+        fullName: "",
+        email: "",
+        phone: "",
+        organization: "",
+        message: "",
+        agreeTerms: false,
+      });
     } else {
       document.body.style.overflow = "unset";
     }
