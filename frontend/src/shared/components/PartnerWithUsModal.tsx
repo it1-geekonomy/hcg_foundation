@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { X, User, Mail, Building2, MessageSquare } from "lucide-react";
 import PhoneInputField from "@/shared/forms/PhoneInputField";
+import Typography from "@/lib/Typography";
 
 interface PartnerWithUsModalProps {
   isOpen: boolean;
@@ -169,26 +170,42 @@ export default function PartnerWithUsModal({
         {/* Left Column: Form Content (Frame 603: Left: 47.64px -> 2.9775rem, Top: 38.77px -> 2.423rem, Bottom: 46.8px -> 2.925rem, Width: 309.08px -> 19.3175rem on desktop) */}
         <div className="relative w-full md:w-[22rem] shrink-0 px-[1.25rem] sm:px-0 sm:pl-[2.9775rem] sm:pr-[1.25rem] pt-[1.75rem] sm:pt-[2.423rem] pb-[1.75rem] sm:pb-[2.925rem] flex flex-col justify-between overflow-y-auto md:overflow-y-hidden min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <div>
-            {/* Frame 298: Title + Subtitle */}
+            {/* Frame 298: Title + Subtitle using design-system Typography */}
             <div className="w-full max-w-[17.0625rem]">
-              <h2 className="font-tiempos-headline italic font-normal text-[#0D2838] text-[1.5rem] sm:text-[1.8rem] leading-[1.05] tracking-[0.03em]">
+              <Typography
+                variant="heading-5"
+                as="h2"
+                className="text-[#0D2838]"
+              >
                 Be a Part of Someone&apos;s
                 <span className="block">Cancer Journey</span>
-              </h2>
-              <p className="font-manrope font-normal text-[#596D79] text-[0.7436rem] leading-[150%] tracking-[0.01em] mt-[0.5rem]">
+              </Typography>
+              <Typography
+                variant="caption-1"
+                as="p"
+                className="text-[#596D79] mt-[0.5rem]"
+              >
                 Share a few details and our team will get in touch with you to
                 explore partnership opportunities.
-              </p>
+              </Typography>
             </div>
 
             {submitted ? (
               <div className="my-[2rem] p-[1.5rem] bg-[#FFF9EA] border border-[#F3E3B6] rounded-[0.415rem] text-center w-full max-w-[17.0625rem]">
-                <h3 className="font-manrope font-medium text-[1.25rem] text-[#2E1C12] mb-[0.5rem]">
+                <Typography
+                  variant="heading-3"
+                  as="h3"
+                  className="text-[#2E1C12] mb-[0.5rem]"
+                >
                   Thank You!
-                </h3>
-                <p className="font-manrope font-normal text-[0.875rem] text-[#6C6048]">
+                </Typography>
+                <Typography
+                  variant="body-8"
+                  as="p"
+                  className="text-[#6C6048]"
+                >
                   We have received your details and will get in touch shortly.
-                </p>
+                </Typography>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="w-full max-w-[17.0625rem]">
@@ -225,9 +242,13 @@ export default function PartnerWithUsModal({
                       />
                     </div>
                     {errors.fullName && (
-                      <p className="font-manrope text-[0.6875rem] text-red-500 mt-[0.25rem]">
+                      <Typography
+                        variant="caption-1"
+                        as="p"
+                        className="text-red-500 mt-[0.25rem]"
+                      >
                         {errors.fullName}
-                      </p>
+                      </Typography>
                     )}
                   </div>
 
@@ -263,9 +284,13 @@ export default function PartnerWithUsModal({
                       />
                     </div>
                     {errors.email && (
-                      <p className="font-manrope text-[0.6875rem] text-red-500 mt-[0.25rem]">
+                      <Typography
+                        variant="caption-1"
+                        as="p"
+                        className="text-red-500 mt-[0.25rem]"
+                      >
                         {errors.email}
-                      </p>
+                      </Typography>
                     )}
                   </div>
 
@@ -360,19 +385,22 @@ export default function PartnerWithUsModal({
                       }
                       className="size-[0.9375rem] accent-[#FED034] rounded-[0.2rem] cursor-pointer shrink-0"
                     />
-                    <label
-                      htmlFor="modal-terms"
-                      className="cursor-pointer text-[0.7436rem] font-manrope font-normal text-[#596D79] leading-[150%]"
-                    >
-                      <span>I have read and agree to the </span>
-                      <a
-                        href="/terms"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline text-[#FED034] hover:opacity-80 transition-opacity font-medium"
+                    <label htmlFor="modal-terms" className="cursor-pointer">
+                      <Typography
+                        variant="caption-1"
+                        as="span"
+                        className="text-[#596D79]"
                       >
-                        Terms & Conditions
-                      </a>
+                        I have read and agree to the{" "}
+                        <a
+                          href="/terms"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline text-[#FED034] hover:opacity-80 transition-opacity font-medium"
+                        >
+                          Terms & Conditions
+                        </a>
+                      </Typography>
                     </label>
                   </div>
 
@@ -381,9 +409,13 @@ export default function PartnerWithUsModal({
                     type="submit"
                     className="w-full sm:w-[17.0625rem] h-[3.0625rem] bg-[#FED034] text-[#292D32] rounded-[0.415rem] transition duration-200 hover:bg-[#E9BD26] cursor-pointer flex items-center justify-center shrink-0"
                   >
-                    <span className="font-manrope font-semibold text-[0.875rem] text-[#292D32]">
+                    <Typography
+                      variant="button-1"
+                      as="span"
+                      className="text-[#292D32]"
+                    >
                       Submit
-                    </span>
+                    </Typography>
                   </button>
                 </div>
               </form>
