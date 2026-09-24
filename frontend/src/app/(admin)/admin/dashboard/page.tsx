@@ -234,7 +234,7 @@ export default function Page() {
                   stats.topDonors.map((donor: any, idx: number) => (
                     <TableRow key={idx} className="transition-colors hover:bg-gray-50/80 border-b-gray-50 last:border-0">
                       <TableCell className="font-bold text-gray-900 pl-6 md:pl-8 py-4">
-                        {donor.name || "Anonymous"}
+                        {donor.fullName || "Anonymous"}
                       </TableCell>
                       <TableCell className="text-right pr-6 md:pr-8 py-4 text-emerald-600 font-semibold">
                         ₹{donor.amount?.toLocaleString('en-IN') || 0}
