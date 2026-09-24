@@ -7,11 +7,12 @@ import { cmsApi } from "@/domains/cms/lib/api";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import type { CmsEvent } from "@/domains/cms/lib/types";
+import EventCard from "@/domains/resources/components/EventCard";
+import type { EventItem } from "@/domains/resources/constants/events";
+import CmsWebsitePreview from "@/domains/cms/ui/CmsWebsitePreview";
 import {
   CmsBadge,
-  CmsDetailCard,
   CmsHtmlContentCard,
-  CmsMediaTile,
   CmsRecordActions,
   CmsSeoCard,
   CmsViewError,
@@ -107,6 +108,19 @@ export default function EventViewPage() {
 
   const isDeleted = Boolean(event.deletedAt);
 
+  const previewEvent: EventItem | null = event ? {
+    id: event.id ?? "",
+    slug: event.slug ?? "",
+    title: event.title ?? "",
+    date: event.eventDate ? new Date(event.eventDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "",
+    category: "Community Event",
+    summary: event.shortDescription ?? "",
+    fullStory: event.content ?? "",
+    imageUrl: event.eventBanner || event.eventMobileBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+    mobileImageUrl: event.eventMobileBanner || event.eventBanner || "",
+    location: event.eventLocation ?? "",
+  } : null;
+
   return (
     <div className="space-y-6">
       <CmsViewHeader
@@ -153,39 +167,21 @@ export default function EventViewPage() {
         }
       />
 
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(180px,240px)_minmax(0,1fr)]">
-        <div className="space-y-3 self-start">
-          <CmsMediaTile
-            src={event.eventBanner}
-            label="Desktop banner"
-            empty="No desktop banner"
-            className="h-44"
-          />
-          <CmsMediaTile
-            src={event.eventMobileBanner}
-            label="Mobile banner"
-            empty="No mobile banner"
-            className="h-36"
-          />
+      <CmsWebsitePreview label="Website preview" className="bg-[#FFF6D8]">
+        <div className="max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex justify-center">
+          <div className="w-full max-w-3xl">
+            {previewEvent ? <EventCard event={previewEvent} /> : null}
+          </div>
         </div>
+      </CmsWebsitePreview>
 
-        <div className="space-y-4">
-          <CmsDetailCard title="Short description">
-            <Typography
-              variant="label-1"
-              as="p"
-              className="leading-relaxed text-[#212121]"
-            >
-              {event.shortDescription?.trim() || "—"}
-            </Typography>
-          </CmsDetailCard>
-          <CmsHtmlContentCard html={event.content} />
-          <CmsSeoCard
-            metaTitle={event.metaTitle}
-            metaDescription={event.metaDescription}
-            schemaCode={event.schemaCode}
-          />
-        </div>
+      <div className="space-y-4">
+        <CmsHtmlContentCard html={event.content} />
+        <CmsSeoCard
+          metaTitle={event.metaTitle}
+          metaDescription={event.metaDescription}
+          schemaCode={event.schemaCode}
+        />
       </div>
     </div>
   );
