@@ -20,7 +20,7 @@ export default function ProjectCard({
   return (
     <Link
       href={`/resources/projects/${project.slug || project.id}`}
-      className={`group relative block aspect-[16/11] sm:aspect-[788.39/454.09] w-full overflow-hidden rounded-[6px] bg-[#EFEAD8] shadow-xs transition duration-300 hover:shadow-md hover:-translate-y-1 ${className}`}
+      className={`group relative block aspect-[4/3.5] sm:aspect-[4/3] xl:aspect-[4/3] w-full overflow-hidden rounded-[6px] bg-[#EFEAD8] shadow-xs transition duration-300 hover:shadow-md hover:-translate-y-1 ${className}`}
     >
       <picture className="h-full w-full block">
         {project.mobileImageUrl && (
@@ -43,20 +43,20 @@ export default function ProjectCard({
           - Tablet (< lg:) when 1 col: Roomy side-by-side
           - Mobile (< sm:): Stacked with Read More button below date
       */}
-      <div className="absolute left-[0.75rem] right-[0.75rem] bottom-[0.75rem] xl:left-[1.1rem] xl:right-[1.28rem] xl:bottom-[1.51rem] h-auto sm:h-auto xl:h-[8.47375rem] py-3 xl:py-0 flex flex-col sm:flex-row sm:items-center justify-between gap-[0.5rem] sm:gap-[0.75rem] xl:gap-[1rem] p-[0.75rem] sm:p-0 sm:pl-[1.25rem] xl:pl-[1.74rem] sm:pr-[1rem] xl:pr-[2.61rem] rounded-[6px] border border-white/10 bg-[#838383]/40 backdrop-blur-[55px] text-white transition duration-300 group-hover:bg-[#838383]/50">
+      <div className="absolute left-[0.75rem] right-[0.75rem] bottom-[0.75rem] xl:left-[1.1rem] xl:right-[1.28rem] xl:bottom-[1.51rem] h-auto lg:h-[9.5rem] xl:h-[11rem] flex flex-col lg:flex-row lg:items-center justify-between gap-[0.75rem] lg:gap-[1rem] p-[1rem] lg:py-[1rem] lg:px-[1.5rem] xl:pl-[1.74rem] xl:pr-[2.61rem] rounded-[6px] border border-white/10 bg-[#838383]/40 backdrop-blur-[55px] text-white transition duration-300 group-hover:bg-[#838383]/50">
         {/* Left: Title + Date stacked */}
-        <div className="flex flex-col justify-center items-start min-w-0 flex-1 text-left gap-[0.35rem] sm:gap-[0.5rem] xl:gap-[0.65rem]">
-          <div className="w-full drop-shadow-xs text-left min-w-0 overflow-hidden">
+        <div className="flex flex-col justify-center items-start min-w-0 flex-1 text-left gap-[0.5rem] lg:gap-[0.65rem]">
+          <div className="w-full drop-shadow-xs text-left min-w-0 h-auto">
             <Typography
-              variant="heading-7"
+              variant="heading-8"
               as={headingTag}
               title={project.title}
-              className="font-argestadisplay font-normal text-white block line-clamp-2 w-full leading-snug sm:leading-tight"
+              className="font-argestadisplay font-normal text-white block w-full !leading-[1.15]"
             >
               {project.title}
             </Typography>
           </div>
-          <div className="flex items-center gap-[0.35rem] sm:gap-[0.5rem] xl:gap-[0.7rem] min-w-0 text-left">
+          <div className="flex items-center gap-[0.35rem] sm:gap-[0.5rem] xl:gap-[0.7rem] min-w-0 text-left pt-1">
             <img
               src="/Resources/calendar.png"
               alt="Calendar"
@@ -71,8 +71,8 @@ export default function ProjectCard({
         </div>
 
         {/* Read More button: Lower than project date on mobile, side-by-side and shifted right on sm+ */}
-        <div className="shrink-0 flex items-center self-start sm:self-center pt-[0.25rem] sm:pt-0">
-          <span className="inline-flex items-center justify-center whitespace-nowrap h-[2rem] sm:h-[2.85rem] xl:h-[3.5625rem] w-auto xl:w-[11rem] px-[0.75rem] sm:px-[1rem] xl:px-[1.1rem] gap-[0.35rem] sm:gap-[0.45rem] xl:gap-[0.52rem] rounded-[6px] border border-white/10 bg-[#FCCC2D] text-[#2D2D2D] backdrop-blur-[42px] shadow-xs cursor-pointer shrink-0 transition duration-300 group-hover:bg-[#E9B510] group-hover:scale-105">
+        <div className="shrink-0 flex items-center self-center pt-[0.5rem] lg:pt-0">
+          <span className="inline-flex items-center justify-center whitespace-nowrap h-[1.75rem] lg:h-[2.5rem] xl:h-[3rem] w-auto xl:w-[9.5rem] px-[0.75rem] lg:px-[1.25rem] gap-[0.45rem] rounded-[6px] border border-white/10 bg-[#FCCC2D] text-[#2D2D2D] backdrop-blur-[42px] shadow-xs cursor-pointer shrink-0 transition duration-300 group-hover:bg-[#E9B510] group-hover:scale-105">
             <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
               Read More
             </Typography>

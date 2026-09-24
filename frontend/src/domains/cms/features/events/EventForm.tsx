@@ -12,6 +12,7 @@ import type {
 } from "@/domains/cms/lib/types";
 import {
   EVENT_BANNER_SIZE,
+  EVENT_MOBILE_BANNER_SIZE,
 } from "@/domains/home/constants/togetherwehope";
 import CmsImagePicker from "@/domains/cms/ui/CmsImagePicker";
 import { CmsFormField } from "@/domains/cms/ui/CmsFormField";
@@ -308,10 +309,11 @@ export default function EventForm({
         <CmsFormField
           label="Mobile banner"
           htmlFor="eventMobileBanner"
-          hint="WebP or AVIF"
+          hint={`WebP or AVIF · required size ${EVENT_MOBILE_BANNER_SIZE.width} × ${EVENT_MOBILE_BANNER_SIZE.height}px`}
         >
           <CmsImagePicker
             label="mobile banner"
+            requiredSize={EVENT_MOBILE_BANNER_SIZE}
             value={{
               file: value.eventMobileBannerFile,
               url: value.eventMobileBannerUrl,

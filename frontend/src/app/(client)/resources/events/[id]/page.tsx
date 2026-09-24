@@ -116,25 +116,27 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
               </div>
 
               {/* Story Paragraphs */}
-              {eventItem.fullStory.includes("<") ? (
-                <div
-                  className="mt-5 sm:mt-6 prose max-w-none text-left font-argestadisplay font-normal text-justify text-[#596D79] prose-headings:!text-[#0D2838] prose-a:!text-[#FCCC2D] [&_*]:!bg-transparent [&_p]:!text-[#596D79] [&_span]:!text-[#596D79] [&_div]:!text-[#596D79] [&_strong]:!text-[#596D79] [&_h1]:!text-[#0D2838] [&_h2]:!text-[#0D2838] [&_h3]:!text-[#0D2838] [&_h4]:!text-[#0D2838] [&_h5]:!text-[#0D2838] [&_h6]:!text-[#0D2838] [&_li]:!text-[#596D79] [&_td]:!text-[#596D79] [&_th]:!text-[#0D2838]"
-                  dangerouslySetInnerHTML={{ __html: eventItem.fullStory }}
-                />
-              ) : (
-                <div className="mt-5 sm:mt-6 space-y-4 text-left">
-                  {eventItem.fullStory.split("\n\n").map((paragraph, index) => (
-                    <Typography
-                      key={index}
-                      variant="body-10"
-                      as="p"
-                      className="font-argestadisplay font-normal text-justify text-[#596D79]"
-                    >
-                      {paragraph}
-                    </Typography>
-                  ))}
-                </div>
-              )}
+              <div className="mt-4 sm:mt-5 max-h-[25rem] sm:max-h-[30rem] lg:max-h-[35rem] xl:max-h-[40rem] overflow-y-auto no-scrollbar pr-2 sm:pr-4">
+                {eventItem.fullStory.includes("<") ? (
+                  <div
+                    className="prose max-w-none text-left font-argestadisplay font-normal text-justify text-[#596D79] prose-headings:!text-[#0D2838] prose-a:!text-[#FCCC2D] [&_*]:!bg-transparent [&_p]:!text-[#596D79] [&_span]:!text-[#596D79] [&_div]:!text-[#596D79] [&_strong]:!text-[#596D79] [&_h1]:!text-[#0D2838] [&_h2]:!text-[#0D2838] [&_h3]:!text-[#0D2838] [&_h4]:!text-[#0D2838] [&_h5]:!text-[#0D2838] [&_h6]:!text-[#0D2838] [&_li]:!text-[#596D79] [&_td]:!text-[#596D79] [&_th]:!text-[#0D2838]"
+                    dangerouslySetInnerHTML={{ __html: eventItem.fullStory }}
+                  />
+                ) : (
+                  <div className="space-y-4 text-left">
+                    {eventItem.fullStory.split("\n\n").map((paragraph, index) => (
+                      <Typography
+                        key={index}
+                        variant="body-10"
+                        as="p"
+                        className="font-argestadisplay font-normal text-justify text-[#596D79]"
+                      >
+                        {paragraph}
+                      </Typography>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Reusable Social Share Buttons */}
               <ShareStory />

@@ -9,7 +9,7 @@ import EventCard from "@/domains/resources/components/EventCard";
 import { EventItem } from "@/domains/resources/constants/events";
 import { publicEventsApi } from "@/domains/cms/lib/api";
 
-const CONTAINER = "max-w-[90rem] xl:max-w-[102rem] 2xl:max-w-[106rem] mx-auto px-4 sm:px-6 lg:px-8";
+const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
 interface RelatedEventsProps {
   currentEventId: string;
@@ -132,18 +132,17 @@ export default function RelatedEvents({ currentEventId }: RelatedEventsProps) {
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         onDragStart={(e) => e.preventDefault()}
-        className={`mt-6 sm:mt-8 flex overflow-x-auto gap-4 sm:gap-5 lg:gap-6 no-scrollbar pb-4 sm:pb-0 touch-pan-y ${isDragging ? "cursor-grabbing scroll-auto" : "cursor-grab snap-x snap-mandatory scroll-smooth"}`}
+        className={`mt-6 sm:mt-8 flex overflow-x-auto gap-6 sm:gap-8 no-scrollbar pb-4 sm:pb-0 touch-pan-y ${isDragging ? "cursor-grabbing scroll-auto" : "cursor-grab snap-x snap-mandatory scroll-smooth"}`}
       >
         {allRelatedEvents.map((item) => (
           <div
             key={item.id}
-            className={`shrink-0 w-[calc(100%-1rem)] sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] snap-center flex select-none [&_img]:pointer-events-none ${loading ? "opacity-50" : "opacity-100"}`}
+            className={`shrink-0 w-[calc(100%-1rem)] md:w-[calc(50%-1rem)] xl:w-[calc(50%-1.5rem)] snap-center flex select-none [&_img]:pointer-events-none ${loading ? "opacity-50" : "opacity-100"}`}
             onClickCapture={handleLinkClick}
           >
             <EventCard
               event={item}
               headingTag="h3"
-              aspectRatio="aspect-[1/1] min-[450px]:aspect-[788/454] sm:aspect-[530.16/374.62] lg:aspect-[530.16/374.62]"
             />
           </div>
         ))}

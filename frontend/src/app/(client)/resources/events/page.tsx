@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Banner from "@/shared/components/Herobannersection";
 import DonateForm from "@/shared/components/DonateForm";
 import PaginationControls from "@/shared/components/PaginationControls";
@@ -8,45 +8,26 @@ import EventCard from "@/domains/resources/components/EventCard";
 import { EventItem } from "@/domains/resources/constants/events";
 import { publicEventsApi } from "@/domains/cms/lib/api";
 
-const CONTAINER = "max-w-[90rem] xl:max-w-[102rem] 2xl:max-w-[106rem] mx-auto px-4 sm:px-6 lg:px-8";
-
-function chunkIntoPages<T>(items: T[], pageSize: number): T[][] {
-  if (items.length === 0) return [];
-  if (items.length <= pageSize) return [items];
-
-  const totalPages = Math.ceil(items.length / pageSize);
-  const result: T[][] = [];
-
-  for (let i = 0; i < totalPages; i++) {
-    if (i === totalPages - 1) {
-      // Last page: always take the last `pageSize` items so 3 rows x 2 cols is completely filled and never left empty!
-      result.push(items.slice(-pageSize));
-    } else {
-      result.push(items.slice(i * pageSize, (i + 1) * pageSize));
-    }
-  }
-
-  return result;
-}
+const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
 export default function EventsPage() {
   const [allEvents, setAllEvents] = useState<EventItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(6);
+  const [itemsPerPage, setItemsPerPage] = useState<number | null>(null);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Touch swipe support
-  const touchStartXRef = useRef<number | null>(null);
-
-  // Responsive itemsPerPage: 3 on desktop (1 row x 3 columns), 2 on tablet, 1 on mobile
+  // Responsive itemsPerPage
   useEffect(() => {
     const updateItemsPerPage = () => {
-      if (window.innerWidth < 640) {
-        setItemsPerPage(1);
-      } else if (window.innerWidth < 1024) {
-        setItemsPerPage(2);
+      if (window.innerWidth < 1024) {
+        setItemsPerPage(4);
+      } else if (window.innerWidth < 1280) {
+        setItemsPerPage(4);
       } else {
-        setItemsPerPage(3);
+        setItemsPerPage(6);
       }
     };
     updateItemsPerPage();
@@ -54,18 +35,28 @@ export default function EventsPage() {
     return () => window.removeEventListener("resize", updateItemsPerPage);
   }, []);
 
-  // Fetch all published events once so smooth horizontal sliding works instantly with 0 latency
+  // Fetch events page
   useEffect(() => {
+    if (itemsPerPage === null) return;
     let cancelled = false;
-    setLoading(true);
-
+    
+    if (allEvents.length === 0) {
+      setLoading(true);
+    } else {
+      setIsFetching(true);
+    }
+    
+    setError(null);
     (async () => {
       try {
         const res = await publicEventsApi.listPublished({
-          limit: 100,
+          page: currentPage,
+          limit: itemsPerPage,
         });
-        if (!cancelled) {
-          const mapped: EventItem[] = (res.data ?? []).map((e) => ({
+        if (cancelled) return;
+        
+        if (res.data && res.data.length > 0) {
+          const mapped: EventItem[] = res.data.map((e) => ({
             id: e.id ?? "",
             slug: e.slug ?? "",
             title: e.title ?? "",
@@ -90,44 +81,39 @@ export default function EventsPage() {
             location: e.eventLocation ?? "",
           }));
           setAllEvents(mapped);
+          setTotalCount(res.meta.total);
+        } else {
+          setAllEvents([]);
+          setTotalCount(0);
         }
-      } catch (err) {
-        if (!cancelled) setAllEvents([]);
+      } catch (err: any) {
+        if (!cancelled) {
+          setAllEvents([]);
+          setTotalCount(0);
+          setError(err.message || "Failed to load events.");
+        }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+          setIsFetching(false);
+        }
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [currentPage, itemsPerPage]);
 
-  // Compute pages with full items (last page is never left empty!)
-  const pages = useMemo(() => {
-    return chunkIntoPages(allEvents, itemsPerPage);
-  }, [allEvents, itemsPerPage]);
-
-  const totalPages = Math.max(1, pages.length);
+  const totalItems = totalCount ?? 0;
+  const itemsPerPg = itemsPerPage || 6;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPg));
   const safePage = Math.min(currentPage, totalPages);
+  
+  const currentEvents = allEvents;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartXRef.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartXRef.current === null) return;
-    const diff = touchStartXRef.current - e.changedTouches[0].clientX;
-    if (diff > 50 && safePage < totalPages) {
-      setCurrentPage((p) => Math.min(totalPages, p + 1));
-    } else if (diff < -50 && safePage > 1) {
-      setCurrentPage((p) => Math.max(1, p - 1));
-    }
-    touchStartXRef.current = null;
   };
 
   return (
@@ -136,42 +122,48 @@ export default function EventsPage() {
         bgImage="/Resources/Resources banner image.png"
         bgImageAlt="Events"
         breadcrumbs={[
-          { label: "Home", href: "/#events" },
+          { label: "Home", href: "/" },
           { label: "Resources" },
         ]}
         title="Events"
       />
 
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
-        {/* Smooth Horizontal Sliding Track */}
-        <div
-          className="overflow-hidden w-full touch-pan-y"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
+        <div className="w-full">
           <div
-            className="flex w-full transition-transform duration-500 ease-out"
-            style={{ transform: `translateX(-${(safePage - 1) * 100}%)` }}
+            key={`${safePage}-${itemsPerPage}`}
+            className={`flex flex-col gap-16 pb-24 lg:pb-0 lg:grid lg:grid-cols-2 lg:gap-x-[2rem] lg:gap-y-[2.5rem] transition-all duration-500 ease-in-out ${
+              isFetching ? "opacity-40 scale-[0.98] blur-[1px] pointer-events-none" : "opacity-100 scale-100 blur-0"
+            }`}
           >
-            {pages.map((pageItems, pageIdx) => (
+            {currentEvents.map((eventItem, itemIdx) => (
               <div
-                key={pageIdx}
-                className="w-full shrink-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-[1.25rem] lg:gap-x-[1.5rem] gap-y-[1.5rem] sm:gap-y-[2rem] lg:gap-y-[2.5rem]"
+                key={`${eventItem.id}-${itemIdx}`}
+                className="sticky top-[var(--mobile-top)] lg:top-auto lg:relative w-full"
+                style={
+                  {
+                    "--mobile-top": `calc(6rem + ${itemIdx * 1.5}rem)`,
+                    zIndex: itemIdx,
+                  } as React.CSSProperties
+                }
               >
-                {pageItems.map((eventItem, itemIdx) => (
-                  <EventCard
-                    key={`${eventItem.id}-${pageIdx}-${itemIdx}`}
-                    event={eventItem}
-                    headingTag="h2"
-                  />
-                ))}
+                <EventCard
+                  event={eventItem}
+                  headingTag="h2"
+                  className="w-full shadow-2xl shadow-black/10 lg:shadow-xs transition-all duration-500"
+                />
               </div>
             ))}
           </div>
 
-          {!loading && allEvents.length === 0 && (
+          {!loading && !error && currentEvents.length === 0 && (
             <div className="py-12 text-center text-neutral-500">
               No events available at the moment.
+            </div>
+          )}
+          {error && (
+            <div className="py-12 text-center text-red-500">
+              {error}
             </div>
           )}
         </div>
