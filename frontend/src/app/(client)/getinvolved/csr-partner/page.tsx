@@ -15,7 +15,7 @@ export default function CsrPartnerPage() {
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
 
   return (
-    <main className="min-h-screen bg-[#FFFBEA]">
+    <main className="min-h-screen bg-[#FFF8E2]">
       <Banner
         bgImage="/Get Involved/Get Involved banner image.png"
         bgImageAlt="CSR Partner"
@@ -61,7 +61,8 @@ export default function CsrPartnerPage() {
           {CSR_PARTNER_CARDS.map((card) => (
             <div
               key={card.id}
-              className="rounded-[0.27rem] border border-[#FFDF7C] bg-[#FDF7EB] p-[1.5rem] sm:pt-[1.4375rem] sm:px-[3.1625rem] sm:pb-[2.5rem] flex flex-col justify-start min-h-[22rem] lg:min-h-[26.4rem] transition duration-300 hover:shadow-xs"
+              style={{ backgroundColor: "#FDF7EB", borderColor: "#FFDF7C" }}
+              className="rounded-[4.31px] border border-[#FFDF7C] bg-[#FDF7EB] p-[1.5rem] sm:pt-[1.4375rem] sm:pl-[3.725rem] sm:pr-[2.58rem] sm:pb-[2.5rem] flex flex-col justify-start min-h-[22rem] lg:min-h-[26.4rem] transition duration-300 hover:shadow-xs"
             >
               {/* Card Number */}
               <div className="mb-[0.25rem] sm:mb-[0.5rem] text-left">

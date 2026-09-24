@@ -38,15 +38,25 @@ export default function PaginationControls({
     }
   };
 
-  const getPageNumbers = () => {
+  const getPageNumbers = (): (number | string)[] => {
     if (totalPages <= 1) return [1];
-    if (totalPages === 2) {
-      return [1, '..', 2];
+    if (totalPages <= 4) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
-    if (currentPage === 1 || currentPage === totalPages) {
-      return [1, '..', totalPages];
+
+    // When totalPages > 4:
+    // If currentPage is near start (page 1 or 2): 1, 2, '...', totalPages
+    if (currentPage <= 2) {
+      return [1, 2, "...", totalPages];
     }
-    return [1, '..', currentPage, '..', totalPages];
+
+    // If currentPage is near end (totalPages - 1 or totalPages): 1, '...', totalPages - 1, totalPages
+    if (currentPage >= totalPages - 1) {
+      return [1, "...", totalPages - 1, totalPages];
+    }
+
+    // If currentPage is in the middle: 1, '...', currentPage, '...', totalPages
+    return [1, "...", currentPage, "...", totalPages];
   };
 
   return (
@@ -91,13 +101,13 @@ export default function PaginationControls({
       {showNumbers && totalPages > 1 && (
         <div className="flex items-center justify-center gap-1 sm:gap-1.5 px-0.5">
           {getPageNumbers().map((item, index) => {
-            if (item === '..') {
+            if (typeof item === "string") {
               return (
                 <span
                   key={`dots-${index}`}
                   className="px-0.5 text-[#8C826B] font-bold text-xs select-none tracking-wider"
                 >
-                  ..
+                  ...
                 </span>
               );
             }

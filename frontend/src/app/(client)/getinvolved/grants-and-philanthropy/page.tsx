@@ -8,13 +8,13 @@ import { PHILANTHROPY_CARDS } from "@/domains/getinvolved/constants/grants-and-p
 import Banner from "@/shared/components/Herobannersection";
 import { DiagonalArrowIcon } from "@/shared/components/icons/ArrowIcons";
 
-const CONTAINER = "mx-[clamp(1rem,8vw,8rem)] xl:mx-[clamp(0.5rem,3vw,4rem)] 2xl:mx-[clamp(1rem,10vw,10rem)]";
+const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
 export default function GrantsAndPhilanthropyPage() {
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
 
   return (
-    <main className="min-h-screen bg-[#FFFBEA]">
+    <main className="min-h-screen bg-[#FFF8E2]">
       <Banner
         bgImage="/Get Involved/Get Involved banner image.png"
         bgImageAlt="Grants & Philanthropy"
@@ -57,11 +57,11 @@ export default function GrantsAndPhilanthropyPage() {
           {PHILANTHROPY_CARDS.map((card) => (
             <div
               key={card.id}
-              className="group flex flex-col justify-between overflow-hidden rounded-xl bg-[#FFF9EA] border border-[#F3E3B6] shadow-xs transition duration-300 hover:shadow-md"
+              className="group flex flex-col justify-between overflow-hidden rounded-lg bg-white border border-black/[0.04] shadow-xs transition duration-300 hover:shadow-md"
             >
               {/* Card Top: Circular Icon Badge + Title + Description */}
-              <div className="p-5 sm:p-6 lg:p-8 flex items-start gap-3.5 sm:gap-4 lg:gap-5 min-h-[9rem] sm:min-h-[10.5rem] lg:min-h-[11.25rem]">
-                <div className="w-[3.5rem] h-[3.5rem] sm:w-[5rem] sm:h-[5rem] lg:w-[6.6875rem] lg:h-[6.6875rem] shrink-0 rounded-full bg-[#FFF3CC] flex items-center justify-center p-[0.875rem] sm:p-[1.25rem] lg:pt-[2rem] lg:pb-[1.7rem] lg:pl-[1.9375rem] lg:pr-[1.7rem]">
+              <div className="p-4 sm:p-5 lg:p-6 xl:p-8 flex items-start gap-3 sm:gap-4 xl:gap-5 min-h-[7.5rem] sm:min-h-[8.5rem] xl:min-h-[11.25rem]">
+                <div className="w-[3.25rem] h-[3.25rem] sm:w-[4rem] sm:h-[4rem] lg:w-[4.25rem] lg:h-[4.25rem] xl:w-[6.6875rem] xl:h-[6.6875rem] shrink-0 rounded-full bg-[#FFF3CC] flex items-center justify-center p-[0.75rem] sm:p-[1rem] lg:p-[1.125rem] xl:p-[27.25px]">
                   <img
                     src={card.iconUrl}
                     alt={card.title}
@@ -71,7 +71,10 @@ export default function GrantsAndPhilanthropyPage() {
                 <div>
                   <div className="mb-2">
                     <Typography variant="heading-10" as="h2" className="font-argestadisplay font-normal text-[#0D2838]">
-                      {card.title}
+                      <span className="block">{card.title}</span>
+                      {card.titleLine2 && (
+                        <span className="block">{card.titleLine2}</span>
+                      )}
                     </Typography>
                   </div>
                   <Typography variant="body-9" as="p" className="font-manrope font-normal text-[#606060]">
@@ -93,25 +96,22 @@ export default function GrantsAndPhilanthropyPage() {
           ))}
         </div>
 
-        {/* Bottom Impact Banner matching Figma 100% */}
-        <div className="mt-10 sm:mt-14 lg:mt-16 rounded-xl bg-[#FFF5D6] p-6 sm:p-10 lg:p-14 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
-          <div className="lg:col-span-7">
-            <div className="max-w-lg">
-              <Typography
-                variant="heading-1"
-                as="h2"
-                className="font-tiempos-headline font-normal max-lg:!text-left text-left text-[#0D2838]"
-              >
-                Creating Lasting Change Through Partnership
-              </Typography>
-            </div>
+        {/* Bottom Impact Banner matching Figma Frame 576 */}
+        <div className="mt-10 sm:mt-14 lg:mt-16 rounded-xl bg-[#FFF4CF] px-6 sm:px-10 lg:pl-[3.375rem] lg:pr-[2.875rem] py-6 sm:py-8 lg:pt-[2.25rem] lg:pb-[1.6875rem] flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 sm:gap-8 xl:gap-12 2xl:gap-16">
+          <div className="shrink-0">
+            <Typography
+              variant="heading-1"
+              as="h2"
+              className="font-tiempos-headline font-normal !text-left text-[#0D2838]"
+            >
+              Creating Lasting Change
+              <span className="block">Through Partnership</span>
+            </Typography>
           </div>
-          <div className="lg:col-span-5 flex flex-col items-start gap-4 sm:gap-5">
-            <div className="max-w-md text-justify">
-              <Typography variant="body-10" as="p" className="font-argestadisplay font-normal text-[#121212]">
-                Your contribution can help a patient receive care, give a family hope, and help build healthier communities.
-              </Typography>
-            </div>
+          <div className="flex flex-col items-start gap-3 sm:gap-3.5 max-w-[32rem]">
+            <Typography variant="body-10" as="p" className="font-argestadisplay font-normal text-left text-[#121212]">
+              Your contribution can help a patient receive care, give a family hope, and help build healthier communities.
+            </Typography>
             <button
               type="button"
               onClick={() => setIsPartnerModalOpen(true)}
