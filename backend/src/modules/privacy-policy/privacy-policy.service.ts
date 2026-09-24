@@ -110,6 +110,12 @@ export class PrivacyPolicyService {
 
   private async saveOrThrow(entity: PrivacyPolicy): Promise<PrivacyPolicy> {
     try {
+      if (entity.status === ContentStatus.PUBLISHED) {
+        const existing = await this.repo.findOne({ where: { status: ContentStatus.PUBLISHED } });
+        if (existing && existing.id !== entity.id) {
+          throw new ConflictException('A published version already exists. Please archive it before publishing a new one.');
+        }
+      }
       return await this.repo.save(entity);
     } catch (err) {
       if (this.isUniqueViolation(err)) {
