@@ -43,15 +43,15 @@ export default function ProjectCard({
           - Tablet (< lg:) when 1 col: Roomy side-by-side
           - Mobile (< sm:): Stacked with Read More button below date
       */}
-      <div className="absolute left-[0.75rem] right-[0.75rem] bottom-[0.75rem] xl:left-[1.1rem] xl:right-[1.28rem] xl:bottom-[1.51rem] h-auto sm:h-[8.47375rem] flex flex-col sm:flex-row sm:items-center justify-between gap-[0.5rem] sm:gap-[0.75rem] xl:gap-[1rem] p-[0.75rem] sm:p-0 sm:pl-[1.25rem] xl:pl-[1.74rem] sm:pr-[1rem] xl:pr-[2.61rem] rounded-[6px] border border-white/10 bg-[#838383]/40 backdrop-blur-[55px] text-white transition duration-300 group-hover:bg-[#838383]/50">
+      <div className="absolute left-[0.75rem] right-[0.75rem] bottom-[0.75rem] xl:left-[1.1rem] xl:right-[1.28rem] xl:bottom-[1.51rem] h-auto sm:h-auto xl:h-[8.47375rem] py-3 xl:py-0 flex flex-col sm:flex-row sm:items-center justify-between gap-[0.5rem] sm:gap-[0.75rem] xl:gap-[1rem] p-[0.75rem] sm:p-0 sm:pl-[1.25rem] xl:pl-[1.74rem] sm:pr-[1rem] xl:pr-[2.61rem] rounded-[6px] border border-white/10 bg-[#838383]/40 backdrop-blur-[55px] text-white transition duration-300 group-hover:bg-[#838383]/50">
         {/* Left: Title + Date stacked */}
-        <div className="flex flex-col justify-center items-start min-w-0 flex-1 text-left gap-[0.35rem] sm:gap-[0.65rem] xl:gap-[0.93rem]">
+        <div className="flex flex-col justify-center items-start min-w-0 flex-1 text-left gap-[0.35rem] sm:gap-[0.5rem] xl:gap-[0.65rem]">
           <div className="w-full drop-shadow-xs text-left min-w-0 overflow-hidden">
             <Typography
               variant="heading-7"
               as={headingTag}
               title={project.title}
-              className="font-argestadisplay font-normal text-white block truncate w-full"
+              className="font-argestadisplay font-normal text-white block line-clamp-2 w-full leading-snug sm:leading-tight"
             >
               {project.title}
             </Typography>
