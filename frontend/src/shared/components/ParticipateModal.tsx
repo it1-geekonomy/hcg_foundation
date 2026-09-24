@@ -55,10 +55,12 @@ export default function ParticipateModal({
     languages: "",
     computerSkills: "",
     location: "",
+    educationalQualification: "",
     fundraisingGoal: "",
     reason: "",
     volunteerInterest: "",
     availability: "",
+    whyVolunteer: "",
     message: "",
     agreeTerms: false,
   });
@@ -161,10 +163,12 @@ export default function ParticipateModal({
         languages: "",
         computerSkills: "",
         location: "",
+        educationalQualification: "",
         fundraisingGoal: "",
         reason: "",
         volunteerInterest: "",
         availability: "",
+        whyVolunteer: "",
         message: "",
         agreeTerms: false,
       });
@@ -174,6 +178,7 @@ export default function ParticipateModal({
 
   const isIntern = type === "intern";
   const isFundraise = type === "fundraise";
+  const isVolunteer = type === "volunteer";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/60 backdrop-blur-xs transition-opacity duration-300">
@@ -255,15 +260,10 @@ export default function ParticipateModal({
                     </span>
                   </>
                 )}
-                {!isIntern && !isFundraise && (
-                  <>
-                    <span className="block">
-                      Join our team of dedicated volunteers and help support patient care initiatives,
-                    </span>
-                    <span className="block">
-                      screening camps, administrative work, and community outreach.
-                    </span>
-                  </>
+                {isVolunteer && (
+                  <span className="block text-[#596D79]">
+                    &ldquo;Share your time, skills, and energy to support cancer patients, families, and communities.&rdquo;
+                  </span>
                 )}
               </Typography>
             </div>
@@ -329,12 +329,12 @@ export default function ParticipateModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                 <div className="relative">
                   <div
-                    className={`flex items-center border-b py-2.5 transition-colors ${errors.email
+                    className={`flex items-start pt-1 pb-7 border-b transition-colors ${errors.email
                         ? "border-red-500"
                         : "border-[#E5E0D0] focus-within:border-[#FCCC2D]"
                       }`}
                   >
-                    <Mail className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                    <Mail className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
                     <input
                       type="email"
                       required
@@ -382,19 +382,30 @@ export default function ParticipateModal({
                   </div>
                 ) : (
                   <div className="relative">
-                    <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
-                      <User className="size-4 text-[#0D2838] shrink-0 mr-3" />
-                      <input
-                        type="text"
+                    <div className="flex items-start pt-1 pb-7 border-b border-[#E5E0D0] focus-within:border-[#FCCC2D] transition-colors">
+                      <User className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
+                      <select
                         required
-                        placeholder="City / Location*"
                         value={formData.location}
                         onChange={(e) =>
                           setFormData({ ...formData, location: e.target.value })
                         }
-                        className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
-                      />
-                      <ChevronDown className="size-4 text-[#0D2838] shrink-0 ml-1 pointer-events-none" />
+                        className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden font-manrope cursor-pointer appearance-none"
+                      >
+                        <option value="" disabled>
+                          City / Location*
+                        </option>
+                        <option value="Bengaluru">Bengaluru</option>
+                        <option value="Mumbai">Mumbai</option>
+                        <option value="Delhi NCR">Delhi NCR</option>
+                        <option value="Ahmedabad">Ahmedabad</option>
+                        <option value="Chennai">Chennai</option>
+                        <option value="Hyderabad">Hyderabad</option>
+                        <option value="Kolkata">Kolkata</option>
+                        <option value="Pune">Pune</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      <ChevronDown className="size-4 text-[#0D2838] shrink-0 ml-1 mt-0.5 pointer-events-none" />
                     </div>
                   </div>
                 )}
@@ -483,8 +494,59 @@ export default function ParticipateModal({
                     </div>
                   </div>
                 </>
+              ) : isVolunteer ? (
+                /* Volunteer Row 3: Educational Qualification & Areas of Interest */
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
+                  <div className="relative">
+                    <div className="flex items-start pt-1 pb-7 border-b border-[#E5E0D0] focus-within:border-[#FCCC2D] transition-colors">
+                      <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
+                      <input
+                        type="text"
+                        required
+                        placeholder="Educational Qualification*"
+                        value={formData.educationalQualification}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            educationalQualification: e.target.value,
+                          })
+                        }
+                        className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <div className="flex items-start pt-1 pb-7 border-b border-[#E5E0D0] focus-within:border-[#FCCC2D] transition-colors">
+                      <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
+                      <select
+                        required
+                        value={formData.volunteerInterest}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            volunteerInterest: e.target.value,
+                          })
+                        }
+                        className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden font-manrope cursor-pointer appearance-none"
+                      >
+                        <option value="" disabled>
+                          Areas of Interest*
+                        </option>
+                        <option value="Patient Support & Care">Patient Support & Care</option>
+                        <option value="Screening & Medical Camps">Screening & Medical Camps</option>
+                        <option value="Community Outreach & Awareness">Community Outreach & Awareness</option>
+                        <option value="Art Therapy & Creative Sessions">Art Therapy & Creative Sessions</option>
+                        <option value="Administrative & Operations">Administrative & Operations</option>
+                        <option value="Fundraising & Event Support">Fundraising & Event Support</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      <ChevronDown className="size-4 text-[#0D2838] shrink-0 ml-1 mt-0.5 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
               ) : (
-                /* Specific to Fundraise / Volunteer (Frame 582: Gap 51px) */
+                /* Specific to Fundraise (Frame 582: Gap 51px) */
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                   <div className="relative">
                     <div className="flex items-center border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
@@ -492,26 +554,13 @@ export default function ParticipateModal({
                       <input
                         type="text"
                         required
-                        placeholder={
-                          isFundraise
-                            ? "Fundraising Goal*"
-                            : "Area of Interest*"
-                        }
-                        value={
-                          isFundraise
-                            ? formData.fundraisingGoal
-                            : formData.volunteerInterest
-                        }
+                        placeholder="Fundraising Goal*"
+                        value={formData.fundraisingGoal}
                         onChange={(e) =>
-                          isFundraise
-                            ? setFormData({
-                              ...formData,
-                              fundraisingGoal: e.target.value,
-                            })
-                            : setFormData({
-                              ...formData,
-                              volunteerInterest: e.target.value,
-                            })
+                          setFormData({
+                            ...formData,
+                            fundraisingGoal: e.target.value,
+                          })
                         }
                         className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                       />
@@ -524,24 +573,13 @@ export default function ParticipateModal({
                       <input
                         type="text"
                         required
-                        placeholder={
-                          isFundraise
-                            ? "Why are you fundraising?*"
-                            : "Availability / Hours per week*"
-                        }
-                        value={
-                          isFundraise ? formData.reason : formData.availability
-                        }
+                        placeholder="Why are you fundraising?*"
+                        value={formData.reason}
                         onChange={(e) =>
-                          isFundraise
-                            ? setFormData({
-                              ...formData,
-                              reason: e.target.value,
-                            })
-                            : setFormData({
-                              ...formData,
-                              availability: e.target.value,
-                            })
+                          setFormData({
+                            ...formData,
+                            reason: e.target.value,
+                          })
                         }
                         className="w-full bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
                       />
@@ -550,7 +588,7 @@ export default function ParticipateModal({
                 </div>
               )}
 
-              {/* Bottom section: Attach Resume for Intern (Figma Frame 622: 545px x 99px, Radius 8px, Dashed #A3A3A3, Fill #FFFFFF 65%), Your Message for Fundraise/Volunteer */}
+              {/* Bottom section: Attach Resume for Intern (Figma Frame 622: 545px x 99px, Radius 8px, Dashed #A3A3A3, Fill #FFFFFF 65%), Why would you like to volunteer? for Volunteer, Your Message for Fundraise */}
               {isIntern ? (
                 <div className="relative">
                   <input
@@ -579,6 +617,26 @@ export default function ParticipateModal({
                         : "Upload your resume(PDF,DOC) - Max 5 MB"}
                     </span>
                   </label>
+                </div>
+              ) : isVolunteer ? (
+                /* Why would you like to volunteer?* for Volunteer */
+                <div className="relative">
+                  <div className="flex items-start border-b border-[#E5E0D0] py-2.5 focus-within:border-[#FCCC2D] transition-colors">
+                    <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3 mt-1" />
+                    <textarea
+                      required
+                      placeholder="Why would you like to volunteer?*"
+                      value={formData.whyVolunteer || formData.message}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          whyVolunteer: e.target.value,
+                          message: e.target.value,
+                        })
+                      }
+                      className="w-full h-[5.54rem] bg-transparent text-[0.78rem] leading-[150%] tracking-[0.03em] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none"
+                    />
+                  </div>
                 </div>
               ) : (
                 /* Your Message (Height: 88.67px matching Figma Frame 298) */

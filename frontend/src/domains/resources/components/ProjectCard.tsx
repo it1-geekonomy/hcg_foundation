@@ -20,7 +20,7 @@ export default function ProjectCard({
   return (
     <Link
       href={`/resources/projects/${project.slug || project.id}`}
-      className={`group relative block aspect-[1/1] min-[450px]:aspect-[788/454] md:aspect-[1/1] lg:aspect-[1/1] xl:aspect-[6/5] 2xl:aspect-[788/454] w-full overflow-hidden rounded-[0.5rem] bg-[#EFEAD8] shadow-xs transition duration-300 hover:shadow-md hover:-translate-y-1 ${className}`}
+      className={`group relative block aspect-[16/11] sm:aspect-[788.39/454.09] w-full overflow-hidden rounded-[6px] bg-[#EFEAD8] shadow-xs transition duration-300 hover:shadow-md hover:-translate-y-1 ${className}`}
     >
       <picture className="h-full w-full block">
         {project.mobileImageUrl && (
@@ -34,44 +34,50 @@ export default function ProjectCard({
         />
       </picture>
 
-      {/* Floating Glassmorphic Overlay */}
-      <div className="absolute inset-x-[0.375rem] bottom-[0.375rem] sm:inset-x-[0.625rem] sm:bottom-[0.625rem] lg:inset-x-[0.75rem] lg:bottom-[0.75rem] flex flex-col justify-between gap-[0.375rem] sm:gap-[0.5rem] px-[0.625rem] py-[0.5rem] sm:px-[0.75rem] sm:py-[0.625rem] lg:px-[0.875rem] lg:py-[0.75rem] rounded-[0.5rem] sm:rounded-[0.625rem] border border-white/20 bg-[#8D8D8D]/40 backdrop-blur-md text-white transition duration-300 group-hover:bg-[#8D8D8D]/50">
-        <div className="w-full flex flex-col justify-center gap-[0.25rem] text-left">
-          <div className="drop-shadow-xs text-left">
+      {/* Linear Gradient Overlay matching Figma Frame 109: #000000 35% to #666666 0% */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent pointer-events-none" />
+
+      {/* Floating Glassmorphic Overlay:
+          - Desktop Large (xl:): Exact Figma Frame 105 (176px button, 42px right padding, 135.58px height)
+          - Desktop Medium (lg:): Proportional side-by-side with button shifted right to prevent hiding date
+          - Tablet (< lg:) when 1 col: Roomy side-by-side
+          - Mobile (< sm:): Stacked with Read More button below date
+      */}
+      <div className="absolute left-[0.75rem] right-[0.75rem] bottom-[0.75rem] xl:left-[1.1rem] xl:right-[1.28rem] xl:bottom-[1.51rem] h-auto sm:h-auto xl:h-[8.47375rem] py-3 xl:py-0 flex flex-col sm:flex-row sm:items-center justify-between gap-[0.5rem] sm:gap-[0.75rem] xl:gap-[1rem] p-[0.75rem] sm:p-0 sm:pl-[1.25rem] xl:pl-[1.74rem] sm:pr-[1rem] xl:pr-[2.61rem] rounded-[6px] border border-white/10 bg-[#838383]/40 backdrop-blur-[55px] text-white transition duration-300 group-hover:bg-[#838383]/50">
+        {/* Left: Title + Date stacked */}
+        <div className="flex flex-col justify-center items-start min-w-0 flex-1 text-left gap-[0.35rem] sm:gap-[0.5rem] xl:gap-[0.65rem]">
+          <div className="w-full drop-shadow-xs text-left min-w-0 overflow-hidden">
             <Typography
-              variant="body-2"
+              variant="heading-7"
               as={headingTag}
               title={project.title}
-              className="text-left text-white block [text-wrap:balance]"
+              className="font-argestadisplay font-normal text-white block line-clamp-2 w-full leading-snug sm:leading-tight"
             >
               {project.title}
             </Typography>
           </div>
-        </div>
-
-        {/* Date & Read More row: Mobile < 450px: Read More down in middle; >= 450px: Parallel */}
-        <div className="flex flex-col min-[450px]:flex-row min-[450px]:items-center min-[450px]:justify-between gap-[0.375rem] sm:gap-[0.5rem] w-full pt-[0.1rem]">
-          <div className="flex items-center gap-[0.35rem] sm:gap-[0.5rem] min-w-0 text-left">
+          <div className="flex items-center gap-[0.35rem] sm:gap-[0.5rem] xl:gap-[0.7rem] min-w-0 text-left">
             <img
               src="/Resources/calendar.png"
               alt="Calendar"
-              className="size-[0.8125rem] sm:size-[1rem] shrink-0 object-contain"
+              className="size-[0.875rem] sm:size-[1.15rem] xl:size-[1.39rem] shrink-0 object-contain"
             />
-            <div className="text-left">
-              <Typography variant="body-8" as="span" className="text-white">
+            <div className="text-left min-w-0 overflow-hidden">
+              <Typography variant="body-8" as="span" className="text-white block truncate">
                 Project Date: {project.date}
               </Typography>
             </div>
           </div>
+        </div>
 
-          <div className="flex justify-center min-[450px]:justify-end w-full min-[450px]:w-auto pt-[0.15rem] min-[450px]:pt-0">
-            <span className="inline-flex items-center justify-center whitespace-nowrap h-[2.125rem] sm:h-[2.375rem] px-[0.875rem] sm:px-[1rem] gap-[0.35rem] sm:gap-[0.5rem] rounded-[0.25rem] sm:rounded-[0.3125rem] border border-white/10 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs cursor-pointer shrink-0 transition duration-300 group-hover:bg-[#E9B510]">
-              <Typography variant="button-3" as="span" className="text-[#2D2D2D]">
-                Read More
-              </Typography>
-              <DiagonalArrowIcon className="w-[1.25rem] h-[1rem] sm:w-[1.375rem] sm:h-[1.1rem] text-[#2D2D2D] shrink-0" />
-            </span>
-          </div>
+        {/* Read More button: Lower than project date on mobile, side-by-side and shifted right on sm+ */}
+        <div className="shrink-0 flex items-center self-start sm:self-center pt-[0.25rem] sm:pt-0">
+          <span className="inline-flex items-center justify-center whitespace-nowrap h-[2rem] sm:h-[2.85rem] xl:h-[3.5625rem] w-auto xl:w-[11rem] px-[0.75rem] sm:px-[1rem] xl:px-[1.1rem] gap-[0.35rem] sm:gap-[0.45rem] xl:gap-[0.52rem] rounded-[6px] border border-white/10 bg-[#FCCC2D] text-[#2D2D2D] backdrop-blur-[42px] shadow-xs cursor-pointer shrink-0 transition duration-300 group-hover:bg-[#E9B510] group-hover:scale-105">
+            <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
+              Read More
+            </Typography>
+            <DiagonalArrowIcon className="w-[1rem] h-[0.85rem] sm:w-[1.2rem] sm:h-[0.95rem] xl:w-[1.375rem] xl:h-[1.1rem] text-[#2D2D2D] shrink-0" />
+          </span>
         </div>
       </div>
     </Link>

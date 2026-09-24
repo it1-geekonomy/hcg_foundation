@@ -8,7 +8,7 @@ import ProjectCard from "@/domains/resources/components/ProjectCard";
 import { ProjectItem } from "@/domains/resources/constants/projects";
 import { publicProjectsApi } from "@/domains/cms/lib/api";
 
-const CONTAINER = "mx-[clamp(1rem,8vw,8rem)] xl:mx-[clamp(0.5rem,3vw,4rem)] 2xl:mx-[clamp(1rem,10vw,10rem)]";
+const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
 function chunkIntoPages<T>(items: T[], pageSize: number): T[][] {
   if (items.length === 0) return [];
@@ -38,11 +38,11 @@ export default function ProjectsPage() {
   // Touch swipe support
   const touchStartXRef = useRef<number | null>(null);
 
-  // Responsive itemsPerPage: 6 on desktop & tablet (3 rows x 2 columns), 2 on mobile (2 rows x 1 column)
+  // Responsive itemsPerPage: 6 on desktop (1024px+), 3 on tablet/mobile (< 1024px)
   useEffect(() => {
     const updateItemsPerPage = () => {
-      if (window.innerWidth < 768) {
-        setItemsPerPage(2);
+      if (window.innerWidth < 1024) {
+        setItemsPerPage(3);
       } else {
         setItemsPerPage(6);
       }
@@ -128,7 +128,7 @@ export default function ProjectsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FFFBEA]">
+    <main className="min-h-screen bg-[#FFF8E2]">
       <Banner
         bgImage="/Resources/Resources banner image.png"
         bgImageAlt="Projects"
@@ -153,7 +153,7 @@ export default function ProjectsPage() {
             {pages.map((pageItems, pageIdx) => (
               <div
                 key={pageIdx}
-                className="w-full shrink-0 grid grid-cols-1 md:grid-cols-2 gap-x-[1.25rem] lg:gap-x-[1.5rem] gap-y-[1.5rem] sm:gap-y-[2rem] lg:gap-y-[2.5rem]"
+                className="w-full shrink-0 grid grid-cols-1 lg:grid-cols-2 gap-x-[1.5rem] xl:gap-x-[2rem] gap-y-[1.5rem] sm:gap-y-[2rem] lg:gap-y-[2.5rem]"
               >
                 {pageItems.map((projectItem, itemIdx) => (
                   <ProjectCard
