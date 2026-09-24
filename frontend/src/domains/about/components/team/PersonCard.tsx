@@ -163,7 +163,7 @@ export function PersonCard({
             transitionTimingFunction: "ease-out",
           }}
           className={cx(
-            "absolute inset-x-[0.875rem] bottom-[2.75rem] flex min-h-[5.25rem] items-center justify-between gap-3 rounded-xl px-4 py-3",
+            "absolute inset-x-[0.875rem] bottom-[2.75rem] flex min-h-[5.25rem] items-center justify-between gap-3 rounded-xl px-4 py-2 lg:py-3",
             flipped ? "opacity-0" : "opacity-100",
             CARD_GRADIENT_BG,
           )}
