@@ -325,7 +325,7 @@ export default function DonateSection() {
         <button
           type="button"
           onClick={openDetailsForm}
-          className="rounded py-3 font-bold bg-[#FCCC2D] w-[240px] sm:w-[300px] md:w-full font-manrope"
+          className="rounded py-3 font-bold bg-[#FCCC2D] w-[240px] sm:w-[300px] md:w-full font-manrope cursor-pointer"
         >
           <Typography variant="button-1" as="span">
             Donate Now

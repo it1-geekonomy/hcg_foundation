@@ -566,7 +566,7 @@ const international = !isIndiaCountry(selectedCountryCode);
             <button
               type="submit"
               disabled={loading}
-              className="mt-6 w-full rounded bg-[#FCCC2D] py-3.5 font-manrope font-bold text-[#3A2E00] disabled:opacity-60"
+              className="mt-6 w-full rounded bg-[#FCCC2D] py-3.5 font-manrope font-bold text-[#3A2E00] disabled:opacity-60 cursor-pointer"
             >
               <Typography variant="button-1" as="span">
                 {loading
