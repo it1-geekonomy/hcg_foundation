@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowUpRight } from "lucide-react";
 import Typography from "@/lib/Typography";
 import DonateForm from "@/shared/components/DonateForm";
 import PartnerWithUsModal from "@/shared/components/PartnerWithUsModal";
@@ -22,7 +21,7 @@ export default function ParticipatePage() {
     useState<ParticipateModalType>(null);
 
   return (
-    <main className="min-h-screen bg-[#FFFBEA]">
+    <main className="min-h-screen bg-[#FFF8E2]">
       <Banner
         bgImage="/Get Involved/Get Involved banner image.png"
         bgImageAlt="Participate"
@@ -69,7 +68,7 @@ export default function ParticipatePage() {
           {PARTICIPATE_CARDS.map((card) => (
             <div
               key={card.id}
-              className="group flex flex-col justify-between overflow-hidden rounded-lg bg-[#FFF9EA] border border-[#F3E3B6] shadow-xs transition duration-300 hover:shadow-md"
+              className="group flex flex-col justify-between overflow-hidden rounded-t-[0.375rem] rounded-b-[0.25rem] bg-[#FFFCF3] shadow-xs transition duration-300 hover:shadow-md"
             >
               {/* Card Top: Image Asset */}
               <div className="w-full h-[15rem] sm:h-[16.25rem] lg:h-[22.1875rem] overflow-hidden relative bg-[#EFEAD8]">
@@ -90,8 +89,8 @@ export default function ParticipatePage() {
                 />
               </div>
 
-              {/* Card Body: Title, Description, Apply Button */}
-              <div className="p-6 sm:p-7 pt-3 flex-1 flex flex-col justify-between">
+              {/* Card Body: Title, Description, Apply Button (Rectangle 1663: #FFFCF3) */}
+              <div className="p-6 sm:p-7 pt-3 flex-1 flex flex-col justify-between bg-[#FFFCF3] rounded-b-[0.25rem]">
                 <div>
                   <div className="mb-3">
                     <Typography variant="heading-10" as="h2" className="font-argestadisplay font-normal text-[#0D2838]">
@@ -111,12 +110,17 @@ export default function ParticipatePage() {
                     onClick={() =>
                       setActiveModalType(card.id as ParticipateModalType)
                     }
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#FCCC2D] text-[#2D2D2D] rounded-md shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
+                    className="inline-flex items-center justify-between w-[11.6875rem] h-[3.5625rem] pl-[1.1025rem] pr-[0.58rem] py-[0.58rem] gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 active:scale-95 cursor-pointer"
                   >
-                    <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#2D2D2D]">
+                    <span className="font-manrope font-semibold text-[1.125rem] leading-[150%] tracking-[0.02em] text-[#2D2D2D]">
                       Apply Now
-                    </Typography>
-                    <ArrowUpRight className="size-4 sm:size-5 text-[#2D2D2D]" />
+                    </span>
+                    <img
+                      src="/Get Involved/Vector (5).png"
+                      alt=""
+                      aria-hidden="true"
+                      className="w-[1.2925rem] h-[1.034rem] object-contain shrink-0"
+                    />
                   </button>
                 </div>
               </div>
@@ -124,15 +128,15 @@ export default function ParticipatePage() {
           ))}
         </div>
 
-        {/* Bottom Benefits Banner matching Figma Frame 577 */}
-        <div className="bg-[#FFF4CF] py-6 sm:py-8 lg:pt-[1.9375rem] lg:pb-[2.25rem] px-5 sm:px-8 lg:px-6 grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-center">
+        {/* Bottom Benefits Banner matching Figma Frame 577: #FFF4CF, Radius 0.375rem, Padding Top 1.9375rem, Bottom 2.25rem, Left/Right 1.25rem */}
+        <div className="bg-[#FFF4CF] rounded-[0.375rem] pt-[1.9375rem] pb-[2.25rem] px-5 sm:px-[1.25rem] grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-center">
           {PARTICIPATE_BENEFITS.map((benefit) => (
-            <div key={benefit.id} className="flex items-center gap-3.5 sm:gap-4 lg:gap-5">
-              <div className="size-13 lg:size-14 rounded-full border border-[#C2A947] flex items-center justify-center shrink-0 p-3 bg-transparent">
+            <div key={benefit.id} className="flex items-center gap-[1.3rem]">
+              <div className="w-[4.9225rem] h-[4.9225rem] rounded-full border border-[#C2A947] flex items-center justify-center shrink-0 bg-[#FFF3CC]">
                 <img
                   src={benefit.iconUrl}
                   alt={benefit.title}
-                  className="w-full h-full object-contain"
+                  className="w-[2.38375rem] h-[2.38375rem] object-contain"
                 />
               </div>
               <div className="text-left">
@@ -148,7 +152,7 @@ export default function ParticipatePage() {
                 <Typography
                   variant="body-9"
                   as="p"
-                  className="font-manrope font-normal text-left text-[#2C2C2C]"
+                  className="font-manrope font-normal text-left text-[#6C6C6C]"
                 >
                   {benefit.description}
                 </Typography>

@@ -112,14 +112,16 @@ const BY_CODE = Object.fromEntries(
 ) as Record<string, DonationCountry>;
 
 export function getDonationCountry(code: string): DonationCountry {
-  if (BY_CODE[code]) return BY_CODE[code];
-  // Unknown / legacy "OTHER" → USD international
-  return {
-    code: code || "XX",
-    name: "Other / International",
-    dial: "+",
-    currency: DEFAULT_CURRENCY,
-  };
+  if (code && BY_CODE[code.toUpperCase()]) return BY_CODE[code.toUpperCase()];
+  if (code && BY_CODE[code]) return BY_CODE[code];
+  return (
+    BY_CODE["IN"] || {
+      code: "IN",
+      name: "India",
+      dial: "+91",
+      currency: "INR",
+    }
+  );
 }
 
 export function isIndiaCountry(code: string) {
