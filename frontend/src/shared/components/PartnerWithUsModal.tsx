@@ -170,34 +170,37 @@ export default function PartnerWithUsModal({
         {/* Left Column: Form Content (Frame 603: Left: 47.64px -> 2.9775rem, Top: 38.77px -> 2.423rem, Bottom: 46.8px -> 2.925rem, Width: 309.08px -> 19.3175rem on desktop) */}
         <div className="relative w-full md:w-[22.3rem] shrink-0 px-[1.25rem] sm:px-0 sm:pl-[2.9775rem] sm:pr-0 pt-[1.75rem] sm:pt-[2.423rem] pb-[1.75rem] sm:pb-[2.925rem] flex flex-col justify-between overflow-y-auto md:overflow-y-hidden min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <div>
-            {/* Frame 298: Title + Subtitle using design-system Typography (Title: Fill 309.08px -> 19.3175rem, Subtitle: Fixed 284.7px -> 17.794rem) */}
-            <div className="w-full max-w-[19.3175rem]">
+            {/* Frame 298: Title + Subtitle using design-system Typography */}
+            <div className="w-full max-w-[19.3175rem] space-y-[0.5rem]">
               <Typography
                 variant="heading-5"
                 as="h2"
-                className="text-[#0D2838] leading-[1.05] tracking-[0.03em]"
+                className="text-[#0D2838]"
               >
                 <span className="block sm:whitespace-nowrap">
                   Be a Part of Someone&apos;s
                 </span>
                 <span className="block whitespace-nowrap">Cancer Journey</span>
               </Typography>
-              <Typography
-                variant="caption-1"
-                as="p"
-                className="text-[#596D79] mt-[0.5rem] w-full max-w-[17.794rem]"
-              >
-                Share a few details and our team will get in touch with you to
-                explore partnership opportunities.
-              </Typography>
+
+              <div className="w-full max-w-[17.794rem]">
+                <Typography
+                  variant="caption-1"
+                  as="p"
+                  className="text-[#596D79]"
+                >
+                  Share a few details and our team will get in touch with you to
+                  explore partnership opportunities.
+                </Typography>
+              </div>
             </div>
 
             {submitted ? (
-              <div className="my-[2rem] p-[1.5rem] bg-[#FFF9EA] border border-[#F3E3B6] rounded-[0.415rem] text-center w-full max-w-[17.0625rem]">
+              <div className="my-[2rem] p-[1.5rem] bg-[#FFF9EA] border border-[#F3E3B6] rounded-[0.415rem] text-center w-full max-w-[17.0625rem] space-y-[0.5rem]">
                 <Typography
                   variant="heading-3"
                   as="h3"
-                  className="text-[#2E1C12] mb-[0.5rem]"
+                  className="text-[#2E1C12]"
                 >
                   Thank You!
                 </Typography>
@@ -244,13 +247,15 @@ export default function PartnerWithUsModal({
                       />
                     </div>
                     {errors.fullName && (
-                      <Typography
-                        variant="caption-1"
-                        as="p"
-                        className="text-red-500 mt-[0.25rem]"
-                      >
-                        {errors.fullName}
-                      </Typography>
+                      <div className="mt-[0.25rem]">
+                        <Typography
+                          variant="caption-1"
+                          as="p"
+                          className="text-red-500"
+                        >
+                          {errors.fullName}
+                        </Typography>
+                      </div>
                     )}
                   </div>
 
@@ -286,13 +291,15 @@ export default function PartnerWithUsModal({
                       />
                     </div>
                     {errors.email && (
-                      <Typography
-                        variant="caption-1"
-                        as="p"
-                        className="text-red-500 mt-[0.25rem]"
-                      >
-                        {errors.email}
-                      </Typography>
+                      <div className="mt-[0.25rem]">
+                        <Typography
+                          variant="caption-1"
+                          as="p"
+                          className="text-red-500"
+                        >
+                          {errors.email}
+                        </Typography>
+                      </div>
                     )}
                   </div>
 
