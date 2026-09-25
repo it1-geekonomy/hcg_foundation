@@ -10,7 +10,8 @@ import DonateForm from "@/shared/components/DonateForm";
 import PaginationControls from "@/shared/components/PaginationControls";
 import ShareStory from "@/shared/components/ShareStory";
 import ProjectCard from "@/domains/resources/components/ProjectCard";
-import { ProjectItem } from "@/domains/resources/constants/projects";
+import SwasthiArtTherapySection from "@/domains/resources/components/SwasthiArtTherapySection";
+import { ProjectItem, PROJECTS_DATA } from "@/domains/resources/constants/projects";
 import { publicProjectsApi } from "@/domains/cms/lib/api";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
@@ -99,7 +100,12 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           });
         }
       } catch (err) {
-        if (!cancelled) setProjectItem(null);
+        if (!cancelled) {
+          const fallback = PROJECTS_DATA.find(
+            (item) => item.slug === resolvedParams.id || item.id === resolvedParams.id
+          );
+          setProjectItem(fallback ?? null);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -150,6 +156,14 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   if (!loading && !projectItem) {
     notFound();
   }
+
+  const isArtTherapy = Boolean(
+    projectItem &&
+      (projectItem.slug?.toLowerCase().includes("art-therapy") ||
+        projectItem.title?.toLowerCase().includes("art therapy") ||
+        resolvedParams.id?.toLowerCase().includes("art-therapy") ||
+        resolvedParams.id?.toLowerCase().includes("art-gallery"))
+  );
 
   return (
     <main className="min-h-screen bg-[#FFF8E2]">
@@ -231,6 +245,11 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Swasthi Art Gallery & Art Therapy Program (Special section for Art Therapy & Wellness) */}
+        {!loading && projectItem && isArtTherapy && (
+          <SwasthiArtTherapySection />
         )}
       </section>
 

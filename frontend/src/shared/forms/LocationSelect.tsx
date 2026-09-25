@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { User, ChevronDown, Check, X, Search, PlusCircle } from "lucide-react";
 import { City, State, Country } from "country-state-city";
+import Typography from "@/lib/Typography";
 
 // Pre-compute state name map for India using country-state-city library
 const indianStatesMap = new Map(
@@ -177,41 +178,44 @@ export default function LocationSelect({
   };
 
   return (
-    <div className={`relative ${className}`} ref={containerRef}>
+    <div className={`relative h-full ${className}`} ref={containerRef}>
       {/* Main Form Input Bar - Displays selected location */}
       <div
         onClick={() => {
           setIsOpen((prev) => !prev);
           setIsOtherMode(false);
         }}
-        className={`${
-          (value || "").trim()
-            ? "min-h-[2.2rem] h-auto pb-1.5"
-            : "h-[41.14px] pb-[21.66px]"
-        } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all cursor-pointer`}
+        className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all cursor-pointer"
       >
-        <div className="flex items-start gap-1.5 min-w-0 max-w-full">
-          <User className="size-4 text-[#0D2838] shrink-0 mr-1.5 mt-0.5" />
-          <span
-            className="text-[0.82rem] leading-normal font-medium font-manrope text-[#0D2838] select-none break-words whitespace-normal"
+        <div className="flex items-center gap-1.5">
+          <User className="size-4 text-[#0D2838] shrink-0 mr-1.5" />
+          <Typography
+            variant="caption-1"
+            as="span"
+            className="font-medium font-manrope text-[#0D2838] select-none leading-normal"
           >
-            {value || placeholder}
-          </span>
+            {placeholder}
+          </Typography>
           <ChevronDown
-            className={`size-3.5 text-[#0D2838] shrink-0 mt-0.5 transition-transform duration-200 ${
+            className={`size-3.5 text-[#0D2838] shrink-0 transition-transform duration-200 ${
               isOpen ? "rotate-180" : ""
             }`}
           />
-          {/* Hidden input for HTML form validation */}
-          <input
-            type="text"
-            required={required}
-            value={value}
-            readOnly
-            className="sr-only"
-            tabIndex={-1}
-          />
         </div>
+        <div className="pl-7 w-full">
+          <span className="text-[0.82rem] leading-normal font-medium font-manrope text-[#0D2838] break-words whitespace-normal block min-h-[1.2rem]">
+            {value}
+          </span>
+        </div>
+        {/* Hidden input for HTML form validation */}
+        <input
+          type="text"
+          required={required}
+          value={value}
+          readOnly
+          className="sr-only"
+          tabIndex={-1}
+        />
       </div>
 
       {/* Dropdown Container */}
