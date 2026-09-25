@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Typography from "@/lib/Typography"; 
 import {
@@ -5,11 +8,112 @@ import {
   type ReferralStep,
 } from "@/domains/ourprograms/FinancialSupport/constants/howtoreferpatient";
 
- 
-function StepCard({ step }: { step: ReferralStep }) {
+/* =====================================================
+   POP-IN & SETTLE ANIMATION
+   The SECTION (not each card) is watched. The moment the
+   section enters the viewport, every card pops in one by
+   one (staggered by its index). It plays once per page
+   load — scrolling away and back does NOT replay it.
+===================================================== */
+const POP_IN_STYLES = `
+  @keyframes popInSettle {
+    0% {
+      opacity: 0;
+      transform: scale(0.55) translateY(24px);
+    }
+    55% {
+      opacity: 1;
+      transform: scale(1.06) translateY(-6px);
+    }
+    75% {
+      transform: scale(0.97) translateY(2px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .pop-in-hidden {
+    opacity: 0;
+    transform: scale(0.55) translateY(24px);
+  }
+
+  .pop-in-active {
+    animation-name: popInSettle;
+    animation-duration: 0.65s;
+    animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* "both" holds the 0% keyframe (opacity 0, scaled down) during the
+       stagger delay too, so each card stays hidden until its turn,
+       instead of sitting visible-but-still while it waits. */
+    animation-fill-mode: both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pop-in-hidden,
+    .pop-in-active {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+`;
+
+const POP_IN_STAGGER_SECONDS = 0.12;
+
+/* Watches ONE element (the whole section) and reports whether
+   it has entered the viewport. Fires once on first entry (on
+   initial mount/refresh, whenever that first entry happens),
+   then stops observing — so scrolling back up/down again does
+   NOT reset or replay the animation. */
+function useSectionVisible<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          // Stop watching once it has animated in — prevents
+          // reset/replay when scrolling back up and down again.
+          observer.disconnect();
+        }
+      },
+      {
+        threshold: 0.15,
+      }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, visible };
+}
+
+function StepCard({
+  step,
+  animationIndex = 0,
+  sectionVisible,
+}: {
+  step: ReferralStep;
+  animationIndex?: number;
+  sectionVisible: boolean;
+}) {
   return (
     <div
-      className="group relative h-full rounded-xl border border-[#FFECB3] bg-[#FFFAEC] p-4 transition-colors duration-300 ease-out hover:border-[#FCCC2D] hover:bg-[#FFE39D] sm:p-5"
+      className={`group relative h-full rounded-xl border border-[#FFECB3] bg-[#FFFAEC] p-4 transition-colors duration-300 ease-out hover:border-[#FCCC2D] hover:bg-[#FFE39D] sm:p-5 ${
+        sectionVisible ? "pop-in-active" : "pop-in-hidden"
+      }`}
+      style={
+        sectionVisible
+          ? { animationDelay: `${animationIndex * POP_IN_STAGGER_SECONDS}s` }
+          : undefined
+      }
     >
       {/* Number */}
       <span className="absolute left-3 top-0 flex h-5 min-w-5 -translate-y-1/2 items-center justify-center rounded-md bg-[#FCCC2D] px-1.5 py-4 leading-none text-black sm:left-4 sm:h-6 sm:min-w-6">
@@ -60,11 +164,15 @@ function StepCard({ step }: { step: ReferralStep }) {
  
 function StepArrow({
   visible,
+  animationIndex = 0,
+  sectionVisible,
 }: {
   visible: {
     mobile: boolean;
     desktop: boolean;
   };
+  animationIndex?: number;
+  sectionVisible: boolean;
 }) {
   if (!visible.mobile && !visible.desktop) return null;
  
@@ -72,7 +180,14 @@ function StepArrow({
     <div
       className={`items-center justify-center py-2 lg:py-0 ${
         visible.mobile ? "flex" : "hidden"
-      } ${visible.desktop ? "lg:flex" : "lg:hidden"}`}
+      } ${visible.desktop ? "lg:flex" : "lg:hidden"} ${
+        sectionVisible ? "pop-in-active" : "pop-in-hidden"
+      }`}
+      style={
+        sectionVisible
+          ? { animationDelay: `${animationIndex * POP_IN_STAGGER_SECONDS}s` }
+          : undefined
+      }
     >
       <Image
         src="/financialbanner/arrows.png"
@@ -92,10 +207,17 @@ export interface HowToReferProps {
 export default function HowToRefer({
   className = "",
 }: HowToReferProps) {
+  const { ref: sectionRef, visible: sectionVisible } =
+    useSectionVisible<HTMLElement>();
+
   return (
     <section
+      ref={sectionRef}
       className={`w-full overflow-x-hidden bg-[#FFFCF2] px-8 py-10 sm:px-20 md:px-6 lg:px-6 lg:py-20 xl:px-6 2xl:px-40 ${className}`}
     >
+      {/* Animation keyframes/classes — scoped to this section only */}
+      <style>{POP_IN_STYLES}</style>
+
       <Typography
         variant="heading-3"
         as="h2"
@@ -119,7 +241,11 @@ export default function HowToRefer({
       <div className="mt-10 flex flex-col gap-4 md:hidden">
         {referralSteps.map((step, index) => (
           <div key={step.id} className="flex flex-col">
-            <StepCard step={step} />
+            <StepCard
+              step={step}
+              animationIndex={index * 2}
+              sectionVisible={sectionVisible}
+            />
  
             {index !== referralSteps.length - 1 && (
               <StepArrow
@@ -127,6 +253,8 @@ export default function HowToRefer({
                   mobile: true,
                   desktop: false,
                 }}
+                animationIndex={index * 2 + 1}
+                sectionVisible={sectionVisible}
               />
             )}
           </div>
@@ -151,11 +279,28 @@ export default function HowToRefer({
               className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-4"
             >
               {/* First Card */}
-              <StepCard step={firstStep} />
+              <StepCard
+                step={firstStep}
+                animationIndex={firstIndex * 2}
+                sectionVisible={sectionVisible}
+              />
  
               {/* Middle Arrow */}
               {secondStep ? (
-                <div className="flex items-center justify-center">
+                <div
+                  className={`flex items-center justify-center ${
+                    sectionVisible ? "pop-in-active" : "pop-in-hidden"
+                  }`}
+                  style={
+                    sectionVisible
+                      ? {
+                          animationDelay: `${
+                            (firstIndex * 2 + 1) * POP_IN_STAGGER_SECONDS
+                          }s`,
+                        }
+                      : undefined
+                  }
+                >
                   <Image
                     src="/financialbanner/arrows.png"
                     alt=""
@@ -169,7 +314,13 @@ export default function HowToRefer({
               )}
  
               {/* Second Card */}
-              {secondStep && <StepCard step={secondStep} />}
+              {secondStep && (
+                <StepCard
+                  step={secondStep}
+                  animationIndex={(firstIndex + 1) * 2}
+                  sectionVisible={sectionVisible}
+                />
+              )}
             </div>
           );
         })}
@@ -192,7 +343,11 @@ export default function HowToRefer({
  
                 return (
                   <div key={step.id} className="contents">
-                    <StepCard step={step} />
+                    <StepCard
+                      step={step}
+                      animationIndex={(rowStart + i) * 2}
+                      sectionVisible={sectionVisible}
+                    />
  
                     {!isLastInRow && (
                       <StepArrow
@@ -200,6 +355,8 @@ export default function HowToRefer({
                           mobile: false,
                           desktop: true,
                         }}
+                        animationIndex={(rowStart + i) * 2 + 1}
+                        sectionVisible={sectionVisible}
                       />
                     )}
                   </div>
@@ -211,4 +368,3 @@ export default function HowToRefer({
     </section>
   );
 }
- 

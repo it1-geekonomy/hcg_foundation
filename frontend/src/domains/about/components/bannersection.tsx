@@ -4,7 +4,7 @@ import Banner from "@/shared/components/Herobannersection";
 // can be reused across pages by swapping this object out.
 const ABOUT_US_BANNER = {
   bgImage: "/aboutus/aboutus.png",
-  bgImageMobile: "/aboutus/aboutus-mobile.png",
+  bgImageMobile: "/aboutus/mobile1.svg",
   bgImageAlt: "Doctors, nurses and families smiling together outside the hospital",
   breadcrumbs: [
     { label: "Home", href: "/" },
