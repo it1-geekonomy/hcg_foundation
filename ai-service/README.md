@@ -25,7 +25,9 @@ venv\Scripts\activate
 pip install -r requirements.txt
 copy .env.example .env   # set OPENAI_API_KEY + INTERNAL_API_KEY
 alembic upgrade head
-uvicorn app.main:app --reload --port 8001
+
+
+
 ```
 
 Then from Nest (JWT): `POST /api/chatbot/reindex` to push CMS + sync corpus.
