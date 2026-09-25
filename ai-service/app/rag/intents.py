@@ -3,7 +3,7 @@ import re
 from app.rag import constants as C
 
 _EXACT = {
-    r"^(hi|hello|hey|good\s*(morning|afternoon|evening))[\s!.]*$": "greeting",
+    r"^(hi|hii|hello|hey|hy|good\s*(morning|afternoon|evening))[\s!.]*$": "greeting",
     r"^(thanks|thank\s*you|thx)[\s!.]*$": "thanks",
     r"^(bye|goodbye|see\s*you)[\s!.]*$": "bye",
     r"^(help|menu|what\s+can\s+you\s+do)[\s!.]*$": "help",

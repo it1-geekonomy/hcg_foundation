@@ -45,8 +45,8 @@ export default function ProjectCard({
       */}
       <div className="absolute left-[0.75rem] right-[0.75rem] bottom-[0.75rem] xl:left-[1.1rem] xl:right-[1.28rem] xl:bottom-[1.51rem] h-auto lg:h-[9.5rem] xl:h-[11rem] flex flex-col lg:flex-row lg:items-center justify-between gap-[0.75rem] lg:gap-[1rem] p-[1rem] lg:py-[1rem] lg:px-[1.5rem] xl:pl-[1.74rem] xl:pr-[2.61rem] rounded-[6px] border border-white/10 bg-[#838383]/40 backdrop-blur-[55px] text-white transition duration-300 group-hover:bg-[#838383]/50">
         {/* Left: Title + Date stacked */}
-        <div className="flex flex-col justify-center items-start min-w-0 flex-1 text-left gap-[0.5rem] lg:gap-[0.65rem]">
-          <div className="w-full drop-shadow-xs text-left min-w-0 h-auto">
+        <div className="flex flex-col justify-center items-start min-w-0 flex-1 text-left gap-[0.5rem] lg:gap-[0.65rem] overflow-hidden">
+          <div className="w-full drop-shadow-xs text-left min-w-0 h-auto overflow-y-auto no-scrollbar max-h-full">
             <Typography
               variant="heading-8"
               as={headingTag}

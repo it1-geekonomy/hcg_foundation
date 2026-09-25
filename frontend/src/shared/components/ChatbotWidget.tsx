@@ -144,18 +144,28 @@ export default function ChatbotWidget() {
                 >
                   <p className="whitespace-pre-wrap">{msg.text}</p>
                   {msg.role === "bot" && msg.sources && msg.sources.length > 0 ? (
-                    <ul className="mt-2 space-y-1 border-t border-[#FCCC2D]/30 pt-2">
-                      {msg.sources.map((source) => (
-                        <li key={`${source.url}-${source.title}`}>
-                          <a
-                            href={source.url}
-                            className="text-[11px] text-[#9A7B00] underline-offset-2 hover:underline"
-                          >
-                            {source.title}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="mt-3 border-t border-[#FCCC2D]/30 pt-2.5">
+                      <p className="mb-1.5 font-manrope text-[10px] font-medium uppercase tracking-wider text-[#9A7B00]/70">
+                        Sources
+                      </p>
+                      <ul className="flex flex-wrap gap-1.5">
+                        {msg.sources.map((source) => (
+                          <li key={`${source.url}-${source.title}`}>
+                            <a
+                              href={source.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 rounded-md bg-[#FCCC2D]/20 px-2.5 py-1 text-[11px] font-medium text-[#9A7B00] transition hover:bg-[#FCCC2D]/40"
+                            >
+                              <span className="max-w-[150px] truncate">{source.title}</span>
+                              <svg className="h-2.5 w-2.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ) : null}
                 </div>
               </div>

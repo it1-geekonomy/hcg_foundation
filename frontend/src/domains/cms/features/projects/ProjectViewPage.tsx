@@ -7,8 +7,8 @@ import { cmsApi, publicProjectsApi } from "@/domains/cms/lib/api";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import type { CmsProject } from "@/domains/cms/lib/types";
-import { mapProjectToCard } from "@/domains/home/constants/project";
-import ProjectsSection from "@/domains/home/components/ProjectsSection";
+import ProjectCard from "@/domains/resources/components/ProjectCard";
+import type { ProjectItem } from "@/domains/resources/constants/projects";
 import CmsWebsitePreview from "@/domains/cms/ui/CmsWebsitePreview";
 import {
   CmsBadge,
@@ -27,7 +27,6 @@ export default function ProjectViewPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [project, setProject] = useState<CmsProject | null>(null);
-  const [published, setPublished] = useState<CmsProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -40,13 +39,9 @@ export default function ProjectViewPage() {
       setLoading(true);
       setError(null);
       try {
-        const [res, publishedRes] = await Promise.all([
-          cmsApi.getProject(id),
-          publicProjectsApi.listPublished({ limit: 12 }).catch(() => null),
-        ]);
+        const res = await cmsApi.getProject(id);
         if (cancelled) return;
         setProject(res.data);
-        setPublished(publishedRes?.data ?? []);
       } catch (err) {
         if (cancelled) return;
         const message = cmsErrorMessage(err, "Failed to load");
@@ -61,25 +56,6 @@ export default function ProjectViewPage() {
       cancelled = true;
     };
   }, [id]);
-
-  const { previewCards, activeIndex } = useMemo(() => {
-    if (!project) return { previewCards: [], activeIndex: 0 };
-
-    const list = [...published];
-    const existingIdx = list.findIndex((p) => p.id === project.id);
-    if (existingIdx === -1) list.unshift(project);
-    else list[existingIdx] = project;
-
-    const cards = list
-      .slice(0, 12)
-      .map((item, index) => mapProjectToCard(item, index));
-    const idx = Math.max(
-      0,
-      cards.findIndex((c) => c.id === project.id),
-    );
-
-    return { previewCards: cards, activeIndex: idx };
-  }, [project, published]);
 
   const onDelete = async () => {
     if (!project) return;
@@ -133,6 +109,18 @@ export default function ProjectViewPage() {
 
   const isDeleted = Boolean(project.deletedAt);
 
+  const previewProject: ProjectItem | null = project ? {
+    id: project.id ?? "",
+    slug: project.slug ?? "",
+    title: project.title ?? "",
+    date: project.projectDate ? new Date(project.projectDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "",
+    category: "Project",
+    summary: project.shortDescription ?? "",
+    fullStory: project.content ?? "",
+    imageUrl: project.projectBanner || project.projectMobileBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+    mobileImageUrl: project.projectMobileBanner || project.projectBanner || "",
+  } : null;
+
   return (
     <div className="space-y-6">
       <CmsViewHeader
@@ -181,11 +169,11 @@ export default function ProjectViewPage() {
       />
 
       <CmsWebsitePreview label="Website preview" className="bg-[#FFF6D8]">
-        <ProjectsSection
-          cards={previewCards}
-          defaultActiveIndex={activeIndex}
-          previewMode
-        />
+        <div className="max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex justify-center">
+          <div className="w-full max-w-3xl">
+            {previewProject ? <ProjectCard project={previewProject} /> : null}
+          </div>
+        </div>
       </CmsWebsitePreview>
 
       <div className="space-y-4">

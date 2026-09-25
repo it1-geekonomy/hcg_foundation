@@ -19,7 +19,7 @@ export default function ClientLayout({
       <main className="flex-1">{children}</main>
 
       <DonateButton />
-      <ChatbotWidget />
+      {/* <ChatbotWidget /> */}
 
       <Footer />
     </div>
