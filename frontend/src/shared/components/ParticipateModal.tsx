@@ -228,11 +228,10 @@ export default function ParticipateModal({
 
       {/* Main Modal Container with exact Figma styling: width 640px (40rem), height 860px (53.75rem) for Intern (Frame 556), 736px (46rem) for Fundraise/Volunteer */}
       <div
-        className={`relative z-10 w-full max-w-[40rem] bg-white shadow-2xl overflow-hidden my-auto flex flex-col ${
-          isIntern
-            ? "max-h-[96vh] sm:h-[53.75rem] rounded-[0.625rem]"
-            : "max-h-[95vh] sm:h-[46rem] rounded-[0.625rem]"
-        }`}
+        className={`relative z-10 w-full max-w-[40rem] bg-white shadow-2xl overflow-hidden my-auto flex flex-col ${isIntern
+          ? "max-h-[96vh] sm:h-[53.75rem] rounded-[0.625rem]"
+          : "max-h-[95vh] sm:h-[46rem] rounded-[0.625rem]"
+          }`}
       >
         {/* Full Modal Watermark Background Image matching Figma */}
         <div
@@ -275,13 +274,12 @@ export default function ParticipateModal({
               </span>
             </div>
             <div
-              className={`${
-                isFundraise
-                  ? "w-full max-w-[26.125rem]"
-                  : isVolunteer
+              className={`${isFundraise
+                ? "w-full max-w-[26.125rem]"
+                : isVolunteer
                   ? "w-full max-w-[18.6875rem]"
                   : "w-full max-w-[28.125rem]"
-              } mx-auto`}
+                } mx-auto`}
             >
               <p className="font-manrope font-normal text-[0.677rem] leading-[150%] tracking-[0.01em] text-[#596D79] text-center">
                 {isIntern && (
@@ -320,39 +318,46 @@ export default function ParticipateModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                 <div className="relative">
                   <div
-                    className={`${
-                      formData.fullName.trim()
-                        ? "min-h-[2.2rem] h-auto pb-1"
-                        : "h-[41.14px] pb-[21.66px]"
-                    } flex items-start border-b transition-all ${
+                    className={`min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${
                       errors.fullName
                         ? "border-red-500"
                         : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                     }`}
                   >
-                    <User className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
-                    <textarea
-                      rows={1}
-                      required
-                      placeholder="Full Name*"
-                      value={formData.fullName}
-                      onInput={handleAutoResize}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") e.preventDefault();
-                      }}
-                      onChange={(e) => {
-                        handleNameChange(e);
-                        handleAutoResize(e);
-                      }}
-                      className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
-                    />
+                    <label htmlFor="participate-fullName" className="flex items-center cursor-pointer">
+                      <User className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                      <Typography
+                        variant="caption-1"
+                        as="span"
+                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                      >
+                        Full Name*
+                      </Typography>
+                    </label>
+                    <div className="pl-7 w-full">
+                      <textarea
+                        id="participate-fullName"
+                        rows={1}
+                        required
+                        value={formData.fullName}
+                        onInput={handleAutoResize}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") e.preventDefault();
+                        }}
+                        onChange={(e) => {
+                          handleNameChange(e);
+                          handleAutoResize(e);
+                        }}
+                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
+                      />
+                    </div>
                   </div>
                   {errors.fullName && (
                     <div className="mt-1">
                       <Typography
                         variant="caption-1"
                         as="p"
-                        className="font-manrope text-xs text-red-500"
+                        className="font-manrope text-red-500"
                       >
                         {errors.fullName}
                       </Typography>
@@ -373,42 +378,49 @@ export default function ParticipateModal({
 
               {/* Row 2: Email & Gender (Intern) / Location (Fundraise/Volunteer) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
-                <div className="relative">
+                <div className="relative h-full">
                   <div
-                    className={`${
-                      formData.email.trim()
-                        ? "min-h-[2.2rem] h-auto pb-1.5"
-                        : "h-[41.14px] pb-[21.66px]"
-                    } flex items-start border-b transition-all ${
+                    className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${
                       errors.email
                         ? "border-red-500"
                         : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                     }`}
                   >
-                    <Mail className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
-                    <textarea
-                      rows={1}
-                      required
-                      placeholder="Email Address*"
-                      value={formData.email}
-                      onInput={handleAutoResize}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") e.preventDefault();
-                      }}
-                      onChange={(e) => {
-                        handleEmailChange(e);
-                        handleAutoResize(e);
-                      }}
-                      onBlur={handleEmailBlur}
-                      className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
-                    />
+                    <label htmlFor="participate-email" className="flex items-center cursor-pointer">
+                      <Mail className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                      <Typography
+                        variant="caption-1"
+                        as="span"
+                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                      >
+                        Email Address*
+                      </Typography>
+                    </label>
+                    <div className="pl-7 w-full">
+                      <textarea
+                        id="participate-email"
+                        rows={1}
+                        required
+                        value={formData.email}
+                        onInput={handleAutoResize}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") e.preventDefault();
+                        }}
+                        onChange={(e) => {
+                          handleEmailChange(e);
+                          handleAutoResize(e);
+                        }}
+                        onBlur={handleEmailBlur}
+                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
+                      />
+                    </div>
                   </div>
                   {errors.email && (
                     <div className="mt-1">
                       <Typography
                         variant="caption-1"
                         as="p"
-                        className="font-manrope text-xs text-red-500"
+                        className="font-manrope text-red-500"
                       >
                         {errors.email}
                       </Typography>
@@ -422,6 +434,7 @@ export default function ParticipateModal({
                     onChange={(val) =>
                       setFormData((prev) => ({ ...prev, gender: val }))
                     }
+                    className="h-full"
                     required
                   />
                 ) : (
@@ -430,6 +443,7 @@ export default function ParticipateModal({
                     onChange={(val) =>
                       setFormData((prev) => ({ ...prev, location: val }))
                     }
+                    className="h-full"
                     required
                   />
                 )}
@@ -444,32 +458,40 @@ export default function ParticipateModal({
                       onChange={(val) =>
                         setFormData((prev) => ({ ...prev, dob: val }))
                       }
+                      className="h-full"
                     />
 
-                    <div className="relative">
+                    <div className="relative h-full">
                       <div
-                        className={`${
-                          formData.course.trim()
-                            ? "min-h-[2.2rem] h-auto pb-1.5"
-                            : "h-[41.14px] pb-[21.66px]"
-                        } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                        className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
                       >
-                        <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
-                        <textarea
-                          rows={1}
-                          required
-                          placeholder="Current Course*"
-                          value={formData.course}
-                          onInput={handleAutoResize}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") e.preventDefault();
-                          }}
-                          onChange={(e) => {
-                            setFormData({ ...formData, course: e.target.value });
-                            handleAutoResize(e);
-                          }}
-                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
-                        />
+                        <label htmlFor="participate-course" className="flex items-center cursor-pointer">
+                          <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                          <Typography
+                            variant="caption-1"
+                            as="span"
+                            className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                          >
+                            Current Course*
+                          </Typography>
+                        </label>
+                        <div className="pl-7 w-full">
+                          <textarea
+                            id="participate-course"
+                            rows={1}
+                            required
+                            value={formData.course}
+                            onInput={handleAutoResize}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") e.preventDefault();
+                            }}
+                            onChange={(e) => {
+                              setFormData({ ...formData, course: e.target.value });
+                              handleAutoResize(e);
+                            }}
+                            className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -477,28 +499,35 @@ export default function ParticipateModal({
                   {/* Address */}
                   <div className="relative">
                     <div
-                      className={`${
-                        formData.address.trim()
-                          ? "min-h-[2.2rem] h-auto pb-1.5"
-                          : "h-[41.14px] pb-[21.66px]"
-                      } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                      className="min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
                     >
-                      <MapPin className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
-                      <textarea
-                        rows={1}
-                        required
-                        placeholder="Your Address*"
-                        value={formData.address}
-                        onInput={handleAutoResize}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.preventDefault();
-                        }}
-                        onChange={(e) => {
-                          setFormData({ ...formData, address: e.target.value });
-                          handleAutoResize(e);
-                        }}
-                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
-                      />
+                      <label htmlFor="participate-address" className="flex items-center cursor-pointer">
+                        <MapPin className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                        >
+                          Your Address*
+                        </Typography>
+                      </label>
+                      <div className="pl-7 w-full">
+                        <textarea
+                          id="participate-address"
+                          rows={1}
+                          required
+                          value={formData.address}
+                          onInput={handleAutoResize}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.preventDefault();
+                          }}
+                          onChange={(e) => {
+                            setFormData({ ...formData, address: e.target.value });
+                            handleAutoResize(e);
+                          }}
+                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -509,36 +538,44 @@ export default function ParticipateModal({
                       onChange={(val) =>
                         setFormData((prev) => ({ ...prev, languages: val }))
                       }
+                      className="h-full"
                       required
                     />
 
-                    <div className="relative">
+                    <div className="relative h-full">
                       <div
-                        className={`${
-                          formData.computerSkills.trim()
-                            ? "min-h-[2.2rem] h-auto pb-1.5"
-                            : "h-[41.14px] pb-[21.66px]"
-                        } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                        className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
                       >
-                        <Wrench className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
-                        <textarea
-                          rows={1}
-                          required
-                          placeholder="Skills*"
-                          value={formData.computerSkills}
-                          onInput={handleAutoResize}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") e.preventDefault();
-                          }}
-                          onChange={(e) => {
-                            setFormData({
-                              ...formData,
-                              computerSkills: e.target.value,
-                            });
-                            handleAutoResize(e);
-                          }}
-                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
-                        />
+                        <label htmlFor="participate-skills" className="flex items-center cursor-pointer">
+                          <Wrench className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                          <Typography
+                            variant="caption-1"
+                            as="span"
+                            className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                          >
+                            Skills*
+                          </Typography>
+                        </label>
+                        <div className="pl-7 w-full">
+                          <textarea
+                            id="participate-skills"
+                            rows={1}
+                            required
+                            value={formData.computerSkills}
+                            onInput={handleAutoResize}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") e.preventDefault();
+                            }}
+                            onChange={(e) => {
+                              setFormData({
+                                ...formData,
+                                computerSkills: e.target.value,
+                              });
+                              handleAutoResize(e);
+                            }}
+                            className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -546,33 +583,40 @@ export default function ParticipateModal({
               ) : isVolunteer ? (
                 /* Volunteer Row 3: Educational Qualification & Areas of Interest */
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
-                  <div className="relative">
+                  <div className="relative h-full">
                     <div
-                      className={`${
-                        formData.educationalQualification.trim()
-                          ? "min-h-[2.2rem] h-auto pb-1.5"
-                          : "h-[41.14px] pb-[21.66px]"
-                      } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                      className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
                     >
-                      <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
-                      <textarea
-                        rows={1}
-                        required
-                        placeholder="Educational Qualification*"
-                        value={formData.educationalQualification}
-                        onInput={handleAutoResize}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.preventDefault();
-                        }}
-                        onChange={(e) => {
-                          setFormData({
-                            ...formData,
-                            educationalQualification: e.target.value,
-                          });
-                          handleAutoResize(e);
-                        }}
-                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
-                      />
+                      <label htmlFor="participate-qualification" className="flex items-center cursor-pointer">
+                        <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                        >
+                          Educational Qualification*
+                        </Typography>
+                      </label>
+                      <div className="pl-7 w-full">
+                        <textarea
+                          id="participate-qualification"
+                          rows={1}
+                          required
+                          value={formData.educationalQualification}
+                          onInput={handleAutoResize}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.preventDefault();
+                          }}
+                          onChange={(e) => {
+                            setFormData({
+                              ...formData,
+                              educationalQualification: e.target.value,
+                            });
+                            handleAutoResize(e);
+                          }}
+                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -584,69 +628,81 @@ export default function ParticipateModal({
                         volunteerInterest: val,
                       }))
                     }
+                    className="h-full"
                     required
                   />
                 </div>
               ) : (
                 /* Specific to Fundraise (Frame 582: Gap 51px) */
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
-                  <div className="relative">
+                  <div className="relative h-full">
                     <div
-                      className={`${
-                        formData.fundraisingGoal.trim()
-                          ? "min-h-[2.2rem] h-auto pb-1.5"
-                          : "h-[41.14px] pb-[21.66px]"
-                      } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                      className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
                     >
-                      <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
-                      <textarea
-                        rows={1}
-                        required
-                        placeholder="Fundraising Goal*"
-                        value={formData.fundraisingGoal}
-                        onInput={handleAutoResize}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.preventDefault();
-                        }}
-                        onChange={(e) => {
-                          setFormData({
-                            ...formData,
-                            fundraisingGoal: e.target.value,
-                          });
-                          handleAutoResize(e);
-                        }}
-                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
-                      />
+                      <label htmlFor="participate-goal" className="flex items-center cursor-pointer">
+                        <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                        >
+                          Fundraising Goal*
+                        </Typography>
+                      </label>
+                      <div className="pl-7 w-full">
+                        <textarea
+                          id="participate-goal"
+                          rows={1}
+                          required
+                          value={formData.fundraisingGoal}
+                          onInput={handleAutoResize}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.preventDefault();
+                          }}
+                          onChange={(e) => {
+                            setFormData({
+                              ...formData,
+                              fundraisingGoal: e.target.value,
+                            });
+                            handleAutoResize(e);
+                          }}
+                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div className="relative">
+                  <div className="relative h-full">
                     <div
-                      className={`${
-                        formData.reason.trim()
-                          ? "min-h-[2.2rem] h-auto pb-1.5"
-                          : "h-[41.14px] pb-[21.66px]"
-                      } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                      className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
                     >
-                      <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5" />
-                      <textarea
-                        rows={1}
-                        required
-                        placeholder="Why are you fundraising?*"
-                        value={formData.reason}
-                        onInput={handleAutoResize}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.preventDefault();
-                        }}
-                        onChange={(e) => {
-                          setFormData({
-                            ...formData,
-                            reason: e.target.value,
-                          });
-                          handleAutoResize(e);
-                        }}
-                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none overflow-hidden"
-                      />
+                      <label htmlFor="participate-reason" className="flex items-center cursor-pointer">
+                        <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                        >
+                          Why are you fundraising?*
+                        </Typography>
+                      </label>
+                      <div className="pl-7 w-full">
+                        <textarea
+                          id="participate-reason"
+                          rows={1}
+                          required
+                          value={formData.reason}
+                          onInput={handleAutoResize}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.preventDefault();
+                          }}
+                          onChange={(e) => {
+                            setFormData({ ...formData, reason: e.target.value });
+                            handleAutoResize(e);
+                          }}
+                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -715,72 +771,80 @@ export default function ParticipateModal({
                 /* Why would you like to volunteer?* for Volunteer - Figma 5.54rem initial space, hugs text when typed */
                 <div className="relative">
                   <div
-                    className={`${
-                      (formData.whyVolunteer || formData.message).trim()
-                        ? "min-h-[2.75rem] h-auto pb-1.5"
-                        : "h-[5.54rem] pb-2"
-                    } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                    className="min-h-[5.54rem] h-auto pb-1.5 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
                   >
-                    <MessageSquare
-                      className={`size-4 text-[#0D2838] shrink-0 mr-3 ${
-                        (formData.whyVolunteer || formData.message).trim()
-                          ? "mt-1.5"
-                          : "mt-0.5"
-                      }`}
-                    />
-                    <textarea
-                      rows={1}
-                      required
-                      placeholder="Why would you like to volunteer?*"
-                      value={formData.whyVolunteer || formData.message}
-                      onInput={handleAutoResize}
-                      onChange={(e) => {
-                        setFormData({
-                          ...formData,
-                          whyVolunteer: e.target.value,
-                          message: e.target.value,
-                        });
-                        handleAutoResize(e);
-                      }}
-                      className={`w-full bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none ${
-                        (formData.whyVolunteer || formData.message).trim()
-                          ? "min-h-[1.5rem] max-h-[8rem] leading-normal py-1 overflow-y-auto"
-                          : "h-full leading-[150%] p-0 overflow-hidden"
-                      }`}
-                    />
+                    <label htmlFor="participate-whyVolunteer" className="flex items-center cursor-pointer pt-0.5">
+                      <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                      <Typography
+                        variant="caption-1"
+                        as="span"
+                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                      >
+                        Why would you like to volunteer?*
+                      </Typography>
+                    </label>
+                    <div className="pl-7 w-full">
+                      <textarea
+                        id="participate-whyVolunteer"
+                        rows={1}
+                        required
+                        maxLength={500}
+                        value={formData.whyVolunteer || formData.message}
+                        onInput={handleAutoResize}
+                        onChange={(e) => {
+                          setFormData({
+                            ...formData,
+                            whyVolunteer: e.target.value,
+                            message: e.target.value,
+                          });
+                          handleAutoResize(e);
+                        }}
+                        className="w-full min-h-[2.5rem] max-h-[8rem] bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto block leading-normal py-1"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end mt-1">
+                    <span className="text-[0.7rem] text-[#7C8B93] font-manrope select-none">
+                      {(formData.whyVolunteer || formData.message).length} / 500
+                    </span>
                   </div>
                 </div>
               ) : (
                 /* Your Message for Fundraise - Figma 5.54rem initial space, hugs text when typed */
                 <div className="relative">
                   <div
-                    className={`${
-                      formData.message.trim()
-                        ? "min-h-[2.75rem] h-auto pb-1.5"
-                        : "h-[5.54rem] pb-2"
-                    } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+                    className="min-h-[5.54rem] h-auto pb-1.5 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
                   >
-                    <MessageSquare
-                      className={`size-4 text-[#0D2838] shrink-0 mr-3 ${
-                        formData.message.trim() ? "mt-1.5" : "mt-0.5"
-                      }`}
-                    />
-                    <textarea
-                      rows={1}
-                      required
-                      placeholder="Your Message*"
-                      value={formData.message}
-                      onInput={handleAutoResize}
-                      onChange={(e) => {
-                        setFormData({ ...formData, message: e.target.value });
-                        handleAutoResize(e);
-                      }}
-                      className={`w-full bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope resize-none ${
-                        formData.message.trim()
-                          ? "min-h-[1.5rem] max-h-[8rem] leading-normal py-1 overflow-y-auto"
-                          : "h-full leading-[150%] p-0 overflow-hidden"
-                      }`}
-                    />
+                    <label htmlFor="participate-message" className="flex items-center cursor-pointer pt-0.5">
+                      <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                      <Typography
+                        variant="caption-1"
+                        as="span"
+                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                      >
+                        Your Message*
+                      </Typography>
+                    </label>
+                    <div className="pl-7 w-full">
+                      <textarea
+                        id="participate-message"
+                        rows={1}
+                        required
+                        maxLength={500}
+                        value={formData.message}
+                        onInput={handleAutoResize}
+                        onChange={(e) => {
+                          setFormData({ ...formData, message: e.target.value });
+                          handleAutoResize(e);
+                        }}
+                        className="w-full min-h-[2.5rem] max-h-[8rem] bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto block leading-normal py-1"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end mt-1">
+                    <span className="text-[0.7rem] text-[#7C8B93] font-manrope select-none">
+                      {formData.message.length} / 500
+                    </span>
                   </div>
                 </div>
               )}
