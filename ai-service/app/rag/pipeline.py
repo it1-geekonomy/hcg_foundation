@@ -52,8 +52,8 @@ def run_chat(message: str, session_id: str | None = None) -> dict:
     answer = recover_if_needed(answer, user_message, ranked, intents)
     sources = pick_sources(ranked, intents)
 
-    # If model returned token somehow, swap
-    if answer.strip() == C.NO_ANSWER_TOKEN:
+    # If model returned token somehow, or if recovery triggered fallback, clear sources
+    if answer.strip() == C.NO_ANSWER_TOKEN or answer.strip() == C.FALLBACK_ANSWER.strip():
         answer = C.FALLBACK_ANSWER
         sources = []
 
