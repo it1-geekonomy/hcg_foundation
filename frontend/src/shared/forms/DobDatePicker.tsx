@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-react";
+import Typography from "@/lib/Typography";
 
 interface DobDatePickerProps {
   value: string;
@@ -152,9 +153,27 @@ export default function DobDatePicker({
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Only allow numbers and slashes - strictly block words/letters
-    const sanitized = e.target.value.replace(/[^\d/]/g, "").slice(0, 10);
-    onChange(sanitized);
+    let inputVal = e.target.value;
+
+    // Handle backspace over slash
+    if (inputVal.length < value.length && value.endsWith("/") && !inputVal.endsWith("/")) {
+      inputVal = inputVal.slice(0, -1);
+    }
+
+    const digits = inputVal.replace(/\D/g, "").slice(0, 8);
+    let formatted = "";
+
+    if (digits.length > 0) {
+      if (digits.length <= 2) {
+        formatted = digits;
+      } else if (digits.length <= 4) {
+        formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+      } else {
+        formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+      }
+    }
+
+    onChange(formatted);
   };
 
   const handleKeyDownInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -173,40 +192,52 @@ export default function DobDatePicker({
     ) {
       return;
     }
-    // Block letters, words, and all other non-digit/slash characters
-    if (!/[\d/]/.test(e.key)) {
+    // Block non-digit keys
+    if (!/\d/.test(e.key)) {
       e.preventDefault();
     }
   };
 
   return (
-    <div className={`relative ${className}`} ref={containerRef}>
+    <div className={`relative h-full ${className}`} ref={containerRef}>
       {/* Trigger Bar */}
       <div
-        className={`${
-          (value || "").trim()
-            ? "min-h-[2.2rem] h-auto pb-1.5"
-            : "h-[41.14px] pb-[21.66px]"
-        } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all`}
+        className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
       >
-        <button
-          type="button"
-          onClick={() => setIsOpen((prev) => !prev)}
-          className="focus:outline-hidden cursor-pointer"
-          aria-label="Toggle calendar"
-        >
-          <CalendarIcon className="size-4 text-[#0D2838] shrink-0 mr-3 mt-0.5 hover:text-[#E5A810] transition-colors" />
-        </button>
-        <input
-          type="text"
-          required={required}
-          placeholder={placeholder}
-          value={value}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDownInput}
-          inputMode="numeric"
-          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden placeholder:text-[#0D2838] font-manrope"
-        />
+        <div className="flex items-center">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsOpen((prev) => !prev);
+            }}
+            className="focus:outline-hidden cursor-pointer p-0 mr-3 flex items-center justify-center border-none bg-transparent leading-none shrink-0"
+            aria-label="Toggle calendar"
+          >
+            <CalendarIcon className="size-4 text-[#0D2838] shrink-0 hover:text-[#E5A810] transition-colors" />
+          </button>
+          <label htmlFor="dob-input" className="cursor-text">
+            <Typography
+              variant="caption-1"
+              as="span"
+              className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+            >
+              {placeholder}
+            </Typography>
+          </label>
+        </div>
+        <div className="pl-7 w-full">
+          <input
+            id="dob-input"
+            type="text"
+            required={required}
+            value={value}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDownInput}
+            inputMode="numeric"
+            className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope h-[1.2rem] py-0 block"
+          />
+        </div>
       </div>
 
       {/* Fully Responsive In-Modal Calendar Popup */}

@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { Globe, ChevronDown, Search, Check, X, PlusCircle } from "lucide-react";
+import Typography from "@/lib/Typography";
 
 export const INDIAN_LANGUAGES = [
   "English",
@@ -35,6 +36,7 @@ interface SearchableLanguageSelectProps {
   onChange: (value: string) => void;
   placeholder?: string;
   required?: boolean;
+  className?: string;
 }
 
 export default function SearchableLanguageSelect({
@@ -42,6 +44,7 @@ export default function SearchableLanguageSelect({
   onChange,
   placeholder = "Languages Known*",
   required = false,
+  className = "",
 }: SearchableLanguageSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -133,7 +136,7 @@ export default function SearchableLanguageSelect({
   );
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className={`relative h-full ${className || ""}`} ref={containerRef}>
       {/* Hidden input for HTML5 form validation if required */}
       {required && (
         <input
@@ -153,24 +156,27 @@ export default function SearchableLanguageSelect({
           setIsOpen((prev) => !prev);
           setIsOtherMode(false);
         }}
-        className={`${
-          selectedLanguages.length > 0
-            ? "min-h-[2.2rem] h-auto pb-1.5"
-            : "h-[41.14px] pb-[21.66px]"
-        } flex items-start border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all cursor-pointer select-none`}
+        className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all cursor-pointer select-none"
       >
-        <div className="flex items-start gap-1.5 min-w-0 max-w-full">
-          <Globe className="size-4 text-[#0D2838] shrink-0 mr-1.5 mt-0.5" />
-          <span className="text-[0.82rem] leading-normal font-medium font-manrope text-[#0D2838] break-words whitespace-normal">
-            {selectedLanguages.length > 0
-              ? selectedLanguages.join(", ")
-              : placeholder}
-          </span>
+        <div className="flex items-center gap-1.5">
+          <Globe className="size-4 text-[#0D2838] shrink-0 mr-1.5" />
+          <Typography
+            variant="caption-1"
+            as="span"
+            className="font-medium font-manrope text-[#0D2838] select-none leading-normal"
+          >
+            {placeholder}
+          </Typography>
           <ChevronDown
-            className={`size-3.5 text-[#0D2838] shrink-0 mt-0.5 transition-transform duration-200 ${
+            className={`size-3.5 text-[#0D2838] shrink-0 transition-transform duration-200 ${
               isOpen ? "rotate-180" : ""
             }`}
           />
+        </div>
+        <div className="pl-7 w-full">
+          <span className="text-[0.82rem] leading-normal font-medium font-manrope text-[#0D2838] break-words whitespace-normal block min-h-[1.2rem]">
+            {selectedLanguages.join(", ")}
+          </span>
         </div>
       </div>
 
