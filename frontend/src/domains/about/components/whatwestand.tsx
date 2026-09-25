@@ -26,13 +26,16 @@ export default function WhatWeStandFor({ className = "" }: WhatWeStandForProps) 
 
       <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
         {pillars.map((pillar, index) => (
-          <div key={index} className="bg-[#FFF3CD] p-8">
-                        <Image
+          <div
+            key={index}
+            className="bg-[#FFF3CD] p-8 transition-all duration-300 ease-out will-change-transform hover:-translate-y-2 hover:scale-105 hover:shadow-xl hover:shadow-[#382E07]/10"
+          >
+            <Image
               src={pillar.icon}
               alt=""
               width={40}
               height={40}
-              className="h-8 w-8 object-contain sm:h-10 sm:w-10"
+              className="h-8 w-8 object-contain transition-transform duration-300 ease-out group-hover:scale-110 sm:h-10 sm:w-10"
             />
 
             <Typography

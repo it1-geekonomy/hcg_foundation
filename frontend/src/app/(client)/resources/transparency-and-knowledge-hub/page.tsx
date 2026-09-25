@@ -7,7 +7,9 @@ export default function OurTeamPage() {
     <>
       <Bannersection />
       <AnnualReportsSection />
+      <div id="donate-form">
         <DonateForm />
+        </div>
     </>
   );
 }
