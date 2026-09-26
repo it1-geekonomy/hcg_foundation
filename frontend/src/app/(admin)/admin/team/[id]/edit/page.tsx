@@ -1,4 +1,4 @@
-import TeamEditPage from "@/domains/cms/components/TeamEditPage";
+import TeamEditPage from "@/domains/cms/features/team/TeamEditPage";
 
 export default function AdminTeamEditPage() {
   return <TeamEditPage />;

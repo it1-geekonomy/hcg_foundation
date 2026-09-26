@@ -1,0 +1,46 @@
+"use client";
+
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import Typography from "@/lib/Typography";
+import { useAuthStore } from "@/store/auth.store";
+
+/** Protects /admin/* — unauthenticated users go to /login */
+export default function AdminAuthGate({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const hasHydrated = useAuthStore((s) => s._hasHydrated);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const setHasHydrated = useAuthStore((s) => s.setHasHydrated);
+
+  useEffect(() => {
+    setHasHydrated(useAuthStore.persist.hasHydrated());
+    return useAuthStore.persist.onFinishHydration(() => {
+      setHasHydrated(true);
+    });
+  }, [setHasHydrated]);
+
+  useEffect(() => {
+    if (!hasHydrated) return;
+    if (!isAuthenticated) {
+      const next = encodeURIComponent(pathname || "/admin/dashboard");
+      router.replace(`/login?next=${next}`);
+    }
+  }, [hasHydrated, isAuthenticated, pathname, router]);
+
+  if (!hasHydrated || !isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#F7F7F5]">
+        <Typography variant="label-1" as="p" className="text-[#5C5C5C]">
+          Checking session…
+        </Typography>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}

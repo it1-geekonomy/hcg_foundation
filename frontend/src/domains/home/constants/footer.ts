@@ -51,23 +51,22 @@ export const FOOTER_COLORS = {
 } as const;
 
 export const FOOTER_QUICK_LINKS = [
-  "Home",
-  "About Us",
-  "Patient Stories",
-  "Patient Testimonials",
-  "Patient Aid",
-  "Donate Now",
-  "Contact Us",
+  { label: "Home", href: "/" },
+  { label: "About Us", href: "/about-us" },
+  { label: "Patient Stories", href: "/journey-of-hope/patient-stories" },
+  { label: "Patient Testimonials", href: "/journey-of-hope/testimonials" },
+  { label: "Donate Now", href: "#donate-form" },
+  { label: "Contact Us", href: "/contact" },
 ] as const;
 
 export const FOOTER_INNER_PAGES = [
-  "Team",
-  "Trustees",
-  "Events",
-  "Projects",
-  "Privacy Policy",
-  "Terms and Conditions",
-  "Disclaimer",
+  { label: "Team", href: "/about-us", scrollTo: "team" },
+  { label: "Trustees", href: "/about-us", scrollTo: "trustees" },
+  { label: "Events", href: "/resources/events" },
+  { label: "Projects", href: "/resources/projects" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms and Conditions", href: "/terms" },
+  { label: "Disclaimer", href: "/terms" },
 ] as const;
 
 export const FOOTER_CONTACT_INFO = {
@@ -79,9 +78,9 @@ export const FOOTER_CONTACT_INFO = {
 } as const;
 
 export const FOOTER_SOCIAL_LINKS = [
-  { name: "Facebook", href: "" },
+  { name: "Instagram", href: "https://www.instagram.com/hcg_foundation/" },
   { name: "LinkedIn", href: "" },
-  { name: "Instagram", href: "" },
+  { name: "Facebook", href: "" },
 ] as const;
 
 export const FOOTER_DEVELOPER = {

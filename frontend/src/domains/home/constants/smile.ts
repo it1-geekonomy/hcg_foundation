@@ -9,26 +9,45 @@ export const stories: SmileStory[] = [
 	{
 		name: "Jatin",
 		date: "3 August, 2026",
-		image: "/Smilestories/Jatin.png",
+		image: "/Smilestories/smilestory1.png",
 		link: "/stories/jatin",
 	},
 	{
 		name: "Archana P",
 		date: "5 December, 2026",
-		image: "/Smilestories/Archana.png",
+		image: "/Smilestories/smilestory2.png",
 		link: "/stories/archana-p",
 	},
 	{
 		name: "Swati Patil",
 		date: "19 June, 2026",
-		image: "/Smilestories/Swati.png",
+		image: "/Smilestories/smilestory3.png",
 		link: "/stories/swati-patil",
 	},
 	{
 		name: "Master Vikshith",
 		date: "1 October, 2026",
-		image: "/Smilestories/Vikshith.png",
+		image: "/Smilestories/smilestory4.png",
 		link: "/stories/master-vikshith",
+	},
+	// Placeholder entries — swap in real name/date/link once available.
+	{
+		name: "Aleema Banu",
+		date: "4 April, 2024",
+		image: "/Smilestories/smilestory5.png",
+		link: "/stories/smilestory5",
+	},
+	{
+		name: "Somappa J J",
+		date: "19 December, 2024",
+		image: "/Smilestories/smilestory6.png",
+		link: "/stories/smilestory6",
+	},
+	{
+		name: "Latha E",
+		date: "20 March, 2026",
+		image: "/Smilestories/smilestory7.png",
+		link: "/stories/smilestory7",
 	},
 ];
 

@@ -1,14 +1,20 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { R2StorageService } from './r2-storage.service';
 
-const IMAGE_TYPES = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
+const IMAGE_TYPES = new Set(['image/webp', 'image/avif']);
+const DOCUMENT_TYPES = new Set(['application/pdf']);
+const CV_TYPES = new Set([
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ]);
+const VIDEO_TYPES = new Set(['video/mp4', 'video/webm']);
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_DOCUMENT_BYTES = 25 * 1024 * 1024;
+const MAX_CV_BYTES = 5 * 1024 * 1024;
+
+export type CdnFileKind = 'image' | 'document' | 'video' | 'cv';
 
 export type CdnFile = {
   originalname: string;
@@ -27,8 +33,12 @@ export class CdnService {
 
   constructor(private readonly r2: R2StorageService) {}
 
-  async upload(file: CdnFile, folder: string): Promise<string> {
-    this.assertImage(file);
+  async upload(
+    file: CdnFile,
+    folder: string,
+    kind: CdnFileKind = 'image',
+  ): Promise<string> {
+    this.assertValidFile(file, kind);
     const uploaded = await this.r2.upload({
       folder,
       fileName: file.originalname,
@@ -53,24 +63,53 @@ export class CdnService {
     oldUrl: string | null | undefined,
     file: CdnFile | undefined,
     folder: string,
+    kind: CdnFileKind = 'image',
   ): Promise<string | null | undefined> {
     if (!file) return oldUrl;
-    const nextUrl = await this.upload(file, folder);
+    const nextUrl = await this.upload(file, folder, kind);
     await this.delete(oldUrl);
     return nextUrl;
   }
 
-  private assertImage(file: CdnFile) {
+  private assertValidFile(file: CdnFile, kind: CdnFileKind) {
     if (!file?.buffer?.length) {
       throw new BadRequestException('Uploaded file is empty.');
     }
-    if (!IMAGE_TYPES.has(file.mimetype)) {
-      throw new BadRequestException(
-        'Only JPEG, PNG, WebP, or GIF images are allowed.',
-      );
+
+    if (kind === 'image') {
+      if (!IMAGE_TYPES.has(file.mimetype)) {
+        throw new BadRequestException(
+          'Only WebP or AVIF images are allowed (max 5MB).',
+        );
+      }
+      if (file.size > MAX_IMAGE_BYTES) {
+        throw new BadRequestException('Image must be 5MB or smaller.');
+      }
+      return;
     }
-    if (file.size > MAX_IMAGE_BYTES) {
-      throw new BadRequestException('Image must be 5MB or smaller.');
+
+    if (kind === 'document') {
+      if (!DOCUMENT_TYPES.has(file.mimetype)) {
+        throw new BadRequestException('Only PDF documents are allowed (max 25MB).');
+      }
+      if (file.size > MAX_DOCUMENT_BYTES) {
+        throw new BadRequestException('Document must be 25MB or smaller.');
+      }
+      return;
+    }
+
+    if (kind === 'cv') {
+      if (!CV_TYPES.has(file.mimetype)) {
+        throw new BadRequestException('Only PDF, DOC, or DOCX documents are allowed (max 5MB).');
+      }
+      if (file.size > MAX_CV_BYTES) {
+        throw new BadRequestException('CV must be 5MB or smaller.');
+      }
+      return;
+    }
+
+    if (!VIDEO_TYPES.has(file.mimetype)) {
+      throw new BadRequestException('Only MP4 or WebM videos are allowed.');
     }
   }
 }

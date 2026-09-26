@@ -35,3 +35,6 @@ services:
 
 volumes:
   pgdata:
+    # Reuse the existing local volume so CMS data is preserved when switching images.
+    external: true
+    name: pgdata

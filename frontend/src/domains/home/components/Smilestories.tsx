@@ -2,47 +2,77 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Calendar } from "lucide-react";
 import Typography from "@/lib/Typography";
 import {
   AUTO_SCROLL_SPEED,
   DRAG_THRESHOLD,
-  loopedStories,
   RESUME_DELAY,
   SAVE_INTERVAL,
   STORAGE_KEY,
   wrap,
 } from "@/domains/home/constants/smile";
+import { publicPatientStoriesApi } from "@/domains/cms/lib/api";
+
+function formatStoryDate(dateStr?: string | null): string {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
 
 function StoryCard({
   name,
   date,
   image,
+  objectPosition,
 }: {
   name: string;
   date: string;
   image: string;
+  objectPosition?: string;
 }) {
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl bg-[#8D8D8D66] p-6 backdrop-blur-xl">
-      {/* photo, inset inside the glass card */}
-      <div className="relative aspect-[8/9] w-full overflow-hidden rounded-xl">
+    <div className="group flex flex-col overflow-hidden rounded-2xl bg-[#8D8D8D66] p-4 sm:p-6 backdrop-blur-xl">
+      {/* photo, inset inside the glass card - aspect ratio is locked via
+         inline style (not just the Tailwind class) so every card's image
+         box is guaranteed the exact same size, regardless of the source
+         image's own dimensions or any Tailwind purge/build quirks */}
+      <div
+        className="relative w-full overflow-hidden rounded-xl bg-[#00000014]"
+        style={{ aspectRatio: "8 / 9" }}
+      >
         <Image
           src={image}
           alt={name}
           fill
           sizes="(max-width: 639px) clamp(240px, 65vw, 320px), (max-width: 767px) clamp(280px, 52vw - 34px, 360px), (max-width: 1023px) clamp(320px, 52vw - 42px, 400px), (max-width: 1279px) clamp(340px, 32vw - 20px, 430px), clamp(280px, 24vw - 6px, 460px)"
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          style={{ objectPosition: objectPosition ?? "center" }}
+          className="rounded-xl object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
       </div>
 
       {/* name / date / arrow, below the photo, inside the card */}
       <div className="flex items-center justify-between gap-2 pt-4">
         <div>
-          <Typography variant="heading-8" as="p" className="text-left text-white font-semibold font-manrope">
+          <Typography
+            variant="heading-8"
+            as="p"
+            className="text-left text-white font-semibold font-manrope"
+          >
             {name}
           </Typography>
-          <Typography variant="text-2"
+          <Typography
+            variant="text-2"
             as="p"
             className="mt-1 flex items-center gap-2 text-white text-nowrap font-normal font-manrope"
           >
@@ -64,10 +94,58 @@ function StoryCard({
 }
 
 export default function SmileStories() {
+  const [apiStories, setApiStories] = useState<any[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await publicPatientStoriesApi.listPublished({
+          page: 1,
+          limit: 12,
+        });
+        if (cancelled) return;
+        if (res.data && res.data.length > 0) {
+          const mapped = res.data.map((item) => ({
+            name: item.title,
+            date: formatStoryDate(item.storyDate),
+            image: item.patientImage || "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=800&auto=format&fit=crop",
+            link: `/journey-of-hope/patient-stories/${item.slug || item.id}`,
+          }));
+          setApiStories(mapped);
+        } else {
+          setApiStories([]);
+        }
+      } catch (err: any) {
+        if (!cancelled) {
+          setApiStories([]);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (apiStories === null) {
+    return <div className="min-h-[400px]"></div>;
+  }
+
+  if (apiStories.length === 0) {
+    return null;
+  }
+
+  return <SmileStoriesCarousel apiStories={apiStories} />;
+}
+
+function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
+  const router = useRouter();
+  const isInfinite = apiStories.length >= 4;
+  const displayStories = isInfinite ? [...apiStories, ...apiStories, ...apiStories] : apiStories;
+
   const sectionRef = useRef<HTMLElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-
   const [hasEntered, setHasEntered] = useState(false);
 
   const offsetRef = useRef(0); // kept wrapped inside [0, oneSetWidth)
@@ -84,6 +162,8 @@ export default function SmileStories() {
   const lastTsRef = useRef<number | null>(null);
   const lastSaveTsRef = useRef(0);
   const pointerIdRef = useRef<number | null>(null);
+  const measureRafRef = useRef<number | null>(null);
+  const clickedLinkRef = useRef<string | null>(null);
 
   const applyTransform = () => {
     if (!trackRef.current) return;
@@ -101,10 +181,22 @@ export default function SmileStories() {
   };
 
   const measure = () => {
-    if (!trackRef.current) return;
+    if (!trackRef.current || !isInfinite) return;
     oneSetWidthRef.current = trackRef.current.scrollWidth / 3;
     offsetRef.current = wrap(offsetRef.current, oneSetWidthRef.current);
     applyTransform();
+  };
+
+  // Debounced measure: avoids layout thrash / jumpy transforms when the
+  // ResizeObserver fires multiple times in a row (e.g. during a viewport
+  // resize or an orientation change), which is what caused the visible
+  // stutter on some screens.
+  const scheduleMeasure = () => {
+    if (measureRafRef.current) cancelAnimationFrame(measureRafRef.current);
+    measureRafRef.current = requestAnimationFrame(() => {
+      measureRafRef.current = null;
+      measure();
+    });
   };
 
   // Restore last scroll position (e.g. user clicked a card, then hit back)
@@ -153,22 +245,26 @@ export default function SmileStories() {
 
   useEffect(() => {
     measure();
-    const ro = new ResizeObserver(() => measure());
+    const ro = new ResizeObserver(() => scheduleMeasure());
     if (viewportRef.current) ro.observe(viewportRef.current);
-    window.addEventListener("resize", measure);
+    window.addEventListener("resize", scheduleMeasure);
     return () => {
       ro.disconnect();
-      window.removeEventListener("resize", measure);
+      window.removeEventListener("resize", scheduleMeasure);
+      if (measureRafRef.current) cancelAnimationFrame(measureRafRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasEntered]);
 
   useEffect(() => {
-    if (!hasEntered) return;
+    if (!hasEntered || !isInfinite) return;
 
     const step = (ts: number) => {
       if (lastTsRef.current === null) lastTsRef.current = ts;
-      const dt = (ts - lastTsRef.current) / 1000;
+      // Clamp dt so a dropped/backgrounded frame (tab switch, slow device)
+      // doesn't cause a big visible jump when the animation resumes - this
+      // is what made the movement look "unsmooth" on some screens.
+      const dt = Math.min((ts - lastTsRef.current) / 1000, 0.05);
       lastTsRef.current = ts;
 
       const shouldMove =
@@ -216,6 +312,7 @@ export default function SmileStories() {
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isInfinite) return;
     isPausedRef.current = true;
     didDragRef.current = false;
     clearResumeTimer();
@@ -227,13 +324,14 @@ export default function SmileStories() {
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (pointerIdRef.current === null || oneSetWidthRef.current === 0) return;
+    if (!isInfinite || pointerIdRef.current === null || oneSetWidthRef.current === 0) return;
     const dx = dragStartXRef.current - e.clientX;
 
     if (!isDraggingRef.current) {
       if (Math.abs(dx) < DRAG_THRESHOLD) return; // ignore tiny jitters / clicks
       isDraggingRef.current = true;
       didDragRef.current = true;
+      clickedLinkRef.current = null;
     }
 
     offsetRef.current = wrap(dragStartOffsetRef.current + dx, oneSetWidthRef.current);
@@ -241,6 +339,7 @@ export default function SmileStories() {
   };
 
   const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isInfinite) return;
     if (pointerIdRef.current !== null) {
       try {
         e.currentTarget.releasePointerCapture(pointerIdRef.current);
@@ -259,30 +358,34 @@ export default function SmileStories() {
       // simple click/tap - resume immediately, no delay
       clearResumeTimer();
       isPausedRef.current = false;
+      if (clickedLinkRef.current) {
+        saveOffset();
+        router.push(clickedLinkRef.current);
+        clickedLinkRef.current = null;
+      }
     }
   };
 
   const handleCardClick = (link: string) => {
-    if (didDragRef.current) return; // it was a drag, not a click - don't navigate
-    saveOffset();
-    window.location.href = "/";
+    if (isInfinite && didDragRef.current) return; // it was a drag, not a click - don't navigate
+    if (isInfinite) saveOffset();
+    router.push(link);
   };
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative w-full lg:py-20"
-    >
-      <Typography variant="heading-3"
+    <section ref={sectionRef} className="relative w-full lg:py-20">
+      <Typography
+        id="smilestories"
+        variant="heading-3"
         as="h2"
-        className="mx-auto mb-14 text-center px-4 text-neutral-800 font-medium font-manrope pt-6"
+        className="mx-auto mb-14 text-center px-4 text-neutral-800 font-medium font-manrope pt-6 scroll-mt-24"
       >
         Behind Every <em className="text-neutral-900 font-tiempos-headline">Smile Is a Story</em>
       </Typography>
 
       <div
         ref={viewportRef}
-        className="mx-auto w-full overflow-hidden px-4 sm:px-6 md:px-8 lg:px-12"
+        className={`mx-auto w-full px-4 sm:px-6 md:px-8 lg:px-12 ${isInfinite ? 'overflow-hidden' : 'overflow-x-auto snap-x no-scrollbar'}`}
       >
         <div
           ref={trackRef}
@@ -291,12 +394,17 @@ export default function SmileStories() {
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
           onWheel={() => {
+            if (!isInfinite) return;
             isPausedRef.current = true;
             scheduleResume();
           }}
-          className="flex w-max touch-pan-y cursor-grab flex-nowrap gap-3 select-none active:cursor-grabbing sm:gap-5 lg:gap-8"
+          className={`flex w-max flex-nowrap gap-3 sm:gap-5 lg:gap-8 ${
+            isInfinite 
+              ? 'touch-pan-y cursor-grab select-none will-change-transform active:cursor-grabbing' 
+              : 'touch-pan-x snap-mandatory'
+          }`}
         >
-          {loopedStories.map((story, i) => (
+          {displayStories.map((story, i) => (
             <div
               key={`${story.name}-${i}`}
               className="shrink-0 basis-[clamp(240px,65vw,320px)] cursor-pointer sm:basis-[clamp(280px,52vw-34px,360px)] md:basis-[clamp(320px,52vw-42px,400px)] lg:basis-[clamp(340px,32vw-20px,430px)] xl:basis-[clamp(280px,24vw-6px,460px)]"
@@ -311,7 +419,13 @@ export default function SmileStories() {
                 }
               }}
               onDragStart={(e) => e.preventDefault()}
-              onClick={() => handleCardClick(story.link)}
+              onPointerDown={() => {
+                clickedLinkRef.current = story.link;
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                handleCardClick(story.link);
+              }}
             >
               <StoryCard {...story} />
             </div>
