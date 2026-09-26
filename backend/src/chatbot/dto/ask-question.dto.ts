@@ -1,9 +1,16 @@
-import { IsString, MinLength } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional, IsString, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class AskQuestionDto {
-  @ApiProperty({ example: 'What programs do you offer for children?' })
+  @ApiProperty({ example: 'How can I donate to HCG Foundation?' })
   @IsString()
-  @MinLength(2)
+  @MinLength(1)
   question: string;
+
+  @ApiPropertyOptional({
+    description: 'Optional conversation session id for follow-ups',
+  })
+  @IsOptional()
+  @IsString()
+  sessionId?: string;
 }

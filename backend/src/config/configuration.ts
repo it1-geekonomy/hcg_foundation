@@ -17,7 +17,7 @@ export default () => ({
     jwtSecret:
       process.env.AUTH_JWT_SECRET ?? 'hcg-dev-secret-change-me',
     jwtExpiresInSeconds: parseInt(
-      process.env.AUTH_JWT_EXPIRES_IN_SECONDS ?? String(60 * 60 * 24 * 7),
+      process.env.AUTH_JWT_EXPIRES_IN_SECONDS ?? String(60 * 60 * 24),
       10,
     ),
   },
@@ -28,5 +28,9 @@ export default () => ({
     endpoint: process.env.R2_ENDPOINT ?? '',
     publicUrl: process.env.R2_PUBLIC_URL ?? '',
     region: process.env.R2_REGION ?? 'auto',
+  },
+  razorpay: {
+    keyId: process.env.RAZORPAY_KEY_ID ?? '',
+    keySecret: process.env.RAZORPAY_KEY_SECRET ?? '',
   },
 });

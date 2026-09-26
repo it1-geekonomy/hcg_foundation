@@ -114,7 +114,7 @@ export default function Ribbon({ id, delay, active }: { id: string; delay: numbe
           d={RIBBON_PATH}
           fill="none"
           stroke={`url(#base-${id})`}
-          strokeWidth={30}
+          strokeWidth={34}
           strokeLinecap="butt"
           style={{
             strokeDasharray: 800,
@@ -127,7 +127,7 @@ export default function Ribbon({ id, delay, active }: { id: string; delay: numbe
           d={LOOP_PATH}
           fill="none"
           stroke={`url(#loop-glow-${id})`}
-          strokeWidth={30}
+          strokeWidth={34}
           strokeLinecap="butt"
           style={{
             opacity: active ? 1 : 0,
@@ -146,7 +146,7 @@ export default function Ribbon({ id, delay, active }: { id: string; delay: numbe
           d={LOOP_PATH}
           fill="none"
           stroke="#FFE486"
-          strokeWidth={20}
+          strokeWidth={24}
           strokeLinecap="butt"
           filter={`url(#loop-glow-filter-${id})`}
           style={{
@@ -155,7 +155,7 @@ export default function Ribbon({ id, delay, active }: { id: string; delay: numbe
           }}
         />
 
-        <path d={RIBBON_PATH} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={31} strokeLinecap="butt" />
+        <path d={RIBBON_PATH} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth={35} strokeLinecap="butt" />
       </g>
     </svg>
   );

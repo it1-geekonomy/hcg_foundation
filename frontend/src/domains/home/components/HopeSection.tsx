@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { ABOUT_CONTENT } from "@/domains/home/constants/hope";
-import { scrollHomeToHero } from "@/domains/home/utils/heroScrollReset";
 import Typography from "@/lib/Typography";
 
 export default function AboutSection() {
@@ -22,17 +22,13 @@ export default function AboutSection() {
 
         <div className="flex flex-col gap-5">
           {ABOUT_CONTENT.paragraphs.map((paragraph) => (
-            <Typography key={paragraph} variant="body-2" as="p" className="text-[#293239] font-normal font-argestadisplay">
+            <Typography key={paragraph} variant="heading-8" as="p" className="text-[#293239] font-normal font-argestadisplay">
               {paragraph}
             </Typography>
           ))}
 
-          <a
+          <Link
             href={ABOUT_CONTENT.cta.href}
-            onClick={(event) => {
-              event.preventDefault();
-              scrollHomeToHero({ smooth: true });
-            }}
             className="mt-2 inline-flex h-12 w-fit items-stretch overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D]"
           >
             <span className="flex h-full items-center px-4">
@@ -44,7 +40,7 @@ export default function AboutSection() {
             <span className="flex h-full w-12 shrink-0 items-center justify-center border-[3px] border-[#FCCC2D] bg-black">
               <ArrowUpRight className="h-4 w-4 text-[#FCCC2D]" />
             </span>
-          </a>
+          </Link>
         </div>
       </div>
     </section>

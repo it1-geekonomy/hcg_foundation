@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Mail, MapPin, Phone, ArrowUpRight } from "lucide-react";
 import {
@@ -87,15 +89,15 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="col-span-2 md:col-span-3 lg:col-span-1 grid grid-cols-2 md:grid-cols-3 gap-x-6 md:gap-x-8 gap-y-10 lg:flex lg:flex-row lg:items-start lg:justify-end lg:gap-x-10 xl:gap-x-14 2xl:gap-x-28">
+          <div className="col-span-2 md:col-span-3 lg:col-span-1 grid grid-cols-[auto_auto] justify-evenly md:grid-cols-3 md:justify-normal gap-x-6 md:gap-x-8 gap-y-10 lg:flex lg:flex-row lg:items-start lg:justify-end lg:gap-x-10 xl:gap-x-14 2xl:gap-x-28">
           <div className="col-span-1">
             <FooterHeading>QUICK LINKS</FooterHeading>
             <ul className="mt-8 space-y-3">
-              {FOOTER_QUICK_LINKS.map((label) => (
-                <li key={label}>
-                  <Link href="/" className="hover:text-[#FDB723] transition-colors">
-                    <Typography variant="body-9" as="span" className="text-white">
-                      {label}
+              {FOOTER_QUICK_LINKS.map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="hover:text-[#FDB723] transition-colors text-white">
+                    <Typography variant="body-9" as="span" className="text-inherit">
+                      {item.label}
                     </Typography>
                   </Link>
                 </li>
@@ -106,11 +108,27 @@ export default function Footer() {
           <div className="col-span-1">
             <FooterHeading>INNER PAGES</FooterHeading>
             <ul className="mt-8 space-y-3">
-              {FOOTER_INNER_PAGES.map((label) => (
-                <li key={label}>
-                  <Link href="/" className="hover:text-[#FDB723] transition-colors">
-                    <Typography variant="body-9" as="span" className="text-white">
-                      {label}
+              {FOOTER_INNER_PAGES.map((item) => (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    className="hover:text-[#FDB723] transition-colors text-white"
+                    onClick={(e) => {
+                      if ("scrollTo" in item && item.scrollTo) {
+                        // If already on the page, scroll smoothly.
+                        if (window.location.pathname === item.href) {
+                          e.preventDefault();
+                          const el = document.getElementById(item.scrollTo);
+                          if (el) el.scrollIntoView({ behavior: "smooth" });
+                        } else {
+                          // Navigating to the page, set session storage so the target page can scroll to it
+                          sessionStorage.setItem("pendingScroll", item.scrollTo);
+                        }
+                      }
+                    }}
+                  >
+                    <Typography variant="body-9" as="span" className="text-inherit">
+                      {item.label}
                     </Typography>
                   </Link>
                 </li>
@@ -146,16 +164,18 @@ export default function Footer() {
                 </a>
               </div>
 
-              <div className="flex space-x-4 pt-2">
+                           <div className="flex space-x-4 pt-2">
                 {FOOTER_SOCIAL_LINKS.map((social) => (
                   <a
                     key={social.name}
                     href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="w-10 h-10 bg-[#FDB723] rounded-full flex items-center justify-center hover:bg-yellow-500 transition-colors"
                   >
-                    {social.name === "Facebook" && <FacebookIcon />}
-                    {social.name === "LinkedIn" && <LinkedinIcon />}
                     {social.name === "Instagram" && <InstagramIcon />}
+                    {social.name === "LinkedIn" && <LinkedinIcon />}
+                    {social.name === "Facebook" && <FacebookIcon />}
                   </a>
                 ))}
               </div>

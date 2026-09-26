@@ -17,7 +17,6 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
-  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -67,6 +66,17 @@ export class UsersController {
     return this.service.findAll(query);
   }
 
+  @Get('deleted')
+  @ApiOperation({
+    summary: 'List recently deleted users (CMS trash)',
+    description:
+      'Soft-deleted users only, newest first. Restore with POST /users/:id/restore.',
+  })
+  @ApiOkResponse({ description: 'Paginated trash list' })
+  findDeleted(@Query() query: PaginationQueryDto) {
+    return this.service.findDeleted(query);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get user by id' })
   @ApiOkResponse({ type: User })
@@ -102,11 +112,28 @@ export class UsersController {
     return this.service.update(id, dto);
   }
 
+  @Post(':id/restore')
+  @ApiOperation({
+    summary: 'Restore soft-deleted user',
+    description: 'Clears deletedAt so the user can log in again.',
+  })
+  @ApiOkResponse({ type: User })
+  restore(@Param('id', ParseUUIDPipe) id: string) {
+    return this.service.restore(id);
+  }
+
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete user by id' })
-  @ApiNoContentResponse()
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.remove(id);
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Soft-delete user by id',
+    description: 'Sets deletedAt. The user can no longer log in. Email/username can be reused.',
+  })
+  @ApiOkResponse({ description: 'User deleted successfully' })
+  async remove(@Param('id', ParseUUIDPipe) id: string) {
+    await this.service.remove(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'User deleted successfully',
+    };
   }
 }

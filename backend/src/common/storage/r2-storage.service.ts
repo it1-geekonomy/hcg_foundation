@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   DeleteObjectCommand,
   PutObjectCommand,
+  ListObjectsV2Command,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
@@ -102,5 +103,37 @@ export class R2StorageService {
       }),
     );
     return true;
+  }
+
+  /**
+   * Fetches the total storage space consumed in the bucket by paginating
+   * through all objects and summing their sizes.
+   */
+  async getStorageMetrics(): Promise<{ totalBytes: number; objectCount: number }> {
+    this.assertConfigured();
+
+    let totalBytes = 0;
+    let objectCount = 0;
+    let isTruncated = true;
+    let continuationToken: string | undefined = undefined;
+
+    while (isTruncated) {
+      const response: any = await this.client.send(
+        new ListObjectsV2Command({
+          Bucket: this.bucket,
+          ContinuationToken: continuationToken,
+        }),
+      );
+
+      response.Contents?.forEach((obj: any) => {
+        totalBytes += obj.Size || 0;
+        objectCount++;
+      });
+
+      isTruncated = response.IsTruncated ?? false;
+      continuationToken = response.NextContinuationToken;
+    }
+
+    return { totalBytes, objectCount };
   }
 }

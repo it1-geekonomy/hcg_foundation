@@ -2,22 +2,43 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Check } from "lucide-react";
 import {
-  AMOUNTS,
   IMPACT_ITEMS,
   TRUST_ITEMS,
 } from "@/domains/home/constants/overlayform";
 import Typography from "@/lib/Typography";
+import DonateDetailsModal from "@/shared/components/DonateDetailsModal";
+import CountrySelect from "@/shared/components/CountrySelect";
+import {
+  DEFAULT_COUNTRY_CODE,
+  getDonationCountry,
+} from "@/domains/home/constants/countries";
+import {
+  type DonationCurrencyCode,
+  formatDonationAmount,
+  getDonationCurrency,
+} from "@/domains/home/constants/donation-currency";
 
 /* ------------------------------------------------------------------ */
 /* Root component                                                      */
 /* ------------------------------------------------------------------ */
 
 export default function OverlayForm({ onClose }: { onClose: () => void }) {
-  const [selectedAmount, setSelectedAmount] = useState("₹3000");
+  const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
+  const country = getDonationCountry(countryCode);
+  const currency: DonationCurrencyCode = country.currency;
+  const currencyMeta = getDonationCurrency(currency);
+
+  // Default to the FIRST preset amount for the current currency.
+  const [selectedPreset, setSelectedPreset] = useState<number | null>(
+    currencyMeta.presets[0] ?? null,
+  );
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customAmount, setCustomAmount] = useState("");
+  const [agreedTo80G, setAgreedTo80G] = useState(false);
+  const [termsError, setTermsError] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   useEffect(() => {
     const scrollY = window.scrollY;
@@ -42,9 +63,30 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
     };
   }, []);
 
+  // Changing country updates currency + resets the amount selection to the
+  // new currency's first preset (mirrors DonateSection's behaviour).
+  const changeCountry = (nextCode: string) => {
+    const next = getDonationCountry(nextCode);
+    const meta = getDonationCurrency(next.currency);
+    setCountryCode(next.code);
+    setShowCustomInput(false);
+    setCustomAmount("");
+    setSelectedPreset(meta.presets[0] ?? null);
+    setTermsError(false);
+  };
+
+  const pickPreset = (amount: number) => {
+    setSelectedPreset(amount);
+    setShowCustomInput(false);
+    setCustomAmount("");
+  };
+
   const commitCustomAmount = () => {
     const numeric = customAmount.trim().replace(/[^\d]/g, "");
-    if (numeric) setSelectedAmount(`₹${numeric}`);
+    if (numeric) {
+      setCustomAmount(numeric);
+      setSelectedPreset(null);
+    }
     setShowCustomInput(false);
   };
 
@@ -58,31 +100,63 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
     }
   };
 
+  const donationAmount = selectedPreset ?? (Number(customAmount) || 0);
+
+  const openDetailsForm = () => {
+    setTermsError(!agreedTo80G);
+    if (!agreedTo80G) return;
+    setDetailsOpen(true);
+  };
+
   const amountProps: AmountProps = {
-    selectedAmount,
-    onSelectAmount: setSelectedAmount,
+    selectedPreset,
+    onSelectPreset: pickPreset,
     showCustomInput,
     customAmount,
     onCustomAmountChange: setCustomAmount,
     onMoreClick: () => setShowCustomInput(true),
     onCustomAmountKeyDown: handleCustomAmountKeyDown,
     onCustomAmountBlur: commitCustomAmount,
+    countryCode,
+    changeCountry,
+    currency,
+    currencyMeta,
+    agreedTo80G,
+    setAgreedTo80G,
+    termsError,
+    setTermsError,
+    onDonateClick: openDetailsForm,
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden overscroll-contain bg-white/10 backdrop-blur-sm py-6 lg:py-12"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="donation-modal-title"
-    >
-      <div className="block lg:hidden">
-        <ModalBelow1024 {...amountProps} onClose={onClose} />
+    <>
+      <div
+        className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden overscroll-contain bg-white/10 backdrop-blur-sm py-3 lg:py-6"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="donation-modal-title"
+      >
+        <div className="block lg:hidden">
+          <ModalBelow1024 {...amountProps} onClose={onClose} />
+        </div>
+        <div className="hidden lg:block">
+          <Modal1024Up {...amountProps} onClose={onClose} />
+        </div>
       </div>
-      <div className="hidden lg:block">
-        <Modal1024Up {...amountProps} onClose={onClose} />
-      </div>
-    </div>
+
+      {detailsOpen ? (
+        <DonateDetailsModal
+          amount={donationAmount}
+          currency={currency}
+          countryCode={countryCode}
+          onClose={() => setDetailsOpen(false)}
+          onAmountChange={(next) => {
+            setCustomAmount(String(next));
+            setSelectedPreset(null);
+          }}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -91,14 +165,23 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
 /* ------------------------------------------------------------------ */
 
 type AmountProps = {
-  selectedAmount: string;
-  onSelectAmount: (amount: string) => void;
+  selectedPreset: number | null;
+  onSelectPreset: (amount: number) => void;
   showCustomInput: boolean;
   customAmount: string;
   onCustomAmountChange: (value: string) => void;
   onMoreClick: () => void;
   onCustomAmountKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onCustomAmountBlur: () => void;
+  countryCode: string;
+  changeCountry: (nextCode: string) => void;
+  currency: DonationCurrencyCode;
+  currencyMeta: ReturnType<typeof getDonationCurrency>;
+  agreedTo80G: boolean;
+  setAgreedTo80G: (value: boolean) => void;
+  termsError: boolean;
+  setTermsError: (value: boolean) => void;
+  onDonateClick: () => void;
 };
 
 /* ------------------------------------------------------------------ */
@@ -219,14 +302,16 @@ const pillInactive =
   "border-gray-200 bg-white text-gray-700 hover:border-gray-400";
 
 function AmountPicker({
-  selectedAmount,
-  onSelectAmount,
+  selectedPreset,
+  onSelectPreset,
   showCustomInput,
   customAmount,
   onCustomAmountChange,
   onMoreClick,
   onCustomAmountKeyDown,
   onCustomAmountBlur,
+  currency,
+  currencyMeta,
   gridClassName,
   pillWidthClassName = "",
   inputSpanClassName = "",
@@ -236,7 +321,7 @@ function AmountPicker({
   inputSpanClassName?: string;
 }) {
   const customInputRef = useRef<HTMLInputElement>(null);
-  const isCustom = !AMOUNTS.includes(selectedAmount);
+  const isCustom = selectedPreset === null;
 
   useEffect(() => {
     if (showCustomInput) customInputRef.current?.focus();
@@ -253,15 +338,15 @@ function AmountPicker({
       </Typography>
 
       <div className={gridClassName}>
-        {AMOUNTS.map((amount) => (
+        {currencyMeta.presets.map((amount) => (
           <button
-            key={amount}
-            onClick={() => onSelectAmount(amount)}
-            className={`${pillWidthClassName} ${pillBase} ${amount === selectedAmount ? pillActive : pillInactive
+            key={`${currency}-${amount}`}
+            onClick={() => onSelectPreset(amount)}
+            className={`${pillWidthClassName} ${pillBase} ${amount === selectedPreset ? pillActive : pillInactive
               }`}
           >
             <Typography variant="body-8" as="span" className="font-semibold font-manrope">
-              {amount}
+              {formatDonationAmount(amount, currency)}
             </Typography>
           </button>
         ))}
@@ -271,7 +356,7 @@ function AmountPicker({
             className={`${inputSpanClassName} flex items-center gap-1 rounded-xl border border-gray-900 bg-white px-3 py-2`}
           >
             <Typography variant="body-8" as="span" className="font-semibold font-manrope text-gray-700">
-              ₹
+              {currencyMeta.symbol}
             </Typography>
             <input
               ref={customInputRef}
@@ -292,7 +377,9 @@ function AmountPicker({
               }`}
           >
             <Typography variant="body-8" as="span" className="font-semibold font-manrope">
-              {isCustom ? selectedAmount : "More"}
+              {isCustom && customAmount
+                ? formatDonationAmount(Number(customAmount), currency)
+                : "More"}
             </Typography>
           </button>
         )}
@@ -301,22 +388,107 @@ function AmountPicker({
   );
 }
 
-function DonateButton({ className }: { className: string }) {
-  const router = useRouter();
+function DonateButton({
+  className,
+  onDonateClick,
+}: {
+  className: string;
+  onDonateClick: () => void;
+}) {
   return (
     <>
-      <button onClick={() => router.push("/")} className={className}>
+      <button onClick={onDonateClick} className={className}>
         <Typography variant="button-6" as="span" className="font-bold font-manrope text-gray-900">
           ❤️ DONATE NOW →
         </Typography>
       </button>
-      <Typography variant="caption-1" as="p" className="lg:hidden mt-2 font-light font-manrope text-center text-[#333131]">
-        🔒 Secure Payment | Powered by Razorpay
-      </Typography>
-      <Typography variant="brand-2" as="p" className="hidden lg:block mt-2 font-light font-manrope text-center text-[#333131]">
-        🔒 Secure Payment | Powered by Razorpay
-      </Typography>
+      
     </>
+  );
+}
+
+function CountryBlock({
+  countryCode,
+  changeCountry,
+  currencyMeta,
+}: Pick<AmountProps, "countryCode" | "changeCountry" | "currencyMeta">) {
+  return (
+    <div className="flex flex-col gap-2 mb-4 w-full max-w-[280px] sm:max-w-[320px]">
+      <Typography
+        variant="body-8"
+        as="span"
+        className="font-medium text-black font-manrope"
+      >
+        Country
+      </Typography>
+            <CountrySelect
+        value={countryCode}
+        onChange={changeCountry}
+        variant="name"
+        borderClassName="border-black"
+        chevronClassName="text-black"
+        textClassName="text-black"
+      />
+      <Typography
+        variant="caption-1"
+        as="span"
+        className="font-manrope font-light text-black/60"
+      >
+        Currency: {currencyMeta.label}
+      </Typography>
+    </div>
+  );
+}
+
+function TermsCheckbox({
+  agreedTo80G,
+  setAgreedTo80G,
+  termsError,
+  setTermsError,
+}: Pick<AmountProps, "agreedTo80G" | "setAgreedTo80G" | "termsError" | "setTermsError">) {
+  return (
+    <div className="mt-4 flex flex-col gap-1.5">
+      <label className="flex min-w-0 cursor-pointer items-center gap-3">
+        <span className="relative flex h-4 w-4 shrink-0">
+          <input
+            type="checkbox"
+            checked={agreedTo80G}
+            aria-invalid={termsError}
+            onChange={(e) => {
+              setAgreedTo80G(e.target.checked);
+              if (e.target.checked) setTermsError(false);
+            }}
+            className="peer h-4 w-4 cursor-pointer appearance-none rounded-[3px] border border-black bg-transparent transition-colors checked:bg-[#FCCC2D] checked:border-[#FCCC2D] focus-visible:ring-2 focus-visible:ring-[#FCCC2D]/50 focus-visible:outline-none"
+          />
+          <Check
+            strokeWidth={3}
+            className="pointer-events-none absolute inset-0 m-auto h-3 w-3 text-[#3A2E00] opacity-0 peer-checked:opacity-100"
+          />
+        </span>
+        <Typography
+          variant="caption-1"
+          as="span"
+          className="min-w-0 flex-1 font-manrope font-light leading-snug text-black/80"
+        >
+          I have read and agree to the applicable{" "}
+          <span className="font-semibold text-[#FCCC2D]">
+            80G Terms &amp; Conditions
+          </span>{" "}
+          for this donation.
+        </Typography>
+      </label>
+
+      {termsError ? (
+        <Typography
+          variant="caption-1"
+          as="p"
+          role="alert"
+          className="pl-7 font-manrope font-light leading-snug text-[#FFE08A]"
+        >
+          Please agree to the 80G Terms &amp; Conditions to continue.
+        </Typography>
+      ) : null}
+    </div>
   );
 }
 
@@ -328,9 +500,12 @@ function Modal1024Up({
   onClose,
   ...amountProps
 }: AmountProps & { onClose: () => void }) {
+  const { countryCode, changeCountry, currencyMeta, agreedTo80G, setAgreedTo80G, termsError, setTermsError, onDonateClick } =
+    amountProps;
+
   return (
-    <div className="relative mx-auto my-4 min-h-[700px] w-[calc(100%-2rem)] max-w-[1400px] overflow-hidden bg-[linear-gradient(115deg,_#ffffff_0%,_#ffffff_52%,_#FCE9AE_74%,_#C89100_100%)] shadow-2xl sm:my-6 sm:w-[calc(100%-3rem)] lg:absolute lg:left-12 lg:right-12 lg:top-12 lg:my-0 lg:min-h-[760px] lg:w-auto lg:max-w-none 2xl:left-24 2xl:right-24 2xl:top-14 2xl:min-h-[780px]">
-      <CloseButton
+    <div className="relative mx-auto my-4 min-h-[700px] w-[calc(100%-2rem)] max-w-[1400px] overflow-hidden bg-[linear-gradient(115deg,_#ffffff_0%,_#ffffff_52%,_#FCE9AE_74%,_#C89100_100%)] shadow-2xl sm:my-6 sm:w-[calc(100%-3rem)] lg:absolute lg:left-12 lg:right-12 lg:top-6 lg:my-0 lg:min-h-[760px] lg:w-auto lg:max-w-none 2xl:left-24 2xl:right-24 2xl:top-6 2xl:min-h-[780px]">
+            <CloseButton
         onClose={onClose}
         className="absolute right-4 top-4 z-[60] flex h-8 w-8 items-center justify-center bg-black text-[#F9BF16] transition hover:bg-gray-800"
       />
@@ -359,13 +534,19 @@ function Modal1024Up({
         />
       </div>
 
-      <div className="relative z-30 flex min-h-[700px] w-full flex-col justify-center px-8 py-10 lg:min-h-0 lg:h-full lg:justify-start lg:px-12 lg:py-12 2xl:px-14">
+      <div className="relative z-30 flex min-h-[700px] w-full flex-col justify-center px-8 py-4 lg:min-h-0 lg:h-full lg:justify-start lg:px-12 lg:py-6 2xl:px-14">
         <div className="relative z-40 w-full lg:max-w-3xl">
           <Heading />
 
           <ImpactItems className="mt-8 grid grid-cols-2 gap-x-10 gap-y-5 lg:grid-cols-2 lg:max-w-[520px] xl:grid-cols-2 2xl:grid-cols-2 2xl:max-w-none" />
 
           <div className="mt-10 max-w-[520px] 2xl:max-w-[560px]">
+            <CountryBlock
+              countryCode={countryCode}
+              changeCountry={changeCountry}
+              currencyMeta={currencyMeta}
+            />
+
             <AmountPicker
               {...amountProps}
               gridClassName="mt-3 grid grid-flow-col auto-cols-fr gap-2 lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-3 xl:grid-cols-3 2xl:grid-flow-col 2xl:auto-cols-fr 2xl:grid-cols-none 2xl:gap-2"
@@ -373,7 +554,17 @@ function Modal1024Up({
               inputSpanClassName="w-full lg:w-full xl:w-full 2xl:w-full"
             />
 
-            <DonateButton className="mt-8 flex w-full items-center justify-center gap-2 rounded-md bg-[#FDC61D] px-10 py-3.5 shadow-sm transition hover:bg-[#E9B510] md:mx-0 lg:w-[calc(100%-0.125rem)] xl:w-[calc(100%-0.125rem)] 2xl:w-[calc(100%-0.125rem)]" />
+            <TermsCheckbox
+              agreedTo80G={agreedTo80G}
+              setAgreedTo80G={setAgreedTo80G}
+              termsError={termsError}
+              setTermsError={setTermsError}
+            />
+
+            <DonateButton
+              onDonateClick={onDonateClick}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-[#FDC61D] px-10 py-3.5 cursor-pointer md:mx-0 lg:w-[calc(100%-0.125rem)] xl:w-[calc(100%-0.125rem)] 2xl:w-[calc(100%-0.125rem)]"
+            />
           </div>
 
           <TrustItems className="mt-8 grid grid-cols-2 gap-x-0 gap-y-4 border-t border-[#EDE8E0] pt-6 lg:grid-cols-1 lg:max-w-[460px] 2xl:grid-cols-2 2xl:gap-x-0 2xl:gap-y-4 2xl:max-w-none" />
@@ -391,9 +582,12 @@ function ModalBelow1024({
   onClose,
   ...amountProps
 }: AmountProps & { onClose: () => void }) {
+  const { countryCode, changeCountry, currencyMeta, agreedTo80G, setAgreedTo80G, termsError, setTermsError, onDonateClick } =
+    amountProps;
+
   return (
-    <div
-      className="relative mx-auto my-4 flex w-[calc(100%-2rem)] max-w-[1400px] flex-col overflow-hidden bg-[linear-gradient(115deg,_#FFEEBD_0%,_#ffffff_100%)] shadow-2xl sm:bg-[linear-gradient(115deg,_#ffffff_0%,_#ffffff_52%,_#FCE9AE_74%)] sm:my-6 sm:w-[calc(100%-3rem)] lg:absolute lg:left-12 lg:right-12 lg:top-12 lg:mx-0 lg:my-0 lg:min-h-[860px] lg:w-auto lg:max-w-none lg:flex-row lg:items-stretch lg:bg-[linear-gradient(115deg,_#ffffff_0%,_#ffffff_52%,_#FCE9AE_74%,_#C89100_100%)] 2xl:left-16 2xl:right-16 2xl:top-16"
+        <div
+      className="relative mx-auto my-2 flex w-[calc(100%-2rem)] max-w-[1400px] flex-col overflow-hidden bg-[linear-gradient(115deg,_#FFEEBD_0%,_#ffffff_100%)] shadow-2xl sm:bg-[linear-gradient(115deg,_#ffffff_0%,_#ffffff_52%,_#FCE9AE_74%)] sm:my-3 sm:w-[calc(100%-3rem)] lg:absolute lg:left-12 lg:right-12 lg:top-6 lg:mx-0 lg:my-0 lg:min-h-[860px] lg:w-auto lg:max-w-none lg:flex-row lg:items-stretch lg:bg-[linear-gradient(115deg,_#ffffff_0%,_#ffffff_52%,_#FCE9AE_74%,_#C89100_100%)] 2xl:left-16 2xl:right-16 2xl:top-16"
     >
       <CloseButton
         onClose={onClose}
@@ -429,6 +623,12 @@ function ModalBelow1024({
         <ImpactItems className="mt-8 grid grid-cols-1 gap-4" />
 
         <div className="mt-10 w-full lg:w-fit">
+          <CountryBlock
+            countryCode={countryCode}
+            changeCountry={changeCountry}
+            currencyMeta={currencyMeta}
+          />
+
           <AmountPicker
             {...amountProps}
             gridClassName="mt-3 flex flex-wrap gap-2"
@@ -436,7 +636,17 @@ function ModalBelow1024({
             inputSpanClassName="w-fit"
           />
 
-          <DonateButton className="mt-8 flex w-fit items-center justify-center gap-2 mx-auto rounded-xl bg-[#FDC61D] px-10 py-3 shadow-sm transition hover:bg-[#E9B510] lg:w-full lg:self-auto lg:px-0 lg:py-3.5" />
+          <TermsCheckbox
+            agreedTo80G={agreedTo80G}
+            setAgreedTo80G={setAgreedTo80G}
+            termsError={termsError}
+            setTermsError={setTermsError}
+          />
+
+          <DonateButton
+            onDonateClick={onDonateClick}
+            className="mt-8 flex w-fit items-center justify-center gap-2 mx-auto rounded-xl bg-[#FDC61D] px-10 py-3 cursor-pointer lg:w-full lg:self-auto lg:px-0 lg:py-3.5"
+          />
         </div>
 
         <TrustItems />
