@@ -39,6 +39,8 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
   {
     table: 'blogs',
     idColumn: 'id',
+
+    
     textColumns: [
       'title',
       'short_description',
@@ -110,22 +112,12 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
   {
     table: 'teams',
     idColumn: 'id',
-    textColumns: ['title', 'designation', 'short_description', 'content'],
+    textColumns: ['title', 'designation', 'content'],
     statusColumn: 'status',
     category: 'Team',
     titleColumn: 'title',
     designationColumn: 'designation',
     buildUrl: (row) => `/about/our-team/${String(row.id ?? '')}`,
-  },
-  {
-    table: 'trustees',
-    idColumn: 'id',
-    textColumns: ['title', 'designation', 'short_description', 'content'],
-    statusColumn: 'status',
-    category: 'Trustee',
-    titleColumn: 'title',
-    designationColumn: 'designation',
-    buildUrl: () => `/about/our-team`,
   },
   {
     table: 'annual_reports',
