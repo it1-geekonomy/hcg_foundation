@@ -3,9 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import Typography from "@/lib/Typography";
+import { cn } from "@/lib/utils";
 import FontWeightText from "./FontWeightText";
 
-function renderTitleWithAnimation(title: ReactNode, className: string): ReactNode {
+function renderTitleWithAnimation(title: ReactNode, className?: string): ReactNode {
   if (typeof title === "string") {
     const lines = title.split("\n");
     return lines.map((line, i) => (
@@ -130,25 +131,13 @@ export default function Banner({
             </nav>
           )}
 
-          {animateTitle ? (
-            <>
-              <h1 className="block text-[32px] leading-[40px] italic tracking-[0.03em] text-[#FFFFFF] lg:hidden">
-                {renderTitleWithAnimation(title, titleClassName || "italic tracking-[0.03em] text-[#FFFFFF]")}
-              </h1>
-              <h1 className="hidden text-[48px] leading-[58px] italic tracking-[0.03em] text-[#FFFFFF] lg:block">
-                {renderTitleWithAnimation(title, titleClassName || "italic tracking-[0.03em] text-[#FFFFFF]")}
-              </h1>
-            </>
-          ) : (
-            <>
-              <Typography variant="heading-4" as="h1" className="block font-normal font-tiempos-headline text-white lg:hidden">
-                {title}
-              </Typography>
-              <Typography variant="heading-2" as="h1" className="hidden font-normal font-tiempos-headline text-white lg:block">
-                {title}
-              </Typography>
-            </>
-          )}
+          <Typography
+            variant="heading-2"
+            as="h1"
+            className={cn("font-normal font-tiempos-headline text-[#FFFFFF]", titleClassName)}
+          >
+            {animateTitle ? renderTitleWithAnimation(title, titleClassName || "italic tracking-[0.03em] text-[#FFFFFF]") : title}
+          </Typography>
         </div>
       </div>
     </section>
