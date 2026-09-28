@@ -12,7 +12,12 @@ import {
   SAVE_INTERVAL,
   STORAGE_KEY,
   wrap,
+  stories as fallbackStories,
 } from "@/domains/home/constants/smile";
+import { motion } from "framer-motion";
+import FlipCard from "@/shared/components/FlipCard";
+import MirrorReveal from "@/shared/components/MirrorReveal";
+import { DiagonalArrowIcon } from "@/shared/components/icons/ArrowIcons";
 import { publicPatientStoriesApi } from "@/domains/cms/lib/api";
 
 function formatStoryDate(dateStr?: string | null): string {
@@ -35,21 +40,23 @@ function StoryCard({
   date,
   image,
   objectPosition,
+  excerpt,
+  onCardClick,
 }: {
   name: string;
   date: string;
   image: string;
   objectPosition?: string;
+  excerpt?: string;
+  onCardClick?: (e: React.MouseEvent) => void;
 }) {
-  return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl bg-[#8D8D8D66] p-4 sm:p-6 backdrop-blur-xl">
-      {/* photo, inset inside the glass card - aspect ratio is locked via
-         inline style (not just the Tailwind class) so every card's image
-         box is guaranteed the exact same size, regardless of the source
-         image's own dimensions or any Tailwind purge/build quirks */}
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  const frontContent = (
+    <div className="group flex h-full w-full flex-col justify-between overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-[rgba(255,255,255,0.55)] bg-[rgba(0,0,0,0.23)] backdrop-blur-[1.30625rem] pt-[1.4223rem] pl-[1.475rem] pr-[1.4223rem] pb-0">
+      {/* photo: aspect 21.177rem / 23.021rem and 1.2643rem radius from Figma */}
       <div
-        className="relative w-full overflow-hidden rounded-xl bg-[#00000014]"
-        style={{ aspectRatio: "8 / 9" }}
+        className="relative w-full aspect-[21.177/23.021] overflow-hidden rounded-[1.2643rem] bg-[#00000014]"
       >
         <Image
           src={image}
@@ -57,12 +64,18 @@ function StoryCard({
           fill
           sizes="(max-width: 639px) clamp(240px, 65vw, 320px), (max-width: 767px) clamp(280px, 52vw - 34px, 360px), (max-width: 1023px) clamp(320px, 52vw - 42px, 400px), (max-width: 1279px) clamp(340px, 32vw - 20px, 430px), clamp(280px, 24vw - 6px, 460px)"
           style={{ objectPosition: objectPosition ?? "center" }}
-          className="rounded-xl object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          className="rounded-[1.2643rem] object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
       </div>
 
-      {/* name / date / arrow, below the photo, inside the card */}
-      <div className="flex items-center justify-between gap-2 pt-4">
+      {/* name / date, below the photo, inside the card */}
+      <div
+        className="h-[6.375rem] flex items-center justify-between cursor-pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+          onCardClick?.(e);
+        }}
+      >
         <div>
           <Typography
             variant="heading-8"
@@ -80,16 +93,82 @@ function StoryCard({
             {date}
           </Typography>
         </div>
-        <span className="relative flex lg:h-12 lg:w-12 h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FFFFFF] group-hover:bg-white/70">
-          <Image
-            src="/Smilestories/Vector.png"
-            alt="View story"
-            width={20}
-            height={20}
-          />
-        </span>
       </div>
     </div>
+  );
+
+  const renderBackContent = (flipped: boolean) => (
+    <MirrorReveal isOpen={flipped} delay={0} duration={0.82}>
+      <div className="relative h-full w-full flex flex-col justify-between items-center p-[1.425rem] rounded-[1.2643rem] border-[0.0527rem] border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2]">
+        {/* Centered Excerpt with Proportional Body-2 */}
+        <div className="relative z-10 flex-1 flex items-center justify-center text-center my-auto px-[0.5rem] w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={
+              flipped
+                ? { opacity: 1, y: 0 }
+                : { opacity: 0, y: 8 }
+            }
+            transition={{
+              duration: flipped ? 0.38 : 0.15,
+              delay: flipped ? 0.42 : 0,
+              ease: [0.25, 1, 0.5, 1],
+            }}
+          >
+            <Typography
+              variant="body-2"
+              as="p"
+              className="text-[#0D2838] max-w-md"
+            >
+              {excerpt || "Explore the journey of hope, courage, and recovery."}
+            </Typography>
+          </motion.div>
+        </div>
+
+        {/* Read More Button Constant at Bottom Center */}
+        <motion.div
+          className="relative z-10 w-full flex justify-center shrink-0 pt-[0.75rem]"
+          initial={{ opacity: 0, y: 8 }}
+          animate={
+            flipped
+              ? { opacity: 1, y: 0 }
+              : { opacity: 0, y: 8 }
+          }
+          transition={{
+            duration: flipped ? 0.38 : 0.15,
+            delay: flipped ? 0.46 : 0,
+            ease: [0.25, 1, 0.5, 1],
+          }}
+        >
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              onCardClick?.(e);
+            }}
+            className="inline-flex items-center justify-center whitespace-nowrap h-[1.75rem] lg:h-[2.5rem] xl:h-[3rem] w-auto xl:w-[9.5rem] px-[0.75rem] lg:px-[1.25rem] gap-[0.45rem] rounded-[0.375rem] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
+          >
+            <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
+              Read More
+            </Typography>
+            <DiagonalArrowIcon className="w-[1rem] h-[0.85rem] sm:w-[1.2rem] sm:h-[0.95rem] xl:w-[1.375rem] xl:h-[1.1rem] text-[#2D2D2D] shrink-0" />
+          </div>
+        </motion.div>
+      </div>
+    </MirrorReveal>
+  );
+
+  return (
+    <FlipCard
+      className="aspect-[385/493] w-full rounded-[1.2643rem]"
+      roundedClassName="rounded-[1.2643rem]"
+      isFlipped={isFlipped}
+      onFlipChange={setIsFlipped}
+      onClick={onCardClick}
+      flipOnHover={true}
+      duration={0.42}
+      front={frontContent}
+      back={renderBackContent}
+    />
   );
 }
 
@@ -111,14 +190,16 @@ export default function SmileStories() {
             date: formatStoryDate(item.storyDate),
             image: item.patientImage || "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=800&auto=format&fit=crop",
             link: `/journey-of-hope/patient-stories/${item.slug || item.id}`,
+            excerpt: item.shortDescription || "",
           }));
-          setApiStories(mapped);
+          const fullStories = mapped.length < 4 ? [...mapped, ...mapped, ...mapped, ...mapped].slice(0, 8) : mapped;
+          setApiStories(fullStories);
         } else {
-          setApiStories([]);
+          setApiStories(fallbackStories.map(s => ({ ...s, excerpt: "Explore the journey of hope, courage, and recovery." })));
         }
       } catch (err: any) {
         if (!cancelled) {
-          setApiStories([]);
+          setApiStories(fallbackStories.map(s => ({ ...s, excerpt: "Explore the journey of hope, courage, and recovery." })));
         }
       }
     })();
@@ -427,7 +508,10 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
                 handleCardClick(story.link);
               }}
             >
-              <StoryCard {...story} />
+              <StoryCard
+                {...story}
+                onCardClick={() => handleCardClick(story.link)}
+              />
             </div>
           ))}
         </div>

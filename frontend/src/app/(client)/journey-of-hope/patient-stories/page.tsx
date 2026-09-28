@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Calendar, ArrowUpRight, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import Typography from "@/lib/Typography";
 import Banner from "@/shared/components/Herobannersection";
 import DonateForm from "@/shared/components/DonateForm";
 import PaginationControls from "@/shared/components/PaginationControls";
 import { PatientStory } from "@/domains/journey-of-hope/constants/stories";
+import PatientStoryCard from "@/domains/journey-of-hope/components/PatientStoryCard";
 import { publicPatientStoriesApi } from "@/domains/cms/lib/api";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
@@ -199,69 +200,14 @@ export default function PatientStoriesPage() {
             }`}
           >
             {currentStories.map((story, index) => (
-              <Link
-              key={story.id}
-              href={`/journey-of-hope/patient-stories/${story.slug || story.id}`}
-              className="group sticky top-[var(--mobile-top)] lg:top-auto lg:relative flex flex-col justify-between aspect-[385/493] w-full max-w-[28rem] mx-auto lg:max-w-none overflow-hidden rounded-[1.375rem] border border-white/50 bg-[#EFEAD8] p-[1.1rem] sm:p-[1.35rem] pb-0 sm:pb-0 shadow-2xl shadow-black/10 lg:shadow-sm transition-all duration-500 hover:shadow-3xl hover:border-white/70"
-              style={{
-                "--mobile-top": `calc(6rem + ${index * 1.5}rem)`,
-                zIndex: index,
-              } as React.CSSProperties}
-            >
-              {/* 1. Full-bleed background photo */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={story.imageUrl}
-                alt=""
-                aria-hidden="true"
-                className="absolute inset-0 h-full w-full object-cover scale-110 filter blur-[0.75rem] opacity-90 transition duration-500 group-hover:scale-115"
+              <PatientStoryCard
+                key={story.id}
+                story={story}
+                style={{
+                  "--mobile-top": `calc(6rem + ${index * 1.5}rem)`,
+                  zIndex: index,
+                } as React.CSSProperties}
               />
-
-              {/* 2. Soft translucent glass tint over outer card */}
-              <div className="absolute inset-0 bg-white/20 backdrop-blur-md transition duration-300 group-hover:bg-white/25" />
-
-              {/* 3. Inner Card */}
-              <div className="relative z-10 w-full aspect-[339/368] overflow-hidden rounded-[1.25rem] shadow-xs">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={story.imageUrl}
-                  alt={story.patientName}
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
-              </div>
-
-              {/* 4. Bottom Info Bar: Name & Date (Left) + Circular Arrow Button (Right) */}
-              <div className="relative z-10 h-[5.5rem] sm:h-[6.375rem] px-1 flex items-center justify-between gap-3">
-                {/* Left: Patient Name & Date */}
-                <div className="flex flex-col text-white min-w-0">
-                  <div className="truncate">
-                    <Typography
-                      variant="heading-8"
-                      as="h3"
-                      className="font-manrope font-bold text-white"
-                    >
-                      {story.patientName}
-                    </Typography>
-                  </div>
-                  <div className="mt-1 flex items-center gap-1.5 text-[#FFFFFF]">
-                    <Calendar className="size-3.5 sm:size-4 text-[#FFFFFF] shrink-0" />
-                    <Typography
-                      variant="body-8"
-                      as="span"
-                      className="font-manrope font-medium text-[#FFFFFF]"
-                    >
-                      {story.date}
-                    </Typography>
-                  </div>
-                </div>
-
-                {/* Right: Circular Arrow Button */}
-                <div className="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-full bg-white text-[#1E1E1E] shadow-sm transition duration-300 group-hover:scale-110">
-                  <ArrowUpRight className="size-5 sm:size-5.5 text-[#1E1E1E]" />
-                </div>
-              </div>
-              </Link>
             ))}
           </div>
         )}
