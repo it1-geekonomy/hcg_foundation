@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import Typography from "@/lib/Typography";
+import FontWeightText from "./FontWeightText";
 
 export interface BannerBreadcrumb {
   label: string;
@@ -21,6 +22,8 @@ export interface BannerProps {
   description?: ReactNode;
   children?: ReactNode;
   className?: string;
+  animateTitle?: boolean;
+  titleClassName?: string;
 }
 
 export default function Banner({
@@ -29,7 +32,9 @@ export default function Banner({
   bgImageAlt = "",
   breadcrumbs,
   title,
+  titleClassName,
   className = "",
+  animateTitle = true,
 }: BannerProps) {
   return (
     <section className={`relative isolate grid w-full ${className}`}>
@@ -91,12 +96,31 @@ export default function Banner({
             </nav>
           )}
 
-          <Typography variant="heading-4" as="h1" className="block font-normal font-tiempos-headline text-white lg:hidden">
-            {title}
-          </Typography>
-          <Typography variant="heading-2" as="h1" className="hidden font-normal font-tiempos-headline text-white lg:block">
-            {title}
-          </Typography>
+          {animateTitle && typeof title === "string" ? (
+            <>
+              <h1 className="block text-[32px] leading-[40px] italic tracking-[0.03em] text-[#FFFFFF] lg:hidden">
+                <FontWeightText
+                  text={title}
+                  className={titleClassName || "italic tracking-[0.03em] text-[#FFFFFF]"}
+                />
+              </h1>
+              <h1 className="hidden text-[48px] leading-[58px] italic tracking-[0.03em] text-[#FFFFFF] lg:block">
+                <FontWeightText
+                  text={title}
+                  className={titleClassName || "italic tracking-[0.03em] text-[#FFFFFF]"}
+                />
+              </h1>
+            </>
+          ) : (
+            <>
+              <Typography variant="heading-4" as="h1" className="block font-normal font-tiempos-headline text-white lg:hidden">
+                {title}
+              </Typography>
+              <Typography variant="heading-2" as="h1" className="hidden font-normal font-tiempos-headline text-white lg:block">
+                {title}
+              </Typography>
+            </>
+          )}
         </div>
       </div>
     </section>
