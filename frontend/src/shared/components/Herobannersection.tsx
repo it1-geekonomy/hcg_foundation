@@ -1,9 +1,43 @@
-import type { ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import Typography from "@/lib/Typography";
 import FontWeightText from "./FontWeightText";
+
+function renderTitleWithAnimation(title: ReactNode, className: string): ReactNode {
+  if (typeof title === "string") {
+    const lines = title.split("\n");
+    return lines.map((line, i) => (
+      <React.Fragment key={i}>
+        <FontWeightText text={line} className={className} />
+        {i < lines.length - 1 && <br />}
+      </React.Fragment>
+    ));
+  }
+
+  if (React.isValidElement(title)) {
+    const element = title as React.ReactElement<{ children?: ReactNode }>;
+    const children = element.props?.children;
+    if (children) {
+      const childArray = React.Children.toArray(children);
+      return childArray.map((child, i) => {
+        if (typeof child === "string") {
+          const trimmed = child.trim();
+          if (!trimmed) return null;
+          return <FontWeightText key={i} text={trimmed} className={className} />;
+        }
+        if (React.isValidElement(child) && (child.type === "br" || (child.type as any)?.name === "br")) {
+          const brEl = child as React.ReactElement<{ className?: string }>;
+          return <br key={i} className={brEl.props?.className} />;
+        }
+        return child;
+      });
+    }
+  }
+
+  return title;
+}
 
 export interface BannerBreadcrumb {
   label: string;
@@ -96,19 +130,13 @@ export default function Banner({
             </nav>
           )}
 
-          {animateTitle && typeof title === "string" ? (
+          {animateTitle ? (
             <>
               <h1 className="block text-[32px] leading-[40px] italic tracking-[0.03em] text-[#FFFFFF] lg:hidden">
-                <FontWeightText
-                  text={title}
-                  className={titleClassName || "italic tracking-[0.03em] text-[#FFFFFF]"}
-                />
+                {renderTitleWithAnimation(title, titleClassName || "italic tracking-[0.03em] text-[#FFFFFF]")}
               </h1>
               <h1 className="hidden text-[48px] leading-[58px] italic tracking-[0.03em] text-[#FFFFFF] lg:block">
-                <FontWeightText
-                  text={title}
-                  className={titleClassName || "italic tracking-[0.03em] text-[#FFFFFF]"}
-                />
+                {renderTitleWithAnimation(title, titleClassName || "italic tracking-[0.03em] text-[#FFFFFF]")}
               </h1>
             </>
           ) : (
