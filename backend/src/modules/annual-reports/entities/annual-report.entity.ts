@@ -11,6 +11,9 @@ export class AnnualReport extends SeoContentEntity {
   @Column({ type: 'varchar', length: 255, nullable: false, unique: true })
   slug?: string;
 
+  @Column({ name: 'short_description', type: 'text', nullable: true })
+  shortDescription?: string | null;
+
   @Column({ name: 'report_year', type: 'varchar', length: 9, nullable: true })
   reportYear?: string | null;
 
