@@ -56,7 +56,7 @@ export default function ParticipatePage() {
             <Typography
               variant="body-10"
               as="p"
-              className="font-argestadisplay font-normal text-[#596D79] text-justify"
+              className="font-argestadisplay font-normal text-[#596D79] text-left lg:text-justify !leading-relaxed"
             >
               Your time, skills and support can bring hope to patients and families. Explore the different ways you can get involved with HCG Foundation.
             </Typography>
@@ -110,16 +110,16 @@ export default function ParticipatePage() {
                     onClick={() =>
                       setActiveModalType(card.id as ParticipateModalType)
                     }
-                    className="inline-flex items-center justify-between w-[11.6875rem] h-[3.5625rem] pl-[1.1025rem] pr-[0.58rem] py-[0.58rem] gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 active:scale-95 cursor-pointer"
+                    className="inline-flex items-center justify-between w-[9.5rem] sm:w-[10.5rem] lg:w-[11.6875rem] h-[2.75rem] sm:h-[3rem] lg:h-[3.5625rem] pl-3.5 pr-2 py-1.5 lg:pl-[1.1025rem] lg:pr-[0.58rem] lg:py-[0.58rem] gap-2 lg:gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 active:scale-95 cursor-pointer"
                   >
-                    <span className="font-manrope font-semibold text-[1.125rem] leading-[150%] tracking-[0.02em] text-[#2D2D2D]">
+                    <span className="font-manrope font-semibold text-[0.875rem] sm:text-[1rem] lg:text-[1.125rem] leading-[150%] tracking-[0.02em] text-[#2D2D2D]">
                       Apply Now
                     </span>
                     <img
                       src="/Get Involved/Vector (5).png"
                       alt=""
                       aria-hidden="true"
-                      className="w-[1.2925rem] h-[1.034rem] object-contain shrink-0"
+                      className="w-[1rem] h-[0.8rem] lg:w-[1.2925rem] lg:h-[1.034rem] object-contain shrink-0"
                     />
                   </button>
                 </div>
@@ -131,12 +131,12 @@ export default function ParticipatePage() {
         {/* Bottom Benefits Banner matching Figma Frame 577: #FFF4CF, Radius 0.375rem, Padding Top 1.9375rem, Bottom 2.25rem, Left/Right 1.25rem */}
         <div className="bg-[#FFF4CF] rounded-[0.375rem] pt-[1.9375rem] pb-[2.25rem] px-5 sm:px-[1.25rem] grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-center">
           {PARTICIPATE_BENEFITS.map((benefit) => (
-            <div key={benefit.id} className="flex items-center gap-[1.3rem]">
-              <div className="w-[4.9225rem] h-[4.9225rem] rounded-full border border-[#C2A947] flex items-center justify-center shrink-0 bg-[#FFF3CC]">
+            <div key={benefit.id} className="flex items-center gap-3.5 sm:gap-4 lg:gap-[1.3rem]">
+              <div className="w-[3.25rem] h-[3.25rem] sm:w-[3.75rem] sm:h-[3.75rem] lg:w-[4.9225rem] lg:h-[4.9225rem] rounded-full border border-[#C2A947] flex items-center justify-center shrink-0 bg-[#FFF3CC]">
                 <img
                   src={benefit.iconUrl}
                   alt={benefit.title}
-                  className="w-[2.38375rem] h-[2.38375rem] object-contain"
+                  className="w-[1.625rem] h-[1.625rem] sm:w-[1.875rem] sm:h-[1.875rem] lg:w-[2.38375rem] lg:h-[2.38375rem] object-contain"
                 />
               </div>
               <div className="text-left">
