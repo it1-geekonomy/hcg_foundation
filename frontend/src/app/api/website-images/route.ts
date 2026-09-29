@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { S3Client, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  ListObjectsV2Command,
+  type ListObjectsV2CommandOutput,
+} from "@aws-sdk/client-s3";
 
 // Configure S3 client directly in the frontend Next.js server
 const client = new S3Client({
@@ -13,14 +18,24 @@ const client = new S3Client({
 const bucket = process.env.R2_BUCKET_NAME!;
 const publicUrl = (process.env.R2_PUBLIC_URL || "").replace(/\/$/, "");
 
+const ALLOWED_TYPES: Record<string, string> = {
+  webp: "image/webp",
+  avif: "image/avif",
+  mp4: "video/mp4",
+  webm: "video/webm",
+};
+
+// Must stay within nginx client_max_body_size (100m) in production
+const MAX_FILE_BYTES = 100 * 1024 * 1024;
+
 export async function GET() {
   try {
-    const objects = [];
+    const objects: { key: string | undefined; url: string; size: number }[] = [];
     let isTruncated = true;
-    let continuationToken = undefined;
+    let continuationToken: string | undefined = undefined;
 
     while (isTruncated) {
-      const response = await client.send(
+      const response: ListObjectsV2CommandOutput = await client.send(
         new ListObjectsV2Command({
           Bucket: bucket,
           Prefix: "website/",
@@ -57,11 +72,18 @@ export async function POST(req: NextRequest) {
 
     const uploaded = await Promise.all(
       files.map(async (file) => {
-        const ext = file.name.split('.').pop()?.toLowerCase();
-        if (!["webp", "avif"].includes(ext || "") && !["image/webp", "image/avif"].includes(file.type)) {
-          throw new Error(`Invalid file type for ${file.name}. Only WEBP and AVIF are allowed.`);
+        const ext = file.name.split('.').pop()?.toLowerCase() || "";
+        const allowedMime = Object.values(ALLOWED_TYPES);
+        if (!ALLOWED_TYPES[ext] && !allowedMime.includes(file.type)) {
+          throw new Error(
+            `Invalid file type for ${file.name}. Only WEBP, AVIF, MP4 and WEBM are allowed.`
+          );
+        }
+        if (file.size > MAX_FILE_BYTES) {
+          throw new Error(`${file.name} is larger than 100 MB.`);
         }
 
+        const contentType = allowedMime.includes(file.type) ? file.type : ALLOWED_TYPES[ext];
         const buffer = Buffer.from(await file.arrayBuffer());
         const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/-+/g, "-");
         const key = `website/${Date.now()}-${Math.random().toString(36).slice(2, 7)}-${safeName}`;
@@ -71,7 +93,7 @@ export async function POST(req: NextRequest) {
             Bucket: bucket,
             Key: key,
             Body: buffer,
-            ContentType: file.type,
+            ContentType: contentType,
           })
         );
 
@@ -79,7 +101,7 @@ export async function POST(req: NextRequest) {
           key,
           url: `${publicUrl}/${key}`,
           size: buffer.length,
-          contentType: file.type,
+          contentType,
         };
       })
     );
