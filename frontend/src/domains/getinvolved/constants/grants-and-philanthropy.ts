@@ -19,7 +19,7 @@ export const PHILANTHROPY_CARDS: PhilanthropyCard[] = [
   {
     id: "support-cancer-awareness",
     iconUrl: "/Get Involved/Granst & Philanthrophy/Support Cancer icon.png",
-    title: "Support Cancer Awareness\u00A0&",
+    title: "Support Cancer Awareness &",
     titleLine2: "Early Detection",
     description:
       "Support or partner for awareness programmes, oral cancer camps, early detection, and timely treatment.",

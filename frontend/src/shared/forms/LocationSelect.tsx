@@ -44,6 +44,7 @@ interface LocationSelectProps {
   placeholder?: string;
   required?: boolean;
   className?: string;
+  error?: string;
 }
 
 export default function LocationSelect({
@@ -52,6 +53,7 @@ export default function LocationSelect({
   placeholder = "City / Location*",
   required = false,
   className = "",
+  error,
 }: LocationSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -185,7 +187,11 @@ export default function LocationSelect({
           setIsOpen((prev) => !prev);
           setIsOtherMode(false);
         }}
-        className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all cursor-pointer"
+        className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b ${
+          error
+            ? "border-red-500"
+            : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+        } transition-all cursor-pointer`}
       >
         <div className="flex items-center gap-1.5">
           <User className="size-4 text-[#0D2838] shrink-0 mr-1.5" />
@@ -210,13 +216,17 @@ export default function LocationSelect({
         {/* Hidden input for HTML form validation */}
         <input
           type="text"
-          required={required}
           value={value}
           readOnly
           className="sr-only"
           tabIndex={-1}
         />
       </div>
+      {error && (
+        <span className="text-xs text-red-600 font-manrope block mt-1">
+          {error}
+        </span>
+      )}
 
       {/* Dropdown Container */}
       {isOpen && (

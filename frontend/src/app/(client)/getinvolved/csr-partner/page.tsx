@@ -35,20 +35,15 @@ export default function CsrPartnerPage() {
               as="h1"
               className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
             >
-              <span className="block xl:whitespace-nowrap">
-                Different Ways To Partner <span className="hidden xl:inline">with</span>
-              </span>
-              <span className="block">
-                <span className="inline xl:hidden">with </span>HCG Foundation
-              </span>
+              Different Ways To Partner with HCG Foundation
             </Typography>
           </div>
           <div className="flex justify-start lg:justify-end">
-            <div className="w-full max-w-[45.5rem]">
+            <div className="w-full lg:max-w-[45.5rem]">
               <Typography
                 variant="body-10"
                 as="p"
-                className="font-argestadisplay font-normal text-left sm:text-justify text-[#596D79]"
+                className="font-argestadisplay font-normal text-justify text-[#596D79]"
               >
                 Corporate can partner with HCG Foundation to make your CSR investment count where it matters most. We have a wide range of partnership options for you to choose from; all of which are customizable to meet your CSR goals.
               </Typography>
@@ -61,13 +56,12 @@ export default function CsrPartnerPage() {
           {CSR_PARTNER_CARDS.map((card) => (
             <div
               key={card.id}
-              style={{ backgroundColor: "#FDF7EB", borderColor: "#FFDF7C" }}
-              className="rounded-[4.31px] border border-[#FFDF7C] bg-[#FDF7EB] p-[1.5rem] sm:pt-[1.4375rem] sm:pl-[3.725rem] sm:pr-[2.58rem] sm:pb-[2.5rem] flex flex-col justify-start min-h-[22rem] lg:min-h-[26.4rem] transition duration-300 hover:shadow-xs"
+              className="rounded-[0.27rem] border border-[#FFDF7C] bg-[#FDF7EB] p-[1.5rem] sm:pt-[1.4375rem] sm:pl-[3.725rem] sm:pr-[2.58rem] sm:pb-[2.5rem] flex flex-col justify-start min-h-[22rem] lg:min-h-[26.4rem] transition duration-300 hover:shadow-xs"
             >
               {/* Card Number */}
               <div className="mb-[0.25rem] sm:mb-[0.5rem] text-left">
                 <Typography
-                  variant="heading-10"
+                  variant="display-3"
                   as="span"
                   className="font-argestadisplay font-normal text-[#596D79]"
                 >
@@ -78,7 +72,7 @@ export default function CsrPartnerPage() {
               {/* Card Title */}
               <div className="mb-[0.75rem] sm:mb-[1rem] text-left">
                 <Typography
-                  variant="heading-10"
+                  variant="heading-11"
                   as="h2"
                   className="font-argestadisplay font-normal text-[#0D2838]"
                 >
@@ -89,7 +83,7 @@ export default function CsrPartnerPage() {
               {/* Card Description */}
               <div className="text-justify">
                 <Typography
-                  variant="body-10"
+                  variant="body-11"
                   as="p"
                   className="font-argestadisplay font-normal text-justify text-[#596D79]"
                 >
@@ -146,10 +140,10 @@ export default function CsrPartnerPage() {
             <Typography
               variant="heading-2"
               as="h2"
-              className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
+              className="font-tiempos-headline font-normal italic text-left text-[#0D2838] leading-tight"
             >
-              <span className="block">Together, We Can Create</span>
-              <span className="block">Greater Impact</span>
+              <span className="inline md:block">Together, We Can Create </span>
+              <span className="inline md:block">Greater Impact</span>
             </Typography>
           </div>
           <div className="flex flex-col items-start gap-[0.625rem] max-w-[32rem]">
@@ -163,7 +157,7 @@ export default function CsrPartnerPage() {
             <button
               type="button"
               onClick={() => setIsPartnerModalOpen(true)}
-              className="w-full sm:w-[13.1875rem] h-[3rem] sm:h-[3.5625rem] inline-flex items-center justify-center pl-[1.1025rem] pr-[0.58rem] py-[0.58rem] gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 backdrop-blur-[42px] transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer shrink-0"
+              className="w-full sm:w-[13.1875rem] h-[3rem] sm:h-[3.5625rem] inline-flex items-center justify-center pl-[1.1025rem] pr-[0.58rem] py-[0.58rem] gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 backdrop-blur-[2.625rem] transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer shrink-0"
             >
               <Typography
                 variant="button-1"

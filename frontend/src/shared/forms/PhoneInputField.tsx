@@ -95,7 +95,11 @@ export default function PhoneInputField({
             nationalDigits.trim()
               ? "min-h-[2.2rem] h-auto pb-1"
               : "h-[41.14px] pb-0.5"
-          } flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all ${containerClassName}`}
+          } flex flex-col justify-between border-b ${
+            error
+              ? "border-red-500"
+              : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+          } transition-all ${containerClassName}`}
         >
           <label className="block text-[0.72rem] leading-tight font-medium text-[#0D2838]">
             {label}
@@ -127,7 +131,7 @@ export default function PhoneInputField({
             <Typography
               variant="caption-1"
               as="span"
-              className="font-manrope font-normal text-red-500"
+              className="font-manrope font-normal text-red-600 text-xs block"
             >
               {error}
             </Typography>
@@ -159,7 +163,7 @@ export default function PhoneInputField({
           </span>
         )}
       </label>
-      <div className="w-full border-b border-[#C7B793] py-1 text-[#2E1C12] flex items-center gap-2">
+      <div className={`w-full border-b ${error ? "border-red-500" : "border-[#C7B793]"} py-1 text-[#2E1C12] flex items-center gap-2`}>
         <CountrySelect
           value={selectedCountryCode}
           onChange={handleCountryChange}
@@ -184,7 +188,7 @@ export default function PhoneInputField({
           <Typography
             variant="caption-1"
             as="span"
-            className="font-manrope font-normal text-red-500"
+            className="font-manrope font-normal text-red-600 text-xs block"
           >
             {error}
           </Typography>

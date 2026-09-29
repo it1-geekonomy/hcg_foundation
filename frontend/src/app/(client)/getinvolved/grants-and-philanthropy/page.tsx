@@ -53,38 +53,46 @@ export default function GrantsAndPhilanthropyPage() {
         </div>
 
         {/* 2x2 Vertical Image Cards Grid matching Figma */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-[3.06rem]">
           {PHILANTHROPY_CARDS.map((card) => (
             <div
               key={card.id}
-              className="group flex flex-col justify-between overflow-hidden rounded-lg bg-white border border-black/[0.04] shadow-xs transition duration-300 hover:shadow-md"
+              className="group flex flex-col justify-between overflow-hidden rounded-[0.375rem] bg-[#FFFCF3] min-h-[27rem] lg:min-h-[28.3125rem] 2xl:h-[28.3125rem]"
             >
               {/* Card Top: Circular Icon Badge + Title + Description */}
-              <div className="p-4 sm:p-5 lg:p-6 xl:p-8 flex items-start gap-3 sm:gap-4 xl:gap-5 min-h-[7.5rem] sm:min-h-[8.5rem] xl:min-h-[11.25rem]">
-                <div className="w-[3.25rem] h-[3.25rem] sm:w-[4rem] sm:h-[4rem] lg:w-[4.25rem] lg:h-[4.25rem] xl:w-[6.6875rem] xl:h-[6.6875rem] shrink-0 rounded-full bg-[#FFF3CC] flex items-center justify-center p-[0.75rem] sm:p-[1rem] lg:p-[1.125rem] xl:p-[27.25px]">
+              <div className="p-4 sm:p-5 lg:p-[1.25rem] xl:p-[1.5rem] 2xl:p-[2rem] flex items-start gap-3 sm:gap-4 lg:gap-4 xl:gap-[1.25rem] 2xl:gap-[2.38rem] bg-[#FFFCF3]">
+                <div className="w-[3rem] h-[3rem] sm:w-[3.5rem] sm:h-[3.5rem] lg:w-[4rem] lg:h-[4rem] xl:w-[4.75rem] xl:h-[4.75rem] 2xl:w-[6.6875rem] 2xl:h-[6.6875rem] shrink-0 rounded-full bg-[#FFF3CC] flex items-center justify-center p-[0.65rem] sm:p-[0.75rem] lg:p-[0.875rem] xl:p-[1rem] 2xl:p-[1.7rem]">
                   <img
                     src={card.iconUrl}
                     alt={card.title}
                     className="w-full h-full object-contain"
                   />
                 </div>
-                <div>
-                  <div className="mb-2">
-                    <Typography variant="heading-10" as="h2" className="font-argestadisplay font-normal text-[#0D2838]">
+                <div className="flex-1">
+                  <div className="mb-2 sm:mb-2.5 lg:mb-[0.75rem] min-h-[2.5rem] sm:min-h-[3rem] lg:min-h-[3.6rem] 2xl:min-h-[4.75rem] flex flex-col justify-start">
+                    <Typography
+                      variant="heading-10"
+                      as="h2"
+                      className="font-argestadisplay font-normal text-[#0D2838]"
+                    >
                       <span className="block">{card.title}</span>
                       {card.titleLine2 && (
                         <span className="block">{card.titleLine2}</span>
                       )}
                     </Typography>
                   </div>
-                  <Typography variant="body-9" as="p" className="font-manrope font-normal text-[#606060]">
+                  <Typography
+                    variant="body-12"
+                    as="p"
+                    className="font-manrope font-normal text-[#606060]"
+                  >
                     {card.description}
                   </Typography>
                 </div>
               </div>
 
-              {/* Card Bottom: Full Width Image Asset */}
-              <div className="w-full h-[13.75rem] sm:h-[15.625rem] lg:h-[17.5rem] overflow-hidden relative bg-[#EFEAD8]">
+              {/* Card Bottom: Full Width Image Asset (matching Figma Rectangle 1667 height: 16.1875rem) */}
+              <div className="w-full h-[12.5rem] sm:h-[13.5rem] lg:h-[13.5rem] xl:h-[14.5rem] 2xl:h-[16.1875rem] shrink-0 overflow-hidden relative bg-[#EFEAD8]">
                 <img
                   src={card.imageUrl}
                   alt={card.title}
@@ -97,7 +105,7 @@ export default function GrantsAndPhilanthropyPage() {
         </div>
 
         {/* Bottom Impact Banner matching Figma Frame 576 */}
-        <div className="mt-10 sm:mt-14 lg:mt-16 rounded-xl bg-[#FFF4CF] px-6 sm:px-10 lg:pl-[3.375rem] lg:pr-[2.875rem] py-6 sm:py-8 lg:pt-[2.25rem] lg:pb-[1.6875rem] flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 sm:gap-8 xl:gap-12 2xl:gap-16">
+        <div className="mt-10 sm:mt-14 lg:mt-16 rounded-xl bg-[#FFF4CF] px-6 sm:px-10 lg:pl-[3.375rem] lg:pr-[2.875rem] py-6 sm:py-8 lg:pt-[2.25rem] lg:pb-[1.6875rem] flex flex-col md:flex-row md:items-center md:justify-between gap-6 sm:gap-8 lg:gap-10 xl:gap-12 2xl:gap-16">
           <div className="shrink-0">
             <Typography
               variant="heading-1"

@@ -39,12 +39,29 @@ export default function ParticipateModal({
   type,
   onClose,
 }: ParticipateModalProps) {
+  interface FormErrors {
+    fullName?: string;
+    phone?: string;
+    email?: string;
+    gender?: string;
+    course?: string;
+    address?: string;
+    languages?: string;
+    computerSkills?: string;
+    resumeFile?: string;
+    location?: string;
+    educationalQualification?: string;
+    volunteerInterest?: string;
+    whyVolunteer?: string;
+    fundraisingGoal?: string;
+    reason?: string;
+    message?: string;
+    agreeTerms?: string;
+  }
+
   const [submitted, setSubmitted] = useState(false);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [errors, setErrors] = useState<{
-    fullName?: string;
-    email?: string;
-  }>({});
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -163,13 +180,18 @@ export default function ParticipateModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
+  const isIntern = type === "intern";
+  const isFundraise = type === "fundraise";
+  const isVolunteer = type === "volunteer";
+
   if (!isOpen || !type) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newErrors: { fullName?: string; email?: string } = {};
+    const newErrors: FormErrors = {};
 
+    // Common: Full Name
     if (!formData.fullName.trim()) {
       newErrors.fullName = "Full name is required";
     } else if (/\d/.test(formData.fullName)) {
@@ -178,10 +200,92 @@ export default function ParticipateModal({
       newErrors.fullName = "Name must be at least 2 characters";
     }
 
+    // Common: Phone Number
+    const phoneVal = formData.phone.trim();
+    let nationalDigits = "";
+    let isIndia = true;
+    if (phoneVal) {
+      if (phoneVal.startsWith("+")) {
+        const parts = phoneVal.split(" ");
+        const dial = parts[0];
+        isIndia = dial === "+91";
+        nationalDigits = parts.slice(1).join("").replace(/\D/g, "");
+      } else {
+        nationalDigits = phoneVal.replace(/\D/g, "");
+      }
+    }
+    if (!nationalDigits) {
+      newErrors.phone = "Phone number is required";
+    } else if (isIndia ? nationalDigits.length !== 10 : nationalDigits.length < 6) {
+      newErrors.phone = isIndia
+        ? "Please enter a 10-digit phone number"
+        : "Please enter a valid phone number";
+    }
+
+    // Common: Email Address
     if (!formData.email.trim()) {
       newErrors.email = "Email address is required";
     } else if (!emailRegex.test(formData.email.trim())) {
       newErrors.email = "Please enter a valid email address";
+    }
+
+    // Specific to Intern
+    if (isIntern) {
+      if (!formData.gender.trim()) {
+        newErrors.gender = "Please select your gender";
+      }
+      if (!formData.course.trim()) {
+        newErrors.course = "Current course is required";
+      }
+      if (!formData.address.trim()) {
+        newErrors.address = "Address is required";
+      }
+      if (!formData.languages.trim()) {
+        newErrors.languages = "Please select languages known";
+      }
+      if (!formData.computerSkills.trim()) {
+        newErrors.computerSkills = "Skills are required";
+      }
+      if (!resumeFile) {
+        newErrors.resumeFile = "Please attach your resume";
+      }
+    }
+
+    // Specific to Volunteer
+    if (isVolunteer) {
+      if (!formData.location.trim()) {
+        newErrors.location = "City / Location is required";
+      }
+      if (!formData.educationalQualification.trim()) {
+        newErrors.educationalQualification = "Educational qualification is required";
+      }
+      if (!formData.volunteerInterest.trim()) {
+        newErrors.volunteerInterest = "Please select areas of interest";
+      }
+      if (!(formData.whyVolunteer || formData.message).trim()) {
+        newErrors.whyVolunteer = "This field is required";
+      }
+    }
+
+    // Specific to Fundraise
+    if (isFundraise) {
+      if (!formData.location.trim()) {
+        newErrors.location = "City / Location is required";
+      }
+      if (!formData.fundraisingGoal.trim()) {
+        newErrors.fundraisingGoal = "Fundraising goal is required";
+      }
+      if (!formData.reason.trim()) {
+        newErrors.reason = "Please enter why you are fundraising";
+      }
+      if (!formData.message.trim()) {
+        newErrors.message = "Message is required";
+      }
+    }
+
+    // Common: Terms & Conditions
+    if (!formData.agreeTerms) {
+      newErrors.agreeTerms = "Please agree to the Terms & Conditions";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -213,13 +317,10 @@ export default function ParticipateModal({
         message: "",
         agreeTerms: false,
       });
+      setResumeFile(null);
       onClose();
-    }, 2000);
+    }, 3000);
   };
-
-  const isIntern = type === "intern";
-  const isFundraise = type === "fundraise";
-  const isVolunteer = type === "volunteer";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/60 backdrop-blur-xs transition-opacity duration-300">
@@ -301,19 +402,7 @@ export default function ParticipateModal({
             </div>
           </div>
 
-          {submitted ? (
-            <div className="my-8 p-6 bg-[#FFF9EA] border border-[#F3E3B6] rounded-lg text-center">
-              <div className="mb-2">
-                <Typography variant="heading-3" as="h3" className="font-manrope font-medium text-[#2E1C12]">
-                  Application Submitted!
-                </Typography>
-              </div>
-              <Typography variant="body-8" as="p" className="font-manrope font-normal text-[#6C6048]">
-                Thank you for reaching out to HCG Foundation. Our team will review your application and get in touch with you soon.
-              </Typography>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="w-full max-w-[34rem] mx-auto flex-1 flex flex-col justify-between font-manrope space-y-4 sm:space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="w-full max-w-[34rem] mx-auto flex-1 flex flex-col justify-between font-manrope space-y-4 sm:space-y-5">
               {/* Row 1: Full Name & Phone Number (Figma Frame 560: 544.45px x 41.14px, Gap: 51px) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                 <div className="relative">
@@ -338,7 +427,6 @@ export default function ParticipateModal({
                       <textarea
                         id="participate-fullName"
                         rows={1}
-                        required
                         value={formData.fullName}
                         onInput={handleAutoResize}
                         onKeyDown={(e) => {
@@ -354,26 +442,28 @@ export default function ParticipateModal({
                   </div>
                   {errors.fullName && (
                     <div className="mt-1">
-                      <Typography
-                        variant="caption-1"
-                        as="p"
-                        className="font-manrope text-red-500"
-                      >
+                      <span className="text-xs text-red-600 font-manrope block">
                         {errors.fullName}
-                      </Typography>
+                      </span>
                     </div>
                   )}
                 </div>
 
-                <PhoneInputField
-                  label="Phone Number"
-                  hideLabel
-                  required
-                  value={formData.phone}
-                  onChange={(val) =>
-                    setFormData((prev) => ({ ...prev, phone: val || "" }))
-                  }
-                />
+                <div className="relative min-h-[2.85rem] h-auto">
+                  <PhoneInputField
+                    label="Phone Number"
+                    hideLabel
+                    required
+                    error={errors.phone}
+                    value={formData.phone}
+                    onChange={(val) => {
+                      if (errors.phone) {
+                        setErrors((prev) => ({ ...prev, phone: undefined }));
+                      }
+                      setFormData((prev) => ({ ...prev, phone: val || "" }));
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Row 2: Email & Gender (Intern) / Location (Fundraise/Volunteer) */}
@@ -400,7 +490,6 @@ export default function ParticipateModal({
                       <textarea
                         id="participate-email"
                         rows={1}
-                        required
                         value={formData.email}
                         onInput={handleAutoResize}
                         onKeyDown={(e) => {
@@ -417,13 +506,9 @@ export default function ParticipateModal({
                   </div>
                   {errors.email && (
                     <div className="mt-1">
-                      <Typography
-                        variant="caption-1"
-                        as="p"
-                        className="font-manrope text-red-500"
-                      >
+                      <span className="text-xs text-red-600 font-manrope block">
                         {errors.email}
-                      </Typography>
+                      </span>
                     </div>
                   )}
                 </div>
@@ -431,20 +516,26 @@ export default function ParticipateModal({
                 {isIntern ? (
                   <GenderSelect
                     value={formData.gender}
-                    onChange={(val) =>
-                      setFormData((prev) => ({ ...prev, gender: val }))
-                    }
+                    error={errors.gender}
+                    onChange={(val) => {
+                      if (errors.gender) {
+                        setErrors((prev) => ({ ...prev, gender: undefined }));
+                      }
+                      setFormData((prev) => ({ ...prev, gender: val }));
+                    }}
                     className="h-full"
-                    required
                   />
                 ) : (
                   <LocationSelect
                     value={formData.location}
-                    onChange={(val) =>
-                      setFormData((prev) => ({ ...prev, location: val }))
-                    }
+                    error={errors.location}
+                    onChange={(val) => {
+                      if (errors.location) {
+                        setErrors((prev) => ({ ...prev, location: undefined }));
+                      }
+                      setFormData((prev) => ({ ...prev, location: val }));
+                    }}
                     className="h-full"
-                    required
                   />
                 )}
               </div>
@@ -463,7 +554,11 @@ export default function ParticipateModal({
 
                     <div className="relative h-full">
                       <div
-                        className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
+                        className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${
+                          errors.course
+                            ? "border-red-500"
+                            : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                        }`}
                       >
                         <label htmlFor="participate-course" className="flex items-center cursor-pointer">
                           <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3" />
@@ -479,13 +574,15 @@ export default function ParticipateModal({
                           <textarea
                             id="participate-course"
                             rows={1}
-                            required
                             value={formData.course}
                             onInput={handleAutoResize}
                             onKeyDown={(e) => {
                               if (e.key === "Enter") e.preventDefault();
                             }}
                             onChange={(e) => {
+                              if (errors.course && e.target.value.trim()) {
+                                setErrors((prev) => ({ ...prev, course: undefined }));
+                              }
                               setFormData({ ...formData, course: e.target.value });
                               handleAutoResize(e);
                             }}
@@ -493,13 +590,24 @@ export default function ParticipateModal({
                           />
                         </div>
                       </div>
+                      {errors.course && (
+                        <div className="mt-1">
+                          <span className="text-xs text-red-600 font-manrope block">
+                            {errors.course}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {/* Address */}
                   <div className="relative">
                     <div
-                      className="min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
+                      className={`min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${
+                        errors.address
+                          ? "border-red-500"
+                          : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                      }`}
                     >
                       <label htmlFor="participate-address" className="flex items-center cursor-pointer">
                         <MapPin className="size-4 text-[#0D2838] shrink-0 mr-3" />
@@ -515,13 +623,15 @@ export default function ParticipateModal({
                         <textarea
                           id="participate-address"
                           rows={1}
-                          required
                           value={formData.address}
                           onInput={handleAutoResize}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") e.preventDefault();
                           }}
                           onChange={(e) => {
+                            if (errors.address && e.target.value.trim()) {
+                              setErrors((prev) => ({ ...prev, address: undefined }));
+                            }
                             setFormData({ ...formData, address: e.target.value });
                             handleAutoResize(e);
                           }}
@@ -529,22 +639,36 @@ export default function ParticipateModal({
                         />
                       </div>
                     </div>
+                    {errors.address && (
+                      <div className="mt-1">
+                        <span className="text-xs text-red-600 font-manrope block">
+                          {errors.address}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Languages & Skills */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                     <SearchableLanguageSelect
                       value={formData.languages}
-                      onChange={(val) =>
-                        setFormData((prev) => ({ ...prev, languages: val }))
-                      }
+                      error={errors.languages}
+                      onChange={(val) => {
+                        if (errors.languages) {
+                          setErrors((prev) => ({ ...prev, languages: undefined }));
+                        }
+                        setFormData((prev) => ({ ...prev, languages: val }));
+                      }}
                       className="h-full"
-                      required
                     />
 
                     <div className="relative h-full">
                       <div
-                        className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
+                        className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${
+                          errors.computerSkills
+                            ? "border-red-500"
+                            : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                        }`}
                       >
                         <label htmlFor="participate-skills" className="flex items-center cursor-pointer">
                           <Wrench className="size-4 text-[#0D2838] shrink-0 mr-3" />
@@ -560,13 +684,15 @@ export default function ParticipateModal({
                           <textarea
                             id="participate-skills"
                             rows={1}
-                            required
                             value={formData.computerSkills}
                             onInput={handleAutoResize}
                             onKeyDown={(e) => {
                               if (e.key === "Enter") e.preventDefault();
                             }}
                             onChange={(e) => {
+                              if (errors.computerSkills && e.target.value.trim()) {
+                                setErrors((prev) => ({ ...prev, computerSkills: undefined }));
+                              }
                               setFormData({
                                 ...formData,
                                 computerSkills: e.target.value,
@@ -577,6 +703,13 @@ export default function ParticipateModal({
                           />
                         </div>
                       </div>
+                      {errors.computerSkills && (
+                        <div className="mt-1">
+                          <span className="text-xs text-red-600 font-manrope block">
+                            {errors.computerSkills}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </>
@@ -585,7 +718,11 @@ export default function ParticipateModal({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                   <div className="relative h-full">
                     <div
-                      className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
+                      className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${
+                        errors.educationalQualification
+                          ? "border-red-500"
+                          : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                      }`}
                     >
                       <label htmlFor="participate-qualification" className="flex items-center cursor-pointer">
                         <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3" />
@@ -601,13 +738,15 @@ export default function ParticipateModal({
                         <textarea
                           id="participate-qualification"
                           rows={1}
-                          required
                           value={formData.educationalQualification}
                           onInput={handleAutoResize}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") e.preventDefault();
                           }}
                           onChange={(e) => {
+                            if (errors.educationalQualification && e.target.value.trim()) {
+                              setErrors((prev) => ({ ...prev, educationalQualification: undefined }));
+                            }
                             setFormData({
                               ...formData,
                               educationalQualification: e.target.value,
@@ -618,18 +757,28 @@ export default function ParticipateModal({
                         />
                       </div>
                     </div>
+                    {errors.educationalQualification && (
+                      <div className="mt-1">
+                        <span className="text-xs text-red-600 font-manrope block">
+                          {errors.educationalQualification}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <VolunteerInterestSelect
                     value={formData.volunteerInterest}
-                    onChange={(val) =>
+                    error={errors.volunteerInterest}
+                    onChange={(val) => {
+                      if (errors.volunteerInterest) {
+                        setErrors((prev) => ({ ...prev, volunteerInterest: undefined }));
+                      }
                       setFormData((prev) => ({
                         ...prev,
                         volunteerInterest: val,
-                      }))
-                    }
+                      }));
+                    }}
                     className="h-full"
-                    required
                   />
                 </div>
               ) : (
@@ -637,7 +786,11 @@ export default function ParticipateModal({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                   <div className="relative h-full">
                     <div
-                      className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
+                      className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${
+                        errors.fundraisingGoal
+                          ? "border-red-500"
+                          : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                      }`}
                     >
                       <label htmlFor="participate-goal" className="flex items-center cursor-pointer">
                         <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3" />
@@ -653,13 +806,15 @@ export default function ParticipateModal({
                         <textarea
                           id="participate-goal"
                           rows={1}
-                          required
                           value={formData.fundraisingGoal}
                           onInput={handleAutoResize}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") e.preventDefault();
                           }}
                           onChange={(e) => {
+                            if (errors.fundraisingGoal && e.target.value.trim()) {
+                              setErrors((prev) => ({ ...prev, fundraisingGoal: undefined }));
+                            }
                             setFormData({
                               ...formData,
                               fundraisingGoal: e.target.value,
@@ -670,11 +825,22 @@ export default function ParticipateModal({
                         />
                       </div>
                     </div>
+                    {errors.fundraisingGoal && (
+                      <div className="mt-1">
+                        <span className="text-xs text-red-600 font-manrope block">
+                          {errors.fundraisingGoal}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="relative h-full">
                     <div
-                      className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
+                      className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${
+                        errors.reason
+                          ? "border-red-500"
+                          : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                      }`}
                     >
                       <label htmlFor="participate-reason" className="flex items-center cursor-pointer">
                         <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3" />
@@ -690,13 +856,15 @@ export default function ParticipateModal({
                         <textarea
                           id="participate-reason"
                           rows={1}
-                          required
                           value={formData.reason}
                           onInput={handleAutoResize}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") e.preventDefault();
                           }}
                           onChange={(e) => {
+                            if (errors.reason && e.target.value.trim()) {
+                              setErrors((prev) => ({ ...prev, reason: undefined }));
+                            }
                             setFormData({ ...formData, reason: e.target.value });
                             handleAutoResize(e);
                           }}
@@ -704,11 +872,18 @@ export default function ParticipateModal({
                         />
                       </div>
                     </div>
+                    {errors.reason && (
+                      <div className="mt-1">
+                        <span className="text-xs text-red-600 font-manrope block">
+                          {errors.reason}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
 
-              {/* Bottom section: Attach Resume for Intern (Figma Frame 622: 545px x 99px, Radius 8px, Dashed #A3A3A3, Fill #FFFFFF 65%), Why would you like to volunteer? for Volunteer, Your Message for Fundraise */}
+              {/* Bottom section: Attach Resume for Intern, Why would you like to volunteer? for Volunteer, Your Message for Fundraise */}
               {isIntern ? (
                 <div className="relative">
                   <input
@@ -719,7 +894,12 @@ export default function ParticipateModal({
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) setResumeFile(file);
+                      if (file) {
+                        setResumeFile(file);
+                        if (errors.resumeFile) {
+                          setErrors((prev) => ({ ...prev, resumeFile: undefined }));
+                        }
+                      }
                     }}
                   />
                   {resumeFile ? (
@@ -753,10 +933,14 @@ export default function ParticipateModal({
                   ) : (
                     <label
                       htmlFor="intern-resume"
-                      className="w-full h-[6.19rem] flex flex-col items-center justify-center gap-[0.625rem] border border-dashed border-[#A3A3A3] rounded-[0.5rem] bg-white/65 cursor-pointer hover:border-[#FCCC2D] transition-colors"
+                      className={`w-full h-[6.19rem] flex flex-col items-center justify-center gap-[0.625rem] border ${
+                        errors.resumeFile
+                          ? "border-solid border-red-500 bg-red-50/20"
+                          : "border-dashed border-[#A3A3A3] bg-white/65 hover:border-[#FCCC2D]"
+                      } rounded-[0.5rem] cursor-pointer transition-colors`}
                     >
                       <div className="flex items-center gap-2">
-                        <FileText className="size-4 text-[#7C8B93]" />
+                        <FileText className={`size-4 ${errors.resumeFile ? "text-red-500" : "text-[#7C8B93]"}`} />
                         <span className="font-manrope font-medium text-[0.78rem] leading-[150%] tracking-[0.03em] text-[#0D2838]">
                           Attach Resume*
                         </span>
@@ -766,12 +950,21 @@ export default function ParticipateModal({
                       </span>
                     </label>
                   )}
+                  {errors.resumeFile && (
+                    <span className="text-xs text-red-600 font-manrope block mt-1">
+                      {errors.resumeFile}
+                    </span>
+                  )}
                 </div>
               ) : isVolunteer ? (
-                /* Why would you like to volunteer?* for Volunteer - Figma 5.54rem initial space, hugs text when typed */
+                /* Why would you like to volunteer?* for Volunteer */
                 <div className="relative">
                   <div
-                    className="min-h-[5.54rem] h-auto pb-1.5 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
+                    className={`min-h-[5.54rem] h-auto pb-1.5 flex flex-col justify-between border-b transition-all ${
+                      errors.whyVolunteer
+                        ? "border-red-500"
+                        : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                    }`}
                   >
                     <label htmlFor="participate-whyVolunteer" className="flex items-center cursor-pointer pt-0.5">
                       <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3" />
@@ -787,11 +980,13 @@ export default function ParticipateModal({
                       <textarea
                         id="participate-whyVolunteer"
                         rows={1}
-                        required
                         maxLength={500}
                         value={formData.whyVolunteer || formData.message}
                         onInput={handleAutoResize}
                         onChange={(e) => {
+                          if (errors.whyVolunteer && e.target.value.trim()) {
+                            setErrors((prev) => ({ ...prev, whyVolunteer: undefined }));
+                          }
                           setFormData({
                             ...formData,
                             whyVolunteer: e.target.value,
@@ -803,17 +998,28 @@ export default function ParticipateModal({
                       />
                     </div>
                   </div>
-                  <div className="flex justify-end mt-1">
+                  <div className="flex justify-between items-center mt-1">
+                    {errors.whyVolunteer ? (
+                      <span className="text-xs text-red-600 font-manrope block">
+                        {errors.whyVolunteer}
+                      </span>
+                    ) : (
+                      <span />
+                    )}
                     <span className="text-[0.7rem] text-[#7C8B93] font-manrope select-none">
                       {(formData.whyVolunteer || formData.message).length} / 500
                     </span>
                   </div>
                 </div>
               ) : (
-                /* Your Message for Fundraise - Figma 5.54rem initial space, hugs text when typed */
+                /* Your Message for Fundraise */
                 <div className="relative">
                   <div
-                    className="min-h-[5.54rem] h-auto pb-1.5 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
+                    className={`min-h-[5.54rem] h-auto pb-1.5 flex flex-col justify-between border-b transition-all ${
+                      errors.message
+                        ? "border-red-500"
+                        : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                    }`}
                   >
                     <label htmlFor="participate-message" className="flex items-center cursor-pointer pt-0.5">
                       <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3" />
@@ -829,11 +1035,13 @@ export default function ParticipateModal({
                       <textarea
                         id="participate-message"
                         rows={1}
-                        required
                         maxLength={500}
                         value={formData.message}
                         onInput={handleAutoResize}
                         onChange={(e) => {
+                          if (errors.message && e.target.value.trim()) {
+                            setErrors((prev) => ({ ...prev, message: undefined }));
+                          }
                           setFormData({ ...formData, message: e.target.value });
                           handleAutoResize(e);
                         }}
@@ -841,7 +1049,14 @@ export default function ParticipateModal({
                       />
                     </div>
                   </div>
-                  <div className="flex justify-end mt-1">
+                  <div className="flex justify-between items-center mt-1">
+                    {errors.message ? (
+                      <span className="text-xs text-red-600 font-manrope block">
+                        {errors.message}
+                      </span>
+                    ) : (
+                      <span />
+                    )}
                     <span className="text-[0.7rem] text-[#7C8B93] font-manrope select-none">
                       {formData.message.length} / 500
                     </span>
@@ -850,48 +1065,76 @@ export default function ParticipateModal({
               )}
 
               {/* Terms and Conditions Checkbox */}
-              <div className="flex items-center gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  id="participate-terms"
-                  required
-                  checked={formData.agreeTerms}
-                  onChange={(e) =>
-                    setFormData({ ...formData, agreeTerms: e.target.checked })
-                  }
-                  className="size-4 accent-[#FCCC2D] rounded-sm cursor-pointer"
-                />
-                <label
-                  htmlFor="participate-terms"
-                  className="cursor-pointer"
-                >
-                  <Typography variant="caption-1" as="span" className="font-manrope font-normal text-[#596D79]">
-                    I have read and agree to the{" "}
-                  </Typography>
-                  <a
-                    href="/terms"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline transition-opacity"
+              <div className="flex flex-col gap-1 pt-1">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="participate-terms"
+                    checked={formData.agreeTerms}
+                    onChange={(e) => {
+                      if (errors.agreeTerms && e.target.checked) {
+                        setErrors((prev) => ({ ...prev, agreeTerms: undefined }));
+                      }
+                      setFormData({ ...formData, agreeTerms: e.target.checked });
+                    }}
+                    className="size-4 accent-[#FCCC2D] rounded-sm cursor-pointer"
+                  />
+                  <label
+                    htmlFor="participate-terms"
+                    className="cursor-pointer"
                   >
-                    <Typography variant="caption-1" as="span" className="font-manrope font-medium text-[#E5A810]">
-                      Terms & Conditions
+                    <Typography variant="caption-1" as="span" className="font-manrope font-normal text-[#596D79]">
+                      I have read and agree to the{" "}
                     </Typography>
-                  </a>
-                </label>
+                    <a
+                      href="/terms"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline transition-opacity"
+                    >
+                      <Typography variant="caption-1" as="span" className="font-manrope font-medium text-[#E5A810]">
+                        Terms & Conditions
+                      </Typography>
+                    </a>
+                  </label>
+                </div>
+                {errors.agreeTerms && (
+                  <span className="text-xs text-red-600 font-manrope block">
+                    {errors.agreeTerms}
+                  </span>
+                )}
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#2E1C12] rounded-md transition duration-200 hover:bg-[#F5C21B] active:scale-[0.99] cursor-pointer"
+                disabled={submitted}
+                className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#2E1C12] rounded-md transition duration-200 hover:bg-[#F5C21B] active:scale-[0.99] cursor-pointer disabled:opacity-80"
               >
                 <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#2E1C12]">
-                  Submit Application
+                  {submitted ? "Submitted ✓" : "Submit Application"}
                 </Typography>
               </button>
+
+              {submitted && (
+                <div className="text-center pt-2 space-y-0.5 animate-in fade-in duration-300">
+                  <Typography
+                    variant="caption-2"
+                    as="p"
+                    className="font-manrope font-semibold text-[#2E7D32]"
+                  >
+                    Application Submitted Successfully!
+                  </Typography>
+                  <Typography
+                    variant="caption-2"
+                    as="p"
+                    className="font-manrope font-normal text-[#2E7D32]"
+                  >
+                    Thank you for reaching out to HCG Foundation. Our team will review your application and get in touch with you soon.
+                  </Typography>
+                </div>
+              )}
             </form>
-          )}
         </div>
       </div>
     </div>
