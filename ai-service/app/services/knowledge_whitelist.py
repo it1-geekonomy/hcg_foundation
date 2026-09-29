@@ -5,6 +5,8 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+from app.rag import constants as C
+
 # Match against posix-relative path lowercased under the source-docs root.
 _ALLOW: list[re.Pattern[str]] = [
     re.compile(p, re.I)
@@ -76,26 +78,20 @@ def classify_doc(path: Path) -> tuple[str, str, str]:
     lower = path.as_posix().lower()
 
     if "newsletter" in lower:
-        return title, "Newsletter", "/resources"
+        return title, "Newsletter", C.TRANSPARENCY_URL
     if "financials" in lower:
-        return title, "Page", "/resources/annual-reports"
+        return title, "Page", C.TRANSPARENCY_URL
     if any(
         k in lower
         for k in ("12a", "80g", "fcra", "csr", "darpan", "gst", "registration")
     ):
         return title, "Page", "/about-us"
     if "patient aid" in lower:
-        return title, "Page", "/patient-aid"
-    if any(
-        k in lower
-        for k in (
-            "diagnostic",
-            "hpv",
-            "oral cancer",
-            "ventilator",
-            "about_hcg",
-            "about hcg",
-        )
-    ):
-        return title, "Project", "/resources/projects"
+        return title, "Page", C.PATIENT_AID_URL
+    if any(k in lower for k in ("hpv", "oral cancer")):
+        return title, "Project", C.AWARENESS_URL
+    if any(k in lower for k in ("diagnostic", "ventilator")):
+        return title, "Project", C.PROJECTS_URL
+    if any(k in lower for k in ("about_hcg", "about hcg")):
+        return title, "Project", "/about-us"
     return title, "Page", "/about-us"

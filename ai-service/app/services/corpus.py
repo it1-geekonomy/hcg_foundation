@@ -41,13 +41,17 @@ def _static_documents() -> list[dict]:
             "table": "static",
             "source_id": "patient-aid",
             "title": "Patient Aid",
-            "url": "/patient-aid",
+            "url": C.PATIENT_AID_URL,
             "category": "Page",
             "content": (
                 "Title: Patient Aid\nCategory: Page\n\n"
-                "Patient Aid helps eligible cancer patients access treatment support "
-                "through HCG Foundation. Application guidance is published on the website. "
-                "How do I apply for Patient Aid? Review the Patient Aid information and "
+                "Patient Aid (also called Aasha Daan — The Gift of Hope) helps eligible, "
+                "economically disadvantaged cancer patients, with a focus on pediatric patients "
+                "and young adults, access treatment support through HCG Foundation. "
+                "The website page 'Financial Support for Pediatric Patients' explains how to refer "
+                "a patient. Application guidance is published on the website. "
+                "How do I apply for Patient Aid? Review the Financial Support for Pediatric "
+                "Patients page on the website and "
                 f"contact {C.OFFICIAL_EMAIL} or {C.OFFICIAL_PHONE}. "
                 "Sponsorship / adopt-a-patient inquiries can also be directed to the same contacts. "
                 "The Foundation is a trust and partners with HCG hospital facilities for care — "
@@ -58,7 +62,7 @@ def _static_documents() -> list[dict]:
             "table": "static",
             "source_id": "donate-now",
             "title": "Donate Now",
-            "url": "/donate",
+            "url": C.DONATE_URL,
             "category": "Page",
             "content": (
                 "Title: Donate Now\nCategory: Page\n\n"
@@ -85,21 +89,35 @@ def _static_documents() -> list[dict]:
         {
             "table": "static",
             "source_id": "internship",
-            "title": "Internship Program",
-            "url": "/internship",
+            "title": "Volunteer, Intern and Fundraise",
+            "url": C.PARTICIPATE_URL,
             "category": "Page",
             "content": (
-                "Title: Internship Program\nCategory: Page\n\n"
-                "HCG Foundation offers internship opportunities as published on the website. "
-                "For internship applications and eligibility, use the Internship Program page "
-                f"or contact {C.OFFICIAL_EMAIL} / {C.OFFICIAL_PHONE}."
+                "Title: Volunteer, Intern and Fundraise\nCategory: Page\n\n"
+                "Individuals can get involved with HCG Foundation in three ways, described on the "
+                "Get Involved > Participate page of the website: Fundraise, Volunteer, and Intern. "
+                "HCG Foundation offers internship opportunities; apply through the Intern option on "
+                "the Participate page. Volunteers can also sign up there. "
+                f"For eligibility questions contact {C.OFFICIAL_EMAIL} / {C.OFFICIAL_PHONE}."
+            ),
+        },
+        {
+            "table": "static",
+            "source_id": "events",
+            "title": "Events",
+            "url": C.EVENTS_URL,
+            "category": "Page",
+            "content": (
+                "Title: Events\nCategory: Page\n\n"
+                "Upcoming and past HCG Foundation events are listed on the Events page of the "
+                "website (Resources > Events)."
             ),
         },
         {
             "table": "static",
             "source_id": "partnerships",
             "title": "Partnerships",
-            "url": "/partnerships",
+            "url": C.CSR_URL,
             "category": "Page",
             "content": (
                 "Title: Partnerships\nCategory: Page\n\n"
@@ -111,7 +129,7 @@ def _static_documents() -> list[dict]:
             "table": "static",
             "source_id": "awareness",
             "title": "Awareness and Prevention",
-            "url": "/awareness",
+            "url": C.AWARENESS_URL,
             "category": "Page",
             "content": (
                 "Title: Awareness and Prevention\nCategory: Page\n\n"
@@ -154,7 +172,7 @@ def _static_documents() -> list[dict]:
             "table": "static",
             "source_id": "fcra-bank-details",
             "title": "FCRA Bank Account Details",
-            "url": "/donate",
+            "url": "/about-us",
             "category": "Page",
             "content": (
                 "Title: FCRA Bank Account Details\nCategory: Page\n\n"
@@ -188,7 +206,7 @@ def _static_documents() -> list[dict]:
             "table": "static",
             "source_id": "founder",
             "title": f"{C.FOUNDER_NAME} — {C.FOUNDER_ROLE}",
-            "url": "/about/our-team",
+            "url": C.TEAM_URL,
             "category": "Trustee",
             "designation": C.FOUNDER_ROLE,
             "content": (
@@ -196,6 +214,18 @@ def _static_documents() -> list[dict]:
                 f"Category: Trustee\n"
                 f"Designation: {C.FOUNDER_ROLE}\n\n"
                 f"{C.FOUNDER_NAME} is the {C.FOUNDER_ROLE} of HCG Foundation."
+            ),
+        },
+        {
+            "table": "static",
+            "source_id": "board-of-trustees",
+            "title": "Board of Trustees",
+            "url": C.TEAM_URL,
+            "category": "Trustee",
+            "content": (
+                "Title: Board of Trustees\nCategory: Trustee\n\n"
+                "HCG Foundation's Board of Trustees, as published on the About Us > Our Team page:\n"
+                + "\n".join(f"- {name} — {role}" for name, role in C.TRUSTEES)
             ),
         },
     ]
@@ -252,11 +282,15 @@ def _title_from_txt(path: Path) -> tuple[str, str, str]:
     url = "/about-us"
     if "newsletter" in lower:
         category = "Newsletter"
-        url = "/resources"
+        url = C.TRANSPARENCY_URL
     elif "patient" in lower:
-        url = "/patient-aid"
-    elif "donate" in lower or "fcra bank" in lower:
-        url = "/donate"
+        url = C.PATIENT_AID_URL
+    elif "donate" in lower:
+        url = C.DONATE_URL
+    elif "financial" in lower:
+        url = C.TRANSPARENCY_URL
+    elif "trustee" in lower or "founder" in lower:
+        url = C.TEAM_URL
     elif "contact" in lower:
         url = "/contact"
     return stem, category, url

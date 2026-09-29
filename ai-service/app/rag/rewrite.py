@@ -136,6 +136,10 @@ def build_multi_queries(rewritten: str, intents: set[str]) -> list[str]:
         queries.append("How does HCG Foundation Patient Aid work and how to apply?")
     if "internship" in intents:
         queries.append("HCG Foundation internship program application")
+    if "volunteer" in intents:
+        queries.append("How can I volunteer, intern or fundraise with HCG Foundation?")
+    if "events" in intents:
+        queries.append("HCG Foundation events date location")
     if "patient_count" in intents:
         queries.append("How many patients has HCG Foundation supported overall?")
         queries.append("HCG Foundation patients supported in Bengaluru city breakdown")
