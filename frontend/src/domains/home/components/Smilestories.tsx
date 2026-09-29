@@ -102,44 +102,17 @@ function StoryCard({
       <div className="relative h-full w-full flex flex-col justify-between items-center p-[1.425rem] rounded-[1.2643rem] border-[0.0527rem] border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2]">
         {/* Centered Excerpt with Proportional Body-2 */}
         <div className="relative z-10 flex-1 flex items-center justify-center text-center my-auto px-[0.5rem] w-full">
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={
-              flipped
-                ? { opacity: 1, y: 0 }
-                : { opacity: 0, y: 8 }
-            }
-            transition={{
-              duration: flipped ? 0.38 : 0.15,
-              delay: flipped ? 0.42 : 0,
-              ease: [0.25, 1, 0.5, 1],
-            }}
+          <Typography
+            variant="body-2"
+            as="p"
+            className="text-[#0D2838] max-w-md"
           >
-            <Typography
-              variant="body-2"
-              as="p"
-              className="text-[#0D2838] max-w-md"
-            >
-              {excerpt || "Explore the journey of hope, courage, and recovery."}
-            </Typography>
-          </motion.div>
+            {excerpt || "Explore the journey of hope, courage, and recovery."}
+          </Typography>
         </div>
 
         {/* Read More Button Constant at Bottom Center */}
-        <motion.div
-          className="relative z-10 w-full flex justify-center shrink-0 pt-[0.75rem]"
-          initial={{ opacity: 0, y: 8 }}
-          animate={
-            flipped
-              ? { opacity: 1, y: 0 }
-              : { opacity: 0, y: 8 }
-          }
-          transition={{
-            duration: flipped ? 0.38 : 0.15,
-            delay: flipped ? 0.46 : 0,
-            ease: [0.25, 1, 0.5, 1],
-          }}
-        >
+        <div className="relative z-10 w-full flex justify-center shrink-0 pt-[0.75rem]">
           <div
             onClick={(e) => {
               e.stopPropagation();
@@ -152,7 +125,7 @@ function StoryCard({
             </Typography>
             <DiagonalArrowIcon className="w-[1rem] h-[0.85rem] sm:w-[1.2rem] sm:h-[0.95rem] xl:w-[1.375rem] xl:h-[1.1rem] text-[#2D2D2D] shrink-0" />
           </div>
-        </motion.div>
+        </div>
       </div>
     </MirrorReveal>
   );

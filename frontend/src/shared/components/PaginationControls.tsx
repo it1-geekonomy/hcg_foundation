@@ -11,6 +11,7 @@ export interface PaginationControlsProps {
   showDots?: boolean;
   showArrows?: boolean;
   showNumbers?: boolean;
+  scrollToTop?: boolean;
 }
 
 export default function PaginationControls({
@@ -21,20 +22,28 @@ export default function PaginationControls({
   showDots = true,
   showArrows = true,
   showNumbers = false,
+  scrollToTop = true,
 }: PaginationControlsProps) {
   if (totalPages <= 1) {
     return null;
   }
 
+  const handlePageClick = (page: number) => {
+    onPageChange(page);
+    if (scrollToTop) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   const handlePrev = () => {
     if (currentPage > 1) {
-      onPageChange(currentPage - 1);
+      handlePageClick(currentPage - 1);
     }
   };
 
   const handleNext = () => {
     if (currentPage < totalPages) {
-      onPageChange(currentPage + 1);
+      handlePageClick(currentPage + 1);
     }
   };
 
@@ -84,7 +93,7 @@ export default function PaginationControls({
               <button
                 key={pageNum}
                 type="button"
-                onClick={() => onPageChange(pageNum)}
+                onClick={() => handlePageClick(pageNum)}
                 aria-label={`Go to page ${pageNum}`}
                 className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
                   isActive
@@ -117,7 +126,7 @@ export default function PaginationControls({
               <button
                 key={`${pageNum}-${index}`}
                 type="button"
-                onClick={() => onPageChange(pageNum)}
+                onClick={() => handlePageClick(pageNum)}
                 aria-label={`Go to page ${pageNum}`}
                 className={`flex size-6 sm:size-7 items-center justify-center rounded-full font-manrope font-semibold text-xs transition cursor-pointer ${
                   isActive

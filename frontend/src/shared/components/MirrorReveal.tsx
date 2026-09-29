@@ -32,9 +32,9 @@ export function MirrorReveal({
         initial={{ x: "0%" }}
         animate={{ x: isOpen ? "-102%" : "0%" }}
         transition={{
-          duration: isOpen ? duration : 0.35,
-          delay: isOpen ? delay : 0,
-          ease: isOpen ? [0.65, 0, 0.25, 1] : [0.25, 1, 0.5, 1],
+          duration: isOpen ? duration : 0.01,
+          delay: isOpen ? delay : 0.52,
+          ease: isOpen ? [0.65, 0, 0.25, 1] : "linear",
         }}
         className="absolute top-0 bottom-0 left-0 w-1/2 z-30 pointer-events-none overflow-hidden border-r border-[#E0D4AE] shadow-md bg-gradient-to-r from-[#F5ECCB] via-[#FFF8E2] to-[#FFF6D8]"
       >
@@ -50,9 +50,9 @@ export function MirrorReveal({
         initial={{ x: "0%" }}
         animate={{ x: isOpen ? "102%" : "0%" }}
         transition={{
-          duration: isOpen ? duration : 0.35,
-          delay: isOpen ? delay : 0,
-          ease: isOpen ? [0.65, 0, 0.25, 1] : [0.25, 1, 0.5, 1],
+          duration: isOpen ? duration : 0.01,
+          delay: isOpen ? delay : 0.52,
+          ease: isOpen ? [0.65, 0, 0.25, 1] : "linear",
         }}
         className="absolute top-0 bottom-0 right-0 w-1/2 z-30 pointer-events-none overflow-hidden border-l border-[#E0D4AE] shadow-md bg-gradient-to-l from-[#F5ECCB] via-[#FFF8E2] to-[#FFF6D8]"
       >

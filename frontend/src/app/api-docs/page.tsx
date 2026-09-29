@@ -15,16 +15,16 @@ const spec = {
   paths: {
     "/api/website-images": {
       get: {
-        summary: "List all website images",
+        summary: "List all website images and videos",
         responses: {
           "200": {
-            description: "A list of images",
+            description: "A list of images and videos",
           },
         },
       },
       post: {
-        summary: "Upload website image(s)",
-        description: "You can upload one or multiple files at once by appending multiple 'file' fields to the FormData. Note: ONLY .webp and .avif files are allowed.",
+        summary: "Upload website image(s) or video(s)",
+        description: "You can upload one or multiple files at once by appending multiple 'file' fields to the FormData. Allowed: .webp and .avif images, .mp4 and .webm videos. Max 100 MB per file.",
         requestBody: {
           required: true,
           content: {
@@ -38,7 +38,7 @@ const spec = {
                       type: "string",
                       format: "binary",
                     },
-                    description: "One or more image files to upload."
+                    description: "One or more image or video files to upload."
                   },
                 },
               },
