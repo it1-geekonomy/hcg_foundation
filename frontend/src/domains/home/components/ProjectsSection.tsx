@@ -9,6 +9,14 @@ import {
   type CardData,
 } from "@/domains/home/constants/project";
 import Typography from "@/lib/Typography";
+import {
+  slideWords,
+  useSlideInLines,
+} from "./slideInWords";
+
+const HEADING_TEXT = "Changing Lives Through HCG Foundation Projects";
+const DESC_TEXT =
+  "Explore the programs and community initiatives that are creating meaningful impact across healthcare, awareness, education, and patient support.";
 
 function ArrowIcon({ className = "" }: { className?: string }) {
   return (
@@ -197,6 +205,11 @@ export default function ProjectsSection({
   const containerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const reduceMotionRef = useRef(false);
+
+  // Header slide-in animations (only active when the header is rendered).
+  const headerActive = showHeader && cards.length > 0;
+  const headingSlide = useSlideInLines(HEADING_TEXT, headerActive);
+  const descSlide = useSlideInLines(DESC_TEXT, headerActive);
 
   const timelineRefs = useRef<(gsap.core.Timeline | null)[]>([]);
 
@@ -643,24 +656,35 @@ export default function ProjectsSection({
     >
       <div className="max-w-full">
         {showHeader ? (
-          <div id="projects" className="mb-10 flex flex-col gap-4 lg:mb-14 lg:flex-row lg:items-start lg:justify-between lg:gap-8 scroll-mt-24">
-            <Typography
-              variant="heading-2"
-              as="h2"
-              className="w-full text-left font-tiempos-headline font-medium text-[#382E07]"
+          <div id="projects" className="mb-10 flex flex-col gap-4 overflow-x-clip lg:mb-14 lg:flex-row lg:items-start lg:justify-between lg:gap-8 scroll-mt-24">
+            <div ref={headingSlide.wrapRef} className="w-full">
+              <Typography
+                variant="heading-2"
+                as="h2"
+                className="text-left font-tiempos-headline font-medium text-[#382E07]"
+              >
+                {slideWords(
+                  HEADING_TEXT,
+                  headingSlide,
+                  "left",
+                  0,
+                  2,
+                  "hidden 2xl:block",
+                )}
+              </Typography>
+            </div>
+            <div
+              ref={descSlide.wrapRef}
+              className="w-full [--slide-x:-80px] lg:max-w-md lg:pt-2 lg:[--slide-x:80px] xl:max-w-xl"
             >
-              Changing Lives Through
-              <br className="hidden 2xl:block" /> HCG Foundation Projects
-            </Typography>
-            <Typography
-              variant="body-2"
-              as="p"
-              className="w-full font-argestadisplay font-normal leading-6 text-black/60 lg:max-w-md lg:pt-2 lg:text-left xl:max-w-xl"
-            >
-              Explore the programs and community initiatives that are creating
-              meaningful impact across healthcare, awareness, education, and
-              patient support.
-            </Typography>
+              <Typography
+                variant="body-2"
+                as="p"
+                className="font-argestadisplay font-normal leading-6 text-black/60 lg:text-left"
+              >
+                {slideWords(DESC_TEXT, descSlide, "responsive", 250)}
+              </Typography>
+            </div>
           </div>
         ) : null}
 

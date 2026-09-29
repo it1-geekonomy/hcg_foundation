@@ -14,6 +14,9 @@ export default function StatSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const [active, setActive] = useState(false);
 
+  const headingRef = useRef<HTMLDivElement | null>(null);
+  const [headingVisible, setHeadingVisible] = useState(false);
+
   const descWrapRef = useRef<HTMLParagraphElement | null>(null);
   const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const rafRef = useRef<number | null>(null);
@@ -112,6 +115,25 @@ export default function StatSection() {
     return () => observer.disconnect();
   }, []);
 
+  // Heading blur reveal — plays once, the first time it scrolls into view.
+  useEffect(() => {
+    const node = headingRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setHeadingVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   // Divide the scroll range evenly across however many visual lines
   // exist. Each line ramps smoothly from 0 -> 1 opacity across its own
   // slice of the scroll range, so one full line finishes filling per
@@ -126,8 +148,22 @@ export default function StatSection() {
 
   return (
     <section ref={sectionRef} className="relative overflow-hidden px-6 pt-4 lg:pt-6 lg:pb-10">
-      <div className="relative max-w-full text-center">
-        <Typography variant="heading-1" as="h2" className="text-[#382E07]">
+      <div ref={headingRef} className="relative max-w-full text-center">
+        <Typography
+          variant="heading-1"
+          as="h2"
+          className="text-[#382E07] motion-reduce:!transition-none"
+          style={{
+            opacity: headingVisible ? 1 : 0,
+            filter: headingVisible ? "blur(0px)" : "blur(14px)",
+            transform: headingVisible
+              ? "translate3d(0,0,0)"
+              : "translate3d(0,32px,0)",
+            transition:
+              "opacity 700ms ease-out, filter 500ms ease-out, transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
+            willChange: "opacity, filter, transform",
+          }}
+        >
           Our Journey of Impact
         </Typography>
       </div>

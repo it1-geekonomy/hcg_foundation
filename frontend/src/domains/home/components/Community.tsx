@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import Typography from "@/lib/Typography";
 import {
@@ -10,10 +10,59 @@ import {
   communityTheme,
 } from "@/domains/home/constants/community";
 
+const LINE_STEP_MS = 120; // delay between consecutive text lines
+const PILL_STEP_MS = 110; // delay between consecutive pills
+const DESC_DELAY_MS = 250; // description starts after the heading
+const SLIDE_TRANSITION =
+  "opacity 700ms ease-out, transform 1000ms cubic-bezier(0.22, 1, 0.36, 1)";
+
 export default function CommunitySection() {
   const mediaRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
 
+  const tagsWrapRef = useRef<HTMLDivElement | null>(null);
+  const textWrapRef = useRef<HTMLDivElement | null>(null);
+  const [tagsVisible, setTagsVisible] = useState(false);
+  const [textVisible, setTextVisible] = useState(false);
+
+  const headWords = communityContent.heading.split(" ");
+  const descWords = communityContent.description.split(" ");
+  const headRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const descRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const [headLines, setHeadLines] = useState<number[]>([]);
+  const [descLines, setDescLines] = useState<number[]>([]);
+
+  // Group words into the visual lines they actually wrap into.
+  useLayoutEffect(() => {
+    const compute = (refs: (HTMLSpanElement | null)[], count: number) => {
+      let line = 0;
+      let prevTop: number | null = null;
+      const lines: number[] = [];
+      for (let i = 0; i < count; i++) {
+        const top = refs[i]?.offsetTop ?? 0;
+        if (prevTop !== null && top > prevTop + 2) line += 1;
+        prevTop = top;
+        lines.push(line);
+      }
+      return lines;
+    };
+
+    const measure = () => {
+      setHeadLines(compute(headRefs.current, headWords.length));
+      setDescLines(compute(descRefs.current, descWords.length));
+    };
+
+    measure();
+    const t = setTimeout(measure, 150); // late font loads
+    window.addEventListener("resize", measure);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("resize", measure);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Existing overlay-card observer (unchanged)
   useEffect(() => {
     const el = mediaRef.current;
     if (!el) return;
@@ -29,45 +78,128 @@ export default function CommunitySection() {
     return () => observer.disconnect();
   }, []);
 
+  // Pills + text each play once, when they first scroll into view.
+  useEffect(() => {
+    const watch = (node: HTMLElement | null, set: (v: boolean) => void) => {
+      if (!node) return;
+      const obs = new IntersectionObserver(
+        (entries) => {
+          if (entries[0]?.isIntersecting) {
+            set(true);
+            obs.disconnect();
+          }
+        },
+        { threshold: 0.25 },
+      );
+      obs.observe(node);
+      return () => obs.disconnect();
+    };
+    const c1 = watch(tagsWrapRef.current, setTagsVisible);
+    const c2 = watch(textWrapRef.current, setTextVisible);
+    return () => {
+      c1?.();
+      c2?.();
+    };
+  }, []);
+
   const scrollToDonateForm = () => {
     document.getElementById("donate-form")?.scrollIntoView({ behavior: "smooth" });
   };
+
+  // Direction comes from the wrapper's --slide-x CSS variable.
+  const slideStyle = (visible: boolean, delayMs: number): React.CSSProperties => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translate3d(0,0,0)" : "translate3d(var(--slide-x),0,0)",
+    transition: SLIDE_TRANSITION,
+    transitionDelay: `${delayMs}ms`,
+    willChange: "opacity, transform",
+  });
+
+  let pillIndex = 0;
 
   return (
     <section className="w-full px-6 pt-8 sm:px-10 md:px-14 lg:px-16 lg:py-16 xl:px-24 2xl:px-32">
       <div className="mx-auto max-w-[1400px]">
         {/* Tags left · heading + body right · vertically centered (Figma) */}
-        <div className="mb-10 flex flex-col gap-8 md:mb-14 lg:mb-14 lg:flex-row lg:items-center lg:justify-between lg:gap-12 xl:gap-20">
-          <div className="order-2 flex flex-col gap-2 md:gap-5 lg:order-1 lg:max-w-[min(100%,32rem)] lg:shrink-0">
+        <div className="mb-10 flex flex-col gap-8 overflow-x-clip md:mb-14 lg:mb-14 lg:flex-row lg:items-center lg:justify-between lg:gap-12 xl:gap-20">
+          {/* Pills: always from the left, one after another.
+              Below 640px the row wrappers use `contents`, so all pills
+              flow as one naturally wrapping list. */}
+          <div
+            ref={tagsWrapRef}
+            className="order-2 flex flex-col gap-2 [--slide-x:-80px] max-sm:flex-row max-sm:flex-wrap md:gap-5 lg:order-1 lg:max-w-[min(100%,32rem)] lg:shrink-0"
+          >
             {communityTagRows.map((row, rowIndex) => (
-              <div key={rowIndex} className="flex flex-wrap gap-2 md:gap-3">
-                {row.map((tag) => (
-                  <Typography
-                    key={tag}
-                    variant="label-2"
-                    as="span"
-                    className="rounded-xs px-3 py-1.5 text-center font-manrope font-normal whitespace-nowrap md:px-4 md:py-2"
-                    style={{
-                      backgroundColor: communityTheme.tagBg,
-                      color: communityTheme.tagText,
-                    }}
-                  >
-                    {tag}
-                  </Typography>
-                ))}
+              <div
+                key={rowIndex}
+                className="flex flex-wrap gap-2 max-sm:contents md:gap-3"
+              >
+                {row.map((tag) => {
+                  const delay = pillIndex * PILL_STEP_MS;
+                  pillIndex += 1;
+                  return (
+                    <Typography
+                      key={tag}
+                      variant="label-2"
+                      as="span"
+                      className="rounded-xs px-3 py-1.5 text-center font-manrope font-normal whitespace-nowrap motion-reduce:!transition-none md:px-4 md:py-2"
+                      style={{
+                        backgroundColor: communityTheme.tagBg,
+                        color: communityTheme.tagText,
+                        ...slideStyle(tagsVisible, delay),
+                      }}
+                    >
+                      {tag}
+                    </Typography>
+                  );
+                })}
               </div>
             ))}
           </div>
 
-          <div className="order-1 lg:order-2 max-w-4xl lg:text-left font-tiempos-text">
-            <Typography variant="heading-2"
-              as="h2"
-              className="text-[#382E07] font-medium"
-            >
-              {communityContent.heading}
+          {/* Text: from the left when stacked, from the right on lg, line by line */}
+          <div
+            ref={textWrapRef}
+            className="order-1 max-w-4xl font-tiempos-text [--slide-x:-80px] lg:order-2 lg:text-left lg:[--slide-x:80px]"
+          >
+            <Typography variant="heading-2" as="h2" className="text-[#382E07] font-medium">
+              {headWords.map((w, i) => (
+                <span key={i}>
+                  <span
+                    ref={(el) => {
+                      headRefs.current[i] = el;
+                    }}
+                    className="inline-block motion-reduce:!transition-none"
+                    style={slideStyle(textVisible, (headLines[i] ?? 0) * LINE_STEP_MS)}
+                  >
+                    {w}
+                  </span>
+                  {i < headWords.length - 1 ? " " : ""}
+                </span>
+              ))}
             </Typography>
-            <Typography variant="body-2" as="p" className="text-[#2D2300C2] mt-3 md:mt-4 font-light font-argestadisplay">
-              {communityContent.description}
+            <Typography
+              variant="body-2"
+              as="p"
+              className="mt-3 font-light font-argestadisplay text-[#2D2300C2] md:mt-4"
+            >
+              {descWords.map((w, i) => (
+                <span key={i}>
+                  <span
+                    ref={(el) => {
+                      descRefs.current[i] = el;
+                    }}
+                    className="inline-block motion-reduce:!transition-none"
+                    style={slideStyle(
+                      textVisible,
+                      DESC_DELAY_MS + (descLines[i] ?? 0) * LINE_STEP_MS,
+                    )}
+                  >
+                    {w}
+                  </span>
+                  {i < descWords.length - 1 ? " " : ""}
+                </span>
+              ))}
             </Typography>
           </div>
         </div>

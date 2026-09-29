@@ -17,6 +17,10 @@ export default function ReelsSection() {
   const [atEnd, setAtEnd] = useState(false);
   const [stripWidthPx, setStripWidthPx] = useState<number | null>(null);
 
+  // Heading blur reveal — plays once, the first time it scrolls into view.
+  const headingRef = useRef<HTMLDivElement | null>(null);
+  const [headingVisible, setHeadingVisible] = useState(false);
+
   // Only one reel can be unmuted at a time. null = all muted.
   // Lifting this up (instead of per-card local state) is what lets
   // unmuting one card automatically mute whichever was previously unmuted.
@@ -76,6 +80,25 @@ export default function ReelsSection() {
     return () => el.removeEventListener("scroll", syncEdges);
   }, [stripWidthPx, syncEdges]);
 
+  // Heading blur reveal observer
+  useEffect(() => {
+    const node = headingRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setHeadingVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   const step = useCallback((delta: -1 | 1) => {
     const el = scrollerRef.current;
     if (!el) return;
@@ -98,13 +121,25 @@ export default function ReelsSection() {
       className="w-full bg-[#FFF6D8] px-4 pt-8 pb-8 md:px-6 lg:px-8 lg:py-16"
     >
       <div className="mx-auto flex max-w-[1400px] flex-col items-center gap-8 md:gap-10 lg:gap-12">
-        <Typography
-          variant="heading-1"
-          as="h2"
-          className="w-full text-center font-medium font-tiempos-headline text-[#382E07] tracking-widest lg:mb-4"
-        >
-          Hope. Care. Impact.
-        </Typography>
+        <div ref={headingRef} className="w-full lg:mb-4">
+          <Typography
+            variant="heading-1"
+            as="h2"
+            className="w-full text-center font-medium font-tiempos-headline text-[#382E07] tracking-widest motion-reduce:!transition-none"
+            style={{
+              opacity: headingVisible ? 1 : 0,
+              filter: headingVisible ? "blur(0px)" : "blur(14px)",
+              transform: headingVisible
+                ? "translate3d(0,0,0)"
+                : "translate3d(0,32px,0)",
+              transition:
+                "opacity 700ms ease-out, filter 500ms ease-out, transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
+              willChange: "opacity, filter, transform",
+            }}
+          >
+            Hope. Care. Impact.
+          </Typography>
+        </div>
 
         {/* items-end: nav buttons sit on card bottom baseline */}
         <div

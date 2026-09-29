@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useAnimation, useInView, type Variants } from "framer-motion";
 import Image from "next/image";
 import Typography from "@/lib/Typography";
@@ -42,6 +42,28 @@ export default function SustainableGoalsSection() {
   const cardsControls = useAnimation();
   const hasPoppedRef = useRef(false);
 
+  // Heading blur reveal — plays once, the first time it scrolls into view.
+  const headingRef = useRef<HTMLDivElement | null>(null);
+  const [headingVisible, setHeadingVisible] = useState(false);
+
+  useEffect(() => {
+    const node = headingRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setHeadingVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     if (!isInView) return;
 
@@ -71,11 +93,24 @@ export default function SustainableGoalsSection() {
     >
       <div className="flex w-full flex-col overflow-hidden rounded-sm lg:flex-row bg-gradient-to-r from-[#4B4B4B] to-[#B1B1B1] lg:flex-row lg:items-center lg:items-center">
         {/* Box heading: rendered below lg (centered) and at lg+ (left-aligned) */}
-        <div className="flex-1 items-center justify-center px-6 py-8 lg:justify-start lg:px-6 lg:py-16 xl:px-14 xl:py-16 2xl:px-20">
+        <div
+          ref={headingRef}
+          className="flex-1 items-center justify-center px-6 py-8 lg:justify-start lg:px-6 lg:py-16 xl:px-14 xl:py-16 2xl:px-20"
+        >
           <Typography
             variant="heading-4"
             as="h2"
-            className="max-w-full font-tiempos-headline font-light text-white text-center lg:!text-left"
+            className="max-w-full font-tiempos-headline font-light text-white text-center lg:!text-left motion-reduce:!transition-none"
+            style={{
+              opacity: headingVisible ? 1 : 0,
+              filter: headingVisible ? "blur(0px)" : "blur(14px)",
+              transform: headingVisible
+                ? "translate3d(0,0,0)"
+                : "translate3d(0,32px,0)",
+              transition:
+                "opacity 700ms ease-out, filter 500ms ease-out, transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
+              willChange: "opacity, filter, transform",
+            }}
           >
             Sustainable Development Goals
           </Typography>
