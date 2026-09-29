@@ -37,6 +37,7 @@ interface SearchableLanguageSelectProps {
   placeholder?: string;
   required?: boolean;
   className?: string;
+  error?: string;
 }
 
 export default function SearchableLanguageSelect({
@@ -45,6 +46,7 @@ export default function SearchableLanguageSelect({
   placeholder = "Languages Known*",
   required = false,
   className = "",
+  error,
 }: SearchableLanguageSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -137,26 +139,17 @@ export default function SearchableLanguageSelect({
 
   return (
     <div className={`relative h-full ${className || ""}`} ref={containerRef}>
-      {/* Hidden input for HTML5 form validation if required */}
-      {required && (
-        <input
-          type="text"
-          value={value}
-          required
-          onChange={() => {}}
-          className="sr-only"
-          tabIndex={-1}
-          aria-hidden="true"
-        />
-      )}
-
       {/* Trigger Bar */}
       <div
         onClick={() => {
           setIsOpen((prev) => !prev);
           setIsOtherMode(false);
         }}
-        className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all cursor-pointer select-none"
+        className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b ${
+          error
+            ? "border-red-500"
+            : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+        } transition-all cursor-pointer select-none`}
       >
         <div className="flex items-center gap-1.5">
           <Globe className="size-4 text-[#0D2838] shrink-0 mr-1.5" />
@@ -179,6 +172,11 @@ export default function SearchableLanguageSelect({
           </span>
         </div>
       </div>
+      {error && (
+        <span className="text-xs text-red-600 font-manrope block mt-1">
+          {error}
+        </span>
+      )}
 
       {/* Elevated Dropdown Panel with Search Bar */}
       {isOpen && (
