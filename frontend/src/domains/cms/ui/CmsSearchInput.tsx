@@ -67,7 +67,7 @@ export default function CmsSearchInput({
   return (
     <div className={cn("relative min-w-0 flex-1", className)}>
       <Search
-        className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-[#8A8A8A]"
+        className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-cms-faint"
         aria-hidden
       />
       <Input
@@ -78,7 +78,7 @@ export default function CmsSearchInput({
         value={draft}
         aria-label={ariaLabel ?? placeholder}
         onChange={(e) => setDraft(e.target.value)}
-        className={cn("w-full pl-8", inputClassName)}
+        className={cn("w-full pl-9", inputClassName)}
       />
     </div>
   );

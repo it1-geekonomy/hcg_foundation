@@ -16,6 +16,7 @@ import {
 } from "@/domains/home/constants/togetherwehope";
 import CmsImagePicker from "@/domains/cms/ui/CmsImagePicker";
 import { CmsFormField } from "@/domains/cms/ui/CmsFormField";
+import CmsDatePicker from "@/domains/cms/ui/CmsDatePicker";
 import CmsLocationInput from "@/domains/cms/ui/CmsLocationInput";
 import CmsSelect, { CONTENT_STATUS_OPTIONS } from "@/domains/cms/ui/CmsSelect";
 import CmsTimePicker from "@/domains/cms/ui/CmsTimePicker";
@@ -29,7 +30,7 @@ const CmsRichTextEditor = dynamic(
     <Typography
       variant="label-1"
       as="div"
-      className="flex h-[360px] items-center justify-center rounded-lg border border-input bg-white text-muted-foreground"
+      className="flex h-[360px] items-center justify-center rounded-lg border border-cms-border bg-white text-cms-muted"
     >
       Loading editor…
     </Typography>
@@ -221,7 +222,7 @@ export default function EventForm({
 }: EventFormProps) {
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-3xl space-y-5">
-      <div className="space-y-4 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div className="space-y-4 rounded-xl border border-cms-border bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <CmsFormField label="Title" htmlFor="title">
           <Input
             id="title"
@@ -253,13 +254,10 @@ export default function EventForm({
 
         <div className="grid gap-4 sm:grid-cols-3">
           <CmsFormField label="Date" htmlFor="eventDate">
-            <Input
+            <CmsDatePicker
               id="eventDate"
-              type="date"
               value={value.eventDate}
-              onChange={(e) =>
-                onChange({ ...value, eventDate: e.target.value })
-              }
+              onChange={(eventDate) => onChange({ ...value, eventDate })}
             />
           </CmsFormField>
           <CmsFormField label="Time" htmlFor="eventTime">
@@ -373,13 +371,15 @@ export default function EventForm({
         onChange={(seo) => onChange({ ...value, ...seo })}
       />
 
-      <Button
-        type="submit"
-        disabled={saving || !value.title.trim() || !value.slug.trim()}
-        className="h-11 w-full bg-[#C45A7A] text-white hover:bg-[#b04e6c] sm:w-auto sm:min-w-[200px]"
-      >
-        {saving ? "Saving…" : submitLabel}
-      </Button>
+      <div className="flex justify-center pb-4">
+        <Button
+          type="submit"
+          disabled={saving || !value.title.trim() || !value.slug.trim()}
+          className="w-full sm:w-auto sm:min-w-32"
+        >
+          {saving ? "Saving…" : submitLabel}
+        </Button>
+      </div>
     </form>
   );
 }

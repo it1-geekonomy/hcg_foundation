@@ -12,6 +12,7 @@ import type {
 } from "@/domains/cms/lib/types";
 import CmsImagePicker from "@/domains/cms/ui/CmsImagePicker";
 import { CmsFormField } from "@/domains/cms/ui/CmsFormField";
+import CmsDatePicker from "@/domains/cms/ui/CmsDatePicker";
 import CmsSelect, { CONTENT_STATUS_OPTIONS } from "@/domains/cms/ui/CmsSelect";
 import { SeoFieldsSection } from "@/domains/cms/ui/SeoFieldsSection";
 import {
@@ -27,7 +28,7 @@ const CmsRichTextEditor = dynamic(
     <Typography
       variant="label-1"
       as="div"
-      className="flex h-[360px] items-center justify-center rounded-lg border border-input bg-white text-muted-foreground"
+      className="flex h-[360px] items-center justify-center rounded-lg border border-cms-border bg-white text-cms-muted"
     >
       Loading editor…
     </Typography>
@@ -215,7 +216,7 @@ export default function ProjectForm({
 }: ProjectFormProps) {
   return (
     <form onSubmit={onSubmit} className="w-full space-y-5">
-      <div className="space-y-4 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div className="space-y-4 rounded-xl border border-cms-border bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <CmsFormField label="Title" htmlFor="title">
           <Input
             id="title"
@@ -247,13 +248,10 @@ export default function ProjectForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <CmsFormField label="Date" htmlFor="projectDate">
-            <Input
+            <CmsDatePicker
               id="projectDate"
-              type="date"
               value={value.projectDate}
-              onChange={(e) =>
-                onChange({ ...value, projectDate: e.target.value })
-              }
+              onChange={(projectDate) => onChange({ ...value, projectDate })}
             />
           </CmsFormField>
 
@@ -368,7 +366,7 @@ export default function ProjectForm({
       <Button
         type="submit"
         disabled={saving || !value.title.trim() || !value.slug.trim()}
-        className="h-11 w-full bg-[#C45A7A] text-white hover:bg-[#b04e6c] sm:w-auto sm:min-w-[200px]"
+        className="w-full sm:w-auto sm:min-w-32"
       >
         {saving ? "Saving…" : submitLabel}
       </Button>

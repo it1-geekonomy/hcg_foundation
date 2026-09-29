@@ -152,7 +152,7 @@ export default function PatientTestimonialViewPage() {
           <Typography
             variant="label-1"
             as="p"
-            className="mt-1 text-[#5C5C5C]"
+            className="mt-1 text-cms-muted"
           >
             {testimonial.shortDescription || "No short description"}
           </Typography>
@@ -172,7 +172,7 @@ export default function PatientTestimonialViewPage() {
 
       <div className="mx-auto max-w-4xl pt-6">
         {isDeleted && (
-          <div className="mb-6 rounded-lg bg-destructive/10 p-4 text-sm text-destructive">
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             This testimonial was deleted on{" "}
             <span className="font-medium">
               {formatCmsDateTime(testimonial.deletedAt)}
@@ -183,13 +183,22 @@ export default function PatientTestimonialViewPage() {
 
         <div className="flex flex-col gap-8">
           {/* Preview Section */}
-          <section className="bg-gradient-to-br from-[#FFFBEA]/80 to-white p-8 rounded-2xl border border-[#FCCC2D]/20 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#FCCC2D]/5 rounded-full blur-3xl pointer-events-none" />
-            <Typography variant="heading-7" as="h3" className="font-semibold text-[#0D2838] tracking-tight mb-8">
-              Live Component Preview
-            </Typography>
-            
-            <div className="relative w-full h-[16rem] sm:h-[18.5rem] lg:h-[16.5rem] xl:h-[19.5rem] 2xl:h-[22.5rem] overflow-visible flex items-center justify-center bg-black/5 rounded-xl border border-black/5">
+          <section className="overflow-hidden rounded-xl border border-cms-border bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+            <div className="border-b border-cms-border px-5 py-3.5">
+              <Typography variant="heading-7" as="h3" className="text-cms-ink">
+                Website preview
+              </Typography>
+              {testimonial.patientTestimonialFile ? (
+                <Typography variant="caption-1" as="p" className="mt-0.5 text-cms-muted">
+                  Use the play button on the card to preview the video testimonial.
+                </Typography>
+              ) : null}
+            </div>
+
+            <div
+              data-site-preview
+              className="relative flex h-[16rem] w-full items-center justify-center overflow-visible bg-cms-subtle sm:h-[18.5rem] lg:h-[16.5rem] xl:h-[19.5rem] 2xl:h-[22.5rem]"
+            >
               <TestimonialCard
                 item={mappedCardItem}
                 diff={0}
@@ -200,11 +209,6 @@ export default function PatientTestimonialViewPage() {
                 onPlayVideo={(url) => setActiveVideoUrl(url)}
               />
             </div>
-            {testimonial.patientTestimonialFile && (
-              <Typography variant="body-10" as="p" className="text-center text-[#596D79] mt-6 italic">
-                * Click the play button on the card above to preview the video testimonial.
-              </Typography>
-            )}
           </section>
 
 
@@ -217,10 +221,12 @@ export default function PatientTestimonialViewPage() {
         </div>
       </div>
 
-      <TestimonialVideoModal
-        videoUrl={activeVideoUrl}
-        onClose={() => setActiveVideoUrl(null)}
-      />
+      <div data-site-preview>
+        <TestimonialVideoModal
+          videoUrl={activeVideoUrl}
+          onClose={() => setActiveVideoUrl(null)}
+        />
+      </div>
     </div>
   );
 }

@@ -20,13 +20,13 @@ export function CmsFormField({
         variant="label-1"
         as="label"
         htmlFor={htmlFor}
-        className="block font-semibold text-[#212121]"
+        className="block font-medium text-cms-ink"
       >
         {label}
       </Typography>
       {children}
       {hint ? (
-        <Typography variant="caption-1" as="p" className="text-muted-foreground">
+        <Typography variant="caption-1" as="p" className="text-cms-muted">
           {hint}
         </Typography>
       ) : null}

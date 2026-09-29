@@ -12,6 +12,7 @@ import type {
 } from "@/domains/cms/lib/types";
 import CmsImagePicker from "@/domains/cms/ui/CmsImagePicker";
 import { CmsFormField } from "@/domains/cms/ui/CmsFormField";
+import CmsDatePicker from "@/domains/cms/ui/CmsDatePicker";
 import CmsSelect, { CONTENT_STATUS_OPTIONS } from "@/domains/cms/ui/CmsSelect";
 import { SeoFieldsSection } from "@/domains/cms/ui/SeoFieldsSection";
 import { PATIENT_STORY_IMAGE_SIZE } from "@/domains/journey-of-hope/constants/stories";
@@ -24,7 +25,7 @@ const CmsRichTextEditor = dynamic(
       <Typography
         variant="label-1"
         as="div"
-        className="flex h-[360px] items-center justify-center rounded-lg border border-input bg-white text-muted-foreground"
+        className="flex h-[360px] items-center justify-center rounded-lg border border-cms-border bg-white text-cms-muted"
       >
         Loading editor…
       </Typography>
@@ -180,8 +181,8 @@ export default function PatientStoryForm({
 }: PatientStoryFormProps) {
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-4xl space-y-6">
-      <div className="space-y-4 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-        <Typography variant="heading-7" as="h2" className="font-semibold text-[#0D2838]">
+      <div className="space-y-4 rounded-xl border border-cms-border bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <Typography variant="heading-7" as="h2" className="font-semibold text-cms-ink">
           Story Details
         </Typography>
 
@@ -218,13 +219,10 @@ export default function PatientStoryForm({
         </CmsFormField>
 
         <CmsFormField label="Story Date" htmlFor="storyDate">
-          <Input
+          <CmsDatePicker
             id="storyDate"
-            type="date"
             value={value.storyDate}
-            onChange={(e) =>
-              onChange({ ...value, storyDate: e.target.value })
-            }
+            onChange={(storyDate) => onChange({ ...value, storyDate })}
           />
         </CmsFormField>
 
@@ -306,7 +304,7 @@ export default function PatientStoryForm({
         <Button
           type="submit"
           disabled={saving || !value.title.trim()}
-          className="h-11 w-full bg-[#C45A7A] text-white hover:bg-[#b04e6c] sm:w-auto sm:min-w-[200px]"
+          className="w-full sm:w-auto sm:min-w-32"
         >
           {saving ? "Saving…" : submitLabel}
         </Button>

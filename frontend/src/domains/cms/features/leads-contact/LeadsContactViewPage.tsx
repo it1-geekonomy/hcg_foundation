@@ -1,49 +1,22 @@
 "use client";
 
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Pencil, RotateCcw, Trash2 } from "lucide-react";
-import Typography from "@/lib/Typography";
-import { Button } from "@/shared/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/ui/card";
 import { cmsApi } from "@/domains/cms/lib/api";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import type { LeadsContact } from "@/domains/cms/lib/types";
 import {
   CmsBadge,
+  CmsDetailCard,
+  CmsDetailRow,
+  CmsRecordActions,
   CmsViewError,
+  CmsViewHeader,
   CmsViewLoading,
   cmsErrorMessage,
+  formatCmsDateTime,
 } from "@/domains/cms/ui/CmsViewChrome";
-
-function Row({ label, value }: { label: string; value?: string | null }) {
-  return (
-    <div className="grid gap-1 border-b border-border/60 py-3 sm:grid-cols-[180px_1fr]">
-      <Typography
-        variant="caption-1"
-        as="p"
-        className="font-semibold uppercase tracking-wide text-muted-foreground"
-      >
-        {label}
-      </Typography>
-      <Typography
-        variant="label-1"
-        as="p"
-        className="whitespace-pre-wrap text-foreground"
-      >
-        {value || "—"}
-      </Typography>
-    </div>
-  );
-}
 
 export default function LeadsContactViewPage() {
   const { id } = useParams<{ id: string }>();
@@ -129,74 +102,31 @@ export default function LeadsContactViewPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <Link
-          href="/admin/leads-contact"
-          className="inline-flex items-center gap-1.5 text-[#9A7B00] hover:underline"
-        >
-          <ArrowLeft className="size-4" />
-          <Typography variant="label-1" as="span">
-            Back to contact leads
-          </Typography>
-        </Link>
-        <div className="flex flex-wrap gap-2">
-          {isDeleted ? (
-            <Button
-              type="button"
-              variant="outline"
-              disabled={busy}
-              className="h-9 gap-1.5"
-              onClick={() => void onRestore()}
-            >
-              <RotateCcw className="size-3.5" />
-              {busy ? "Restoring…" : "Restore"}
-            </Button>
-          ) : (
-            <>
-              <Link
-                href={`/admin/leads-contact/${row.id}/edit`}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3"
-              >
-                <Pencil className="size-3.5" />
-                <Typography variant="label-1" as="span">
-                  Edit
-                </Typography>
-              </Link>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={busy}
-                className="h-9 gap-1.5 border-red-200 text-red-600 hover:bg-red-50"
-                onClick={() => void onDelete()}
-              >
-                <Trash2 className="size-3.5" /> Delete
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <div className="flex flex-wrap items-center gap-2">
-            <CardTitle>{row.fullName}</CardTitle>
-            {isDeleted ? <CmsBadge tone="danger">deleted</CmsBadge> : null}
-          </div>
-          <CardDescription>
-            {isDeleted ? "Deleted contact lead" : "Contact lead"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Row label="Email" value={row.email} />
-          <Row label="Phone" value={row.phone} />
-          <Row label="Message" value={row.message} />
-          <Row
-            label="Submitted"
-            value={new Date(row.createdAt).toLocaleString("en-IN")}
+    <div className="space-y-6">
+      <CmsViewHeader
+        backHref="/admin/leads-contact"
+        title={row.fullName}
+        badges={isDeleted ? <CmsBadge tone="danger">deleted</CmsBadge> : null}
+        meta={`Contact lead · received ${formatCmsDateTime(row.createdAt)}`}
+        actions={
+          <CmsRecordActions
+            isDeleted={isDeleted}
+            busy={busy}
+            editHref={`/admin/leads-contact/${row.id}/edit`}
+            onDelete={() => void onDelete()}
+            onRestore={() => void onRestore()}
           />
-        </CardContent>
-      </Card>
+        }
+      />
+
+      <CmsDetailCard title="Details">
+        <dl>
+          <CmsDetailRow label="Email" value={row.email} />
+          <CmsDetailRow label="Phone" value={row.phone} />
+          <CmsDetailRow label="Message" value={row.message} />
+          <CmsDetailRow label="Submitted" value={formatCmsDateTime(row.createdAt)} />
+        </dl>
+      </CmsDetailCard>
     </div>
   );
 }

@@ -198,7 +198,7 @@ export default function FundraisingCampaignsListPage() {
               <TableBody>
                 {campaigns.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-muted-foreground">
+                    <TableCell colSpan={6} className="text-cms-muted">
                       {tab === "deleted"
                         ? "No deleted campaigns."
                         : "No campaign applications yet."}
@@ -210,14 +210,14 @@ export default function FundraisingCampaignsListPage() {
                       <TableCell>
                         <Link
                           href={`/admin/campaigns/${campaign.id}`}
-                          className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
+                          className="font-medium text-cms-primary underline-offset-2 hover:underline"
                         >
                           {campaign.fullName}
                         </Link>
                         <Typography
                           variant="caption-1"
                           as="p"
-                          className="text-[#8A8A8A]"
+                          className="text-cms-faint"
                         >
                           {campaign.email}
                         </Typography>
@@ -231,7 +231,7 @@ export default function FundraisingCampaignsListPage() {
                           <Typography
                             variant="caption-1"
                             as="span"
-                            className="text-[#5C5C5C]"
+                            className="text-cms-muted"
                           >
                             {formatCmsDateTime(campaign.deletedAt)}
                           </Typography>
@@ -239,13 +239,13 @@ export default function FundraisingCampaignsListPage() {
                           <Typography
                             variant="caption-1"
                             as="span"
-                            className="rounded-full bg-[#F4F4F4] px-2 py-0.5 capitalize text-[#5C5C5C]"
+                            className="rounded-md bg-cms-subtle px-2 py-0.5 capitalize text-cms-muted"
                           >
                             {campaign.status}
                           </Typography>
                         )}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-muted-foreground">
+                      <TableCell className="whitespace-nowrap text-cms-muted">
                         {new Date(campaign.createdAt).toLocaleDateString(
                           "en-IN"
                         )}
@@ -256,7 +256,7 @@ export default function FundraisingCampaignsListPage() {
                             <>
                               <Link
                                 href={`/admin/campaigns/${campaign.id}`}
-                                className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                                className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                                 aria-label={`View ${campaign.fullName}`}
                               >
                                 <Eye className="size-4" />
@@ -264,7 +264,7 @@ export default function FundraisingCampaignsListPage() {
                               <Button
                                 type="button"
                                 variant="outline"
-                                className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+                                className="h-8 gap-1.5 border-cms-border bg-white px-2.5 font-medium text-cms-ink hover:bg-cms-subtle hover:text-cms-ink"
                                 disabled={restoringId === campaign.id}
                                 aria-label={`Restore ${campaign.fullName}`}
                                 onClick={() =>
@@ -286,21 +286,21 @@ export default function FundraisingCampaignsListPage() {
                             <>
                               <Link
                                 href={`/admin/campaigns/${campaign.id}`}
-                                className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                                className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                                 aria-label={`View ${campaign.fullName}`}
                               >
                                 <Eye className="size-4" />
                               </Link>
                               <Link
                                 href={`/admin/campaigns/${campaign.id}/edit`}
-                                className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                                className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                                 aria-label={`Edit ${campaign.fullName}`}
                               >
                                 <Pencil className="size-4" />
                               </Link>
                               <button
                                 type="button"
-                                className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-red-50 hover:text-red-600"
+                                className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-red-50 hover:text-red-600"
                                 aria-label={`Delete ${campaign.fullName}`}
                                 onClick={() =>
                                   void onDelete(

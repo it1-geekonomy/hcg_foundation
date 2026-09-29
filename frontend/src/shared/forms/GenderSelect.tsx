@@ -130,7 +130,7 @@ export default function GenderSelect({
         />
       </div>
       {error && (
-        <span className="text-xs text-red-600 font-manrope block mt-1">
+        <span className="pointer-events-none absolute left-0 right-0 top-full mt-0.5 block text-xs leading-3.5 text-red-600 font-manrope">
           {error}
         </span>
       )}

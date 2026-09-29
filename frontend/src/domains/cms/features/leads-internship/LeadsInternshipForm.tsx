@@ -9,6 +9,7 @@ import type {
   UpdateLeadsInternshipPayload,
 } from "@/domains/cms/lib/types";
 import { CmsFormField } from "@/domains/cms/ui/CmsFormField";
+import CmsDatePicker from "@/domains/cms/ui/CmsDatePicker";
 
 export type LeadsInternshipFormValues = {
   fullName: string;
@@ -140,11 +141,11 @@ export default function LeadsInternshipForm({
           />
         </CmsFormField>
         <CmsFormField label="Date of birth" htmlFor="int-dob">
-          <Input
+          <CmsDatePicker
             id="int-dob"
-            type="date"
             value={value.dob}
-            onChange={(e) => set("dob")(e.target.value)}
+            max={new Date().toLocaleDateString("en-CA")}
+            onChange={(dob) => set("dob")(dob)}
           />
         </CmsFormField>
         <CmsFormField label="Current course" htmlFor="int-course">
@@ -202,7 +203,7 @@ export default function LeadsInternshipForm({
       <Button
         type="submit"
         disabled={saving}
-        className="bg-[#C45A7A] font-manrope hover:bg-[#b04e6c]"
+        className="bg-cms-primary hover:bg-cms-primary-hover"
       >
         {saving ? "Saving…" : submitLabel}
       </Button>

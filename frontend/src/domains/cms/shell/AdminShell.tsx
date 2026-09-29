@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import Typography from "@/lib/Typography";
@@ -30,8 +30,17 @@ export default function AdminShell({
   const [mobileOpen, setMobileOpen] = useState(false);
   const closeMobile = useCallback(() => setMobileOpen(false), []);
 
+  // Dialogs, selects and toasts portal to <body>; they need the CMS scope too.
+  useEffect(() => {
+    document.body.setAttribute("data-cms", "");
+    return () => document.body.removeAttribute("data-cms");
+  }, []);
+
   return (
-    <div className="flex min-h-screen bg-[#F7F7F5] font-manrope text-[#212121]">
+    <div
+      data-cms
+      className="flex min-h-screen bg-cms-canvas text-cms-body"
+    >
       <AdminSidebar
         collapsed={collapsed}
         onCollapsedChange={setCollapsed}
@@ -40,47 +49,38 @@ export default function AdminShell({
       />
 
       <div className="relative z-0 flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-[#E8E8E4] bg-[#F7F7F5]/95 px-4 backdrop-blur-md sm:h-16 sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-cms-border bg-white/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
-            className="inline-flex size-9 items-center justify-center rounded-lg border border-black/8 bg-white text-[#212121] shadow-sm lg:hidden"
+            className="inline-flex size-9 items-center justify-center rounded-lg border border-cms-border bg-white text-cms-ink lg:hidden"
             aria-label="Open menu"
           >
             <Menu className="size-4" />
           </button>
 
-          <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 flex-1 items-center gap-2 text-sm">
+            <span className="hidden text-cms-muted sm:inline">Content management</span>
+            <span className="hidden text-cms-faint sm:inline" aria-hidden>
+              /
+            </span>
             <Typography
-              variant="caption-1"
-              as="p"
-              className="font-semibold tracking-[0.18em] text-[#9A7B00] uppercase"
-            >
-              Content management
-            </Typography>
-            <Typography
-              variant="body-9"
+              variant="label-1"
               as="h1"
-              className="truncate font-semibold tracking-tight text-[#141414]"
+              className="truncate font-semibold text-cms-ink"
             >
               {title}
             </Typography>
           </div>
 
-          <div className="hidden items-center gap-2 sm:flex">
-            <Typography
-              variant="caption-1"
-              as="span"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 font-medium text-[#5C5C5C] shadow-[0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.06]"
-            >
-              <span className="size-1.5 rounded-full bg-emerald-500" />
-              Connected
-            </Typography>
-          </div>
+          <span className="hidden items-center gap-2 rounded-md border border-cms-border bg-white px-2.5 py-1 text-xs font-medium text-cms-muted sm:inline-flex">
+            <span className="size-1.5 rounded-full bg-emerald-500" />
+            Connected
+          </span>
         </header>
 
-        <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
-          <div className="mx-auto w-full max-w-none">{children}</div>
+        <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          <div className="mx-auto w-full max-w-[1440px]">{children}</div>
         </main>
       </div>
 

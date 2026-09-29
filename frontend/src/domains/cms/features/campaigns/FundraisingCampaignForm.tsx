@@ -180,7 +180,7 @@ export default function FundraisingCampaignForm({
       <Typography
         variant="label-1"
         as="label"
-        className="flex items-center gap-2 text-[#212121]"
+        className="flex items-center gap-2 text-cms-ink"
       >
         <input
           type="checkbox"
@@ -194,7 +194,7 @@ export default function FundraisingCampaignForm({
       <Button
         type="submit"
         disabled={saving}
-        className="bg-[#C45A7A] hover:bg-[#b04e6c]"
+        className="bg-cms-primary hover:bg-cms-primary-hover"
       >
         {saving ? "Saving…" : submitLabel}
       </Button>

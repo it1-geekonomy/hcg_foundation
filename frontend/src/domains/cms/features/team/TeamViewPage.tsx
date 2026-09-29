@@ -144,7 +144,7 @@ export default function TeamViewPage() {
             <Typography
               variant="label-1"
               as="p"
-              className="mt-1 text-[#9A7B00]"
+              className="mt-1 text-cms-primary"
             >
               {team.designation}
             </Typography>

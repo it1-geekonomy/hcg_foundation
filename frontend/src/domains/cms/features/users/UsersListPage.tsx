@@ -93,14 +93,14 @@ export default function UsersListPage() {
         <Typography
           variant="label-1"
           as="p"
-          className="max-w-xl text-muted-foreground"
+          className="max-w-xl text-cms-muted"
         >
           CMS admin accounts. Create users separately — this page is the list
           only.
         </Typography>
         <Link
           href="/admin/users/new"
-          className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[#FCCC2D] px-4 text-[#212121] transition hover:brightness-105"
+          className="inline-flex h-9 items-center gap-2 rounded-lg bg-cms-primary px-3.5 text-sm font-medium text-white transition-colors hover:bg-cms-primary-hover"
         >
           <Plus className="size-4" />
           <Typography variant="button-3" as="span">
@@ -153,11 +153,11 @@ export default function UsersListPage() {
               <TableBody>
                 {users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-muted-foreground">
+                    <TableCell colSpan={4} className="text-cms-muted">
                       No users yet.{" "}
                       <Link
                         href="/admin/users/new"
-                        className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
+                        className="font-medium text-cms-primary underline-offset-2 hover:underline"
                       >
                         Create one
                       </Link>
