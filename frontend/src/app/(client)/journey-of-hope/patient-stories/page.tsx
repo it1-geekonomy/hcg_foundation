@@ -36,7 +36,8 @@ export default function PatientStoriesPage() {
   const [loading, setLoading] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+  const [emptyMessage, setEmptyMessage] = useState<string | null>(null);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const isInitialMount = useRef(true);
@@ -103,15 +104,21 @@ export default function PatientStoriesPage() {
           }));
           setApiStories(mapped);
           setTotalCount(res.meta.total);
+          setEmptyMessage(null);
         } else {
           setApiStories([]);
           setTotalCount(0);
+          setEmptyMessage(res.message?.trim() || null);
         }
-      } catch (err: any) {
+      } catch (err) {
         if (!cancelled) {
           setApiStories([]);
           setTotalCount(0);
-          setError(err.message || "Failed to connect to the server. Please check your connection and try again later.");
+          setError(
+            err instanceof Error && err.message
+              ? err.message
+              : "Failed to connect to the server. Please check your connection and try again later."
+          );
         }
       } finally {
         if (!cancelled) {
@@ -189,7 +196,11 @@ export default function PatientStoriesPage() {
               No Stories Found
             </Typography>
             <Typography variant="body-9" as="p" className="text-[#343E43]">
-              There are currently no patient stories available to display. Please check back later.
+              {emptyMessage
+                ? debouncedSearch
+                  ? `${emptyMessage} for “${debouncedSearch}”.`
+                  : `${emptyMessage}. Please check back later.`
+                : "There are currently no patient stories available to display. Please check back later."}
             </Typography>
           </div>
         ) : (

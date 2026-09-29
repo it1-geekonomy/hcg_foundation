@@ -194,7 +194,7 @@ export default function PatientStoriesListPage() {
             <TableBody>
               {stories.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-muted-foreground">
+                  <TableCell colSpan={6} className="text-cms-muted">
                     {tab === "deleted" ? (
                       "No deleted patient stories."
                     ) : (
@@ -202,7 +202,7 @@ export default function PatientStoriesListPage() {
                         No patient stories yet.{" "}
                         <Link
                           href="/admin/patients/new"
-                          className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
+                          className="font-medium text-cms-primary underline-offset-2 hover:underline"
                         >
                           Create one
                         </Link>
@@ -215,7 +215,7 @@ export default function PatientStoriesListPage() {
                   <TableRow key={story.id}>
                     <TableCell>
                       {hasUrl(story.patientImage) ? (
-                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md border border-black/10 bg-[#f4ebd0]/30">
+                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md border border-cms-border bg-cms-subtle/30">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={story.patientImage!}
@@ -224,7 +224,7 @@ export default function PatientStoriesListPage() {
                           />
                         </div>
                       ) : (
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-dashed border-black/15 bg-black/[0.02] text-muted-foreground">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-dashed border-black/15 bg-black/[0.02] text-cms-muted">
                           <Users className="size-4" />
                         </div>
                       )}
@@ -237,10 +237,10 @@ export default function PatientStoriesListPage() {
                         {story.title}
                       </Link>
                     </TableCell>
-                    <TableCell className="hidden font-mono text-xs text-muted-foreground md:table-cell">
+                    <TableCell className="hidden font-mono text-xs text-cms-muted md:table-cell">
                       {story.slug}
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
+                    <TableCell className="text-sm text-cms-muted">
                       {story.storyDate ? String(story.storyDate).slice(0, 10) : "—"}
                     </TableCell>
                     <TableCell>
@@ -248,7 +248,7 @@ export default function PatientStoriesListPage() {
                         <Typography
                           variant="caption-1"
                           as="span"
-                          className="text-[#5C5C5C]"
+                          className="text-cms-muted"
                         >
                           {formatCmsDateTime(story.deletedAt)}
                         </Typography>
@@ -256,7 +256,7 @@ export default function PatientStoriesListPage() {
                         <Typography
                           variant="caption-1"
                           as="span"
-                          className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-[#5C5C5C]"
+                          className="rounded-md bg-cms-subtle px-2 py-0.5 text-cms-muted"
                         >
                           {story.status}
                         </Typography>
@@ -268,7 +268,7 @@ export default function PatientStoriesListPage() {
                           <>
                             <Link
                               href={`/admin/patients/${story.id}`}
-                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                               aria-label={`View ${story.title}`}
                             >
                               <Eye className="size-4" />
@@ -276,7 +276,7 @@ export default function PatientStoriesListPage() {
                             <Button
                               type="button"
                               variant="outline"
-                              className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+                              className="h-8 gap-1.5 border-cms-border bg-white px-2.5 font-medium text-cms-ink hover:bg-cms-subtle hover:text-cms-ink"
                               disabled={restoringId === story.id}
                               aria-label={`Restore ${story.title}`}
                               onClick={() => void onRestore(story.id, story.title)}
@@ -293,14 +293,14 @@ export default function PatientStoriesListPage() {
                           <>
                             <Link
                               href={`/admin/patients/${story.id}`}
-                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                               aria-label={`View ${story.title}`}
                             >
                               <Eye className="size-4" />
                             </Link>
                             <Link
                               href={`/admin/patients/${story.id}/edit`}
-                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                               aria-label={`Edit ${story.title}`}
                             >
                               <Pencil className="size-4" />

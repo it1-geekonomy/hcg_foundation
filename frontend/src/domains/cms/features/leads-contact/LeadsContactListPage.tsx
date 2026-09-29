@@ -171,7 +171,7 @@ export default function LeadsContactListPage() {
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-muted-foreground">
+                    <TableCell colSpan={5} className="text-cms-muted">
                       {tab === "deleted"
                         ? "No deleted contact leads."
                         : "No contact leads yet."}
@@ -183,7 +183,7 @@ export default function LeadsContactListPage() {
                       <TableCell>
                         <Link
                           href={`/admin/leads-contact/${row.id}`}
-                          className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
+                          className="font-medium text-cms-primary underline-offset-2 hover:underline"
                         >
                           {row.fullName}
                         </Link>
@@ -195,7 +195,7 @@ export default function LeadsContactListPage() {
                         <Typography
                           variant="caption-1"
                           as="p"
-                          className="text-[#8A8A8A]"
+                          className="text-cms-faint"
                         >
                           {row.phone || "—"}
                         </Typography>
@@ -203,7 +203,7 @@ export default function LeadsContactListPage() {
                       <TableCell className="max-w-[220px] truncate">
                         {row.message || "—"}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-muted-foreground">
+                      <TableCell className="whitespace-nowrap text-cms-muted">
                         {tab === "deleted"
                           ? formatCmsDateTime(row.deletedAt)
                           : new Date(row.createdAt).toLocaleDateString("en-IN")}
@@ -214,7 +214,7 @@ export default function LeadsContactListPage() {
                             <>
                               <Link
                                 href={`/admin/leads-contact/${row.id}`}
-                                className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] hover:bg-muted"
+                                className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted hover:bg-cms-subtle"
                               >
                                 <Eye className="size-4" />
                               </Link>
@@ -239,19 +239,19 @@ export default function LeadsContactListPage() {
                             <>
                               <Link
                                 href={`/admin/leads-contact/${row.id}`}
-                                className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] hover:bg-muted"
+                                className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted hover:bg-cms-subtle"
                               >
                                 <Eye className="size-4" />
                               </Link>
                               <Link
                                 href={`/admin/leads-contact/${row.id}/edit`}
-                                className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] hover:bg-muted"
+                                className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted hover:bg-cms-subtle"
                               >
                                 <Pencil className="size-4" />
                               </Link>
                               <button
                                 type="button"
-                                className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] hover:bg-red-50 hover:text-red-600"
+                                className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted hover:bg-red-50 hover:text-red-600"
                                 onClick={() =>
                                   void onDelete(row.id, row.fullName)
                                 }

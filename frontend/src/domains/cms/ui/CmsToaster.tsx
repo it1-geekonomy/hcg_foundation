@@ -24,7 +24,7 @@ export default function CmsToaster() {
       {items.map((toast) => (
         <div
           key={toast.id}
-          className={`pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 shadow-lg ${toneClass[toast.tone] ?? toneClass.info}`}
+          className={`pointer-events-auto flex items-start gap-3 rounded-lg border px-4 py-3 shadow-[0_12px_28px_rgba(16,24,40,0.12)] ${toneClass[toast.tone] ?? toneClass.info}`}
           role="status"
         >
           <Typography

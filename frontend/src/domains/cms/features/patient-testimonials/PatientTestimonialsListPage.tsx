@@ -194,7 +194,7 @@ export default function PatientTestimonialsListPage() {
             <TableBody>
               {testimonials.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-muted-foreground">
+                  <TableCell colSpan={6} className="text-cms-muted">
                     {tab === "deleted" ? (
                       "No deleted patient testimonials."
                     ) : (
@@ -202,7 +202,7 @@ export default function PatientTestimonialsListPage() {
                         No patient testimonials yet.{" "}
                         <Link
                           href="/admin/patient-testimonials/new"
-                          className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
+                          className="font-medium text-cms-primary underline-offset-2 hover:underline"
                         >
                           Create one
                         </Link>
@@ -215,7 +215,7 @@ export default function PatientTestimonialsListPage() {
                   <TableRow key={testimonial.id}>
                     <TableCell>
                       {hasUrl(testimonial.patientTestimonialBanner) ? (
-                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md border border-black/10 bg-[#f4ebd0]/30">
+                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md border border-cms-border bg-cms-subtle/30">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={testimonial.patientTestimonialBanner!}
@@ -224,7 +224,7 @@ export default function PatientTestimonialsListPage() {
                           />
                         </div>
                       ) : (
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-dashed border-black/15 bg-black/[0.02] text-muted-foreground">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-dashed border-black/15 bg-black/[0.02] text-cms-muted">
                           <Users className="size-4" />
                         </div>
                       )}
@@ -237,10 +237,10 @@ export default function PatientTestimonialsListPage() {
                         {testimonial.title}
                       </Link>
                     </TableCell>
-                    <TableCell className="hidden text-sm text-muted-foreground md:table-cell max-w-[200px] truncate">
+                    <TableCell className="hidden text-sm text-cms-muted md:table-cell max-w-[200px] truncate">
                       {testimonial.shortDescription || "—"}
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
+                    <TableCell className="text-sm text-cms-muted">
                       {testimonial.createdAt ? String(testimonial.createdAt).slice(0, 10) : "—"}
                     </TableCell>
                     <TableCell>
@@ -248,7 +248,7 @@ export default function PatientTestimonialsListPage() {
                         <Typography
                           variant="caption-1"
                           as="span"
-                          className="text-[#5C5C5C]"
+                          className="text-cms-muted"
                         >
                           {formatCmsDateTime(testimonial.deletedAt)}
                         </Typography>
@@ -256,7 +256,7 @@ export default function PatientTestimonialsListPage() {
                         <Typography
                           variant="caption-1"
                           as="span"
-                          className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-[#5C5C5C]"
+                          className="rounded-md bg-cms-subtle px-2 py-0.5 text-cms-muted"
                         >
                           {testimonial.status}
                         </Typography>
@@ -268,7 +268,7 @@ export default function PatientTestimonialsListPage() {
                           <>
                             <Link
                               href={`/admin/patient-testimonials/${testimonial.id}`}
-                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                               aria-label={`View ${testimonial.title}`}
                             >
                               <Eye className="size-4" />
@@ -276,7 +276,7 @@ export default function PatientTestimonialsListPage() {
                             <Button
                               type="button"
                               variant="outline"
-                              className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+                              className="h-8 gap-1.5 border-cms-border bg-white px-2.5 font-medium text-cms-ink hover:bg-cms-subtle hover:text-cms-ink"
                               disabled={restoringId === testimonial.id}
                               aria-label={`Restore ${testimonial.title}`}
                               onClick={() => void onRestore(testimonial.id, testimonial.title)}
@@ -293,14 +293,14 @@ export default function PatientTestimonialsListPage() {
                           <>
                             <Link
                               href={`/admin/patient-testimonials/${testimonial.id}`}
-                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                               aria-label={`View ${testimonial.title}`}
                             >
                               <Eye className="size-4" />
                             </Link>
                             <Link
                               href={`/admin/patient-testimonials/${testimonial.id}/edit`}
-                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                               aria-label={`Edit ${testimonial.title}`}
                             >
                               <Pencil className="size-4" />

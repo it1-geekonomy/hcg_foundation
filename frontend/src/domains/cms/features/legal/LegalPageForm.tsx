@@ -21,7 +21,7 @@ const CmsRichTextEditor = dynamic(
     <Typography
       variant="label-1"
       as="div"
-      className="flex h-[360px] items-center justify-center rounded-lg border border-input bg-white text-muted-foreground"
+      className="flex h-[360px] items-center justify-center rounded-lg border border-cms-border bg-white text-cms-muted"
     >
       Loading editor…
     </Typography>
@@ -112,7 +112,7 @@ export default function LegalPageForm({
         </Typography>
       ) : null}
 
-      <div className="space-y-4 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div className="space-y-4 rounded-xl border border-cms-border bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <CmsFormField label="Title" htmlFor="title">
           <Input
             id="title"
@@ -158,7 +158,7 @@ export default function LegalPageForm({
       <Button
         type="submit"
         disabled={saving || !value.title.trim() || !hasContent}
-        className="h-11 w-full bg-[#C45A7A] text-white hover:bg-[#b04e6c] sm:w-auto sm:min-w-[200px]"
+        className="w-full sm:w-auto sm:min-w-32"
       >
         {saving ? "Saving…" : submitLabel}
       </Button>

@@ -140,9 +140,9 @@ export default function EventsListPage() {
       activeTabLabel="All events"
       error={error}
     >
-      <Card>
-        <CardHeader>
-          <CardTitle>
+      <Card className="rounded-xl border-cms-border bg-white shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-sky-800">
             {tab === "deleted" ? "Recently deleted" : "All events"}
           </CardTitle>
           <CardDescription>
@@ -193,7 +193,7 @@ export default function EventsListPage() {
             <TableBody>
               {events.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-muted-foreground">
+                  <TableCell colSpan={5} className="text-cms-muted">
                     {tab === "deleted" ? (
                       "No deleted events."
                     ) : (
@@ -201,7 +201,7 @@ export default function EventsListPage() {
                         No events yet.{" "}
                         <Link
                           href="/admin/events/new"
-                          className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
+                          className="font-medium text-cms-primary underline-offset-2 hover:underline"
                         >
                           Create one
                         </Link>
@@ -218,23 +218,23 @@ export default function EventsListPage() {
                         <img
                           src={event.eventBanner!}
                           alt=""
-                          className="size-10 rounded-lg object-cover ring-1 ring-black/5"
+                          className="size-10 rounded-lg object-cover ring-1 ring-cms-border"
                         />
                       ) : (
-                        <div className="size-10 rounded-lg bg-[#F0EEE9] ring-1 ring-black/5" />
+                        <div className="size-10 rounded-lg bg-cms-subtle ring-1 ring-cms-border" />
                       )}
                     </TableCell>
                     <TableCell>
-                      <p className="font-medium">{event.title}</p>
+                      <p className="font-medium text-cms-ink">{event.title}</p>
                       <Typography
                         variant="caption-1"
                         as="p"
-                        className="text-[#8A8A8A]"
+                        className="text-cms-muted"
                       >
                         /{event.slug}
                       </Typography>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-cms-muted">
                       {event.eventDate || "—"}
                       {event.eventTime
                         ? ` · ${event.eventTime.slice(0, 5)}`
@@ -245,7 +245,7 @@ export default function EventsListPage() {
                         <Typography
                           variant="caption-1"
                           as="span"
-                          className="text-[#5C5C5C]"
+                          className="text-cms-muted"
                         >
                           {formatCmsDateTime(event.deletedAt)}
                         </Typography>
@@ -253,7 +253,7 @@ export default function EventsListPage() {
                         <Typography
                           variant="caption-1"
                           as="span"
-                          className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-[#5C5C5C]"
+                          className="rounded-md bg-cms-subtle px-2 py-0.5 text-cms-muted"
                         >
                           {event.status}
                         </Typography>
@@ -265,17 +265,19 @@ export default function EventsListPage() {
                           <>
                             <Link
                               href={`/admin/events/${event.id}`}
-                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
-                              aria-label={`View ${event.title}`}
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
+                              aria-label="View"
+                              title="View"
                             >
                               <Eye className="size-4" />
                             </Link>
                             <Button
                               type="button"
                               variant="outline"
-                              className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+                              className="h-8 gap-1.5 border-cms-border bg-white px-2.5 font-medium text-cms-ink hover:bg-cms-subtle hover:text-cms-ink"
                               disabled={restoringId === event.id}
-                              aria-label={`Restore ${event.title}`}
+                              aria-label="Restore"
+                              title="Restore"
                               onClick={() =>
                                 void onRestore(event.id, event.title)
                               }
@@ -292,15 +294,17 @@ export default function EventsListPage() {
                           <>
                             <Link
                               href={`/admin/events/${event.id}`}
-                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
-                              aria-label={`View ${event.title}`}
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
+                              aria-label="View"
+                              title="View"
                             >
                               <Eye className="size-4" />
                             </Link>
                             <Link
                               href={`/admin/events/${event.id}/edit`}
-                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
-                              aria-label={`Edit ${event.title}`}
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
+                              aria-label="Edit"
+                              title="Edit"
                             >
                               <Pencil className="size-4" />
                             </Link>
@@ -308,7 +312,8 @@ export default function EventsListPage() {
                               type="button"
                               variant="ghost"
                               size="icon-sm"
-                              aria-label={`Delete ${event.title}`}
+                              aria-label="Delete"
+                              title="Delete"
                               onClick={() =>
                                 void onDelete(event.id, event.title)
                               }

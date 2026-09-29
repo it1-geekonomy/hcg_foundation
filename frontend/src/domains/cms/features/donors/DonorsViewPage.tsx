@@ -1,40 +1,25 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import Typography from "@/lib/Typography";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/ui/card";
 import { cmsApi } from "@/domains/cms/lib/api";
 import type { Donor } from "@/domains/cms/lib/types";
 import {
+  CmsBadge,
+  CmsDetailCard,
+  CmsDetailRow,
   CmsViewError,
+  CmsViewHeader,
   CmsViewLoading,
   cmsErrorMessage,
+  formatCmsDateTime,
 } from "@/domains/cms/ui/CmsViewChrome";
 
-function Row({ label, value }: { label: string; value?: string | null }) {
-  return (
-    <div className="grid gap-1 border-b border-border/60 py-3 sm:grid-cols-[160px_1fr]">
-      <Typography
-        variant="caption-1"
-        as="p"
-        className="font-semibold uppercase tracking-wide text-muted-foreground"
-      >
-        {label}
-      </Typography>
-      <Typography variant="label-1" as="p" className="text-foreground">
-        {value || "—"}
-      </Typography>
-    </div>
-  );
+function statusTone(status?: string) {
+  if (status === "paid") return "success" as const;
+  if (status === "failed") return "danger" as const;
+  if (status === "refunded") return "info" as const;
+  return "status" as const;
 }
 
 export default function DonorsViewPage() {
@@ -76,50 +61,72 @@ export default function DonorsViewPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <Link
-        href="/admin/donations"
-        className="inline-flex items-center gap-1.5 text-[#9A7B00] hover:underline"
-      >
-        <ArrowLeft className="size-4" />
-        <Typography variant="label-1" as="span">
-          Back to donations
-        </Typography>
-      </Link>
+    <div className="space-y-6">
+      <CmsViewHeader
+        backHref="/admin/donations"
+        title={donor.fullName}
+        badges={<CmsBadge tone={statusTone(donor.status)}>{donor.status}</CmsBadge>}
+        meta={`${donor.currency} ${donor.amount} · ${formatCmsDateTime(donor.createdAt)}`}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{donor.fullName}</CardTitle>
-          <CardDescription className="capitalize">{donor.status}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Row label="Amount" value={`${donor.currency} ${donor.amount}`} />
-          <Row label="Email" value={donor.email} />
-          <Row label="Phone" value={donor.phone} />
-          <Row label="City" value={donor.city} />
-          <Row
-            label="Country"
-            value={
-              donor.countryCode
-                ? `${donor.country || "—"} (${donor.countryCode})`
-                : donor.country || "India"
-            }
-          />
-          <Row
-            label="Donor type"
-            value={donor.isInternational ? "International" : "India"}
-          />
-          <Row label="PAN / Aadhaar" value={donor.pan} />
-          <Row label="Receipt" value={donor.receiptNumber} />
-          <Row label="Razorpay order" value={donor.razorpayOrderId} />
-          <Row label="Razorpay payment" value={donor.razorpayPaymentId} />
-          <Row label="Message" value={donor.message} />
-          <Row
-            label="Created"
-            value={new Date(donor.createdAt).toLocaleString("en-IN")}
-          />
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <CmsDetailCard title="Donor">
+          <dl>
+            <CmsDetailRow label="Email" value={donor.email} />
+            <CmsDetailRow label="Phone" value={donor.phone} />
+            <CmsDetailRow label="City" value={donor.city} />
+            <CmsDetailRow
+              label="Country"
+              value={
+                donor.countryCode
+                  ? `${donor.country || "—"} (${donor.countryCode})`
+                  : donor.country || "India"
+              }
+            />
+            <CmsDetailRow
+              label="Donor type"
+              value={donor.isInternational ? "International" : "India"}
+            />
+            <CmsDetailRow label="PAN / Aadhaar" value={donor.pan} />
+          </dl>
+        </CmsDetailCard>
+
+        <CmsDetailCard title="Payment">
+          <dl>
+            <CmsDetailRow label="Amount" value={`${donor.currency} ${donor.amount}`} />
+            <CmsDetailRow
+              label="Status"
+              value={<span className="capitalize">{donor.status}</span>}
+            />
+            <CmsDetailRow label="Receipt" value={donor.receiptNumber} />
+            <CmsDetailRow
+              label="Razorpay order"
+              value={
+                donor.razorpayOrderId ? (
+                  <span className="font-mono text-[13px]">{donor.razorpayOrderId}</span>
+                ) : null
+              }
+            />
+            <CmsDetailRow
+              label="Razorpay payment"
+              value={
+                donor.razorpayPaymentId ? (
+                  <span className="font-mono text-[13px]">{donor.razorpayPaymentId}</span>
+                ) : null
+              }
+            />
+            <CmsDetailRow label="Created" value={formatCmsDateTime(donor.createdAt)} />
+          </dl>
+        </CmsDetailCard>
+      </div>
+
+      <CmsDetailCard title="Message">
+        <p className="text-sm whitespace-pre-wrap text-cms-ink">
+          {donor.message?.trim() || (
+            <span className="text-cms-faint">No message provided.</span>
+          )}
+        </p>
+      </CmsDetailCard>
     </div>
   );
 }

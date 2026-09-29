@@ -148,7 +148,7 @@ export default function AnnualReportsListPage() {
         <Typography
           variant="caption-1"
           as="p"
-          className="text-muted-foreground sm:ml-auto"
+          className="text-cms-muted sm:ml-auto"
         >
           {loading
             ? "Loading…"
@@ -161,16 +161,16 @@ export default function AnnualReportsListPage() {
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className="h-56 animate-pulse rounded-xl bg-white/80 ring-1 ring-black/[0.04]"
+              className="h-56 animate-pulse rounded-xl bg-white ring-1 ring-cms-border"
             />
           ))}
         </div>
       ) : reports.length === 0 ? (
-        <div className="rounded-2xl bg-white px-6 py-16 text-center ring-1 ring-black/[0.04]">
+        <div className="rounded-xl bg-white px-6 py-16 text-center ring-1 ring-cms-border">
           <Typography
             variant="label-1"
             as="p"
-            className="text-muted-foreground"
+            className="text-cms-muted"
           >
             {tab === "deleted" ? (
               "No deleted reports."
@@ -179,7 +179,7 @@ export default function AnnualReportsListPage() {
                 No annual reports yet.{" "}
                 <Link
                   href="/admin/annual-reports/new"
-                  className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
+                  className="font-medium text-cms-primary underline-offset-2 hover:underline"
                 >
                   Create one
                 </Link>
@@ -188,14 +188,14 @@ export default function AnnualReportsListPage() {
           </Typography>
         </div>
       ) : tab === "deleted" ? (
-        <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-black/[0.04]">
-          <div className="divide-y divide-black/[0.04]">
+        <div className="overflow-hidden rounded-xl bg-white ring-1 ring-cms-border">
+          <div className="divide-y divide-cms-border">
             {reports.map((report) => (
               <div
                 key={report.id}
                 className="flex flex-wrap items-center gap-3 px-4 py-3 sm:px-5"
               >
-                <div className="size-12 shrink-0 overflow-hidden rounded-lg bg-[#F0EEE9] ring-1 ring-black/5">
+                <div className="size-12 shrink-0 overflow-hidden rounded-lg bg-cms-subtle ring-1 ring-cms-border">
                   {report.annualReportBanner ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -209,14 +209,14 @@ export default function AnnualReportsListPage() {
                   <Typography
                     variant="label-1"
                     as="p"
-                    className="truncate font-semibold text-[#212121]"
+                    className="truncate font-semibold text-cms-ink"
                   >
                     {report.title}
                   </Typography>
                   <Typography
                     variant="caption-1"
                     as="p"
-                    className="text-[#8A8A8A]"
+                    className="text-cms-faint"
                   >
                     Deleted {formatCmsDateTime(report.deletedAt)}
                     {report.reportYear ? ` · ${report.reportYear}` : ""}
@@ -225,7 +225,7 @@ export default function AnnualReportsListPage() {
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/admin/annual-reports/${report.id}`}
-                    className="inline-flex h-8 items-center rounded-md border border-black/10 px-2.5 font-medium text-[#212121] transition hover:bg-[#F7F7F5]"
+                    className="inline-flex h-8 items-center rounded-md border border-cms-border px-2.5 font-medium text-cms-ink transition hover:bg-cms-subtle"
                   >
                     <Typography variant="caption-1" as="span">
                       View
@@ -234,7 +234,7 @@ export default function AnnualReportsListPage() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+                    className="h-8 gap-1.5 border-cms-border bg-white px-2.5 font-medium text-cms-ink hover:bg-cms-subtle hover:text-cms-ink"
                     disabled={restoringId === report.id}
                     aria-label={`Restore ${report.title}`}
                     onClick={() => void onRestore(report)}
@@ -250,7 +250,7 @@ export default function AnnualReportsListPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {reports.map((report) => (
             <AnnualReportCoverTile
               key={report.id}

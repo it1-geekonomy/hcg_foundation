@@ -24,28 +24,28 @@ export default function AnnualReportCoverTile({ report, onDelete }: Props) {
   const year = report.reportYear?.trim();
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl bg-white shadow-[0_4px_14px_rgba(0,0,0,0.05)] ring-1 ring-black/[0.05] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(0,0,0,0.08)]">
-      <div className="relative h-44 overflow-hidden bg-[#F0EEE9] sm:h-48">
+    <article className="group flex flex-col overflow-hidden rounded-xl bg-white shadow-[0_4px_14px_rgba(0,0,0,0.05)] ring-1 ring-cms-border transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(0,0,0,0.08)]">
+      <div className="relative h-44 overflow-hidden bg-cms-subtle sm:h-48">
         {hasBanner ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={report.annualReportBanner!}
             alt=""
-            className="absolute inset-0 h-full w-full object-contain object-center p-1.5"
+            className="absolute inset-0 h-full w-full object-cover object-center"
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5 px-3 text-center">
             <Typography
               variant="caption-1"
               as="span"
-              className="font-semibold tracking-[0.16em] text-[#9A9A9A] uppercase"
+              className="font-semibold tracking-[0.16em] text-cms-faint uppercase"
             >
               Annual report
             </Typography>
             <Typography
               variant="body-9"
               as="span"
-              className="font-semibold text-[#212121]"
+              className="font-semibold text-cms-ink"
             >
               {year || "—"}
             </Typography>
@@ -56,12 +56,12 @@ export default function AnnualReportCoverTile({ report, onDelete }: Props) {
           variant="caption-1"
           as="span"
           className={cn(
-            "absolute top-2 right-2 z-20 rounded-full px-2 py-0.5 font-semibold tracking-wide uppercase shadow-sm",
+            "absolute top-2 right-2 z-20 rounded-md px-2 py-0.5 font-semibold tracking-wide uppercase shadow-sm",
             report.status === "published"
-              ? "bg-[#FCCC2D] text-[#212121]"
+              ? "bg-cms-accent text-cms-ink"
               : report.status === "archived"
-                ? "bg-white/95 text-[#5C5C5C]"
-                : "bg-white/95 text-[#9A7B00]"
+                ? "bg-white/95 text-cms-muted"
+                : "bg-white/95 text-cms-primary"
           )}
         >
           {report.status}
@@ -71,7 +71,7 @@ export default function AnnualReportCoverTile({ report, onDelete }: Props) {
           <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-1.5">
             <Link
               href={`/admin/annual-reports/${report.id}`}
-              className="inline-flex h-8 items-center gap-1 rounded-md bg-white px-2.5 text-[#212121] shadow-sm"
+              className="inline-flex h-8 items-center gap-1 rounded-md bg-white px-2.5 text-cms-ink shadow-sm"
             >
               <Eye className="size-3" />
               <Typography variant="button-2" as="span" className="font-semibold">
@@ -83,7 +83,7 @@ export default function AnnualReportCoverTile({ report, onDelete }: Props) {
                 href={report.annualReportFile!}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex h-8 items-center gap-1 rounded-md bg-[#C45A7A] px-2.5 text-white shadow-sm"
+                className="inline-flex h-8 items-center gap-1 rounded-md bg-cms-primary px-2.5 text-white shadow-sm"
               >
                 <FileDown className="size-3" />
                 <Typography variant="button-2" as="span" className="font-semibold text-white">
@@ -101,11 +101,11 @@ export default function AnnualReportCoverTile({ report, onDelete }: Props) {
         />
       </div>
 
-      <div className="relative z-10 flex items-start gap-1.5 border-t border-black/[0.04] bg-white px-3 py-2.5">
+      <div className="relative z-10 flex items-start gap-1.5 border-t border-cms-border bg-white px-3 py-2.5">
         <div className="min-w-0 flex-1">
           <Link
             href={`/admin/annual-reports/${report.id}`}
-            className="line-clamp-2 block font-semibold leading-snug text-[#212121] transition hover:text-[#9A7B00]"
+            className="line-clamp-2 block font-semibold leading-snug text-cms-ink transition hover:text-cms-primary"
           >
             <Typography variant="label-1" as="span">
               {report.title}
@@ -115,7 +115,7 @@ export default function AnnualReportCoverTile({ report, onDelete }: Props) {
             <Typography
               variant="caption-1"
               as="p"
-              className="mt-0.5 text-[#8A8A8A]"
+              className="mt-0.5 text-cms-faint"
             >
               {year}
             </Typography>
@@ -125,7 +125,7 @@ export default function AnnualReportCoverTile({ report, onDelete }: Props) {
         <div className="flex shrink-0 items-center">
           <Link
             href={`/admin/annual-reports/${report.id}/edit`}
-            className="inline-flex size-7 items-center justify-center rounded-md text-[#5C5C5C] transition hover:bg-[#F7F7F5] hover:text-[#212121]"
+            className="inline-flex size-7 items-center justify-center rounded-md text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
             aria-label={`Edit ${report.title}`}
             title="Edit"
           >
@@ -135,7 +135,7 @@ export default function AnnualReportCoverTile({ report, onDelete }: Props) {
             <button
               type="button"
               onClick={() => onDelete(report)}
-              className="inline-flex size-7 items-center justify-center rounded-md text-[#5C5C5C] transition hover:bg-red-50 hover:text-red-600"
+              className="inline-flex size-7 items-center justify-center rounded-md text-cms-muted transition hover:bg-red-50 hover:text-red-600"
               aria-label={`Delete ${report.title}`}
               title="Delete"
             >

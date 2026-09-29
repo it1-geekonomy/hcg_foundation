@@ -9,9 +9,12 @@ import { cmsToast } from "@/domains/cms/lib/toast";
 import type { CmsEvent } from "@/domains/cms/lib/types";
 import EventCard from "@/domains/resources/components/EventCard";
 import type { EventItem } from "@/domains/resources/constants/events";
+import EventsListSection from "@/domains/resources/components/EventsListSection";
 import CmsWebsitePreview from "@/domains/cms/ui/CmsWebsitePreview";
 import {
   CmsBadge,
+  CmsDetailCard,
+  CmsDetailField,
   CmsHtmlContentCard,
   CmsRecordActions,
   CmsSeoCard,
@@ -40,7 +43,9 @@ export default function EventViewPage() {
       setError(null);
       try {
         const res = await cmsApi.getEvent(id);
-        if (!cancelled) setEvent(res.data);
+        if (!cancelled) {
+          setEvent(res.data);
+        }
       } catch (err) {
         if (cancelled) return;
         const message = cmsErrorMessage(err, "Failed to load");
@@ -132,30 +137,6 @@ export default function EventViewPage() {
             {isDeleted ? <CmsBadge tone="danger">deleted</CmsBadge> : null}
           </>
         }
-        meta={
-          <>
-            <Typography
-              variant="label-1"
-              as="p"
-              className="mt-1 text-muted-foreground"
-            >
-              /{event.slug}
-            </Typography>
-            <Typography
-              variant="label-1"
-              as="p"
-              className="mt-1 text-[#5C5C5C]"
-            >
-              {[
-                event.eventDate,
-                event.eventTime ? event.eventTime.slice(0, 5) : null,
-                event.eventLocation,
-              ]
-                .filter(Boolean)
-                .join(" · ") || "Date / location not set"}
-            </Typography>
-          </>
-        }
         actions={
           <CmsRecordActions
             isDeleted={isDeleted}
@@ -167,22 +148,28 @@ export default function EventViewPage() {
         }
       />
 
-      <CmsWebsitePreview label="Website preview" className="bg-[#FFF6D8]">
-        <div className="max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex justify-center">
-          <div className="w-full max-w-3xl">
-            {previewEvent ? <EventCard event={previewEvent} /> : null}
-          </div>
-        </div>
-      </CmsWebsitePreview>
+      <div className="flex flex-col gap-10">
+        <CmsDetailCard title="Event Information">
+          <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <CmsDetailField label="Slug" value={`/${event.slug}`} />
+            <CmsDetailField label="Date" value={event.eventDate ? new Date(event.eventDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"} />
+            <CmsDetailField label="Time" value={event.eventTime ? event.eventTime.slice(0, 5) : "—"} />
+            <CmsDetailField label="Location" value={event.eventLocation || "—"} />
+          </dl>
+        </CmsDetailCard>
 
-      <div className="space-y-4">
-        <CmsHtmlContentCard html={event.content} />
+        <CmsHtmlContentCard title="Content" html={event.content} />
+
         <CmsSeoCard
           metaTitle={event.metaTitle}
           metaDescription={event.metaDescription}
           schemaCode={event.schemaCode}
         />
       </div>
+
+      <CmsWebsitePreview label="Website preview" className="bg-[#FFF6D8]">
+        <EventsListSection previewEvent={previewEvent} />
+      </CmsWebsitePreview>
     </div>
   );
 }

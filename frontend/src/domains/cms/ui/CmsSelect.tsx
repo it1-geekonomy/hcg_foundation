@@ -18,6 +18,7 @@ type CmsSelectProps = {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  /** Kept for API compatibility; all CMS controls share one height. */
   size?: "sm" | "md";
 };
 
@@ -29,7 +30,6 @@ export default function CmsSelect({
   placeholder = "Select…",
   disabled,
   className,
-  size = "md",
 }: CmsSelectProps) {
   const autoId = useId();
   const inputId = id ?? autoId;
@@ -55,7 +55,7 @@ export default function CmsSelect({
   }, [open]);
 
   return (
-    <div ref={rootRef} className={cn("relative", className)}>
+    <div ref={rootRef} className={cn("relative w-full", className)}>
       <button
         type="button"
         id={inputId}
@@ -66,11 +66,11 @@ export default function CmsSelect({
           if (!disabled) setOpen((v) => !v);
         }}
         className={cn(
-          "flex w-full items-center justify-between gap-2 rounded-lg border border-input bg-white text-left outline-none transition",
-          "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
-          "disabled:cursor-not-allowed disabled:opacity-50",
-          open && "border-[#C45A7A]/40 ring-3 ring-[#C45A7A]/15",
-          size === "sm" ? "h-8 px-2.5" : "h-9 px-2.5"
+          "flex w-full items-center justify-between gap-2 rounded-lg border border-cms-border bg-white px-3 text-left shadow-[0_1px_2px_rgba(16,24,40,0.04)] outline-none transition-[border-color,box-shadow]",
+          "hover:border-cms-border-strong focus-visible:border-cms-primary/60 focus-visible:ring-3 focus-visible:ring-cms-primary/15",
+          "disabled:cursor-not-allowed disabled:bg-cms-subtle disabled:opacity-60",
+          open && "border-cms-primary/60 ring-3 ring-cms-primary/15",
+          "h-9"
         )}
       >
         <Typography
@@ -78,14 +78,14 @@ export default function CmsSelect({
           as="span"
           className={cn(
             "truncate",
-            selected ? "text-[#212121]" : "text-muted-foreground"
+            selected ? "text-cms-ink" : "text-cms-faint"
           )}
         >
           {selected?.label ?? placeholder}
         </Typography>
         <ChevronDown
           className={cn(
-            "size-3.5 shrink-0 text-[#8A8A8A] transition",
+            "size-4 shrink-0 text-cms-faint transition",
             open && "rotate-180"
           )}
         />
@@ -94,7 +94,7 @@ export default function CmsSelect({
       {open ? (
         <ul
           role="listbox"
-          className="absolute top-[calc(100%+6px)] left-0 z-50 max-h-56 w-full overflow-y-auto rounded-xl bg-white py-1 shadow-[0_12px_32px_rgba(0,0,0,0.12)] ring-1 ring-black/10"
+          className="absolute top-[calc(100%+4px)] left-0 z-50 max-h-60 w-full overflow-y-auto rounded-lg border border-cms-border bg-white p-1 shadow-[0_12px_28px_rgba(16,24,40,0.12)]"
         >
           {options.map((option) => {
             const isActive = option.value === value;
@@ -103,10 +103,10 @@ export default function CmsSelect({
                 <button
                   type="button"
                   className={cn(
-                    "flex w-full items-center justify-between gap-2 px-3 py-2 text-left transition",
+                    "flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-left transition-colors",
                     isActive
-                      ? "bg-[#FFF6E8] font-medium text-[#212121]"
-                      : "text-[#3A3A3A] hover:bg-[#F7F7F5]"
+                      ? "bg-cms-subtle font-medium text-cms-ink"
+                      : "text-cms-body hover:bg-cms-subtle"
                   )}
                   onClick={() => {
                     onChange(option.value);
@@ -117,7 +117,7 @@ export default function CmsSelect({
                     {option.label}
                   </Typography>
                   {isActive ? (
-                    <Check className="size-3.5 shrink-0 text-[#C45A7A]" />
+                    <Check className="size-4 shrink-0 text-cms-primary" />
                   ) : null}
                 </button>
               </li>

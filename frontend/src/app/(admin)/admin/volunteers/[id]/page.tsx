@@ -6,7 +6,7 @@ export default function AdminVolunteersByIdPage() {
       <Typography variant="heading-8" as="h1" className="font-semibold">
         Admin Volunteers Id
       </Typography>
-      <Typography variant="label-1" as="p" className="text-muted-foreground">
+      <Typography variant="label-1" as="p" className="text-cms-muted">
         TODO: implement admin volunteers id screen.
       </Typography>
     </div>

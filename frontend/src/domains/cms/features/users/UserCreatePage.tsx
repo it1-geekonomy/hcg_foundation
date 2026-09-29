@@ -51,7 +51,7 @@ export default function UserCreatePage() {
 
       <form
         onSubmit={onSubmit}
-        className="mx-auto max-w-xl space-y-4 rounded-2xl border border-black/5 bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:p-6"
+        className="mx-auto max-w-xl space-y-4 rounded-xl border border-cms-border bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:p-6"
       >
         {error ? (
           <Typography
@@ -109,7 +109,7 @@ export default function UserCreatePage() {
         <Button
           type="submit"
           disabled={saving}
-          className="h-11 w-full bg-[#FCCC2D] text-[#212121] hover:brightness-105"
+          className="w-full sm:w-auto sm:min-w-32"
         >
           {saving ? "Creating…" : "Create user"}
         </Button>

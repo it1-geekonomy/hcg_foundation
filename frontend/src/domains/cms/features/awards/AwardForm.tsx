@@ -111,7 +111,7 @@ export default function AwardForm({
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-3xl space-y-5">
-      <div className="space-y-4 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div className="space-y-4 rounded-xl border border-cms-border bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <CmsFormField label="Title" htmlFor="title">
           <Input
             id="title"
@@ -199,7 +199,7 @@ export default function AwardForm({
         disabled={
           saving || !value.title.trim() || (requireImage && !hasImage)
         }
-        className="h-11 w-full bg-[#C45A7A] text-white hover:bg-[#b04e6c] sm:w-auto sm:min-w-[200px]"
+        className="w-full sm:w-auto sm:min-w-32"
       >
         {saving ? "Saving…" : submitLabel}
       </Button>
