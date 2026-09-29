@@ -1,8 +1,12 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Typography from "@/lib/Typography";
+import AnimatedImageTile, {
+  RevealStyles,
+  useInViewOnce,
+  type TileAnimation,
+} from "@/shared/components/Animatedimagetile";
 
 import {
   SCREENING_IMAGES,
@@ -19,6 +23,7 @@ function splitIntoTwoRows(images: GalleryImage[]): [GalleryImage[], GalleryImage
   const row1Count = Math.ceil(images.length / 2);
   return [images.slice(0, row1Count), images.slice(row1Count)];
 }
+
 function useIsSmUp() {
   const [isSmUp, setIsSmUp] = useState(true);
 
@@ -48,7 +53,7 @@ function ArrowButton({
       aria-label={direction === "left" ? "Show previous set of images" : "Show next set of images"}
       onClick={onClick}
       disabled={disabled}
-      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white shadow-md transition-opacity disabled:cursor-not-allowed disabled:opacity-30 sm:h-7 sm:w-7"
+      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white shadow-md transition-all duration-200 hover:scale-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100 sm:h-7 sm:w-7"
     >
       <svg
         width="13"
@@ -65,36 +70,15 @@ function ArrowButton({
     </button>
   );
 }
-function GalleryTile({
-  image,
-  fullWidth = false,
-}: {
-  image: GalleryImage;
-  fullWidth?: boolean;
-}) {
-  return (
-    <div
-      className={`relative aspect-[4/3] shrink-0 overflow-hidden rounded-sm ${fullWidth
-          ? "w-full"
-          : "w-[calc((100%-1rem)/2)] sm:w-[calc((100%-2rem)/3)]"
-        }`}
-    >
-      <Image
-        src={image.src}
-        alt={image.alt}
-        fill
-        sizes={fullWidth ? "100vw" : "(min-width: 640px) 33vw, 50vw"}
-        className="object-cover"
-      />
-    </div>
-  );
-}
 
 function ScreeningGrid() {
   const isSmUp = useIsSmUp();
   const pageSize = isSmUp ? PAGE_SIZE_DESKTOP : 1;
   const maxStart = Math.max(0, SCREENING_IMAGES.length - pageSize);
   const [windowStart, setWindowStart] = useState(0);
+  const [slideDir, setSlideDir] = useState<TileAnimation>("up");
+  const [wrapperRef, inView] = useInViewOnce<HTMLDivElement>();
+
   useEffect(() => {
     setWindowStart((s) => Math.min(Math.max(0, s), maxStart));
   }, [maxStart]);
@@ -108,16 +92,23 @@ function ScreeningGrid() {
   const canGoPrev = windowStart > 0;
   const canGoNext = windowStart < maxStart;
   const showArrows = maxStart > 0;
-  const goPrev = () => setWindowStart((s) => Math.max(0, s - pageSize));
-  const goNext = () => setWindowStart((s) => Math.min(maxStart, s + pageSize));
+
+  const goPrev = () => {
+    setSlideDir("prev");
+    setWindowStart((s) => Math.max(0, s - pageSize));
+  };
+  const goNext = () => {
+    setSlideDir("next");
+    setWindowStart((s) => Math.min(maxStart, s + pageSize));
+  };
 
   // Swipe / drag support
-  const touchStartX = useState({ x: 0 })[0];
+  const touchStartX = useRef(0);
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.x = e.touches[0].clientX;
+    touchStartX.current = e.touches[0].clientX;
   };
   const handleTouchEnd = (e: React.TouchEvent) => {
-    const deltaX = e.changedTouches[0].clientX - touchStartX.x;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
     const SWIPE_THRESHOLD = 40;
     if (deltaX > SWIPE_THRESHOLD && canGoPrev) goPrev();
     else if (deltaX < -SWIPE_THRESHOLD && canGoNext) goNext();
@@ -125,8 +116,13 @@ function ScreeningGrid() {
 
   const isMobileSingle = !isSmUp && pageSize === 1;
 
+  const tileClass = `aspect-[4/3] shrink-0 ${
+    isMobileSingle ? "w-full" : "w-[calc((100%-1rem)/2)] sm:w-[calc((100%-2rem)/3)]"
+  }`;
+  const tileSizes = isMobileSingle ? "100vw" : "(min-width: 640px) 33vw, 50vw";
+
   return (
-    <div className="flex w-full items-center gap-1">
+    <div ref={wrapperRef} className="flex w-full items-center gap-1">
       {showArrows && <ArrowButton direction="left" onClick={goPrev} disabled={!canGoPrev} />}
 
       <div
@@ -134,15 +130,32 @@ function ScreeningGrid() {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
+        {/* Keys include windowStart so tiles remount and replay the slide animation on every page change */}
         <div className="flex flex-wrap justify-center gap-4">
-          {row1.map((image) => (
-            <GalleryTile key={image.id} image={image} fullWidth={isMobileSingle} />
+          {row1.map((image, i) => (
+            <AnimatedImageTile
+              key={`${windowStart}-${image.id}`}
+              image={image}
+              index={i}
+              animation={slideDir}
+              play={inView}
+              sizes={tileSizes}
+              className={tileClass}
+            />
           ))}
         </div>
         {row2.length > 0 && (
           <div className="flex flex-wrap justify-center gap-4">
-            {row2.map((image) => (
-              <GalleryTile key={image.id} image={image} fullWidth={isMobileSingle} />
+            {row2.map((image, i) => (
+              <AnimatedImageTile
+                key={`${windowStart}-${image.id}`}
+                image={image}
+                index={row1.length + i}
+                animation={slideDir}
+                play={inView}
+                sizes={tileSizes}
+                className={tileClass}
+              />
             ))}
           </div>
         )}
@@ -155,33 +168,28 @@ function ScreeningGrid() {
 
 function StudentOutreachGrid() {
   const [first, second, third] = STUDENT_IMAGES;
+  const [gridRef, inView] = useInViewOnce<HTMLDivElement>();
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-sm">
-        <Image
-          src={first.src}
-          alt={first.alt}
-          fill
-          className="object-cover"
-        />
-      </div>
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-sm">
-        <Image
-          src={second.src}
-          alt={second.alt}
-          fill
-          className="object-cover"
-        />
-      </div>
-      <div className="relative col-span-2 aspect-[4/3] w-1/2 justify-self-center overflow-hidden rounded-sm sm:col-span-1 sm:w-full">
-        <Image
-          src={third.src}
-          alt={third.alt}
-          fill
-          className="object-cover"
-        />
-      </div>
+    <div ref={gridRef} className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <AnimatedImageTile
+        image={first}
+        index={0}
+        play={inView}
+        className="aspect-[4/3] w-full"
+      />
+      <AnimatedImageTile
+        image={second}
+        index={1}
+        play={inView}
+        className="aspect-[4/3] w-full"
+      />
+      <AnimatedImageTile
+        image={third}
+        index={2}
+        play={inView}
+        className="col-span-2 aspect-[4/3] w-1/2 justify-self-center sm:col-span-1 sm:w-full"
+      />
     </div>
   );
 }
@@ -189,6 +197,8 @@ function StudentOutreachGrid() {
 export default function CancerScreeningSection() {
   return (
     <section className="w-full overflow-x-hidden bg-[#FFFCF1] px-8 pt-6 pb-6 sm:px-12 md:px-16 lg:py-14 lg:px-6 xl:py-20 xl:px-6 2xl:px-40">
+      <RevealStyles />
+
       {/* Mobile Screening */}
       <div className="w-full">
         <Typography

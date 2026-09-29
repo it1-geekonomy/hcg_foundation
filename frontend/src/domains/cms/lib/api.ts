@@ -22,6 +22,9 @@ import type {
   PartnershipInquiry,
   PatientStory,
   PatientStoryFields,
+  PatientTestimonial,
+  PatientTestimonialFields,
+  DashboardStats,
   ProjectFields,
   Team,
   TeamFields,
@@ -113,15 +116,22 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   const promise = (async (): Promise<T> => {
-    const res = await fetch(`${API_BASE}${path}`, {
-      ...init,
-      headers: {
-        "Content-Type": "application/json",
-        ...authHeaders(),
-        ...(init?.headers ?? {}),
-      },
-      cache: "no-store",
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${API_BASE}${path}`, {
+        ...init,
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders(),
+          ...(init?.headers ?? {}),
+        },
+        cache: "no-store",
+      });
+    } catch {
+      throw new Error(
+        "Unable to reach the server. Please check your connection and try again."
+      );
+    }
 
     if (!res.ok) {
       if (res.status === 401 && typeof window !== "undefined") {

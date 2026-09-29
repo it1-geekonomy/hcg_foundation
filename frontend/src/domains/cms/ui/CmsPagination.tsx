@@ -35,7 +35,7 @@ export function CmsPagination({
         className
       )}
     >
-      <Typography variant="caption-1" as="p" className="text-muted-foreground">
+      <Typography variant="caption-2" as="p" className="text-cms-muted">
         Showing {from}–{to} of {total}
       </Typography>
 
@@ -56,7 +56,7 @@ export function CmsPagination({
         <Typography
           variant="caption-1"
           as="span"
-          className="min-w-[4.5rem] text-center font-medium text-[#212121]"
+          className="min-w-[4.5rem] text-center font-medium text-cms-ink"
         >
           {page} / {totalPages}
         </Typography>

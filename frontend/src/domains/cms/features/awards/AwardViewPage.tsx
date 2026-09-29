@@ -139,7 +139,7 @@ export default function AwardViewPage() {
           <Typography
             variant="label-1"
             as="p"
-            className="mt-1 text-muted-foreground"
+            className="mt-1 text-cms-muted"
           >
             Display order {award.displayOrder}
           </Typography>
@@ -157,7 +157,7 @@ export default function AwardViewPage() {
                   href={award.awardImageUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 text-[#212121] transition hover:bg-[#F7F7F5]"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-cms-border bg-white px-3 text-cms-ink transition hover:bg-cms-subtle"
                 >
                   <ExternalLink className="size-3.5" />
                   <Typography variant="label-1" as="span">

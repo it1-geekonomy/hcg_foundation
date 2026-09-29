@@ -3,7 +3,7 @@ import Banner from "@/shared/components/Herobannersection";
 // Content is data, kept separate from markup so the same Banner
 // can be reused across pages by swapping this object out.
 const FINANCIALSUPPORT_BANNER = {
-  bgImage: "/financialbanner/financialsupportbanner.png",
+  bgImage: "/aboutus/aboutus.png",
   bgImageMobile: "/aboutus/aboutus-mobile.png",
   bgImageAlt: "finance",
   breadcrumbs: [

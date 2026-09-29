@@ -17,6 +17,8 @@
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
     "migration:show": "npm run typeorm -- migration:show",
+    "migration:run:prod": "typeorm -d dist/database/data-source.js migration:run",
+    "seed:prod": "node dist/database/seeds/admin.seed.js",
     "seed": "ts-node -r tsconfig-paths/register src/database/seeds/admin.seed.ts",
     "seed:admin": "pnpm run seed",
     "seed:old-data": "ts-node -r tsconfig-paths/register src/database/seeds/import-old-mysql.seed.ts",

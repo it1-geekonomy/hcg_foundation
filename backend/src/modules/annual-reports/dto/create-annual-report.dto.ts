@@ -14,6 +14,11 @@ export class CreateAnnualReportDto extends SeoFieldsDto {
   @MaxLength(255)
   slug: string;
 
+  @ApiPropertyOptional({ example: 'A brief description of the annual report' })
+  @IsOptional()
+  @IsString()
+  shortDescription?: string;
+
   @ApiPropertyOptional({
     example: '2024-2025',
     description:

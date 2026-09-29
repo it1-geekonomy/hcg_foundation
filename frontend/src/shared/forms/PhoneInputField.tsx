@@ -17,6 +17,8 @@ interface PhoneInputFieldProps {
   hideLabel?: boolean;
   placeholder?: string;
   containerClassName?: string;
+  /** Render the error below the underline without adding height (compact variant only). */
+  floatingError?: boolean;
 }
 
 export default function PhoneInputField({
@@ -28,6 +30,7 @@ export default function PhoneInputField({
   hideLabel = false,
   placeholder,
   containerClassName = "",
+  floatingError = false,
 }: PhoneInputFieldProps) {
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>("IN");
   const country = getDonationCountry(selectedCountryCode);
@@ -126,7 +129,11 @@ export default function PhoneInputField({
             />
           </div>
         </div>
-        {error && (
+        {error && floatingError ? (
+          <span className="pointer-events-none absolute left-0 right-0 top-full mt-0.5 block text-xs leading-3.5 text-red-600 font-manrope">
+            {error}
+          </span>
+        ) : error ? (
           <div className="mt-0.5">
             <Typography
               variant="caption-1"
@@ -136,7 +143,7 @@ export default function PhoneInputField({
               {error}
             </Typography>
           </div>
-        )}
+        ) : null}
       </div>
     );
   }

@@ -11,6 +11,7 @@ import type { HomeBanner } from "@/domains/cms/lib/types";
 import {
   CmsBadge,
   CmsDetailCard,
+  CmsDetailField,
   CmsMediaTile,
   CmsRecordActions,
   CmsViewError,
@@ -119,17 +120,6 @@ export default function HomeBannerViewPage() {
             {isDeleted ? <CmsBadge tone="danger">deleted</CmsBadge> : null}
           </>
         }
-        meta={
-          <Typography
-            variant="label-1"
-            as="p"
-            className="mt-1 text-muted-foreground"
-          >
-            {banner.name}
-            {banner.location ? ` · ${banner.location}` : ""} · order{" "}
-            {banner.displayOrder}
-          </Typography>
-        }
         actions={
           <CmsRecordActions
             isDeleted={isDeleted}
@@ -143,7 +133,7 @@ export default function HomeBannerViewPage() {
                   href={banner.bannerImageUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 text-[#212121] transition hover:bg-[#F7F7F5]"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-cms-border bg-white px-3 text-cms-ink transition hover:bg-cms-subtle"
                 >
                   <ExternalLink className="size-3.5" />
                   <Typography variant="label-1" as="span">
@@ -156,8 +146,17 @@ export default function HomeBannerViewPage() {
         }
       />
 
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(220px,320px)_minmax(0,1fr)]">
-        <div className="space-y-4">
+      <div className="flex flex-col gap-10">
+        <CmsDetailCard title="Banner Information">
+          <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <CmsDetailField label="Name" value={banner.name} />
+            <CmsDetailField label="Location" value={banner.location || "—"} />
+            <CmsDetailField label="Display Order" value={String(banner.displayOrder)} />
+          </dl>
+        </CmsDetailCard>
+
+        <CmsDetailCard title="Images">
+          <div className="grid gap-4 sm:grid-cols-3">
           <CmsMediaTile
             src={banner.bannerImageUrl}
             alt={banner.title}
@@ -182,14 +181,15 @@ export default function HomeBannerViewPage() {
               ) : null}
             </div>
           ) : null}
-        </div>
+          </div>
+        </CmsDetailCard>
 
         <CmsDetailCard title="Short description">
           {banner.shortDescription?.trim() ? (
             <Typography
               variant="label-1"
               as="p"
-              className="whitespace-pre-wrap leading-relaxed text-[#212121]"
+              className="whitespace-pre-wrap leading-relaxed text-cms-ink"
             >
               {banner.shortDescription}
             </Typography>
@@ -197,7 +197,7 @@ export default function HomeBannerViewPage() {
             <Typography
               variant="label-1"
               as="p"
-              className="text-muted-foreground"
+              className="text-cms-muted"
             >
               No description yet.
             </Typography>

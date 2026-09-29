@@ -25,6 +25,38 @@ import VolunteerInterestSelect from "@/shared/forms/VolunteerInterestSelect";
 import GenderSelect from "@/shared/forms/GenderSelect";
 import DobDatePicker from "@/shared/forms/DobDatePicker";
 import Typography from "@/lib/Typography";
+import { participateApi } from "@/shared/lib/participate-api";
+
+const RESUME_TYPES = new Set([
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]);
+const MAX_RESUME_BYTES = 5 * 1024 * 1024;
+
+/** Out of flow so an error never stretches its field or the paired field in the same row. */
+const FIELD_ERROR_CLASS =
+  "pointer-events-none absolute left-0 right-0 top-full mt-0.5 block text-xs leading-3.5 text-red-600 font-manrope";
+
+/** DD/MM/YYYY → YYYY-MM-DD (API format); undefined when incomplete/invalid. */
+function toIsoDate(value: string): string | undefined {
+  const match = value.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) return undefined;
+  const [, dd, mm, yyyy] = match;
+  const date = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+  if (
+    date.getFullYear() !== Number(yyyy) ||
+    date.getMonth() !== Number(mm) - 1 ||
+    date.getDate() !== Number(dd)
+  ) {
+    return undefined;
+  }
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function normalizeAmount(value: string) {
+  return value.replace(/[,\s₹]/g, "");
+}
 
 export type ParticipateModalType = "intern" | "fundraise" | "volunteer" | null;
 
@@ -60,6 +92,9 @@ export default function ParticipateModal({
   }
 
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -137,6 +172,9 @@ export default function ParticipateModal({
       document.body.style.overflow = "hidden";
       // Fresh clean state every time modal is opened
       setSubmitted(false);
+      setSubmitting(false);
+      setSuccessMessage("");
+      setSubmitError("");
       setErrors({});
       setResumeFile(null);
       setFormData({
@@ -186,8 +224,10 @@ export default function ParticipateModal({
 
   if (!isOpen || !type) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting || submitted) return;
+    setSubmitError("");
 
     const newErrors: FormErrors = {};
 
@@ -248,6 +288,10 @@ export default function ParticipateModal({
       }
       if (!resumeFile) {
         newErrors.resumeFile = "Please attach your resume";
+      } else if (!RESUME_TYPES.has(resumeFile.type)) {
+        newErrors.resumeFile = "Resume must be a PDF, DOC, or DOCX file";
+      } else if (resumeFile.size > MAX_RESUME_BYTES) {
+        newErrors.resumeFile = "Resume must be 5 MB or smaller";
       }
     }
 
@@ -272,8 +316,11 @@ export default function ParticipateModal({
       if (!formData.location.trim()) {
         newErrors.location = "City / Location is required";
       }
-      if (!formData.fundraisingGoal.trim()) {
+      const goal = normalizeAmount(formData.fundraisingGoal);
+      if (!goal) {
         newErrors.fundraisingGoal = "Fundraising goal is required";
+      } else if (!/^\d+(\.\d{1,2})?$/.test(goal) || Number(goal) <= 0) {
+        newErrors.fundraisingGoal = "Please enter a valid amount (e.g. 50000)";
       }
       if (!formData.reason.trim()) {
         newErrors.reason = "Please enter why you are fundraising";
@@ -294,9 +341,70 @@ export default function ParticipateModal({
     }
 
     setErrors({});
+    setSubmitting(true);
+
+    const fullName = formData.fullName.trim();
+    const email = formData.email.trim();
+    const compactPhone = phoneVal.replace(/\s+/g, "");
+
+    let message = "";
+    try {
+      if (isFundraise) {
+        const res = await participateApi.submitFundraisingCampaign({
+          fullName,
+          phoneNumber: phoneVal,
+          email,
+          city: formData.location.trim(),
+          fundraisingGoal: normalizeAmount(formData.fundraisingGoal),
+          fundraisingReason: formData.reason.trim(),
+          message: formData.message.trim() || undefined,
+          termsAccepted: formData.agreeTerms,
+        });
+        message = res.message;
+      } else if (isVolunteer) {
+        const res = await participateApi.submitVolunteer({
+          fullName,
+          phone: compactPhone,
+          email,
+          cityLocation: formData.location.trim(),
+          educationalQualification: formData.educationalQualification.trim(),
+          areasOfInterest: formData.volunteerInterest.trim(),
+          reason: (formData.whyVolunteer || formData.message).trim(),
+          termsAccepted: formData.agreeTerms,
+        });
+        message = res.message;
+      } else if (isIntern && resumeFile) {
+        const res = await participateApi.submitInternship({
+          fullName,
+          phone: compactPhone,
+          email,
+          gender: formData.gender.trim() || undefined,
+          dob: toIsoDate(formData.dob),
+          currentCourse: formData.course.trim() || undefined,
+          address: formData.address.trim() || undefined,
+          languages: formData.languages.trim() || undefined,
+          computerSkills: formData.computerSkills.trim() || undefined,
+          termsAccepted: formData.agreeTerms,
+          cv: resumeFile,
+        });
+        message = res.message;
+      }
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error && err.message
+          ? err.message
+          : "Something went wrong. Please try again."
+      );
+      setSubmitting(false);
+      return;
+    }
+
+    setSubmitting(false);
+    setSuccessMessage(message || "Application Submitted Successfully!");
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
+      setSuccessMessage("");
       setFormData({
         fullName: "",
         phone: "",
@@ -441,11 +549,7 @@ export default function ParticipateModal({
                     </div>
                   </div>
                   {errors.fullName && (
-                    <div className="mt-1">
-                      <span className="text-xs text-red-600 font-manrope block">
-                        {errors.fullName}
-                      </span>
-                    </div>
+                    <span className={FIELD_ERROR_CLASS}>{errors.fullName}</span>
                   )}
                 </div>
 
@@ -453,6 +557,7 @@ export default function ParticipateModal({
                   <PhoneInputField
                     label="Phone Number"
                     hideLabel
+                    floatingError
                     required
                     error={errors.phone}
                     value={formData.phone}
@@ -505,11 +610,7 @@ export default function ParticipateModal({
                     </div>
                   </div>
                   {errors.email && (
-                    <div className="mt-1">
-                      <span className="text-xs text-red-600 font-manrope block">
-                        {errors.email}
-                      </span>
-                    </div>
+                    <span className={FIELD_ERROR_CLASS}>{errors.email}</span>
                   )}
                 </div>
 
@@ -591,11 +692,7 @@ export default function ParticipateModal({
                         </div>
                       </div>
                       {errors.course && (
-                        <div className="mt-1">
-                          <span className="text-xs text-red-600 font-manrope block">
-                            {errors.course}
-                          </span>
-                        </div>
+                        <span className={FIELD_ERROR_CLASS}>{errors.course}</span>
                       )}
                     </div>
                   </div>
@@ -640,11 +737,7 @@ export default function ParticipateModal({
                       </div>
                     </div>
                     {errors.address && (
-                      <div className="mt-1">
-                        <span className="text-xs text-red-600 font-manrope block">
-                          {errors.address}
-                        </span>
-                      </div>
+                      <span className={FIELD_ERROR_CLASS}>{errors.address}</span>
                     )}
                   </div>
 
@@ -704,11 +797,7 @@ export default function ParticipateModal({
                         </div>
                       </div>
                       {errors.computerSkills && (
-                        <div className="mt-1">
-                          <span className="text-xs text-red-600 font-manrope block">
-                            {errors.computerSkills}
-                          </span>
-                        </div>
+                        <span className={FIELD_ERROR_CLASS}>{errors.computerSkills}</span>
                       )}
                     </div>
                   </div>
@@ -758,11 +847,7 @@ export default function ParticipateModal({
                       </div>
                     </div>
                     {errors.educationalQualification && (
-                      <div className="mt-1">
-                        <span className="text-xs text-red-600 font-manrope block">
-                          {errors.educationalQualification}
-                        </span>
-                      </div>
+                      <span className={FIELD_ERROR_CLASS}>{errors.educationalQualification}</span>
                     )}
                   </div>
 
@@ -826,11 +911,7 @@ export default function ParticipateModal({
                       </div>
                     </div>
                     {errors.fundraisingGoal && (
-                      <div className="mt-1">
-                        <span className="text-xs text-red-600 font-manrope block">
-                          {errors.fundraisingGoal}
-                        </span>
-                      </div>
+                      <span className={FIELD_ERROR_CLASS}>{errors.fundraisingGoal}</span>
                     )}
                   </div>
 
@@ -873,11 +954,7 @@ export default function ParticipateModal({
                       </div>
                     </div>
                     {errors.reason && (
-                      <div className="mt-1">
-                        <span className="text-xs text-red-600 font-manrope block">
-                          {errors.reason}
-                        </span>
-                      </div>
+                      <span className={FIELD_ERROR_CLASS}>{errors.reason}</span>
                     )}
                   </div>
                 </div>
@@ -894,11 +971,20 @@ export default function ParticipateModal({
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) {
-                        setResumeFile(file);
-                        if (errors.resumeFile) {
-                          setErrors((prev) => ({ ...prev, resumeFile: undefined }));
-                        }
+                      if (!file) return;
+                      const fileError = !RESUME_TYPES.has(file.type)
+                        ? "Resume must be a PDF, DOC, or DOCX file"
+                        : file.size > MAX_RESUME_BYTES
+                          ? "Resume must be 5 MB or smaller"
+                          : undefined;
+                      if (fileError) {
+                        e.target.value = "";
+                        setErrors((prev) => ({ ...prev, resumeFile: fileError }));
+                        return;
+                      }
+                      setResumeFile(file);
+                      if (errors.resumeFile) {
+                        setErrors((prev) => ({ ...prev, resumeFile: undefined }));
                       }
                     }}
                   />
@@ -951,9 +1037,7 @@ export default function ParticipateModal({
                     </label>
                   )}
                   {errors.resumeFile && (
-                    <span className="text-xs text-red-600 font-manrope block mt-1">
-                      {errors.resumeFile}
-                    </span>
+                    <span className={FIELD_ERROR_CLASS}>{errors.resumeFile}</span>
                   )}
                 </div>
               ) : isVolunteer ? (
@@ -1065,7 +1149,7 @@ export default function ParticipateModal({
               )}
 
               {/* Terms and Conditions Checkbox */}
-              <div className="flex flex-col gap-1 pt-1">
+              <div className="relative flex flex-col gap-1 pt-1">
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -1099,22 +1183,37 @@ export default function ParticipateModal({
                   </label>
                 </div>
                 {errors.agreeTerms && (
-                  <span className="text-xs text-red-600 font-manrope block">
-                    {errors.agreeTerms}
-                  </span>
+                  <span className={FIELD_ERROR_CLASS}>{errors.agreeTerms}</span>
                 )}
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={submitted}
-                className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#2E1C12] rounded-md transition duration-200 hover:bg-[#F5C21B] active:scale-[0.99] cursor-pointer disabled:opacity-80"
+                disabled={submitted || submitting}
+                aria-busy={submitting}
+                className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#2E1C12] rounded-md transition duration-200 hover:bg-[#F5C21B] active:scale-[0.99] cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed"
               >
                 <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#2E1C12]">
-                  {submitted ? "Submitted ✓" : "Submit Application"}
+                  {submitted
+                    ? "Submitted ✓"
+                    : submitting
+                      ? "Submitting…"
+                      : "Submit Application"}
                 </Typography>
               </button>
+
+              {submitError && !submitted && (
+                <div role="alert" className="text-center pt-2 animate-in fade-in duration-300">
+                  <Typography
+                    variant="caption-2"
+                    as="p"
+                    className="font-manrope font-semibold text-red-600"
+                  >
+                    {submitError}
+                  </Typography>
+                </div>
+              )}
 
               {submitted && (
                 <div className="text-center pt-2 space-y-0.5 animate-in fade-in duration-300">
@@ -1123,7 +1222,7 @@ export default function ParticipateModal({
                     as="p"
                     className="font-manrope font-semibold text-[#2E7D32]"
                   >
-                    Application Submitted Successfully!
+                    {successMessage || "Application Submitted Successfully!"}
                   </Typography>
                   <Typography
                     variant="caption-2"

@@ -152,14 +152,14 @@ export default function PatientStoryViewPage() {
             <Typography
               variant="label-1"
               as="p"
-              className="mt-1 font-mono text-muted-foreground"
+              className="mt-1 font-mono text-cms-muted"
             >
               /{story.slug}
             </Typography>
             <Typography
               variant="label-1"
               as="p"
-              className="mt-1 text-[#5C5C5C]"
+              className="mt-1 text-cms-muted"
             >
               {[
                 story.storyDate ? `Date: ${String(story.storyDate).slice(0, 10)}` : null,

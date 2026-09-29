@@ -1,100 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import Typography from "@/lib/Typography"; 
+import { motion, useReducedMotion } from "framer-motion";
+import type { ReactNode } from "react";
+import Typography from "@/lib/Typography";
 import {
   referralSteps,
   type ReferralStep,
 } from "@/domains/ourprograms/FinancialSupport/constants/howtoreferpatient";
+import { STAGGER_SECONDS, useSectionVisible } from "./howToReferAnimation";
 
-/* =====================================================
-   POP-IN & SETTLE ANIMATION
-   The SECTION (not each card) is watched. The moment the
-   section enters the viewport, every card pops in one by
-   one (staggered by its index). It plays once per page
-   load — scrolling away and back does NOT replay it.
-===================================================== */
-const POP_IN_STYLES = `
-  @keyframes popInSettle {
-    0% {
-      opacity: 0;
-      transform: scale(0.55) translateY(24px);
-    }
-    55% {
-      opacity: 1;
-      transform: scale(1.06) translateY(-6px);
-    }
-    75% {
-      transform: scale(0.97) translateY(2px);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
+const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+const SPRING = { type: "spring", stiffness: 320, damping: 14 } as const;
 
-  .pop-in-hidden {
-    opacity: 0;
-    transform: scale(0.55) translateY(24px);
-  }
-
-  .pop-in-active {
-    animation-name: popInSettle;
-    animation-duration: 0.65s;
-    animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
-    /* "both" holds the 0% keyframe (opacity 0, scaled down) during the
-       stagger delay too, so each card stays hidden until its turn,
-       instead of sitting visible-but-still while it waits. */
-    animation-fill-mode: both;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .pop-in-hidden,
-    .pop-in-active {
-      animation: none;
-      opacity: 1;
-      transform: none;
-    }
-  }
-`;
-
-const POP_IN_STAGGER_SECONDS = 0.12;
-
-/* Watches ONE element (the whole section) and reports whether
-   it has entered the viewport. Fires once on first entry (on
-   initial mount/refresh, whenever that first entry happens),
-   then stops observing — so scrolling back up/down again does
-   NOT reset or replay the animation. */
-function useSectionVisible<T extends HTMLElement>() {
-  const ref = useRef<T | null>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          // Stop watching once it has animated in — prevents
-          // reset/replay when scrolling back up and down again.
-          observer.disconnect();
-        }
-      },
-      {
-        threshold: 0.15,
-      }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  return { ref, visible };
-}
-
+/* ---------- Step card ---------- */
 function StepCard({
   step,
   animationIndex = 0,
@@ -104,32 +23,105 @@ function StepCard({
   animationIndex?: number;
   sectionVisible: boolean;
 }) {
+  const reduce = useReducedMotion();
+  const skip = reduce === true;
+  const play = sectionVisible || skip;
+  const delay = animationIndex * STAGGER_SECONDS;
+
   return (
-    <div
-      className={`group relative h-full rounded-xl border border-[#FFECB3] bg-[#FFFAEC] p-4 transition-colors duration-300 ease-out hover:border-[#FCCC2D] hover:bg-[#FFE39D] sm:p-5 ${
-        sectionVisible ? "pop-in-active" : "pop-in-hidden"
-      }`}
-      style={
-        sectionVisible
-          ? { animationDelay: `${animationIndex * POP_IN_STAGGER_SECONDS}s` }
-          : undefined
+    <motion.div
+      className="group relative h-full rounded-xl border border-[#FFECB3] bg-[#FFFAEC] p-4 transition-colors duration-300 ease-out hover:border-[#FCCC2D] hover:bg-[#FFE39D] sm:p-5"
+      initial={
+        skip
+          ? false
+          : { opacity: 0, y: 44, scale: 0.96, filter: "blur(10px)" }
+      }
+      animate={
+        play
+          ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }
+          : { opacity: 0, y: 44, scale: 0.96, filter: "blur(10px)" }
+      }
+      transition={
+        skip ? { duration: 0 } : { duration: 0.85, ease: EASE_OUT, delay }
       }
     >
-      {/* Number */}
-      <span className="absolute left-3 top-0 flex h-5 min-w-5 -translate-y-1/2 items-center justify-center rounded-md bg-[#FCCC2D] px-1.5 py-4 leading-none text-black sm:left-4 sm:h-6 sm:min-w-6">
-        <Typography
-          variant="body-9"
-          as="span"
-          className="font-manrope font-bold"
+      {/* One-time light sweep (clipped inside the card, so the badge isn't cut off) */}
+      {!skip && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl"
         >
-          {step.id}
-        </Typography>
+          <motion.span
+            className="absolute inset-y-0 left-0 w-[35%] bg-[linear-gradient(100deg,rgba(255,255,255,0)_0%,rgba(255,255,255,0.75)_50%,rgba(255,255,255,0)_100%)]"
+            initial={{ x: "-140%", skewX: -18, opacity: 0 }}
+            animate={
+              play
+                ? { x: ["-140%", "340%"], opacity: [0, 1, 0] }
+                : { x: "-140%", opacity: 0 }
+            }
+            transition={{
+              duration: 1.1,
+              ease: "easeOut",
+              times: [0, 0.15, 1],
+              delay: delay + 0.75,
+            }}
+          />
+        </span>
+      )}
+
+      {/* Number: outer span handles position, motion span handles animation */}
+      <span className="absolute left-3 top-0 -translate-y-1/2 sm:left-4">
+        <motion.span
+          className="flex h-5 min-w-5 items-center justify-center rounded-md bg-[#FCCC2D] px-1.5 py-4 leading-none text-black sm:h-6 sm:min-w-6"
+          initial={skip ? false : { scale: 0, rotate: -40, opacity: 0 }}
+          animate={
+            play
+              ? { scale: 1, rotate: 0, opacity: 1 }
+              : { scale: 0, rotate: -40, opacity: 0 }
+          }
+          transition={
+            skip
+              ? { duration: 0 }
+              : {
+                  ...SPRING,
+                  delay: delay + 0.4,
+                  opacity: { duration: 0.2, delay: delay + 0.4 },
+                }
+          }
+        >
+          <Typography
+            variant="body-9"
+            as="span"
+            className="font-manrope font-bold"
+          >
+            {step.id}
+          </Typography>
+        </motion.span>
       </span>
 
       {/* Icon + Text */}
       <div className="flex items-center gap-3 sm:gap-4">
-        {/* Vertical icon container — enlarged, outlined style; fills solid + icon turns white on hover */}
-        <div className="flex h-[72px] w-[56px] shrink-0 items-center justify-center rounded-xl border-2 border-[#FCCC2D] bg-transparent transition-colors duration-300 group-hover:bg-yellow-500 sm:h-20 sm:w-16">
+        {/* Icon box: turns in and settles */}
+        <motion.div
+          className="flex h-[72px] w-[56px] shrink-0 items-center justify-center rounded-xl border-2 border-[#FCCC2D] bg-transparent transition-colors duration-300 group-hover:bg-yellow-500 sm:h-20 sm:w-16"
+          initial={skip ? false : { scale: 0.5, rotate: -90, opacity: 0 }}
+          animate={
+            play
+              ? { scale: 1, rotate: 0, opacity: 1 }
+              : { scale: 0.5, rotate: -90, opacity: 0 }
+          }
+          transition={
+            skip
+              ? { duration: 0 }
+              : {
+                  type: "spring",
+                  stiffness: 240,
+                  damping: 15,
+                  delay: delay + 0.3,
+                  opacity: { duration: 0.25, delay: delay + 0.3 },
+                }
+          }
+        >
           <Image
             src={step.icon}
             alt=""
@@ -137,8 +129,8 @@ function StepCard({
             height={36}
             className="h-8 w-8 object-contain transition duration-300 group-hover:brightness-0 group-hover:invert sm:h-9 sm:w-9"
           />
-        </div>
- 
+        </motion.div>
+
         {/* Heading + Description */}
         <div className="min-w-0 flex-1">
           <Typography
@@ -148,7 +140,7 @@ function StepCard({
           >
             {step.title}
           </Typography>
- 
+
           <Typography
             variant="body-7"
             as="p"
@@ -158,14 +150,49 @@ function StepCard({
           </Typography>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
- 
+
+/* ---------- Looping "next step" nudge (one axis) ---------- */
+function Nudge({
+  axis,
+  play,
+  delay,
+  skip,
+  children,
+}: {
+  axis: "x" | "y";
+  play: boolean;
+  delay: number;
+  skip: boolean;
+  children: ReactNode;
+}) {
+  const rest = axis === "x" ? { x: -3 } : { y: -3 };
+  const loop = axis === "x" ? { x: [-3, 5, -3] } : { y: [-3, 5, -3] };
+
+  return (
+    <motion.div
+      initial={rest}
+      animate={play && !skip ? loop : rest}
+      transition={{
+        duration: 1.6,
+        ease: "easeInOut",
+        repeat: Infinity,
+        delay: delay + 0.6,
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* ---------- Arrow between steps ---------- */
 function StepArrow({
   visible,
   animationIndex = 0,
   sectionVisible,
+  horizontalOnly = false,
 }: {
   visible: {
     mobile: boolean;
@@ -173,40 +200,87 @@ function StepArrow({
   };
   animationIndex?: number;
   sectionVisible: boolean;
+  /** Tablet layout: arrow always points right, no responsive rotation */
+  horizontalOnly?: boolean;
 }) {
+  const reduce = useReducedMotion();
+  const skip = reduce === true;
+  const play = sectionVisible || skip;
+  const delay = animationIndex * STAGGER_SECONDS;
+
   if (!visible.mobile && !visible.desktop) return null;
- 
+
   return (
-    <div
-      className={`items-center justify-center py-2 lg:py-0 ${
-        visible.mobile ? "flex" : "hidden"
-      } ${visible.desktop ? "lg:flex" : "lg:hidden"} ${
-        sectionVisible ? "pop-in-active" : "pop-in-hidden"
+    <motion.div
+      className={`items-center justify-center ${
+        horizontalOnly ? "flex" : "py-2 lg:py-0"
+      } ${
+        horizontalOnly
+          ? ""
+          : `${visible.mobile ? "flex" : "hidden"} ${
+              visible.desktop ? "lg:flex" : "lg:hidden"
+            }`
       }`}
-      style={
-        sectionVisible
-          ? { animationDelay: `${animationIndex * POP_IN_STAGGER_SECONDS}s` }
-          : undefined
+      initial={skip ? false : { scale: 0.2, opacity: 0 }}
+      animate={
+        play
+          ? { scale: [0.2, 1.3, 1], opacity: [0, 1, 1] }
+          : { scale: 0.2, opacity: 0 }
+      }
+      transition={
+        skip
+          ? { duration: 0 }
+          : { duration: 0.5, times: [0, 0.6, 1], ease: "easeOut", delay }
       }
     >
-      <Image
-        src="/financialbanner/arrows.png"
-        alt=""
-        width={24}
-        height={24}
-        className="h-6 w-6 rotate-90 object-contain lg:rotate-0"
-      />
-    </div>
+      {horizontalOnly ? (
+        <Nudge axis="x" play={play} delay={delay} skip={skip}>
+          <Image
+            src="/financialbanner/arrows.png"
+            alt=""
+            width={24}
+            height={24}
+            className="h-6 w-6 object-contain"
+          />
+        </Nudge>
+      ) : (
+        <>
+          {/* Below lg: points DOWN, nudges vertically */}
+          <div className="lg:hidden">
+            <Nudge axis="y" play={play} delay={delay} skip={skip}>
+              <Image
+                src="/financialbanner/arrows.png"
+                alt=""
+                width={24}
+                height={24}
+                className="h-6 w-6 rotate-90 object-contain"
+              />
+            </Nudge>
+          </div>
+
+          {/* lg and up: points RIGHT, nudges horizontally */}
+          <div className="hidden lg:block">
+            <Nudge axis="x" play={play} delay={delay} skip={skip}>
+              <Image
+                src="/financialbanner/arrows.png"
+                alt=""
+                width={24}
+                height={24}
+                className="h-6 w-6 object-contain"
+              />
+            </Nudge>
+          </div>
+        </>
+      )}
+    </motion.div>
   );
 }
- 
+
 export interface HowToReferProps {
   className?: string;
 }
- 
-export default function HowToRefer({
-  className = "",
-}: HowToReferProps) {
+
+export default function HowToRefer({ className = "" }: HowToReferProps) {
   const { ref: sectionRef, visible: sectionVisible } =
     useSectionVisible<HTMLElement>();
 
@@ -215,9 +289,6 @@ export default function HowToRefer({
       ref={sectionRef}
       className={`w-full overflow-x-hidden bg-[#FFFCF2] px-8 py-10 sm:px-20 md:px-6 lg:px-6 lg:py-20 xl:px-6 2xl:px-40 ${className}`}
     >
-      {/* Animation keyframes/classes — scoped to this section only */}
-      <style>{POP_IN_STYLES}</style>
-
       <Typography
         variant="heading-3"
         as="h2"
@@ -225,15 +296,15 @@ export default function HowToRefer({
       >
         How to Refer a Patient to HCG Foundation
       </Typography>
- 
+
       <Typography
         variant="body-6"
         as="p"
         className="mx-auto mt-3 max-w-xl text-center font-manrope font-normal text-[#6B6660]"
       >
-       A clear, compassionate 9-step process ensures every eligible patient receives the support they need — quickly and with dignity.
+        A clear, compassionate 9-step process ensures every eligible patient receives the support they need — quickly and with dignity.
       </Typography>
- 
+
       {/* =====================================================
           MOBILE — BELOW 768px
           1 COLUMN + VERTICAL ARROWS
@@ -246,13 +317,10 @@ export default function HowToRefer({
               animationIndex={index * 2}
               sectionVisible={sectionVisible}
             />
- 
+
             {index !== referralSteps.length - 1 && (
               <StepArrow
-                visible={{
-                  mobile: true,
-                  desktop: false,
-                }}
+                visible={{ mobile: true, desktop: false }}
                 animationIndex={index * 2 + 1}
                 sectionVisible={sectionVisible}
               />
@@ -260,7 +328,7 @@ export default function HowToRefer({
           </div>
         ))}
       </div>
- 
+
       {/* =====================================================
           TABLET — md (768px) up to lg
           2 COLUMNS + HORIZONTAL ARROWS IN THE MIDDLE
@@ -272,48 +340,29 @@ export default function HowToRefer({
           const firstIndex = rowIndex * 2;
           const firstStep = referralSteps[firstIndex];
           const secondStep = referralSteps[firstIndex + 1];
- 
+
           return (
             <div
               key={firstStep.id}
               className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-4"
             >
-              {/* First Card */}
               <StepCard
                 step={firstStep}
                 animationIndex={firstIndex * 2}
                 sectionVisible={sectionVisible}
               />
- 
-              {/* Middle Arrow */}
+
               {secondStep ? (
-                <div
-                  className={`flex items-center justify-center ${
-                    sectionVisible ? "pop-in-active" : "pop-in-hidden"
-                  }`}
-                  style={
-                    sectionVisible
-                      ? {
-                          animationDelay: `${
-                            (firstIndex * 2 + 1) * POP_IN_STAGGER_SECONDS
-                          }s`,
-                        }
-                      : undefined
-                  }
-                >
-                  <Image
-                    src="/financialbanner/arrows.png"
-                    alt=""
-                    width={24}
-                    height={24}
-                    className="h-6 w-6 object-contain"
-                  />
-                </div>
+                <StepArrow
+                  visible={{ mobile: true, desktop: true }}
+                  horizontalOnly
+                  animationIndex={firstIndex * 2 + 1}
+                  sectionVisible={sectionVisible}
+                />
               ) : (
                 <div />
               )}
- 
-              {/* Second Card */}
+
               {secondStep && (
                 <StepCard
                   step={secondStep}
@@ -325,7 +374,7 @@ export default function HowToRefer({
           );
         })}
       </div>
- 
+
       {/* =====================================================
           DESKTOP — lg+
           3 COLUMNS + HORIZONTAL ARROWS
@@ -340,7 +389,7 @@ export default function HowToRefer({
               .slice(rowStart, rowStart + 3)
               .map((step, i) => {
                 const isLastInRow = i === 2;
- 
+
                 return (
                   <div key={step.id} className="contents">
                     <StepCard
@@ -348,13 +397,10 @@ export default function HowToRefer({
                       animationIndex={(rowStart + i) * 2}
                       sectionVisible={sectionVisible}
                     />
- 
+
                     {!isLastInRow && (
                       <StepArrow
-                        visible={{
-                          mobile: false,
-                          desktop: true,
-                        }}
+                        visible={{ mobile: false, desktop: true }}
                         animationIndex={(rowStart + i) * 2 + 1}
                         sectionVisible={sectionVisible}
                       />

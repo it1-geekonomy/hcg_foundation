@@ -141,9 +141,9 @@ export default function HomeBannersListPage() {
       activeTabLabel="All banners"
       error={error}
     >
-      <Card>
-        <CardHeader>
-          <CardTitle>
+      <Card className="rounded-xl border-cms-border bg-white shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-sky-800">
             {tab === "deleted" ? "Recently deleted" : "All banners"}
           </CardTitle>
           <CardDescription>
@@ -193,7 +193,7 @@ export default function HomeBannersListPage() {
             <TableBody>
               {visibleBanners.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-muted-foreground">
+                  <TableCell colSpan={5} className="text-cms-muted">
                     {tab === "deleted" ? (
                       "No deleted banners."
                     ) : (
@@ -201,7 +201,7 @@ export default function HomeBannersListPage() {
                         No banners yet.{" "}
                         <Link
                           href="/admin/home-banners/new"
-                          className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
+                          className="font-medium text-cms-primary underline-offset-2 hover:underline"
                         >
                           Create one
                         </Link>
@@ -218,29 +218,29 @@ export default function HomeBannersListPage() {
                         <img
                           src={banner.bannerImageUrl}
                           alt=""
-                          className="size-10 rounded-lg object-contain ring-1 ring-black/5"
+                          className="size-10 rounded-lg object-contain ring-1 ring-cms-border"
                         />
                       ) : (
-                        <div className="size-10 rounded-lg bg-[#F0EEE9] ring-1 ring-black/5" />
+                        <div className="size-10 rounded-lg bg-cms-subtle ring-1 ring-cms-border" />
                       )}
                     </TableCell>
                     <TableCell>
-                      <div className="font-medium">{banner.title}</div>
+                      <div className="font-medium text-cms-ink">{banner.title}</div>
                       <Typography
                         variant="caption-1"
                         as="div"
-                        className="text-[#8A8A8A]"
+                        className="text-cms-muted"
                       >
                         {banner.name}
                       </Typography>
                     </TableCell>
-                    <TableCell>{banner.displayOrder}</TableCell>
+                    <TableCell className="text-cms-muted">{banner.displayOrder}</TableCell>
                     <TableCell>
                       {tab === "deleted" ? (
                         <Typography
                           variant="caption-1"
                           as="span"
-                          className="text-[#5C5C5C]"
+                          className="text-cms-muted"
                         >
                           {formatCmsDateTime(banner.deletedAt)}
                         </Typography>
@@ -248,10 +248,10 @@ export default function HomeBannersListPage() {
                         <Typography
                           variant="caption-1"
                           as="span"
-                          className={`rounded-full px-2 py-0.5 ${
+                          className={`rounded-md px-2 py-0.5 ${
                             banner.isActive
-                              ? "bg-[#E8F6EC] text-[#1B6B3A]"
-                              : "bg-[#F4F4F4] text-[#5C5C5C]"
+                              ? "bg-emerald-50 text-emerald-700"
+                              : "bg-cms-subtle text-cms-muted"
                           }`}
                         >
                           {banner.isActive ? "Active" : "Inactive"}
@@ -264,17 +264,19 @@ export default function HomeBannersListPage() {
                           <>
                             <Link
                               href={`/admin/home-banners/${banner.id}`}
-                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                               aria-label={`View ${banner.title}`}
+                              title={`View ${banner.title}`}
                             >
                               <Eye className="size-4" />
                             </Link>
                             <Button
                               type="button"
                               variant="outline"
-                              className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+                              className="h-8 gap-1.5 border-cms-border bg-white px-2.5 font-medium text-cms-ink hover:bg-cms-subtle hover:text-cms-ink"
                               disabled={restoringId === banner.id}
                               aria-label={`Restore ${banner.title}`}
+                              title={`Restore ${banner.title}`}
                               onClick={() =>
                                 void onRestore(banner.id, banner.title)
                               }
@@ -291,15 +293,17 @@ export default function HomeBannersListPage() {
                           <>
                             <Link
                               href={`/admin/home-banners/${banner.id}`}
-                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
-                              aria-label={`View ${banner.title}`}
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
+                              aria-label="View"
+                              title="View"
                             >
                               <Eye className="size-4" />
                             </Link>
                             <Link
                               href={`/admin/home-banners/${banner.id}/edit`}
-                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
-                              aria-label={`Edit ${banner.title}`}
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
+                              aria-label="Edit"
+                              title="Edit"
                             >
                               <Pencil className="size-4" />
                             </Link>
@@ -307,7 +311,8 @@ export default function HomeBannersListPage() {
                               type="button"
                               variant="ghost"
                               size="icon-sm"
-                              aria-label={`Delete ${banner.title}`}
+                              aria-label="Delete"
+                              title="Delete"
                               onClick={() =>
                                 void onDelete(banner.id, banner.title)
                               }

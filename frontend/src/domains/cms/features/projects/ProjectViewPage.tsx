@@ -137,14 +137,14 @@ export default function ProjectViewPage() {
             <Typography
               variant="label-1"
               as="p"
-              className="mt-1 text-muted-foreground"
+              className="mt-1 text-cms-muted"
             >
               /{project.slug}
             </Typography>
             <Typography
               variant="label-1"
               as="p"
-              className="mt-1 text-[#5C5C5C]"
+              className="mt-1 text-cms-muted"
             >
               {[
                 project.projectDate || null,

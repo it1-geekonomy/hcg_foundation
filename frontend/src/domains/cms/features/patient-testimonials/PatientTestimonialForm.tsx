@@ -146,8 +146,8 @@ export default function PatientTestimonialForm({
 }: PatientTestimonialFormProps) {
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-4xl space-y-6">
-      <div className="space-y-4 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-        <Typography variant="heading-7" as="h2" className="font-semibold text-[#0D2838]">
+      <div className="space-y-4 rounded-xl border border-cms-border bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <Typography variant="heading-7" as="h2" className="font-semibold text-cms-ink">
           Testimonial Content
         </Typography>
 
@@ -186,8 +186,8 @@ export default function PatientTestimonialForm({
         </CmsFormField>
       </div>
 
-      <div className="space-y-4 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-        <Typography variant="heading-7" as="h2" className="font-semibold text-[#0D2838]">
+      <div className="space-y-4 rounded-xl border border-cms-border bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <Typography variant="heading-7" as="h2" className="font-semibold text-cms-ink">
           Media
         </Typography>
 
@@ -278,7 +278,7 @@ export default function PatientTestimonialForm({
         <Button
           type="submit"
           disabled={saving || !value.title.trim()}
-          className="h-11 w-full bg-[#C45A7A] text-white hover:bg-[#b04e6c] sm:w-auto sm:min-w-[200px]"
+          className="w-full sm:w-auto sm:min-w-32"
         >
           {saving ? "Saving…" : submitLabel}
         </Button>

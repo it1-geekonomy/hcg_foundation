@@ -68,63 +68,51 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-md">
-      <div className="mb-8 flex flex-col items-center text-center">
+    <div className="mx-auto w-full max-w-[400px]">
+      <div className="mb-8 flex justify-center">
         <Image
           src="/footer/Logo.png"
           alt="HCG Foundation"
-          width={200}
-          height={64}
-          className="mb-6 h-14 w-auto object-contain"
+          width={290}
+          height={99}
+          unoptimized
+          className="h-[88px] w-auto object-contain"
           priority
         />
-        <Typography
-          variant="heading-8"
-          as="h1"
-          className="font-semibold tracking-tight text-white"
-        >
-          Sign in
-        </Typography>
-        <Typography
-          variant="label-1"
-          as="p"
-          className="mt-2 text-white/45"
-        >
-          Access the HCG Foundation content studio
-        </Typography>
       </div>
 
       <form
         onSubmit={onSubmit}
-        className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
+        className="rounded-xl border border-cms-border bg-white p-7 shadow-[0_24px_60px_rgba(0,0,0,0.35)]"
       >
-        <label className="mb-4 block">
-          <Typography
-            variant="caption-1"
-            as="span"
-            className="mb-1.5 block font-semibold tracking-wide text-white/50 uppercase"
-          >
-            Email or username
+        <div className="mb-6">
+          <Typography variant="heading-8" as="h1" className="text-cms-ink">
+            Sign in
           </Typography>
+          <Typography variant="label-1" as="p" className="mt-1 text-cms-muted">
+            Access the HCG Foundation content studio
+          </Typography>
+        </div>
+
+        <label className="mb-4 block">
+          <span className="mb-1.5 block text-[13px] font-medium text-cms-body">
+            Email or username
+          </span>
           <input
             type="text"
             autoComplete="username"
             required
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-[#141414] px-3.5 py-2.5 font-manrope text-white outline-none transition focus:border-[#FCCC2D]/50"
+            className="h-10 w-full rounded-lg border border-cms-border bg-white px-3 text-sm text-cms-ink outline-none transition placeholder:text-cms-faint focus:border-cms-primary/60 focus:ring-3 focus:ring-cms-primary/15"
             placeholder="admin@hcg.org"
           />
         </label>
 
         <label className="mb-5 block">
-          <Typography
-            variant="caption-1"
-            as="span"
-            className="mb-1.5 block font-semibold tracking-wide text-white/50 uppercase"
-          >
+          <span className="mb-1.5 block text-[13px] font-medium text-cms-body">
             Password
-          </Typography>
+          </span>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -133,13 +121,13 @@ export default function LoginForm() {
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-[#141414] py-2.5 pr-11 pl-3.5 font-manrope text-white outline-none transition focus:border-[#FCCC2D]/50"
+              className="h-10 w-full rounded-lg border border-cms-border bg-white pr-11 pl-3 text-sm text-cms-ink outline-none transition placeholder:text-cms-faint focus:border-cms-primary/60 focus:ring-3 focus:ring-cms-primary/15"
               placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute top-1/2 right-2.5 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-white/70 transition hover:text-white"
+              className="absolute top-1/2 right-1.5 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-cms-muted transition hover:text-cms-ink"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
@@ -155,7 +143,7 @@ export default function LoginForm() {
           <Typography
             variant="label-1"
             as="p"
-            className="mb-4 rounded-lg bg-red-500/10 px-3 py-2 text-red-300 ring-1 ring-red-500/20"
+            className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-red-700"
           >
             {error}
           </Typography>
@@ -164,19 +152,17 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="flex w-full items-center justify-center rounded-xl bg-[#FCCC2D] px-4 py-2.5 text-[#141414] transition hover:brightness-105 disabled:opacity-60"
+          className="flex h-10 w-full items-center justify-center rounded-lg bg-cms-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-cms-primary-hover disabled:opacity-60"
         >
-          <Typography variant="button-3" as="span">
-            {loading ? "Signing in…" : "Sign in"}
-          </Typography>
+          {loading ? "Signing in…" : "Sign in"}
         </button>
 
         <Typography
           variant="caption-1"
           as="p"
-          className="mt-5 text-center text-white/35"
+          className="mt-5 text-center text-cms-muted"
         >
-          <Link href="/" className="underline-offset-2 hover:text-white/60 hover:underline">
+          <Link href="/" className="underline-offset-2 hover:text-cms-ink hover:underline">
             Back to website
           </Link>
         </Typography>

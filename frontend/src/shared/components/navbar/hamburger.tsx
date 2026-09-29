@@ -69,8 +69,8 @@ export function MobileMenuPanel({
       {/* Floating glass card: equal margin on left, right, and bottom so the
           background photo shows evenly on all open sides, matching the
           existing left/right inset from the parent container. */}
-      <div className="mx-[clamp(1rem,3vw,1.5rem)] mb-[clamp(1rem,3vw,1.5rem)] mt-1 rounded-lg overflow-hidden">
-        <div className="flex flex-col items-start gap-1 bg-black/[0.18] px-[clamp(1rem,3vw,1.5rem)] pb-3 pt-3 border-t border-white/10 text-left max-h-[70vh] overflow-y-auto overscroll-contain">
+      <div className="mx-[clamp(1rem,3vw,1.5rem)] mb-[clamp(1rem,3vw,1.5rem)] mt-1 rounded-lg overflow-hidden max-sm:mx-0 max-sm:mb-0 max-sm:mt-0 max-sm:rounded-none">
+        <div className="flex flex-col items-start gap-1 bg-black/[0.18] px-[clamp(1rem,3vw,1.5rem)] pb-3 pt-3 border-t border-white/10 text-left max-h-[70vh] overflow-y-auto overscroll-contain max-sm:bg-transparent max-sm:max-h-[calc(100dvh-3.5rem)]">
           {navLinks.map((link, i) => {
             const isOpen = openDropdown === i;
             const isChildActive =

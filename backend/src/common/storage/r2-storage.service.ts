@@ -136,4 +136,42 @@ export class R2StorageService {
 
     return { totalBytes, objectCount };
   }
+
+  /**
+   * Lists all objects in the bucket that match the given prefix.
+   */
+  async listObjectsByPrefix(prefix: string): Promise<UploadedObject[]> {
+    this.assertConfigured();
+
+    const objects: UploadedObject[] = [];
+    let isTruncated = true;
+    let continuationToken: string | undefined = undefined;
+
+    while (isTruncated) {
+      const response: any = await this.client.send(
+        new ListObjectsV2Command({
+          Bucket: this.bucket,
+          Prefix: prefix,
+          ContinuationToken: continuationToken,
+        }),
+      );
+
+      response.Contents?.forEach((obj: any) => {
+        // Exclude the folder itself if it appears as an object
+        if (obj.Key === prefix) return;
+        
+        objects.push({
+          key: obj.Key,
+          url: `${this.publicUrl}/${obj.Key}`,
+          contentType: 'application/octet-stream',
+          size: obj.Size || 0,
+        });
+      });
+
+      isTruncated = response.IsTruncated ?? false;
+      continuationToken = response.NextContinuationToken;
+    }
+
+    return objects;
+  }
 }

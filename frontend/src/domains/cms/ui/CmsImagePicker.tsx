@@ -136,21 +136,11 @@ export default function CmsImagePicker({
       />
 
       {sizeLabel ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-[#FCCC2D]/50 bg-[#FFF8E8] px-3 py-2">
-          <Typography
-            variant="caption-1"
-            as="span"
-            className="font-semibold tracking-wide text-[#7A5A00] uppercase"
-          >
-            Required size
-          </Typography>
-          <Typography
-            variant="label-1"
-            as="span"
-            className="font-semibold text-[#212121]"
-          >
+        <div className="inline-flex w-fit items-center gap-2 rounded-md border border-cms-border bg-cms-subtle px-2.5 py-1 text-xs">
+          <span className="font-medium text-cms-muted">Required size</span>
+          <span className="font-semibold text-cms-ink tabular-nums">
             {sizeLabel}
-          </Typography>
+          </span>
         </div>
       ) : null}
 
@@ -195,11 +185,11 @@ export default function CmsImagePicker({
           void applyFile(file);
         }}
         className={cn(
-          "overflow-hidden rounded-xl border border-black/8 bg-[#F7F6F3] outline-none transition",
-          !disabled && "cursor-pointer hover:border-[#C45A7A]/35 hover:bg-[#F3F1ED]",
+          "overflow-hidden rounded-lg border border-dashed border-cms-border-strong bg-cms-subtle/60 outline-none transition-colors",
+          !disabled && "cursor-pointer hover:border-cms-primary/50 hover:bg-cms-subtle",
           !disabled &&
-            "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
-          dragging && !disabled && "border-[#C45A7A]/50 bg-[#FFF6E8]",
+            "focus-visible:border-cms-primary/60 focus-visible:ring-3 focus-visible:ring-cms-primary/15",
+          dragging && !disabled && "border-cms-primary bg-cms-primary-soft",
           disabled && "cursor-not-allowed opacity-60"
         )}
       >
@@ -219,7 +209,7 @@ export default function CmsImagePicker({
                     e.stopPropagation();
                     clear();
                   }}
-                  className="absolute top-2 right-2 z-10 inline-flex size-8 items-center justify-center rounded-full bg-white/95 text-[#212121] shadow-sm ring-1 ring-black/10 transition hover:bg-white"
+                  className="absolute top-2 right-2 z-10 inline-flex size-8 items-center justify-center rounded-md border border-cms-border bg-white text-cms-ink shadow-sm transition hover:bg-red-50"
                   aria-label="Remove image"
                 >
                   <Trash2 className="size-3.5 text-destructive" />
@@ -228,20 +218,20 @@ export default function CmsImagePicker({
             </>
           ) : (
             <div className="pointer-events-none flex flex-col items-center gap-2 px-6 text-center">
-              <div className="flex size-12 items-center justify-center rounded-full bg-white ring-1 ring-black/5">
-                <ImagePlus className="size-5 text-[#8A8A8A]" />
+              <div className="flex size-10 items-center justify-center rounded-lg border border-cms-border bg-white">
+                <ImagePlus className="size-5 text-cms-muted" />
               </div>
               <Typography
                 variant="label-1"
                 as="p"
-                className="font-medium text-[#3A3A3A]"
+                className="font-medium text-cms-ink"
               >
-                No {label} selected
+                Click or drop to upload {label}
               </Typography>
               <Typography
                 variant="caption-1"
                 as="p"
-                className="max-w-[280px] text-[#7A7A7A]"
+                className="max-w-[300px] text-cms-muted"
               >
                 {sizeLabel
                   ? `Attach a WebP or AVIF image at exactly ${sizeLabel} (max 5MB)`
@@ -252,38 +242,40 @@ export default function CmsImagePicker({
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          disabled={disabled}
-          className="h-9 gap-1.5"
-          onClick={() => openPicker()}
-        >
-          <Upload className="size-3.5" />
-          Upload new
-        </Button>
-        {previewSrc ? (
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Typography variant="caption-1" as="p" className="min-w-0 truncate text-cms-muted">
+          {value.file
+            ? `${value.file.name} · ${(value.file.size / 1024).toFixed(0)} KB${sizeLabel ? ` · ${sizeLabel}` : ""}`
+            : previewSrc
+              ? "Current image"
+              : "No file selected"}
+        </Typography>
+        <div className="flex items-center gap-2">
+          {previewSrc ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={disabled}
+              className="text-red-600 hover:bg-red-50 hover:text-red-700"
+              onClick={clear}
+            >
+              <Trash2 className="size-3.5" />
+              Remove
+            </Button>
+          ) : null}
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
+            size="sm"
             disabled={disabled}
-            className="h-9 gap-1.5 text-destructive"
-            onClick={clear}
+            onClick={() => openPicker()}
           >
-            <Trash2 className="size-3.5" />
-            Clear
+            <Upload className="size-3.5" />
+            {previewSrc ? "Replace" : "Upload"}
           </Button>
-        ) : null}
+        </div>
       </div>
-
-      {value.file ? (
-        <Typography variant="caption-1" as="p" className="text-[#5C5C5C]">
-          Selected file: {value.file.name} (
-          {(value.file.size / 1024).toFixed(0)} KB)
-          {sizeLabel ? ` · ${sizeLabel}` : ""}
-        </Typography>
-      ) : null}
     </div>
   );
 }

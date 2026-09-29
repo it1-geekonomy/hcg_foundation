@@ -192,7 +192,7 @@ export default function PartnershipInquiriesListPage() {
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-muted-foreground">
+                    <TableCell colSpan={6} className="text-cms-muted">
                       {tab === "deleted"
                         ? "No deleted inquiries."
                         : "No partnership inquiries yet."}
@@ -204,7 +204,7 @@ export default function PartnershipInquiriesListPage() {
                       <TableCell>
                         <Link
                           href={`/admin/partnership-inquiries/${row.id}`}
-                          className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
+                          className="font-medium text-cms-primary underline-offset-2 hover:underline"
                         >
                           {row.fullName}
                         </Link>
@@ -217,7 +217,7 @@ export default function PartnershipInquiriesListPage() {
                         <Typography
                           variant="caption-1"
                           as="p"
-                          className="text-[#8A8A8A]"
+                          className="text-cms-faint"
                         >
                           {row.phoneNumber}
                         </Typography>
@@ -227,7 +227,7 @@ export default function PartnershipInquiriesListPage() {
                           <Typography
                             variant="caption-1"
                             as="span"
-                            className="text-[#5C5C5C]"
+                            className="text-cms-muted"
                           >
                             {formatCmsDateTime(row.deletedAt)}
                           </Typography>
@@ -235,13 +235,13 @@ export default function PartnershipInquiriesListPage() {
                           <Typography
                             variant="caption-1"
                             as="span"
-                            className="rounded-full bg-[#F4F4F4] px-2 py-0.5 capitalize text-[#5C5C5C]"
+                            className="rounded-md bg-cms-subtle px-2 py-0.5 capitalize text-cms-muted"
                           >
                             {row.status.replace("_", " ")}
                           </Typography>
                         )}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-muted-foreground">
+                      <TableCell className="whitespace-nowrap text-cms-muted">
                         {new Date(row.createdAt).toLocaleDateString("en-IN")}
                       </TableCell>
                       <TableCell>
@@ -250,7 +250,7 @@ export default function PartnershipInquiriesListPage() {
                             <>
                               <Link
                                 href={`/admin/partnership-inquiries/${row.id}`}
-                                className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                                className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                                 aria-label={`View ${row.fullName}`}
                               >
                                 <Eye className="size-4" />
@@ -258,7 +258,7 @@ export default function PartnershipInquiriesListPage() {
                               <Button
                                 type="button"
                                 variant="outline"
-                                className="h-8 gap-1.5 border-black/10 bg-white px-2.5"
+                                className="h-8 gap-1.5 border-cms-border bg-white px-2.5"
                                 disabled={restoringId === row.id}
                                 onClick={() =>
                                   void onRestore(row.id, row.fullName)
@@ -276,21 +276,21 @@ export default function PartnershipInquiriesListPage() {
                             <>
                               <Link
                                 href={`/admin/partnership-inquiries/${row.id}`}
-                                className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                                className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                                 aria-label={`View ${row.fullName}`}
                               >
                                 <Eye className="size-4" />
                               </Link>
                               <Link
                                 href={`/admin/partnership-inquiries/${row.id}/edit`}
-                                className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                                className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                                 aria-label={`Edit ${row.fullName}`}
                               >
                                 <Pencil className="size-4" />
                               </Link>
                               <button
                                 type="button"
-                                className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-red-50 hover:text-red-600"
+                                className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-red-50 hover:text-red-600"
                                 aria-label={`Delete ${row.fullName}`}
                                 onClick={() =>
                                   void onDelete(row.id, row.fullName)

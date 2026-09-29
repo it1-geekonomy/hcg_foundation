@@ -130,7 +130,7 @@ export default function AnnualReportForm({
         </Typography>
       ) : null}
 
-      <div className="space-y-4 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div className="space-y-4 rounded-xl border border-cms-border bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <CmsFormField label="Title" htmlFor="title">
           <Input
             id="title"
@@ -237,7 +237,7 @@ export default function AnnualReportForm({
                 href={fileUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
+                className="font-medium text-cms-primary underline-offset-2 hover:underline"
               >
                 Open on CDN
               </a>
@@ -255,7 +255,7 @@ export default function AnnualReportForm({
             }
           />
           {value.reportFile ? (
-            <Typography variant="caption-1" as="p" className="text-[#5C5C5C]">
+            <Typography variant="caption-1" as="p" className="text-cms-muted">
               Selected: {value.reportFile.name}
             </Typography>
           ) : null}
@@ -285,13 +285,15 @@ export default function AnnualReportForm({
         onChange={(seo) => onChange({ ...value, ...seo })}
       />
 
-      <Button
-        type="submit"
-        disabled={saving || !value.title.trim() || !value.slug.trim()}
-        className="h-11 w-full bg-[#C45A7A] text-white hover:bg-[#b04e6c] sm:w-auto sm:min-w-[200px]"
-      >
-        {saving ? "Saving…" : submitLabel}
-      </Button>
+      <div className="flex justify-center pb-4">
+        <Button
+          type="submit"
+          disabled={saving || !value.title.trim() || !value.slug.trim()}
+          className="w-full sm:w-auto sm:min-w-32"
+        >
+          {saving ? "Saving…" : submitLabel}
+        </Button>
+      </div>
     </form>
   );
 }

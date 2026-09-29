@@ -144,7 +144,7 @@ export default function LegalPagesListPage({
           <Link
             href={section.publicPath}
             target="_blank"
-            className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
+            className="font-medium text-cms-primary underline-offset-2 hover:underline"
           >
             {section.publicPath}
           </Link>
@@ -208,7 +208,7 @@ export default function LegalPagesListPage({
             <TableBody>
               {pages.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-muted-foreground">
+                  <TableCell colSpan={4} className="text-cms-muted">
                     {tab === "deleted" ? (
                       "No deleted entries."
                     ) : (
@@ -216,7 +216,7 @@ export default function LegalPagesListPage({
                         No entries yet.{" "}
                         <Link
                           href={`${section.basePath}/new`}
-                          className="font-medium text-[#9A7B00] underline-offset-2 hover:underline"
+                          className="font-medium text-cms-primary underline-offset-2 hover:underline"
                         >
                           Create one
                         </Link>
@@ -233,7 +233,7 @@ export default function LegalPagesListPage({
                         <Typography
                           variant="caption-1"
                           as="span"
-                          className="text-[#5C5C5C]"
+                          className="text-cms-muted"
                         >
                           {formatCmsDateTime(item.deletedAt)}
                         </Typography>
@@ -241,13 +241,13 @@ export default function LegalPagesListPage({
                         <Typography
                           variant="caption-1"
                           as="span"
-                          className="rounded-full bg-[#F4F4F4] px-2 py-0.5 text-[#5C5C5C]"
+                          className="rounded-md bg-cms-subtle px-2 py-0.5 text-cms-muted"
                         >
                           {item.status}
                         </Typography>
                       )}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="text-cms-muted">
                       {item.updatedAt
                         ? new Date(item.updatedAt).toLocaleDateString()
                         : "—"}
@@ -258,7 +258,7 @@ export default function LegalPagesListPage({
                           <>
                             <Link
                               href={`${section.basePath}/${item.id}`}
-                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                               aria-label={`View ${item.title}`}
                             >
                               <Eye className="size-4" />
@@ -266,7 +266,7 @@ export default function LegalPagesListPage({
                             <Button
                               type="button"
                               variant="outline"
-                              className="h-8 gap-1.5 border-black/10 bg-white px-2.5 font-medium text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
+                              className="h-8 gap-1.5 border-cms-border bg-white px-2.5 font-medium text-cms-ink hover:bg-cms-subtle hover:text-cms-ink"
                               disabled={restoringId === item.id}
                               aria-label={`Restore ${item.title}`}
                               onClick={() =>
@@ -285,14 +285,14 @@ export default function LegalPagesListPage({
                           <>
                             <Link
                               href={`${section.basePath}/${item.id}`}
-                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                               aria-label={`View ${item.title}`}
                             >
                               <Eye className="size-4" />
                             </Link>
                             <Link
                               href={`${section.basePath}/${item.id}/edit`}
-                              className="inline-flex size-7 items-center justify-center rounded-lg text-[#5C5C5C] transition hover:bg-muted hover:text-[#212121]"
+                              className="inline-flex size-7 items-center justify-center rounded-lg text-cms-muted transition hover:bg-cms-subtle hover:text-cms-ink"
                               aria-label={`Edit ${item.title}`}
                             >
                               <Pencil className="size-4" />

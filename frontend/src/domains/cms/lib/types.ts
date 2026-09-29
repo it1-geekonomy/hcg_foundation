@@ -384,6 +384,8 @@ export type UpdateLeadsContactPayload = Partial<{
 }>;
 
 export type Paginated<T> = {
+  message?: string;
+  statusCode?: number;
   data: T[];
   meta: {
     total: number;

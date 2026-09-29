@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Typography from "@/lib/Typography";
 import { publicAnnualReportsApi } from "@/domains/cms/lib/api";
 import {
@@ -11,6 +11,35 @@ import {
   mapAnnualReportToCard,
   type Report,
 } from "@/domains/resources/Transparencyhub/constants/annualreport";
+import {
+  DownloadProgress,
+  PdfTile,
+  ReportCardShell,
+} from "./annualReportAnimation";
+
+const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
+/* ---------- Page-count cache (localStorage) ---------- */
+// Counts are keyed by PDF URL, so repeat visits show the number instantly.
+const COUNT_CACHE_KEY = "ar-page-counts-v1";
+
+function readCountCache(): Record<string, string> {
+  try {
+    return JSON.parse(localStorage.getItem(COUNT_CACHE_KEY) ?? "{}");
+  } catch {
+    return {};
+  }
+}
+
+function writeCountCache(url: string, label: string) {
+  try {
+    const cache = readCountCache();
+    cache[url] = label;
+    localStorage.setItem(COUNT_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // storage unavailable (private mode / quota) - ignore
+  }
+}
 
 export default function AnnualReportsSection({
   previewReports,
@@ -21,16 +50,37 @@ export default function AnnualReportsSection({
   const [page, setPage] = useState(0);
   const [reports, setReports] = useState<Report[]>(previewReports ?? []);
   const [loading, setLoading] = useState(!previewReports);
+  // Page counts live outside `reports` so a count arriving never re-creates the list
+  const [pageCounts, setPageCounts] = useState<Record<string, string>>({});
+  // Download progress per report id (0-100). Missing key = not downloading.
+  const [downloads, setDownloads] = useState<Record<string, number>>({});
+  const requestedCounts = useRef<Set<string>>(new Set());
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  // Apply the right breakpoint before the first paint, so the grid doesn't jump on refresh
+  useIsoLayoutEffect(() => {
     function handleResize() {
-      setBreakpoint(getBreakpoint(window.innerWidth));
-      setPage(0); // reset to first page when layout density changes
+      const next = getBreakpoint(window.innerWidth);
+      setBreakpoint((prev) =>
+        prev.perPage === next.perPage && prev.cols === next.cols ? prev : next
+      );
     }
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Go back to the first page only when the layout density actually changes
+  useEffect(() => {
+    setPage(0);
+  }, [breakpoint.perPage]);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,16 +88,6 @@ export default function AnnualReportsSection({
     if (previewReports) {
       setReports(previewReports);
       setLoading(false);
-      previewReports.forEach(async (rep) => {
-        if (!rep.pdfUrl) return;
-        const count = await countPdfPages(rep.pdfUrl);
-        if (cancelled || !count) return;
-        setReports((prev) =>
-          prev.map((item) =>
-            item.id === rep.id ? { ...item, pages: formatPageCount(count) } : item
-          )
-        );
-      });
       return;
     }
 
@@ -58,20 +98,7 @@ export default function AnnualReportsSection({
         if (cancelled) return;
 
         const rawData = res.data ?? [];
-        const mapped = rawData.map(mapAnnualReportToCard);
-        setReports(mapped);
-
-        // Asynchronously calculate PDF page counts without blocking initial display
-        mapped.forEach(async (rep) => {
-          if (!rep.pdfUrl) return;
-          const count = await countPdfPages(rep.pdfUrl);
-          if (cancelled || !count) return;
-          setReports((prev) =>
-            prev.map((item) =>
-              item.id === rep.id ? { ...item, pages: formatPageCount(count) } : item
-            )
-          );
-        });
+        setReports(rawData.map(mapAnnualReportToCard));
       } catch {
         if (!cancelled) {
           setReports([]);
@@ -94,33 +121,148 @@ export default function AnnualReportsSection({
   const totalPages = Math.ceil(reports.length / perPage);
   const visibleReports = reports.slice(page * perPage, page * perPage + perPage);
 
+  // Page counts: as soon as the reports load, show cached counts immediately,
+  // count the visible cards first (all in parallel), then count the rest in the
+  // background so other pages are already filled in when the user switches.
+  useEffect(() => {
+    if (reports.length === 0) return;
+
+    const cache = readCountCache();
+    const cached: Record<string, string> = {};
+    const pending: Report[] = [];
+
+    for (const r of reports) {
+      if (!r.pdfUrl || r.pages) continue;
+      if (cache[r.pdfUrl]) cached[r.id] = cache[r.pdfUrl];
+      else if (!requestedCounts.current.has(r.id)) pending.push(r);
+    }
+
+    // Cached counts show right away, in the same render as the title
+    if (Object.keys(cached).length) {
+      setPageCounts((prev) => ({ ...cached, ...prev }));
+    }
+
+    async function run(rep: Report) {
+      if (requestedCounts.current.has(rep.id)) return;
+      requestedCounts.current.add(rep.id);
+      const count = await countPdfPages(rep.pdfUrl!);
+      if (!mounted.current || !count) return;
+      const label = formatPageCount(count);
+      writeCountCache(rep.pdfUrl!, label);
+      setPageCounts((prev) => ({ ...prev, [rep.id]: label }));
+    }
+
+    // Visible cards first, all in parallel
+    const visibleIds = new Set(
+      reports
+        .slice(page * perPage, page * perPage + perPage)
+        .map((r) => r.id)
+    );
+    const first = pending.filter((r) => visibleIds.has(r.id));
+    const rest = pending.filter((r) => !visibleIds.has(r.id));
+    first.forEach((r) => void run(r));
+
+    // Everything else in the background, 3 at a time
+    (async () => {
+      const queue = [...rest];
+      const worker = async () => {
+        while (queue.length && mounted.current) await run(queue.shift()!);
+      };
+      await Promise.all([worker(), worker(), worker()]);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reports]);
+
   function handleOpen(pdfUrl?: string) {
     if (!pdfUrl) return;
     window.open(pdfUrl, "_blank", "noopener,noreferrer");
   }
 
-  async function handleDownload(
-    e: React.MouseEvent,
-    pdfUrl?: string,
-    title?: string
-  ) {
+  function setProgress(id: string, value: number) {
+    if (!mounted.current) return;
+    setDownloads((prev) => ({ ...prev, [id]: value }));
+  }
+
+  function clearProgress(id: string) {
+    if (!mounted.current) return;
+    setDownloads((prev) => {
+      const { [id]: _removed, ...rest } = prev;
+      return rest;
+    });
+  }
+
+  function triggerSave(href: string, filename: string) {
+    const link = document.createElement("a");
+    link.href = href;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  async function handleDownload(e: React.MouseEvent, report: Report) {
     e.stopPropagation();
-    if (!pdfUrl) return;
+    const { id, pdfUrl, title } = report;
+    if (!pdfUrl || downloads[id] !== undefined) return;
 
     const safeTitle =
       (title
         ? `${title.replace(/[^a-zA-Z0-9_\-\s]/g, "").trim().replace(/\s+/g, "_")}.pdf`
         : pdfUrl.split("/").pop()) || "annual-report.pdf";
 
-    // Use our Next.js download proxy endpoint which sets Content-Disposition: attachment
-    const downloadEndpoint = `/api/download?url=${encodeURIComponent(pdfUrl)}&filename=${encodeURIComponent(safeTitle)}`;
+    // Next.js download proxy endpoint (sets Content-Disposition: attachment)
+    const endpoint = `/api/download?url=${encodeURIComponent(pdfUrl)}&filename=${encodeURIComponent(safeTitle)}`;
 
-    const link = document.createElement("a");
-    link.href = downloadEndpoint;
-    link.download = safeTitle;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    setProgress(id, 3);
+
+    // If the server doesn't send a size, ease toward 90% so the line still moves
+    let knownTotal = false;
+    let current = 3;
+    const ticker = window.setInterval(() => {
+      if (knownTotal) return;
+      current += (90 - current) * 0.06;
+      setProgress(id, current);
+    }, 150);
+
+    try {
+      const res = await fetch(endpoint);
+      if (!res.ok || !res.body) throw new Error("Download failed");
+
+      const total = Number(res.headers.get("Content-Length")) || 0;
+      knownTotal = total > 0;
+
+      const reader = res.body.getReader();
+      const chunks: Uint8Array[] = [];
+      let received = 0;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value) {
+          chunks.push(value);
+          received += value.length;
+          if (knownTotal) {
+            current = Math.max(current, Math.min(97, (received / total) * 100));
+            setProgress(id, current);
+          }
+        }
+      }
+
+      const blob = new Blob(chunks as BlobPart[], { type: "application/pdf" });
+      const blobUrl = URL.createObjectURL(blob);
+      triggerSave(blobUrl, safeTitle);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10_000);
+
+      setProgress(id, 100); // line fills the whole bottom edge
+    } catch {
+      // Fall back to a plain browser download if streaming fails
+      triggerSave(endpoint, safeTitle);
+      setProgress(id, 100);
+    } finally {
+      window.clearInterval(ticker);
+      // Let the full line show briefly, then fade it out
+      setTimeout(() => clearProgress(id), 900);
+    }
   }
 
   return (
@@ -144,7 +286,7 @@ export default function AnnualReportsSection({
       </div>
 
       {loading && reports.length === 0 ? (
-        <div className={`mt-10 grid ${cols} gap-4 lg:gap-5`}>
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
           {Array.from({ length: perPage }).map((_, idx) => (
             <div
               key={idx}
@@ -167,63 +309,73 @@ export default function AnnualReportsSection({
         </div>
       ) : (
         <div className={`mt-10 grid ${cols} gap-4 lg:gap-5`}>
-          {visibleReports.map((report, idx) => (
-            <div
-              key={report.id || `${page}-${idx}`}
-              role="button"
-              tabIndex={0}
-              onClick={() => handleOpen(report.pdfUrl)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") handleOpen(report.pdfUrl);
-              }}
-              className="flex cursor-pointer items-start gap-3 rounded-2xl bg-[#FFFCF3] p-4 shadow-sm transition-shadow hover:shadow-md"
-            >
-              {/* PDF icon — background fills the full card height, icon scales up on larger screens */}
-              <div className="flex h-full w-12 sm:w-14 lg:w-16 shrink-0 items-center justify-center rounded-lg bg-[#FFEBAF]">
-                <img src="/pdficon.png" alt="PDF" className="h-10 w-10 sm:h-12 sm:w-12 lg:h-10 lg:w-10" />
-              </div>
+          {visibleReports.map((report, idx) => {
+            const pagesLabel = report.pages || pageCounts[report.id] || "";
+            const dlProgress = downloads[report.id];
+            const isDownloading = dlProgress !== undefined;
+            return (
+              <ReportCardShell
+                key={report.id || `${page}-${idx}`}
+                onOpen={() => handleOpen(report.pdfUrl)}
+              >
+                {/* Download progress: yellow line fills the bottom edge of the card */}
+                {isDownloading && <DownloadProgress progress={dlProgress} />}
 
-              <div className="min-w-0 flex-1">
-                <Typography
-                  variant="body-5"
-                  as="h3"
-                  className="line-clamp-2 text-[#0D2838] mb-2 font-manrope font-bold leading-snug"
-                >
-                  {report.title}
-                </Typography>
+                {/* PDF icon: two sheets slide out behind it on hover */}
+                <PdfTile />
 
-                {/* Description row — download icon now lives at the end of this row */}
-                <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
                   <Typography
-                    variant="caption-1"
-                    as="p"
-                    className="line-clamp-4 text-[#606060] font-manrope font-medium"
+                    variant="body-5"
+                    as="h3"
+                    className="line-clamp-2 text-[#0D2838] mb-2 font-manrope font-bold leading-snug"
                   >
-                    {report.description}
+                    {report.title}
                   </Typography>
 
-                  <button
-                    type="button"
-                    onClick={(e) => handleDownload(e, report.pdfUrl, report.title)}
-                    aria-label={`Download ${report.title}`}
-                    className="shrink-0 rounded-full p-1 hover:bg-black/5"
-                  >
-                    <img src="/downloadbtn.png" alt="Download" className="h-6 w-6 sm:h-6 sm:w-6 lg:h-8 lg:w-8" />
-                  </button>
+                  {/* Description row - download icon lives at the end of this row */}
+                  <div className="flex items-start justify-between gap-2">
+                    <Typography
+                      variant="caption-1"
+                      as="p"
+                      className="line-clamp-4 text-[#606060] font-manrope font-medium"
+                    >
+                      {report.description}
+                    </Typography>
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleDownload(e, report)}
+                      disabled={isDownloading}
+                      aria-busy={isDownloading}
+                      aria-label={`Download ${report.title}`}
+                      className="shrink-0 rounded-full p-1 cursor-pointer disabled:cursor-progress disabled:opacity-60"
+                    >
+                      <img src="/downloadbtn.png" alt="Download" className="h-6 w-6 sm:h-6 sm:w-6 lg:h-8 lg:w-8" />
+                    </button>
+                  </div>
+
+                  {/* Space for the page count is always reserved, so nothing shifts when it arrives */}
+                  {report.pdfUrl ? (
+                    <div className="relative mt-2">
+                      <Typography
+                        variant="caption-1"
+                        as="p"
+                        className={`font-medium text-[#111111] font-manrope ${
+                          pagesLabel ? "opacity-100" : "opacity-0"
+                        }`}
+                      >
+                        {pagesLabel || "00 pages"}
+                      </Typography>
+                      {!pagesLabel && (
+                        <span className="absolute left-0 top-1/2 h-3 w-16 -translate-y-1/2 animate-pulse rounded bg-[#FFEBAF]/70" />
+                      )}
+                    </div>
+                  ) : null}
                 </div>
-
-                {report.pages ? (
-                  <Typography
-                    variant="caption-1"
-                    as="p"
-                    className="mt-2 font-medium text-[#111111] font-manrope"
-                  >
-                    {report.pages}
-                  </Typography>
-                ) : null}
-              </div>
-            </div>
-          ))}
+              </ReportCardShell>
+            );
+          })}
         </div>
       )}
 

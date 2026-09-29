@@ -1,0 +1,6 @@
+# Production secrets and server-generated data (docker-compose.prod.yml at repo root)
+.env
+.env.*
+!.env.example
+/certbot/
+/backups/
