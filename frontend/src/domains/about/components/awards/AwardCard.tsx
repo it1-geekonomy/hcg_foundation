@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Typography from "@/lib/Typography";
 import type { AwardItem } from "@/domains/about/constants/awards";
 import { ImageUnavailableNotice } from "../shared/ImageUnavailableNotice";
+import { AwardLens, useAwardLens } from "./awardLens";
 
 export function AwardCard({
   award,
@@ -18,26 +19,44 @@ export function AwardCard({
   const [imageFailed, setImageFailed] = useState(false);
   const showImage = Boolean(award.image?.trim()) && !imageFailed;
 
+  const { boxRef, lensRef, innerRef, handleMove, handleLeave } = useAwardLens();
+
   useEffect(() => {
     setImageFailed(false);
   }, [award.image]);
 
   return (
-    <div data-award-card className="min-w-0 w-full">
+    <div
+      data-award-card
+      className="mx-auto w-full max-w-[280px] max-[500px]:max-w-none sm:max-w-[460px]"
+    >
       <div
+        ref={boxRef}
         data-award-image
-        className="relative mx-auto aspect-[4/5] w-[80%] overflow-hidden sm:mx-0 sm:w-full"
+        onPointerMove={showImage ? handleMove : undefined}
+        onPointerLeave={showImage ? handleLeave : undefined}
+        className="relative aspect-[4/5] w-full overflow-hidden"
       >
         {showImage ? (
-          <Image
-            src={award.image}
-            alt={award.title || "Award"}
-            fill
-            sizes="(max-width: 640px) 80vw, 45vw"
-            className="object-cover"
-            unoptimized={/^https?:\/\//i.test(award.image)}
-            onError={() => setImageFailed(true)}
-          />
+          <>
+            <Image
+              src={award.image}
+              alt={award.title || "Award"}
+              fill
+              sizes="(max-width: 500px) 100vw, (max-width: 640px) 280px, 460px"
+              className="object-cover"
+              unoptimized={/^https?:\/\//i.test(award.image)}
+              onError={() => setImageFailed(true)}
+              draggable={false}
+              onDragStart={(e) => e.preventDefault()}
+            />
+
+            <AwardLens
+              image={award.image}
+              lensRef={lensRef}
+              innerRef={innerRef}
+            />
+          </>
         ) : (
           <ImageUnavailableNotice />
         )}
@@ -62,13 +81,22 @@ export function AwardCard({
         </div>
 
         {award.description ? (
-          <Typography
-            variant="body-9"
-            as="p"
-            className="mt-4 break-words text-center font-manrope font-normal text-[#293239] sm:mt-8"
-          >
-            {award.description}
-          </Typography>
+          <>
+            <Typography
+              variant="body-7"
+              as="p"
+              className="mt-4 block break-words text-center font-manrope font-normal text-[#293239] sm:mt-8 lg:hidden"
+            >
+              {award.description}
+            </Typography>
+            <Typography
+              variant="body-9"
+              as="p"
+              className="mt-4 hidden break-words text-center font-manrope font-normal text-[#293239] sm:mt-8 lg:block"
+            >
+              {award.description}
+            </Typography>
+          </>
         ) : null}
       </div>
     </div>

@@ -1,4 +1,7 @@
+"use client";
 
+import { useEffect, useRef } from "react";
+import { motion, useAnimation, useInView, type Variants } from "framer-motion";
 import Image from "next/image";
 import Typography from "@/lib/Typography";
 import {
@@ -6,13 +9,67 @@ import {
   sustainableGoalsTheme,
 } from "@/domains/home/constants/sustainableGoals";
 
-export default function SustainableGoalsSection() {
-  return (
-    <section className="w-full bg-[#FFF6D8] px-4 md:px-4 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
+// --- animation timing knobs ---
+const CARD_DELAY_STEP = 0.15; // gap between each card starting to enter
+const CARD_START_DELAY = 0.2; // delay before the first card starts
+const CARD_DURATION = 0.5; // how long each card takes to "sit"
+const POP_DURATION = 0.45; // how long the final pop takes
 
-      <div
-        className="flex w-full flex-col overflow-hidden rounded-sm lg:flex-row bg-gradient-to-r from-[#4B4B4B] to-[#B1B1B1] lg:flex-row lg:items-center lg:items-center"
-      >
+// Single variants object driving both stages on the SAME element:
+// hidden -> visible (staggered slide/fade in) -> pop (group bounce, once)
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 48, scale: 1 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: CARD_DURATION,
+      delay: CARD_START_DELAY + i * CARD_DELAY_STEP,
+      ease: "easeOut",
+    },
+  }),
+  pop: {
+    scale: [1, 1.12, 0.97, 1],
+    transition: { duration: POP_DURATION, ease: "easeInOut" },
+  },
+};
+
+export default function SustainableGoalsSection() {
+  const sectionRef = useRef(null);
+  // triggers once, when ~30% of the section is visible
+  const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
+
+  const cardsControls = useAnimation();
+  const hasPoppedRef = useRef(false);
+
+  useEffect(() => {
+    if (!isInView) return;
+
+    cardsControls.start("visible");
+
+    // Fire the single group pop right after the last card finishes sitting
+    const totalEntranceTime =
+      CARD_START_DELAY +
+      (sustainableGoals.length - 1) * CARD_DELAY_STEP +
+      CARD_DURATION;
+
+    const timer = setTimeout(() => {
+      if (!hasPoppedRef.current) {
+        cardsControls.start("pop");
+        hasPoppedRef.current = true;
+      }
+    }, totalEntranceTime * 1000);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInView]);
+
+  return (
+    <section
+      ref={sectionRef}
+      className="w-full bg-[#FFF6D8] px-4 md:px-4 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40"
+    >
+      <div className="flex w-full flex-col overflow-hidden rounded-sm lg:flex-row bg-gradient-to-r from-[#4B4B4B] to-[#B1B1B1] lg:flex-row lg:items-center lg:items-center">
         {/* Box heading: rendered below lg (centered) and at lg+ (left-aligned) */}
         <div className="flex-1 items-center justify-center px-6 py-8 lg:justify-start lg:px-6 lg:py-16 xl:px-14 xl:py-16 2xl:px-20">
           <Typography
@@ -27,9 +84,13 @@ export default function SustainableGoalsSection() {
         {/* Below md (768px): grid-cols-2, full width, px-6, natural order.
             md+: cols-4 grid, then lg: flex row */}
         <div className="grid w-full grid-cols-2 justify-items-center gap-4 px-6 py-6 md:w-auto md:grid-cols-4 md:gap-1.5 md:justify-items-stretch md:p-4 lg:flex lg:shrink-0 lg:items-center lg:gap-0 lg:p-4">
-          {sustainableGoals.map((goal) => (
-            <div
+          {sustainableGoals.map((goal, index) => (
+            <motion.div
               key={goal.number}
+              custom={index}
+              initial="hidden"
+              animate={cardsControls}
+              variants={cardVariants}
               className="relative flex aspect-square w-full flex-col px-1 lg:w-40 xl:w-48 2xl:w-52"
               style={{ backgroundColor: goal.bg }}
             >
@@ -60,7 +121,7 @@ export default function SustainableGoalsSection() {
                   {goal.title}
                 </Typography>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

@@ -8,6 +8,7 @@ import Banner from "@/shared/components/Herobannersection";
 import DonateForm from "@/shared/components/DonateForm";
 import ShareStory from "@/shared/components/ShareStory";
 import RelatedEvents from "@/domains/resources/components/RelatedEvents";
+import PuzzleImage from "@/shared/components/Puzzleimage";
 import { EventItem } from "@/domains/resources/constants/events";
 import { publicEventsApi } from "@/domains/cms/lib/api";
 
@@ -144,11 +145,18 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
 
             {/* Right Column: Featured Image (5 cols) */}
             <div className="sm:col-span-5 flex flex-col items-start w-full order-first sm:order-last">
-              <div className="relative aspect-[4/3] w-full max-w-[37.5rem] overflow-hidden rounded-xl bg-[#EFEAD8] shadow-md">
-                <img
+              <div className="relative aspect-[4/3] w-full max-w-[37.5rem] overflow-hidden rounded-xl">
+                {/* Puzzle-piece reveal on the detail image only — pieces
+                    fade/scale in at their own cell, in a randomized order,
+                    the moment this box scrolls into view. */}
+                <PuzzleImage
+                  key={eventItem.id}
                   src={eventItem.imageUrl}
                   alt={eventItem.title}
-                  className="h-full w-full object-cover"
+                  rows={4}
+                  cols={5}
+                  fit="cover"
+                  staggerDuration={1000}
                 />
               </div>
             </div>

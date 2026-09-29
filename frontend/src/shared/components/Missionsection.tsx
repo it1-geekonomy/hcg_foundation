@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import Image from "next/image";
 import Typography from "@/lib/Typography";
+import PuzzleImage from "./Puzzleimage";
 
 export interface MissionListBlock {
   /** Optional label above the list, e.g. "Mission:" or "Vision:" */
@@ -74,7 +74,11 @@ export default function MissionHighlight({
         {/* Image — row placement:
             - below lg (<1024px): reordered to appear right after the heading (order-3)
             - lg to <1920px: starts at the content/description row
-            - 1920px+: starts at the heading row (spans heading+content), regardless of bullet list */}
+            - 1920px+: starts at the heading row (spans heading+content), regardless of bullet list
+
+            The image itself is rendered as an animated grid of "puzzle pieces"
+            (PuzzleImage) that fly in and lock together the moment this section
+            scrolls into view. */}
         <div
           className="relative order-3 mt-6 w-full min-w-0 overflow-hidden bg-[#FFF8E2]
             lg:aspect-auto lg:h-full lg:max-h-none lg:min-h-0 lg:self-stretch lg:justify-self-stretch
@@ -82,21 +86,28 @@ export default function MissionHighlight({
             lg:row-start-3 lg:row-span-1
             min-[1920px]:!row-start-2 min-[1920px]:!row-span-2"
         >
-          {/* Mobile/tablet: natural aspect ratio, no crop, no leftover space */}
-          <Image
-            src={image}
-            alt={imageAlt}
-            width={800}
-            height={600}
-            className="block h-auto w-full max-h-64 object-contain object-top sm:max-h-72 md:max-h-80 lg:hidden"
-          />
-          {/* Desktop (lg+): fills the stretched grid cell */}
-          <Image
-            src={image}
-            alt={imageAlt}
-            fill
-            className="hidden object-contain object-center lg:block"
-          />
+          {/* Mobile/tablet: natural aspect box, puzzle-piece reveal, no crop */}
+          <div className="relative h-64 w-full sm:h-72 md:h-80 lg:hidden">
+            <PuzzleImage
+              src={image}
+              alt={imageAlt}
+              rows={3}
+              cols={4}
+              fit="contain"
+              staggerDuration={700}
+            />
+          </div>
+          {/* Desktop (lg+): fills the stretched grid cell, puzzle-piece reveal */}
+          <div className="hidden h-full w-full lg:block">
+            <PuzzleImage
+              src={image}
+              alt={imageAlt}
+              rows={4}
+              cols={5}
+              fit="contain"
+              staggerDuration={900}
+            />
+          </div>
         </div>
 
         {/* Content / paragraphs */}
