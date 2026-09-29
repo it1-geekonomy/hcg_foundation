@@ -114,15 +114,13 @@ export default function DonateSection() {
         className="flex flex-col items-center gap-2 text-center"
       >
         <div className="flex items-center gap-2">
-          <IconBeat>
-            <Image
-              src={donateIcon}
-              alt=""
-              width={26}
-              height={26}
-              className="h-[clamp(2rem,5vw,2.5rem)] w-[clamp(2rem,5vw,2.5rem)]"
-            />
-          </IconBeat>
+          <Image
+            src={donateIcon}
+            alt=""
+            width={26}
+            height={26}
+            className="h-[clamp(2rem,5vw,2.5rem)] w-[clamp(2rem,5vw,2.5rem)]"
+          />
           <Typography
             variant="heading-6"
             as="h3"
