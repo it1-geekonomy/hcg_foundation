@@ -59,10 +59,17 @@ def full_sync(force: bool = False) -> dict:
     for doc in docs:
         vector_store.upsert_document(doc)
 
+    # Curated docs that were renamed or removed would otherwise linger with old titles/URLs
+    stale = vector_store.delete_stale(
+        {"static", "knowledge"},
+        {(d["table"], str(d["source_id"])) for d in docs},
+    )
+
     vector_store.save_fingerprint(fp)
     return {
         "status": "synced",
         "fingerprint": fp,
         "corpus_documents": len(docs),
+        "stale_chunks_deleted": stale,
         "indexed_chunks": vector_store.indexed_count(),
     }

@@ -42,14 +42,16 @@ def match_fast_intent(message: str) -> dict | None:
                 return {
                     "intent": intent,
                     "answer": C.DONATE_INTENT_ANSWER,
-                    "sources": [{"title": "Donate Now", "url": "/donate"}],
+                    "sources": [
+                        {"title": C.PAGE_LABELS[C.DONATE_URL], "url": C.DONATE_URL}
+                    ],
                 }
             if intent == "founder":
                 return {
                     "intent": intent,
                     "answer": C.FOUNDER_INTENT_ANSWER,
                     "sources": [
-                        {"title": "Our Team / Trustees", "url": "/about/our-team"}
+                        {"title": C.PAGE_LABELS[C.TEAM_URL], "url": C.TEAM_URL}
                     ],
                 }
     return None
@@ -94,6 +96,8 @@ def detect_intents(text: str) -> set[str]:
         intents.add("founder")
     if "internship" in t or "intern " in t:
         intents.add("internship")
+    if any(k in t for k in ("volunteer", "fundrais", "get involved", "participate")):
+        intents.add("volunteer")
     if any(
         k in t
         for k in (
@@ -102,10 +106,32 @@ def detect_intents(text: str) -> set[str]:
             "sponsor",
             "adopt a patient",
             "eligible",
+            "aasha daan",
+            "asha daan",
+            "financial aid",
+            "financial support",
+            "afford",
         )
     ):
         intents.add("patient_aid")
-    if any(k in t for k in ("contact", "phone", "email", "address", "reach")):
+    if any(
+        k in t
+        for k in (
+            "contact",
+            "phone",
+            "email",
+            "address",
+            "reach",
+            "helpline",
+            "help line",
+            "call you",
+            "call us",
+            "whatsapp",
+            "mobile number",
+            "phone number",
+            "contact number",
+        )
+    ):
         intents.add("contact")
     if "privacy" in t:
         intents.add("privacy")

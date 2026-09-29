@@ -7,6 +7,67 @@ OFFICIAL_ADDRESS = (
 FOUNDER_NAME = "Dr. B.S. Ajaikumar"
 FOUNDER_ROLE = "Founder and Managing Trustee"
 
+# Mirrors the About Us > Our Team page on the website.
+TRUSTEES = [
+    (FOUNDER_NAME, FOUNDER_ROLE),
+    ("Ms. Anjali Ajaikumar Rossi", "Trustee"),
+    ("Dr. Ganesh Nayak", "Trustee"),
+    ("Prof. (Dr.) Ramesh S Bilimagga", "Trustee"),
+    ("Mr. Satish Shenoy", "Trustee"),
+]
+
+# --- Public website routes (must match frontend/src/app/(client)) ---
+# Every page renders the donate form, so donation links scroll to it in place.
+DONATE_URL = "#donate-form"
+PATIENT_AID_URL = "/our-programs/financial-support-for-pediatric-patients"
+AWARENESS_URL = "/our-programs/awareness-and-screening-camps"
+PARTICIPATE_URL = "/getinvolved/participate"
+CSR_URL = "/getinvolved/csr-partner"
+TRANSPARENCY_URL = "/resources/transparency-and-knowledge-hub"
+TEAM_URL = "/about/our-team"
+EVENTS_URL = "/resources/events"
+PROJECTS_URL = "/resources/projects"
+
+PAGE_LABELS = {
+    "/": "Home",
+    "/about-us": "About Us",
+    "/about/our-story": "Our Story",
+    TEAM_URL: "Our Team & Trustees",
+    "/contact": "Contact Us",
+    DONATE_URL: "Donate Now",
+    PATIENT_AID_URL: "Financial Support for Pediatric Patients",
+    AWARENESS_URL: "Awareness & Screening Camps",
+    "/our-programs/swasthi-gallery": "Swasti Gallery",
+    PARTICIPATE_URL: "Volunteer & Internships",
+    CSR_URL: "CSR Partnership",
+    "/getinvolved/grants-and-philanthropy": "Grants & Philanthropy",
+    "/journey-of-hope/patient-stories": "Patient Stories",
+    "/journey-of-hope/testimonials": "Testimonials",
+    EVENTS_URL: "Events",
+    PROJECTS_URL: "Projects",
+    TRANSPARENCY_URL: "Annual Reports & Newsletters",
+    "/privacy": "Privacy Policy",
+    "/terms": "Terms & Conditions",
+}
+
+# Routes that never existed on the site but may still be stored on older indexed chunks.
+LEGACY_URLS = {
+    "/donate": DONATE_URL,
+    "/patient-aid": PATIENT_AID_URL,
+    "/internship": PARTICIPATE_URL,
+    "/partnerships": CSR_URL,
+    "/awareness": AWARENESS_URL,
+    "/resources": TRANSPARENCY_URL,
+    "/resources/annual-reports": TRANSPARENCY_URL,
+}
+
+DETAIL_PREFIXES = (
+    "/journey-of-hope/patient-stories/",
+    "/resources/events/",
+    "/resources/projects/",
+    "/about/our-team/",
+)
+
 # Organisation compliance details (safe to share when visitors ask)
 OFFICIAL_PAN = "AAATH6254R"
 FCRA_BANK_NAME = "State Bank of India (SBI)"
@@ -29,9 +90,16 @@ SETUP_ANSWER = (
 )
 
 GREETING_ANSWER = (
-    "Hello! I’m the HCG Foundation assistant. I can help with donations, "
-    "Patient Aid, programs, trustees, internships, and registration details "
+    "Hello! I’m the HCG Foundation AI Assistant. I can help with donations, "
+    "Patient Aid, programs, trustees, volunteering, internships, and registration details "
     f"like 80G/FCRA. Official contact: {OFFICIAL_EMAIL}, {OFFICIAL_PHONE}."
+)
+
+CONTACT_ANSWER = (
+    "You can reach HCG Foundation at:\n"
+    f"- Phone: {OFFICIAL_PHONE}\n"
+    f"- Email: {OFFICIAL_EMAIL}\n"
+    f"- Address: {OFFICIAL_ADDRESS}"
 )
 
 THANKS_ANSWER = "You’re welcome. Happy to help with anything else about HCG Foundation."
@@ -47,7 +115,7 @@ HELP_ANSWER = (
 )
 
 DONATE_INTENT_ANSWER = (
-    "You can support HCG Foundation through our Donate Now page on the website. "
+    "You can support HCG Foundation using the Donate Now form on the website. "
     "Eligible Indian donations may receive an 80G tax receipt as described in our "
     "registration materials. "
     f"Contact: {OFFICIAL_EMAIL}, {OFFICIAL_PHONE}. Address: {OFFICIAL_ADDRESS}."

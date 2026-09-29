@@ -101,6 +101,34 @@ def delete_row(table: str, source_id: str) -> int:
         db.close()
 
 
+def delete_stale(tables: set[str], keep: set[tuple[str, str]]) -> int:
+    """Delete chunks from ``tables`` whose (table, source_id) is no longer in ``keep``."""
+    db = _db()
+    try:
+        existing = (
+            db.query(DocumentChunk.source_table, DocumentChunk.source_id)
+            .filter(DocumentChunk.source_table.in_(tables))
+            .distinct()
+            .all()
+        )
+        deleted = 0
+        for table, source_id in existing:
+            if (table, source_id) in keep:
+                continue
+            deleted += (
+                db.query(DocumentChunk)
+                .filter(
+                    DocumentChunk.source_table == table,
+                    DocumentChunk.source_id == source_id,
+                )
+                .delete(synchronize_session=False)
+            )
+        db.commit()
+        return int(deleted)
+    finally:
+        db.close()
+
+
 def upsert_document(doc: dict) -> int:
     """
     Upsert one parent document as overlapping chunks.
