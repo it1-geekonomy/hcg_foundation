@@ -3,7 +3,6 @@ import MissionHighlight from "@/shared/components/Missionsection";
 // Content is data, kept separate from markup so the same MissionHighlight
 // component can be reused across pages by swapping this object out.
 const OUR_MISSION_CONTENT = {
-  label: "Our Mission",
   heading: (
     <>
       Care, Hope &amp; Healing for {" "}
@@ -22,7 +21,6 @@ const OUR_MISSION_CONTENT = {
 export default function OurMissionSection() {
   return (
     <MissionHighlight
-      label={OUR_MISSION_CONTENT.label}
       heading={OUR_MISSION_CONTENT.heading}
       paragraphs={OUR_MISSION_CONTENT.paragraphs}
       image={OUR_MISSION_CONTENT.image}

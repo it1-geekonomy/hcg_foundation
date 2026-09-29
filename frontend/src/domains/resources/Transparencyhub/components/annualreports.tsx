@@ -57,12 +57,47 @@ export default function AnnualReportsSection({
   const requestedCounts = useRef<Set<string>>(new Set());
   const mounted = useRef(true);
 
+  // Heading blur reveal — plays once, the first time it scrolls into view.
+  const headingRef = useRef<HTMLDivElement | null>(null);
+  const [headingVisible, setHeadingVisible] = useState(false);
+
   useEffect(() => {
     mounted.current = true;
     return () => {
       mounted.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    const node = headingRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setHeadingVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  // Same blur + fade + slide-up as StatSection; delay staggers each element.
+  const revealStyle = (delayMs = 0): React.CSSProperties => ({
+    opacity: headingVisible ? 1 : 0,
+    filter: headingVisible ? "blur(0px)" : "blur(14px)",
+    transform: headingVisible
+      ? "translate3d(0,0,0)"
+      : "translate3d(0,32px,0)",
+    transition:
+      "opacity 700ms ease-out, filter 500ms ease-out, transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
+    transitionDelay: `${delayMs}ms`,
+    willChange: "opacity, filter, transform",
+  });
 
   // Apply the right breakpoint before the first paint, so the grid doesn't jump on refresh
   useIsoLayoutEffect(() => {
@@ -267,19 +302,37 @@ export default function AnnualReportsSection({
 
   return (
     <section className="bg-[#FFF8E2] pt-6 pb-6 px-8 sm:px-12 md:px-16 lg:py-20 lg:px-6 xl:px-6 2xl:px-40">
-      <div className="text-center">
-        <div className="mb-4 flex items-center justify-center gap-2">
+      <div ref={headingRef} className="text-center">
+        {/* Dot + label reveal together as one row */}
+        <div
+          className="mb-4 flex items-center justify-center gap-2 motion-reduce:!transition-none"
+          style={revealStyle(0)}
+        >
           <span className="h-2 w-2 rounded-full bg-[#FCCC2D]" />
-          <Typography variant="body-7" as="span" className="text-[#6F5E09] font-manrope font-normal">
+          <Typography
+            variant="body-7"
+            as="span"
+            className="text-[#6F5E09] font-manrope font-normal"
+          >
             transparency
           </Typography>
         </div>
 
-        <Typography variant="heading-3" as="h2" className="font-tiempos-headline font-normal">
+        <Typography
+          variant="heading-3"
+          as="h2"
+          className="font-tiempos-headline font-normal motion-reduce:!transition-none"
+          style={revealStyle(150)}
+        >
           Annual Reports & Impact
         </Typography>
 
-        <Typography variant="body-2" as="p" className="mx-auto mt-4 max-w-2xl font-normal font-argestadisplay">
+        <Typography
+          variant="body-2"
+          as="p"
+          className="mx-auto mt-4 max-w-2xl font-normal font-argestadisplay motion-reduce:!transition-none"
+          style={revealStyle(300)}
+        >
           Explore our annual reports to see the impact of cancer awareness,
           patient support, and community healthcare initiatives.
         </Typography>

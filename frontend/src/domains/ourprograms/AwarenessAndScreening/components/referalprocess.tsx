@@ -14,6 +14,7 @@ const STAGGER = 0.3; // gap between one icon and the next
 const POP_DURATION = 0.6;
 const RING_DURATION = 0.9;
 const RING_LAG = 0.1; // ring starts slightly after the pop begins
+const RING_REPEAT_DELAY = 0.8; // pause between each ring pulse
 
 function CheckIcon({ index, play }: { index: number; play: boolean }) {
   const reduce = useReducedMotion();
@@ -22,7 +23,7 @@ function CheckIcon({ index, play }: { index: number; play: boolean }) {
 
   return (
     <span aria-hidden className="relative mt-0.5 h-5 w-5 shrink-0">
-      {/* Ripple ring: sibling of the circle, always mounted, one-time */}
+      {/* Ripple ring: loops forever */}
       <motion.span
         className="pointer-events-none absolute inset-0 rounded-full border-2 border-[#FCCC2D]"
         style={{ willChange: "transform, opacity" }}
@@ -35,7 +36,10 @@ function CheckIcon({ index, play }: { index: number; play: boolean }) {
         transition={{
           duration: RING_DURATION,
           ease: "easeOut",
-          delay: delay + RING_LAG,
+          delay: delay + RING_LAG, // applies only before the first cycle
+          repeat: animate ? Infinity : 0,
+          repeatType: "loop",
+          repeatDelay: RING_REPEAT_DELAY,
         }}
       />
 

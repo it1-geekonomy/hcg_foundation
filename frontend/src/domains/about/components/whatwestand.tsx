@@ -30,37 +30,47 @@ export default function WhatWeStandFor({ className = "" }: WhatWeStandForProps) 
         },
       });
 
-      // Animate the heading in
-      tl.fromTo(headerRef.current, {
-        y: 40,
-        opacity: 0,
-      }, {
-        y: 0,
-        opacity: 1,
-        duration: 0.8,
-        ease: "power3.out",
-      })
-      // Stagger the cards in with a springy overshoot (back.out)
-      .fromTo(
-        cardsRef.current.filter(Boolean), // Filter out nulls safely
-        {
-          y: 100,
-          opacity: 0,
-          scale: 0.9,
-          rotateX: -25,
-        },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          rotateX: 0,
-          duration: 0.9,
-          stagger: 0.12,
-          ease: "back.out(1.4)",
-          transformOrigin: "center bottom",
-        },
-        "-=0.4" // Starts 0.4s before the heading finishes
-      );
+      // Heading blur reveal (same timings/easing as StatSection):
+      // opacity 700ms ease-out, blur 500ms ease-out, rise 1100ms cubic-bezier(0.22, 1, 0.36, 1)
+      tl.fromTo(
+        headerRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.7, ease: "power1.out" },
+        0
+      )
+        .fromTo(
+          headerRef.current,
+          { filter: "blur(14px)" },
+          { filter: "blur(0px)", duration: 0.5, ease: "power1.out" },
+          0
+        )
+        .fromTo(
+          headerRef.current,
+          { y: 32 },
+          { y: 0, duration: 1.1, ease: "expo.out" },
+          0
+        )
+        // Stagger the cards in with a springy overshoot (back.out)
+        .fromTo(
+          cardsRef.current.filter(Boolean), // Filter out nulls safely
+          {
+            y: 100,
+            opacity: 0,
+            scale: 0.9,
+            rotateX: -25,
+          },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            rotateX: 0,
+            duration: 0.9,
+            stagger: 0.12,
+            ease: "back.out(1.4)",
+            transformOrigin: "center bottom",
+          },
+          0.4 // Cards start at the same moment as before (0.4s in)
+        );
     }, sectionRef);
 
     return () => ctx.revert();
@@ -72,7 +82,7 @@ export default function WhatWeStandFor({ className = "" }: WhatWeStandForProps) 
       className={`w-full overflow-x-hidden bg-[#FFFCF2] pt-6 pb-6 px-8 sm:px-12 md:px-16 lg:py-20 lg:px-6 xl:px-6 2xl:px-40 ${className}`}
       style={{ perspective: "1200px" }}
     >
-      <div ref={headerRef}>
+      <div ref={headerRef} style={{ willChange: "opacity, filter, transform" }}>
         <Typography
           variant="heading-3"
           as="h2"
