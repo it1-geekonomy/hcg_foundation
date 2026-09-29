@@ -11,6 +11,7 @@ import PaginationControls from "@/shared/components/PaginationControls";
 import ShareStory from "@/shared/components/ShareStory";
 import ProjectCard from "@/domains/resources/components/ProjectCard";
 import SwasthiArtTherapySection from "@/domains/resources/components/SwasthiArtTherapySection";
+import PuzzleImage from "@/shared/components/Puzzleimage";
 import { ProjectItem, PROJECTS_DATA } from "@/domains/resources/constants/projects";
 import { publicProjectsApi } from "@/domains/cms/lib/api";
 
@@ -236,11 +237,18 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             </div>
 
             <div className="sm:col-span-5 flex flex-col items-start w-full order-first sm:order-last">
-              <div className="relative aspect-[4/3] sm:aspect-[4/3] w-full max-w-[37.5rem] overflow-hidden rounded-xl bg-[#EFEAD8] shadow-md">
-                <img
+              <div className="relative aspect-[4/3] sm:aspect-[4/3] w-full max-w-[37.5rem] overflow-hidden rounded-xl">
+                {/* Puzzle-piece reveal on the detail image only — pieces
+                    fade/scale in at their own cell, in a randomized order,
+                    the moment this box scrolls into view. */}
+                <PuzzleImage
+                  key={projectItem.id}
                   src={projectItem.imageUrl}
                   alt={projectItem.title}
-                  className="h-full w-full object-cover"
+                  rows={4}
+                  cols={5}
+                  fit="cover"
+                  staggerDuration={1000}
                 />
               </div>
             </div>

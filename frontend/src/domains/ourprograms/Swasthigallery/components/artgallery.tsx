@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Typography from "@/lib/Typography";
@@ -12,19 +15,30 @@ function Card({
   title,
   description,
   showMobileDivider = false,
+  visible,
+  index,
 }: {
   icon: string;
   title: string;
   description: string;
   showMobileDivider?: boolean;
+  visible: boolean;
+  index: number;
 }) {
+  const delay = index * 140;
+  const fromX = index % 2 === 0 ? -50 : 50; // alternate entry sides
+
   return (
     <div
-      className={`min-w-0 p-6 sm:p-8 lg:p-6 xl:p-10 ${
-        showMobileDivider ? "border-b border-[#FFECC5] sm:border-b-0" : ""
-      }`}
+      style={{
+        ["--delay" as string]: `${delay}ms`,
+        ["--fx" as string]: `${fromX}px`,
+      }}
+      className={`swasti-card min-w-0 p-6 sm:p-8 lg:p-6 xl:p-10 ${
+        visible ? "is-visible" : ""
+      } ${showMobileDivider ? "border-b border-[#FFECC5] sm:border-b-0" : ""}`}
     >
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#FEF0D3] sm:h-14 sm:w-14 lg:h-16 lg:w-16 xl:h-20 xl:w-20">
+      <span className="swasti-icon flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#FEF0D3] sm:h-14 sm:w-14 lg:h-16 lg:w-16 xl:h-20 xl:w-20">
         <Image
           src={icon}
           alt=""
@@ -34,11 +48,19 @@ function Card({
         />
       </span>
 
-      <Typography variant="heading-8" as="h3" className="mt-4 font-argestadisplay font-normal text-black">
+      <Typography
+        variant="heading-8"
+        as="h3"
+        className="swasti-title mt-4 font-argestadisplay font-normal text-black"
+      >
         {title}
       </Typography>
 
-      <Typography variant="body-7" as="p" className="mt-2 font-manrope font-normal text-[#606060]">
+      <Typography
+        variant="body-7"
+        as="p"
+        className="swasti-desc mt-2 font-manrope font-normal text-[#606060]"
+      >
         {description}
       </Typography>
     </div>
@@ -49,7 +71,7 @@ function VerticalDivider() {
   return (
     <span
       aria-hidden
-      className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-px -translate-x-1/2 sm:block"
+      className="pointer-events-none absolute inset-y-0 left-1/2 z-[4] hidden w-px -translate-x-1/2 sm:block"
       style={{
         backgroundColor: "rgba(133,125,106,0.35)",
         maskImage: `linear-gradient(to bottom, ${FADE_GRADIENT})`,
@@ -65,7 +87,7 @@ function HorizontalDivider() {
   return (
     <span
       aria-hidden
-      className="pointer-events-none absolute inset-x-0 top-1/2 hidden h-px -translate-y-1/2 sm:block"
+      className="pointer-events-none absolute inset-x-0 top-1/2 z-[4] hidden h-px -translate-y-1/2 sm:block"
       style={{
         backgroundColor: "rgba(133,125,106,0.35)",
         maskImage: `linear-gradient(to right, ${FADE_GRADIENT})`,
@@ -78,7 +100,26 @@ function HorizontalDivider() {
 }
 
 export default function SwastiArtGallery() {
-  const [card1, card2, card3, card4] = ART_GALLERY_CARDS;
+  const cards = ART_GALLERY_CARDS;
+
+  const cardsRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = cardsRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
     <section className="w-full overflow-x-hidden bg-[#FFF8E2] pt-8 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-20 lg:px-6 xl:px-6 2xl:px-40">
@@ -118,17 +159,16 @@ export default function SwastiArtGallery() {
           </Typography>
         </div>
 
-        {/* Right: 2x2 icon card grid. A single relative wrapper holds all four
-            cards in one grid, with ONE full-height VerticalDivider and ONE
-            full-width HorizontalDivider absolutely positioned over it. Each
-            fades only near the true outer edges of the box, so the center
-            crossing where the two lines meet stays fully solid. */}
-        <div className="relative min-w-0 border border-[#FFECC5] bg-[#FFFBEE]">
-          <div className="grid grid-cols-1 sm:grid-cols-2">
-            <Card {...card1} showMobileDivider />
-            <Card {...card2} showMobileDivider />
-            <Card {...card3} showMobileDivider />
-            <Card {...card4} />
+        {/* Right: animated 2x2 icon card grid */}
+        <div
+          ref={cardsRef}
+          className="relative min-w-0 overflow-hidden border border-[#FFECC5] bg-[#FFFBEE]"
+        >
+          <div className="relative z-[1] grid grid-cols-1 sm:grid-cols-2">
+            <Card {...cards[0]} showMobileDivider visible={visible} index={0} />
+            <Card {...cards[1]} showMobileDivider visible={visible} index={1} />
+            <Card {...cards[2]} showMobileDivider visible={visible} index={2} />
+            <Card {...cards[3]} visible={visible} index={3} />
           </div>
           <VerticalDivider />
           <HorizontalDivider />

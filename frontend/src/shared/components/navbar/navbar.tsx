@@ -53,6 +53,18 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Close the open desktop dropdown as soon as the user scrolls
+  useEffect(() => {
+    if (openDesktopDropdown === null) return;
+
+    const handleDropdownScroll = () => {
+      setOpenDesktopDropdown(null);
+    };
+
+    window.addEventListener("scroll", handleDropdownScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleDropdownScroll);
+  }, [openDesktopDropdown]);
+
   const toggleDropdown = (index: number) => {
     setOpenDropdown((prev) => (prev === index ? null : index));
   };
@@ -72,13 +84,16 @@ export default function Navbar() {
   };
 
   return (
-    <div
-      id="site-navbar"
-      className={`fixed top-[clamp(0.75rem,2vw,1.5rem)] inset-x-[clamp(1rem,8vw,8rem)] xl:inset-x-[clamp(0.5rem,3vw,4rem)] 2xl:inset-x-[clamp(1rem,10vw,10rem)] z-50 transition-transform duration-300 ease-in-out ${isVisible ? "translate-y-0" : "-translate-y-[150%]"
-        }`}
-    >
-      <nav className="w-full border border-white/10 bg-black/[0.18] backdrop-blur-[60px] px-[clamp(1rem,2vw,1.5rem)] xl:px-0">
-        <div className="flex items-center justify-between h-[clamp(3.5rem,6vw,4.5rem)] xl:ml-8">
+    <>
+      {/* Reserves the bar height only below 640px so page sections start under it. */}
+      <div aria-hidden="true" className="h-[calc(3.5rem+1px)] w-full sm:hidden" />
+      <div
+        id="site-navbar"
+        className={`fixed z-50 transition-transform duration-300 ease-in-out top-0 inset-x-0 sm:top-[clamp(0.75rem,2vw,1.5rem)] sm:inset-x-[clamp(1rem,8vw,8rem)] xl:inset-x-[clamp(0.5rem,3vw,4rem)] 2xl:inset-x-[clamp(1rem,10vw,10rem)] ${isVisible ? "translate-y-0" : "-translate-y-[150%]"
+          }`}
+      >
+      <nav className="w-full border border-white/10 bg-black/[0.18] backdrop-blur-[60px] px-[clamp(1rem,2vw,1.5rem)] max-sm:border-x-0 max-sm:border-t-0 max-sm:bg-[#2a2622] max-sm:px-0 max-sm:backdrop-blur-none xl:px-0">
+        <div className="flex items-center justify-between h-[clamp(3.5rem,6vw,4.5rem)] max-sm:h-14 max-sm:px-[clamp(1rem,2vw,1.5rem)] xl:ml-8">
           {/* Logo */}
           <Link
             href="/"
@@ -200,5 +215,6 @@ export default function Navbar() {
         />
       </nav>
     </div>
+    </>
   );
 }

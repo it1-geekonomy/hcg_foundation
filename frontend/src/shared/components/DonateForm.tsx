@@ -23,6 +23,20 @@ import {
   formatDonationAmount,
   getDonationCurrency,
 } from "@/domains/home/constants/donation-currency";
+import {
+  AvatarPop,
+  CountUp,
+  DonateBg,
+  DonateCard,
+  DonateItem,
+  DonateMotionProvider,
+  DrawLine,
+  HeartBeat,
+  IconBeat,
+  MaskWord,
+  Shake,
+  useSectionInView,
+} from "./donateAnimation";
 
 export default function DonateSection() {
   const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
@@ -38,6 +52,9 @@ export default function DonateSection() {
   const [amountError, setAmountError] = useState<string | null>(null);
   const [agreedTo80G, setAgreedTo80G] = useState(false);
   const [termsError, setTermsError] = useState(false);
+  const [shakeKey, setShakeKey] = useState(0);
+
+  const { ref: sectionRef, inView } = useSectionInView<HTMLElement>();
 
   const changeCountry = (nextCode: string) => {
     const next = getDonationCountry(nextCode);
@@ -81,28 +98,38 @@ export default function DonateSection() {
     setAmountError(amountInvalid ? "Please choose or enter an amount." : null);
     setTermsError(!agreedTo80G);
 
-    if (amountInvalid || !agreedTo80G) return;
+    if (amountInvalid || !agreedTo80G) {
+      setShakeKey((k) => k + 1);
+      return;
+    }
 
     setDetailsOpen(true);
   };
 
   const cardContent = (
     <>
-      <div className="flex flex-col items-center gap-2 text-center">
+      {/* Header */}
+      <DonateItem
+        index={0}
+        className="flex flex-col items-center gap-2 text-center"
+      >
         <div className="flex items-center gap-2">
-          <Image
-            src={donateIcon}
-            alt=""
-            width={26}
-            height={26}
-            className="h-[clamp(2rem,5vw,2.5rem)] w-[clamp(2rem,5vw,2.5rem)]"
-          />
+          <IconBeat>
+            <Image
+              src={donateIcon}
+              alt=""
+              width={26}
+              height={26}
+              className="h-[clamp(2rem,5vw,2.5rem)] w-[clamp(2rem,5vw,2.5rem)]"
+            />
+          </IconBeat>
           <Typography
             variant="heading-6"
             as="h3"
             className="font-tiempos-fine font-normal text-white"
           >
-            Donate Now
+            <MaskWord index={0}>Donate</MaskWord>{" "}
+            <MaskWord index={1}>Now</MaskWord>
           </Typography>
         </div>
 
@@ -114,9 +141,10 @@ export default function DonateSection() {
           Your contribution helps us provide care, support and hope to those
           who need it most.
         </Typography>
-      </div>
+      </DonateItem>
 
-      <div className="flex flex-col gap-2 mb-4">
+      {/* Country */}
+      <DonateItem index={1} className="flex flex-col gap-2 mb-4">
         <Typography
           variant="body-8"
           as="span"
@@ -136,9 +164,10 @@ export default function DonateSection() {
         >
           Currency: {currencyMeta.label}
         </Typography>
-      </div>
+      </DonateItem>
 
-      <div className="flex flex-col gap-3 mb-6 md:mb-0">
+      {/* Amounts (buttons themselves are not animated) */}
+      <DonateItem index={2} className="flex flex-col gap-3 mb-6 md:mb-0">
         <Typography
           variant="body-7"
           as="span"
@@ -197,20 +226,20 @@ export default function DonateSection() {
               onClick={pickCustom}
               className="rounded border-1 border-[#FCCC2D] bg-[#FCCC2D]/15 px-4 py-1.5 text-white font-semibold backdrop-blur-sm transition-colors sm:w-[80%] sm:mx-auto sm:px-0 sm:py-2.5 md:w-[88%]"
             >
-              <Typography
-                variant="body-8"
-                as="span"
-                className="font-manrope"
-              >
+              <Typography variant="body-8" as="span" className="font-manrope">
                 More
               </Typography>
             </button>
           )}
         </div>
-      </div>
+      </DonateItem>
 
-      <div className="hidden md:flex items-center gap-3 lg:mb-4">
-        <span className="h-px flex-1 bg-white/15" />
+      {/* "or" divider */}
+      <DonateItem
+        index={3}
+        className="hidden md:flex items-center gap-3 lg:mb-4"
+      >
+        <DrawLine side="left" />
         <Typography
           variant="body-6"
           as="span"
@@ -218,10 +247,11 @@ export default function DonateSection() {
         >
           or
         </Typography>
-        <span className="h-px flex-1 bg-white/25" />
-      </div>
+        <DrawLine side="right" />
+      </DonateItem>
 
-      <div className="flex flex-col gap-2">
+      {/* Custom amount */}
+      <DonateItem index={4} className="flex flex-col gap-2">
         <Typography
           variant="body-8"
           as="span"
@@ -246,10 +276,10 @@ export default function DonateSection() {
             className="w-full bg-transparent text-white placeholder-white/40 outline-none"
           />
         </div>
-      </div>
+      </DonateItem>
 
       {/* 80G terms */}
-      <div className="flex flex-col gap-1.5">
+      <DonateItem index={5} className="flex flex-col gap-1.5">
         <label className="flex min-w-0 cursor-pointer items-center gap-3">
           <span className="relative flex h-4 w-4 shrink-0">
             <input
@@ -281,30 +311,39 @@ export default function DonateSection() {
         </label>
 
         {termsError ? (
-          <Typography
-            variant="caption-1"
-            as="p"
-            role="alert"
-            className="pl-7 font-manrope font-light leading-snug text-[#FFE08A]"
-          >
-            Please agree to the 80G Terms &amp; Conditions to continue.
-          </Typography>
+          <Shake key={`terms-${shakeKey}`}>
+            <Typography
+              variant="caption-1"
+              as="p"
+              role="alert"
+              className="pl-7 font-manrope font-light leading-snug text-[#FFE08A]"
+            >
+              Please agree to the 80G Terms &amp; Conditions to continue.
+            </Typography>
+          </Shake>
         ) : null}
-      </div>
+      </DonateItem>
 
       {/* Social proof */}
-      <div className="mb-2 flex min-w-0 items-start gap-3 md:mb-0">
+      <DonateItem
+        index={6}
+        className="mb-2 flex min-w-0 items-start gap-3 md:mb-0"
+      >
         <div className="flex shrink-0 -space-x-2 pt-0.5">
           {donorAvatars.map((src, i) => (
-            <Image
+            <AvatarPop
               key={src}
-              src={src}
-              alt=""
-              width={24}
-              height={24}
-              style={{ zIndex: donorAvatars.length - i }}
-              className="h-[clamp(1.25rem,4vw,1.5rem)] w-[clamp(1.25rem,4vw,1.5rem)] rounded-full border border-white/50"
-            />
+              index={i}
+              zIndex={donorAvatars.length - i}
+            >
+              <Image
+                src={src}
+                alt=""
+                width={24}
+                height={24}
+                className="h-[clamp(1.25rem,4vw,1.5rem)] w-[clamp(1.25rem,4vw,1.5rem)] rounded-full border border-white/50"
+              />
+            </AvatarPop>
           ))}
         </div>
         <Typography
@@ -312,15 +351,18 @@ export default function DonateSection() {
           as="p"
           className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/90"
         >
-          126 kind donors have contributed this month. Join with them today.❤️
+          <CountUp to={126} /> kind donors have contributed this month. Join
+          with them today.
+          <HeartBeat>❤️</HeartBeat>
         </Typography>
-      </div>
+      </DonateItem>
 
-      <div className="flex flex-col items-center mb-0">
+      {/* Donate button (its section fades in, the button itself does not animate) */}
+      <DonateItem index={7} className="flex flex-col items-center mb-0">
         {amountError ? (
-          <p className="mb-2 font-manrope text-[#FFE08A]">
-            {amountError}
-          </p>
+          <Shake key={`amount-${shakeKey}`}>
+            <p className="mb-2 font-manrope text-[#FFE08A]">{amountError}</p>
+          </Shake>
         ) : null}
         <button
           type="button"
@@ -331,9 +373,12 @@ export default function DonateSection() {
             Donate Now
           </Typography>
         </button>
-      </div>
+      </DonateItem>
 
-      <div className="flex items-center justify-center gap-1.5">
+      <DonateItem
+        index={8}
+        className="flex items-center justify-center gap-1.5"
+      >
         <Lock className="h-4 w-4 text-white/70" />
         <Typography
           variant="caption-1"
@@ -349,66 +394,77 @@ export default function DonateSection() {
         >
           Secure Payment • Trusted by Thousands
         </Typography>
-      </div>
+      </DonateItem>
     </>
   );
 
   return (
-    <section className="w-full bg-[#FFF6D8]">
-      <Script
-        src="https://checkout.razorpay.com/v1/checkout.js"
-        strategy="afterInteractive"
-      />
-      {detailsOpen ? (
-        <DonateDetailsModal
-          amount={donationAmount}
-          currency={currency}
-          countryCode={countryCode}
-          onClose={() => setDetailsOpen(false)}
-          onAmountChange={(next) => {
-            setIsCustom(true);
-            setCustomAmount(String(next));
-            setSelectedPreset(null);
-          }}
+    <section ref={sectionRef} className="w-full bg-[#FFF6D8]">
+      <DonateMotionProvider inView={inView}>
+        <Script
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          strategy="afterInteractive"
         />
-      ) : null}
-      <div className="relative w-full">
-        <div className="relative w-full overflow-hidden md:hidden">
-          <Image
-            src={donatemobileimg}
-            alt="Two people holding hands"
-            fill
-            priority
-            className="object-cover object-top"
+        {detailsOpen ? (
+          <DonateDetailsModal
+            amount={donationAmount}
+            currency={currency}
+            countryCode={countryCode}
+            onClose={() => setDetailsOpen(false)}
+            onAmountChange={(next) => {
+              setIsCustom(true);
+              setCustomAmount(String(next));
+              setSelectedPreset(null);
+            }}
           />
-          <div className="relative z-10 px-6 py-6 sm:px-10 sm:py-10">
-            <div
-              className="flex w-full flex-col gap-4 rounded border border-white/15 p-5 backdrop-blur-md"
-              style={{ backgroundColor: donateTheme.glassBg }}
-            >
-              {cardContent}
-            </div>
-          </div>
-        </div>
+        ) : null}
 
-        <div className="relative hidden w-full overflow-hidden md:block">
-          <Image
-            src={donateBgImage}
-            alt="Two people holding hands"
-            fill
-            priority
-            className="object-cover"
-          />
-          <div className="relative z-10 flex justify-end py-6 pl-6 pr-10 md:pr-[60px] lg:py-8 lg:pl-8 lg:pr-20 xl:py-10 xl:pl-10 xl:pr-28">
-            <div
-              className="flex w-[440px] flex-col gap-5 rounded border border-white/15 p-8 backdrop-blur-md lg:w-[540px] lg:gap-6 lg:p-12 xl:w-[600px] xl:p-10"
-              style={{ backgroundColor: donateTheme.glassBg }}
-            >
-              {cardContent}
+        <div className="relative w-full">
+          {/* Mobile */}
+          <div className="relative w-full overflow-hidden md:hidden">
+            <DonateBg>
+              <Image
+                src={donatemobileimg}
+                alt="Two people holding hands"
+                fill
+                priority
+                className="object-cover object-top"
+              />
+            </DonateBg>
+            <div className="relative z-10 px-6 py-6 sm:px-10 sm:py-10">
+              <DonateCard
+                from="bottom"
+                className="relative flex w-full flex-col gap-4 overflow-hidden rounded border border-white/15 p-5 backdrop-blur-md"
+                style={{ backgroundColor: donateTheme.glassBg }}
+              >
+                {cardContent}
+              </DonateCard>
+            </div>
+          </div>
+
+          {/* Desktop */}
+          <div className="relative hidden w-full overflow-hidden md:block">
+            <DonateBg>
+              <Image
+                src={donateBgImage}
+                alt="Two people holding hands"
+                fill
+                priority
+                className="object-cover"
+              />
+            </DonateBg>
+            <div className="relative z-10 flex justify-end py-6 pl-6 pr-10 md:pr-[60px] lg:py-8 lg:pl-8 lg:pr-20 xl:py-10 xl:pl-10 xl:pr-28">
+              <DonateCard
+                from="right"
+                className="relative flex w-[440px] flex-col gap-5 overflow-hidden rounded border border-white/15 p-8 backdrop-blur-md lg:w-[540px] lg:gap-6 lg:p-12 xl:w-[600px] xl:p-10"
+                style={{ backgroundColor: donateTheme.glassBg }}
+              >
+                {cardContent}
+              </DonateCard>
             </div>
           </div>
         </div>
-      </div>
+      </DonateMotionProvider>
     </section>
   );
 }

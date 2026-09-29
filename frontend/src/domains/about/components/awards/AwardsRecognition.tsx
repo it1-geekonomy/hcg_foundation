@@ -31,11 +31,7 @@ function AwardScrollArrow({
       aria-label={isLeft ? "Scroll to previous award" : "Scroll to next award"}
       onClick={onClick}
       disabled={disabled}
-      className={`pointer-events-auto flex h-10 w-10 items-center justify-center transition-opacity ${
-        isLeft
-          ? "-ml-4 sm:-ml-6 lg:-ml-10"
-          : "-mr-4 sm:-mr-6 lg:-mr-10"
-      } ${
+      className={`flex h-10 w-10 flex-none items-center justify-center transition-opacity ${
         disabled
           ? "cursor-not-allowed opacity-40"
           : "cursor-pointer opacity-100"
@@ -56,7 +52,12 @@ function AwardScrollArrow({
 
 /**
  * Shared About Us awards section — used on the public site and in CMS preview.
- * Arrow centering is pure CSS (image-height rail), so scaled CMS preview matches the website.
+ * Arrows are real flex siblings of the track (not absolutely positioned over
+ * it), so they can never overlay the images; a 2px gap sits between them.
+ * Below 640px the track's width is capped to match the visible card so the
+ * arrows land right next to the image instead of at the far edges.
+ * Dragging (mouse or touch) is handled manually via pointer events so it
+ * always advances exactly one card per gesture, on every screen size.
  */
 export default function AwardsRecognition({
   items,
@@ -68,6 +69,11 @@ export default function AwardsRecognition({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [titleHeight, setTitleHeight] = useState<number | null>(null);
+  const [imageHeight, setImageHeight] = useState<number | null>(null);
+
+  const isDraggingRef = useRef(false);
+  const dragStartXRef = useRef(0);
+  const draggedDistanceRef = useRef(0);
 
   const updateScrollState = useCallback(() => {
     const el = trackRef.current;
@@ -82,10 +88,16 @@ export default function AwardsRecognition({
     setTitleHeight(max || null);
   }, []);
 
+  const updateImageHeight = useCallback(() => {
+    const el = trackRef.current?.querySelector<HTMLElement>("[data-award-image]");
+    setImageHeight(el ? el.offsetHeight : null);
+  }, []);
+
   useEffect(() => {
     titleRefs.current = titleRefs.current.slice(0, items.length);
     updateScrollState();
     updateTitleHeight();
+    updateImageHeight();
 
     const el = trackRef.current;
     if (!el) return;
@@ -96,6 +108,7 @@ export default function AwardsRecognition({
     const onResize = () => {
       updateScrollState();
       updateTitleHeight();
+      updateImageHeight();
     };
     window.addEventListener("resize", onResize);
 
@@ -103,7 +116,7 @@ export default function AwardsRecognition({
       el.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
     };
-  }, [items, updateScrollState, updateTitleHeight]);
+  }, [items, updateScrollState, updateTitleHeight, updateImageHeight]);
 
   const scrollByCard = (direction: "left" | "right") => {
     const el = trackRef.current;
@@ -117,9 +130,40 @@ export default function AwardsRecognition({
     });
   };
 
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    isDraggingRef.current = true;
+    draggedDistanceRef.current = 0;
+    dragStartXRef.current = e.clientX;
+    trackRef.current?.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingRef.current) return;
+    draggedDistanceRef.current = e.clientX - dragStartXRef.current;
+  };
+
+  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    try {
+      trackRef.current?.releasePointerCapture(e.pointerId);
+    } catch {
+      // pointer capture may already be released; safe to ignore
+    }
+    const distance = draggedDistanceRef.current;
+    const threshold = 40;
+    if (distance <= -threshold) {
+      scrollByCard("right");
+    } else if (distance >= threshold) {
+      scrollByCard("left");
+    }
+    draggedDistanceRef.current = 0;
+  };
+
   if (items.length === 0) return null;
 
   const showArrows = canScrollLeft || canScrollRight;
+  const arrowRailStyle = imageHeight != null ? { height: `${imageHeight}px` } : undefined;
 
   return (
     <section
@@ -147,49 +191,56 @@ export default function AwardsRecognition({
       ) : null}
 
       <div className={hideIntro ? "relative" : "relative mt-10"}>
-        {/*
-          Arrow rail height = award image (4:5). Same CSS on site + CMS —
-          no JS measurement, so scaled preview cannot drift.
-        */}
-        {showArrows ? (
-          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 grid">
+        <div className="mx-auto flex max-w-[1100px] items-start justify-center gap-[2px]">
+          {showArrows ? (
             <div
-              aria-hidden
-              className="col-start-1 row-start-1 mx-auto aspect-[4/5] w-[80%] sm:mx-0 sm:w-[calc(50%-12px)] lg:w-[calc(50%-24px)]"
-            />
-            <div className="col-start-1 row-start-1 flex items-center justify-between self-stretch">
+              className="flex flex-none items-center justify-center"
+              style={arrowRailStyle}
+            >
               <AwardScrollArrow
                 direction="left"
                 disabled={!canScrollLeft}
                 onClick={() => scrollByCard("left")}
               />
+            </div>
+          ) : null}
+
+          <div
+            ref={trackRef}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
+            className="flex min-w-0 flex-1 cursor-grab select-none snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth [touch-action:pan-y] active:cursor-grabbing [scrollbar-width:none] max-[499px]:max-w-none min-[500px]:max-[639px]:max-w-[280px] lg:gap-16 [&::-webkit-scrollbar]:hidden"
+          >
+            {items.map((award, index) => (
+              <div
+                key={awardKey(award, index)}
+                className="min-w-0 flex-none basis-full snap-start sm:basis-[calc(50%-12px)] lg:basis-[calc(50%-32px)]"
+              >
+                <AwardCard
+                  award={award}
+                  titleHeight={titleHeight}
+                  titleRef={(el) => {
+                    titleRefs.current[index] = el;
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+
+          {showArrows ? (
+            <div
+              className="flex flex-none items-center justify-center"
+              style={arrowRailStyle}
+            >
               <AwardScrollArrow
                 direction="right"
                 disabled={!canScrollRight}
                 onClick={() => scrollByCard("right")}
               />
             </div>
-          </div>
-        ) : null}
-
-        <div
-          ref={trackRef}
-          className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth [scrollbar-width:none] lg:gap-12 [&::-webkit-scrollbar]:hidden"
-        >
-          {items.map((award, index) => (
-            <div
-              key={awardKey(award, index)}
-              className="min-w-0 flex-none basis-full snap-start sm:basis-[calc(50%-12px)] lg:basis-[calc(50%-24px)]"
-            >
-              <AwardCard
-                award={award}
-                titleHeight={titleHeight}
-                titleRef={(el) => {
-                  titleRefs.current[index] = el;
-                }}
-              />
-            </div>
-          ))}
+          ) : null}
         </div>
       </div>
     </section>

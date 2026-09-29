@@ -9,14 +9,14 @@ export const IMPACT_ITEMS = [
     desc: "Help fund critical cancer treatments",
   },
   {
-    emoji: "🤝",
-    title: "Care & Compassion",
-    desc: "Provide emotional and holistic care",
-  },
-  {
     emoji: "💰",
     title: "Financial Assistance",
     desc: "Offer financial aid to families in need",
+  },
+  {
+    emoji: "🤝",
+    title: "Care & Compassion",
+    desc: "Provide emotional and holistic care",
   },
   {
     emoji: "❤️",
