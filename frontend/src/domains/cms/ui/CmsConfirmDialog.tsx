@@ -29,7 +29,7 @@ export default function CmsConfirmDialog() {
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
       <button
         type="button"
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-[#0f1115]/50 backdrop-blur-[2px]"
         aria-label="Dismiss"
         onClick={() => close(false)}
       />
@@ -40,49 +40,46 @@ export default function CmsConfirmDialog() {
         aria-describedby={
           options.description ? "cms-confirm-desc" : undefined
         }
-        className="relative w-full max-w-md rounded-2xl bg-white p-5 shadow-xl ring-1 ring-black/10 sm:p-6"
+        className="relative w-full max-w-md overflow-hidden rounded-xl bg-white shadow-[0_24px_48px_rgba(16,24,40,0.18)] ring-1 ring-cms-border"
       >
-        <Typography
-          variant="body-9"
-          as="h2"
-          id="cms-confirm-title"
-          className="font-semibold text-[#212121]"
-        >
-          {options.title}
-        </Typography>
-        {options.description ? (
+        <div className="p-6">
           <Typography
-            variant="label-1"
-            as="p"
-            id="cms-confirm-desc"
-            className="mt-2 leading-relaxed text-[#5C5C5C]"
+            variant="body-9"
+            as="h2"
+            id="cms-confirm-title"
+            className="font-semibold text-cms-ink"
           >
-            {options.description}
+            {options.title}
           </Typography>
-        ) : null}
-        <div className="mt-5 flex flex-wrap justify-end gap-2">
+          {options.description ? (
+            <Typography
+              variant="label-1"
+              as="p"
+              id="cms-confirm-desc"
+              className="mt-2 text-cms-muted"
+            >
+              {options.description}
+            </Typography>
+          ) : null}
+        </div>
+        <div className="flex flex-wrap justify-end gap-2 border-t border-cms-border bg-cms-subtle/60 px-6 py-3.5">
           <Button
             type="button"
             variant="outline"
-            className="h-9 border-black/10 bg-white text-[#212121] hover:bg-[#F0F0EC] hover:text-[#212121]"
             onClick={() => close(false)}
           >
-            <Typography variant="button-3" as="span">
-              {cancelLabel}
-            </Typography>
+            {cancelLabel}
           </Button>
           <Button
             type="button"
             className={
               tone === "danger"
-                ? "h-9 bg-red-600 text-white hover:bg-red-700 hover:text-white"
-                : "h-9 bg-[#FCCC2D] text-[#212121] hover:bg-[#f5c01f] hover:text-[#212121]"
+                ? "bg-red-600 text-white hover:bg-red-700"
+                : undefined
             }
             onClick={() => close(true)}
           >
-            <Typography variant="button-3" as="span">
-              {confirmLabel}
-            </Typography>
+            {confirmLabel}
           </Button>
         </div>
       </div>

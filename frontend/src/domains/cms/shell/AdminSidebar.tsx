@@ -55,22 +55,32 @@ function SidebarNav({
     <>
       <div
         className={cn(
-          "relative flex h-16 shrink-0 items-center border-b border-white/[0.06] px-3.5 lg:h-[72px]",
-          collapsed && showDesktopToggle && "justify-center"
+          "relative flex shrink-0 items-center",
+          collapsed && showDesktopToggle
+            ? "h-20 justify-center px-2"
+            : "h-24 px-5"
         )}
       >
         <Link
           href="/admin/dashboard"
-          className="flex h-10 min-w-0 flex-1 items-center overflow-hidden lg:h-11"
+          className={cn(
+            "flex items-center overflow-hidden",
+            collapsed && showDesktopToggle ? "w-9" : "min-w-0 flex-1"
+          )}
           aria-label="HCG Foundation admin"
           onClick={onNavigate}
         >
+          {/* Logo text is white, so it only reads on the dark sidebar. Collapsed = crop to the mark. */}
           <Image
             src="/footer/Logo.png"
             alt="HCG Foundation"
-            width={180}
-            height={52}
-            className="h-10 w-[160px] max-w-none shrink-0 object-contain object-left lg:h-11 lg:w-[180px]"
+            width={290}
+            height={99}
+            unoptimized
+            className={cn(
+              "w-auto max-w-none shrink-0 object-contain object-left",
+              collapsed && showDesktopToggle ? "h-8" : "h-16"
+            )}
             priority
           />
         </Link>
@@ -90,7 +100,7 @@ function SidebarNav({
           <button
             type="button"
             onClick={() => onCollapsedChange(!collapsed)}
-            className="absolute top-1/2 right-0 z-50 flex size-7 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/12 bg-[#171717] text-white/70 shadow-[0_4px_12px_rgba(0,0,0,0.4)] transition-colors hover:border-[#FCCC2D]/50 hover:text-[#FCCC2D]"
+            className="absolute top-1/2 right-0 z-50 flex size-6 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cms-border bg-white text-cms-muted shadow-sm transition-colors hover:text-cms-ink"
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? (
@@ -102,23 +112,19 @@ function SidebarNav({
         ) : null}
       </div>
 
-      <nav className="flex-1 overflow-x-hidden overflow-y-auto px-3 py-5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        <div className="space-y-7">
+      <nav className="flex-1 overflow-x-hidden overflow-y-auto px-3 py-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="space-y-5">
           {adminMenuGroups.map((group) => (
             <div key={group.label}>
               {collapsed && showDesktopToggle ? (
-                <div className="mx-auto mb-2.5 h-px w-5 bg-white/10" />
+                <div className="mx-auto mb-2 h-px w-5 bg-white/10" />
               ) : (
-                <Typography
-                  variant="caption-1"
-                  as="p"
-                  className="mb-2.5 px-3 font-semibold tracking-[0.2em] text-white/30 uppercase"
-                >
+                <p className="mb-1.5 px-2.5 text-[11px] leading-4 font-medium tracking-[0.08em] text-white/40 uppercase">
                   {group.label}
-                </Typography>
+                </p>
               )}
 
-              <ul className="space-y-1">
+              <ul className="space-y-0.5">
                 {group.items.map((item) => {
                   const active = isActivePath(pathname, item.href);
                   const Icon = item.icon;
@@ -131,33 +137,32 @@ function SidebarNav({
                         title={item.label}
                         onClick={onNavigate}
                         className={cn(
-                          "group relative flex items-center gap-3 overflow-hidden rounded-xl py-2.5 font-medium transition-colors duration-200",
-                          iconOnly ? "justify-center px-0" : "px-3",
+                          "group relative flex h-9 items-center gap-2.5 overflow-hidden rounded-md font-medium transition-colors duration-150",
+                          iconOnly ? "justify-center px-0" : "px-2.5",
                           active
-                            ? "bg-[linear-gradient(90deg,rgba(252,204,45,0.16),rgba(252,204,45,0.04))] text-[#FCCC2D]"
-                            : "text-white/60 hover:bg-white/[0.04] hover:text-white"
+                            ? "bg-white/[0.09] text-white"
+                            : "text-white/60 hover:bg-white/[0.05] hover:text-white"
                         )}
                       >
                         {active ? (
-                          <span className="absolute top-1/2 left-0 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-[#FCCC2D]" />
+                          <span className="absolute top-1/2 left-0 h-4 w-[3px] -translate-y-1/2 rounded-r-full bg-cms-accent" />
                         ) : null}
 
-                        <span
+                        <Icon
                           className={cn(
-                            "flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors",
+                            "size-4 shrink-0 transition-colors",
                             active
-                              ? "bg-[#FCCC2D] text-[#141414] shadow-[0_6px_16px_rgba(252,204,45,0.28)]"
-                              : "bg-white/[0.04] text-white/65 group-hover:bg-white/[0.08] group-hover:text-white"
+                              ? "text-cms-accent"
+                              : "text-white/50 group-hover:text-white/80"
                           )}
-                        >
-                          <Icon className="size-4" strokeWidth={1.75} />
-                        </span>
+                          strokeWidth={1.75}
+                        />
 
                         {!iconOnly ? (
                           <Typography
                             variant="label-1"
                             as="span"
-                            className="truncate tracking-[-0.01em]"
+                            className="truncate"
                           >
                             {item.label}
                           </Typography>
@@ -177,18 +182,18 @@ function SidebarNav({
           <button
             type="button"
             onClick={() => void handleLogout()}
-            className="mx-auto flex size-10 items-center justify-center rounded-xl bg-white/[0.03] text-white/50 ring-1 ring-white/[0.06] transition hover:bg-white/5 hover:text-white"
+            className="mx-auto flex size-9 items-center justify-center rounded-md text-white/50 transition hover:bg-white/5 hover:text-white"
             aria-label="Sign out"
             title="Sign out"
           >
             <LogOut className="size-4" />
           </button>
         ) : (
-          <div className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-3 ring-1 ring-white/[0.06]">
+          <div className="flex items-center gap-2.5 rounded-md px-2 py-2">
             <Typography
               variant="caption-1"
               as="div"
-              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#FCCC2D]/15 font-bold text-[#FCCC2D]"
+              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-cms-accent/15 font-semibold text-cms-accent"
             >
               {initialsFromName(user?.fullName)}
             </Typography>
@@ -203,7 +208,7 @@ function SidebarNav({
               <Typography
                 variant="caption-1"
                 as="p"
-                className="truncate text-white/35"
+                className="truncate text-white/45"
               >
                 {user?.email || "CMS access"}
               </Typography>
@@ -211,7 +216,7 @@ function SidebarNav({
             <button
               type="button"
               onClick={() => void handleLogout()}
-              className="flex size-8 shrink-0 items-center justify-center rounded-lg text-white/40 transition hover:bg-white/5 hover:text-white"
+              className="flex size-8 shrink-0 items-center justify-center rounded-md text-white/45 transition hover:bg-white/5 hover:text-white"
               aria-label="Sign out"
               title="Sign out"
             >
@@ -265,7 +270,7 @@ export default function AdminSidebar({
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[min(280px,86vw)] flex-col bg-[#0C0C0C] text-white shadow-2xl transition-transform duration-300 ease-out lg:hidden",
+          "fixed inset-y-0 left-0 z-50 flex w-[min(280px,86vw)] flex-col bg-cms-sidebar text-white shadow-2xl transition-transform duration-300 ease-out lg:hidden",
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -279,8 +284,8 @@ export default function AdminSidebar({
 
       <aside
         className={cn(
-          "relative sticky top-0 z-50 hidden h-screen shrink-0 flex-col overflow-visible border-r border-white/[0.06] bg-[#0C0C0C] text-white transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:flex",
-          collapsed ? "w-[88px]" : "w-[280px]"
+          "relative sticky top-0 z-50 hidden h-screen shrink-0 flex-col overflow-visible border-r border-white/[0.06] bg-cms-sidebar text-white transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:flex",
+          collapsed ? "w-[68px]" : "w-[248px]"
         )}
       >
         <SidebarNav

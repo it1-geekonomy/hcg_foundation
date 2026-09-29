@@ -75,11 +75,12 @@ export default async function StoryDetailPage({
     } else {
       is404 = true;
     }
-  } catch (err: any) {
-    if (err.message && err.message.includes("404")) {
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "";
+    if (/\b404\b|not found/i.test(message)) {
       is404 = true;
     } else {
-      errorMsg = err.message || "Failed to connect to the server. Please check your connection and try again later.";
+      errorMsg = message || "Failed to connect to the server. Please check your connection and try again later.";
     }
   }
 

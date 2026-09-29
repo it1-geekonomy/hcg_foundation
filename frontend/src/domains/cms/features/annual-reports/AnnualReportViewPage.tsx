@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { ExternalLink, FileDown } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import Typography from "@/lib/Typography";
 import { cmsApi, publicAnnualReportsApi } from "@/domains/cms/lib/api";
 import { cmsToast } from "@/domains/cms/lib/toast";
@@ -14,7 +14,7 @@ import CmsWebsitePreview from "@/domains/cms/ui/CmsWebsitePreview";
 import {
   CmsBadge,
   CmsDetailCard,
-  CmsMediaTile,
+  CmsDetailField,
   CmsRecordActions,
   CmsSeoCard,
   CmsViewError,
@@ -31,24 +31,33 @@ function hasUrl(value?: string | null) {
 
 function FileRow({
   label,
+  subLabel,
   url,
   openLabel = "Open URL",
 }: {
   label: string;
+  subLabel?: string;
   url?: string | null;
   openLabel?: string;
 }) {
   return (
-    <li className="flex flex-wrap items-center justify-between gap-2">
-      <Typography variant="label-1" as="span" className="text-[#5C5C5C]">
-        {label}
-      </Typography>
+    <div className="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <Typography variant="body-9" as="p" className="font-medium text-cms-ink">
+          {label}
+        </Typography>
+        {subLabel && (
+          <Typography variant="label-1" as="p" className="text-cms-muted">
+            {subLabel}
+          </Typography>
+        )}
+      </div>
       {hasUrl(url) ? (
         <a
           href={url!}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1 font-medium text-[#9A7B00] underline-offset-2 hover:underline"
+          className="inline-flex items-center gap-1.5 font-medium text-cms-primary hover:text-cms-primary-hover hover:underline"
         >
           <Typography variant="label-1" as="span">
             {openLabel}
@@ -59,12 +68,12 @@ function FileRow({
         <Typography
           variant="label-1"
           as="span"
-          className="text-muted-foreground"
+          className="text-cms-faint"
         >
           Not uploaded
         </Typography>
       )}
-    </li>
+    </div>
   );
 }
 
@@ -180,15 +189,6 @@ export default function AnnualReportViewPage() {
             {isDeleted ? <CmsBadge tone="danger">deleted</CmsBadge> : null}
           </>
         }
-        meta={
-          <Typography
-            variant="label-1"
-            as="p"
-            className="mt-1 text-muted-foreground"
-          >
-            /{report.slug}
-          </Typography>
-        }
         actions={
           <CmsRecordActions
             isDeleted={isDeleted}
@@ -196,24 +196,53 @@ export default function AnnualReportViewPage() {
             editHref={`${LIST_HREF}/${report.id}/edit`}
             onDelete={onDelete}
             onRestore={onRestore}
-            extra={
-              hasUrl(report.annualReportFile) ? (
-                <a
-                  href={report.annualReportFile!}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#C45A7A] px-3 text-white transition hover:bg-[#b04e6c]"
-                >
-                  <FileDown className="size-3.5" />
-                  <Typography variant="button-3" as="span">
-                    Open file
-                  </Typography>
-                </a>
-              ) : null
-            }
           />
         }
       />
+
+      <div className="flex flex-col gap-10">
+        <CmsDetailCard title="Report Information">
+          <dl className="grid gap-4 sm:grid-cols-2">
+            <CmsDetailField label="Slug" value={`/${report.slug}`} />
+            <CmsDetailField label="Status" value={report.status} />
+          </dl>
+        </CmsDetailCard>
+
+        <CmsDetailCard title={`Files (3)`}>
+          <ul className="divide-y divide-cms-border -my-5">
+            <li className="py-4">
+              <FileRow
+                label="Desktop / Web Banner"
+                subLabel="Image file"
+                url={report.annualReportBanner}
+                openLabel="Open"
+              />
+            </li>
+            <li className="py-4">
+              <FileRow
+                label="Mobile Banner"
+                subLabel="Image file"
+                url={report.annualReportMobileBanner}
+                openLabel="Open"
+              />
+            </li>
+            <li className="py-4">
+              <FileRow
+                label="Report File"
+                subLabel="PDF document"
+                url={report.annualReportFile}
+                openLabel="Download"
+              />
+            </li>
+          </ul>
+        </CmsDetailCard>
+
+        <CmsSeoCard
+          metaTitle={report.metaTitle}
+          metaDescription={report.metaDescription}
+          schemaCode={report.schemaCode}
+        />
+      </div>
 
       <CmsWebsitePreview
         label="Website preview · Transparency & Knowledge Hub"
@@ -221,50 +250,6 @@ export default function AnnualReportViewPage() {
       >
         <AnnualReportsSection previewReports={previewReports} />
       </CmsWebsitePreview>
-
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(180px,220px)_minmax(0,1fr)]">
-        <div className="self-start space-y-2">
-          <CmsMediaTile
-            src={report.annualReportBanner}
-            alt={`${report.title} cover`}
-            empty="No cover image"
-            className="h-56"
-          />
-          <Typography
-            variant="label-1"
-            as="p"
-            className="text-center font-semibold text-[#212121]"
-          >
-            {report.title}
-          </Typography>
-        </div>
-
-        <div className="space-y-4">
-          <CmsDetailCard title="Files (R2)">
-            <ul className="space-y-3">
-              <FileRow
-                label="Desktop / web banner"
-                url={report.annualReportBanner}
-              />
-              <FileRow
-                label="Mobile banner"
-                url={report.annualReportMobileBanner}
-              />
-              <FileRow
-                label="Report file"
-                url={report.annualReportFile}
-                openLabel="Open file"
-              />
-            </ul>
-          </CmsDetailCard>
-
-          <CmsSeoCard
-            metaTitle={report.metaTitle}
-            metaDescription={report.metaDescription}
-            schemaCode={report.schemaCode}
-          />
-        </div>
-      </div>
     </div>
   );
 }

@@ -19,15 +19,17 @@ export function SeoFieldsSection({
   onChange: (next: SeoValue) => void;
 }) {
   return (
-    <section className="space-y-4 rounded-xl border border-[#FCCC2D]/40 bg-[#FFF8E8]/60 p-4">
-      <Typography
-        variant="label-1"
-        as="h3"
-        className="font-bold tracking-wide text-[#C45A7A]"
-      >
-        SEO Meta Tags:
-      </Typography>
+    <section className="overflow-hidden rounded-xl border border-cms-border bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+      <div className="border-b border-cms-border px-6 py-4">
+        <Typography variant="heading-7" as="h3" className="text-cms-ink">
+          SEO
+        </Typography>
+        <Typography variant="caption-1" as="p" className="mt-0.5 text-cms-muted">
+          Controls how this page appears in search results and link previews.
+        </Typography>
+      </div>
 
+      <div className="space-y-5 p-6">
       <CmsFormField label="Meta Title" htmlFor="metaTitle">
         <Input
           id="metaTitle"
@@ -54,8 +56,10 @@ export function SeoFieldsSection({
           placeholder="Schema Code"
           value={value.schemaCode}
           onChange={(e) => onChange({ ...value, schemaCode: e.target.value })}
+          className="font-mono text-xs"
         />
       </CmsFormField>
+      </div>
     </section>
   );
 }

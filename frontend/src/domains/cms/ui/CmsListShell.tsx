@@ -34,13 +34,18 @@ export default function CmsListShell({
   error,
   children,
 }: Props) {
+  const tabs: { id: CmsListTab; label: string }[] = [
+    { id: "active", label: activeTabLabel },
+    { id: "deleted", label: deletedTabLabel },
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <Typography
           variant="label-1"
           as="p"
-          className="max-w-xl text-muted-foreground"
+          className="max-w-2xl text-cms-muted"
         >
           {description}
         </Typography>
@@ -48,43 +53,37 @@ export default function CmsListShell({
         {createHref && createLabel ? (
           <Link
             href={createHref}
-            className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[#C45A7A] px-4 text-white transition hover:bg-[#b04e6c]"
+            className="inline-flex h-9 items-center gap-2 rounded-lg bg-cms-primary px-3.5 text-sm font-medium text-white shadow-[0_1px_2px_rgba(16,24,40,0.08)] transition-colors hover:bg-cms-primary-hover"
           >
             <Plus className="size-4" />
-            <Typography variant="button-3" as="span">
-              {createLabel}
-            </Typography>
+            {createLabel}
           </Link>
         ) : null}
       </div>
 
-      <div className="inline-flex rounded-xl bg-white p-1 ring-1 ring-black/5">
-        <button
-          type="button"
-          onClick={() => onTabChange("active")}
-          className={`rounded-lg px-3.5 py-1.5 font-medium transition ${
-            tab === "active"
-              ? "bg-[#C45A7A] text-white"
-              : "text-[#5C5C5C] hover:text-[#212121]"
-          }`}
-        >
-          <Typography variant="label-1" as="span">
-            {activeTabLabel}
-          </Typography>
-        </button>
-        <button
-          type="button"
-          onClick={() => onTabChange("deleted")}
-          className={`rounded-lg px-3.5 py-1.5 font-medium transition ${
-            tab === "deleted"
-              ? "bg-[#C45A7A] text-white"
-              : "text-[#5C5C5C] hover:text-[#212121]"
-          }`}
-        >
-          <Typography variant="label-1" as="span">
-            {deletedTabLabel}
-          </Typography>
-        </button>
+      <div
+        role="tablist"
+        className="flex gap-6 border-b border-cms-border"
+      >
+        {tabs.map((t) => {
+          const active = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => onTabChange(t.id)}
+              className={`-mb-px border-b-2 pb-2.5 text-sm font-medium transition-colors ${
+                active
+                  ? "border-cms-primary text-cms-ink"
+                  : "border-transparent text-cms-muted hover:border-cms-border-strong hover:text-cms-ink"
+              }`}
+            >
+              {t.label}
+            </button>
+          );
+        })}
       </div>
 
       {error ? (

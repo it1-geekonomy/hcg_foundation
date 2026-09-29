@@ -246,7 +246,7 @@ export default function CmsLocationInput({
   return (
     <div ref={rootRef} className={cn("relative", className)}>
       <div className="relative">
-        <MapPin className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-[#8A8A8A]" />
+        <MapPin className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-cms-faint" />
         <Input
           id={inputId}
           value={value}
@@ -281,14 +281,14 @@ export default function CmsLocationInput({
           }}
         />
         {loading ? (
-          <Loader2 className="pointer-events-none absolute top-1/2 right-2.5 size-3.5 -translate-y-1/2 animate-spin text-[#8A8A8A]" />
+          <Loader2 className="pointer-events-none absolute top-1/2 right-2.5 size-3.5 -translate-y-1/2 animate-spin text-cms-faint" />
         ) : null}
       </div>
 
       {open && suggestions.length > 0 ? (
         <ul
           role="listbox"
-          className="absolute top-[calc(100%+6px)] left-0 z-50 max-h-64 w-full overflow-y-auto rounded-xl bg-white py-1 shadow-[0_12px_32px_rgba(0,0,0,0.12)] ring-1 ring-black/10"
+          className="absolute top-[calc(100%+6px)] left-0 z-50 max-h-64 w-full overflow-y-auto rounded-xl bg-white py-1 shadow-[0_12px_32px_rgba(0,0,0,0.12)] ring-1 ring-cms-border"
         >
           {suggestions.map((item, index) => (
             <li key={item.id} role="option" aria-selected={index === activeIndex}>
@@ -297,13 +297,13 @@ export default function CmsLocationInput({
                 className={cn(
                   "flex w-full items-start gap-2 px-3 py-2 text-left transition",
                   index === activeIndex
-                    ? "bg-[#FFF6E8] text-[#212121]"
-                    : "text-[#3A3A3A] hover:bg-[#F7F7F5]"
+                    ? "bg-cms-subtle text-cms-ink"
+                    : "text-cms-body hover:bg-cms-subtle"
                 )}
                 onMouseEnter={() => setActiveIndex(index)}
                 onClick={() => pick(item.label)}
               >
-                <MapPin className="mt-0.5 size-3.5 shrink-0 text-[#C45A7A]" />
+                <MapPin className="mt-0.5 size-3.5 shrink-0 text-cms-primary" />
                 <Typography variant="label-1" as="span" className="leading-snug">
                   {item.label}
                 </Typography>
@@ -321,7 +321,7 @@ export default function CmsLocationInput({
         <Typography
           variant="caption-1"
           as="p"
-          className="mt-1.5 text-[#8A8A8A]"
+          className="mt-1.5 text-cms-faint"
         >
           No places found — you can still save this as a custom location.
         </Typography>

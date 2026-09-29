@@ -77,7 +77,7 @@ export default function DonorsListPage() {
       <Typography
         variant="label-1"
         as="p"
-        className="max-w-xl text-muted-foreground"
+        className="max-w-xl text-cms-muted"
       >
         Website donations that completed payment.
       </Typography>
@@ -137,7 +137,7 @@ export default function DonorsListPage() {
               <TableBody>
                 {donors.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-muted-foreground">
+                    <TableCell colSpan={5} className="text-cms-muted">
                       No donations yet.
                     </TableCell>
                   </TableRow>
@@ -147,7 +147,7 @@ export default function DonorsListPage() {
                       <TableCell className="font-medium">
                         <Link
                           href={`/admin/donations/${donor.id}`}
-                          className="text-[#9A7B00] underline-offset-2 hover:underline"
+                          className="text-cms-primary underline-offset-2 hover:underline"
                         >
                           {donor.fullName}
                         </Link>
@@ -163,14 +163,14 @@ export default function DonorsListPage() {
                           <Typography
                             variant="caption-1"
                             as="span"
-                            className="text-[#9A7B00]"
+                            className="text-cms-primary"
                           >
                             International
                           </Typography>
                         ) : null}
                       </TableCell>
                       <TableCell className="capitalize">{donor.status}</TableCell>
-                      <TableCell className="whitespace-nowrap text-muted-foreground">
+                      <TableCell className="whitespace-nowrap text-cms-muted">
                         {new Date(donor.createdAt).toLocaleDateString("en-IN")}
                       </TableCell>
                     </TableRow>

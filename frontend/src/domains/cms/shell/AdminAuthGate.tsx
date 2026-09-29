@@ -34,8 +34,8 @@ export default function AdminAuthGate({
 
   if (!hasHydrated || !isAuthenticated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F7F7F5]">
-        <Typography variant="label-1" as="p" className="text-[#5C5C5C]">
+      <div className="flex min-h-screen items-center justify-center bg-cms-canvas">
+        <Typography variant="label-1" as="p" className="text-cms-muted">
           Checking session…
         </Typography>
       </div>

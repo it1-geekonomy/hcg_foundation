@@ -13,7 +13,7 @@ function Card({
       data-slot="card"
       data-size={size}
       className={cn(
-        "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-xl bg-card py-(--card-spacing) text-card-foreground ring-1 ring-foreground/10 [--card-spacing:--spacing(4)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
+        "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-xl bg-white py-(--card-spacing) text-cms-body shadow-[0_1px_2px_rgba(16,24,40,0.04)] ring-1 ring-cms-border [--card-spacing:--spacing(5)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(4)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
         className
       )}
       {...props}
@@ -40,7 +40,7 @@ function CardTitle({ className, children, ...props }: React.ComponentProps<"div"
       variant="body-9"
       as="div"
       data-slot="card-title"
-      className={cn("leading-snug font-medium", className)}
+      className={cn("font-semibold text-cms-ink", className)}
       {...props}
     >
       {children}
@@ -54,7 +54,7 @@ function CardDescription({ className, children, ...props }: React.ComponentProps
       variant="label-1"
       as="div"
       data-slot="card-description"
-      className={cn("text-muted-foreground", className)}
+      className={cn("text-cms-muted", className)}
       {...props}
     >
       {children}
@@ -90,7 +90,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-footer"
       className={cn(
-        "flex items-center rounded-b-xl border-t bg-muted/50 p-(--card-spacing)",
+        "flex items-center rounded-b-xl border-t border-cms-border bg-cms-subtle/60 p-(--card-spacing)",
         className
       )}
       {...props}

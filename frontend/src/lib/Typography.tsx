@@ -32,7 +32,7 @@ const Typography = ({
   style,
   ...rest
 }: TypographyProps) => {
-  const { scale, style: variantStyle } = getTypographyStyles(variant);
+  const { scale, variant: resolvedVariant, style: variantStyle } = getTypographyStyles(variant);
   const Tag: React.ElementType =
     as ?? (typographyDefaultTags[variant as TypographyVariant] as React.ElementType | undefined) ?? "span";
 
@@ -43,6 +43,7 @@ const Typography = ({
     <Tag
       {...rest}
       {...{ [TYPO_FLUID_ATTR]: "" }}
+      data-typo={resolvedVariant}
       className={cn(scale.fontClass, weightClass, fontStyleClass, className)}
       style={{ ...variantStyle, ...style }}
     >

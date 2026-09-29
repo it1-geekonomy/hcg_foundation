@@ -21,7 +21,7 @@ export default function CmsRichTextEditor({
   height = 360,
 }: CmsRichTextEditorProps) {
   return (
-    <div className="overflow-hidden rounded-lg border border-input bg-white [&_.tox-tinymce]:!rounded-lg [&_.tox-tinymce]:!border-0">
+    <div className="overflow-hidden rounded-lg border border-cms-border bg-white [&_.tox-tinymce]:!rounded-lg [&_.tox-tinymce]:!border-0">
       <Editor
         id={id}
         licenseKey="gpl"
@@ -64,9 +64,9 @@ export default function CmsRichTextEditor({
             "bullist numlist outdent indent | link image media table | " +
             "removeformat code fullscreen | help",
           content_style:
-            "body { font-family: Manrope, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #212121; }" +
-            " body * { color: #212121 !important; }" +
-            " a { color: #9A7B00 !important; }",
+            "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.65; color: #111827; margin: 16px; }" +
+            " body * { color: #111827 !important; }" +
+            " a { color: #c45a7a !important; }",
           skin: "oxide",
           content_css: "default",
         }}

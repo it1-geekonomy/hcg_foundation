@@ -151,7 +151,7 @@ export default function HomeBannerForm({
 
   return (
     <form onSubmit={onSubmit} className="w-full space-y-5">
-      <div className="space-y-4 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div className="space-y-4 rounded-xl border border-cms-border bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <div className="grid gap-4 sm:grid-cols-2">
           <CmsFormField label="Name" htmlFor="name" hint="Internal label">
             <Input
@@ -292,19 +292,21 @@ export default function HomeBannerForm({
         </CmsFormField>
       </div>
 
-      <Button
-        type="submit"
-        disabled={
-          saving ||
-          !value.name.trim() ||
-          !value.title.trim() ||
-          (mode === "create" && !value.bannerImageFile) ||
-          (mode === "edit" && !hasBannerImage)
-        }
-        className="h-11 w-full bg-[#C45A7A] text-white hover:bg-[#b04e6c] sm:w-auto sm:min-w-[200px]"
-      >
-        {saving ? "Saving…" : submitLabel}
-      </Button>
+      <div className="flex justify-center pb-4">
+        <Button
+          type="submit"
+          disabled={
+            saving ||
+            !value.name.trim() ||
+            !value.title.trim() ||
+            (mode === "create" && !value.bannerImageFile) ||
+            (mode === "edit" && !hasBannerImage)
+          }
+          className="w-full sm:w-auto sm:min-w-32"
+        >
+          {saving ? "Saving…" : submitLabel}
+        </Button>
+      </div>
     </form>
   );
 }

@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import Typography from "@/lib/Typography";
-import { HeartHandshake, FolderKanban, Users, MessageSquareText, IndianRupee, CalendarDays, BarChart4 } from "lucide-react";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/ui/card";
+  HeartHandshake,
+  FolderKanban,
+  Users,
+  MessageSquareText,
+  IndianRupee,
+  CalendarDays,
+  BarChart4,
+  Loader2,
+  type LucideIcon,
+} from "lucide-react";
 import {
   Table,
   TableBody,
@@ -19,11 +23,6 @@ import {
   TableRow,
 } from "@/shared/ui/table";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   PieChart,
@@ -33,6 +32,100 @@ import {
 import { cmsApi } from "@/domains/cms/lib/api";
 import { DashboardStats } from "@/domains/cms/lib/types";
 import { formatCmsDateTime } from "@/domains/cms/ui/CmsViewChrome";
+
+type Metric = {
+  title: string;
+  value: string | number;
+  icon: LucideIcon;
+  tint: string;
+  href?: string;
+};
+
+function MetricCard({
+  metric,
+  loading,
+  className = "",
+}: {
+  metric: Metric;
+  loading: boolean;
+  className?: string;
+}) {
+  const body = (
+    <>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-[13px] font-medium text-cms-muted">{metric.title}</p>
+        <span
+          className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${metric.tint}`}
+        >
+          <metric.icon className="size-4" strokeWidth={1.75} />
+        </span>
+      </div>
+      <p className="mt-3 text-2xl leading-8 font-semibold tracking-tight text-cms-ink tabular-nums">
+        {loading ? (
+          <span className="inline-block h-7 w-20 animate-pulse rounded bg-cms-subtle align-middle" />
+        ) : (
+          metric.value
+        )}
+      </p>
+    </>
+  );
+
+  const base = `block rounded-xl border border-cms-border bg-white p-5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] ${className}`;
+
+  return metric.href ? (
+    <Link
+      href={metric.href}
+      className={`${base} transition-colors hover:border-cms-border-strong`}
+    >
+      {body}
+    </Link>
+  ) : (
+    <div className={base}>{body}</div>
+  );
+}
+
+function Panel({
+  title,
+  description,
+  action,
+  children,
+  className = "",
+}: {
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section
+      className={`flex flex-col overflow-hidden rounded-xl border border-cms-border bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)] ${className}`}
+    >
+      <div className="flex items-start justify-between gap-3 border-b border-cms-border px-5 py-4">
+        <div className="min-w-0">
+          <Typography variant="heading-7" as="h2" className="text-cms-ink">
+            {title}
+          </Typography>
+          {description ? (
+            <p className="mt-0.5 text-[13px] text-cms-muted">{description}</p>
+          ) : null}
+        </div>
+        {action}
+      </div>
+      <div className="flex-1">{children}</div>
+    </section>
+  );
+}
+
+function EmptyRow({ colSpan, children }: { colSpan: number; children: React.ReactNode }) {
+  return (
+    <TableRow className="hover:bg-transparent">
+      <TableCell colSpan={colSpan} className="h-32 text-center text-cms-muted">
+        {children}
+      </TableCell>
+    </TableRow>
+  );
+}
 
 export default function Page() {
   const [loading, setLoading] = useState(true);
@@ -55,266 +148,265 @@ export default function Page() {
     void loadData();
   }, []);
 
-  const metrics = [
+  const metrics: Metric[] = [
     {
-      title: "Total Donations",
-      value: `₹${stats?.totalDonationsAmount?.toLocaleString('en-IN') || 0}`,
+      title: "Total donations",
+      value: `₹${stats?.totalDonationsAmount?.toLocaleString("en-IN") || 0}`,
       icon: IndianRupee,
-      bgClass: "bg-gradient-to-br from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20",
-      iconColor: "text-emerald-500",
+      tint: "bg-emerald-50 text-emerald-600",
+      href: "/admin/donations",
     },
     {
-      title: "Total Donors",
+      title: "Total donors",
       value: stats?.totalDonors || 0,
       icon: HeartHandshake,
-      bgClass: "bg-gradient-to-br from-blue-500/10 to-indigo-500/10 hover:from-blue-500/20 hover:to-indigo-500/20",
-      iconColor: "text-blue-500",
+      tint: "bg-sky-50 text-sky-600",
+      href: "/admin/donations",
     },
     {
-      title: "Active Projects",
+      title: "Active projects",
       value: stats?.activeProjects || 0,
       icon: FolderKanban,
-      bgClass: "bg-gradient-to-br from-purple-500/10 to-pink-500/10 hover:from-purple-500/20 hover:to-pink-500/20",
-      iconColor: "text-purple-500",
+      tint: "bg-violet-50 text-violet-600",
+      href: "/admin/projects",
     },
     {
-      title: "Active Campaigns",
+      title: "Active campaigns",
       value: stats?.activeCampaigns || 0,
       icon: BarChart4,
-      bgClass: "bg-gradient-to-br from-orange-500/10 to-red-500/10 hover:from-orange-500/20 hover:to-red-500/20",
-      iconColor: "text-orange-500",
+      tint: "bg-orange-50 text-orange-600",
+      href: "/admin/campaigns",
     },
     {
-      title: "Active Events",
+      title: "Active events",
       value: stats?.activeEvents || 0,
       icon: CalendarDays,
-      bgClass: "bg-gradient-to-br from-cyan-500/10 to-blue-500/10 hover:from-cyan-500/20 hover:to-blue-500/20",
-      iconColor: "text-cyan-500",
+      tint: "bg-cyan-50 text-cyan-600",
+      href: "/admin/events",
     },
     {
-      title: "Pending Partnerships",
+      title: "Pending partnerships",
       value: stats?.pendingPartnerships || 0,
       icon: MessageSquareText,
-      bgClass: "bg-gradient-to-br from-yellow-500/10 to-amber-500/10 hover:from-yellow-500/20 hover:to-amber-500/20",
-      iconColor: "text-amber-500",
+      tint: "bg-amber-50 text-amber-600",
+      href: "/admin/partnership-inquiries",
     },
     {
-      title: "Registered Users",
+      title: "Registered users",
       value: stats?.totalUsers || 0,
       icon: Users,
-      bgClass: "bg-gradient-to-br from-slate-500/10 to-gray-500/10 hover:from-slate-500/20 hover:to-gray-500/20",
-      iconColor: "text-slate-500",
+      tint: "bg-cms-subtle text-cms-muted",
+      href: "/admin/users",
     },
   ];
 
   const distributionData = [
-    { name: "Projects", value: stats?.activeProjects || 0, color: "#a855f7" },
+    { name: "Projects", value: stats?.activeProjects || 0, color: "#8b5cf6" },
     { name: "Campaigns", value: stats?.activeCampaigns || 0, color: "#f97316" },
     { name: "Events", value: stats?.activeEvents || 0, color: "#06b6d4" },
-  ].filter(d => d.value > 0);
-  
-  if (distributionData.length === 0) {
-    distributionData.push({ name: "No Data", value: 1, color: "#e2e8f0" });
+  ].filter((d) => d.value > 0);
+
+  const hasDistribution = distributionData.length > 0;
+  if (!hasDistribution) {
+    distributionData.push({ name: "No data", value: 1, color: "#e5e7eb" });
   }
 
   return (
-    <div className={`flex flex-col gap-8 p-6 md:p-8 transition-opacity duration-700 ${loading ? 'opacity-0' : 'opacity-100 animate-in fade-in slide-in-from-bottom-4'}`}>
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <Typography variant="heading-5" as="h1" className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
-            Overview
-          </Typography>
-        </div>
+    <div className="flex flex-col gap-6">
+      <div className="border-b border-cms-border pb-5">
+        <Typography variant="heading-5" as="h1" className="text-cms-ink">
+          Overview
+        </Typography>
+        <Typography variant="label-1" as="p" className="mt-1 text-cms-muted">
+          A snapshot of donations, published content and incoming requests.
+        </Typography>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map((metric, i) => (
-          <Card 
-            key={metric.title} 
-            className={`transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border-border/50 bg-white/50 backdrop-blur-sm shadow-sm ${metric.bgClass} ${i === 0 ? "lg:col-span-2 bg-gradient-to-r from-emerald-500/10 to-teal-600/10" : ""}`}
-          >
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <CardTitle className="text-sm font-semibold text-foreground/70 uppercase tracking-wider">
-                {metric.title}
-              </CardTitle>
-              <div className={`p-2.5 rounded-xl bg-white shadow-sm ${metric.iconColor}`}>
-                <metric.icon className="h-5 w-5" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className={`font-bold text-foreground tracking-tight ${i === 0 ? "text-4xl" : "text-3xl"}`}>
-                {loading ? "..." : metric.value}
-              </div>
-            </CardContent>
-          </Card>
+          <MetricCard
+            key={metric.title}
+            metric={metric}
+            loading={loading}
+            className={i === 0 ? "sm:col-span-2" : ""}
+          />
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card className="transition-all duration-300 hover:shadow-lg border-border/50 bg-white/50 backdrop-blur-sm shadow-sm flex flex-col md:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-xl font-bold text-gray-800">Content Distribution</CardTitle>
-            <CardDescription className="font-medium">
-              Breakdown of active entities.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex-1 flex flex-col justify-center">
-            <div className="h-[250px] w-full flex items-center justify-center">
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Panel
+          title="Content distribution"
+          description="Active projects, campaigns and events."
+        >
+          <div className="p-5">
+            <div className="relative h-[220px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
-                  />
+                  {hasDistribution ? (
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: 8,
+                        border: "1px solid #e5e7eb",
+                        boxShadow: "0 8px 20px rgba(16,24,40,0.08)",
+                        padding: "8px 12px",
+                        fontSize: 13,
+                      }}
+                    />
+                  ) : null}
                   <Pie
                     data={distributionData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={70}
-                    outerRadius={95}
-                    paddingAngle={8}
+                    innerRadius={64}
+                    outerRadius={88}
+                    paddingAngle={hasDistribution ? 3 : 0}
                     dataKey="value"
                     stroke="none"
-                    cornerRadius={6}
+                    cornerRadius={4}
                   >
-                    {distributionData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} className="hover:opacity-85 transition-opacity outline-none" />
+                    {distributionData.map((entry) => (
+                      <Cell key={entry.name} fill={entry.color} className="outline-none" />
                     ))}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-2xl font-semibold text-cms-ink tabular-nums">
+                  {hasDistribution
+                    ? distributionData.reduce((sum, d) => sum + d.value, 0)
+                    : 0}
+                </span>
+                <span className="text-xs text-cms-muted">active items</span>
+              </div>
             </div>
-            <div className="flex flex-wrap justify-center gap-5 mt-4">
-              {distributionData.map((entry) => (
-                <div key={entry.name} className="flex items-center gap-2 text-sm bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
-                  <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: entry.color }} />
-                  <span className="text-gray-600 font-medium">{entry.name}</span>
-                  <span className="font-bold text-gray-900">{entry.value}</span>
-                </div>
+            <ul className="mt-4 divide-y divide-cms-border">
+              {(hasDistribution ? distributionData : []).map((entry) => (
+                <li
+                  key={entry.name}
+                  className="flex items-center justify-between py-2 text-sm"
+                >
+                  <span className="flex items-center gap-2 text-cms-body">
+                    <span
+                      className="size-2.5 rounded-sm"
+                      style={{ backgroundColor: entry.color }}
+                    />
+                    {entry.name}
+                  </span>
+                  <span className="font-medium text-cms-ink tabular-nums">
+                    {entry.value}
+                  </span>
+                </li>
               ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="transition-all duration-300 hover:shadow-lg border-border/50 bg-white/50 backdrop-blur-sm shadow-sm overflow-hidden md:col-span-2">
-          <CardHeader className="bg-gray-50/80 border-b border-border/40 pb-5 pt-6 px-6 md:px-8">
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle className="text-xl font-bold text-gray-800">Top Donors</CardTitle>
-                <CardDescription className="font-medium mt-1">
-                  Leading contributors to the foundation.
-                </CardDescription>
-              </div>
-              <div className="p-2 bg-white rounded-lg shadow-sm border border-gray-100">
-                <HeartHandshake className="w-5 h-5 text-gray-500" />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader className="bg-transparent">
-                <TableRow className="hover:bg-transparent border-b-gray-100">
-                  <TableHead className="pl-6 md:pl-8 h-14 font-semibold text-gray-600">Donor Name</TableHead>
-                  <TableHead className="text-right pr-6 md:pr-8 font-semibold text-gray-600">Amount Donated</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={2} className="text-center py-12 text-muted-foreground font-medium">
-                      Loading top donors...
-                    </TableCell>
-                  </TableRow>
-                ) : !stats?.topDonors?.length ? (
-                  <TableRow>
-                    <TableCell colSpan={2} className="text-center py-12 text-muted-foreground font-medium">
-                      No top donors found yet.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  stats.topDonors.map((donor: any, idx: number) => (
-                    <TableRow key={idx} className="transition-colors hover:bg-gray-50/80 border-b-gray-50 last:border-0">
-                      <TableCell className="font-bold text-gray-900 pl-6 md:pl-8 py-4">
-                        {donor.fullName || "Anonymous"}
-                      </TableCell>
-                      <TableCell className="text-right pr-6 md:pr-8 py-4 text-emerald-600 font-semibold">
-                        ₹{donor.amount?.toLocaleString('en-IN') || 0}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="transition-all duration-300 hover:shadow-lg border-border/50 bg-white/50 backdrop-blur-sm shadow-sm overflow-hidden mt-2">
-        <CardHeader className="bg-gray-50/80 border-b border-border/40 pb-5 pt-6 px-6 md:px-8">
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle className="text-xl font-bold text-gray-800">Recent Contacts & Leads</CardTitle>
-              <CardDescription className="font-medium mt-1">
-                Latest submissions from the website contact forms.
-              </CardDescription>
-            </div>
-            <div className="p-2 bg-white rounded-lg shadow-sm border border-gray-100">
-              <Users className="w-5 h-5 text-gray-500" />
-            </div>
+              {!hasDistribution && !loading ? (
+                <li className="py-2 text-center text-sm text-cms-muted">
+                  Nothing active yet.
+                </li>
+              ) : null}
+            </ul>
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader className="bg-transparent">
-              <TableRow className="hover:bg-transparent border-b-gray-100">
-                <TableHead className="pl-6 md:pl-8 h-14 font-semibold text-gray-600">Name</TableHead>
-                <TableHead className="font-semibold text-gray-600">Email</TableHead>
-                <TableHead className="font-semibold text-gray-600">Date Received</TableHead>
-                <TableHead className="text-right pr-6 md:pr-8 font-semibold text-gray-600">Status</TableHead>
+        </Panel>
+
+        <Panel
+          title="Top donors"
+          description="Leading contributors to the foundation."
+          className="lg:col-span-2"
+          action={
+            <Link
+              href="/admin/donations"
+              className="shrink-0 text-[13px] font-medium text-cms-primary hover:underline"
+            >
+              View all
+            </Link>
+          }
+        >
+          <Table flush>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="pl-5">Donor</TableHead>
+                <TableHead className="pr-5 text-right">Amount donated</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center py-12 text-muted-foreground font-medium">
-                    <div className="flex flex-col items-center justify-center gap-3">
-                      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                      Loading recent contacts...
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : !stats?.recentContacts?.length ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-center py-12 text-muted-foreground font-medium">
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <Users className="w-8 h-8 text-gray-300 mb-2" />
-                      No recent contacts found.
-                    </div>
-                  </TableCell>
-                </TableRow>
+                <EmptyRow colSpan={2}>
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="size-4 animate-spin" />
+                    Loading top donors…
+                  </span>
+                </EmptyRow>
+              ) : !stats?.topDonors?.length ? (
+                <EmptyRow colSpan={2}>No donations recorded yet.</EmptyRow>
               ) : (
-                stats.recentContacts.map((contact) => (
-                  <TableRow key={contact.id} className="transition-colors hover:bg-gray-50/80 border-b-gray-50 last:border-0 cursor-pointer">
-                    <TableCell className="font-bold text-gray-900 pl-6 md:pl-8 py-4">
-                      {contact.fullName}
-                    </TableCell>
-                    <TableCell className="text-gray-600 font-medium py-4">
-                      {contact.email}
-                    </TableCell>
-                    <TableCell className="text-gray-500 font-medium py-4">
-                      {formatCmsDateTime(contact.createdAt)}
-                    </TableCell>
-                    <TableCell className="text-right pr-6 md:pr-8 py-4">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
-                        New Lead
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                ))
+                stats.topDonors.map(
+                  (donor: { fullName?: string; amount?: number }, idx: number) => (
+                    <TableRow key={idx}>
+                      <TableCell className="pl-5 font-medium text-cms-ink">
+                        {donor.fullName || "Anonymous"}
+                      </TableCell>
+                      <TableCell className="pr-5 text-right font-medium text-cms-ink tabular-nums">
+                        ₹{donor.amount?.toLocaleString("en-IN") || 0}
+                      </TableCell>
+                    </TableRow>
+                  ),
+                )
               )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+        </Panel>
+      </div>
+
+      <Panel
+        title="Recent contacts & leads"
+        description="Latest submissions from the website contact forms."
+        action={
+          <Link
+            href="/admin/leads-contact"
+            className="shrink-0 text-[13px] font-medium text-cms-primary hover:underline"
+          >
+            View all
+          </Link>
+        }
+      >
+        <Table flush>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="pl-5">Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Received</TableHead>
+              <TableHead className="pr-5 text-right">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <EmptyRow colSpan={4}>
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="size-4 animate-spin" />
+                  Loading recent contacts…
+                </span>
+              </EmptyRow>
+            ) : !stats?.recentContacts?.length ? (
+              <EmptyRow colSpan={4}>No recent contacts found.</EmptyRow>
+            ) : (
+              stats.recentContacts.map((contact) => (
+                <TableRow key={contact.id}>
+                  <TableCell className="pl-5 font-medium text-cms-ink">
+                    {contact.fullName}
+                  </TableCell>
+                  <TableCell className="text-cms-muted">{contact.email}</TableCell>
+                  <TableCell className="text-cms-muted">
+                    {formatCmsDateTime(contact.createdAt)}
+                  </TableCell>
+                  <TableCell className="pr-5 text-right">
+                    <span className="inline-flex items-center rounded-md bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-800 ring-1 ring-sky-600/20 ring-inset">
+                      New lead
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </Panel>
     </div>
   );
 }
