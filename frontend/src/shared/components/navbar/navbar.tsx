@@ -128,13 +128,13 @@ export default function Navbar() {
                     key={i}
                     href={link.href}
                     onClick={(e) => {
-                      if (link.href === "/") {
-                        sessionStorage.setItem("nav_action", "navbar_home");
-                        window.dispatchEvent(new Event("nav_action_event"));
-                        if (pathname === "/") {
-                          e.preventDefault();
-                        }
+                      if (link.href !== "/") return;
+                      if (pathname === "/") {
+                        handleHomeNav(e);
+                        return;
                       }
+                      sessionStorage.setItem("nav_action", "navbar_home");
+                      window.dispatchEvent(new Event("nav_action_event"));
                     }}
                     className="relative flex items-center gap-1 py-1"
                   >
