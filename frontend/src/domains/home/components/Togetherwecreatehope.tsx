@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
@@ -108,6 +108,10 @@ export default function TogetherWeCreateHope() {
   const [slides, setSlides] = useState<CarouselSlide[]>(CAROUSEL_SLIDES);
   const [loaded, setLoaded] = useState(false);
 
+  // Heading + description blur reveal — plays once, the first time it scrolls into view.
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const [headerVisible, setHeaderVisible] = useState(false);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -128,20 +132,63 @@ export default function TogetherWeCreateHope() {
     };
   }, []);
 
+  useEffect(() => {
+    const node = headerRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setHeaderVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section className="w-full py-10 md:py-6 px-8 sm:px-12 md:px-16 lg:py-10 xl:py-14 lg:px-6 xl:px-6 2xl:px-40">
-      <div id="events" className="flex flex-col items-center gap-2 text-center mb-[clamp(2rem,4vw,3.5rem)] scroll-mt-24">
+      <div
+        ref={headerRef}
+        id="events"
+        className="flex flex-col items-center gap-2 text-center mb-[clamp(2rem,4vw,3.5rem)] scroll-mt-24"
+      >
         <Typography
           variant="heading-1"
           as="h2"
-          className="font-tiempos-headline italic text-[#090909]"
+          className="font-tiempos-headline italic text-[#090909] motion-reduce:!transition-none"
+          style={{
+            opacity: headerVisible ? 1 : 0,
+            filter: headerVisible ? "blur(0px)" : "blur(14px)",
+            transform: headerVisible
+              ? "translate3d(0,0,0)"
+              : "translate3d(0,32px,0)",
+            transition:
+              "opacity 700ms ease-out, filter 500ms ease-out, transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
+            willChange: "opacity, filter, transform",
+          }}
         >
           {TOGETHER_CONTENT.heading}
         </Typography>
         <Typography
           variant="body-2"
           as="p"
-          className="max-w-4xl text-[#2D2300C2] font-normal font-argestadisplay"
+          className="max-w-4xl text-[#2D2300C2] font-normal font-argestadisplay motion-reduce:!transition-none"
+          style={{
+            opacity: headerVisible ? 1 : 0,
+            filter: headerVisible ? "blur(0px)" : "blur(14px)",
+            transform: headerVisible
+              ? "translate3d(0,0,0)"
+              : "translate3d(0,32px,0)",
+            transition:
+              "opacity 700ms ease-out, filter 500ms ease-out, transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
+            transitionDelay: "150ms",
+            willChange: "opacity, filter, transform",
+          }}
         >
           {TOGETHER_CONTENT.description}
         </Typography>
