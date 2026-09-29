@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   COLLAPSED_WIDTH,
   type CardData,
@@ -13,6 +14,8 @@ import {
   slideWords,
   useSlideInLines,
 } from "./slideInWords";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const HEADING_TEXT = "Changing Lives Through HCG Foundation Projects";
 const DESC_TEXT =
@@ -329,6 +332,34 @@ export default function ProjectsSection({
       "(prefers-reduced-motion: reduce)"
     ).matches;
   }, []);
+
+  // On desktop the section starts edge-to-edge and its side padding grows
+  // back in as it scrolls into view.
+  const hasCards = cards.length > 0;
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const mm = gsap.matchMedia();
+    mm.add(
+      "(min-width: 1024px) and (prefers-reduced-motion: no-preference)",
+      () => {
+        gsap.from(section, {
+          paddingLeft: 0,
+          paddingRight: 0,
+          scrollTrigger: {
+            trigger: section,
+            start: "top 90%",
+            end: "top 15%",
+            scrub: 1.5,
+            invalidateOnRefresh: true,
+          },
+        });
+      }
+    );
+
+    return () => mm.revert();
+  }, [hasCards]);
 
   useEffect(() => {
     const els = cardsRef.current.filter(
