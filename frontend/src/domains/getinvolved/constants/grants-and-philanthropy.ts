@@ -1,7 +1,6 @@
 export interface PhilanthropyCard {
   id: string;
   title: string;
-  titleLine2?: string;
   description: string;
   imageUrl: string;
   iconUrl: string;
@@ -19,8 +18,7 @@ export const PHILANTHROPY_CARDS: PhilanthropyCard[] = [
   {
     id: "support-cancer-awareness",
     iconUrl: "/Get Involved/Granst & Philanthrophy/Support Cancer icon.png",
-    title: "Support Cancer Awareness &",
-    titleLine2: "Early Detection",
+    title: "Support Cancer Awareness & Early Detection",
     description:
       "Support or partner for awareness programmes, oral cancer camps, early detection, and timely treatment.",
     imageUrl: "/Get Involved/Granst & Philanthrophy/Support Cancer Awareness.png",
@@ -28,8 +26,7 @@ export const PHILANTHROPY_CARDS: PhilanthropyCard[] = [
   {
     id: "create-philanthropic-partnership",
     iconUrl: "/Get Involved/Granst & Philanthrophy/Create a Philanthropic icon.png",
-    title: "Create a Philanthropic",
-    titleLine2: "Partnership",
+    title: "Create a Philanthropic Partnership",
     description:
       "Work with HCG Foundation to design a giving initiative aligned with your philanthropic interests, priorities, and desired impact.",
     imageUrl: "/Get Involved/Granst & Philanthrophy/Create a Philanthropic.png",
@@ -37,8 +34,7 @@ export const PHILANTHROPY_CARDS: PhilanthropyCard[] = [
   {
     id: "support-healthcare-innovation",
     iconUrl: "/Get Involved/Granst & Philanthrophy/Support Healthcar icon.png",
-    title: "Support Healthcare",
-    titleLine2: "Innovation",
+    title: "Support Healthcare Innovation",
     description:
       "Support research, innovation, and technology-led solutions that contribute to better, more accessible, and affordable healthcare.",
     imageUrl: "/Get Involved/Granst & Philanthrophy/Support Healthcare.png",

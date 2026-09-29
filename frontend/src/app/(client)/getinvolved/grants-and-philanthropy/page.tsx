@@ -48,11 +48,11 @@ export default function GrantsAndPhilanthropyPage() {
         </div>
 
         {/* 2x2 Vertical Image Cards Grid matching Figma (2 columns from 768px+) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-5 lg:gap-[3.06rem]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-5 lg:gap-6 xl:gap-[3.06rem]">
           {PHILANTHROPY_CARDS.map((card) => (
             <div
               key={card.id}
-              className="group flex flex-col justify-between overflow-hidden rounded-[0.375rem] bg-[#FFFCF3] h-full min-h-0 md:min-h-[24rem] lg:min-h-[28.3125rem] 2xl:h-[28.3125rem]"
+              className="group flex flex-col justify-between overflow-hidden rounded-[0.375rem] bg-[#FFFCF3] h-full min-h-0 md:min-h-[24rem] lg:min-h-[28.3125rem] 2xl:min-h-[28.3125rem]"
             >
               {/* Card Top: Circular Icon Badge + Title + Description */}
               <div className="p-4 sm:p-5 md:p-4 lg:p-[1.25rem] xl:p-[1.5rem] 2xl:p-[2rem] flex items-start gap-3 sm:gap-4 md:gap-3.5 lg:gap-4 xl:gap-[1.25rem] 2xl:gap-[2.38rem] bg-[#FFFCF3]">
@@ -64,16 +64,13 @@ export default function GrantsAndPhilanthropyPage() {
                   />
                 </div>
                 <div className="flex-1">
-                  <div className="mb-2 sm:mb-2.5 lg:mb-[0.75rem] min-h-[2.5rem] sm:min-h-[3rem] md:min-h-[2.8rem] lg:min-h-[3.6rem] 2xl:min-h-[4.75rem] flex flex-col justify-start">
+                  <div className="mb-2 sm:mb-2.5 lg:mb-[0.75rem] min-h-[2.5rem] sm:min-h-[2.8rem] md:min-h-[3rem] lg:min-h-[3.6rem] 2xl:min-h-[4.25rem] flex flex-col justify-start">
                     <Typography
                       variant="heading-10"
                       as="h2"
-                      className="font-argestadisplay font-normal text-[#0D2838]"
+                      className="font-argestadisplay font-normal text-[#0D2838] leading-tight"
                     >
-                      <span className="block">{card.title}</span>
-                      {card.titleLine2 && (
-                        <span className="block">{card.titleLine2}</span>
-                      )}
+                      {card.title}
                     </Typography>
                   </div>
                   <Typography
