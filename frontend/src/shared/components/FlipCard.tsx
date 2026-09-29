@@ -14,6 +14,7 @@ export interface FlipCardProps {
   onClick?: (e: React.MouseEvent) => void;
   flipOnHover?: boolean;
   duration?: number;
+  returnDuration?: number;
 }
 
 export function FlipCard({
@@ -26,10 +27,18 @@ export function FlipCard({
   onClick,
   flipOnHover = true,
   duration = 0.55,
+  returnDuration,
 }: FlipCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [internalFlipped, setInternalFlipped] = useState(false);
   const isFlipped = controlledFlipped !== undefined ? controlledFlipped : internalFlipped;
+
+  // When flipping forward: brisk (duration, e.g. 0.42s - 0.55s)
+  // When flipping backward: slower & relaxed (returnDuration, default 0.85s)
+  const currentDuration = isFlipped ? duration : (returnDuration ?? 1.0);
+  const currentEase: [number, number, number, number] = isFlipped
+    ? [0.25, 1, 0.5, 1]
+    : [0.4, 0.0, 0.2, 1];
 
   const isTouchRef = useRef(false);
 
@@ -100,20 +109,27 @@ export function FlipCard({
       )}
     >
       <div className="relative h-full w-full">
-        {/* Front Face: Rotates from 0 to 180 */}
+        {/* Front Face: Rotates from 0 to 180 (hidden when facing away so glassmorphism backdrop-blur never mirrors) */}
         <motion.div
           className={cn(
             "absolute inset-0 h-full w-full overflow-hidden",
             roundedClassName,
-            isFlipped ? "pointer-events-none z-0" : "pointer-events-auto z-10"
+            isFlipped ? "pointer-events-none" : "pointer-events-auto"
           )}
           initial={false}
           animate={{
             rotateY: isFlipped ? 180 : 0,
+            opacity: isFlipped ? 0 : 1,
           }}
           transition={{
-            duration: duration,
-            ease: [0.25, 1, 0.5, 1],
+            rotateY: {
+              duration: currentDuration,
+              ease: currentEase,
+            },
+            opacity: {
+              duration: 0.01,
+              delay: isFlipped ? currentDuration * 0.45 : currentDuration * 0.5,
+            },
           }}
           style={{
             backfaceVisibility: "hidden",
@@ -125,20 +141,22 @@ export function FlipCard({
           {front}
         </motion.div>
 
-        {/* Back Face: Rotates from -180 to 0 (lands at 0deg so zero subpixel blur or texture downscaling) */}
+        {/* Back Face: Rotates from -180 to 0 (always 100% solid and opaque, lands flat at 0deg) */}
         <motion.div
           className={cn(
             "absolute inset-0 h-full w-full overflow-hidden",
             roundedClassName,
-            isFlipped ? "pointer-events-auto z-10" : "pointer-events-none z-0"
+            isFlipped ? "pointer-events-auto" : "pointer-events-none"
           )}
           initial={false}
           animate={{
             rotateY: isFlipped ? 0 : -180,
           }}
           transition={{
-            duration: duration,
-            ease: [0.25, 1, 0.5, 1],
+            rotateY: {
+              duration: currentDuration,
+              ease: currentEase,
+            },
           }}
           style={{
             backfaceVisibility: "hidden",
