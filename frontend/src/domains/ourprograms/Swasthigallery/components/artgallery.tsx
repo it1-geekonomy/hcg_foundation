@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Typography from "@/lib/Typography";
@@ -9,6 +9,27 @@ import {
   FADE_GRADIENT,
 } from "@/domains/ourprograms/Swasthigallery/constants/artgallery";
 import GallerySection from "./gallerysection";
+
+const LINE_STEP_MS = 120; // delay between consecutive lines
+const DESC_DELAY_MS = 250; // body starts after the heading
+const SLIDE_TRANSITION =
+  "opacity 700ms ease-out, transform 1000ms cubic-bezier(0.22, 1, 0.36, 1)";
+
+const HEADING_WORDS = ["A", "Space", "Where", "Art", "Heals"];
+const HEADING_BREAK_AFTER = 2; // the lg-only line break sits after "Where"
+
+const PARAGRAPHS = [
+  "Swasti Art Gallery, an initiative of the HCG Foundation, is a creative care unit with galleries at HCG's main hospital in Bangalore and other HCG facilities across India. Launched in 2007, Swasti promotes art and raises funds to support cancer patients.",
+  "The gallery creates a positive environment for patients and families while hosting art shows, camps, workshops, and art therapy events with artists from across India and abroad.",
+  "Swasti also provides a platform for artists and art lovers by showcasing quality artwork and promoting emerging and established talent.",
+];
+
+type Word = { w: string; group: number; last: boolean };
+
+const PARA_WORDS: Word[] = PARAGRAPHS.flatMap((p, gi) => {
+  const parts = p.split(" ");
+  return parts.map((w, wi) => ({ w, group: gi, last: wi === parts.length - 1 }));
+});
 
 function Card({
   icon,
@@ -105,6 +126,86 @@ export default function SwastiArtGallery() {
   const cardsRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
+  // Text slide-in (always from the left)
+  const headWrapRef = useRef<HTMLDivElement | null>(null);
+  const bodyWrapRef = useRef<HTMLDivElement | null>(null);
+  const [headVisible, setHeadVisible] = useState(false);
+  const [bodyVisible, setBodyVisible] = useState(false);
+
+  const headRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const paraRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const [headLines, setHeadLines] = useState<number[]>([]);
+  const [paraLines, setParaLines] = useState<number[]>([]);
+  const [paraLineCount, setParaLineCount] = useState(1);
+
+  // Group words into the visual lines they actually wrap into.
+  useLayoutEffect(() => {
+    const measure = () => {
+      // heading
+      let line = 0;
+      let prevTop: number | null = null;
+      const hl: number[] = [];
+      HEADING_WORDS.forEach((_, i) => {
+        const top = headRefs.current[i]?.offsetTop ?? 0;
+        if (prevTop !== null && top > prevTop + 2) line += 1;
+        prevTop = top;
+        hl.push(line);
+      });
+      setHeadLines(hl);
+
+      // paragraphs (a new paragraph always starts a new line)
+      let pLine = -1;
+      let prevGroup = -1;
+      let pTop = -Infinity;
+      const pl = PARA_WORDS.map((f, i) => {
+        const top = paraRefs.current[i]?.offsetTop ?? 0;
+        if (f.group !== prevGroup || top > pTop + 2) {
+          pLine += 1;
+          prevGroup = f.group;
+          pTop = top;
+        }
+        return pLine;
+      });
+      setParaLines(pl);
+      setParaLineCount(pLine + 1);
+    };
+
+    measure();
+    const t = setTimeout(measure, 150); // late font loads
+    window.addEventListener("resize", measure);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  // Each block plays once, when it first scrolls into view.
+  useEffect(() => {
+    const watch = (
+      node: HTMLElement | null,
+      set: (v: boolean) => void,
+    ): (() => void) | undefined => {
+      if (!node) return;
+      const obs = new IntersectionObserver(
+        (entries) => {
+          if (entries[0]?.isIntersecting) {
+            set(true);
+            obs.disconnect();
+          }
+        },
+        { threshold: 0.25 },
+      );
+      obs.observe(node);
+      return () => obs.disconnect();
+    };
+    const c1 = watch(headWrapRef.current, setHeadVisible);
+    const c2 = watch(bodyWrapRef.current, setBodyVisible);
+    return () => {
+      c1?.();
+      c2?.();
+    };
+  }, []);
+
   useEffect(() => {
     const el = cardsRef.current;
     if (!el) return;
@@ -121,42 +222,103 @@ export default function SwastiArtGallery() {
     return () => io.disconnect();
   }, []);
 
+  // Direction comes from the wrapper's --slide-x CSS variable (always left).
+  const slideStyle = (isVisible: boolean, delayMs: number): React.CSSProperties => ({
+    opacity: isVisible ? 1 : 0,
+    transform: isVisible ? "translate3d(0,0,0)" : "translate3d(var(--slide-x),0,0)",
+    transition: SLIDE_TRANSITION,
+    transitionDelay: `${delayMs}ms`,
+    willChange: "opacity, transform",
+  });
+
   return (
     <section className="w-full overflow-x-hidden bg-[#FFF8E2] pt-8 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-20 lg:px-6 xl:px-6 2xl:px-40">
       <div className="grid w-full grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-2 xl:gap-10 2xl:gap-20">
         {/* Left: heading, paragraphs, email */}
         <div className="min-w-0">
-          <Typography
-            variant="heading-2"
-            as="h2"
-            className="font-tiempos-headline text-[#382E07] font-normal"
-          >
-            A Space Where
-            <br className="hidden lg:block" /> Art Heals
-          </Typography>
-
-          <div className="mt-6 space-y-5">
-            <Typography variant="body-2" as="p" className="font-normal font-argestadisplay text-[#293239]">
-              Swasti Art Gallery, an initiative of the HCG Foundation, is a creative care unit with
-              galleries at HCG&apos;s main hospital in Bangalore and other HCG facilities across India.
-              Launched in 2007, Swasti promotes art and raises funds to support cancer patients.
-            </Typography>
-            <Typography variant="body-2" as="p" className="font-normal font-argestadisplay text-[#293239]">
-              The gallery creates a positive environment for patients and families while hosting art
-              shows, camps, workshops, and art therapy events with artists from across India and abroad.
-            </Typography>
-            <Typography variant="body-2" as="p" className="font-normal font-argestadisplay text-[#293239]">
-              Swasti also provides a platform for artists and art lovers by showcasing quality artwork
-              and promoting emerging and established talent.
+          <div ref={headWrapRef} className="overflow-x-clip [--slide-x:-80px]">
+            <Typography
+              variant="heading-2"
+              as="h2"
+              className="font-tiempos-headline text-[#382E07] font-normal"
+            >
+              {HEADING_WORDS.map((w, i) => (
+                <Fragment key={i}>
+                  <span
+                    ref={(el) => {
+                      headRefs.current[i] = el;
+                    }}
+                    className="inline-block motion-reduce:!transition-none"
+                    style={slideStyle(headVisible, (headLines[i] ?? 0) * LINE_STEP_MS)}
+                  >
+                    {w}
+                  </span>
+                  {i === HEADING_BREAK_AFTER ? (
+                    <>
+                      {" "}
+                      <br className="hidden lg:block" />
+                    </>
+                  ) : i < HEADING_WORDS.length - 1 ? (
+                    " "
+                  ) : (
+                    ""
+                  )}
+                </Fragment>
+              ))}
             </Typography>
           </div>
 
-          <Typography variant="body-2" as="p" className="mt-6 font-normal font-argestadisplay text-[#293239]">
-            Email:{" "}
-            <Link href="mailto:swasthigallery@gmail.com">
-              swasthigallery@gmail.com
-            </Link>
-          </Typography>
+          <div ref={bodyWrapRef} className="overflow-x-clip [--slide-x:-80px]">
+            <div className="mt-6 space-y-5">
+              {PARAGRAPHS.map((paragraph, gi) => (
+                <Typography
+                  key={gi}
+                  variant="body-2"
+                  as="p"
+                  className="font-normal font-argestadisplay text-[#293239]"
+                >
+                  {PARA_WORDS.map((f, i) =>
+                    f.group !== gi ? null : (
+                      <Fragment key={i}>
+                        <span
+                          ref={(el) => {
+                            paraRefs.current[i] = el;
+                          }}
+                          className="inline-block motion-reduce:!transition-none"
+                          style={slideStyle(
+                            bodyVisible,
+                            DESC_DELAY_MS + (paraLines[i] ?? 0) * LINE_STEP_MS,
+                          )}
+                        >
+                          {f.w}
+                        </span>
+                        {f.last ? "" : " "}
+                      </Fragment>
+                    ),
+                  )}
+                </Typography>
+              ))}
+            </div>
+
+            <Typography
+              variant="body-2"
+              as="p"
+              className="mt-6 font-normal font-argestadisplay text-[#293239]"
+            >
+              <span
+                className="inline-block motion-reduce:!transition-none"
+                style={slideStyle(
+                  bodyVisible,
+                  DESC_DELAY_MS + paraLineCount * LINE_STEP_MS,
+                )}
+              >
+                Email:{" "}
+                <Link href="mailto:swasthigallery@gmail.com">
+                  swasthigallery@gmail.com
+                </Link>
+              </span>
+            </Typography>
+          </div>
         </div>
 
         {/* Right: animated 2x2 icon card grid */}

@@ -75,6 +75,29 @@ export default function AwardsRecognition({
   const dragStartXRef = useRef(0);
   const draggedDistanceRef = useRef(0);
 
+  /* ---------- Text-only: intro slide-in (plays once) ---------- */
+  const introRef = useRef<HTMLDivElement | null>(null);
+  const [introVisible, setIntroVisible] = useState(false);
+
+  useEffect(() => {
+    if (hideIntro) return;
+    const node = introRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setIntroVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hideIntro]);
+
   const updateScrollState = useCallback(() => {
     const el = trackRef.current;
     if (!el) return;
@@ -170,24 +193,32 @@ export default function AwardsRecognition({
       className={`w-full overflow-x-hidden bg-[#FFFCF2] px-8 pt-6 pb-6 sm:px-12 md:px-16 lg:px-6 lg:py-20 xl:px-6 2xl:px-40 ${className}`}
     >
       {!hideIntro ? (
-        <>
+        <div ref={introRef}>
           <Typography
             variant="heading-2"
             as="h2"
-            className="font-tiempos-headline text-[#382E07]"
+            className={`font-tiempos-headline text-[#382E07] transition-all duration-[900ms] ease-out motion-reduce:translate-x-0 motion-reduce:opacity-100 motion-reduce:transition-none ${
+              introVisible
+                ? "translate-x-0 opacity-100"
+                : "-translate-x-16 opacity-0"
+            }`}
           >
             Awards & Recognition
           </Typography>
           <Typography
             variant="body-2"
             as="p"
-            className="mt-6 max-w-4xl font-argestadisplay font-normal text-[#293239]"
+            className={`mt-6 max-w-4xl font-argestadisplay font-normal text-[#293239] transition-all duration-[900ms] delay-150 ease-out motion-reduce:translate-x-0 motion-reduce:opacity-100 motion-reduce:transition-none ${
+              introVisible
+                ? "translate-x-0 opacity-100"
+                : "-translate-x-16 opacity-0"
+            }`}
           >
             These recognitions reflect the support of our partners, well-wishers
             and communities, and inspire us to continue working towards equitable
             cancer care for all.
           </Typography>
-        </>
+        </div>
       ) : null}
 
       <div className={hideIntro ? "relative" : "relative mt-10"}>
