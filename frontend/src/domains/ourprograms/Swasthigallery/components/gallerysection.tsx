@@ -1,7 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import AnimatedImageTile, {
+  RevealStyles,
+  useInViewOnce,
+} from "@/shared/components/Animatedimagetile";
 import { GALLERY_IMAGES } from "@/domains/ourprograms/Swasthigallery/constants/gallerysection";
 
 function ArrowButton({
@@ -19,7 +22,7 @@ function ArrowButton({
       aria-label={direction === "left" ? "Scroll gallery left" : "Scroll gallery right"}
       onClick={onClick}
       disabled={disabled}
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white shadow-md transition-opacity disabled:cursor-not-allowed disabled:opacity-30 sm:h-9 sm:w-9"
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white shadow-md transition-all duration-200 hover:scale-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100 sm:h-9 sm:w-9"
     >
       <svg
         width="16"
@@ -44,9 +47,12 @@ const WHEEL_THRESHOLD = 10;
 // Time to ignore further wheel events after triggering one card move,
 // so a single trackpad swipe (which fires many wheel events) only moves once.
 const WHEEL_LOCK_MS = 450;
+// Only the first few cards are stagger-delayed; the rest are off-screen anyway.
+const MAX_STAGGER_INDEX = 4;
 
 export default function GallerySection() {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const [revealRef, inView] = useInViewOnce<HTMLDivElement>();
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
@@ -169,7 +175,9 @@ export default function GallerySection() {
   };
 
   return (
-    <div className="mt-8 w-full lg:mt-14 xl:mt-24 pb-8">
+    <div ref={revealRef} className="mt-8 w-full lg:mt-14 xl:mt-24 pb-8">
+      <RevealStyles />
+
       <div className="flex w-full max-w-xs mx-auto items-center gap-1 sm:max-w-none sm:mx-0">
         {hasOverflow && (
           <ArrowButton direction="left" onClick={() => scrollByCard("left")} disabled={!canScrollLeft} />
@@ -185,19 +193,15 @@ export default function GallerySection() {
           style={{ touchAction: "pan-y" }}
           className="flex min-w-0 flex-1 snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {GALLERY_IMAGES.map((image) => (
-            <div
+          {GALLERY_IMAGES.map((image, index) => (
+            <AnimatedImageTile
               key={image.src}
               data-gallery-card
-              className="relative h-72 w-full shrink-0 snap-start overflow-hidden rounded-sm sm:h-64 sm:w-[calc((100%-1rem)/2)] md:h-72 md:w-[calc((100%-1rem)/2)] lg:h-80 lg:w-[calc((100%-2rem)/3)] xl:h-96 xl:w-[calc((100%-3rem)/4)]"
-            >
-              <Image
-                src={image.src}
-                alt={image.alt}
-                fill
-                className="object-cover"
-              />
-            </div>
+              image={image}
+              index={Math.min(index, MAX_STAGGER_INDEX)}
+              play={inView}
+              className="h-72 w-full shrink-0 snap-start sm:h-64 sm:w-[calc((100%-1rem)/2)] md:h-72 md:w-[calc((100%-1rem)/2)] lg:h-80 lg:w-[calc((100%-2rem)/3)] xl:h-96 xl:w-[calc((100%-3rem)/4)]"
+            />
           ))}
         </div>
         {hasOverflow && (
