@@ -218,6 +218,35 @@ function HopeAvatar({ size = 44, className = "" }: { size?: number; className?: 
   );
 }
 
+/** Launcher avatar framed by two soft yellow halos with an online dot. */
+function HopeBadge({ size = 88 }: { size?: number }) {
+  const inner = Math.round(size * 0.78);
+  return (
+    <span
+      className="relative flex shrink-0 items-center justify-center rounded-full"
+      style={{ width: size, height: size }}
+    >
+      <span aria-hidden className="absolute inset-0 rounded-full bg-[#FCE7A0]/55" />
+      <span
+        className="relative flex items-center justify-center rounded-full bg-[#FDF3D2] ring-2 ring-[#FCE29A]"
+        style={{ width: inner, height: inner }}
+      >
+        <HopeAvatar size={Math.round(inner * 0.84)} />
+      </span>
+      <span
+        aria-hidden
+        className="absolute rounded-full bg-[#5CC45C]"
+        style={{
+          width: Math.round(size * 0.15),
+          height: Math.round(size * 0.15),
+          right: size * 0.08,
+          bottom: size * 0.08,
+        }}
+      />
+    </span>
+  );
+}
+
 function TypingIndicator() {
   return (
     <div className="flex items-center gap-3">
@@ -424,7 +453,7 @@ export default function ChatbotWidget() {
             exit={{ opacity: 0, y: 24, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 380, damping: 32 }}
             style={{ transformOrigin: "bottom right" }}
-            className="fixed inset-0 z-[60] flex flex-col overflow-hidden bg-[#FBF8EC] sm:inset-auto sm:right-6 sm:bottom-28 sm:h-[min(660px,calc(100dvh-9rem))] sm:w-[420px] sm:rounded-[28px] sm:shadow-[0_24px_60px_-16px_rgba(60,48,10,0.35)] sm:ring-1 sm:ring-black/5"
+            className="fixed inset-0 z-[60] flex flex-col overflow-hidden bg-[#FBF8EC] sm:inset-auto sm:right-6 sm:bottom-[108px] sm:h-[min(660px,calc(100dvh-9rem))] sm:w-[420px] sm:rounded-[28px] sm:shadow-[0_24px_60px_-16px_rgba(60,48,10,0.35)] sm:ring-1 sm:ring-black/5"
           >
             {/* Header */}
             <div className="flex shrink-0 items-center gap-3 bg-[linear-gradient(100deg,#CDEAF1_0%,#FBF1C9_48%,#F9D5DE_100%)] px-5 py-4 sm:px-7">
@@ -486,9 +515,7 @@ export default function ChatbotWidget() {
                   transition={{ delay: 0.1 }}
                   className="flex flex-col items-center pt-2 text-center"
                 >
-                  <span className="rounded-full bg-[#FDF1C8] p-1.5 shadow-[0_0_0_6px_rgba(252,204,45,0.14)]">
-                    <HopeAvatar size={60} />
-                  </span>
+                  <HopeAvatar size={80} />
                   <h2 className="mt-5 font-tiempos-headline text-[26px] leading-tight text-[#1F1F1F] italic">
                     Hey! How can we help you? <span className="not-italic">👋</span>
                   </h2>
@@ -681,29 +708,37 @@ export default function ChatbotWidget() {
           whileTap={{ scale: 0.94 }}
           aria-label={open ? "Close chat" : "Open HCG Foundation AI Assistant"}
           aria-expanded={open}
-          className="relative flex h-16 w-16 items-center justify-center rounded-full bg-[#FCCC2D] shadow-[0_12px_30px_-8px_rgba(60,48,10,0.5)] ring-4 ring-white"
+          className="relative flex h-[72px] w-[72px] items-center justify-center rounded-full"
         >
-          {!open && isEmpty ? (
-            <span className="absolute inset-0 animate-ping rounded-full bg-[#FCCC2D]/40 [animation-duration:2.5s]" />
+          {!open ? (
+            <motion.span
+              aria-hidden
+              className="absolute inset-2 rounded-full bg-[#FCCC2D]/50"
+              initial={{ scale: 1, opacity: 0 }}
+              animate={{ scale: [1, 1.5], opacity: [0.7, 0] }}
+              transition={{ duration: 1.2, ease: "easeOut", repeat: Infinity, repeatDelay: 4 }}
+            />
           ) : null}
           <AnimatePresence mode="wait" initial={false}>
             <motion.span
               key={open ? "close" : "open"}
-              initial={{ rotate: -90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 90, opacity: 0 }}
+              initial={{ scale: 0.6, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.6, opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="relative flex items-center justify-center"
+              className="flex items-center justify-center"
             >
               {open ? (
-                <X className="h-7 w-7 text-[#1F1F1F]" strokeWidth={2} />
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FCCC2D] shadow-[0_10px_24px_-8px_rgba(60,48,10,0.5)]">
+                  <X className="h-5 w-5 text-[#1F1F1F]" strokeWidth={2} />
+                </span>
               ) : (
-                <HopeAvatar size={64} />
+                <HopeBadge size={72} />
               )}
             </motion.span>
           </AnimatePresence>
           {hasUnread && !open ? (
-            <span className="absolute top-0 right-0 h-4 w-4 rounded-full bg-[#E5383B] ring-2 ring-white" />
+            <span className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-[#E5383B] ring-2 ring-white" />
           ) : null}
         </motion.button>
       </div>
