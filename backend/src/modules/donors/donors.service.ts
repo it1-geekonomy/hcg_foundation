@@ -44,7 +44,7 @@ export class DonorsService {
     private readonly repo: Repository<Donor>,
     private readonly razorpay: RazorpayService,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   async createOrder(dto: CreateDonationDto): Promise<DonationCheckout> {
     const amount = dto.amount.toFixed(2);
@@ -140,9 +140,9 @@ export class DonorsService {
       this.logger.log(
         `Donation paid. donor=${saved.id} receipt=${saved.receiptNumber}`,
       );
-      // this.emailService.sendDonationReceipt(saved).catch(err => {
-      //   this.logger.error(`Failed to send receipt for donor ${saved.id}: ${err.message}`);
-      // });
+      this.emailService.sendDonationReceipt(saved).catch(err => {
+        this.logger.error(`Failed to send receipt for donor ${saved.id}: ${err.message}`);
+      });
       return saved;
     }
 
@@ -176,9 +176,9 @@ export class DonorsService {
     this.logger.log(
       `Donation paid. donor=${saved.id} receipt=${saved.receiptNumber}`,
     );
-    // this.emailService.sendDonationReceipt(saved).catch(err => {
-    //   this.logger.error(`Failed to send receipt for donor ${saved.id}: ${err.message}`);
-    // });
+    this.emailService.sendDonationReceipt(saved).catch(err => {
+      this.logger.error(`Failed to send receipt for donor ${saved.id}: ${err.message}`);
+    });
     return saved;
   }
 
