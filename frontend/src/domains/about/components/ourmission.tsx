@@ -204,13 +204,13 @@ function TitleBar({ icon, title }: { icon: string; title: string }) {
       className="flex items-center gap-3 px-3 py-3 motion-reduce:!transition-none sm:max-w-[320px]"
       style={{ background: BAR_GRADIENT, ...slideStyle(visible) }}
     >
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#C0A554] sm:h-16 sm:w-16">
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#C0A554] sm:h-12 sm:w-12">
         <Image
           src={icon}
           alt=""
           width={32}
           height={32}
-          className="h-7 w-7 object-contain sm:h-10 sm:w-10"
+          className="h-7 w-7 object-contain sm:h-8 sm:w-8"
         />
       </span>
       <Typography
