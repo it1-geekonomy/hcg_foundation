@@ -62,6 +62,11 @@ Activate the venv first (`.\venv\Scripts\Activate.ps1` or `source venv/bin/activ
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8001
 ```
+or 
+#Run 
+.\venv\Scripts\Activate.ps1
+uvicorn app.main:app --host 0.0.0.0 --port 8001
+
 
 For auto-restart on code changes, add `--reload`. On Windows `--reload` can hang
 and keep serving old code; if that happens, stop it and run without `--reload`
