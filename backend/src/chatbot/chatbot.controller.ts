@@ -1,5 +1,18 @@
-import { Body, Controller, Post, Param, HttpStatus } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Post,
+  Param,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiTags,
+  ApiTooManyRequestsResponse,
+} from '@nestjs/swagger';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { Public } from '../common/decorators/public.decorator';
 import { IngestionService } from './services/ingestion.service';
 import { ChatService } from './services/chat.service';
@@ -42,12 +55,14 @@ export class ChatbotController {
   }
 
   @Public()
+  @UseGuards(ThrottlerGuard)
   @Post('chat')
   @ApiOperation({
     summary: 'Ask the HCG Foundation chatbot a question',
     description:
-      'Public website endpoint. Does not re-sync the index. Pass sessionId for follow-ups.',
+      'Public website endpoint. Does not re-sync the index. Pass sessionId for follow-ups. Rate limited per IP: 10 messages/minute and 100/hour.',
   })
+  @ApiTooManyRequestsResponse({ description: 'Rate limit exceeded' })
   async chat(@Body() dto: AskQuestionDto) {
     const data = await this.chatService.answerQuestion(
       dto.question,

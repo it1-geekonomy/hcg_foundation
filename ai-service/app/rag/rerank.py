@@ -120,14 +120,23 @@ def rerank(hits: list[dict], intents: set[str]) -> list[dict]:
     return filtered[: settings.retrieval_top_k]
 
 
-def pick_sources(hits: list[dict], intents: set[str]) -> list[dict]:
+_PINNED_PAGES = (
+    ("events", C.EVENTS_URL, "event"),
+    ("terms", "/terms", "terms"),
+    ("privacy", "/privacy", "privacy"),
+)
+
+
+def pick_sources(hits: list[dict], intents: set[str], answer: str = "") -> list[dict]:
     sources: list[dict] = []
     seen_urls: set[str] = set()
-    for intent, url in (("events", C.EVENTS_URL), ("terms", "/terms"), ("privacy", "/privacy")):
-        if intent in intents:
+    text = answer.lower()
+    # Long messages trigger many intents; pin a page only when the answer is actually about it
+    for intent, url, keyword in _PINNED_PAGES:
+        if intent in intents and keyword in text:
             sources.append({"title": C.PAGE_LABELS[url], "url": url})
             seen_urls.add(url)
-    if {"terms", "privacy"} & intents:
+    if seen_urls & {"/terms", "/privacy"}:
         return sources
     if not hits:
         return sources
