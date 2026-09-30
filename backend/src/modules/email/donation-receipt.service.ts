@@ -84,9 +84,10 @@ export class DonationReceiptService {
     const regularFont = this.asset('fonts', 'Roboto-Regular.ttf');
     const boldFont = this.asset('fonts', 'Roboto-Bold.ttf');
 
-    const [logoBuf, sealBuf] = await Promise.all([
+    const [logoBuf, sealBuf, watermarkBuf] = await Promise.all([
       this.resolveImage('logo', 800),
-      this.resolveImage('signature-stamp', 600).catch(() => this.resolveImage('seal', 600)), // Fallback to seal if they haven't saved it yet
+      this.resolveImage('signature-stamp', 600).catch(() => this.resolveImage('seal', 600)),
+      this.resolveImage('watermark', 800).catch(() => null),
     ]);
 
     const donorName = donor.fullName?.trim() || 'Donor';
@@ -97,10 +98,14 @@ export class DonationReceiptService {
     const pan = donor.pan?.trim() || '—';
     const amountWords = numberToWords(amount, donor.currency || 'INR');
 
+    const CYAN_BAR = '#2fb7ec';
+    const YELLOW_BAR = '#ffb81c';
+    const PINK_BAR = '#e63888';
+
     return new Promise<Buffer>((resolve, reject) => {
       const doc = new PDFDocument({
         size: [PAGE.width, PAGE.height],
-        margin: 40,
+        margin: 0,
         info: {
           Title: `Donation Receipt - ${donorName}`,
           Author: 'HCG Foundation',
@@ -115,123 +120,169 @@ export class DonationReceiptService {
       doc.registerFont('Sans', regularFont);
       doc.registerFont('SansBold', boldFont);
 
+      // Top color bar
+      doc.rect(0, 0, PAGE.width / 3, 5).fill(CYAN_BAR);
+      doc.rect(PAGE.width / 3, 0, PAGE.width / 3, 5).fill(YELLOW_BAR);
+      doc.rect((PAGE.width / 3) * 2, 0, PAGE.width / 3, 5).fill(PINK_BAR);
+
+      // Background watermark
+      if (watermarkBuf) {
+        doc.save();
+        doc.image(watermarkBuf, (PAGE.width - 500) / 2, (PAGE.height - 450) / 2, { width: 500 });
+        doc.restore();
+      }
+
       // Logo
-      doc.image(logoBuf, 40, 40, { height: 50 });
+      const logoWidth = 140;
+      doc.image(logoBuf, (PAGE.width - logoWidth) / 2, 40, { width: logoWidth });
 
+      doc.y = 110;
       // Title
-      doc.moveDown(4);
-      doc.font('SansBold').fontSize(14).text('DONATION RECEIPT', { align: 'center' });
-      doc.moveDown(0.5);
-      doc.fontSize(12).text(`PAN-AAATH6254R`, { align: 'center' });
-
-      doc.moveDown(1.5);
-      doc.font('Sans').fontSize(11).text(
-        `We confirm the receipt of donation from Mr/Mrs ${donorName} ONLINE Rs.${amount.toFixed(2)}/-`,
-        { align: 'center' }
-      );
-      doc.moveDown(0.2);
-      doc.text(`Dated ${dateStr}`, { align: 'center' });
+      doc.font('Times-Roman').fillColor('#101b4d').fontSize(22).text('DONATION RECEIPT', { align: 'center', characterSpacing: 1.5 });
+      doc.moveDown(0.3);
+      doc.font('Sans').fillColor('#333333').fontSize(9).text(`PAN-AAATH6254R`, { align: 'center', characterSpacing: 1 });
 
       doc.moveDown(2);
+      
+      const text1 = 'We Confirm The Receipt Of Donation From ';
+      const text2 = `Mr/Mrs ${donorName}`;
+      doc.font('Sans').fontSize(10);
+      const w1 = doc.widthOfString(text1);
+      doc.font('SansBold').fontSize(10);
+      const w2 = doc.widthOfString(text2);
+      const startX1 = (PAGE.width - (w1 + w2)) / 2;
+      
+      doc.font('Sans').fillColor('#555555').text(text1, startX1, doc.y, { lineBreak: false });
+      doc.font('SansBold').fillColor('#2b3e71').text(text2, startX1 + w1, doc.y);
+
+      doc.moveDown(0.5);
+
+      const text3 = `ONLINE ₹${amount.toFixed(2)}/- `;
+      const text4 = `Dated ${dateStr}`;
+      doc.font('SansBold').fontSize(10);
+      const w3 = doc.widthOfString(text3);
+      doc.font('Sans').fontSize(10);
+      const w4 = doc.widthOfString(text4);
+      const startX2 = (PAGE.width - (w3 + w4)) / 2;
+
+      doc.font('SansBold').fillColor('#2b3e71').text(text3, startX2, doc.y, { lineBreak: false });
+      doc.font('Sans').fillColor('#555555').text(text4, startX2 + w3, doc.y);
 
       // Table Draw
-      const tableTop = doc.y;
-      const leftColX = 40;
-      const rightColX = PAGE.width / 2;
-      const rowHeight = 35;
-      const colWidthLeft = PAGE.width / 2 - 40;
-      const colWidthRight = PAGE.width / 2 - 40;
+      const tableTop = doc.y + 20;
+      let currentY = tableTop;
+      const tableX = 50;
+      const tableW = PAGE.width - 100;
 
       const rows = [
         ['Receipt Number', String(receiptNum)],
-        ['Total Donation', `INR ${amount.toFixed(2)}`],
+        ['Total Donation', `₹${amount.toFixed(2)}`],
         ['City', city],
         ['Receipt Date', dateStr],
-        ['PAN/AADHAR Details of Donor', pan],
-        ['Mode of Payment', 'ONLINE'],
-        ['Amount in words', amountWords.toLowerCase()]
+        ['PAN/AADHAR Details Of Donor', pan],
+        ['Mode Of Payment', 'ONLINE'],
+        ['Amount In Words', amountWords.replace(/\b\w/g, l => l.toUpperCase())]
       ];
 
-      doc.lineWidth(1).strokeColor('#000000');
-
-      let currentY = tableTop;
-
-      // Draw top border
-      doc.moveTo(leftColX, currentY).lineTo(PAGE.width - 40, currentY).stroke();
+      doc.lineWidth(0.5).strokeColor('#e0e0e0');
 
       for (let i = 0; i < rows.length; i++) {
         const [label, value] = rows[i];
+        
+        doc.font('Sans').fontSize(10);
+        const valHeight = doc.heightOfString(value, { width: tableW - 260 });
+        const labHeight = doc.heightOfString(label, { width: 170 });
+        const currentRowHeight = Math.max(35, valHeight + 20, labHeight + 20);
 
-        doc.font('Sans').fontSize(11);
-        const textOptionsLeft = { width: colWidthLeft - 20, align: 'left' as const };
-        const textOptionsRight = { width: colWidthRight - 20, align: 'left' as const };
+        if (i > 0) {
+          doc.moveTo(tableX, currentY).lineTo(tableX + tableW, currentY).stroke();
+        }
 
-        const labHeight = doc.heightOfString(label, textOptionsLeft);
-        const valHeight = doc.heightOfString(value, textOptionsRight);
-        const currentRowHeight = Math.max(35, labHeight + 20, valHeight + 20);
-
-        // Draw vertical lines
-        doc.moveTo(leftColX, currentY).lineTo(leftColX, currentY + currentRowHeight).stroke();
-        doc.moveTo(rightColX, currentY).lineTo(rightColX, currentY + currentRowHeight).stroke();
-        doc.moveTo(PAGE.width - 40, currentY).lineTo(PAGE.width - 40, currentY + currentRowHeight).stroke();
-
-        // Text (vertically centered)
-        doc.text(label, leftColX + 10, currentY + (currentRowHeight - labHeight) / 2, textOptionsLeft);
-        doc.text(value, rightColX + 10, currentY + (currentRowHeight - valHeight) / 2, textOptionsRight);
+        doc.fillColor('#333333');
+        doc.text(label, tableX + 20, currentY + (currentRowHeight - labHeight) / 2, { width: 170 });
+        doc.text(':', tableX + 200, currentY + (currentRowHeight - doc.heightOfString(':')) / 2, { width: 10 });
+        doc.text(value, tableX + 240, currentY + (currentRowHeight - valHeight) / 2, { width: tableW - 260 });
 
         currentY += currentRowHeight;
-
-        // Draw bottom border
-        doc.moveTo(leftColX, currentY).lineTo(PAGE.width - 40, currentY).stroke();
       }
-
-      doc.moveDown(2);
+      
+      // Outer box
+      doc.rect(tableX, tableTop, tableW, currentY - tableTop).stroke();
 
       // Note section
-      doc.x = 40;
-      doc.y = currentY + 30;
+      currentY += 30;
+      const noteH = 90;
+      
+      doc.rect(tableX, currentY, tableW, noteH).fillAndStroke('#fdf7f2', '#f3e6d8');
+      
+      // Info icon
+      doc.circle(tableX + 20, currentY + 17, 6).fill('#d4a135');
+      doc.fillColor('#ffffff').font('SansBold').fontSize(8).text('i', tableX + 18.8, currentY + 13);
+      
+      doc.fillColor('#000000').font('SansBold').fontSize(9).text('Note:', tableX + 32, currentY + 12);
+      
+      const noteText = 'Donation Are Eligible For 50% Deduction From Taxable Income Under Section 80G(5)(Vi) Of The Income ' +
+        'Tax Act 1961 Unique Registration Number AAATH6254RF20213 Dated 24/09/2021, Subject To ' +
+        'Realization Of Donation.';
+        
+      doc.font('Sans').fillColor('#555555').fontSize(9).text(noteText, tableX + 20, currentY + 30, {
+        width: tableW - 40,
+        lineGap: 3,
+        align: 'justify'
+      });
 
-      // Dashed line
-      doc.lineWidth(0.5).dash(3, { space: 3 }).moveTo(40, doc.y).lineTo(PAGE.width - 40, doc.y).stroke();
-      doc.undash();
-
-      doc.moveDown(1.5);
-      doc.font('SansBold').fontSize(11).text('Note:');
-      doc.moveDown(0.5);
-      doc.font('Sans').fontSize(11).text(
-        'Donation are eligible for 50% deduction from taxable income under section 80G(5)(vi) of the Income ' +
-        'Tax Act 1961 Unique registration number AAATH6254RF20213 dated 24/09/2021, subject to ' +
-        'realization of donation.',
-        { width: PAGE.width - 80, align: 'left', lineGap: 3 }
-      );
-
-      doc.moveDown(3);
-
-      // Authorized Signatory
-      const authY = doc.y;
-      doc.font('Sans').fontSize(11).text('Authorized Signatory', 40, authY);
-
-      doc.image(sealBuf, 40, authY + 15, { height: 60 });
-
-      doc.moveDown(5);
-      doc.font('SansBold').fontSize(12).text('Thank you for your generosity. We appreciate your support!', 40, doc.y, { align: 'center', width: PAGE.width - 80 });
+      // Signature area
+      currentY += noteH + 40;
+      
+      // Left side: Seal/Signature
+      doc.image(sealBuf, tableX - 5, currentY, { height: 120 });
+      doc.font('Sans').fillColor('#333333').fontSize(10).text('Authorized Signatory', tableX, currentY + 120);
+      
+      // Right side
+      const rightMsgX = PAGE.width - tableX - 170;
+      doc.moveTo(rightMsgX, currentY + 100).lineTo(rightMsgX, currentY + 135).lineWidth(1.5).strokeColor('#e63888').stroke();
+      
+      doc.font('Sans').fillColor('#111111').fontSize(10).text('Thank You For Your Generosity.', rightMsgX + 10, currentY + 105);
+      doc.text('We Appreciate Your Support!', rightMsgX + 10, currentY + 120);
 
       // Footer
-      const footerY = PAGE.height - 70; // Moved up slightly to prevent page break
-      doc.font('Sans').fontSize(9).text('https://www.hcgfoundation.org', 40, footerY, { lineBreak: false });
-      doc.font('Sans').text(
-        'Ground Floor, Tower Block Unity Building Complex, Mission Road, Bangalore 560027, Karnataka, India',
-        200, footerY,
-        { width: PAGE.width - 240, align: 'right' }
+      const footerY = PAGE.height - 40;
+      
+      doc.font('Sans').fillColor('#888888').fontSize(7.5);
+      
+      // Website
+      const globePath = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z";
+      doc.save().translate(tableX + 4, footerY + 0.5).scale(0.35).path(globePath).fill('#888888', 'even-odd').restore();
+      doc.text('www.hcgfoundation.org', tableX + 15, footerY);
+      
+      // Address
+      const mapPinPath = "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z";
+      const addressText = 'Ground floor, Tower block unity building complex, Mission road, Bangalore 560027, Karnataka, India.';
+      const addressX = 240;
+      
+      doc.save().translate(addressX + 4, footerY + 0.5).scale(0.35).path(mapPinPath).fill('#888888', 'even-odd').restore();
+      
+      doc.text(
+        addressText,
+        addressX + 15, footerY,
+        { lineBreak: false }
       );
+
+      // Bottom color bar
+      doc.rect(0, PAGE.height - 5, PAGE.width / 3, 5).fill(CYAN_BAR);
+      doc.rect(PAGE.width / 3, PAGE.height - 5, PAGE.width / 3, 5).fill(YELLOW_BAR);
+      doc.rect((PAGE.width / 3) * 2, PAGE.height - 5, PAGE.width / 3, 5).fill(PINK_BAR);
 
       doc.end();
     });
   }
 
   private formatDateTime(date: Date) {
-    // 2026-06-22 06:49:07 format
     const pad = (n: number) => n.toString().padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+    let hours = date.getHours();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    return `${pad(date.getDate())}-${pad(date.getMonth() + 1)}-${date.getFullYear()} ${pad(hours)}:${pad(date.getMinutes())} ${ampm}`;
   }
 }
