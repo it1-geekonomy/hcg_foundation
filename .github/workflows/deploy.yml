@@ -1,0 +1,140 @@
+name: Deploy to production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      rebuild_all:
+        description: Rebuild every service, not only the changed ones
+        type: boolean
+        default: false
+      reindex_chatbot:
+        description: Force a full chatbot re-embed (website pages + built-in knowledge)
+        type: boolean
+        default: false
+
+# Never run two deploys at once, and never cancel one halfway through.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  DEPLOY_BRANCH: main
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      ai_service: ${{ steps.filter.outputs.ai_service }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
+            ai_service:
+              - 'ai-service/**'
+
+  backend:
+    name: Build backend
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+
+  frontend:
+    name: Build frontend
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      # Unreachable on purpose: pages that fetch CMS data at build time fail fast instead of hanging.
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:9/api
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+
+  ai-service:
+    name: Check AI service
+    needs: changes
+    if: needs.changes.outputs.ai_service == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ai-service
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python -m compileall -q app alembic
+
+  deploy:
+    name: Deploy to Droplet
+    needs: [changes, backend, frontend, ai-service]
+    # Skipped build jobs (folder unchanged) are fine; a failed one blocks the deploy.
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 50
+    steps:
+      - name: Run deploy.sh on the server
+        uses: appleboy/ssh-action@v1.2.5
+        env:
+          DEPLOY_BRANCH: ${{ env.DEPLOY_BRANCH }}
+          REBUILD_ALL: ${{ inputs.rebuild_all || 'false' }}
+          REINDEX_CHATBOT: ${{ inputs.reindex_chatbot || 'false' }}
+          # The job token lets the server fetch the private repo without storing credentials; it expires when the job ends.
+          GIT_FETCH_URL: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          command_timeout: 45m
+          envs: DEPLOY_BRANCH,REBUILD_ALL,REINDEX_CHATBOT,GIT_FETCH_URL
+          script: |
+            set -e
+            cd /opt/hcg
+            GIT_TERMINAL_PROMPT=0 git fetch --quiet "$GIT_FETCH_URL" "+refs/heads/$DEPLOY_BRANCH:refs/remotes/origin/$DEPLOY_BRANCH"
+            # Run the deploy script from the commit being deployed, so changes to it apply immediately.
+            git show "origin/$DEPLOY_BRANCH:deploy.sh" > /tmp/hcg-deploy.sh
+            bash /tmp/hcg-deploy.sh
