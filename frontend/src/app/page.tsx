@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
 
 import ClientLayout from "@/app/(client)/layout";
 import ClientPage from "@/app/(client)/page";
@@ -97,11 +98,14 @@ export default function HomePage() {
             <ClientPage />
           </ClientLayout>
 
-          {showDonationOverlay && (
-            <OverlayForm
-              onClose={() => setShowDonationOverlay(false)}
-            />
-          )}
+          <AnimatePresence>
+            {showDonationOverlay && (
+              <OverlayForm
+                key="donation-overlay"
+                onClose={() => setShowDonationOverlay(false)}
+              />
+            )}
+          </AnimatePresence>
         </>
       )}
     </>
