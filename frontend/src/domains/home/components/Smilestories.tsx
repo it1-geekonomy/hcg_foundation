@@ -35,6 +35,42 @@ function formatStoryDate(dateStr?: string | null): string {
   }
 }
 
+/**
+ * Invisible copy of the card's front layout. It sits in normal flow, so the
+ * card's height comes from its content: when a name wraps to 2 lines the
+ * footer (and therefore the whole card) gets taller. Because the carousel
+ * track is a flex row, every card is then stretched to the tallest one.
+ *
+ * NOTE: the footer classes here MUST match the footer in StoryCard's front.
+ */
+function StoryCardSizer({ name, date }: { name: string; date: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none invisible flex select-none flex-col justify-between overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-transparent pt-[1.4223rem] pl-[1.475rem] pr-[1.4223rem] pb-0"
+    >
+      <div className="aspect-[21.177/23.021] w-full shrink-0" />
+      <div className="flex flex-col justify-between pt-[1.4rem] pb-4">
+        <Typography
+          variant="heading-8"
+          as="p"
+          className="text-left font-semibold font-manrope"
+        >
+          {name}
+        </Typography>
+        <Typography
+          variant="text-2"
+          as="p"
+          className="mt-1 flex items-center gap-2 text-nowrap font-normal font-manrope"
+        >
+          <Calendar className="h-4 w-4" strokeWidth={1.75} />
+          {date}
+        </Typography>
+      </div>
+    </div>
+  );
+}
+
 function StoryCard({
   name,
   date,
@@ -65,38 +101,38 @@ function StoryCard({
   const frontContent = (
     <div className="group flex h-full w-full flex-col justify-between overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-[rgba(255,255,255,0.55)] bg-[rgba(0,0,0,0.23)] backdrop-blur-[1.30625rem] pt-[1.4223rem] pl-[1.475rem] pr-[1.4223rem] pb-0">
       {/* photo: aspect 21.177rem / 23.021rem and 1.2643rem radius from Figma */}
-      <div
-        className="relative w-full aspect-[21.177/23.021] overflow-hidden rounded-[1.2643rem] bg-[#00000014]"
-      >
+      <div className="relative w-full aspect-[21.177/23.021] shrink-0 overflow-hidden rounded-[1.2643rem] bg-[#00000014]">
         <Image
           src={image}
           alt={name}
           fill
-          sizes="(max-width: 639px) clamp(240px, 65vw, 320px), (max-width: 767px) clamp(280px, 52vw - 34px, 360px), (max-width: 1023px) clamp(320px, 52vw - 42px, 400px), (max-width: 1279px) clamp(340px, 32vw - 20px, 430px), clamp(280px, 24vw - 6px, 460px)"
+          sizes="(max-width: 639px) clamp(240px, 65vw, 320px), (max-width: 767px) clamp(280px, 52vw - 34px, 360px), (max-width: 1023px) clamp(320px, 52vw - 42px, 400px), (max-width: 1279px) clamp(320px, 30vw - 20px, 400px), clamp(280px, 22vw - 6px, 410px)"
           style={{ objectPosition: objectPosition ?? "center" }}
           className="rounded-[1.2643rem] object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
       </div>
 
-      {/* name / date, below the photo, inside the card */}
-      <div className="h-[6.375rem] flex items-center justify-between">
-        <div>
-          <Typography
-            variant="heading-8"
-            as="p"
-            className="text-left text-white font-semibold font-manrope"
-          >
-            {name}
-          </Typography>
-          <Typography
-            variant="text-2"
-            as="p"
-            className="mt-1 flex items-center gap-2 text-white text-nowrap font-normal font-manrope"
-          >
-            <Calendar className="h-4 w-4" strokeWidth={1.75} />
-            {date}
-          </Typography>
-        </div>
+      {/* name pinned to the top of the footer, date pinned to the bottom.
+          Every card in the row is the same height (the tallest one), so names
+          all start on the same line and dates all sit on the same line.
+          When no name wraps, the footer is only as tall as its content, so the
+          name and date stay close together. */}
+      <div className="flex flex-1 flex-col justify-between pt-[1.4rem] pb-4">
+        <Typography
+          variant="heading-8"
+          as="p"
+          className="text-left text-white font-semibold font-manrope"
+        >
+          {name}
+        </Typography>
+        <Typography
+          variant="text-2"
+          as="p"
+          className="mt-1 flex items-center gap-2 text-white text-nowrap font-normal font-manrope"
+        >
+          <Calendar className="h-4 w-4" strokeWidth={1.75} />
+          {date}
+        </Typography>
       </div>
     </div>
   );
@@ -140,23 +176,34 @@ function StoryCard({
   );
 
   return (
-    <FlipCard
-      className="aspect-[385/493] w-full rounded-[1.2643rem]"
-      roundedClassName="rounded-[1.2643rem]"
-      isFlipped={currentFlipped}
-      onFlipChange={handleFlipChange}
-      onClick={(e) => {
-        // On desktop mouse, clicking the card navigates.
-        // On mobile touch, clicking the card flips or taps Read More.
-        if (typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches) {
-          onCardClick?.(e);
-        }
-      }}
-      flipOnHover={true}
-      duration={0.42}
-      front={frontContent}
-      back={renderBackContent}
-    />
+    // flex-1 = fill the (stretched) carousel item; the sizer gives the minimum height
+    <div className="relative w-full flex-1">
+      <StoryCardSizer name={name} date={date} />
+
+      {/* the real flip card fills whatever height the row ends up with */}
+      <div className="absolute inset-0">
+        <FlipCard
+          className="h-full w-full rounded-[1.2643rem]"
+          roundedClassName="rounded-[1.2643rem]"
+          isFlipped={currentFlipped}
+          onFlipChange={handleFlipChange}
+          onClick={(e) => {
+            // On desktop mouse, clicking the card navigates.
+            // On mobile touch, clicking the card flips or taps Read More.
+            if (
+              typeof window !== "undefined" &&
+              window.matchMedia("(hover: hover)").matches
+            ) {
+              onCardClick?.(e);
+            }
+          }}
+          flipOnHover={true}
+          duration={0.42}
+          front={frontContent}
+          back={renderBackContent}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -507,6 +554,7 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
             isPausedRef.current = true;
             scheduleResume();
           }}
+          // flex row (default align-items: stretch) => every card is as tall as the tallest one
           className={`flex w-max flex-nowrap gap-3 sm:gap-5 lg:gap-8 ${isInfinite
               ? 'touch-pan-y cursor-grab select-none will-change-transform active:cursor-grabbing'
               : 'touch-pan-x snap-mandatory'
@@ -515,7 +563,7 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
           {displayStories.map((story, i) => (
             <div
               key={`${story.name}-${i}`}
-              className="shrink-0 basis-[clamp(240px,65vw,320px)] sm:basis-[clamp(280px,52vw-34px,360px)] md:basis-[clamp(320px,52vw-42px,400px)] lg:basis-[clamp(340px,32vw-20px,430px)] xl:basis-[clamp(280px,24vw-6px,460px)]"
+              className="flex flex-col shrink-0 basis-[clamp(240px,65vw,320px)] sm:basis-[clamp(280px,52vw-34px,360px)] md:basis-[clamp(320px,52vw-42px,400px)] lg:basis-[clamp(320px,30vw-20px,400px)] xl:basis-[clamp(280px,22vw-6px,410px)]"
               onPointerEnter={(e) => {
                 if (e.pointerType === "mouse") {
                   isHoverPausedRef.current = true;
