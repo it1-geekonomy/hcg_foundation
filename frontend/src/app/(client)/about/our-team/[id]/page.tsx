@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { publicTeamsApi } from "@/domains/cms/lib/api";
+import CmsHtmlContent from "@/domains/cms/ui/CmsHtmlContent";
 import Typography from "@/lib/Typography";
 
 type Params = Promise<{ id: string }>;
@@ -67,16 +68,8 @@ export default async function OurTeamMemberPage({
               {member.designation}
             </p>
           ) : null}
-          {member.shortDescription ? (
-            <p className="mt-4 font-manrope text-base text-[#5C5C5C]">
-              {member.shortDescription}
-            </p>
-          ) : null}
           {member.content ? (
-            <div
-              className="prose prose-neutral mt-8 max-w-none font-manrope"
-              dangerouslySetInnerHTML={{ __html: member.content }}
-            />
+            <CmsHtmlContent html={member.content} className="mt-8" />
           ) : null}
         </div>
       </div>

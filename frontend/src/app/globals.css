@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-geist-sans), system-ui, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -76,6 +76,10 @@
   font-family: var(--font-argestadisplay);
 }
 
+@utility font-geist {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
 
 /*
  * Fluid typography: compressed mobile floor, gentle sm/md steps, clamp from lg (1024px).
@@ -104,6 +108,71 @@
   }
 }
 
+/*
+ * Admin CMS type scale.
+ * <Typography> variants belong to the public website (fluid, serif/display fonts,
+ * inline line-height/letter-spacing). Inside [data-cms] they are remapped to one
+ * fixed UI scale in Geist. Website previews ([data-site-preview]) are excluded so
+ * they keep rendering exactly like the live site. `!important` is only used where
+ * Typography sets inline styles.
+ */
+[data-cms] {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-cms] [data-typo]:not([data-site-preview] *) {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-style: normal;
+  font-size: 0.875rem;
+  line-height: 1.25rem !important;
+  letter-spacing: 0 !important;
+}
+
+[data-cms] :is([data-typo="heading-5"], [data-typo="heading-8"], [data-typo="heading-4"], [data-typo="heading-2"]):not([data-site-preview] *) {
+  font-size: 1.375rem;
+  line-height: 1.75rem !important;
+  font-weight: 600;
+  letter-spacing: -0.015em !important;
+}
+
+[data-cms] :is([data-typo="heading-7"], [data-typo="heading-6"], [data-typo="heading-9"], [data-typo="text-1"]):not([data-site-preview] *) {
+  font-size: 1rem;
+  line-height: 1.5rem !important;
+  font-weight: 600;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+}
+
+[data-cms] [data-typo="body-9"]:not([data-site-preview] *) {
+  font-size: 0.9375rem;
+  line-height: 1.375rem !important;
+}
+
+[data-cms] :is([data-typo="body-7"], [data-typo="body-8"], [data-typo="body-10"], [data-typo="body-12"]):not([data-site-preview] *) {
+  font-size: 0.875rem;
+  line-height: 1.375rem !important;
+}
+
+[data-cms] :is([data-typo="caption-2"], [data-typo="button-2"]):not([data-site-preview] *) {
+  font-size: 0.8125rem;
+  line-height: 1.25rem !important;
+}
+
+[data-cms] [data-typo="caption-1"]:not([data-site-preview] *) {
+  font-size: 0.75rem;
+  line-height: 1rem !important;
+}
+
+[data-cms] [data-typo].uppercase:not([data-site-preview] *) {
+  letter-spacing: 0.06em !important;
+}
+
+[data-cms] .cms-html-content:not([data-site-preview] *) {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
 .card-panel {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -113,6 +182,35 @@
   width: 0;
   height: 0;
   display: none;
+}
+
+/* Collapsed project card — vertical title marquee when text is too long */
+.project-vertical-marquee-track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+  will-change: transform;
+}
+
+.project-vertical-marquee-track[data-animate="true"] {
+  animation: project-vertical-marquee linear infinite;
+}
+
+@keyframes project-vertical-marquee {
+  from {
+    transform: translateY(-50%);
+  }
+
+  to {
+    transform: translateY(0%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-vertical-marquee-track[data-animate="true"] {
+    animation: none;
+  }
 }
 
 /* Reels carousel — explicit W×H (9:16), values match reelsLayout in constants/Reels.ts */
@@ -215,42 +313,185 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
   }
 }
+
+/* Admin CMS palette — use these (bg-cms-*, text-cms-*, border-cms-*) instead of raw hex in CMS code. */
+@theme {
+  --color-cms-canvas: #f6f7f9;
+  --color-cms-subtle: #f3f4f6;
+  --color-cms-border: #e5e7eb;
+  --color-cms-border-strong: #d1d5db;
+  --color-cms-ink: #111827;
+  --color-cms-body: #374151;
+  --color-cms-muted: #6b7280;
+  --color-cms-faint: #9ca3af;
+  --color-cms-primary: #c45a7a;
+  --color-cms-primary-hover: #ad4a68;
+  --color-cms-primary-soft: #fbeff3;
+  --color-cms-accent: #fccc2d;
+  --color-cms-accent-soft: #fff7db;
+  --color-cms-sidebar: #0f1115;
+}
+
 @theme {
   --animate-float: float 4s ease-in-out infinite;
   --animate-float-sm: float-sm 4s ease-in-out infinite;
   --animate-float-md: float-md 4s ease-in-out infinite;
+  --animate-breath: breath 6s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+}
+
+@keyframes breath {
+  0% {
+    font-variation-settings: "wght" 100;
+    font-weight: 100;
+  }
+
+  16.5% {
+    font-variation-settings: "wght" 900;
+    font-weight: 900;
+  }
+
+  33%,
+  100% {
+    font-variation-settings: "wght" 100;
+    font-weight: 100;
+  }
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-8px);
   }
 }
 
 @keyframes float-sm {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-14px);
   }
 }
 
 @keyframes float-md {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px);
   }
+
   50% {
     transform: translateY(-20px);
   }
+}
+
+@import "tailwindcss";
+
+@theme {
+  --breakpoint-3xl: 120rem;
+}
+
+/* Hide vertical scrollbar globally */
+html {
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+html::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Edge, Safari */
+}
+
+body {
+  -ms-overflow-style: none;
+  /* IE/old Edge */
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+/* ===== Swasti cards: entrance animation only (no gradients, no hover, no rings) ===== */
+@keyframes swasti-reveal {
+  from {
+    opacity: 0;
+    translate: var(--fx, 0px) 64px;
+    scale: 0.92;
+    filter: blur(10px);
+    clip-path: inset(10% 8% 10% 8% round 28px);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+    filter: blur(0);
+    clip-path: inset(0% 0% 0% 0% round 0px);
+  }
+}
+@keyframes swasti-icon-in {
+  from { opacity: 0; scale: 0.3; rotate: -120deg; }
+  to   { opacity: 1; scale: 1;   rotate: 0deg; }
+}
+@keyframes swasti-fade-up {
+  from { opacity: 0; translate: 0 16px; filter: blur(4px); }
+  to   { opacity: 1; translate: 0 0;    filter: blur(0); }
+}
+@keyframes swasti-float {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -5px; }
+}
+
+/* Card */
+.swasti-card {
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+}
+.swasti-card.is-visible {
+  opacity: 1;
+  animation: swasti-reveal 1s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+/* Icon */
+.swasti-icon { position: relative; }
+.swasti-card.is-visible .swasti-icon {
+  animation:
+    swasti-icon-in 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) backwards,
+    swasti-float 4s ease-in-out infinite;
+  animation-delay: calc(var(--delay, 0ms) + 300ms), calc(var(--delay, 0ms) + 1300ms);
+}
+
+/* Text */
+.swasti-card.is-visible .swasti-title {
+  animation: swasti-fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--delay, 0ms) + 500ms);
+}
+.swasti-card.is-visible .swasti-desc {
+  animation: swasti-fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--delay, 0ms) + 650ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swasti-card,
+  .swasti-card * {
+    animation: none !important;
+  }
+  .swasti-card { opacity: 1 !important; }
 }

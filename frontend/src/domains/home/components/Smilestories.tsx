@@ -2,47 +2,90 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Calendar } from "lucide-react";
 import Typography from "@/lib/Typography";
 import {
   AUTO_SCROLL_SPEED,
   DRAG_THRESHOLD,
-  loopedStories,
   RESUME_DELAY,
   SAVE_INTERVAL,
   STORAGE_KEY,
   wrap,
+  stories as fallbackStories,
 } from "@/domains/home/constants/smile";
+import { motion } from "framer-motion";
+import FlipCard from "@/shared/components/FlipCard";
+import MirrorReveal from "@/shared/components/MirrorReveal";
+import { DiagonalArrowIcon } from "@/shared/components/icons/ArrowIcons";
+import { publicPatientStoriesApi } from "@/domains/cms/lib/api";
+
+function formatStoryDate(dateStr?: string | null): string {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
 
 function StoryCard({
   name,
   date,
   image,
+  objectPosition,
+  excerpt,
+  onCardClick,
 }: {
   name: string;
   date: string;
   image: string;
+  objectPosition?: string;
+  excerpt?: string;
+  onCardClick?: (e: React.MouseEvent) => void;
 }) {
-  return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl bg-[#8D8D8D66] p-6 backdrop-blur-xl">
-      {/* photo, inset inside the glass card */}
-      <div className="relative aspect-[8/9] w-full overflow-hidden rounded-xl">
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  const frontContent = (
+    <div className="group flex h-full w-full flex-col justify-between overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-[rgba(255,255,255,0.55)] bg-[rgba(0,0,0,0.23)] backdrop-blur-[1.30625rem] pt-[1.4223rem] pl-[1.475rem] pr-[1.4223rem] pb-0">
+      {/* photo: aspect 21.177rem / 23.021rem and 1.2643rem radius from Figma */}
+      <div
+        className="relative w-full aspect-[21.177/23.021] overflow-hidden rounded-[1.2643rem] bg-[#00000014]"
+      >
         <Image
           src={image}
           alt={name}
           fill
           sizes="(max-width: 639px) clamp(240px, 65vw, 320px), (max-width: 767px) clamp(280px, 52vw - 34px, 360px), (max-width: 1023px) clamp(320px, 52vw - 42px, 400px), (max-width: 1279px) clamp(340px, 32vw - 20px, 430px), clamp(280px, 24vw - 6px, 460px)"
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          style={{ objectPosition: objectPosition ?? "center" }}
+          className="rounded-[1.2643rem] object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
       </div>
 
-      {/* name / date / arrow, below the photo, inside the card */}
-      <div className="flex items-center justify-between gap-2 pt-4">
+      {/* name / date, below the photo, inside the card */}
+      <div
+        className="h-[6.375rem] flex items-center justify-between cursor-pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+          onCardClick?.(e);
+        }}
+      >
         <div>
-          <Typography variant="heading-8" as="p" className="text-left text-white font-semibold font-manrope">
+          <Typography
+            variant="heading-8"
+            as="p"
+            className="text-left text-white font-semibold font-manrope"
+          >
             {name}
           </Typography>
-          <Typography variant="text-2"
+          <Typography
+            variant="text-2"
             as="p"
             className="mt-1 flex items-center gap-2 text-white text-nowrap font-normal font-manrope"
           >
@@ -50,25 +93,118 @@ function StoryCard({
             {date}
           </Typography>
         </div>
-        <span className="relative flex lg:h-12 lg:w-12 h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FFFFFF] group-hover:bg-white/70">
-          <Image
-            src="/Smilestories/Vector.png"
-            alt="View story"
-            width={20}
-            height={20}
-          />
-        </span>
       </div>
     </div>
+  );
+
+  const renderBackContent = (flipped: boolean) => (
+    <MirrorReveal isOpen={flipped} delay={0} duration={0.82}>
+      <div className="relative h-full w-full flex flex-col justify-between items-center p-[1.425rem] rounded-[1.2643rem] border-[0.0527rem] border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2]">
+        {/* Centered Excerpt with Proportional Body-2 */}
+        <div className="relative z-10 flex-1 flex items-center justify-center text-center my-auto px-[0.5rem] w-full">
+          <Typography
+            variant="body-2"
+            as="p"
+            className="text-[#0D2838] max-w-md"
+          >
+            {excerpt || "Explore the journey of hope, courage, and recovery."}
+          </Typography>
+        </div>
+
+        {/* Read More Button Constant at Bottom Center */}
+        <div className="relative z-10 w-full flex justify-center shrink-0 pt-[0.75rem]">
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              onCardClick?.(e);
+            }}
+            className="inline-flex items-center justify-center whitespace-nowrap h-[1.75rem] lg:h-[2.5rem] xl:h-[3rem] w-auto xl:w-[9.5rem] px-[0.75rem] lg:px-[1.25rem] gap-[0.45rem] rounded-[0.375rem] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
+          >
+            <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
+              Read More
+            </Typography>
+            <DiagonalArrowIcon className="w-[1rem] h-[0.85rem] sm:w-[1.2rem] sm:h-[0.95rem] xl:w-[1.375rem] xl:h-[1.1rem] text-[#2D2D2D] shrink-0" />
+          </div>
+        </div>
+      </div>
+    </MirrorReveal>
+  );
+
+  return (
+    <FlipCard
+      className="aspect-[385/493] w-full rounded-[1.2643rem]"
+      roundedClassName="rounded-[1.2643rem]"
+      isFlipped={isFlipped}
+      onFlipChange={setIsFlipped}
+      onClick={onCardClick}
+      flipOnHover={true}
+      duration={0.42}
+      front={frontContent}
+      back={renderBackContent}
+    />
   );
 }
 
 export default function SmileStories() {
+  const [apiStories, setApiStories] = useState<any[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await publicPatientStoriesApi.listPublished({
+          page: 1,
+          limit: 12,
+        });
+        if (cancelled) return;
+        if (res.data && res.data.length > 0) {
+          const mapped = res.data.map((item) => ({
+            name: item.title,
+            date: formatStoryDate(item.storyDate),
+            image: item.patientImage || "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=800&auto=format&fit=crop",
+            link: `/journey-of-hope/patient-stories/${item.slug || item.id}`,
+            excerpt: item.shortDescription || "",
+          }));
+          const fullStories = mapped.length < 4 ? [...mapped, ...mapped, ...mapped, ...mapped].slice(0, 8) : mapped;
+          setApiStories(fullStories);
+        } else {
+          setApiStories(fallbackStories.map(s => ({ ...s, excerpt: "Explore the journey of hope, courage, and recovery." })));
+        }
+      } catch (err: any) {
+        if (!cancelled) {
+          setApiStories(fallbackStories.map(s => ({ ...s, excerpt: "Explore the journey of hope, courage, and recovery." })));
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (apiStories === null) {
+    return <div className="min-h-[400px]"></div>;
+  }
+
+  if (apiStories.length === 0) {
+    return null;
+  }
+
+  return <SmileStoriesCarousel apiStories={apiStories} />;
+}
+
+function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
+  const router = useRouter();
+  const isInfinite = apiStories.length >= 4;
+  const displayStories = isInfinite ? [...apiStories, ...apiStories, ...apiStories] : apiStories;
+
   const sectionRef = useRef<HTMLElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-
   const [hasEntered, setHasEntered] = useState(false);
+
+  // Heading blur reveal — plays once, the first time it scrolls into view.
+  const headingRef = useRef<HTMLDivElement | null>(null);
+  const [headingVisible, setHeadingVisible] = useState(false);
 
   const offsetRef = useRef(0); // kept wrapped inside [0, oneSetWidth)
   const oneSetWidthRef = useRef(0);
@@ -84,6 +220,8 @@ export default function SmileStories() {
   const lastTsRef = useRef<number | null>(null);
   const lastSaveTsRef = useRef(0);
   const pointerIdRef = useRef<number | null>(null);
+  const measureRafRef = useRef<number | null>(null);
+  const clickedLinkRef = useRef<string | null>(null);
 
   const applyTransform = () => {
     if (!trackRef.current) return;
@@ -101,10 +239,22 @@ export default function SmileStories() {
   };
 
   const measure = () => {
-    if (!trackRef.current) return;
+    if (!trackRef.current || !isInfinite) return;
     oneSetWidthRef.current = trackRef.current.scrollWidth / 3;
     offsetRef.current = wrap(offsetRef.current, oneSetWidthRef.current);
     applyTransform();
+  };
+
+  // Debounced measure: avoids layout thrash / jumpy transforms when the
+  // ResizeObserver fires multiple times in a row (e.g. during a viewport
+  // resize or an orientation change), which is what caused the visible
+  // stutter on some screens.
+  const scheduleMeasure = () => {
+    if (measureRafRef.current) cancelAnimationFrame(measureRafRef.current);
+    measureRafRef.current = requestAnimationFrame(() => {
+      measureRafRef.current = null;
+      measure();
+    });
   };
 
   // Restore last scroll position (e.g. user clicked a card, then hit back)
@@ -151,24 +301,47 @@ export default function SmileStories() {
     return () => observer.disconnect();
   }, []);
 
+  // Heading blur reveal observer
+  useEffect(() => {
+    const node = headingRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setHeadingVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     measure();
-    const ro = new ResizeObserver(() => measure());
+    const ro = new ResizeObserver(() => scheduleMeasure());
     if (viewportRef.current) ro.observe(viewportRef.current);
-    window.addEventListener("resize", measure);
+    window.addEventListener("resize", scheduleMeasure);
     return () => {
       ro.disconnect();
-      window.removeEventListener("resize", measure);
+      window.removeEventListener("resize", scheduleMeasure);
+      if (measureRafRef.current) cancelAnimationFrame(measureRafRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasEntered]);
 
   useEffect(() => {
-    if (!hasEntered) return;
+    if (!hasEntered || !isInfinite) return;
 
     const step = (ts: number) => {
       if (lastTsRef.current === null) lastTsRef.current = ts;
-      const dt = (ts - lastTsRef.current) / 1000;
+      // Clamp dt so a dropped/backgrounded frame (tab switch, slow device)
+      // doesn't cause a big visible jump when the animation resumes - this
+      // is what made the movement look "unsmooth" on some screens.
+      const dt = Math.min((ts - lastTsRef.current) / 1000, 0.05);
       lastTsRef.current = ts;
 
       const shouldMove =
@@ -216,6 +389,7 @@ export default function SmileStories() {
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isInfinite) return;
     isPausedRef.current = true;
     didDragRef.current = false;
     clearResumeTimer();
@@ -227,13 +401,14 @@ export default function SmileStories() {
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (pointerIdRef.current === null || oneSetWidthRef.current === 0) return;
+    if (!isInfinite || pointerIdRef.current === null || oneSetWidthRef.current === 0) return;
     const dx = dragStartXRef.current - e.clientX;
 
     if (!isDraggingRef.current) {
       if (Math.abs(dx) < DRAG_THRESHOLD) return; // ignore tiny jitters / clicks
       isDraggingRef.current = true;
       didDragRef.current = true;
+      clickedLinkRef.current = null;
     }
 
     offsetRef.current = wrap(dragStartOffsetRef.current + dx, oneSetWidthRef.current);
@@ -241,6 +416,7 @@ export default function SmileStories() {
   };
 
   const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isInfinite) return;
     if (pointerIdRef.current !== null) {
       try {
         e.currentTarget.releasePointerCapture(pointerIdRef.current);
@@ -259,30 +435,46 @@ export default function SmileStories() {
       // simple click/tap - resume immediately, no delay
       clearResumeTimer();
       isPausedRef.current = false;
+      if (clickedLinkRef.current) {
+        saveOffset();
+        router.push(clickedLinkRef.current);
+        clickedLinkRef.current = null;
+      }
     }
   };
 
   const handleCardClick = (link: string) => {
-    if (didDragRef.current) return; // it was a drag, not a click - don't navigate
-    saveOffset();
-    window.location.href = "/";
+    if (isInfinite && didDragRef.current) return; // it was a drag, not a click - don't navigate
+    if (isInfinite) saveOffset();
+    router.push(link);
   };
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative w-full lg:py-20"
-    >
-      <Typography variant="heading-3"
-        as="h2"
-        className="mx-auto mb-14 text-center px-4 text-neutral-800 font-medium font-manrope pt-6"
-      >
-        Behind Every <em className="text-neutral-900 font-tiempos-headline">Smile Is a Story</em>
-      </Typography>
+    <section ref={sectionRef} className="relative w-full lg:py-20">
+      <div ref={headingRef} className="mb-14">
+        <Typography
+          id="smilestories"
+          variant="heading-3"
+          as="h2"
+          className="mx-auto text-center px-4 text-neutral-800 font-medium font-manrope pt-6 scroll-mt-24 motion-reduce:!transition-none"
+          style={{
+            opacity: headingVisible ? 1 : 0,
+            filter: headingVisible ? "blur(0px)" : "blur(14px)",
+            transform: headingVisible
+              ? "translate3d(0,0,0)"
+              : "translate3d(0,32px,0)",
+            transition:
+              "opacity 700ms ease-out, filter 500ms ease-out, transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
+            willChange: "opacity, filter, transform",
+          }}
+        >
+          Behind Every <em className="text-neutral-900 font-tiempos-headline">Smile Is a Story</em>
+        </Typography>
+      </div>
 
       <div
         ref={viewportRef}
-        className="mx-auto w-full overflow-hidden px-4 sm:px-6 md:px-8 lg:px-12"
+        className={`mx-auto w-full px-4 sm:px-6 md:px-8 lg:px-12 ${isInfinite ? 'overflow-hidden' : 'overflow-x-auto snap-x no-scrollbar'}`}
       >
         <div
           ref={trackRef}
@@ -291,12 +483,17 @@ export default function SmileStories() {
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
           onWheel={() => {
+            if (!isInfinite) return;
             isPausedRef.current = true;
             scheduleResume();
           }}
-          className="flex w-max touch-pan-y cursor-grab flex-nowrap gap-3 select-none active:cursor-grabbing sm:gap-5 lg:gap-8"
+          className={`flex w-max flex-nowrap gap-3 sm:gap-5 lg:gap-8 ${
+            isInfinite 
+              ? 'touch-pan-y cursor-grab select-none will-change-transform active:cursor-grabbing' 
+              : 'touch-pan-x snap-mandatory'
+          }`}
         >
-          {loopedStories.map((story, i) => (
+          {displayStories.map((story, i) => (
             <div
               key={`${story.name}-${i}`}
               className="shrink-0 basis-[clamp(240px,65vw,320px)] cursor-pointer sm:basis-[clamp(280px,52vw-34px,360px)] md:basis-[clamp(320px,52vw-42px,400px)] lg:basis-[clamp(340px,32vw-20px,430px)] xl:basis-[clamp(280px,24vw-6px,460px)]"
@@ -311,9 +508,18 @@ export default function SmileStories() {
                 }
               }}
               onDragStart={(e) => e.preventDefault()}
-              onClick={() => handleCardClick(story.link)}
+              onPointerDown={() => {
+                clickedLinkRef.current = story.link;
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                handleCardClick(story.link);
+              }}
             >
-              <StoryCard {...story} />
+              <StoryCard
+                {...story}
+                onCardClick={() => handleCardClick(story.link)}
+              />
             </div>
           ))}
         </div>

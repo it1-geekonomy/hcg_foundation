@@ -45,3 +45,23 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Chroma vector store (legacy local path; live store is pgvector)
+data/
+
+# Local-only / sensitive knowledge — never commit
+knowledge/source-docs/**/Cancelled*
+knowledge/source-docs/**/PAN*
+knowledge/source-docs/**/FCRA BANK*
+knowledge/source-docs/**/POA*
+knowledge/source-docs/**/Trust Deed*
+knowledge/source-docs/**/Trust Resolution*
+knowledge/source-docs/**/Truste Further*
+knowledge/source-docs/**/*Form*10B*
+knowledge/source-docs/**/*Form*10BB*
+knowledge/source-docs/**/*form10B*
+knowledge/source-docs/**/*.jpg
+knowledge/source-docs/**/*.jpeg
+knowledge/source-docs/**/*.png
+knowledge/source-docs/**/National CSR*
+knowledge/source-docs/**/NGO Leadership*

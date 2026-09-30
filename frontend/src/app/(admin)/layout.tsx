@@ -1,5 +1,5 @@
-import AdminAuthGate from "@/domains/cms/components/AdminAuthGate";
-import AdminShell from "@/domains/cms/components/AdminShell";
+import AdminAuthGate from "@/domains/cms/shell/AdminAuthGate";
+import AdminShell from "@/domains/cms/shell/AdminShell";
 
 export default function AdminLayout({
   children,

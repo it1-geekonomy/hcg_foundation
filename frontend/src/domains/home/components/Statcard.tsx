@@ -1,12 +1,23 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import type { Stat } from "@/domains/home/constants/stat";
 import Typography from "@/lib/Typography";
-import Ribbon from "./Ribbon";
-import { useCountUp } from "@/domains/home/constants/Usecountup";
 
-export default function StatCard({ stat, active, id }: { stat: Stat; active: boolean; id: string }) {
-  const count = useCountUp(stat.value, active);
+export default function StatCard({ stat, active }: { stat: Stat; active: boolean }) {
+  const [reloadKey, setReloadKey] = useState(0);
+  const wasActive = useRef(false);
+
+  useEffect(() => {
+    // Only bump the key on the false -> true transition, so the gif
+    // restarts from frame 1 every time the card re-enters view
+    // (scrolling down into it, or scrolling back up into it).
+    if (active && !wasActive.current) {
+      setReloadKey((k) => k + 1);
+    }
+    wasActive.current = active;
+  }, [active]);
 
   return (
     <div
@@ -17,30 +28,23 @@ export default function StatCard({ stat, active, id }: { stat: Stat; active: boo
         transitionDelay: `${stat.delay}s`,
       }}
     >
-      <div className="relative h-72 w-[202px]">
-        <Ribbon id={id} delay={stat.delay} active={active} />
-
-        <Typography variant="display-2"
-          as="span"
-          className="pointer-events-none absolute top-[30%] whitespace-nowrap px-1 text-[#2E1C12] drop-shadow-sm font-bold lg:hidden"
-          style={{ left: "47%", transform: "translateX(-50%) translateY(-50%)" }}
-        >
-          {count.toLocaleString()}
-          {stat.suffix}
-        </Typography>
-        <Typography variant="heading-7"
-          as="span"
-          className="pointer-events-none absolute top-[30%] whitespace-nowrap px-1 text-[#2E1C12] drop-shadow-sm font-bold hidden lg:block"
-          style={{ left: "47%", transform: "translateX(-50%) translateY(-50%)" }}
-        >
-          {count.toLocaleString()}
-          {stat.suffix}
-        </Typography>
+      <div className="relative h-56 w-[202px] lg:h-64">
+        {active && (
+          <Image
+            key={reloadKey}
+            src={`${stat.gif}?r=${reloadKey}`}
+            alt={stat.label.replace("\n", " ")}
+            fill
+            unoptimized
+            className="object-contain"
+          />
+        )}
       </div>
 
-      <Typography variant="body-4"
+      <Typography
+        variant="body-4"
         as="p"
-        className="mt-2 whitespace-pre-line text-center text-black font-light"
+        className="whitespace-pre-line text-center text-black font-light"
       >
         {stat.label}
       </Typography>

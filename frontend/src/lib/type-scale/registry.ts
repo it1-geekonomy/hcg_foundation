@@ -78,6 +78,7 @@ export function getTypographyStyles(variant: TypographyVariant | string) {
 /** Suggested HTML element per variant — override with `as` prop when needed */
 export const typographyDefaultTags: Partial<Record<TypographyVariant, string>> = {
   "display-1": "h1",
+  "display-3": "span",
   "heading-1": "h2",
   "heading-2": "h2",
   "heading-3": "h2",
@@ -85,15 +86,19 @@ export const typographyDefaultTags: Partial<Record<TypographyVariant, string>> =
   "heading-5": "h3",
   "heading-6": "h2",
   "heading-7": "h3",
+  "heading-11": "h2",
   "label-3": "h3",
   "body-8": "p",
   "body-9": "span",
   "body-7": "p",
   "body-10": "p",
+  "body-11": "p",
   "body-6": "p",
   "body-2": "p",
   "body-1": "p",
   "body-3": "p",
   "body-4": "p",
   "heading-9": "p",
+  "heading-10": "h2",
+  "body-12": "p",
 };

@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.config import settings
 from app.database import Base
-from app.models import DocumentChunk  # noqa: F401 — must import so Base sees the model
+from app.models import DocumentChunk, RagMeta  # noqa: F401 — so Base sees models
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)

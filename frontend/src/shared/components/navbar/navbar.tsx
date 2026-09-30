@@ -18,7 +18,6 @@ export default function Navbar() {
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const [openDesktopDropdown, setOpenDesktopDropdown] = useState<number | null>(null);
   const desktopNavRef = useRef<HTMLDivElement>(null);
-  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,23 +53,24 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Close the open desktop dropdown as soon as the user scrolls
+  useEffect(() => {
+    if (openDesktopDropdown === null) return;
+
+    const handleDropdownScroll = () => {
+      setOpenDesktopDropdown(null);
+    };
+
+    window.addEventListener("scroll", handleDropdownScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleDropdownScroll);
+  }, [openDesktopDropdown]);
+
   const toggleDropdown = (index: number) => {
     setOpenDropdown((prev) => (prev === index ? null : index));
   };
 
   const toggleDesktopDropdown = (index: number) => {
     setOpenDesktopDropdown((prev) => (prev === index ? null : index));
-  };
-
-  const handleDesktopEnter = (index: number) => {
-    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
-    setOpenDesktopDropdown(index);
-  };
-
-  const handleDesktopLeave = () => {
-    closeTimeoutRef.current = setTimeout(() => {
-      setOpenDesktopDropdown(null);
-    }, 150);
   };
 
   const scrollToDonateForm = () => {
@@ -84,21 +84,31 @@ export default function Navbar() {
   };
 
   return (
-    <div
-      id="site-navbar"
-      className={`fixed top-[clamp(0.75rem,2vw,1.5rem)] inset-x-[clamp(1rem,8vw,8rem)] xl:inset-x-[clamp(0.5rem,3vw,4rem)] 2xl:inset-x-[clamp(1rem,10vw,10rem)] z-50 transition-transform duration-300 ease-in-out ${isVisible ? "translate-y-0" : "-translate-y-[150%]"
-        }`}
-    >
-      <nav className="w-full border border-white/10 bg-black/[0.18] backdrop-blur-[60px] px-[clamp(1rem,2vw,1.5rem)] xl:px-0">
-        <div className="flex items-center justify-between h-[clamp(3.5rem,6vw,4.5rem)] xl:ml-8">
+    <>
+      {/* Reserves the bar height only below 640px so page sections start under it. */}
+      <div aria-hidden="true" className="h-[calc(3.5rem+1px)] w-full sm:hidden" />
+      <div
+        id="site-navbar"
+        className={`fixed z-50 transition-transform duration-300 ease-in-out top-0 inset-x-0 sm:top-[clamp(0.75rem,2vw,1.5rem)] sm:inset-x-[clamp(1rem,8vw,8rem)] xl:inset-x-[clamp(0.5rem,3vw,4rem)] 2xl:inset-x-[clamp(1rem,10vw,10rem)] ${isVisible ? "translate-y-0" : "-translate-y-[150%]"
+          }`}
+      >
+      <nav className="w-full border border-white/10 bg-black/[0.18] backdrop-blur-[60px] px-[clamp(1rem,2vw,1.5rem)] max-sm:border-x-0 max-sm:border-t-0 max-sm:bg-[#2a2622] max-sm:px-0 max-sm:backdrop-blur-none xl:px-0">
+        <div className="flex items-center justify-between h-[clamp(3.5rem,6vw,4.5rem)] max-sm:h-14 max-sm:px-[clamp(1rem,2vw,1.5rem)] xl:ml-8">
           {/* Logo */}
-          <Link href="/" onClick={handleHomeNav} className="shrink-0 transition-transform duration-300 hover:scale-105">
+          <Link
+            href="/"
+            onClick={() => {
+              sessionStorage.setItem("nav_action", "logo");
+              window.dispatchEvent(new Event("nav_action_event"));
+            }}
+            className="flex h-full shrink-0 items-center py-2 transition-transform duration-300 hover:scale-105"
+          >
             <Image
               src={navbarContent.logo.src}
               alt={navbarContent.logo.alt}
               width={140}
               height={40}
-              className="h-[clamp(2rem,4vw,2.5rem)] w-auto"
+              className="h-full w-auto"
               priority
             />
           </Link>
@@ -106,21 +116,37 @@ export default function Navbar() {
           {/* Nav Links — desktop (xl and up) */}
           <div ref={desktopNavRef} className="hidden xl:flex items-center gap-[clamp(1.75rem,2vw,2rem)]">
             {navLinks.map((link, i) => {
+              const isChildActive = Boolean(
+                link.hasDropdown &&
+                  link.dropdownItems?.some((item) => item.href === pathname)
+              );
+              const isActive = link.href === pathname || isChildActive;
+
               if (!link.hasDropdown) {
                 return (
                   <Link
                     key={i}
                     href={link.href}
-                    onClick={link.href === "/" ? handleHomeNav : undefined}
-                    className="group relative flex items-center gap-1 py-1"
+                    onClick={(e) => {
+                      if (link.href !== "/") return;
+                      if (pathname === "/") {
+                        handleHomeNav(e);
+                        return;
+                      }
+                      sessionStorage.setItem("nav_action", "navbar_home");
+                      window.dispatchEvent(new Event("nav_action_event"));
+                    }}
+                    className="relative flex items-center gap-1 py-1"
                   >
-                    <Typography variant={link.href === pathname ? "text-1" : "text-2"}
+                    <Typography
+                      variant="text-2"
                       as="span"
-                      className="text-white font-manrope transition-colors duration-300 group-hover:text-[#FED034]"
+                      className={`font-manrope text-white transition-colors duration-300 ${
+                        isActive ? "font-bold" : "font-medium"
+                      }`}
                     >
                       {link.label}
                     </Typography>
-                    <span className="absolute -bottom-1 left-0 h-[2px] w-full origin-left scale-x-0 bg-[#FED034] transition-transform duration-300 ease-out group-hover:scale-x-100" />
                   </Link>
                 );
               }
@@ -129,10 +155,9 @@ export default function Navbar() {
                 <DesktopDropdown
                   key={i}
                   link={link}
+                  isActive={isActive}
                   isOpen={openDesktopDropdown === i}
                   onToggle={() => toggleDesktopDropdown(i)}
-                  onMouseEnter={() => handleDesktopEnter(i)}
-                  onMouseLeave={handleDesktopLeave}
                   onItemClick={() => setOpenDesktopDropdown(null)}
                 />
               );
@@ -148,9 +173,9 @@ export default function Navbar() {
                 event.preventDefault();
                 scrollToDonateForm();
               }}
-              className="hidden xl:inline-block shrink-0 px-5 py-2.5 bg-[#FED034] hover:bg-[#e6bc2e] transition-all duration-300 hover:shadow-[0_0_20px_rgba(254,208,52,0.5)] mr-6"
+              className="hidden xl:inline-block shrink-0 px-5 py-2.5 bg-[#FED034] mr-6"
             >
-              <Typography variant="button-4" as="span" className="text-[#262626] font-manrope font-light">
+              <Typography variant="button-4" as="span" className="text-[#262626] font-manrope font-bold">
                 {navbarContent.donateButton.label}
               </Typography>
             </Link>
@@ -162,9 +187,9 @@ export default function Navbar() {
                 event.preventDefault();
                 scrollToDonateForm();
               }}
-              className="hidden sm:inline-block xl:hidden shrink-0 px-5 py-2.5 bg-[#FED034] hover:bg-[#e6bc2e] transition-all duration-300 hover:shadow-[0_0_20px_rgba(254,208,52,0.5)]"
+              className="hidden sm:inline-block xl:hidden shrink-0 px-5 py-2.5 bg-[#FED034]"
             >
-              <Typography variant="button-4" as="span" className="text-[#262626]">
+              <Typography variant="button-4" as="span" className="text-[#262626] font-bold">
                 {navbarContent.donateButton.label}
               </Typography>
             </Link>
@@ -190,5 +215,6 @@ export default function Navbar() {
         />
       </nav>
     </div>
+    </>
   );
 }

@@ -8,4 +8,6 @@ export const ApiTagsConst = {
   ADMIN: 'Admin',
   CHATBOT: 'Chatbot',
   HEALTH: 'Health',
+  FUNDRAISING_CAMPAIGNS: 'Fundraising Campaigns',
+  PARTNERSHIP_INQUIRIES: 'Partnership Inquiries',
 } as const;

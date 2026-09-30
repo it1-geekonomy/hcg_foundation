@@ -6,6 +6,7 @@ import {
   EventSubscriber,
   InsertEvent,
   UpdateEvent,
+  RecoverEvent,
   RemoveEvent,
   SoftRemoveEvent,
 } from 'typeorm';
@@ -59,6 +60,13 @@ export class ChatbotSyncSubscriber implements EntitySubscriberInterface {
     // Treat a soft-delete the same as a hard delete for chatbot purposes —
     // if it's hidden from your site, it shouldn't show up in chat answers.
     this.deleteIfTracked(event.metadata.tableName, event.databaseEntity ?? event.entity);
+  }
+
+  afterRecover(event: RecoverEvent<any>) {
+    this.syncIfTracked(
+      event.metadata.tableName,
+      event.entity ?? event.databaseEntity,
+    );
   }
 
   private syncIfTracked(tableName: string, entity: any) {

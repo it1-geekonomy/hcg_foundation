@@ -1,4 +1,4 @@
-import LegalPageViewPage from "@/domains/cms/components/LegalPageViewPage";
+import LegalPageViewPage from "@/domains/cms/features/legal/LegalPageViewPage";
 import { PRIVACY_SECTION } from "@/domains/cms/lib/legal-sections";
 
 export default function AdminPrivacyPolicyViewPage() {

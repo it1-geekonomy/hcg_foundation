@@ -4,6 +4,7 @@ export const donateTheme = {
   accent: "#FCCC2D",
 };
 
+/** @deprecated Prefer donation-currency presets */
 export const donateAmountOptions = ["₹500", "₹1500", "₹2500"];
 
 export const donateIcon = "/Donateform/donateicon.png";

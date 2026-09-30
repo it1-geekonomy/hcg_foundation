@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   DeleteObjectCommand,
   PutObjectCommand,
+  ListObjectsV2Command,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
@@ -102,5 +103,75 @@ export class R2StorageService {
       }),
     );
     return true;
+  }
+
+  /**
+   * Fetches the total storage space consumed in the bucket by paginating
+   * through all objects and summing their sizes.
+   */
+  async getStorageMetrics(): Promise<{ totalBytes: number; objectCount: number }> {
+    this.assertConfigured();
+
+    let totalBytes = 0;
+    let objectCount = 0;
+    let isTruncated = true;
+    let continuationToken: string | undefined = undefined;
+
+    while (isTruncated) {
+      const response: any = await this.client.send(
+        new ListObjectsV2Command({
+          Bucket: this.bucket,
+          ContinuationToken: continuationToken,
+        }),
+      );
+
+      response.Contents?.forEach((obj: any) => {
+        totalBytes += obj.Size || 0;
+        objectCount++;
+      });
+
+      isTruncated = response.IsTruncated ?? false;
+      continuationToken = response.NextContinuationToken;
+    }
+
+    return { totalBytes, objectCount };
+  }
+
+  /**
+   * Lists all objects in the bucket that match the given prefix.
+   */
+  async listObjectsByPrefix(prefix: string): Promise<UploadedObject[]> {
+    this.assertConfigured();
+
+    const objects: UploadedObject[] = [];
+    let isTruncated = true;
+    let continuationToken: string | undefined = undefined;
+
+    while (isTruncated) {
+      const response: any = await this.client.send(
+        new ListObjectsV2Command({
+          Bucket: this.bucket,
+          Prefix: prefix,
+          ContinuationToken: continuationToken,
+        }),
+      );
+
+      response.Contents?.forEach((obj: any) => {
+        // Exclude the folder itself if it appears as an object
+        if (obj.Key === prefix) return;
+        
+        objects.push({
+          key: obj.Key,
+          url: `${this.publicUrl}/${obj.Key}`,
+          contentType: 'application/octet-stream',
+          size: obj.Size || 0,
+        });
+      });
+
+      isTruncated = response.IsTruncated ?? false;
+      continuationToken = response.NextContinuationToken;
+    }
+
+    return objects;
   }
 }

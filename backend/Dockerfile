@@ -1,18 +1,20 @@
 # --- Build stage ---
-FROM node:20-alpine AS builder
+FROM node:22-slim AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
+RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 COPY . .
-RUN npm run build
+RUN pnpm run build
 
 # --- Production stage ---
-FROM node:20-alpine
+FROM node:22-slim
 WORKDIR /app
 ENV NODE_ENV=production
-COPY package*.json ./
-RUN npm install --omit=dev
+RUN corepack enable && corepack prepare pnpm@10.32.1 --activate
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile --prod && pnpm store prune
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src/database ./src/database
-EXPOSE 3000
-CMD ["node", "dist/main"]
+EXPOSE 6060
+# Apply pending TypeORM migrations, then start the API
+CMD ["sh", "-c", "pnpm run migration:run:prod && node dist/main"]

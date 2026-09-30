@@ -1,5 +1,18 @@
-import { Body, Controller, Post, Param } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Post,
+  Param,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiTags,
+  ApiTooManyRequestsResponse,
+} from '@nestjs/swagger';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { Public } from '../common/decorators/public.decorator';
 import { IngestionService } from './services/ingestion.service';
 import { ChatService } from './services/chat.service';
@@ -16,23 +29,49 @@ export class ChatbotController {
   @Post('reindex')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Rebuild chatbot knowledge base (super-admin)',
+    summary: 'Rebuild chatbot knowledge base (CMS / super-admin)',
+    description:
+      'Pushes all published CMS rows to the AI service, then runs fingerprint sync for static/knowledge files.',
   })
   async reindexAll() {
-    return this.ingestionService.reindexAll();
+    const data = await this.ingestionService.reindexAll();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Chatbot knowledge base reindex started successfully',
+      data,
+    };
   }
 
   @Post('reindex/:table')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Rebuild chatbot KB for one table (super-admin)' })
+  @ApiOperation({ summary: 'Rebuild chatbot KB for one table (CMS / super-admin)' })
   async reindexTable(@Param('table') table: string) {
-    return this.ingestionService.reindexTable(table);
+    const data = await this.ingestionService.reindexTable(table);
+    return {
+      statusCode: HttpStatus.OK,
+      message: `Chatbot knowledge base reindexed for ${table}`,
+      data,
+    };
   }
 
   @Public()
+  @UseGuards(ThrottlerGuard)
   @Post('chat')
-  @ApiOperation({ summary: 'Ask the NGO chatbot a question' })
+  @ApiOperation({
+    summary: 'Ask the HCG Foundation chatbot a question',
+    description:
+      'Public website endpoint. Does not re-sync the index. Pass sessionId for follow-ups. Rate limited per IP: 10 messages/minute and 100/hour.',
+  })
+  @ApiTooManyRequestsResponse({ description: 'Rate limit exceeded' })
   async chat(@Body() dto: AskQuestionDto) {
-    return this.chatService.answerQuestion(dto.question);
+    const data = await this.chatService.answerQuestion(
+      dto.question,
+      dto.sessionId,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Chatbot reply generated successfully',
+      data,
+    };
   }
 }

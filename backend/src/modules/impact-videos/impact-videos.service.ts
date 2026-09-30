@@ -1,0 +1,189 @@
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
+import { ContentStatus } from '../../common/enums/content-status.enum';
+import {
+  buildPaginatedResult,
+  PaginatedResult,
+} from '../../common/interfaces/paginated.interface';
+import { CdnFile, CdnService } from '../../common/storage/cdn.service';
+import {
+  applyDisplayOrderUpdate,
+  assignDisplayOrderOnRestore,
+  compactDisplayOrderAfterDelete,
+  prepareInsertDisplayOrder,
+} from '../../common/utils/display-order';
+import {
+  applyDeletedFilter,
+  restoreSoftDeleted,
+} from '../../common/utils/soft-delete';
+import { CreateImpactVideoDto } from './dto/create-impact-video.dto';
+import { UpdateImpactVideoDto } from './dto/update-impact-video.dto';
+import { ImpactVideo } from './entities/impact-video.entity';
+
+const ALLOWED_VIDEO_TYPES = new Set(['video/mp4', 'video/webm']);
+
+export type ImpactVideoFiles = {
+  videoFile?: CdnFile;
+};
+
+export type ImpactVideoUploadedFiles = {
+  videoFile?: CdnFile[];
+};
+
+@Injectable()
+export class ImpactVideosService {
+  constructor(
+    @InjectRepository(ImpactVideo)
+    private readonly repo: Repository<ImpactVideo>,
+    private readonly cdn: CdnService,
+  ) {}
+
+  async create(
+    dto: CreateImpactVideoDto,
+    file?: CdnFile,
+  ): Promise<ImpactVideo> {
+    if (!file) {
+      throw new BadRequestException(
+        'Video file is required to create an impact video.',
+      );
+    }
+
+    this.validateVideoFile(file);
+    const videoUrl = await this.cdn.upload(file, 'impact-videos', 'video');
+
+    const displayOrder = await prepareInsertDisplayOrder(
+      this.repo,
+      dto.displayOrder,
+    );
+
+    try {
+      const entity = this.repo.create({
+        videoUrl,
+        displayOrder,
+        status: dto.status ?? ContentStatus.DRAFT,
+      });
+      return await this.repo.save(entity);
+    } catch (err) {
+      await this.cdn.delete(videoUrl);
+      throw err;
+    }
+  }
+
+  async findAll(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResult<ImpactVideo>> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 20;
+
+    const qb = this.repo
+      .createQueryBuilder('entity')
+      .orderBy('entity.displayOrder', 'ASC')
+      .addOrderBy('entity.createdAt', 'DESC');
+    applyDeletedFilter(qb, query);
+
+    if (query.status) {
+      qb.andWhere('entity.status = :status', { status: query.status });
+    }
+
+    const [data, total] = await qb
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    return buildPaginatedResult(data, total, page, limit);
+  }
+
+  async findDeleted(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResult<ImpactVideo>> {
+    return this.findAll({ ...query, includeDeleted: true, onlyDeleted: true });
+  }
+
+  async findPublished(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResult<ImpactVideo>> {
+    return this.findAll({
+      ...query,
+      status: ContentStatus.PUBLISHED,
+      includeDeleted: false,
+    });
+  }
+
+  async findOne(id: string): Promise<ImpactVideo> {
+    const entity = await this.repo.findOne({ where: { id } });
+    if (!entity) {
+      throw new NotFoundException(
+        `Impact video not found for id "${id}". Check the id and try again.`,
+      );
+    }
+    return entity;
+  }
+
+  async update(
+    id: string,
+    dto: UpdateImpactVideoDto,
+    file?: CdnFile,
+  ): Promise<ImpactVideo> {
+    const entity = await this.findOne(id);
+
+    if (file) {
+      this.validateVideoFile(file);
+      const replacedUrl = await this.cdn.replace(
+        entity.videoUrl,
+        file,
+        'impact-videos',
+        'video',
+      );
+      if (replacedUrl) {
+        entity.videoUrl = replacedUrl;
+      }
+    }
+
+    if (
+      dto.displayOrder !== undefined &&
+      dto.displayOrder !== entity.displayOrder
+    ) {
+      entity.displayOrder = await applyDisplayOrderUpdate(
+        this.repo,
+        id,
+        entity.displayOrder,
+        dto.displayOrder,
+      );
+    }
+
+    if (dto.status !== undefined) {
+      entity.status = dto.status;
+    }
+
+    return await this.repo.save(entity);
+  }
+
+  async remove(id: string): Promise<void> {
+    const entity = await this.findOne(id);
+    const removedOrder = entity.displayOrder;
+    await this.repo.softRemove(entity);
+    await compactDisplayOrderAfterDelete(this.repo, removedOrder);
+  }
+
+  async restore(id: string): Promise<ImpactVideo> {
+    const entity = await restoreSoftDeleted(this.repo, id, 'Impact video');
+    return assignDisplayOrderOnRestore(this.repo, entity);
+  }
+
+  private validateVideoFile(file: CdnFile): void {
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('Uploaded video file is empty.');
+    }
+    if (!ALLOWED_VIDEO_TYPES.has(file.mimetype)) {
+      throw new BadRequestException(
+        'Only MP4 and WebM video formats are allowed.',
+      );
+    }
+  }
+}

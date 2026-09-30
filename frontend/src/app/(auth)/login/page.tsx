@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import LoginForm from "@/domains/cms/components/LoginForm";
+import LoginForm from "@/domains/cms/shell/LoginForm";
 
 export default function AuthLoginPage() {
   return (
