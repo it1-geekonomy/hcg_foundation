@@ -1,19 +1,18 @@
 "use client";
 
-import React, { use, useState, useEffect, useRef } from "react";
-import Link from "next/link";
+import React, { use, useState, useEffect } from "react";
 import { notFound } from "next/navigation";
-import { ArrowUpRight } from "lucide-react";
+import { Calendar } from "lucide-react";
 import Typography from "@/lib/Typography";
 import Banner from "@/shared/components/Herobannersection";
 import DonateForm from "@/shared/components/DonateForm";
-import PaginationControls from "@/shared/components/PaginationControls";
 import ShareStory from "@/shared/components/ShareStory";
-import ProjectCard from "@/domains/resources/components/ProjectCard";
+import RelatedProjects from "@/domains/resources/components/RelatedProjects";
 import SwasthiArtTherapySection from "@/domains/resources/components/SwasthiArtTherapySection";
 import PuzzleImage from "@/shared/components/Puzzleimage";
 import { ProjectItem, PROJECTS_DATA } from "@/domains/resources/constants/projects";
 import { publicProjectsApi } from "@/domains/cms/lib/api";
+import { useDetailPageAnimations } from "@/shared/lib/detailPageAnimations";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
@@ -25,47 +24,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const resolvedParams = use(params);
   const [projectItem, setProjectItem] = useState<ProjectItem | null>(null);
   const [loading, setLoading] = useState(true);
-  
-  const [allRelatedProjects, setAllRelatedProjects] = useState<ProjectItem[]>([]);
-  
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-  const isDraggingOverThreshold = useRef<boolean>(false);
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    if (!scrollContainerRef.current) return;
-    setIsDragging(true);
-    isDraggingOverThreshold.current = false;
-    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
-    setScrollLeft(scrollContainerRef.current.scrollLeft);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging || !scrollContainerRef.current) return;
-    const x = e.pageX - scrollContainerRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    if (Math.abs(x - startX) > 6) {
-      isDraggingOverThreshold.current = true;
-      e.preventDefault();
-      scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-    }
-  };
-
-  const handlePointerUp = () => {
-    setIsDragging(false);
-    setTimeout(() => {
-      isDraggingOverThreshold.current = false;
-    }, 50);
-  };
-
-  const handleLinkClick = (e: React.MouseEvent) => {
-    if (isDraggingOverThreshold.current) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  };
+  const [relatedProjects, setRelatedProjects] = useState<ProjectItem[]>([]);
 
   const [fromHome, setFromHome] = useState(false);
 
@@ -109,7 +68,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
         }
 
         if (!cancelled && rel.length > 0) {
-          setAllRelatedProjects(
+          setRelatedProjects(
             rel.map((item) => ({
               id: item.id ?? "",
               slug: item.slug ?? "",
@@ -136,7 +95,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           );
           setProjectItem(fallback ?? null);
           if (fallback) {
-            setAllRelatedProjects(
+            setRelatedProjects(
               PROJECTS_DATA.filter((item) => item.id !== fallback.id).slice(0, 6)
             );
           }
@@ -149,6 +108,8 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
       cancelled = true;
     };
   }, [resolvedParams.id]);
+
+  useDetailPageAnimations(!loading && Boolean(projectItem), projectItem?.id);
 
   if (!loading && !projectItem) {
     notFound();
@@ -196,6 +157,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-12 sm:gap-10 lg:gap-14 items-start">
+            {/* Left Column: Story Details (7 cols) */}
             <div className="sm:col-span-7 flex flex-col">
               <Typography
                 variant="heading-2"
@@ -205,7 +167,19 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 {projectItem.title}
               </Typography>
 
-              {/* Full Story HTML / Text Narrative */}
+              {/* Metadata: Project date (same treatment as event date/location) */}
+              {projectItem.date && (
+                <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-4 sm:gap-6">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <Calendar className="size-4 text-[#C08600] shrink-0" />
+                    <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
+                      {projectItem.date}
+                    </Typography>
+                  </div>
+                </div>
+              )}
+
+              {/* Story Paragraphs */}
               <div className="mt-4 sm:mt-5 max-h-[25rem] sm:max-h-[30rem] lg:max-h-[35rem] xl:max-h-[40rem] overflow-y-auto no-scrollbar pr-2 sm:pr-4">
                 {projectItem.fullStory.includes("<") ? (
                   <div
@@ -232,8 +206,9 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               <ShareStory />
             </div>
 
+            {/* Right Column: Featured Image (5 cols) */}
             <div className="sm:col-span-5 flex flex-col items-start w-full order-first sm:order-last">
-              <div className="relative aspect-[4/3] sm:aspect-[4/3] w-full max-w-[37.5rem] overflow-hidden rounded-xl">
+              <div className="relative aspect-[4/3] w-full max-w-[37.5rem] overflow-hidden rounded-xl">
                 {/* Puzzle-piece reveal on the detail image only — pieces
                     fade/scale in at their own cell, in a randomized order,
                     the moment this box scrolls into view. */}
@@ -257,43 +232,13 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
         )}
       </section>
 
-      {/* Related Articles Section matching Figma Frame 10 */}
-      <section className={`${CONTAINER} py-8 sm:py-12 border-t border-[#E8DFC5]`}>
-        <div className="flex items-center justify-between mb-6 sm:mb-8">
-          <Typography
-            variant="heading-6"
-            as="h2"
-            className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
-          >
-            Related Articles
-          </Typography>
-          <Link
-            href="/resources/projects"
-            className="inline-flex items-center gap-1 text-[#2D2D2D] transition hover:text-[#B88700]"
-          >
-            <Typography variant="body-9" as="span" className="font-manrope font-semibold text-[#2D2D2D]">
-              View All
-            </Typography>
-            <ArrowUpRight className="size-4 text-[#2D2D2D]" />
-          </Link>
-        </div>
-
-        <div 
-          ref={scrollContainerRef}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          onDragStart={(e) => e.preventDefault()}
-          className={`mt-6 sm:mt-8 flex overflow-x-auto gap-6 sm:gap-8 no-scrollbar pb-4 sm:pb-0 touch-pan-y ${isDragging ? "cursor-grabbing scroll-auto" : "cursor-grab snap-x snap-mandatory scroll-smooth"}`}
-        >
-          {allRelatedProjects.map((item) => (
-            <div key={item.id} className="shrink-0 w-[calc(100%-1rem)] md:w-[calc(50%-1rem)] xl:w-[calc(50%-1.5rem)] snap-center flex select-none [&_img]:pointer-events-none" onClickCapture={handleLinkClick}>
-              <ProjectCard project={item} headingTag="h3" />
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Reusable Related Projects Section */}
+      {projectItem && (
+        <RelatedProjects
+          currentProjectId={projectItem.id}
+          projects={relatedProjects}
+        />
+      )}
 
       <div id="donate-form">
         <DonateForm />
