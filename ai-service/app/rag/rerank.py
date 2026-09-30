@@ -88,6 +88,9 @@ def rerank(hits: list[dict], intents: set[str]) -> list[dict]:
         if "privacy" in intents and "privacy" in title:
             score += 0.40
 
+        if "events" in intents and category == "event":
+            score += 0.30
+
         if "programs" in intents and category in ("project", "page", "award"):
             score += 0.15
 
@@ -120,9 +123,12 @@ def rerank(hits: list[dict], intents: set[str]) -> list[dict]:
 def pick_sources(hits: list[dict], intents: set[str]) -> list[dict]:
     sources: list[dict] = []
     seen_urls: set[str] = set()
-    if "events" in intents:
-        sources.append({"title": C.PAGE_LABELS[C.EVENTS_URL], "url": C.EVENTS_URL})
-        seen_urls.add(C.EVENTS_URL)
+    for intent, url in (("events", C.EVENTS_URL), ("terms", "/terms"), ("privacy", "/privacy")):
+        if intent in intents:
+            sources.append({"title": C.PAGE_LABELS[url], "url": url})
+            seen_urls.add(url)
+    if {"terms", "privacy"} & intents:
+        return sources
     if not hits:
         return sources
     best = hits[0]["score"]

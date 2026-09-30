@@ -453,7 +453,7 @@ export default function ChatbotWidget() {
             exit={{ opacity: 0, y: 24, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 380, damping: 32 }}
             style={{ transformOrigin: "bottom right" }}
-            className="fixed inset-0 z-[60] flex flex-col overflow-hidden bg-[#FBF8EC] sm:inset-auto sm:right-6 sm:bottom-[108px] sm:h-[min(660px,calc(100dvh-9rem))] sm:w-[420px] sm:rounded-[28px] sm:shadow-[0_24px_60px_-16px_rgba(60,48,10,0.35)] sm:ring-1 sm:ring-black/5"
+            className="fixed inset-0 z-[60] flex flex-col overflow-hidden bg-[#FBF8EC] sm:inset-auto sm:right-6 sm:bottom-[148px] sm:h-[min(660px,calc(100dvh-11rem))] lg:bottom-[132px] sm:w-[420px] sm:rounded-[28px] sm:shadow-[0_24px_60px_-16px_rgba(60,48,10,0.35)] sm:ring-1 sm:ring-black/5"
           >
             {/* Header */}
             <div className="flex shrink-0 items-center gap-3 bg-[linear-gradient(100deg,#CDEAF1_0%,#FBF1C9_48%,#F9D5DE_100%)] px-5 py-4 sm:px-7">
@@ -668,7 +668,7 @@ export default function ChatbotWidget() {
 
       {/* Launcher */}
       <div
-        className={`fixed right-4 bottom-4 z-[60] items-end gap-3 sm:right-6 sm:bottom-6 ${
+        className={`fixed right-4 bottom-16 z-[60] items-end gap-3 sm:right-6 lg:bottom-12 ${
           open ? "hidden sm:flex" : "flex"
         } flex-col`}
       >

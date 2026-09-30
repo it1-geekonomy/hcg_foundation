@@ -46,6 +46,8 @@ class Settings(BaseSettings):
     knowledge_dir: str = "./knowledge/public"
     geekonomy_docs_dir: str = "./knowledge/source-docs"
     site_base_url: str = "https://hcgfoundation.org"
+    # Where the sync fetches public pages to index their text; empty disables page indexing
+    site_crawl_url: str = "http://localhost:3000"
     # Vectors live in Postgres via pgvector (document_chunks).
 
     @property

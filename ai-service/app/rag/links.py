@@ -11,9 +11,11 @@ _MD_LINK = re.compile(r"\[([^\]]+)\]\(([^)\s]+)\)")
 _BARE_SITE_URL = re.compile(r"https?://(?:www\.)?hcgfoundation\.org[^\s)\]]*", re.I)
 # The model sometimes imitates the NO_ANSWER_FOUND sentinel with variants of its own
 _SENTINEL = re.compile(r"\bNO_[A-Z_]+_FOUND\b[.:]?\s*")
+# "URL: /path" lines copied from the context format instead of a proper link
+_URL_LINE = re.compile(r"(?im)^([ \t]*(?:[-*]\s+)?)(?:\*\*)?URL:?(?:\*\*)?:?\s*(\S+?)\s*$")
 
 # Rows synced from the CMS carry their own record titles (story names, events...).
-_CURATED_TABLES = {"static", "knowledge"}
+_CURATED_TABLES = {"static", "knowledge", "site"}
 
 
 def public_url(url: str | None) -> str | None:
@@ -47,7 +49,15 @@ def clean_answer(text: str) -> str:
         link = f"[{C.PAGE_LABELS.get(valid, 'this page')}]({valid})" if valid else "the website"
         return link + trailing
 
+    def url_line(m: re.Match) -> str:
+        valid = public_url(_SITE_PREFIX.sub("", m.group(2)) or "/")
+        if not valid:
+            return ""
+        return f"{m.group(1)}More: [{C.PAGE_LABELS.get(valid, 'details')}]({valid})"
+
     out = _SENTINEL.sub("", text or "")
+    out = _URL_LINE.sub(url_line, out)
+    out = re.sub(r"\n{3,}", "\n\n", out)
     out = _MD_LINK.sub(md, out)
     # Bare site URLs outside Markdown links
     out = re.sub(

@@ -190,16 +190,29 @@ def _static_documents() -> list[dict]:
         {
             "table": "static",
             "source_id": "mission-overview",
-            "title": "Mission and Programs Overview",
+            "title": "Programs and Initiatives",
             "url": "/about-us",
             "category": "Page",
             "content": (
-                "Title: Mission and Programs Overview\nCategory: Page\n\n"
-                "HCG Foundation’s mission focuses on cancer care support: Patient Aid, "
-                "awareness and prevention, diagnostics support, and related community programs. "
-                "Published materials may mention psychological / counseling support as part of "
-                "holistic patient care. Programs and projects listed in the CMS should be treated "
-                "as the source of truth for current initiatives."
+                "Title: Programs and Initiatives\nCategory: Page\n\n"
+                "What programs does HCG Foundation run? What projects and initiatives does it have?\n"
+                "HCG Foundation supports cancer patients, families and communities through:\n"
+                f"- Financial Support for Pediatric Patients ({C.PATIENT_AID_URL}) — Patient Aid / "
+                "Aasha Daan (The Gift of Hope): financial assistance for economically disadvantaged "
+                "cancer patients, with a focus on children and young adults. HCG hospitals give "
+                "approved patients a discount and the Foundation pays the discounted bill.\n"
+                f"- Awareness & Screening Camps ({C.AWARENESS_URL}) — cancer screening and awareness "
+                "camps focused on breast, oral and cervical cancers; Mobile Screening that takes "
+                "screening to underserved and remote areas; Student Outreach healthy-habits campaigns "
+                "for 4th–6th grade students in government schools since 2018; HPV vaccination.\n"
+                "- Swasti Gallery (/our-programs/swasthi-gallery) — art gallery and art therapy "
+                "initiative since 2007 at HCG hospitals; proceeds support cancer patients.\n"
+                "- Counselling for patients and families, and research & innovation (About Us page).\n"
+                f"- Projects ({C.PROJECTS_URL}) — funded projects such as cancer diagnostic support "
+                "and ventilator support.\n"
+                f"Ways to get involved: Participate ({C.PARTICIPATE_URL}) to fundraise, volunteer or "
+                f"intern; CSR Partnership ({C.CSR_URL}); Grants & Philanthropy "
+                "(/getinvolved/grants-and-philanthropy)."
             ),
         },
         {

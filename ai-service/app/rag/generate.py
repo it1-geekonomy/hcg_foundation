@@ -30,8 +30,10 @@ Rules:
 10. Keep answers warm, concise, and visitor-facing. Do not mention embeddings, RAG, or internal systems.
 11. Organisation PAN and FCRA bank account may be shared when the visitor asks — use only the official values above / context. Never share cancelled-cheque images, personal staff phones, or donor names.
 12. Links: only link to a URL shown in a context block's URL field, copied exactly (relative paths like /contact — never add a domain), as Markdown [label](url). Never make up URLs; if a block's URL is "-", do not link it. Donations use the Donate Now form ({C.DONATE_URL}).
-13. Dates: compare every event date with TODAY (given with the question). Events dated before today are past events — never call them upcoming. If no event in context is dated today or later, say in a friendly sentence that no upcoming events are published right now, briefly mention the most recent past events with their dates, and suggest checking the [Events]({C.EVENTS_URL}) page.
+13. Dates: each event block has an "Event status" line — follow it exactly. PAST events must never be called upcoming or current. If no event in context is dated today or later, say in a friendly sentence that no upcoming events are published right now, briefly mention the most recent past events with their dates, and suggest checking the [Events]({C.EVENTS_URL}) page.
 14. The official phone number {C.OFFICIAL_PHONE} is the Foundation's contact / helpline number.
+15. Never write raw "URL:" / "Focus:" field lines. Put links inline in the sentence, e.g. "see [Awareness & Screening Camps](/our-programs/awareness-and-screening-camps)".
+16. Context blocks with Category "Page" hold the actual text of the public website pages — prefer them when describing programs, initiatives and how to get involved.
 """
 
 
@@ -46,6 +48,7 @@ def generate_answer(question: str, contexts: list[dict]) -> str:
             f"Category: {c.get('category')}\n"
             f"URL: {public_url(c.get('url')) or '-'}\n"
             f"Designation: {c.get('designation') or '-'}\n"
+            f"{_event_status(c)}"
             f"Content:\n{c.get('content')}"
         )
     context_text = "\n\n---\n\n".join(blocks)
@@ -74,15 +77,27 @@ def generate_answer(question: str, contexts: list[dict]) -> str:
 _EVENT_DATE = re.compile(r"Event Date:\s*\w{3} (\w{3} \d{1,2} \d{4})")
 
 
+def _event_date(context: dict) -> datetime | None:
+    if (context.get("category") or "").lower() != "event":
+        return None
+    m = _EVENT_DATE.search(context.get("content") or "")
+    return datetime.strptime(m.group(1), "%b %d %Y") if m else None
+
+
+def _event_status(context: dict) -> str:
+    when = _event_date(context)
+    if not when:
+        return ""
+    status = "UPCOMING event" if when.date() >= date.today() else "PAST event (already happened)"
+    return f"Event status: {status}, held on {when:%d %B %Y}\n"
+
+
 def _no_upcoming_events_answer(contexts: list[dict]) -> str:
     dated: list[tuple[datetime, str]] = []
     for c in contexts:
-        if (c.get("category") or "").lower() != "event":
+        when = _event_date(c)
+        if not when:
             continue
-        m = _EVENT_DATE.search(c.get("content") or "")
-        if not m:
-            continue
-        when = datetime.strptime(m.group(1), "%b %d %Y")
         url = public_url(c.get("url"))
         name = c.get("title") or "Event"
         label = f"[{name}]({url})" if url else name
@@ -151,6 +166,18 @@ def recover_if_needed(answer: str, question: str, contexts: list[dict], intents:
         lines.extend(f"- {name} — {role}" for name, role in C.TRUSTEES)
         lines.append(f"See [Our Team & Trustees]({C.TEAM_URL}) for their profiles.")
         return "\n".join(lines)
+
+    if "terms" in intents:
+        return (
+            "You can read HCG Foundation’s terms on the [Terms & Conditions](/terms) page. "
+            f"For any questions about them, email {C.OFFICIAL_EMAIL} or call {C.OFFICIAL_PHONE}."
+        )
+
+    if "privacy" in intents:
+        return (
+            "You can read how HCG Foundation handles personal information on the "
+            f"[Privacy Policy](/privacy) page. For questions, email {C.OFFICIAL_EMAIL}."
+        )
 
     if "non_cancer" in intents:
         return (

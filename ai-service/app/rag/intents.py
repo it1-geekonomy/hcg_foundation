@@ -57,98 +57,90 @@ def match_fast_intent(message: str) -> dict | None:
     return None
 
 
+def _has(text: str, *patterns: str) -> bool:
+    """Match keywords at the start of a word, so "reach" doesn't fire on "outreach"."""
+    return any(re.search(r"\b" + p, text) for p in patterns)
+
+
 def detect_intents(text: str) -> set[str]:
     t = (text or "").lower()
     intents: set[str] = set()
-    if any(k in t for k in ("donate", "donation", "80g", "tax receipt", "receipt")):
+    if _has(t, "donat", "donor", "80g", "tax receipt", "receipt"):
         intents.add("donate")
-    if any(k in t for k in ("fcra", "foreign", "overseas", "nri")):
+    if _has(t, "fcra", "foreign", "overseas", r"nris?\b"):
         intents.add("fcra")
-    if any(
-        k in t
-        for k in (
-            "bank",
-            "account number",
-            "account no",
-            "a/c",
-            "ifsc",
-            "swift",
-            "neft",
-            "rtgs",
-            "wire transfer",
-            "bank details",
-            "bank account",
-        )
+    if _has(
+        t,
+        "bank",
+        "account number",
+        "account no",
+        "a/c",
+        "ifsc",
+        "swift",
+        "neft",
+        "rtgs",
+        "wire transfer",
     ):
         intents.add("bank")
         intents.add("fcra")
-    if any(k in t for k in ("pan", "pan card", "permanent account")):
+    if _has(t, r"pan\b", "permanent account"):
         intents.add("pan")
         intents.add("certificate")
-    if any(k in t for k in ("12a", "csr", "darpan", "certificate", "registration")):
+    if _has(t, "12a", "csr", "darpan", "certificate", "registration"):
         intents.add("certificate")
-    if any(
-        k in t
-        for k in ("trustee", "board", "who runs", "leadership", "governing")
-    ):
+    if _has(t, "trustee", r"board\b", "who runs", "leadership", "governing"):
         intents.add("trustees")
-    if any(k in t for k in ("founder", "ajaikumar")):
+    if _has(t, "founder", "ajaikumar"):
         intents.add("founder")
-    if "internship" in t or "intern " in t:
+    if _has(t, r"intern(ship)?s?\b"):
         intents.add("internship")
-    if any(k in t for k in ("volunteer", "fundrais", "get involved", "participate")):
+    if _has(t, "volunteer", "fundrais", "get involved", "participat"):
         intents.add("volunteer")
-    if any(
-        k in t
-        for k in (
-            "patient aid",
-            "how do i apply",
-            "sponsor",
-            "adopt a patient",
-            "eligible",
-            "aasha daan",
-            "asha daan",
-            "financial aid",
-            "financial support",
-            "afford",
-        )
+    if _has(
+        t,
+        "patient aid",
+        "how do i apply",
+        "sponsor",
+        "adopt a patient",
+        "eligib",
+        "aasha daan",
+        "asha daan",
+        "financial aid",
+        "financial support",
+        "afford",
     ):
         intents.add("patient_aid")
-    if any(
-        k in t
-        for k in (
-            "contact",
-            "phone",
-            "email",
-            "address",
-            "reach",
-            "helpline",
-            "help line",
-            "call you",
-            "call us",
-            "whatsapp",
-            "mobile number",
-            "phone number",
-            "contact number",
-        )
+    if _has(
+        t,
+        "contact",
+        "phone",
+        r"e-?mail\b",
+        "address",
+        r"reach\b",
+        "helpline",
+        "help line",
+        "call you",
+        "call us",
+        "whatsapp",
+        "mobile number",
     ):
         intents.add("contact")
-    if "privacy" in t:
+    if _has(t, "privacy"):
         intents.add("privacy")
-    if "terms" in t:
+    if _has(t, r"terms\b", "t&c"):
         intents.add("terms")
-    if any(k in t for k in ("program", "project", "mission", "what do you do")):
+    if _has(t, "program", "project", "mission", "what do you do", "initiative"):
         intents.add("programs")
-    if "event" in t:
+    if _has(t, r"events?\b"):
         intents.add("events")
-    if "hospital" in t:
+    if _has(t, "hospital"):
         intents.add("hospital")
-    if any(k in t for k in ("bengaluru", "bangalore", "how many patient")):
+    if _has(t, "bengaluru", "bangalore", "how many patient"):
         intents.add("patient_count")
-    if any(k in t for k in ("heart attack", "diabetes", "non-cancer", "non cancer")):
+    if _has(t, "heart attack", "diabetes", "non-cancer", "non cancer"):
         intents.add("non_cancer")
-    if any(k in t for k in ("psychological", "counsel", "mental")):
+    if _has(t, "psycholog", "counsel", "mental"):
         intents.add("psychological")
-    if any(k in t for k in ("monthly", "recurring")):
+    if _has(t, "monthly", "recurring"):
         intents.add("monthly")
     return intents
