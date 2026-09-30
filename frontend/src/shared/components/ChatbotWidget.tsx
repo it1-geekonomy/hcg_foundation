@@ -26,7 +26,7 @@ import {
   Send,
   X,
 } from "lucide-react";
-import { chatbotApi } from "@/shared/lib/chatbot-api";
+import { ChatbotApiError, chatbotApi } from "@/shared/lib/chatbot-api";
 
 type ChatRole = "bot" | "user";
 
@@ -50,6 +50,8 @@ const TEASER_KEY = "hcg-chatbot-teaser-dismissed";
 const AVATAR_SRC = "/chatbot/hope-avatar.webp";
 const LOGO_SRC = "/chatbot/hcg-logo-color.svg";
 const GREETING = "Hi! I’m Hope 👋\nHow can I help you today?";
+/** Must match the backend AskQuestionDto limit */
+const MAX_MESSAGE_LENGTH = 1000;
 
 const SUGGESTIONS = [
   { label: "How can I donate?", icon: Heart, iconClass: "fill-[#E5383B] text-[#E5383B]" },
@@ -378,13 +380,16 @@ export default function ChatbotWidget() {
           sources: res.data?.sources ?? [],
         },
       ]);
-    } catch {
+    } catch (err) {
+      const rateLimited = err instanceof ChatbotApiError && err.status === 429;
       setMessages((prev) => [
         ...prev,
         {
           id: newId(),
           role: "bot",
-          text: "I’m having trouble connecting right now. Please check your connection and try again.",
+          text: rateLimited
+            ? "You’re sending messages a little too quickly. Please wait a minute, then tap Try again."
+            : "I’m having trouble connecting right now. Please check your connection and try again.",
           at: Date.now(),
           retryQuestion: trimmed,
         },
@@ -648,6 +653,7 @@ export default function ChatbotWidget() {
                     resizeInput();
                   }}
                   onKeyDown={onInputKeyDown}
+                  maxLength={MAX_MESSAGE_LENGTH}
                   placeholder="Type your message..."
                   aria-label="Ask the HCG Foundation AI Assistant"
                   className="max-h-[120px] min-w-0 flex-1 resize-none self-center bg-transparent py-2 font-manrope text-[15px] leading-relaxed text-[#1F1F1F] outline-none placeholder:text-[#9A9A9A]"
@@ -661,6 +667,18 @@ export default function ChatbotWidget() {
                   <Send className="h-5 w-5 -translate-x-px translate-y-px" strokeWidth={2.25} />
                 </button>
               </form>
+              {input.length >= MAX_MESSAGE_LENGTH * 0.8 ? (
+                <p
+                  aria-live="polite"
+                  className={`mt-1.5 px-4 text-right font-manrope text-[11px] ${
+                    input.length >= MAX_MESSAGE_LENGTH ? "text-[#C62828]" : "text-[#8A8A8A]"
+                  }`}
+                >
+                  {input.length >= MAX_MESSAGE_LENGTH
+                    ? `Limit reached (${MAX_MESSAGE_LENGTH} characters) — please keep your question short`
+                    : `${input.length} / ${MAX_MESSAGE_LENGTH}`}
+                </p>
+              ) : null}
             </div>
           </motion.div>
         ) : null}

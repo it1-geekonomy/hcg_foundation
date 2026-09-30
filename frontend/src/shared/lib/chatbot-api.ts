@@ -20,6 +20,16 @@ export type ChatbotReply = {
   response_time_ms?: number;
 };
 
+export class ChatbotApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ChatbotApiError";
+    this.status = status;
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
@@ -39,7 +49,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     } catch {
       // ignore
     }
-    throw new Error(message);
+    throw new ChatbotApiError(message, res.status);
   }
 
   return res.json() as Promise<T>;
