@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Typography from "@/lib/Typography";
+import PaginationControls from "@/shared/components/PaginationControls";
 import { publicAnnualReportsApi } from "@/domains/cms/lib/api";
 import {
   BREAKPOINTS,
@@ -433,19 +434,15 @@ export default function AnnualReportsSection({
       )}
 
       {totalPages > 1 && (
-        <div className="mt-8 flex items-center justify-center gap-2">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setPage(i)}
-              aria-label={`Go to page ${i + 1}`}
-              className={`h-2 rounded-full transition-all ${
-                i === page ? "w-6 bg-[#FCCC2D]" : "w-2 bg-[#FCCC2D]/30"
-              }`}
-            />
-          ))}
-        </div>
+        <PaginationControls
+          className="mt-8"
+          currentPage={page + 1}
+          totalPages={totalPages}
+          onPageChange={(p) => setPage(p - 1)}
+          showDots={false}
+          showArrows
+          showNumbers
+        />
       )}
     </section>
   );

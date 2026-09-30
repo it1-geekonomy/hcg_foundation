@@ -1,6 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  type ReactNode,
+} from "react";
 import { PanInfo } from "framer-motion";
 import Typography from "@/lib/Typography";
 import Banner from "@/shared/components/Herobannersection";
@@ -10,7 +15,60 @@ import TestimonialControls from "@/domains/journey-of-hope/components/Testimonia
 import TestimonialVideoModal from "@/domains/journey-of-hope/components/TestimonialVideoModal";
 import { publicPatientTestimonialsApi } from "@/domains/cms/lib/api";
 
-const CONTAINER = "max-w-[90rem] 2xl:max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8";
+const CONTAINER =
+  "max-w-[90rem] 2xl:max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8";
+
+/* Slide-in from the left. Plays once when it scrolls into view. */
+function SlideInLeft({
+  children,
+  className = "",
+  delay = 0,
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.25 },
+    );
+
+    obs.observe(node);
+
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`overflow-x-clip motion-reduce:!transition-none ${className}`}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible
+          ? "translate3d(0,0,0)"
+          : "translate3d(-80px,0,0)",
+        transition:
+          "opacity 700ms ease-out, transform 1000ms cubic-bezier(0.22, 1, 0.36, 1)",
+        transitionDelay: `${delay}ms`,
+        willChange: "opacity, transform",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 type CardItem = {
   id: string;
@@ -26,22 +84,28 @@ export default function TestimonialsPage() {
   const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Screen size detection for responsive transform values
   const [windowWidth, setWindowWidth] = useState<number>(1200);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
+
     handleResize();
     window.addEventListener("resize", handleResize);
+
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
     let cancelled = false;
+
     (async () => {
       setLoading(true);
+
       try {
-        const res = await publicPatientTestimonialsApi.listPublished({ limit: 50 });
+        const res = await publicPatientTestimonialsApi.listPublished({
+          limit: 50,
+        });
+
         if (!cancelled && res.data) {
           const items: CardItem[] = res.data.map((t) => ({
             id: t.id,
@@ -50,6 +114,7 @@ export default function TestimonialsPage() {
             thumbnailUrl: t.patientTestimonialBanner || "",
             videoUrl: t.patientTestimonialFile || "",
           }));
+
           setTestimonials(items);
         }
       } catch (err) {
@@ -58,6 +123,7 @@ export default function TestimonialsPage() {
         if (!cancelled) setLoading(false);
       }
     })();
+
     return () => {
       cancelled = true;
     };
@@ -65,30 +131,47 @@ export default function TestimonialsPage() {
 
   const handleNext = () => {
     if (testimonials.length === 0) return;
-    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+
+    setCurrentIndex(
+      (prev) => (prev + 1) % testimonials.length,
+    );
   };
 
   const handlePrev = () => {
     if (testimonials.length === 0) return;
-    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+
+    setCurrentIndex(
+      (prev) =>
+        (prev - 1 + testimonials.length) % testimonials.length,
+    );
   };
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     const swipeThreshold = 25;
-    if (info.offset.x < -swipeThreshold || info.velocity.x < -150) {
+
+    if (
+      info.offset.x < -swipeThreshold ||
+      info.velocity.x < -150
+    ) {
       handleNext();
-    } else if (info.offset.x > swipeThreshold || info.velocity.x > 150) {
+    } else if (
+      info.offset.x > swipeThreshold ||
+      info.velocity.x > 150
+    ) {
       handlePrev();
     }
   };
 
-  // Compute circular cyclic offset relative to active center index
   const getRelativeOffset = (index: number) => {
     const total = testimonials.length;
+
     if (total === 0) return 0;
+
     let diff = index - currentIndex;
+
     if (diff > total / 2) diff -= total;
     if (diff < -total / 2) diff += total;
+
     return diff;
   };
 
@@ -104,34 +187,51 @@ export default function TestimonialsPage() {
         title="Patient Testimonials"
       />
 
-      {/* Main Section matching Figma Node 1342:32240 */}
-      <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
-        {/* Header Title & Subtitle matching Figma specs */}
+      {/* Main Section */}
+      <section
+        className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}
+      >
+        {/* Header Title & Subtitle */}
         <div className="w-full text-left">
-          <Typography
-            variant="heading-2"
-            as="h2"
-            className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
+          {/* Heading Animation */}
+          <SlideInLeft>
+            <Typography
+              variant="heading-2"
+              as="h2"
+              className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
+            >
+              Patient Testimonials
+            </Typography>
+          </SlideInLeft>
+
+          {/* Description Animation */}
+          <SlideInLeft
+            delay={150}
+            className="mt-3 sm:mt-4 max-w-full md:max-w-[51.25rem] lg:max-w-[86.25rem]"
           >
-            Patient Testimonials
-          </Typography>
-          <div className="mt-3 sm:mt-4 max-w-full md:max-w-[51.25rem] lg:max-w-[86.25rem]">
             <Typography
               variant="body-10"
               as="p"
               className="font-argestadisplay font-normal text-justify text-[#596D79]"
             >
-              Every journey is filled with courage, compassion, and resilience. Explore inspiring patient stories, community initiatives, and life-changing moments that reflect HCG Foundation&apos;s commitment to bringing hope, healing, and support to those who need it most.
+              Every journey is filled with courage, compassion, and
+              resilience. Explore inspiring patient stories, community
+              initiatives, and life-changing moments that reflect HCG
+              Foundation&apos;s commitment to bringing hope, healing, and
+              support to those who need it most.
             </Typography>
-          </div>
+          </SlideInLeft>
         </div>
 
-        {/* Horizontal 3D Carousel Stage with Hardware-Accelerated 60fps Motion */}
+        {/* Horizontal 3D Carousel */}
         <div className="relative mt-8 sm:mt-12 w-full h-[16rem] sm:h-[18.5rem] lg:h-[16.5rem] xl:h-[19.5rem] 2xl:h-[22.5rem] overflow-visible flex items-center justify-center">
           {loading ? (
             <div className="animate-pulse flex gap-4 w-full justify-center">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="w-[30%] h-64 bg-black/10 rounded-xl" />
+                <div
+                  key={i}
+                  className="w-[30%] h-64 bg-black/10 rounded-xl"
+                />
               ))}
             </div>
           ) : testimonials.length > 0 ? (
@@ -148,13 +248,17 @@ export default function TestimonialsPage() {
               />
             ))
           ) : (
-            <Typography variant="body-9" as="p" className="text-[#596D79]">
+            <Typography
+              variant="body-9"
+              as="p"
+              className="text-[#596D79]"
+            >
               No testimonials available at this time.
             </Typography>
           )}
         </div>
 
-        {/* Bottom Centered Pagination Navigation Arrows + Dots matching Figma */}
+        {/* Controls */}
         {testimonials.length > 0 && (
           <TestimonialControls
             currentIndex={currentIndex}
@@ -166,13 +270,13 @@ export default function TestimonialsPage() {
         )}
       </section>
 
-      {/* Video Modal Player */}
+      {/* Video Modal */}
       <TestimonialVideoModal
         videoUrl={activeVideoUrl}
         onClose={() => setActiveVideoUrl(null)}
       />
 
-      {/* Donate Section at the Bottom */}
+      {/* Donate Section */}
       <div id="donate-form">
         <DonateForm />
       </div>
