@@ -269,9 +269,12 @@ export default function PatientTestimonialForm({
       </div>
 
       <SeoFieldsSection
-        value={value}
-        onChange={onChange}
-        disabled={saving}
+        value={{
+          metaTitle: value.metaTitle,
+          metaDescription: value.metaDescription,
+          schemaCode: value.schemaCode,
+        }}
+        onChange={(seo) => onChange({ ...value, ...seo })}
       />
 
       <div className="flex justify-end gap-3">

@@ -25,6 +25,12 @@ const ART_GALLERY_CARDS = [
   },
 ];
 
+const PARAGRAPH_CLASS = "font-argestadisplay font-normal text-justify text-[#596D79]";
+const SUBHEADING_CLASS = "font-argestadisplay font-normal underline text-[#262626]";
+const CARD_STAGGER_MS = 120;
+
+/* Text blocks carry data-detail-anim so the detail-page slide-ins
+   (useDetailPageAnimations) reveal them as they scroll into view. */
 export default function SwasthiArtTherapySection() {
   return (
     <div className="mt-[2.5rem] sm:mt-[3.5rem] lg:mt-[4.5rem] flex flex-col space-y-[2rem] sm:space-y-[2.5rem]">
@@ -33,6 +39,7 @@ export default function SwasthiArtTherapySection() {
         <Typography
           variant="heading-2"
           as="h2"
+          data-detail-anim="lines"
           className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
         >
           Swasthi Art Gallery & Art Therapy Program
@@ -41,40 +48,24 @@ export default function SwasthiArtTherapySection() {
 
       {/* Intro Paragraph */}
       <div>
-        <Typography
-          variant="body-10"
-          as="p"
-          className="font-argestadisplay font-normal text-justify text-[#596D79]"
-        >
-          Swasthi Art Gallery is HCG Foundation's creative care initiative where art supports patients through their cancer journey. Located within HCG's headquarters at Tower 1, Bengaluru, Swasthi Gallery brings together two connected efforts: a contemporary art gallery that channels the power of art into funding cancer care, and a dedicated Art Therapy program that brings the healing process of art-making directly to patients.
+        <Typography variant="body-10" as="p" data-detail-anim="lines" data-detail-anim-delay="150" className={PARAGRAPH_CLASS}>
+          Swasthi Art Gallery is HCG Foundation&apos;s creative care initiative where art supports patients through their cancer journey. Located within HCG&apos;s headquarters at Tower 1, Bengaluru, Swasthi Gallery brings together two connected efforts: a contemporary art gallery that channels the power of art into funding cancer care, and a dedicated Art Therapy program that brings the healing process of art-making directly to patients.
         </Typography>
       </div>
 
       {/* About Swasthi Gallery Sub-section */}
       <div className="flex flex-col space-y-[1rem]">
         <div>
-          <Typography
-            variant="heading-8"
-            as="h3"
-            className="font-argestadisplay font-normal underline text-[#262626]"
-          >
+          <Typography variant="heading-8" as="h3" data-detail-anim="slide" className={SUBHEADING_CLASS}>
             About Swasthi Gallery
           </Typography>
         </div>
 
-        <Typography
-          variant="body-10"
-          as="p"
-          className="font-argestadisplay font-normal text-justify text-[#596D79]"
-        >
+        <Typography variant="body-10" as="p" data-detail-anim="lines" data-detail-anim-delay="150" className={PARAGRAPH_CLASS}>
           Launched in 2007, the art space in a hospital gives a positive energy to the patients and their families. Swasthi Art Gallery has been actively involved in organizing art shows, camps and workshops which involve artists coming from across the country and outside.
         </Typography>
 
-        <Typography
-          variant="body-10"
-          as="p"
-          className="font-argestadisplay font-normal text-justify text-[#596D79]"
-        >
+        <Typography variant="body-10" as="p" data-detail-anim="lines" data-detail-anim-delay="150" className={PARAGRAPH_CLASS}>
           The gallery offers a platform to bring forth young upcoming artists and also organizes shows for renowned artists. Swasthi aspires to create a space for art lovers and buyers by exhibiting quality art pieces. They aim at raising funds for the HCG foundation to help support the cancer patients.
         </Typography>
       </div>
@@ -84,53 +75,29 @@ export default function SwasthiArtTherapySection() {
         {/* Left Side: Art Therapy: Healing Through Creative Process */}
         <div className="w-full xl:flex-1 flex flex-col space-y-[1.25rem]">
           <div>
-            <Typography
-              variant="heading-8"
-              as="h3"
-              className="font-argestadisplay font-normal underline text-[#262626]"
-            >
+            <Typography variant="heading-8" as="h3" data-detail-anim="slide" className={SUBHEADING_CLASS}>
               Art Therapy: Healing Through the Creative Process
             </Typography>
           </div>
 
-          <Typography
-            variant="body-10"
-            as="p"
-            className="font-argestadisplay font-normal text-justify text-[#596D79]"
-          >
-            In 2018, Swasthi Art Gallery extended its mission from the gallery walls to direct patient care with the launch of its Art Therapy program at HCG Bangalore hospital. Art therapy is a form of expressive therapy that uses the creative process of making art to support a patient's physical, mental, and emotional wellbeing.
+          <Typography variant="body-10" as="p" data-detail-anim="lines" data-detail-anim-delay="150" className={PARAGRAPH_CLASS}>
+            In 2018, Swasthi Art Gallery extended its mission from the gallery walls to direct patient care with the launch of its Art Therapy program at HCG Bangalore hospital. Art therapy is a form of expressive therapy that uses the creative process of making art to support a patient&apos;s physical, mental, and emotional wellbeing.
           </Typography>
 
           <div className="w-full max-w-[48rem] flex flex-col space-y-[1rem]">
-            <Typography
-              variant="body-10"
-              as="p"
-              className="font-argestadisplay font-normal text-justify text-[#596D79]"
-            >
+            <Typography variant="body-10" as="p" data-detail-anim="lines" className={PARAGRAPH_CLASS}>
               Every session is built around the individual. A typical session unfolds in three parts:
             </Typography>
 
-            <Typography
-              variant="body-10"
-              as="p"
-              className="font-argestadisplay font-normal text-justify text-[#596D79]"
-            >
+            <Typography variant="body-10" as="p" data-detail-anim="lines" className={PARAGRAPH_CLASS}>
               • <span className="font-normal text-[#262626]">Pre-art conversation</span> — the pre-art component is crucial, especially for the first meeting between the art therapist and the patient. This allows the therapist to get to know and assess the patient
             </Typography>
 
-            <Typography
-              variant="body-10"
-              as="p"
-              className="font-argestadisplay font-normal text-justify text-[#596D79]"
-            >
+            <Typography variant="body-10" as="p" data-detail-anim="lines" className={PARAGRAPH_CLASS}>
               • <span className="font-normal text-[#262626]">The creative process</span> — the second part is the actual creative process, or the making of a piece or pieces of art. The therapist may teach the patient some art techniques, but the most important thing is to simply create something...
             </Typography>
 
-            <Typography
-              variant="body-10"
-              as="p"
-              className="font-argestadisplay font-normal text-justify text-[#596D79]"
-            >
+            <Typography variant="body-10" as="p" data-detail-anim="lines" className={PARAGRAPH_CLASS}>
               • <span className="font-normal text-[#262626]">Post-art reflection</span> — Patient and therapist discuss the finished piece together, the patient is expected to talk about their feelings, what led them to create that art, how they felt while making the art and their thoughts post completing it.
             </Typography>
           </div>
@@ -166,6 +133,8 @@ export default function SwasthiArtTherapySection() {
               return (
                 <React.Fragment key={card.title}>
                   <div
+                    data-detail-anim="slide"
+                    data-detail-anim-delay={index * CARD_STAGGER_MS}
                     className={`flex flex-col justify-center ${
                       isFirstCol ? "sm:pr-[2rem] xl:pr-[2.5rem]" : "sm:pl-[2rem] xl:pl-[2.5rem]"
                     } ${
@@ -226,20 +195,12 @@ export default function SwasthiArtTherapySection() {
 
       {/* Bottom Closing Paragraphs */}
       <div className="flex flex-col space-y-[1.25rem] pt-[0.5rem]">
-        <Typography
-          variant="body-10"
-          as="p"
-          className="font-argestadisplay font-normal text-justify text-[#596D79]"
-        >
+        <Typography variant="body-10" as="p" data-detail-anim="lines" className={PARAGRAPH_CLASS}>
           Sessions can be individual, group, or family-based allowing patients to process their experience alongside fellow patients navigating the same journey, always with the choice to share only what feels comfortable.
         </Typography>
 
-        <Typography
-          variant="body-10"
-          as="p"
-          className="font-argestadisplay font-normal text-justify text-[#596D79]"
-        >
-          Together, Swasthi Gallery and Art Therapy reflect HCG Foundation's belief that cancer care extends beyond medicine. One raises the funds that make patient support possible; the other puts the healing power of art directly into patients' hands.
+        <Typography variant="body-10" as="p" data-detail-anim="lines" className={PARAGRAPH_CLASS}>
+          Together, Swasthi Gallery and Art Therapy reflect HCG Foundation&apos;s belief that cancer care extends beyond medicine. One raises the funds that make patient support possible; the other puts the healing power of art directly into patients&apos; hands.
         </Typography>
       </div>
     </div>

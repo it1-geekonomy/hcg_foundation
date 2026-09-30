@@ -335,17 +335,17 @@ export default function MissionHighlight({
             lg:row-start-3 lg:row-span-1
             min-[1920px]:!row-start-2 min-[1920px]:!row-span-2"
         >
-          {/* Mobile/tablet: natural aspect box, puzzle-piece reveal, no crop */}
-          <div className="relative h-64 w-full sm:h-72 md:h-80 lg:hidden">
-            <PuzzleImage
-              src={image}
-              alt={imageAlt}
-              rows={3}
-              cols={4}
-              fit="contain"
-              staggerDuration={700}
-            />
-          </div>
+         {/* Mobile/tablet: box matches the image ratio, so no empty bands */}
+<div className="relative aspect-[3/2] w-full lg:hidden">
+  <PuzzleImage
+    src={image}
+    alt={imageAlt}
+    rows={3}
+    cols={4}
+    fit="cover"
+    staggerDuration={700}
+  />
+</div>
           {/* Desktop (lg+): fills the stretched grid cell, puzzle-piece reveal */}
           <div className="hidden h-full w-full lg:block">
             <PuzzleImage

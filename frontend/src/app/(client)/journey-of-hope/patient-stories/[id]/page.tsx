@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Script from "next/script";
 import { notFound } from "next/navigation";
 import { Calendar } from "lucide-react";
 import DonateForm from "@/shared/components/DonateForm";
@@ -13,6 +14,162 @@ import { DetailTracker } from "@/shared/components/DetailTracker";
 import PuzzleImage from "@/shared/components/Puzzleimage";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
+
+/* Animation script (added). Plain DOM code, so this file stays a server component. */
+const ANIM_SCRIPT = String.raw`
+(function () {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  var T = "opacity 700ms ease-out, transform 1000ms cubic-bezier(0.22, 1, 0.36, 1)";
+  var STEP = 120, MAXD = 1200;
+  var dir = window.innerWidth >= 640 ? 80 : -80; /* story text: right on sm+, left when stacked */
+
+  function hide(el, x) {
+    el.style.opacity = "0";
+    el.style.transform = "translate3d(" + x + "px,0,0)";
+    el.style.transition = "none";
+    el.style.willChange = "opacity, transform";
+  }
+  function watch(el, cb) {
+    var io = new IntersectionObserver(function (e) {
+      if (e[0].isIntersecting) { io.disconnect(); cb(); }
+    }, { threshold: 0.01, rootMargin: "0px 0px -5% 0px" });
+    io.observe(el);
+  }
+  function wrap(root) {
+    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), nodes = [], spans = [];
+    while (w.nextNode()) nodes.push(w.currentNode);
+    nodes.forEach(function (n) {
+      var t = n.nodeValue || "";
+      if (!t.trim()) return;
+      var frag = document.createDocumentFragment();
+      t.split(/(\s+)/).forEach(function (p) {
+        if (!p) return;
+        if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; }
+        var s = document.createElement("span");
+        s.textContent = p;
+        s.style.display = "inline-block";
+        frag.appendChild(s);
+        spans.push(s);
+      });
+      n.parentNode.replaceChild(frag, n);
+    });
+    return spans;
+  }
+  function lineText(root, delay) {
+    if (!root) return;
+    var spans = wrap(root);
+    spans.forEach(function (s) { hide(s, dir); });
+    void root.getBoundingClientRect();
+    watch(root, function () {
+      var line = -1, top0 = -Infinity;
+      var lines = spans.map(function (s) {
+        var top = s.getBoundingClientRect().top;
+        if (Math.abs(top - top0) > 4) { line++; top0 = top; }
+        return line;
+      });
+      spans.forEach(function (s, i) {
+        s.style.transition = T;
+        s.style.transitionDelay = (delay + Math.min(lines[i] * STEP, MAXD)) + "ms";
+        s.style.opacity = "1";
+        s.style.transform = "translate3d(0,0,0)";
+      });
+    });
+  }
+  /* trigger = the element whose visibility starts the animation.
+     Defaults to the parent, because the element itself starts OFF-SCREEN
+     (translated 80px sideways) and an off-screen element never "intersects". */
+  function slide(el, x, delay, trigger) {
+    if (!el) return;
+    if (getComputedStyle(el).display === "inline") el.style.display = "inline-block";
+    hide(el, x);
+    void el.getBoundingClientRect();
+    watch(trigger || el.parentElement || el, function () {
+      el.style.transition = T;
+      el.style.transitionDelay = delay + "ms";
+      el.style.opacity = "1";
+      el.style.transform = "translate3d(0,0,0)";
+      setTimeout(function () {
+        el.style.opacity = ""; el.style.transform = "";
+        el.style.transition = ""; el.style.transitionDelay = ""; el.style.willChange = "";
+      }, 1000 + delay + 100);
+    });
+  }
+
+  /* "Read more stories": ALWAYS from the LEFT. "View all" (+ arrow): ALWAYS from the RIGHT. */
+  var RM = /^read\s*more/i, VA = /^view\s*all/i;
+  function scanButtons(scope, left, right) {
+    var c = Array.prototype.slice.call(
+      scope.querySelectorAll("h1, h2, h3, h4, h5, h6, a, button, span, p, div")
+    ).filter(function (el) {
+      if (right.contains(el) || left.contains(el)) return false; /* only the related-stories area */
+      if (el.closest("[data-story-btn]")) return false; /* already animated (or inside one) */
+      var t = (el.textContent || "").trim();
+      /* skip a row that holds BOTH texts, so each one animates on its own */
+      if (/read\s*more/i.test(t) && /view\s*all/i.test(t)) return false;
+      /* short text only, so a whole card / whole row is never matched */
+      return t.length <= 40 && (RM.test(t) || VA.test(t));
+    });
+    c.filter(function (el) {
+      return !c.some(function (o) { return o !== el && o.contains(el); });
+    }).forEach(function (el) {
+      el.setAttribute("data-story-btn", "1");
+      var isViewAll = VA.test((el.textContent || "").trim());
+      slide(el, isViewAll ? 80 : -80, isViewAll ? 150 : 0);
+    });
+  }
+
+  function init() {
+    /* anchor on the story columns, NOT the first <section> (that is the banner) */
+    var left = document.querySelector('[class*="sm:col-span-5"]');
+    var right = document.querySelector('[class*="sm:col-span-7"]');
+    if (!left || !right) return false;
+    if (right.getAttribute("data-story-anim")) return true;
+    right.setAttribute("data-story-anim", "1");
+
+    var scope = right.closest("section") || document.body;
+    scope.style.overflowX = "clip"; /* slide offsets must not create a horizontal scrollbar */
+
+    /* name: line by line */
+    var h1 = right.querySelector("h1");
+    lineText(h1, 0);
+
+    /* date: calendar icon + text come in together (row is the trigger) */
+    var dateRow = h1 ? h1.nextElementSibling : null;
+    if (dateRow) {
+      slide(dateRow.querySelector("svg"), dir, 150, dateRow);
+      lineText(dateRow.querySelector("span"), 150);
+    }
+
+    /* story body: line by line */
+    lineText(right.querySelector(".no-scrollbar"), 300);
+
+    /* social share: from the LEFT */
+    slide(left.lastElementChild, -80, 150, left);
+
+    /* Read more stories / View all: scan now, and again if the related stories render late */
+    scanButtons(scope, left, right);
+    var raf = null;
+    var mo = new MutationObserver(function () {
+      if (raf) return;
+      raf = requestAnimationFrame(function () {
+        raf = null;
+        scanButtons(scope, left, right);
+      });
+    });
+    mo.observe(scope, { childList: true, subtree: true });
+    setTimeout(function () { mo.disconnect(); }, 6000);
+    return true;
+  }
+
+  /* retry briefly in case the content isn't in the DOM yet */
+  var tries = 0;
+  (function attempt() {
+    if (init() || ++tries > 20) return;
+    setTimeout(attempt, 100);
+  })();
+})();
+`;
 
 function formatStoryDate(dateStr?: string | null): string {
   if (!dateStr) return "";
@@ -194,6 +351,12 @@ export default async function StoryDetailPage({
       <div id="donate-form">
         <DonateForm />
       </div>
+
+      <Script
+        id={`story-anim-${targetId}`}
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: ANIM_SCRIPT }}
+      />
     </main>
   );
 }

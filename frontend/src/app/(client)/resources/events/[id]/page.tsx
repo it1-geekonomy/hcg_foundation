@@ -11,6 +11,7 @@ import RelatedEvents from "@/domains/resources/components/RelatedEvents";
 import PuzzleImage from "@/shared/components/Puzzleimage";
 import { EventItem } from "@/domains/resources/constants/events";
 import { publicEventsApi } from "@/domains/cms/lib/api";
+import { useDetailPageAnimations } from "@/shared/lib/detailPageAnimations";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
@@ -21,15 +22,21 @@ interface EventDetailPageProps {
 export default function EventDetailPage({ params }: EventDetailPageProps) {
   const resolvedParams = use(params);
   const [eventItem, setEventItem] = useState<EventItem | null>(null);
+  const [relatedEvents, setRelatedEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
     (async () => {
       setLoading(true);
       try {
         const res = await publicEventsApi.getBySlug(resolvedParams.id);
         const e = res.data?.detail;
+        const rel = res.data?.related?.data ?? [];
+
         if (!cancelled && e) {
           setEventItem({
             id: e.id ?? "",
@@ -43,6 +50,23 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
             location: e.eventLocation ?? "",
           });
         }
+
+        if (!cancelled && rel.length > 0) {
+          setRelatedEvents(
+            rel.map((item) => ({
+              id: item.id ?? "",
+              slug: item.slug ?? "",
+              title: item.title ?? "",
+              date: item.eventDate ? new Date(item.eventDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "",
+              category: "Community Event" as const,
+              summary: item.shortDescription ?? "",
+              fullStory: item.content ?? "",
+              imageUrl: item.eventBanner || item.eventMobileBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+              mobileImageUrl: item.eventMobileBanner || item.eventBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+              location: item.eventLocation ?? "",
+            }))
+          );
+        }
       } catch (err) {
         if (!cancelled) setEventItem(null);
       } finally {
@@ -53,6 +77,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
       cancelled = true;
     };
   }, [resolvedParams.id]);
+
+  useDetailPageAnimations(!loading && Boolean(eventItem), eventItem?.id);
 
   if (!loading && !eventItem) {
     notFound();
@@ -165,7 +191,12 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
       </section>
 
       {/* Reusable Related Events Section */}
-      {eventItem && <RelatedEvents currentEventId={eventItem.id} />}
+      {eventItem && (
+        <RelatedEvents
+          currentEventId={eventItem.id}
+          events={relatedEvents}
+        />
+      )}
 
       <div id="donate-form">
         <DonateForm />
