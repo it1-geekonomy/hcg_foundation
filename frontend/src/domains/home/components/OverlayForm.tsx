@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
+import { LayoutGroup } from "framer-motion";
 import {
   IMPACT_ITEMS,
 } from "@/domains/home/constants/overlayform";
@@ -18,6 +19,7 @@ import {
   formatDonationAmount,
   getDonationCurrency,
 } from "@/domains/home/constants/donation-currency";
+import { ActivePill, CardReveal, OverlayBackdrop } from "./overlayFormMotion";
 
 /* ------------------------------------------------------------------ */
 /* Portrait asset + backdrop                                           */
@@ -171,20 +173,23 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
 
   return (
     <>
-     
-      <div
-        className="fixed inset-0 z-50 h-[100dvh] overflow-hidden overflow-clip overscroll-none bg-white/10 backdrop-blur-sm p-2 lg:p-3"
+      <OverlayBackdrop
+        className="fixed inset-0 z-50 h-[100dvh] overflow-hidden overflow-clip overscroll-none p-2 lg:p-3"
         role="dialog"
-        aria-modal="true"
+        aria-modal={true}
         aria-labelledby="donation-modal-title"
       >
         <div className="flex h-full items-center justify-center lg:hidden">
-          <ModalBelow1024 {...amountProps} onClose={onClose} />
+          <LayoutGroup id="overlay-compact">
+            <ModalBelow1024 {...amountProps} onClose={onClose} />
+          </LayoutGroup>
         </div>
         <div className="hidden lg:flex lg:h-full lg:items-center lg:justify-center">
-          <Modal1024Up {...amountProps} onClose={onClose} />
+          <LayoutGroup id="overlay-wide">
+            <Modal1024Up {...amountProps} onClose={onClose} />
+          </LayoutGroup>
         </div>
-      </div>
+      </OverlayBackdrop>
 
       {detailsOpen ? (
         <DonateDetailsModal
@@ -314,10 +319,10 @@ function ImpactItems({
 
 
 const pillBase =
-  "rounded-xl border font-semibold transition";
-const pillActive = "border-gray-900 bg-gray-900 text-white";
+  "relative rounded-xl border bg-white font-semibold transition-colors duration-300";
+const pillActive = "border-gray-900 text-white";
 const pillInactive =
-  "border-gray-200 bg-white text-[#1C1C1C] hover:border-gray-400";
+  "border-gray-200 text-[#1C1C1C] hover:border-gray-400";
 
 function AmountPicker({
   selectedPreset,
@@ -356,18 +361,22 @@ function AmountPicker({
       </Typography>
 
       <div className={gridClassName}>
-        {currencyMeta.presets.map((amount) => (
-          <button
-            key={`${currency}-${amount}`}
-            onClick={() => onSelectPreset(amount)}
-            className={`${pillWidthClassName} ${pillBase} ${amount === selectedPreset ? pillActive : pillInactive
-              }`}
-          >
-            <Typography variant="body-8" as="span" className="font-semibold font-manrope">
-              {formatDonationAmount(amount, currency)}
-            </Typography>
-          </button>
-        ))}
+        {currencyMeta.presets.map((amount) => {
+          const active = amount === selectedPreset;
+          return (
+            <button
+              key={`${currency}-${amount}`}
+              onClick={() => onSelectPreset(amount)}
+              aria-pressed={active}
+              className={`${pillWidthClassName} ${pillBase} ${active ? pillActive : pillInactive}`}
+            >
+              {active ? <ActivePill /> : null}
+              <Typography variant="body-8" as="span" className="relative font-semibold font-manrope">
+                {formatDonationAmount(amount, currency)}
+              </Typography>
+            </button>
+          );
+        })}
 
         {showCustomInput ? (
           <div
@@ -391,10 +400,11 @@ function AmountPicker({
         ) : (
           <button
             onClick={onMoreClick}
-            className={`${pillWidthClassName} ${pillBase} ${isCustom ? pillActive : pillInactive
-              }`}
+            aria-pressed={isCustom}
+            className={`${pillWidthClassName} ${pillBase} ${isCustom ? pillActive : pillInactive}`}
           >
-            <Typography variant="body-8" as="span" className="font-semibold font-manrope">
+            {isCustom ? <ActivePill /> : null}
+            <Typography variant="body-8" as="span" className="relative font-semibold font-manrope">
               {isCustom && customAmount
                 ? formatDonationAmount(Number(customAmount), currency)
                 : "More"}
@@ -503,7 +513,7 @@ function TermsCheckbox({
           variant="caption-1"
           as="p"
           role="alert"
-          className="pl-7 font-manrope font-light leading-snug text-[#FFE08A]"
+          className="pl-7 font-manrope font-light leading-snug text-[#B45309]"
         >
           Please agree to the 80G Terms &amp; Conditions to continue.
         </Typography>
@@ -524,7 +534,10 @@ function Modal1024Up({
     amountProps;
 
   return (
-    <div className="relative mx-auto max-h-full w-full max-w-[820px] overflow-hidden overflow-clip overscroll-none rounded-xl bg-white shadow-2xl xl:max-w-[860px] 2xl:max-w-[900px]">
+    <CardReveal
+      frameClassName="mx-auto max-h-full w-full max-w-[820px] xl:max-w-[860px] 2xl:max-w-[900px]"
+      className="relative w-full overflow-hidden overflow-clip overscroll-none rounded-xl bg-white shadow-2xl"
+    >
       <CloseButton
         onClose={onClose}
         className="absolute right-4 top-4 z-[60] flex h-8 w-8 items-center justify-center bg-black text-[#F9BF16] transition hover:bg-gray-800"
@@ -578,7 +591,7 @@ function Modal1024Up({
           </div>
         </div>
       </div>
-    </div>
+    </CardReveal>
   );
 }
 
@@ -594,7 +607,10 @@ function ModalBelow1024({
     amountProps;
 
   return (
-    <div className="relative mx-auto my-1 max-h-full w-[calc(100%-1rem)] max-w-[380px] overflow-y-auto overscroll-contain rounded-xl bg-white shadow-2xl sm:w-[calc(100%-2rem)] sm:max-w-[400px] sm:overflow-hidden md:max-w-[460px]">
+    <CardReveal
+      frameClassName="mx-auto my-1 max-h-full w-[calc(100%-1rem)] max-w-[380px] sm:w-[calc(100%-2rem)] sm:max-w-[400px] md:max-w-[460px]"
+      className="relative w-full overflow-y-auto overscroll-contain rounded-xl bg-white shadow-2xl sm:overflow-hidden"
+    >
       <CloseButton
         onClose={onClose}
         className="absolute right-2.5 top-2.5 z-10 flex h-5 w-5 items-center justify-center rounded-sm bg-black leading-none text-[#F9BF16] transition"
@@ -609,36 +625,36 @@ function ModalBelow1024({
             <ImpactItems className="grid grid-cols-1 gap-y-1.5" centerOnMobile />
 
             <div className="mt-2.5 w-full">
-            <CountryBlock
-              countryCode={countryCode}
-              changeCountry={changeCountry}
-              currencyMeta={currencyMeta}
-              className="flex flex-col gap-1 mb-2 w-full"
-            />
+              <CountryBlock
+                countryCode={countryCode}
+                changeCountry={changeCountry}
+                currencyMeta={currencyMeta}
+                className="flex flex-col gap-1 mb-2 w-full"
+              />
 
-            <AmountPicker
-              {...amountProps}
-              gridClassName="mt-1.5 grid grid-cols-3 gap-1"
-              pillWidthClassName="w-full justify-center text-center px-1.5 py-1"
-              inputSpanClassName="w-full"
-            />
+              <AmountPicker
+                {...amountProps}
+                gridClassName="mt-1.5 grid grid-cols-3 gap-1"
+                pillWidthClassName="w-full justify-center text-center px-1.5 py-1"
+                inputSpanClassName="w-full"
+              />
 
-            <TermsCheckbox
-              agreedTo80G={agreedTo80G}
-              setAgreedTo80G={setAgreedTo80G}
-              termsError={termsError}
-              setTermsError={setTermsError}
-            />
+              <TermsCheckbox
+                agreedTo80G={agreedTo80G}
+                setAgreedTo80G={setAgreedTo80G}
+                termsError={termsError}
+                setTermsError={setTermsError}
+              />
 
-            <DonateButton
-              onDonateClick={onDonateClick}
-              className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#FDC61D] px-6 py-2 cursor-pointer"
-            />
+              <DonateButton
+                onDonateClick={onDonateClick}
+                className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#FDC61D] px-6 py-2 cursor-pointer"
+              />
             </div>
           </div>
         </div>
       </div>
       <div className="h-1.5" />
-    </div>
+    </CardReveal>
   );
 }
