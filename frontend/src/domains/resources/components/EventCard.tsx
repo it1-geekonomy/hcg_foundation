@@ -25,6 +25,9 @@ export default function EventCard({
   const detailUrl = `/resources/events/${event.slug || event.id}`;
 
   const handleCardClick = () => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
     router.push(detailUrl);
   };
 

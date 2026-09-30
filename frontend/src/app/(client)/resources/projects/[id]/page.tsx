@@ -32,36 +32,38 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const clickedLinkRef = useRef<boolean>(false);
+  const isDraggingOverThreshold = useRef<boolean>(false);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!scrollContainerRef.current) return;
     setIsDragging(true);
-    clickedLinkRef.current = false;
+    isDraggingOverThreshold.current = false;
     setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
     setScrollLeft(scrollContainerRef.current.scrollLeft);
-    scrollContainerRef.current.setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging || !scrollContainerRef.current) return;
-    e.preventDefault();
-    clickedLinkRef.current = true;
     const x = e.pageX - scrollContainerRef.current.offsetLeft;
     const walk = (x - startX) * 2;
-    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    setIsDragging(false);
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.releasePointerCapture(e.pointerId);
+    if (Math.abs(x - startX) > 6) {
+      isDraggingOverThreshold.current = true;
+      e.preventDefault();
+      scrollContainerRef.current.scrollLeft = scrollLeft - walk;
     }
   };
 
+  const handlePointerUp = () => {
+    setIsDragging(false);
+    setTimeout(() => {
+      isDraggingOverThreshold.current = false;
+    }, 50);
+  };
+
   const handleLinkClick = (e: React.MouseEvent) => {
-    if (clickedLinkRef.current) {
+    if (isDraggingOverThreshold.current) {
       e.preventDefault();
+      e.stopPropagation();
     }
   };
 
@@ -76,11 +78,16 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
   useEffect(() => {
     let cancelled = false;
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
     (async () => {
       setLoading(true);
       try {
         const res = await publicProjectsApi.getBySlug(resolvedParams.id);
         const p = res.data?.detail;
+        const rel = res.data?.related?.data ?? [];
+
         if (!cancelled && p) {
           setProjectItem({
             id: p.id ?? "",
@@ -100,12 +107,39 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               "/Resources/Resources banner image.png",
           });
         }
+
+        if (!cancelled && rel.length > 0) {
+          setAllRelatedProjects(
+            rel.map((item) => ({
+              id: item.id ?? "",
+              slug: item.slug ?? "",
+              title: item.title ?? "",
+              date: item.projectDate ? new Date(item.projectDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "",
+              category: "Projects",
+              summary: item.shortDescription ?? "",
+              fullStory: item.content ?? "",
+              imageUrl:
+                item.projectBanner ||
+                item.projectMobileBanner ||
+                "/Resources/Resources banner image.png",
+              mobileImageUrl:
+                item.projectMobileBanner ||
+                item.projectBanner ||
+                "/Resources/Resources banner image.png",
+            }))
+          );
+        }
       } catch (err) {
         if (!cancelled) {
           const fallback = PROJECTS_DATA.find(
             (item) => item.slug === resolvedParams.id || item.id === resolvedParams.id
           );
           setProjectItem(fallback ?? null);
+          if (fallback) {
+            setAllRelatedProjects(
+              PROJECTS_DATA.filter((item) => item.id !== fallback.id).slice(0, 6)
+            );
+          }
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -115,44 +149,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
       cancelled = true;
     };
   }, [resolvedParams.id]);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (projectItem) {
-      (async () => {
-        try {
-          const res = await publicProjectsApi.listPublished({ limit: 12 });
-          if (!cancelled) {
-            const related = (res.data ?? [])
-              .filter(p => p.id !== projectItem.id)
-              .map(p => ({
-                id: p.id ?? "",
-                slug: p.slug ?? "",
-                title: p.title ?? "",
-                date: p.projectDate ? new Date(p.projectDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "",
-                category: "Projects",
-                summary: p.shortDescription ?? "",
-                fullStory: p.content ?? "",
-                imageUrl:
-                  p.projectBanner ||
-                  p.projectMobileBanner ||
-                  "/Resources/Resources banner image.png",
-                mobileImageUrl:
-                  p.projectMobileBanner ||
-                  p.projectBanner ||
-                  "/Resources/Resources banner image.png",
-              }));
-            setAllRelatedProjects(related);
-          }
-        } catch {
-          // ignore
-        }
-      })();
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, [projectItem?.id]);
 
   if (!loading && !projectItem) {
     notFound();

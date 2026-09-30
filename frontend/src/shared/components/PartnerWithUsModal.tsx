@@ -215,12 +215,12 @@ export default function PartnerWithUsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-[1rem] sm:p-[1.5rem] overflow-y-auto bg-black/60 backdrop-blur-[0.25rem] transition-opacity duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-[1rem] sm:p-[1.5rem] overflow-hidden bg-black/60 backdrop-blur-[0.25rem] transition-opacity duration-300">
       {/* Click outside backdrop to close */}
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
-      {/* Modal Card Container (Frame 601: 709px x 815.35px -> 44.3125rem x 50.959rem on desktop, compact on mobile) */}
-      <div className="relative z-10 w-full max-w-[22.5rem] sm:max-w-[24rem] md:max-w-[44.3125rem] bg-[#FDF9F3] rounded-[0.415rem] shadow-2xl overflow-hidden flex flex-col md:flex-row my-auto max-h-[calc(100dvh-2rem)] md:h-[50.959rem]">
+      {/* Modal Card Container: statically locked and centered in viewport */}
+      <div className="relative z-10 w-full max-w-[22.5rem] sm:max-w-[24rem] md:max-w-[44.3125rem] bg-[#FDF9F3] rounded-[0.415rem] shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[calc(100dvh-2rem)] md:h-auto">
         {/* Close Button placed at top right of the modal container */}
         <button
           type="button"
@@ -231,8 +231,8 @@ export default function PartnerWithUsModal({
           <X className="size-[1.125rem] stroke-[2.2]" />
         </button>
 
-        {/* Left Column: Form Content */}
-        <div className="relative w-full md:w-[22.3rem] shrink-0 px-[1.25rem] sm:px-[1.5rem] md:pl-[2.9775rem] md:pr-0 pt-[1.75rem] sm:pt-[2.423rem] pb-[1.75rem] sm:pb-[2.925rem] flex flex-col justify-between overflow-y-auto md:overflow-y-hidden min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        {/* Left Column: Form Content (static on desktop, no mouse wheel shift) */}
+        <div className="relative w-full md:w-[22.3rem] shrink-0 px-[1.25rem] sm:px-[1.5rem] md:pl-[2.5rem] md:pr-[0.75rem] pt-[1.25rem] sm:pt-[1.5rem] md:pt-[1.75rem] pb-[1.25rem] sm:pb-[1.5rem] flex flex-col justify-between overflow-y-auto md:overflow-hidden min-h-0">
           <div>
             {/* Frame 298: Title + Subtitle using design-system Typography */}
             <div className="w-full max-w-[19.3175rem] mx-auto md:mx-0 space-y-[0.5rem]">
@@ -260,8 +260,8 @@ export default function PartnerWithUsModal({
             </div>
 
             <form onSubmit={handleSubmit} noValidate className="w-full max-w-[18.5625rem] mx-auto md:mx-0">
-                {/* Inputs Group: Frame 560 fields with exact gap of 24px (1.5rem) on desktop */}
-                <div className="flex flex-col gap-[1.25rem] sm:gap-[1.5rem] mt-[1.5rem] sm:mt-[1.875rem]">
+                {/* Inputs Group: Frame 560 fields with balanced spacing */}
+                <div className="flex flex-col gap-[0.875rem] sm:gap-[1.125rem] mt-[1.25rem] sm:mt-[1.5rem]">
                   {/* 1. Full Name */}
                   <div className="relative">
                     <div
@@ -468,8 +468,8 @@ export default function PartnerWithUsModal({
                   </div>
                 </div>
 
-                {/* Footer Section: Exact Figma 54px (3.375rem) gap on desktop, compact on mobile */}
-                <div className="mt-[2rem] sm:mt-[3.375rem] flex flex-col gap-[0.875rem]">
+                {/* Footer Section: Terms and Submit Button */}
+                <div className="mt-[1.25rem] sm:mt-[1.5rem] flex flex-col gap-[0.75rem]">
                   {/* Terms and Conditions Checkbox (Figma Component 8: 297px x 18px -> 18.5625rem, gap: 4.5px -> 0.28125rem) */}
                   <div className="flex flex-col gap-1 w-full">
                     <div className="flex items-center gap-[0.28125rem] w-full">
@@ -522,12 +522,12 @@ export default function PartnerWithUsModal({
                     )}
                   </div>
 
-                  {/* Submit Button (Width: w-full / 297px on desktop, Height: 49px -> 3.0625rem, #FED034) */}
+                  {/* Submit Button */}
                   <button
                     type="submit"
                     disabled={submitted || submitting}
                     aria-busy={submitting}
-                    className="w-full sm:mt-[1.2rem] h-[3.0625rem] bg-[#FED034] text-[#292D32] rounded-[0.415rem] transition duration-200 hover:bg-[#E9BD26] cursor-pointer flex items-center justify-center shrink-0 disabled:opacity-80 disabled:cursor-not-allowed"
+                    className="w-full mt-[0.5rem] sm:mt-[0.75rem] h-[2.875rem] sm:h-[3.0625rem] bg-[#FED034] text-[#292D32] rounded-[0.415rem] transition duration-200 hover:bg-[#E9BD26] cursor-pointer flex items-center justify-center shrink-0 disabled:opacity-80 disabled:cursor-not-allowed"
                   >
                     <Typography
                       variant="button-1"
@@ -578,8 +578,8 @@ export default function PartnerWithUsModal({
           </div>
         </div>
 
-        {/* Right Column: Hero Image Asset (358px x 815.35px -> 22.375rem x 50.959rem) */}
-        <div className="hidden md:block w-[22.375rem] h-full relative shrink-0 bg-[#FDF9F3]">
+        {/* Right Column: Hero Image Asset */}
+        <div className="hidden md:block w-[22.375rem] self-stretch relative shrink-0 bg-[#FDF9F3]">
           <img
             src="/Get Involved/Partner With Us form/Partner With Us.png"
             alt="Be a Part of Someone's Cancer Journey"
