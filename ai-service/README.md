@@ -10,7 +10,7 @@ Quality RAG service modeled on the old PHP + FastAPI bot:
 6. Sources (max 3)
 
 CMS rows are pushed by NestJS (`POST /internal/sync`) for **published** content only.
-Static pages + `knowledge/public/` + whitelisted files under
+Website page text (fetched from the frontend) + curated static pages + `knowledge/public/` + whitelisted files under
 `knowledge/source-docs/` (PDF/DOCX/PPTX) are refreshed by `POST /sync`
 (fingerprint; not on every chat).
 
@@ -82,11 +82,17 @@ The NestJS backend reaches it through `AI_SERVICE_URL=http://localhost:8001` in 
 
 ### 3. Build the search index
 
-Run once after setup, and again whenever `knowledge/` files or the static page content change:
+Run once after setup, and again whenever `knowledge/` files or the website page text change:
 
 ```bash
 python -c "from app.services.sync_service import full_sync; print(full_sync(force=True))"
 ```
+
+The sync also reads the visible text of the public website pages (About Us, programs,
+Get Involved, Contact, ...) from the running frontend at `SITE_CRAWL_URL`
+(default `http://localhost:3000`), so start the frontend first. The page list is in
+`app/services/site_pages.py`. If a page can't be fetched, its previously indexed text is kept
+and the result lists it under `site_pages_failed`.
 
 To push CMS content (projects, events, blogs, ...) as well, call the Nest endpoint
 `POST /api/chatbot/reindex` with an admin JWT. It sends the CMS rows and triggers the corpus sync.

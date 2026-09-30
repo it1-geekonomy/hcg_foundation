@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.services import corpus, vector_store
+from app.services import corpus, site_pages, vector_store
 
 
 def upsert_cms_event(event: dict) -> dict:
@@ -42,7 +42,8 @@ def full_sync(force: bool = False) -> dict:
     CMS rows are upserted separately by NestJS; this endpoint refreshes
     curated pages/files and can force a fingerprint rewrite.
     """
-    docs = corpus.load_corpus_documents()
+    site_docs, site_failed = site_pages.load_site_pages()
+    docs = corpus.load_corpus_documents() + site_docs
     fp = vector_store.compute_fingerprint(docs)
     current = vector_store.load_fingerprint()
 
@@ -60,16 +61,18 @@ def full_sync(force: bool = False) -> dict:
         vector_store.upsert_document(doc)
 
     # Curated docs that were renamed or removed would otherwise linger with old titles/URLs
-    stale = vector_store.delete_stale(
-        {"static", "knowledge"},
-        {(d["table"], str(d["source_id"])) for d in docs},
-    )
+    # Pages that failed to load keep their previously indexed text
+    keep = {(d["table"], str(d["source_id"])) for d in docs}
+    keep |= {("site", path) for path in site_failed}
+    stale = vector_store.delete_stale({"static", "knowledge", "site"}, keep)
 
     vector_store.save_fingerprint(fp)
     return {
         "status": "synced",
         "fingerprint": fp,
         "corpus_documents": len(docs),
+        "site_pages_indexed": len(site_docs),
+        "site_pages_failed": site_failed,
         "stale_chunks_deleted": stale,
         "indexed_chunks": vector_store.indexed_count(),
     }
