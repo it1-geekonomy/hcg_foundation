@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import re
+from datetime import date, datetime
+
 from app.rag import constants as C
+from app.rag.links import public_url
 from app.services.embeddings import chat_complete
 
-SYSTEM_PROMPT = f"""You are the public website assistant for HCG Foundation, a cancer-care charity trust in India.
+SYSTEM_PROMPT = f"""You are the public website AI Assistant for HCG Foundation, a cancer-care charity trust in India.
 
 Official contact (use only these unless context has newer published values):
 - Email: {C.OFFICIAL_EMAIL}
@@ -25,6 +29,11 @@ Rules:
 9. Never dump internal proposal fields (contact person, staff mobiles, partner pitches, budgets) unless asked and present in context. Prefer public pages (Donate, Patient Aid, certificates) over partner proposal documents for FAQs.
 10. Keep answers warm, concise, and visitor-facing. Do not mention embeddings, RAG, or internal systems.
 11. Organisation PAN and FCRA bank account may be shared when the visitor asks — use only the official values above / context. Never share cancelled-cheque images, personal staff phones, or donor names.
+12. Links: only link to a URL shown in a context block's URL field, copied exactly (relative paths like /contact — never add a domain), as Markdown [label](url). Never make up URLs; if a block's URL is "-", do not link it. Donations use the Donate Now form ({C.DONATE_URL}).
+13. Dates: each event block has an "Event status" line — follow it exactly. PAST events must never be called upcoming or current. If no event in context is dated today or later, say in a friendly sentence that no upcoming events are published right now, briefly mention the most recent past events with their dates, and suggest checking the [Events]({C.EVENTS_URL}) page.
+14. The official phone number {C.OFFICIAL_PHONE} is the Foundation's contact / helpline number.
+15. Never write raw "URL:" / "Focus:" field lines. Put links inline in the sentence, e.g. "see [Awareness & Screening Camps](/our-programs/awareness-and-screening-camps)".
+16. Context blocks with Category "Page" hold the actual text of the public website pages — prefer them when describing programs, initiatives and how to get involved.
 """
 
 
@@ -37,8 +46,9 @@ def generate_answer(question: str, contexts: list[dict]) -> str:
         blocks.append(
             f"[{i}] Title: {c.get('title')}\n"
             f"Category: {c.get('category')}\n"
-            f"URL: {c.get('url')}\n"
+            f"URL: {public_url(c.get('url')) or '-'}\n"
             f"Designation: {c.get('designation') or '-'}\n"
+            f"{_event_status(c)}"
             f"Content:\n{c.get('content')}"
         )
     context_text = "\n\n---\n\n".join(blocks)
@@ -50,6 +60,7 @@ def generate_answer(question: str, contexts: list[dict]) -> str:
                 {
                     "role": "user",
                     "content": (
+                        f"TODAY: {date.today():%d %B %Y}\n\n"
                         f"CONTEXT:\n{context_text}\n\n"
                         f"VISITOR QUESTION:\n{question}\n\n"
                         "Answer grounded in CONTEXT only."
@@ -61,6 +72,43 @@ def generate_answer(question: str, contexts: list[dict]) -> str:
         )
     except Exception:
         return C.NO_ANSWER_TOKEN
+
+
+_EVENT_DATE = re.compile(r"Event Date:\s*\w{3} (\w{3} \d{1,2} \d{4})")
+
+
+def _event_date(context: dict) -> datetime | None:
+    if (context.get("category") or "").lower() != "event":
+        return None
+    m = _EVENT_DATE.search(context.get("content") or "")
+    return datetime.strptime(m.group(1), "%b %d %Y") if m else None
+
+
+def _event_status(context: dict) -> str:
+    when = _event_date(context)
+    if not when:
+        return ""
+    status = "UPCOMING event" if when.date() >= date.today() else "PAST event (already happened)"
+    return f"Event status: {status}, held on {when:%d %B %Y}\n"
+
+
+def _no_upcoming_events_answer(contexts: list[dict]) -> str:
+    dated: list[tuple[datetime, str]] = []
+    for c in contexts:
+        when = _event_date(c)
+        if not when:
+            continue
+        url = public_url(c.get("url"))
+        name = c.get("title") or "Event"
+        label = f"[{name}]({url})" if url else name
+        dated.append((when, f"- {label} — {when:%d %b %Y}"))
+
+    lines = ["There are no upcoming events published on the website right now."]
+    if dated:
+        lines.append("Our most recent events:")
+        lines.extend(line for _, line in sorted(dated, reverse=True)[:3])
+    lines.append(f"Keep an eye on the [Events]({C.EVENTS_URL}) page for new dates.")
+    return "\n".join(lines)
 
 
 def recover_if_needed(answer: str, question: str, contexts: list[dict], intents: set[str]) -> str:
@@ -88,7 +136,8 @@ def recover_if_needed(answer: str, question: str, contexts: list[dict], intents:
             "patient aid" in (c.get("title") or "").lower() for c in contexts
         ):
             return (
-                "For Patient Aid support, review the Patient Aid information on the website "
+                "For Patient Aid support, review the "
+                f"[Financial Support for Pediatric Patients]({C.PATIENT_AID_URL}) page "
                 "and contact the Foundation to apply. "
                 f"Email {C.OFFICIAL_EMAIL} or call {C.OFFICIAL_PHONE}."
             )
@@ -97,23 +146,38 @@ def recover_if_needed(answer: str, question: str, contexts: list[dict], intents:
         if "donate" in joined or any("donate" in (c.get("title") or "").lower() for c in contexts):
             return C.DONATE_INTENT_ANSWER
 
+    if "contact" in intents:
+        return C.CONTACT_ANSWER
+
+    if "events" in intents:
+        return _no_upcoming_events_answer(contexts)
+
+    if "hospital" in intents:
+        return (
+            "HCG Foundation is a charitable trust and does not own hospitals. Patients supported "
+            "through its Patient Aid program are treated at HCG hospital facilities, which offer "
+            "discounts to patients approved by the Foundation. A full list of centres isn’t "
+            f"published in our materials — for details, email {C.OFFICIAL_EMAIL} or call "
+            f"{C.OFFICIAL_PHONE}."
+        )
+
     if "trustees" in intents or "founder" in intents:
-        trustees = [
-            c
-            for c in contexts
-            if (c.get("category") or "").lower() == "trustee"
-            or "ajaikumar" in (c.get("title") or "").lower()
-        ]
-        if trustees:
-            lines = ["HCG Foundation’s published trustees / leadership include:"]
-            for t in trustees:
-                des = t.get("designation") or ""
-                title = t.get("title") or "Trustee"
-                lines.append(f"- {title}" + (f" — {des}" if des else ""))
-            lines.append(
-                f"For more, see Our Team / Trustees on the website, or contact {C.OFFICIAL_EMAIL}."
-            )
-            return "\n".join(lines)
+        lines = ["**HCG Foundation Board of Trustees**"]
+        lines.extend(f"- {name} — {role}" for name, role in C.TRUSTEES)
+        lines.append(f"See [Our Team & Trustees]({C.TEAM_URL}) for their profiles.")
+        return "\n".join(lines)
+
+    if "terms" in intents:
+        return (
+            "You can read HCG Foundation’s terms on the [Terms & Conditions](/terms) page. "
+            f"For any questions about them, email {C.OFFICIAL_EMAIL} or call {C.OFFICIAL_PHONE}."
+        )
+
+    if "privacy" in intents:
+        return (
+            "You can read how HCG Foundation handles personal information on the "
+            f"[Privacy Policy](/privacy) page. For questions, email {C.OFFICIAL_EMAIL}."
+        )
 
     if "non_cancer" in intents:
         return (

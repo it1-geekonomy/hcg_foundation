@@ -16,6 +16,9 @@ TYPO_MAP = {
     "intership": "internship",
     "internsip": "internship",
     "fcraa": "fcra",
+    "asha": "aasha",
+    "volunter": "volunteer",
+    "voluntier": "volunteer",
 }
 
 

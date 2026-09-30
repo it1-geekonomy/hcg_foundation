@@ -44,58 +44,33 @@ function StepCard({
       initial={
         skip
           ? false
-          : { opacity: 0, y: 44, scale: 0.96, filter: "blur(10px)" }
+          : { opacity: 0, y: 40 }
       }
       animate={
         play
-          ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }
-          : { opacity: 0, y: 44, scale: 0.96, filter: "blur(10px)" }
+          ? { opacity: 1, y: 0 }
+          : { opacity: 0, y: 40 }
       }
       transition={
-        skip ? { duration: 0 } : { duration: 0.85, ease: EASE_OUT, delay }
+        skip ? { duration: 0 } : { duration: 0.8, ease: EASE_OUT, delay }
       }
     >
-      {/* One-time light sweep (clipped inside the card, so the badge isn't cut off) */}
-      {!skip && (
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl"
-        >
-          <motion.span
-            className="absolute inset-y-0 left-0 w-[35%] bg-[linear-gradient(100deg,rgba(255,255,255,0)_0%,rgba(255,255,255,0.75)_50%,rgba(255,255,255,0)_100%)]"
-            initial={{ x: "-140%", skewX: -18, opacity: 0 }}
-            animate={
-              play
-                ? { x: ["-140%", "340%"], opacity: [0, 1, 0] }
-                : { x: "-140%", opacity: 0 }
-            }
-            transition={{
-              duration: 1.1,
-              ease: "easeOut",
-              times: [0, 0.15, 1],
-              delay: delay + 0.75,
-            }}
-          />
-        </span>
-      )}
-
       {/* Number: outer span handles position, motion span handles animation */}
       <span className="absolute left-3 top-0 -translate-y-1/2 sm:left-4">
         <motion.span
-          className="flex h-5 min-w-5 items-center justify-center rounded-md bg-[#FCCC2D] px-1.5 py-4 leading-none text-black sm:h-6 sm:min-w-6"
-          initial={skip ? false : { scale: 0, rotate: -40, opacity: 0 }}
+          className="flex h-5 min-w-5 items-center justify-center rounded-md bg-[#FCCC2D] px-1.5 py-4 leading-none text-black sm:h-6 sm:min-w-6 shadow-sm"
+          initial={skip ? false : { scale: 0.8, opacity: 0, y: 10 }}
           animate={
             play
-              ? { scale: 1, rotate: 0, opacity: 1 }
-              : { scale: 0, rotate: -40, opacity: 0 }
+              ? { scale: 1, opacity: 1, y: 0 }
+              : { scale: 0.8, opacity: 0, y: 10 }
           }
           transition={
             skip
               ? { duration: 0 }
               : {
                   ...SPRING,
-                  delay: delay + 0.4,
-                  opacity: { duration: 0.2, delay: delay + 0.4 },
+                  delay: delay + 0.2,
                 }
           }
         >
@@ -111,24 +86,21 @@ function StepCard({
 
       {/* Icon + Text */}
       <div className="flex items-center gap-3 sm:gap-4">
-        {/* Icon box: turns in and settles */}
+        {/* Icon box: clean scale-up without spinning */}
         <motion.div
           className="flex h-[72px] w-[56px] shrink-0 items-center justify-center rounded-xl border-2 border-[#FCCC2D] bg-transparent transition-colors duration-300 group-hover:bg-yellow-500 sm:h-20 sm:w-16"
-          initial={skip ? false : { scale: 0.5, rotate: -90, opacity: 0 }}
+          initial={skip ? false : { scale: 0.8, opacity: 0 }}
           animate={
             play
-              ? { scale: 1, rotate: 0, opacity: 1 }
-              : { scale: 0.5, rotate: -90, opacity: 0 }
+              ? { scale: 1, opacity: 1 }
+              : { scale: 0.8, opacity: 0 }
           }
           transition={
             skip
               ? { duration: 0 }
               : {
-                  type: "spring",
-                  stiffness: 240,
-                  damping: 15,
-                  delay: delay + 0.3,
-                  opacity: { duration: 0.25, delay: delay + 0.3 },
+                  ...SPRING,
+                  delay: delay + 0.15,
                 }
           }
         >

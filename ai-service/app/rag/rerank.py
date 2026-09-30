@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from app.config import settings
+from app.rag import constants as C
+from app.rag.links import public_url, source_label
 
 
 def rerank(hits: list[dict], intents: set[str]) -> list[dict]:
@@ -72,11 +74,22 @@ def rerank(hits: list[dict], intents: set[str]) -> list[dict]:
                 score += 0.10
 
         if "internship" in intents:
-            if "internship" in title:
+            if "intern" in title:
                 score += 0.40
+
+        if "volunteer" in intents:
+            if "volunteer" in title:
+                score += 0.40
+
+        if "hospital" in intents:
+            if title.strip() == "patient aid":
+                score += 0.30
 
         if "privacy" in intents and "privacy" in title:
             score += 0.40
+
+        if "events" in intents and category == "event":
+            score += 0.30
 
         if "programs" in intents and category in ("project", "page", "award"):
             score += 0.15
@@ -108,23 +121,32 @@ def rerank(hits: list[dict], intents: set[str]) -> list[dict]:
 
 
 def pick_sources(hits: list[dict], intents: set[str]) -> list[dict]:
-    if not hits:
-        return []
-    best = hits[0]["score"]
-    margin = settings.source_score_margin
     sources: list[dict] = []
     seen_urls: set[str] = set()
+    for intent, url in (("events", C.EVENTS_URL), ("terms", "/terms"), ("privacy", "/privacy")):
+        if intent in intents:
+            sources.append({"title": C.PAGE_LABELS[url], "url": url})
+            seen_urls.add(url)
+    if {"terms", "privacy"} & intents:
+        return sources
+    if not hits:
+        return sources
+    best = hits[0]["score"]
+    margin = settings.source_score_margin
 
     for h in hits:
         if h["score"] < best - margin:
             break
-        title = h.get("title") or "HCG Foundation"
-        url = h.get("url") or "/"
+        url = public_url(h.get("url"))
+        if not url:
+            continue
+        title = source_label(h, url)
+        raw_title = (h.get("title") or "").lower()
         category = (h.get("category") or "").lower()
 
         if "fcra" in intents or "certificate" in intents or "bank" in intents or "pan" in intents:
             if category not in ("page", "legal") and not any(
-                k in title.lower()
+                k in raw_title
                 for k in (
                     "fcra",
                     "80g",
@@ -138,7 +160,7 @@ def pick_sources(hits: list[dict], intents: set[str]) -> list[dict]:
             ):
                 continue
         if "trustees" in intents or "founder" in intents:
-            if category not in ("trustee", "page", "team") and "ajaikumar" not in title.lower():
+            if category not in ("trustee", "page", "team") and "ajaikumar" not in raw_title:
                 # still allow trustee pages
                 if category != "trustee":
                     continue

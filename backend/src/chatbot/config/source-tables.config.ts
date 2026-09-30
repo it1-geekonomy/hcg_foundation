@@ -127,7 +127,7 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
     category: 'Annual Report',
     titleColumn: 'title',
     slugColumn: 'slug',
-    buildUrl: () => `/resources/annual-reports`,
+    buildUrl: () => `/resources/transparency-and-knowledge-hub`,
   },
   {
     table: 'awards',

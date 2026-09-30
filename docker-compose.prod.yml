@@ -26,6 +26,7 @@ services:
       DB_PORT: 5432
       INTERNAL_API_KEY: ${AI_SERVICE_INTERNAL_KEY}
       SITE_BASE_URL: ${PUBLIC_URL}
+      SITE_CRAWL_URL: http://frontend:3000
     depends_on:
       postgres:
         condition: service_healthy

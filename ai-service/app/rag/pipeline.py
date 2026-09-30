@@ -7,6 +7,7 @@ from app.config import settings
 from app.rag import constants as C
 from app.rag.generate import generate_answer, recover_if_needed
 from app.rag.intents import detect_intents, match_fast_intent
+from app.rag.links import clean_answer
 from app.rag.memory import append_turn, get_history
 from app.rag.normalize import normalize_for_retrieval
 from app.rag.rerank import pick_sources, rerank
@@ -50,6 +51,7 @@ def run_chat(message: str, session_id: str | None = None) -> dict:
     ranked = rerank(hits, intents)
     answer = generate_answer(user_message, ranked)
     answer = recover_if_needed(answer, user_message, ranked, intents)
+    answer = clean_answer(answer) or C.NO_ANSWER_TOKEN
     sources = pick_sources(ranked, intents)
 
     # If model returned token somehow, or if recovery triggered fallback, clear sources
