@@ -42,7 +42,7 @@ On the server:
 ```bash
 git clone https://github.com/it2-geekonomy/hcg_foundation.git /opt/hcg
 cd /opt/hcg
-git checkout DEVELOPMENT        # or the branch you want to deploy
+git checkout main
 bash setup-droplet.sh
 ```
 
@@ -93,20 +93,65 @@ Open:
 
 ### Load the chatbot knowledge
 
-After logging in to the CMS and publishing content, call
-`POST /api/chatbot/reindex` from Swagger (authorize with the admin JWT) to
-push CMS content and the knowledge files into pgvector.
-
-## Deploying updates
+Load the built-in knowledge and the website pages (automatic deploys do this
+for you afterwards):
 
 ```bash
-cd /opt/hcg
-git pull
-docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
-docker image prune -f
+docker compose --env-file .env.prod -f docker-compose.prod.yml exec ai-service python -c "from app.services.sync_service import full_sync; print(full_sync(force=True))"
 ```
 
-Only changed services are rebuilt. New migrations run automatically.
+Published CMS content syncs on every save. To resend all of it, call
+`POST /api/chatbot/reindex` from Swagger (authorize with the admin JWT).
+
+## Deploying updates (automatic)
+
+Every merge or push to `main` deploys itself through
+`.github/workflows/deploy.yml`:
+
+1. GitHub builds only the folders that changed (`backend`, `frontend`,
+   `ai-service`). If a build fails, nothing reaches the server.
+2. GitHub connects to the Droplet over SSH and runs `deploy.sh`, which:
+   - checks out the new `main` commit (`.env.prod` is never touched);
+   - rebuilds only the changed services, one at a time;
+   - restarts containers and waits for the API, website and AI service to respond;
+   - runs database migrations and the admin seed (both skip if there is nothing to do);
+   - syncs the chatbot with the website text (skipped automatically if the text is unchanged);
+   - removes unused images and build cache older than 7 days.
+
+A failed build leaves the live site on the previous version.
+
+To redeploy by hand: GitHub → Actions → **Deploy to production** → **Run
+workflow**. Tick **Rebuild every service** to rebuild all images, or **Force a
+full chatbot re-embed** to refresh the chatbot. The same script works on the
+server:
+
+```bash
+bash /opt/hcg/deploy.sh
+REBUILD_ALL=true REINDEX_CHATBOT=true bash /opt/hcg/deploy.sh
+```
+
+### One-time setup for automatic deploys
+
+1. On the server, create a key that GitHub Actions uses to log in:
+
+   ```bash
+   ssh-keygen -t ed25519 -f ~/.ssh/github_actions -N "" -C "github-actions-deploy"
+   cat ~/.ssh/github_actions.pub >> ~/.ssh/authorized_keys
+   cat ~/.ssh/github_actions
+   ```
+
+2. In GitHub → the repo → Settings → Secrets and variables → Actions → **New
+   repository secret**, add:
+
+   | Secret           | Value                                                    |
+   |------------------|----------------------------------------------------------|
+   | `DEPLOY_HOST`    | `YOUR_IP`                                                |
+   | `DEPLOY_USER`    | `root`                                                   |
+   | `DEPLOY_SSH_KEY` | The whole private key printed above, including the `-----BEGIN` and `-----END` lines |
+
+The server fetches code with GitHub's temporary job token, so it doesn't need
+its own GitHub credentials. CMS content syncs to the chatbot on every save, so
+it needs no deploy.
 
 ## Useful commands
 
