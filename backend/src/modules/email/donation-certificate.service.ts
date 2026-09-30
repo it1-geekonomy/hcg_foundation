@@ -4,8 +4,13 @@ import * as path from 'path';
 import {
   PDFDocument,
   PDFFont,
+  PDFHexString,
+  PDFName,
+  PDFOperator,
+  PDFOperatorNames,
   PDFPage,
   RGB,
+  endMarkedContent,
   popGraphicsState,
   pushGraphicsState,
   rgb,
@@ -14,7 +19,12 @@ import {
 import fontkit from '@pdf-lib/fontkit';
 import type { Donor } from '../donors/entities/donor.entity';
 
-const TEXT_COLOR = rgb(0x0d / 255, 0x28 / 255, 0x38 / 255);
+function hex(color: string): RGB {
+  const n = parseInt(color.slice(1), 16);
+  return rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
+}
+
+const TEXT_COLOR = hex('#0D2838');
 
 /**
  * Layout of certificate-base.pdf (exported from 30.docx), in PDF points with
@@ -23,8 +33,19 @@ const TEXT_COLOR = rgb(0x0d / 255, 0x28 / 255, 0x38 / 255);
  */
 const DESIGN_PX = 1583.04 / 5075;
 
+// Arial is not redistributable; Liberation Sans has identical metrics.
+const FONT_FILES = {
+  name: 'Arizonia-Regular.ttf',
+  serif: 'CrimsonText-Regular.ttf',
+  sans: 'LiberationSans-Regular.ttf',
+  sansBold: 'LiberationSans-Bold.ttf',
+  // Liberation Sans has no ₹ glyph
+  symbol: 'Roboto-Bold.ttf',
+} as const;
+
+type FontKey = keyof typeof FONT_FILES;
+
 const NAME = {
-  font: 'Arizonia-Regular.ttf',
   size: 309.92 * DESIGN_PX,
   x: 110.4,
   maxWidth: 1360,
@@ -33,9 +54,7 @@ const NAME = {
   bandBottom: 636.6,
 };
 
-// Arial Bold is not redistributable; Liberation Sans Bold has identical metrics.
 const VALUE = {
-  font: 'LiberationSans-Bold.ttf',
   size: 72 * DESIGN_PX,
   letterSpacing: 0.09,
   // Between the column labels and the bottom of the column dividers
@@ -46,11 +65,111 @@ const VALUE = {
 
 // Label centres and the space between the dividers on either side
 const COLUMNS = [
-  { center: 194.7, halfWidth: 130.2 }, // Donation amount
-  { center: 448.1, halfWidth: 123.0 }, // Donation date
-  { center: 703.2, halfWidth: 131.8 }, // Donation for
-  { center: 1018.4, halfWidth: 184.4 }, // Transaction reference no.
-  { center: 1353.9, halfWidth: 150.6 }, // PAN / Aadhaar no.
+  { label: 'DONATION AMOUNT', center: 194.7, halfWidth: 130.2 },
+  { label: 'DONATION DATE', center: 448.1, halfWidth: 123.0 },
+  { label: 'DONATION FOR', center: 703.2, halfWidth: 131.8 },
+  { label: 'TRANSACTION REFERENCE NO.', center: 1018.4, halfWidth: 184.4 },
+  { label: 'PAN / AADHAAR NO', center: 1353.9, halfWidth: 150.6 },
+];
+
+type StaticText = {
+  text: string;
+  font: FontKey;
+  /** Design px */
+  size: number;
+  /** Fraction of the font size, like CSS letter-spacing in % */
+  letterSpacing?: number;
+  x: number;
+  baseline: number;
+  align?: 'left' | 'center';
+  color: string;
+};
+
+/**
+ * The fixed wording of the certificate. 30.docx only has it as pictures and
+ * outlines, which strip-certificate-text.py removes from the base PDF, so it
+ * is drawn here as selectable text at the size and position of the original.
+ */
+const STATIC_TEXT: StaticText[] = [
+  {
+    text: 'DONATION CERTIFICATE',
+    font: 'serif',
+    size: 166.6,
+    letterSpacing: 0.02,
+    x: 108.49,
+    baseline: 308.78,
+    color: '#112653',
+  },
+  {
+    text: 'OF APPRECIATION',
+    font: 'sans',
+    size: 57.1,
+    letterSpacing: 0.25,
+    x: 108.74,
+    baseline: 357.15,
+    color: '#39415C',
+  },
+  {
+    text: 'THIS IS TO CERTIFY THAT',
+    font: 'sans',
+    size: 57.1,
+    letterSpacing: 0.25,
+    x: 109.95,
+    baseline: 461.73,
+    color: '#39415C',
+  },
+  {
+    text: 'In Grateful Appreciation Of Your Generous Contribution Towards Creating A Cancer-Free Tomorrow.',
+    font: 'sans',
+    size: 65.3,
+    letterSpacing: -0.009,
+    x: 110.26,
+    baseline: 651.38,
+    color: '#1F335D',
+  },
+  ...COLUMNS.map((col): StaticText => ({
+    text: col.label,
+    font: 'sans',
+    size: 52.9,
+    letterSpacing: 0.05,
+    x: col.center,
+    baseline: 767.62,
+    align: 'center',
+    color: '#585858',
+  })),
+  // Signatory blocks: dark on the yellow wave (left), white on the pink (right)
+  ...[
+    { x: 198.0, baseline: 1042.04, color: '#000000' },
+    { x: 1363.0, baseline: 1040.3, color: '#FFFFFF' },
+  ].flatMap(({ x, baseline, color }): StaticText[] => [
+    {
+      text: 'Authorized Signatory',
+      font: 'sans',
+      size: 48.6,
+      x,
+      baseline,
+      align: 'center',
+      color,
+    },
+    {
+      text: 'HCG Foundation',
+      font: 'sansBold',
+      size: 60.8,
+      x,
+      baseline: baseline + 28.47,
+      align: 'center',
+      color,
+    },
+  ]),
+  {
+    text: 'www.hcgfoundation.org',
+    font: 'sans',
+    size: 48.5,
+    letterSpacing: 0.044,
+    x: 706.33,
+    baseline: 1093.8,
+    color: '#F5F5F1',
+  },
 ];
 
 type Run = { text: string; font: PDFFont };
@@ -60,6 +179,16 @@ type FontSet = {
   primaryChars: Set<number>;
   fallback: PDFFont;
   capHeight: number;
+};
+
+type LineOptions = {
+  size: number;
+  letterSpacing: number;
+  x: number;
+  /** Distance of the baseline from the top of the page */
+  baseline: number;
+  align: 'left' | 'center';
+  color: RGB;
 };
 
 @Injectable()
@@ -87,30 +216,44 @@ export class DonationCertificateService {
     pdf.registerFontkit(fontkit);
     const page = pdf.getPages()[0];
 
-    const embed = (file: string) =>
-      pdf.embedFont(this.readAsset('fonts', file), { subset: true });
-    const [nameFont, valueFont, symbolFont] = await Promise.all([
-      embed(NAME.font),
-      embed(VALUE.font),
-      // Liberation Sans has no ₹ glyph
-      embed('Roboto-Bold.ttf'),
-    ]);
+    const keys = Object.keys(FONT_FILES) as FontKey[];
+    const embedded = await Promise.all(
+      keys.map((key) =>
+        pdf.embedFont(this.readAsset('fonts', FONT_FILES[key]), {
+          subset: true,
+        }),
+      ),
+    );
+    const fonts = {} as Record<FontKey, PDFFont>;
+    const charSets = {} as Record<FontKey, Set<number>>;
+    keys.forEach((key, i) => {
+      fonts[key] = embedded[i];
+      charSets[key] = new Set(embedded[i].getCharacterSet());
+    });
+    const fontSet = (
+      key: FontKey,
+      capHeight = 0,
+      fallback: FontKey = 'symbol',
+    ): FontSet => ({
+      primary: fonts[key],
+      primaryChars: charSets[key],
+      fallback: fonts[fallback],
+      capHeight,
+    });
 
-    const nameFonts: FontSet = {
-      primary: nameFont,
-      primaryChars: new Set(nameFont.getCharacterSet()),
-      fallback: valueFont,
-      capHeight: 0.66,
-    };
-    const valueFonts: FontSet = {
-      primary: valueFont,
-      primaryChars: new Set(valueFont.getCharacterSet()),
-      fallback: symbolFont,
-      capHeight: 0.688,
-    };
+    for (const item of STATIC_TEXT) {
+      this.drawLine(page, this.splitRuns(item.text, fontSet(item.font)), {
+        size: item.size * DESIGN_PX,
+        letterSpacing: item.letterSpacing ?? 0,
+        x: item.x,
+        baseline: item.baseline,
+        align: item.align ?? 'left',
+        color: hex(item.color),
+      });
+    }
 
     const donorName = this.capitalize(donor.fullName?.trim() || 'Donor');
-    this.drawFitted(page, donorName, nameFonts, {
+    this.drawFitted(page, donorName, fontSet('name', 0.66, 'sansBold'), {
       size: NAME.size,
       letterSpacing: 0,
       maxWidth: NAME.maxWidth,
@@ -121,6 +264,7 @@ export class DonationCertificateService {
       color: TEXT_COLOR,
     });
 
+    const valueFonts = fontSet('sansBold', 0.688);
     const values = [
       this.formatAmount(donor.amount, donor.currency),
       this.formatDate(donor.createdAt ?? new Date()),
@@ -163,15 +307,10 @@ export class DonationCertificateService {
     page: PDFPage,
     text: string,
     fonts: FontSet,
-    opts: {
-      size: number;
-      letterSpacing: number;
+    opts: Omit<LineOptions, 'baseline'> & {
       maxWidth: number;
       bandTop: number;
       bandBottom: number;
-      align: 'left' | 'center';
-      x: number;
-      color: RGB;
     },
   ) {
     const runs = this.splitRuns(text, fonts);
@@ -180,28 +319,40 @@ export class DonationCertificateService {
       natural > opts.maxWidth
         ? (opts.size * opts.maxWidth) / natural
         : opts.size;
+    const bandMiddle = (opts.bandTop + opts.bandBottom) / 2;
+    this.drawLine(page, runs, {
+      ...opts,
+      size,
+      baseline: bandMiddle + (fonts.capHeight * size) / 2,
+    });
+  }
+
+  private drawLine(page: PDFPage, runs: Run[], opts: LineOptions) {
+    const { size, color } = opts;
     const spacing = size * opts.letterSpacing;
     const width = this.measure(runs, size, opts.letterSpacing);
-
-    const bandMiddle = (opts.bandTop + opts.bandBottom) / 2;
-    const baselineFromTop = bandMiddle + (fonts.capHeight * size) / 2;
-    const y = page.getHeight() - baselineFromTop;
+    const y = page.getHeight() - opts.baseline;
     let x = opts.align === 'center' ? opts.x - width / 2 : opts.x;
 
-    page.pushOperators(pushGraphicsState(), setCharacterSpacing(spacing));
+    // Wide letter spacing makes viewers copy "O F  A P P R E C I A T I O N";
+    // ActualText tells them the real string.
+    const text = PDFHexString.fromText(runs.map((r) => r.text).join(''));
+    const actualText = `<< /ActualText ${text.toString()} >>`;
+    page.pushOperators(
+      PDFOperator.of(PDFOperatorNames.BeginMarkedContentSequence, [
+        PDFName.of('Span'),
+        actualText,
+      ]),
+      pushGraphicsState(),
+      setCharacterSpacing(spacing),
+    );
     for (const run of runs) {
-      page.drawText(run.text, {
-        x,
-        y,
-        size,
-        font: run.font,
-        color: opts.color,
-      });
+      page.drawText(run.text, { x, y, size, font: run.font, color });
       x +=
         run.font.widthOfTextAtSize(run.text, size) +
         spacing * [...run.text].length;
     }
-    page.pushOperators(popGraphicsState());
+    page.pushOperators(popGraphicsState(), endMarkedContent());
   }
 
   private splitRuns(text: string, fonts: FontSet): Run[] {
