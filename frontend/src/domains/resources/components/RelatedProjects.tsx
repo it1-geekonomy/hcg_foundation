@@ -34,10 +34,17 @@ export default function RelatedProjects({ currentProjectId, projects }: RelatedP
     isDraggingOverThreshold.current = false;
     setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
     setScrollLeft(scrollContainerRef.current.scrollLeft);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging || !scrollContainerRef.current) return;
+    if (e.pointerType === "mouse" && e.buttons !== 1) {
+      handlePointerUp(e);
+      return;
+    }
     const x = e.pageX - scrollContainerRef.current.offsetLeft;
     const walk = (x - startX) * 2;
     if (Math.abs(x - startX) > 6) {
@@ -47,8 +54,15 @@ export default function RelatedProjects({ currentProjectId, projects }: RelatedP
     }
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e?: React.PointerEvent) => {
     setIsDragging(false);
+    if (e && scrollContainerRef.current) {
+      try {
+        if (scrollContainerRef.current.hasPointerCapture(e.pointerId)) {
+          scrollContainerRef.current.releasePointerCapture(e.pointerId);
+        }
+      } catch {}
+    }
     setTimeout(() => {
       isDraggingOverThreshold.current = false;
     }, 50);
