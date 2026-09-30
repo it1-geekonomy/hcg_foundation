@@ -47,5 +47,8 @@ else {
   }
 }
 
-Copy-Item $tmpPdf $outPdf -Force
+# The wording in the template is pictures/outlines; DonationCertificateService
+# draws it as real text, so drop it from the background (needs: pip install pymupdf).
+python (Join-Path $PSScriptRoot 'strip-certificate-text.py') $tmpPdf $outPdf
+if ($LASTEXITCODE -ne 0) { throw 'strip-certificate-text.py failed' }
 Write-Host "Wrote $outPdf ($((Get-Item $outPdf).Length) bytes)"
