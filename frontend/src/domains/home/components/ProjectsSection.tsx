@@ -205,6 +205,7 @@ export default function ProjectsSection({
   defaultActiveIndex = 0,
 }: ProjectsSectionProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const reduceMotionRef = useRef(false);
@@ -260,6 +261,12 @@ export default function ProjectsSection({
     if (newStart === clampedWindowStart) return;
     setWindowStart(newStart);
     setActiveIndex(newStart + safeDefault);
+    // The arrows sit below the cards, so bring the heading back into view to
+    // show the new set from the top (its scroll-margin clears the navbar).
+    (headerRef.current ?? sectionRef.current)?.scrollIntoView({
+      behavior: reduceMotionRef.current ? "auto" : "smooth",
+      block: "start",
+    });
   };
 
   const handlePrev = () => shift(-1);
@@ -687,7 +694,7 @@ export default function ProjectsSection({
     >
       <div className="max-w-full">
         {showHeader ? (
-          <div id="projects" className="mb-10 flex flex-col gap-4 overflow-x-clip lg:mb-14 lg:flex-row lg:items-start lg:justify-between lg:gap-8 scroll-mt-24">
+          <div ref={headerRef} id="projects" className="mb-10 flex flex-col gap-4 overflow-x-clip lg:mb-14 lg:flex-row lg:items-start lg:justify-between lg:gap-8 scroll-mt-24">
             <div ref={headingSlide.wrapRef} className="w-full">
               <Typography
                 variant="heading-2"
