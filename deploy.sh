@@ -113,8 +113,11 @@ main() {
     warn "Chatbot sync failed. The site is live; re-run with REINDEX_CHATBOT=true."
   fi
 
-  log "Cleaning up unused images and old build cache"
+  # Never prune volumes: the database lives in the pgdata volume.
+  log "Cleaning up stopped containers, unused images/networks and old build cache"
+  docker container prune -f
   docker image prune -f
+  docker network prune -f
   docker builder prune -f --filter until=168h
   docker system df
   df -h /
