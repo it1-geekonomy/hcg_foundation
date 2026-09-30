@@ -40,6 +40,15 @@ export type InternshipPayload = {
   cv: File;
 };
 
+export type PartnershipInquiryPayload = {
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  organizationName?: string;
+  message: string;
+  termsAccepted: boolean;
+};
+
 type Envelope<T = unknown> = {
   statusCode: number;
   message: string;
@@ -95,4 +104,7 @@ export const participateApi = {
     fd.append("cv", cv, cv.name);
     return send("/leads-internship", { method: "POST", body: fd });
   },
+
+  submitPartnershipInquiry: (payload: PartnershipInquiryPayload) =>
+    postJson("/partnership-inquiries", payload),
 };
