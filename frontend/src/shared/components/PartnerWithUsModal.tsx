@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { X, User, Mail, Building2, MessageSquare } from "lucide-react";
 import PhoneInputField from "@/shared/forms/PhoneInputField";
 import Typography from "@/lib/Typography";
+import { participateApi } from "@/shared/lib/participate-api";
 
 interface PartnerWithUsModalProps {
   isOpen: boolean;
@@ -32,6 +33,8 @@ export default function PartnerWithUsModal({
   }
 
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -83,6 +86,8 @@ export default function PartnerWithUsModal({
     if (isOpen) {
       document.body.style.overflow = "hidden";
       setSubmitted(false);
+      setSubmitting(false);
+      setSubmitError("");
       setErrors({});
       setFormData({
         fullName: "",
@@ -115,8 +120,10 @@ export default function PartnerWithUsModal({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting || submitted) return;
+    setSubmitError("");
 
     const newErrors: FormErrors = {};
 
@@ -170,6 +177,28 @@ export default function PartnerWithUsModal({
     }
 
     setErrors({});
+    setSubmitting(true);
+
+    try {
+      await participateApi.submitPartnershipInquiry({
+        fullName: formData.fullName.trim(),
+        email: formData.email.trim(),
+        phoneNumber: phoneVal,
+        organizationName: formData.organization.trim() || undefined,
+        message: formData.message.trim(),
+        termsAccepted: formData.agreeTerms,
+      });
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error && err.message
+          ? err.message
+          : "Something went wrong. Please try again."
+      );
+      setSubmitting(false);
+      return;
+    }
+
+    setSubmitting(false);
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
@@ -496,17 +525,34 @@ export default function PartnerWithUsModal({
                   {/* Submit Button (Width: w-full / 297px on desktop, Height: 49px -> 3.0625rem, #FED034) */}
                   <button
                     type="submit"
-                    disabled={submitted}
-                    className="w-full sm:mt-[1.2rem] h-[3.0625rem] bg-[#FED034] text-[#292D32] rounded-[0.415rem] transition duration-200 hover:bg-[#E9BD26] cursor-pointer flex items-center justify-center shrink-0 disabled:opacity-80"
+                    disabled={submitted || submitting}
+                    aria-busy={submitting}
+                    className="w-full sm:mt-[1.2rem] h-[3.0625rem] bg-[#FED034] text-[#292D32] rounded-[0.415rem] transition duration-200 hover:bg-[#E9BD26] cursor-pointer flex items-center justify-center shrink-0 disabled:opacity-80 disabled:cursor-not-allowed"
                   >
                     <Typography
                       variant="button-1"
                       as="span"
                       className="text-[#292D32]"
                     >
-                      {submitted ? "Submitted ✓" : "Submit"}
+                      {submitted
+                        ? "Submitted ✓"
+                        : submitting
+                          ? "Submitting…"
+                          : "Submit"}
                     </Typography>
                   </button>
+
+                  {submitError && !submitted && (
+                    <div role="alert" className="text-center pt-2 animate-in fade-in duration-300">
+                      <Typography
+                        variant="caption-2"
+                        as="p"
+                        className="font-manrope font-semibold text-red-600"
+                      >
+                        {submitError}
+                      </Typography>
+                    </div>
+                  )}
 
                   {submitted && (
                     <div className="text-center pt-2 space-y-0.5 animate-in fade-in duration-300">
