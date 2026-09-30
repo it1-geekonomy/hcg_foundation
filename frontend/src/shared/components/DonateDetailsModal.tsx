@@ -107,10 +107,13 @@ export default function DonateDetailsModal({
 
   const currencyMeta = getDonationCurrency(currency);
   const formattedAmount = formatDonationAmount(amountValue, currency);
-const [selectedCountryCode, setSelectedCountryCode] = useState(countryCode);
-
-const country = getDonationCountry(selectedCountryCode);
-const international = !isIndiaCountry(selectedCountryCode);
+  // The donation country (picked on the form) decides currency, PAN and 80G;
+  // the phone's country only sets the dialling code.
+  const country = getDonationCountry(countryCode);
+  const international = !isIndiaCountry(countryCode);
+  const [phoneCountryCode, setPhoneCountryCode] = useState(countryCode);
+  const phoneCountry = getDonationCountry(phoneCountryCode);
+  const indianPhone = isIndiaCountry(phoneCountryCode);
 
   function startAmountEdit() {
     setEditingAmount(true);
@@ -169,27 +172,21 @@ const international = !isIndiaCountry(selectedCountryCode);
       return;
     }
 
-    if (isIndiaCountry(selectedCountryCode) && currency !== "INR") {
-      setError("Indian donations must use INR.");
-      return;
-    }
-
-    const national = nationalPhoneDigits(phone, country.dial);
-    if (international) {
-      if (national.length < 6) {
-        setError("Please enter a valid phone number.");
+    const national = nationalPhoneDigits(phone, phoneCountry.dial);
+    if (indianPhone) {
+      if (national.length !== 10) {
+        setError("Please enter a 10-digit phone number.");
         return;
       }
-    } else if (national.length !== 10) {
-      setError("Please enter a 10-digit phone number.");
+    } else if (national.length < 6) {
+      setError("Please enter a valid phone number.");
       return;
     }
 
-    const payloadPhone = international
-      ? country.dial === "+"
+    const payloadPhone =
+      indianPhone || phoneCountry.dial === "+"
         ? national
-        : `${country.dial}${national}`
-      : national;
+        : `${phoneCountry.dial}${national}`;
 
     setLoading(true);
     try {
@@ -199,7 +196,7 @@ const international = !isIndiaCountry(selectedCountryCode);
         email: email.trim(),
         city: city.trim() || undefined,
         country: country.name,
-        countryCode: selectedCountryCode,
+        countryCode,
         isInternational: international,
         currency,
         pan: international ? undefined : pan.replace(/\s/g, "") || undefined,
@@ -433,9 +430,9 @@ const international = !isIndiaCountry(selectedCountryCode);
 
   <div className="flex items-center border-b border-white/35">
  <CountrySelect
-  value={selectedCountryCode}
+  value={phoneCountryCode}
   onChange={(nextCode) => {
-    setSelectedCountryCode(nextCode);
+    setPhoneCountryCode(nextCode);
     setPhone("");
   }}
   variant="dial"
@@ -451,7 +448,7 @@ const international = !isIndiaCountry(selectedCountryCode);
       value={phone}
       onChange={(e) =>
         setPhone(
-          nationalPhoneDigits(e.target.value, country.dial)
+          nationalPhoneDigits(e.target.value, phoneCountry.dial)
         )
       }
       className="min-w-0 flex-1 bg-transparent py-1.5 font-manrope text-sm text-white outline-none placeholder:text-white/30"
