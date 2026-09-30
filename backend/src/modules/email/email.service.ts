@@ -61,7 +61,7 @@ export class EmailService {
     const receipt = donor.receiptNumber || '—';
     const dateLabel = new Date(donor.createdAt ?? Date.now()).toLocaleDateString(
       'en-IN',
-      { day: '2-digit', month: 'short', year: 'numeric' },
+      { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' },
     );
     const certFilename = `HCG-Donation-Certificate-${receipt}.pdf`;
     const receiptFilename = `HCG-Donation-Receipt-${receipt}.pdf`;
