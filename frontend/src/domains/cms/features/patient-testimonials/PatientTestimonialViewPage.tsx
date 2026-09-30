@@ -70,7 +70,7 @@ export default function PatientTestimonialViewPage() {
     if (!testimonial) return;
     const ok = await cmsConfirm({
       title: "Move to Recently Deleted?",
-      description: `“${testimonial.patientName}” will be soft-deleted. You can restore it later.`,
+      description: `“${testimonial.title}” will be soft-deleted. You can restore it later.`,
       confirmLabel: "Move to deleted",
       tone: "danger",
     });
@@ -90,7 +90,7 @@ export default function PatientTestimonialViewPage() {
     if (!testimonial) return;
     const ok = await cmsConfirm({
       title: "Restore Patient Testimonial?",
-      description: `“${testimonial.patientName}” will be restored to active status.`,
+      description: `“${testimonial.title}” will be restored to active status.`,
       confirmLabel: "Restore",
     });
     if (!ok) return;
