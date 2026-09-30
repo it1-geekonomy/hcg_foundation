@@ -41,6 +41,8 @@ function StoryCard({
   image,
   objectPosition,
   excerpt,
+  isFlipped,
+  onFlipChange,
   onCardClick,
 }: {
   name: string;
@@ -48,9 +50,17 @@ function StoryCard({
   image: string;
   objectPosition?: string;
   excerpt?: string;
+  isFlipped?: boolean;
+  onFlipChange?: (flipped: boolean) => void;
   onCardClick?: (e: React.MouseEvent) => void;
 }) {
-  const [isFlipped, setIsFlipped] = useState(false);
+  const [internalFlipped, setInternalFlipped] = useState(false);
+  const currentFlipped = isFlipped !== undefined ? isFlipped : internalFlipped;
+
+  const handleFlipChange = (f: boolean) => {
+    if (isFlipped === undefined) setInternalFlipped(f);
+    onFlipChange?.(f);
+  };
 
   const frontContent = (
     <div className="group flex h-full w-full flex-col justify-between overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-[rgba(255,255,255,0.55)] bg-[rgba(0,0,0,0.23)] backdrop-blur-[1.30625rem] pt-[1.4223rem] pl-[1.475rem] pr-[1.4223rem] pb-0">
@@ -69,13 +79,7 @@ function StoryCard({
       </div>
 
       {/* name / date, below the photo, inside the card */}
-      <div
-        className="h-[6.375rem] flex items-center justify-between cursor-pointer"
-        onClick={(e) => {
-          e.stopPropagation();
-          onCardClick?.(e);
-        }}
-      >
+      <div className="h-[6.375rem] flex items-center justify-between">
         <div>
           <Typography
             variant="heading-8"
@@ -100,30 +104,35 @@ function StoryCard({
   const renderBackContent = (flipped: boolean) => (
     <MirrorReveal isOpen={flipped} delay={0} duration={0.82}>
       <div className="relative h-full w-full flex flex-col justify-between items-center p-[1.425rem] rounded-[1.2643rem] border-[0.0527rem] border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2]">
-        {/* Centered Excerpt with Proportional Body-2 */}
-        <div className="relative z-10 flex-1 flex items-center justify-center text-center my-auto px-[0.5rem] w-full">
-          <Typography
-            variant="body-2"
-            as="p"
-            className="text-[#0D2838] max-w-md"
-          >
-            {excerpt || "Explore the journey of hope, courage, and recovery."}
-          </Typography>
+        {/* Scrollable Story Description matching Team & Trustees pattern */}
+        <div className="min-h-0 flex-1 overflow-y-auto pr-1.5 space-y-2.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {(excerpt || "Explore the journey of hope, courage, and recovery.")
+            .split("\n\n")
+            .map((paragraph, idx) => (
+              <Typography
+                key={idx}
+                variant="body-9"
+                as="p"
+                className="font-manrope leading-relaxed font-normal !text-[#0D2838] text-left"
+              >
+                {paragraph}
+              </Typography>
+            ))}
         </div>
 
         {/* Read More Button Constant at Bottom Center */}
-        <div className="relative z-10 w-full flex justify-center shrink-0 pt-[0.75rem]">
+        <div className="relative z-10 w-full flex justify-center shrink-0 pt-3 border-t border-[#E0D4AE]/50 mt-2">
           <div
             onClick={(e) => {
               e.stopPropagation();
               onCardClick?.(e);
             }}
-            className="inline-flex items-center justify-center whitespace-nowrap h-[1.75rem] lg:h-[2.5rem] xl:h-[3rem] w-auto xl:w-[9.5rem] px-[0.75rem] lg:px-[1.25rem] gap-[0.45rem] rounded-[0.375rem] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
+            className="inline-flex items-center justify-center whitespace-nowrap h-[2rem] lg:h-[2.35rem] w-auto px-4 lg:px-5 gap-[0.45rem] rounded-[0.375rem] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
           >
             <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
               Read More
             </Typography>
-            <DiagonalArrowIcon className="w-[1rem] h-[0.85rem] sm:w-[1.2rem] sm:h-[0.95rem] xl:w-[1.375rem] xl:h-[1.1rem] text-[#2D2D2D] shrink-0" />
+            <DiagonalArrowIcon className="w-[0.95rem] h-[0.8rem] lg:w-[1.05rem] lg:h-[0.88rem] text-[#2D2D2D] shrink-0" />
           </div>
         </div>
       </div>
@@ -134,9 +143,15 @@ function StoryCard({
     <FlipCard
       className="aspect-[385/493] w-full rounded-[1.2643rem]"
       roundedClassName="rounded-[1.2643rem]"
-      isFlipped={isFlipped}
-      onFlipChange={setIsFlipped}
-      onClick={onCardClick}
+      isFlipped={currentFlipped}
+      onFlipChange={handleFlipChange}
+      onClick={(e) => {
+        // On desktop mouse, clicking the card navigates.
+        // On mobile touch, clicking the card flips or taps Read More.
+        if (typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches) {
+          onCardClick?.(e);
+        }
+      }}
       flipOnHover={true}
       duration={0.42}
       front={frontContent}
@@ -213,6 +228,8 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
   const didDragRef = useRef(false); // true if the current pointer gesture moved past the threshold
   const isPausedRef = useRef(false); // paused by drag/click/wheel interaction
   const isHoverPausedRef = useRef(false); // paused by hovering a card
+  const isFlippedRef = useRef(false); // paused when a card is flipped
+  const [activeFlippedIndex, setActiveFlippedIndex] = useState<number | null>(null);
   const dragStartXRef = useRef(0);
   const dragStartOffsetRef = useRef(0);
   const resumeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -221,7 +238,6 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
   const lastSaveTsRef = useRef(0);
   const pointerIdRef = useRef<number | null>(null);
   const measureRafRef = useRef<number | null>(null);
-  const clickedLinkRef = useRef<string | null>(null);
 
   const applyTransform = () => {
     if (!trackRef.current) return;
@@ -348,6 +364,7 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
         !isDraggingRef.current &&
         !isPausedRef.current &&
         !isHoverPausedRef.current &&
+        !isFlippedRef.current &&
         oneSetWidthRef.current > 0;
 
       if (shouldMove) {
@@ -396,8 +413,8 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
     dragStartXRef.current = e.clientX;
     dragStartOffsetRef.current = offsetRef.current;
     pointerIdRef.current = e.pointerId;
-    // capture on the track itself (currentTarget), not whatever child was tapped
-    e.currentTarget.setPointerCapture(e.pointerId);
+    // Do not call setPointerCapture here; wait until drag threshold is exceeded
+    // so child touch/click events (flip, read more) pass through on tap.
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -408,7 +425,15 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
       if (Math.abs(dx) < DRAG_THRESHOLD) return; // ignore tiny jitters / clicks
       isDraggingRef.current = true;
       didDragRef.current = true;
-      clickedLinkRef.current = null;
+      if (activeFlippedIndex !== null) {
+        setActiveFlippedIndex(null);
+        isFlippedRef.current = false;
+      }
+      try {
+        e.currentTarget.setPointerCapture(pointerIdRef.current);
+      } catch {
+        // ignore
+      }
     }
 
     offsetRef.current = wrap(dragStartOffsetRef.current + dx, oneSetWidthRef.current);
@@ -432,14 +457,9 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
       // real drag - give the user a moment before auto-scroll kicks back in
       scheduleResume();
     } else {
-      // simple click/tap - resume immediately, no delay
+      // simple click/tap - unpause immediately
       clearResumeTimer();
       isPausedRef.current = false;
-      if (clickedLinkRef.current) {
-        saveOffset();
-        router.push(clickedLinkRef.current);
-        clickedLinkRef.current = null;
-      }
     }
   };
 
@@ -487,16 +507,15 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
             isPausedRef.current = true;
             scheduleResume();
           }}
-          className={`flex w-max flex-nowrap gap-3 sm:gap-5 lg:gap-8 ${
-            isInfinite 
-              ? 'touch-pan-y cursor-grab select-none will-change-transform active:cursor-grabbing' 
+          className={`flex w-max flex-nowrap gap-3 sm:gap-5 lg:gap-8 ${isInfinite
+              ? 'touch-pan-y cursor-grab select-none will-change-transform active:cursor-grabbing'
               : 'touch-pan-x snap-mandatory'
-          }`}
+            }`}
         >
           {displayStories.map((story, i) => (
             <div
               key={`${story.name}-${i}`}
-              className="shrink-0 basis-[clamp(240px,65vw,320px)] cursor-pointer sm:basis-[clamp(280px,52vw-34px,360px)] md:basis-[clamp(320px,52vw-42px,400px)] lg:basis-[clamp(340px,32vw-20px,430px)] xl:basis-[clamp(280px,24vw-6px,460px)]"
+              className="shrink-0 basis-[clamp(240px,65vw,320px)] sm:basis-[clamp(280px,52vw-34px,360px)] md:basis-[clamp(320px,52vw-42px,400px)] lg:basis-[clamp(340px,32vw-20px,430px)] xl:basis-[clamp(280px,24vw-6px,460px)]"
               onPointerEnter={(e) => {
                 if (e.pointerType === "mouse") {
                   isHoverPausedRef.current = true;
@@ -508,16 +527,14 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
                 }
               }}
               onDragStart={(e) => e.preventDefault()}
-              onPointerDown={() => {
-                clickedLinkRef.current = story.link;
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                handleCardClick(story.link);
-              }}
             >
               <StoryCard
                 {...story}
+                isFlipped={activeFlippedIndex === i}
+                onFlipChange={(flipped) => {
+                  setActiveFlippedIndex(flipped ? i : null);
+                  isFlippedRef.current = flipped;
+                }}
                 onCardClick={() => handleCardClick(story.link)}
               />
             </div>
