@@ -240,15 +240,21 @@ interface EventDetailPageProps {
 export default function EventDetailPage({ params }: EventDetailPageProps) {
   const resolvedParams = use(params);
   const [eventItem, setEventItem] = useState<EventItem | null>(null);
+  const [relatedEvents, setRelatedEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
     (async () => {
       setLoading(true);
       try {
         const res = await publicEventsApi.getBySlug(resolvedParams.id);
         const e = res.data?.detail;
+        const rel = res.data?.related?.data ?? [];
+
         if (!cancelled && e) {
           setEventItem({
             id: e.id ?? "",
@@ -261,6 +267,23 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
             imageUrl: e.eventBanner || e.eventMobileBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
             location: e.eventLocation ?? "",
           });
+        }
+
+        if (!cancelled && rel.length > 0) {
+          setRelatedEvents(
+            rel.map((item) => ({
+              id: item.id ?? "",
+              slug: item.slug ?? "",
+              title: item.title ?? "",
+              date: item.eventDate ? new Date(item.eventDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "",
+              category: "Community Event" as const,
+              summary: item.shortDescription ?? "",
+              fullStory: item.content ?? "",
+              imageUrl: item.eventBanner || item.eventMobileBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+              mobileImageUrl: item.eventMobileBanner || item.eventBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+              location: item.eventLocation ?? "",
+            }))
+          );
         }
       } catch (err) {
         if (!cancelled) setEventItem(null);
@@ -390,7 +413,12 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
       </section>
 
       {/* Reusable Related Events Section */}
-      {eventItem && <RelatedEvents currentEventId={eventItem.id} />}
+      {eventItem && (
+        <RelatedEvents
+          currentEventId={eventItem.id}
+          events={relatedEvents}
+        />
+      )}
 
       <div id="donate-form">
         <DonateForm />

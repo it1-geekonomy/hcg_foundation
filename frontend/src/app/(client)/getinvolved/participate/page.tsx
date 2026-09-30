@@ -225,7 +225,7 @@ export default function ParticipatePage() {
                 as="h1"
                 className="font-tiempos-headline font-normal italic text-left text-[#0D2838] lg:whitespace-nowrap"
               >
-                Art Gallery & Art Therapy Sessions
+                Find Your Way to Make an Impact
               </Typography>
             </div>
           </div>

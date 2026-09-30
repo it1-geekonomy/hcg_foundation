@@ -12,59 +12,69 @@ import { publicEventsApi } from "@/domains/cms/lib/api";
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
 interface RelatedEventsProps {
-  currentEventId: string;
+  currentEventId?: string;
+  events?: EventItem[];
 }
 
-export default function RelatedEvents({ currentEventId }: RelatedEventsProps) {
-  const [allRelatedEvents, setAllRelatedEvents] = useState<EventItem[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function RelatedEvents({ currentEventId, events }: RelatedEventsProps) {
+  const [allRelatedEvents, setAllRelatedEvents] = useState<EventItem[]>(events ?? []);
+  const [loading, setLoading] = useState(!events);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const clickedLinkRef = useRef<boolean>(false);
+  const isDraggingOverThreshold = useRef<boolean>(false);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!scrollContainerRef.current) return;
     setIsDragging(true);
-    clickedLinkRef.current = false;
+    isDraggingOverThreshold.current = false;
     setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
     setScrollLeft(scrollContainerRef.current.scrollLeft);
-    scrollContainerRef.current.setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging || !scrollContainerRef.current) return;
-    e.preventDefault();
-    clickedLinkRef.current = true;
     const x = e.pageX - scrollContainerRef.current.offsetLeft;
     const walk = (x - startX) * 2;
-    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    setIsDragging(false);
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.releasePointerCapture(e.pointerId);
+    if (Math.abs(x - startX) > 6) {
+      isDraggingOverThreshold.current = true;
+      e.preventDefault();
+      scrollContainerRef.current.scrollLeft = scrollLeft - walk;
     }
   };
 
+  const handlePointerUp = () => {
+    setIsDragging(false);
+    setTimeout(() => {
+      isDraggingOverThreshold.current = false;
+    }, 50);
+  };
+
   const handleLinkClick = (e: React.MouseEvent) => {
-    if (clickedLinkRef.current) {
+    if (isDraggingOverThreshold.current) {
       e.preventDefault();
+      e.stopPropagation();
     }
   };
 
   useEffect(() => {
+    if (events && events.length > 0) {
+      setAllRelatedEvents(events);
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
     (async () => {
       setLoading(true);
       try {
-        const res = await publicEventsApi.listPublished({ limit: 10 });
+        const res = await publicEventsApi.listPublished({ limit: 4 });
         if (!cancelled) {
           const mapped = (res.data ?? [])
             .filter((e) => (e.slug || e.id) !== currentEventId)
+            .slice(0, 3)
             .map((e) => ({
               id: e.id ?? "",
               slug: e.slug ?? "",
@@ -94,7 +104,7 @@ export default function RelatedEvents({ currentEventId }: RelatedEventsProps) {
     return () => {
       cancelled = true;
     };
-  }, [currentEventId]);
+  }, [events, currentEventId]);
 
 
 

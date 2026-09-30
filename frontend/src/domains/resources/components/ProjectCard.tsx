@@ -25,6 +25,9 @@ export default function ProjectCard({
   const detailUrl = `/resources/projects/${project.slug || project.id}`;
 
   const handleCardClick = () => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
     router.push(detailUrl);
   };
 
