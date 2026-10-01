@@ -91,7 +91,7 @@ export function PdfTile() {
 
         <motion.img
           variants={icon}
-          src="/pdficon.png"
+          src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790839625904-knd7w-vscode-icons_file-type-pdf2.webp"
           alt="PDF"
           className="h-10 w-10 sm:h-12 sm:w-12 lg:h-10 lg:w-10"
         />

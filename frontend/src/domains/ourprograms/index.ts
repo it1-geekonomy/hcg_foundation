@@ -4,6 +4,4 @@ export {default as howtoreferpatient} from "./FinancialSupport/components/howtor
 export {default as bannersection} from "./AwarenessAndScreening/components/bannersection";
 export {default as cancerscreening} from "./AwarenessAndScreening/components/cancerscreening";
 export {default as referalprocess} from "./AwarenessAndScreening/components/referalprocess";
-export {default as gallerybanner} from "./Swasthigallery/components/bannersection";
-export {default as artgallery} from "./Swasthigallery/components/artgallery";
 export {default as screeningsection} from "./AwarenessAndScreening/components/screeningsection";
