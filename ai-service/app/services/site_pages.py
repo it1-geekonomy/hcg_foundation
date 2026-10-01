@@ -12,7 +12,9 @@ from app.rag import constants as C
 
 log = logging.getLogger(__name__)
 
-# Listing pages built from CMS rows (events, projects, stories...) are indexed from the CMS itself.
+# Every public page with text of its own. Listing pages (patient stories,
+# events, projects) render only in the browser and hold nothing but CMS items,
+# which are indexed from the CMS itself, as are /terms and /privacy.
 SITE_PAGES = [
     "/",
     "/about-us",
@@ -25,6 +27,7 @@ SITE_PAGES = [
     C.CSR_URL,
     "/getinvolved/grants-and-philanthropy",
     C.TRANSPARENCY_URL,
+    "/journey-of-hope/testimonials",
 ]
 
 # "/" server-renders only the intro animation; the same sections are rendered at /home-content.

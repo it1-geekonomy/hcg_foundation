@@ -14,6 +14,11 @@ class SyncEvent(BaseModel):
     designation: Optional[str] = None
 
 
+class PruneRequest(BaseModel):
+    table: str = Field(..., examples=["patient_stories"])
+    keep_ids: list[str] = Field(default_factory=list)
+
+
 class FullSyncRequest(BaseModel):
     force: bool = False
 
