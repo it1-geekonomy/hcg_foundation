@@ -72,6 +72,19 @@ function ShareIconButton({
   );
 }
 
+const openInNewTab = (url: string) => {
+  window.open(url, "_blank", "noopener,noreferrer");
+};
+
+const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export default function ShareStory({
   title = "Share this story",
   className = "",
@@ -79,39 +92,61 @@ export default function ShareStory({
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedInsta, setCopiedInsta] = useState(false);
 
-  const handleCopyLink = () => {
-    if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href);
+  const handleCopyLink = async () => {
+    if (typeof window === "undefined") return;
+    const ok = await copyToClipboard(window.location.href);
+    if (ok) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 1000);
     }
   };
 
   const handleShareFacebook = () => {
-    if (typeof window !== "undefined") {
-      const url = encodeURIComponent(window.location.href);
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
-    }
+    if (typeof window === "undefined") return;
+    const url = encodeURIComponent(window.location.href);
+    openInNewTab(`https://www.facebook.com/sharer/sharer.php?u=${url}`);
   };
 
   const handleShareWhatsapp = () => {
-    if (typeof window !== "undefined") {
-      const url = encodeURIComponent(window.location.href);
-      window.open(`https://api.whatsapp.com/send?text=${url}`, "_blank");
-    }
+    if (typeof window === "undefined") return;
+    const text = encodeURIComponent(`${document.title} ${window.location.href}`);
+    openInNewTab(`https://api.whatsapp.com/send?text=${text}`);
   };
 
-  const handleShareInstagram = () => {
-    if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href);
+  const handleShareInstagram = async () => {
+    if (typeof window === "undefined") return;
+    const url = window.location.href;
+
+    // Mobile: native share sheet (Instagram shows up if installed)
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile && typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title: document.title, url });
+        return;
+      } catch {
+        // cancelled or failed -> fall through to copy + open
+      }
+    }
+
+    // Desktop / fallback: open Instagram first (avoids popup blockers),
+    // then copy the link so the user can paste it.
+    openInNewTab("https://www.instagram.com/");
+    const ok = await copyToClipboard(url);
+    if (ok) {
       setCopiedInsta(true);
-      setTimeout(() => setCopiedInsta(false), 1000);
+      setTimeout(() => setCopiedInsta(false), 1500);
     }
   };
 
   return (
-    <div className={`mt-6 sm:mt-8 flex flex-wrap items-center gap-2.5 sm:gap-3 ${className}`}>
-      <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
+    <div
+      className={`mt-6 sm:mt-8 flex flex-wrap items-center gap-2.5 sm:gap-3 ${className}`}
+    >
+      <Typography
+        variant="body-10"
+        as="span"
+        className="font-argestadisplay font-normal text-[#C08600]"
+      >
         {title}
       </Typography>
       <div className="flex items-center gap-2">
