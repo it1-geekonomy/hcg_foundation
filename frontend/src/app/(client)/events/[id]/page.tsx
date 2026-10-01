@@ -50,7 +50,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
             category: "Community Event" as const,
             summary: e.shortDescription ?? "",
             fullStory: e.content ?? "",
-            imageUrl: e.eventBanner || e.eventMobileBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+            imageUrl: e.eventBanner || e.eventMobileBanner || "",
             location: e.eventLocation ?? "",
           });
         }
@@ -65,8 +65,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
               category: "Community Event" as const,
               summary: item.shortDescription ?? "",
               fullStory: item.content ?? "",
-              imageUrl: item.eventBanner || item.eventMobileBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
-              mobileImageUrl: item.eventMobileBanner || item.eventBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+              imageUrl: item.eventBanner || item.eventMobileBanner || "",
+              mobileImageUrl: item.eventMobileBanner || item.eventBanner || "",
               location: item.eventLocation ?? "",
             }))
           );
@@ -98,14 +98,15 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
   return (
     <main className="min-h-screen bg-[#FFF8E2]">
       <Banner
-        bgImage="/Resources/Resources banner image.png"
-        bgImageAlt="Events"
+        bgImage={eventItem?.imageUrl || ""}
+        bgImageMobile={eventItem?.mobileImageUrl || ""}
+        bgImageAlt={eventItem?.title || "Events"}
         breadcrumbs={[
           { label: "Home", href: "/#events" },
           { label: "Resources" },
           { label: "Events" },
         ]}
-        title="Events"
+        title={eventItem?.title || "Events"}
       />
 
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
@@ -196,15 +197,17 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                 {/* Puzzle-piece reveal on the detail image only — pieces
                     fade/scale in at their own cell, in a randomized order,
                     the moment this box scrolls into view. */}
-                <PuzzleImage
-                  key={eventItem.id}
-                  src={eventItem.imageUrl}
-                  alt={eventItem.title}
-                  rows={4}
-                  cols={5}
-                  fit="cover"
-                  staggerDuration={1000}
-                />
+                {eventItem.imageUrl ? (
+                  <PuzzleImage
+                    key={eventItem.id}
+                    src={eventItem.imageUrl}
+                    alt={eventItem.title}
+                    rows={4}
+                    cols={5}
+                    fit="cover"
+                    staggerDuration={1000}
+                  />
+                ) : null}
               </div>
             </div>
           </div>

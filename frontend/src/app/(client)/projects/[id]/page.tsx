@@ -65,14 +65,8 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             category: "Projects",
             summary: p.shortDescription ?? "",
             fullStory: p.content ?? "",
-            imageUrl:
-              p.projectBanner ||
-              p.projectMobileBanner ||
-              "/Resources/Resources banner image.png",
-            mobileImageUrl:
-              p.projectMobileBanner ||
-              p.projectBanner ||
-              "/Resources/Resources banner image.png",
+            imageUrl: p.projectBanner || p.projectMobileBanner || "",
+            mobileImageUrl: p.projectMobileBanner || p.projectBanner || "",
           });
         }
 
@@ -86,14 +80,8 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               category: "Projects",
               summary: item.shortDescription ?? "",
               fullStory: item.content ?? "",
-              imageUrl:
-                item.projectBanner ||
-                item.projectMobileBanner ||
-                "/Resources/Resources banner image.png",
-              mobileImageUrl:
-                item.projectMobileBanner ||
-                item.projectBanner ||
-                "/Resources/Resources banner image.png",
+              imageUrl: item.projectBanner || item.projectMobileBanner || "",
+              mobileImageUrl: item.projectMobileBanner || item.projectBanner || "",
             }))
           );
         }
@@ -137,8 +125,9 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   return (
     <main className="min-h-screen bg-[#FFF8E2]">
       <Banner
-        bgImage="/Resources/Resources banner image.png"
-        bgImageAlt="Projects"
+        bgImage={projectItem?.imageUrl || ""}
+        bgImageMobile={projectItem?.mobileImageUrl || ""}
+        bgImageAlt={projectItem?.title || "Projects"}
         breadcrumbs={[
           {
             label: "Home",
@@ -150,7 +139,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           },
           { label: "Resources" },
         ]}
-        title="Projects"
+        title={projectItem?.title || "Projects"}
       />
 
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
@@ -231,15 +220,17 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 {/* Puzzle-piece reveal on the detail image only — pieces
                     fade/scale in at their own cell, in a randomized order,
                     the moment this box scrolls into view. */}
-                <PuzzleImage
-                  key={projectItem.id}
-                  src={projectItem.imageUrl}
-                  alt={projectItem.title}
-                  rows={4}
-                  cols={5}
-                  fit="cover"
-                  staggerDuration={1000}
-                />
+                {projectItem.imageUrl ? (
+                  <PuzzleImage
+                    key={projectItem.id}
+                    src={projectItem.imageUrl}
+                    alt={projectItem.title}
+                    rows={4}
+                    cols={5}
+                    fit="cover"
+                    staggerDuration={1000}
+                  />
+                ) : null}
               </div>
             </div>
           </div>

@@ -295,7 +295,7 @@ export default function ParticipatePage() {
                       Apply Now
                     </span>
                     <img
-                      src="/Get Involved/Vector (5).png"
+                      src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790849562451-vj014-vector-17-.webp"
                       alt=""
                       aria-hidden="true"
                       className="w-[1rem] h-[0.8rem] lg:w-[1.2925rem] lg:h-[1.034rem] object-contain shrink-0"

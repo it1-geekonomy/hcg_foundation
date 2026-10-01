@@ -68,14 +68,8 @@ export default function EventsListSection({ previewEvent }: { previewEvent?: Eve
             category: "Community Event",
             summary: e.shortDescription ?? "",
             fullStory: e.content ?? "",
-            imageUrl:
-              e.eventBanner ||
-              e.eventMobileBanner ||
-              "/Resources/Resources banner image.png",
-            mobileImageUrl:
-              e.eventMobileBanner ||
-              e.eventBanner ||
-              "/Resources/Resources banner image.png",
+            imageUrl: e.eventBanner || e.eventMobileBanner || "",
+            mobileImageUrl: e.eventMobileBanner || e.eventBanner || "",
             location: e.eventLocation ?? "",
           }));
 

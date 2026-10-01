@@ -121,7 +121,7 @@ export default function EventViewPage() {
     category: "Community Event",
     summary: event.shortDescription ?? "",
     fullStory: event.content ?? "",
-    imageUrl: event.eventBanner || event.eventMobileBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+    imageUrl: event.eventBanner || event.eventMobileBanner || "",
     mobileImageUrl: event.eventMobileBanner || event.eventBanner || "",
     location: event.eventLocation ?? "",
   } : null;
