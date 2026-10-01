@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useState, useEffect } from "react";
+import React, { use, useState, useEffect, useRef } from "react";
 import { notFound } from "next/navigation";
 import { Calendar } from "lucide-react";
 import Typography from "@/lib/Typography";
@@ -14,6 +14,7 @@ import { ProjectItem, PROJECTS_DATA } from "@/domains/resources/constants/projec
 import { isMissingContentError, publicProjectsApi } from "@/domains/cms/lib/api";
 import ContentNotice, { LOAD_ERROR_MESSAGE } from "@/shared/components/ContentNotice";
 import { useDetailPageAnimations } from "@/shared/lib/detailPageAnimations";
+import { PROJECT_FROM_HOME_KEY } from "@/domains/home/constants/project";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
@@ -29,13 +30,17 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const [attempt, setAttempt] = useState(0);
   const [relatedProjects, setRelatedProjects] = useState<ProjectItem[]>([]);
 
-  const [fromHome, setFromHome] = useState(false);
+  const fromHome = useRef(false);
 
+  // The flag moves onto this page's history entry: it survives refresh and back/forward
+  // the way a ?from=home query did, without appearing in the URL.
   useEffect(() => {
-    if (typeof window !== "undefined" && window.location.search.includes("from=home")) {
-      setFromHome(true);
-      sessionStorage.setItem("came_from_details", "projects");
+    if (sessionStorage.getItem(PROJECT_FROM_HOME_KEY)) {
+      sessionStorage.removeItem(PROJECT_FROM_HOME_KEY);
+      window.history.replaceState({ ...window.history.state, [PROJECT_FROM_HOME_KEY]: true }, "");
     }
+    fromHome.current = Boolean(window.history.state?.[PROJECT_FROM_HOME_KEY]);
+    if (fromHome.current) sessionStorage.setItem("came_from_details", "projects");
   }, []);
 
   useEffect(() => {
@@ -138,8 +143,8 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           {
             label: "Home",
             href: "/",
-            onClick: (e) => {
-              sessionStorage.setItem("nav_action", fromHome ? "banner_home_section" : "banner_home_top");
+            onClick: () => {
+              sessionStorage.setItem("nav_action", fromHome.current ? "banner_home_section" : "banner_home_top");
               window.dispatchEvent(new Event("nav_action_event"));
             }
           },
