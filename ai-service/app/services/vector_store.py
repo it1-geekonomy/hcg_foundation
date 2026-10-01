@@ -36,7 +36,38 @@ def _row_to_hit(row: DocumentChunk, similarity: float) -> dict:
         "parent_source_id": parent,
         "designation": row.designation or "",
         "slug": row.slug or "",
+        "chunk_index": row.chunk_index,
     }
+
+
+def with_neighbor_chunks(hits: list[dict]) -> list[dict]:
+    """Give each hit the chunks around it: retrieval keeps one chunk per document,
+    and an answer often spans two (a list in one chunk, its last items in the next)."""
+    db = _db()
+    try:
+        out: list[dict] = []
+        for hit in hits:
+            idx = hit.get("chunk_index")
+            if idx is None or hit.get("expanded"):
+                out.append(hit)
+                continue
+            rows = (
+                db.query(DocumentChunk.chunk_index, DocumentChunk.content)
+                .filter(
+                    DocumentChunk.source_table == hit["table"],
+                    DocumentChunk.source_id == hit["source_id"],
+                    DocumentChunk.chunk_index.between(idx - 1, idx + 1),
+                )
+                .order_by(DocumentChunk.chunk_index)
+                .all()
+            )
+            item = dict(hit)
+            if len(rows) > 1:
+                item["content"] = "\n".join(content for _, content in rows)
+            out.append(item)
+        return out
+    finally:
+        db.close()
 
 
 def indexed_count() -> int:
@@ -85,9 +116,18 @@ def compute_fingerprint(docs: list[dict]) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def _lock_document(db: Session, table: str, source_id: str) -> None:
+    """Serialize writers of one document (instant CMS sync vs periodic reconcile)."""
+    db.execute(
+        text("SELECT pg_advisory_xact_lock(hashtext(:k))"),
+        {"k": f"{table}#{source_id}"},
+    )
+
+
 def delete_row(table: str, source_id: str) -> int:
     db = _db()
     try:
+        _lock_document(db, table, str(source_id))
         deleted = (
             db.query(DocumentChunk)
             .filter(
@@ -130,10 +170,37 @@ def delete_stale(tables: set[str], keep: set[tuple[str, str]]) -> int:
         db.close()
 
 
-def upsert_document(doc: dict) -> int:
+def _is_unchanged(table: str, source_id: str, pieces: list[str], meta: tuple) -> bool:
+    db = _db()
+    try:
+        rows = (
+            db.query(
+                DocumentChunk.content,
+                DocumentChunk.title,
+                DocumentChunk.url,
+                DocumentChunk.category,
+                DocumentChunk.slug,
+                DocumentChunk.designation,
+            )
+            .filter(
+                DocumentChunk.source_table == table,
+                DocumentChunk.source_id == source_id,
+            )
+            .order_by(DocumentChunk.chunk_index)
+            .all()
+        )
+        return [r[0] for r in rows] == pieces and all(
+            (r[1] or "", r[2] or "", r[3] or "", r[4] or "", r[5] or "") == meta for r in rows
+        )
+    finally:
+        db.close()
+
+
+def upsert_document(doc: dict, force: bool = False) -> int:
     """
     Upsert one parent document as overlapping chunks.
     Required keys: table, source_id, content, title, url, category
+    Unchanged documents are left alone (no embedding call) unless ``force``.
     """
     table = doc["table"]
     source_id = str(doc["source_id"])
@@ -145,15 +212,20 @@ def upsert_document(doc: dict) -> int:
     if not pieces:
         return delete_row(table, source_id)
 
-    vectors = embeddings.embed_batch(pieces)
     title = doc.get("title") or table
     url = doc.get("url") or "/"
     category = doc.get("category") or "Page"
     slug = doc.get("slug") or ""
     designation = doc.get("designation") or ""
 
+    if not force and _is_unchanged(table, source_id, pieces, (title, url, category, slug, designation)):
+        return len(pieces)
+
+    vectors = embeddings.embed_batch(pieces)
+
     db = _db()
     try:
+        _lock_document(db, table, source_id)
         db.query(DocumentChunk).filter(
             DocumentChunk.source_table == table,
             DocumentChunk.source_id == source_id,
@@ -193,7 +265,7 @@ def rebuild_from_documents(docs: list[dict]) -> dict:
 
     total_chunks = 0
     for doc in docs:
-        total_chunks += upsert_document(doc)
+        total_chunks += upsert_document(doc, force=True)
     fp = compute_fingerprint(docs)
     save_fingerprint(fp)
     return {
@@ -249,6 +321,7 @@ def search(
                     "parent_source_id": parent,
                     "designation": r["designation"] or "",
                     "slug": r["slug"] or "",
+                    "chunk_index": r["chunk_index"],
                 }
             )
         return out
@@ -368,6 +441,7 @@ def _named_hit(db: Session, row: DocumentChunk) -> dict:
     )
     if nxt:
         hit["content"] = f"{row.content}\n{nxt.content}"
+    hit["expanded"] = True
     return hit
 
 
