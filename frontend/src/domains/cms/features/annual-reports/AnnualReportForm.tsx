@@ -132,23 +132,6 @@ export default function AnnualReportForm({
         </CmsFormField>
 
         <CmsFormField
-          label="Slug"
-          htmlFor="slug"
-          hint="URL-safe id; auto-fills from title until you edit it"
-        >
-          <Input
-            id="slug"
-            required
-            placeholder="annual-report-2024-25"
-            value={value.slug}
-            onChange={(e) => {
-              onSlugManualEdit?.();
-              onChange({ ...value, slug: e.target.value });
-            }}
-          />
-        </CmsFormField>
-
-        <CmsFormField
           label="Report year"
           htmlFor="reportYear"
           hint="Max 9 chars, e.g. 2024-25 or 2024-2025"
