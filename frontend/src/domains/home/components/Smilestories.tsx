@@ -102,14 +102,16 @@ function StoryCard({
     <div className="group flex h-full w-full flex-col justify-between overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-[rgba(255,255,255,0.55)] bg-[rgba(0,0,0,0.23)] backdrop-blur-[1.30625rem] pt-[1.4223rem] pl-[1.475rem] pr-[1.4223rem] pb-0">
       {/* photo: aspect 21.177rem / 23.021rem and 1.2643rem radius from Figma */}
       <div className="relative w-full aspect-[21.177/23.021] shrink-0 overflow-hidden rounded-[1.2643rem] bg-[#00000014]">
-        <Image
-          src={image}
-          alt={name}
-          fill
-          sizes="(max-width: 639px) clamp(240px, 65vw, 320px), (max-width: 767px) clamp(280px, 52vw - 34px, 360px), (max-width: 1023px) clamp(320px, 52vw - 42px, 400px), (max-width: 1279px) clamp(320px, 30vw - 20px, 400px), clamp(280px, 22vw - 6px, 410px)"
-          style={{ objectPosition: objectPosition ?? "center" }}
-          className="rounded-[1.2643rem] object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-        />
+        {image ? (
+          <Image
+            src={image}
+            alt={name}
+            fill
+            sizes="(max-width: 639px) clamp(240px, 65vw, 320px), (max-width: 767px) clamp(280px, 52vw - 34px, 360px), (max-width: 1023px) clamp(320px, 52vw - 42px, 400px), (max-width: 1279px) clamp(320px, 30vw - 20px, 400px), clamp(280px, 22vw - 6px, 410px)"
+            style={{ objectPosition: objectPosition ?? "center" }}
+            className="rounded-[1.2643rem] object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          />
+        ) : null}
       </div>
 
       {/* name pinned to the top of the footer, date pinned to the bottom.
@@ -142,18 +144,20 @@ function StoryCard({
       <div className="relative h-full w-full flex flex-col justify-between items-center p-[1.425rem] rounded-[1.2643rem] border-[0.0527rem] border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2]">
         {/* Scrollable Story Description matching Team & Trustees pattern */}
         <div className="min-h-0 flex-1 overflow-y-auto pr-1.5 space-y-2.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {(excerpt || "Explore the journey of hope, courage, and recovery.")
-            .split("\n\n")
-            .map((paragraph, idx) => (
-              <Typography
-                key={idx}
-                variant="body-9"
-                as="p"
-                className="font-manrope leading-relaxed font-normal !text-[#0D2838] text-left"
-              >
-                {paragraph}
-              </Typography>
-            ))}
+          {excerpt ? (
+            excerpt
+              .split("\n\n")
+              .map((paragraph, idx) => (
+                <Typography
+                  key={idx}
+                  variant="body-9"
+                  as="p"
+                  className="font-manrope leading-relaxed font-normal !text-[#0D2838] text-left"
+                >
+                  {paragraph}
+                </Typography>
+              ))
+          ) : null}
         </div>
 
         {/* Read More Button Constant at Bottom Center */}
@@ -223,18 +227,18 @@ export default function SmileStories() {
           const mapped = res.data.map((item) => ({
             name: item.title,
             date: formatStoryDate(item.storyDate),
-            image: item.patientImage || "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=800&auto=format&fit=crop",
+            image: item.patientImage || "",
             link: `/patient-stories/${item.slug || item.id}`,
             excerpt: item.shortDescription || "",
           }));
           const fullStories = mapped.length < 4 ? [...mapped, ...mapped, ...mapped, ...mapped].slice(0, 8) : mapped;
           setApiStories(fullStories);
         } else {
-          setApiStories(fallbackStories.map(s => ({ ...s, excerpt: "Explore the journey of hope, courage, and recovery." })));
+          setApiStories(fallbackStories.map(s => ({ ...s, excerpt: "" })));
         }
       } catch (err: any) {
         if (!cancelled) {
-          setApiStories(fallbackStories.map(s => ({ ...s, excerpt: "Explore the journey of hope, courage, and recovery." })));
+          setApiStories(fallbackStories.map(s => ({ ...s, excerpt: "" })));
         }
       }
     })();

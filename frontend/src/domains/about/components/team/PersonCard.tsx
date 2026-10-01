@@ -263,26 +263,18 @@ export function PersonCard({
                   "[&::-webkit-scrollbar]:hidden",
                 )}
               >
-                {description && description.length > 0 ? (
-                  description.map((paragraph, i) => (
-                    <Typography
-                      key={i}
-                      variant="body-7"
-                      as="p"
-                      className="font-manrope leading-relaxed font-normal text-white/90"
-                    >
-                      {paragraph}
-                    </Typography>
-                  ))
-                ) : (
-                  <Typography
-                    variant="body-7"
-                    as="p"
-                    className="font-manrope leading-relaxed font-normal text-white/70 italic"
-                  >
-                    Dedicated to supporting equitable healthcare and the mission of HCG Foundation.
-                  </Typography>
-                )}
+                {description && description.length > 0
+                  ? description.map((paragraph, i) => (
+                      <Typography
+                        key={i}
+                        variant="body-7"
+                        as="p"
+                        className="font-manrope leading-relaxed font-normal text-white/90"
+                      >
+                        {paragraph}
+                      </Typography>
+                    ))
+                  : null}
               </div>
             </div>
 
