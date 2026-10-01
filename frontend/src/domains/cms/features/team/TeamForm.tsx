@@ -17,7 +17,6 @@ import CmsSelect, {
   CONTENT_STATUS_OPTIONS,
   TEAM_TYPE_OPTIONS,
 } from "@/domains/cms/ui/CmsSelect";
-import { SeoFieldsSection } from "@/domains/cms/ui/SeoFieldsSection";
 
 const CmsRichTextEditor = dynamic(
   () => import("@/domains/cms/ui/CmsRichTextEditor"),
@@ -40,9 +39,6 @@ export type TeamFormValues = {
   designation: string;
   content: string;
   status: ContentStatus;
-  metaTitle: string;
-  metaDescription: string;
-  schemaCode: string;
   teamImageFile: File | null;
   teamImageUrl: string | null;
 };
@@ -53,9 +49,6 @@ export const emptyTeamForm = (): TeamFormValues => ({
   designation: "",
   content: "",
   status: "draft",
-  metaTitle: "",
-  metaDescription: "",
-  schemaCode: "",
   teamImageFile: null,
   teamImageUrl: null,
 });
@@ -67,9 +60,6 @@ export function teamToFormValues(team: Team): TeamFormValues {
     designation: team.designation ?? "",
     content: team.content ?? "",
     status: team.status ?? "draft",
-    metaTitle: team.metaTitle ?? "",
-    metaDescription: team.metaDescription ?? "",
-    schemaCode: team.schemaCode ?? "",
     teamImageFile: null,
     teamImageUrl: team.teamImage ?? null,
   };
@@ -88,9 +78,6 @@ export function formValuesToFields(form: TeamFormValues): TeamFields {
     designation: form.designation.trim() || undefined,
     content: plainContent ? form.content : undefined,
     status: form.status,
-    metaTitle: form.metaTitle.trim() || undefined,
-    metaDescription: form.metaDescription.trim() || undefined,
-    schemaCode: form.schemaCode.trim() || undefined,
   };
 }
 
@@ -136,9 +123,6 @@ export function getTeamPatch(
     "designation",
     "content",
     "status",
-    "metaTitle",
-    "metaDescription",
-    "schemaCode",
   ];
 
   for (const key of keys) {
@@ -266,15 +250,6 @@ export default function TeamForm({
           />
         </CmsFormField>
       </div>
-
-      <SeoFieldsSection
-        value={{
-          metaTitle: value.metaTitle,
-          metaDescription: value.metaDescription,
-          schemaCode: value.schemaCode,
-        }}
-        onChange={(seo) => onChange({ ...value, ...seo })}
-      />
 
       <Button
         type="submit"

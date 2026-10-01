@@ -63,7 +63,6 @@ export default function AnnualReportEditPage() {
         formValuesToFields(form),
         {
           banner: form.bannerFile,
-          mobileBanner: form.mobileBannerFile,
           file: form.reportFile,
         }
       );
@@ -93,7 +92,6 @@ export default function AnnualReportEditPage() {
         submitLabel="Save changes"
         saving={saving}
         existingBannerUrl={report?.annualReportBanner}
-        existingMobileBannerUrl={report?.annualReportMobileBanner}
         existingFileUrl={report?.annualReportFile}
         slugLocked
       />

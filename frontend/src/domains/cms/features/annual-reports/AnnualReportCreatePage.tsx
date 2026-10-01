@@ -30,7 +30,6 @@ export default function AnnualReportCreatePage() {
     try {
       const res = await cmsApi.createAnnualReport(formValuesToFields(form), {
         banner: form.bannerFile,
-        mobileBanner: form.mobileBannerFile,
         file: form.reportFile,
       });
       cmsToast.success(res.message || "Annual report created successfully");
