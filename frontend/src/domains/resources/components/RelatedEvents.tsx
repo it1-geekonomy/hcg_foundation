@@ -28,13 +28,14 @@ export default function RelatedEvents({ currentEventId, events }: RelatedEventsP
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!scrollContainerRef.current) return;
+    const target = e.target as HTMLElement;
+    if (target.closest("button, a, [role='button'], [data-no-drag='true']")) {
+      return;
+    }
     setIsDragging(true);
     isDraggingOverThreshold.current = false;
     setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
     setScrollLeft(scrollContainerRef.current.scrollLeft);
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId);
-    } catch {}
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -48,6 +49,11 @@ export default function RelatedEvents({ currentEventId, events }: RelatedEventsP
     if (Math.abs(x - startX) > 6) {
       isDraggingOverThreshold.current = true;
       e.preventDefault();
+      try {
+        if (!scrollContainerRef.current.hasPointerCapture(e.pointerId)) {
+          scrollContainerRef.current.setPointerCapture(e.pointerId);
+        }
+      } catch {}
       scrollContainerRef.current.scrollLeft = scrollLeft - walk;
     }
   };
@@ -119,10 +125,6 @@ export default function RelatedEvents({ currentEventId, events }: RelatedEventsP
       cancelled = true;
     };
   }, [events, currentEventId]);
-
-
-
-
 
   if (!loading && allRelatedEvents.length === 0) {
     return null;

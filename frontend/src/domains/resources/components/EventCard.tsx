@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import Typography from "@/lib/Typography";
 import { DiagonalArrowIcon } from "@/shared/components/icons/ArrowIcons";
@@ -100,10 +101,14 @@ export default function EventCard({
 
         {/* Read More Button Constant at Bottom Center */}
         <div className="relative z-10 w-full flex justify-center shrink-0 pt-3">
-          <div
+          <Link
+            href={detailUrl}
+            data-no-drag="true"
             onClick={(e) => {
               e.stopPropagation();
-              handleCardClick();
+              if (typeof window !== "undefined") {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
             }}
             className="inline-flex items-center justify-center whitespace-nowrap h-[1.75rem] lg:h-[2.5rem] xl:h-[3rem] w-auto xl:w-[9.5rem] px-[0.75rem] lg:px-[1.25rem] gap-[0.45rem] rounded-[6px] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
           >
@@ -111,7 +116,7 @@ export default function EventCard({
               Read More
             </Typography>
             <DiagonalArrowIcon className="w-[1rem] h-[0.85rem] sm:w-[1.2rem] sm:h-[0.95rem] xl:w-[1.375rem] xl:h-[1.1rem] text-[#2D2D2D] shrink-0" />
-          </div>
+          </Link>
         </div>
       </div>
     </MirrorReveal>
