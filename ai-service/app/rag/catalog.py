@@ -13,8 +13,8 @@ from app.services import vector_store
 
 # (question pattern, source table, singular, plural, listing page)
 _CATALOG = [
-    (r"patient\s+stor(?:y|ies)|\bstories\b", "patient_stories", "patient story", "patient stories", "/journey-of-hope/patient-stories"),
-    (r"testimonials?", "patient_testimonials", "testimonial", "testimonials", "/journey-of-hope/testimonials"),
+    (r"patient\s+stor(?:y|ies)|\bstories\b", "patient_stories", "patient story", "patient stories", C.PATIENT_STORIES_URL),
+    (r"testimonials?", "patient_testimonials", "testimonial", "testimonials", C.TESTIMONIALS_URL),
     (r"\bevents?\b", "events", "event", "events", C.EVENTS_URL),
     (r"\bprojects?\b", "projects", "project", "projects", C.PROJECTS_URL),
     (r"team\s+members?|\bteam\b|\bstaff\b", "teams", "team member", "team members", C.TEAM_URL),

@@ -22,12 +22,12 @@ SITE_PAGES = [
     "/contact",
     C.PATIENT_AID_URL,
     C.AWARENESS_URL,
-    "/our-programs/swasthi-gallery",
+    C.SWASTHI_URL,
     C.PARTICIPATE_URL,
     C.CSR_URL,
-    "/getinvolved/grants-and-philanthropy",
+    C.GRANTS_URL,
     C.TRANSPARENCY_URL,
-    "/journey-of-hope/testimonials",
+    C.TESTIMONIALS_URL,
 ]
 
 # "/" server-renders only the intro animation; the same sections are rendered at /home-content.

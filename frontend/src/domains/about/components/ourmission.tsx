@@ -348,7 +348,7 @@ export default function MissionVision({ className = "" }: MissionVisionProps) {
         {/* ---------- Mission + Vision contents ---------- */}
         <div className="lg:col-start-1 lg:row-start-3 lg:mt-6 lg:self-center 2xl:self-auto">
           {/* Mission */}
-          <TitleBar icon="/ourvision/missionicon.png" title="Our Mission" />
+          <TitleBar icon="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790835195947-56yv3-fi_7198217.webp" title="Our Mission" />
 
           {/* Column flow: first 3 items fill col 1, last 3 fill col 2.
               lg:items-start pins each row's items to the same top edge. */}
@@ -360,7 +360,7 @@ export default function MissionVision({ className = "" }: MissionVisionProps) {
 
           {/* Vision */}
           <div className="mt-12 lg:hidden xl:block">
-            <TitleBar icon="/ourvision/visionicon.png" title="Our Vision" />
+            <TitleBar icon="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790835289594-mb01b-fi_1078327.webp" title="Our Vision" />
 
             <ul className="mt-8 grid grid-cols-1 items-center gap-x-8 gap-y-6 sm:grid-cols-2 lg:items-start lg:gap-x-6 xl:gap-x-8">
               {VISION_ITEMS.map((item) => (

@@ -8,8 +8,8 @@ export const donateTheme = {
 export const donateAmountOptions = ["₹500", "₹1500", "₹2500"];
 
 export const donateIcon = "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790831702666-8yetv-mdi_love.webp";
-export const donateBgImage = "/Donateform/bgimage.png";
-export const donatemobileimg = "/Donateform/formmobileimg.png";
+export const donateBgImage = "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790834698044-foy0f-rectangle-45.webp";
+export const donatemobileimg = "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790834845622-ml0vm-rectangle-45-1-.webp";
 
 export const donorAvatars = [
   "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790831781093-hxawr-ellipse-3.webp",

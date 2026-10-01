@@ -205,14 +205,14 @@ def _static_documents() -> list[dict]:
                 "camps focused on breast, oral and cervical cancers; Mobile Screening that takes "
                 "screening to underserved and remote areas; Student Outreach healthy-habits campaigns "
                 "for 4th–6th grade students in government schools since 2018; HPV vaccination.\n"
-                "- Swasti Gallery (/our-programs/swasthi-gallery) — art gallery and art therapy "
+                f"- Swasti Gallery ({C.SWASTHI_URL}) — art gallery and art therapy "
                 "initiative since 2007 at HCG hospitals; proceeds support cancer patients.\n"
                 "- Counselling for patients and families, and research & innovation (About Us page).\n"
                 f"- Projects ({C.PROJECTS_URL}) — funded projects such as cancer diagnostic support "
                 "and ventilator support.\n"
                 f"Ways to get involved: Participate ({C.PARTICIPATE_URL}) to fundraise, volunteer or "
                 f"intern; CSR Partnership ({C.CSR_URL}); Grants & Philanthropy "
-                "(/getinvolved/grants-and-philanthropy)."
+                f"({C.GRANTS_URL})."
             ),
         },
         {

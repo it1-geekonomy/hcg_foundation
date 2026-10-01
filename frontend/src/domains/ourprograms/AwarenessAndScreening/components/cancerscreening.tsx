@@ -3,7 +3,7 @@ import MissionHighlight from "@/shared/components/Missionsection";
 // Content is data, kept separate from markup so the same MissionHighlight
 // component can be reused across pages by swapping this object out.
 const OUR_MISSION_CONTENT = {
-  label: "Our Mission",
+  label: "Programs",
   heading: (
     <>
       Cancer Screening and {" "}
@@ -15,7 +15,7 @@ const OUR_MISSION_CONTENT = {
     "At HCG Foundation, we believe that cancer is curable if detected early. Unfortunately, our experience has shown that many individuals seek medical attention only when the disease has progressed to advanced stages (III or IV). This lack of early diagnosis is prevalent among various groups, including government health department personnel, rural populations, and even educated individuals.",
     "To address this critical issue, we have developed comprehensive programs aimed at cancer screening programs and raising awareness about cancer, with a particular focus on breast, oral, and cervical cancers. These initiatives educate communities about cancer's early signs and symptoms and promote regular screenings.",
   ],
-  image: "/cancerscreening/cancerscreening.png",
+  image: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790836743207-gpzof-rectangle-1655.webp",
   imageAlt: "A family greeting an elderly couple outdoors",
 };
 

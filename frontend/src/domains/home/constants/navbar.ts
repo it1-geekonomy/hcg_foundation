@@ -12,7 +12,6 @@ export const navLinks = [
     dropdownItems: [
       { label: "Financial Support for Pediatric Patients", href: "/financial-support-for-pediatric-patients" },
       { label: "Awareness & Screening Camps", href: "/awareness-and-screening-camps" },
-      { label: "Swasthi Gallery", href: "/swasthi-gallery" },
     ],
   },
   {
