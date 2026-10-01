@@ -14,7 +14,7 @@ const OUR_MISSION_CONTENT = {
     "HCG Foundation works to support cancer patients, families, and communities through initiatives focused on financial assistance, awareness, early detection, education, and holistic patient support.",
     "Our work aims to make cancer care more accessible and extend support beyond clinical treatment — helping patients and families navigate different stages of the cancer journey with greater care, dignity, and hope. HCG Foundation supports cancer patients and families through financial assistance, awareness, early detection, and holistic care—bringing greater hope and support throughout their cancer journey.",
   ],
-  image: "/aboutus/mission.png",
+  image: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790835927238-r7h8m-rectangle-185-1-.webp",
   imageAlt: "A family greeting an elderly couple outdoors",
 };
 

@@ -218,7 +218,7 @@ function StepArrow({
       {horizontalOnly ? (
         <Nudge axis="x" play={play} delay={delay} skip={skip}>
           <Image
-            src="/financialbanner/arrows.png"
+            src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790836614763-72lki-_x34_1_arrow_right.webp"
             alt=""
             width={24}
             height={24}
@@ -231,7 +231,7 @@ function StepArrow({
           <div className="lg:hidden">
             <Nudge axis="y" play={play} delay={delay} skip={skip}>
               <Image
-                src="/financialbanner/arrows.png"
+                src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790836614763-72lki-_x34_1_arrow_right.webp"
                 alt=""
                 width={24}
                 height={24}
