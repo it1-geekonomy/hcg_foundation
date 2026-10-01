@@ -97,7 +97,7 @@ const ANIM_SCRIPT = String.raw`
   }
 
   /* "Read more stories": ALWAYS from the LEFT. "View all" (+ arrow): ALWAYS from the RIGHT. */
-  var RM = /^read\s*more/i, VA = /^view\s*all/i;
+  var RM = /^read\s*more\s*stories/i, VA = /^view\s*all/i;
   function scanButtons(scope, left, right) {
     var c = Array.prototype.slice.call(
       scope.querySelectorAll("h1, h2, h3, h4, h5, h6, a, button, span, p, div")

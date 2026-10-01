@@ -71,9 +71,9 @@ export default function SwasthiArtTherapySection() {
       </div>
 
       {/* Side-by-side Section: Narrative + 2x2 Feature Box */}
-      <div className="flex flex-col xl:flex-row gap-[2.5rem] xl:gap-[3rem] items-start pt-[0.5rem]">
+      <div className="flex flex-col lg:flex-row gap-[2rem] xl:gap-[3rem] items-start lg:items-center pt-[0.5rem]">
         {/* Left Side: Art Therapy: Healing Through Creative Process */}
-        <div className="w-full xl:flex-1 flex flex-col space-y-[1.25rem]">
+        <div className="w-full lg:flex-1 flex flex-col space-y-[1.25rem]">
           <div>
             <Typography variant="heading-8" as="h3" data-detail-anim="slide" className={SUBHEADING_CLASS}>
               Art Therapy: Healing Through the Creative Process
@@ -84,7 +84,7 @@ export default function SwasthiArtTherapySection() {
             In 2018, Swasthi Art Gallery extended its mission from the gallery walls to direct patient care with the launch of its Art Therapy program at HCG Bangalore hospital. Art therapy is a form of expressive therapy that uses the creative process of making art to support a patient&apos;s physical, mental, and emotional wellbeing.
           </Typography>
 
-          <div className="w-full max-w-[48rem] flex flex-col space-y-[1rem]">
+          <div className="w-full flex flex-col space-y-[1rem]">
             <Typography variant="body-10" as="p" data-detail-anim="lines" className={PARAGRAPH_CLASS}>
               Every session is built around the individual. A typical session unfolds in three parts:
             </Typography>
@@ -104,8 +104,8 @@ export default function SwasthiArtTherapySection() {
         </div>
 
         {/* Right Side: 2x2 Feature Box (Figma Rectangle 1673: 762px x 597px) */}
-        <div className="w-full max-w-[47.625rem] xl:w-[47.625rem] h-auto sm:h-[37.3125rem] shrink-0 mx-auto xl:mx-0">
-          <div className="w-full h-full rounded-[0.375rem] border border-[#FFECC5] bg-gradient-to-b from-[#FFFBEE] to-[#FEF3D3] p-[1.5rem] sm:p-[2.5rem] xl:p-[3rem] grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 relative">
+        <div className="w-full lg:w-[48%] xl:w-[47.625rem] lg:max-w-none xl:max-w-[47.625rem] h-auto sm:h-[37.3125rem] shrink-0 mx-auto lg:mx-0">
+          <div className="w-full h-full rounded-[0.375rem] border border-[#FFECC5] bg-gradient-to-b from-[#FFFBEE] to-[#FEF3D3] p-[1.5rem] sm:p-[2rem] xl:p-[3rem] grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 relative">
             {/* Center Vertical Divider (Figma Line 21: 506.0742px x 0.6px, fading to 0% opacity at both ends) */}
             <div
               aria-hidden="true"
