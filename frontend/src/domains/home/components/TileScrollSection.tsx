@@ -229,8 +229,9 @@ function renderWordLines(
             >
               {word}
             </span>
+            {/* A real space (collapsed inside the fixed-width box) so copied and indexed text keeps word breaks */}
             {idx < words.length - 1 && (
-              <span style={{ display: "inline-block", width: wordSpacing }} />
+              <span style={{ display: "inline-block", width: wordSpacing }}> </span>
             )}
           </span>
         );
