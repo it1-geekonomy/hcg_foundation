@@ -7,6 +7,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   COLLAPSED_WIDTH,
+  PROJECT_FROM_HOME_KEY,
   type CardData,
 } from "@/domains/home/constants/project";
 import Typography from "@/lib/Typography";
@@ -261,7 +262,11 @@ function MoreDetailsButton({
   }
 
   return (
-    <Link href={href} className={classes}>
+    <Link
+      href={href}
+      className={classes}
+      onClick={() => sessionStorage.setItem(PROJECT_FROM_HOME_KEY, "1")}
+    >
       <Typography
         variant="button-1"
         as="span"
