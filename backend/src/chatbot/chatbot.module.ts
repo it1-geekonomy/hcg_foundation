@@ -5,6 +5,7 @@ import { AiServiceClient } from './services/ai-service-client';
 import { IngestionService } from './services/ingestion.service';
 import { ChatService } from './services/chat.service';
 import { ChatbotSyncSubscriber } from './services/chatbot-sync.subscriber';
+import { ChatbotReconcileService } from './services/chatbot-reconcile.service';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ChatbotSyncSubscriber } from './services/chatbot-sync.subscriber';
     IngestionService,
     ChatService,
     ChatbotSyncSubscriber, // auto keeps the AI service in sync with CMS inserts/updates/deletes
+    ChatbotReconcileService, // hourly safety net for anything the instant sync missed
   ],
 })
 export class ChatbotModule {}

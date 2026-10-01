@@ -84,6 +84,11 @@ FALLBACK_ANSWER = (
     f"For help, email {OFFICIAL_EMAIL} or call {OFFICIAL_PHONE}."
 )
 
+OUT_OF_SCOPE_ANSWER = (
+    "Available information focuses on HCG Foundation’s cancer-care work. "
+    f"I could not find details about that topic. Contact {OFFICIAL_EMAIL} if needed."
+)
+
 SETUP_ANSWER = (
     "I’m still setting up my knowledge base. Please try again in a moment, "
     f"or reach us at {OFFICIAL_EMAIL} / {OFFICIAL_PHONE}."
