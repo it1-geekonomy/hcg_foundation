@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useLayoutEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import Typography from "@/lib/Typography";
 import DonateForm from "@/shared/components/DonateForm";
 import PartnerWithUsModal from "@/shared/components/PartnerWithUsModal";
-import { PHILANTHROPY_CARDS } from "@/domains/getinvolved/constants/grants-and-philanthropy";
+import { PHILANTHROPY_CARDS, type PhilanthropyCard } from "@/domains/getinvolved/constants/grants-and-philanthropy";
 import Banner from "@/shared/components/Herobannersection";
 import { DiagonalArrowIcon } from "@/shared/components/icons/ArrowIcons";
 
@@ -168,13 +168,115 @@ function startPhilanthropyAnimations(): void {
   // 2) Bottom banner: title from left, description + CTA from right (left when stacked)
   lineText(q("bottom-title"), LEFT, 0);
 
-  let resolveDesc: () => void = () => {};
+  let resolveDesc: () => void = () => { };
   const descDone = new Promise<void>((r) => {
     resolveDesc = r;
   });
   lineText(q("bottom-desc"), RIGHT, 150, resolveDesc);
   // CTA slides in quickly right after the description settles
   slide(q("bottom-cta"), RIGHT, 0, q("bottom-desc"), descDone, T_CTA, 600);
+}
+
+function PhilanthropyTiltCard({ card }: { card: PhilanthropyCard }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0, isHovered: false });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5; // -0.5 to 0.5
+    setTilt({ x, y, isHovered: true });
+  };
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0, isHovered: false });
+  };
+
+  // Tilt degrees (max ~7 degrees for elegant, subtle luxury feel)
+  const rotateX = tilt.isHovered ? -tilt.y * 14 : 0;
+  const rotateY = tilt.isHovered ? tilt.x * 14 : 0;
+
+  return (
+    <div style={{ perspective: 1200 }} className="h-full">
+      <div
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) ${
+            tilt.isHovered ? "translateY(-6px) scale(1.01)" : "translateY(0) scale(1)"
+          }`,
+          boxShadow: tilt.isHovered
+            ? `${-tilt.x * 16}px ${-tilt.y * 16 + 18}px 32px -8px rgba(13, 40, 56, 0.12), 0 6px 16px -4px rgba(13, 40, 56, 0.06)`
+            : "none",
+          transition: tilt.isHovered
+            ? "transform 100ms ease-out, box-shadow 100ms ease-out"
+            : "transform 600ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 600ms cubic-bezier(0.23, 1, 0.32, 1)",
+          transformStyle: "preserve-3d",
+        }}
+        className="group relative flex flex-col justify-between overflow-hidden rounded-[0.375rem] bg-[#FFFCF3] h-full min-h-0 md:min-h-[24rem] lg:min-h-[28.3125rem] 2xl:min-h-[28.3125rem] cursor-pointer will-change-transform"
+      >
+
+        {/* Card Top: Circular Icon Badge + Title + Description */}
+        <div
+          style={{
+            transform: tilt.isHovered ? "translateZ(26px)" : "translateZ(0)",
+            transition: "transform 200ms ease-out",
+          }}
+          className="p-4 sm:p-5 md:p-4 lg:p-[1.25rem] xl:p-[1.5rem] 2xl:p-[2rem] flex items-start gap-3 sm:gap-4 md:gap-3.5 lg:gap-4 xl:gap-[1.25rem] 2xl:gap-[2.38rem] bg-[#FFFCF3]"
+        >
+          <div
+            style={{
+              transform: tilt.isHovered ? "translateZ(18px) scale(1.05)" : "translateZ(0) scale(1)",
+              transition: "transform 200ms ease-out",
+            }}
+            className="w-[3rem] h-[3rem] sm:w-[3.5rem] sm:h-[3.5rem] md:w-[3.25rem] md:h-[3.25rem] lg:w-[4rem] lg:h-[4rem] xl:w-[4.75rem] xl:h-[4.75rem] 2xl:w-[6.6875rem] 2xl:h-[6.6875rem] shrink-0 rounded-full bg-[#FFF3CC] flex items-center justify-center p-[0.65rem] sm:p-[0.75rem] md:p-[0.7rem] lg:p-[0.875rem] xl:p-[1rem] 2xl:p-[1.7rem] shadow-xs"
+          >
+            <img
+              src={card.iconUrl}
+              alt={card.title}
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <div className="flex-1">
+            <div className="mb-2 sm:mb-2.5 lg:mb-[0.75rem] min-h-[2.5rem] sm:min-h-[2.8rem] md:min-h-[3rem] lg:min-h-[3.6rem] 2xl:min-h-[4.25rem] flex flex-col justify-start">
+              <Typography
+                variant="heading-10"
+                as="h2"
+                className="font-argestadisplay font-normal text-[#0D2838] leading-tight"
+              >
+                {card.title}
+              </Typography>
+            </div>
+            <Typography
+              variant="body-12"
+              as="p"
+              className="font-manrope font-normal text-[#606060]"
+            >
+              {card.description}
+            </Typography>
+          </div>
+        </div>
+
+        {/* Card Bottom: Full Width Image Asset */}
+        <div
+          style={{
+            transform: tilt.isHovered ? "translateZ(14px)" : "translateZ(0)",
+            transition: "transform 200ms ease-out",
+          }}
+          className="w-full h-[11.5rem] sm:h-[12.5rem] md:h-[11.5rem] lg:h-[13.5rem] xl:h-[14.5rem] 2xl:h-[16.1875rem] shrink-0 overflow-hidden relative bg-[#EFEAD8]"
+        >
+          <img
+            src={card.imageUrl}
+            alt={card.title}
+            className="w-full h-full object-cover object-[center_top] transition duration-500 group-hover:scale-105"
+            loading="lazy"
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function GrantsAndPhilanthropyPage() {
@@ -221,52 +323,10 @@ export default function GrantsAndPhilanthropyPage() {
           </div>
         </div>
 
-        {/* 2x2 Vertical Image Cards Grid matching Figma (2 columns from 768px+) */}
+        {/* 2x2 Vertical Image Cards Grid with 3D Parallax Tilt Animation */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-5 lg:gap-6 xl:gap-[3.06rem]">
           {PHILANTHROPY_CARDS.map((card) => (
-            <div
-              key={card.id}
-              className="group flex flex-col justify-between overflow-hidden rounded-[0.375rem] bg-[#FFFCF3] h-full min-h-0 md:min-h-[24rem] lg:min-h-[28.3125rem] 2xl:min-h-[28.3125rem]"
-            >
-              {/* Card Top: Circular Icon Badge + Title + Description */}
-              <div className="p-4 sm:p-5 md:p-4 lg:p-[1.25rem] xl:p-[1.5rem] 2xl:p-[2rem] flex items-start gap-3 sm:gap-4 md:gap-3.5 lg:gap-4 xl:gap-[1.25rem] 2xl:gap-[2.38rem] bg-[#FFFCF3]">
-                <div className="w-[3rem] h-[3rem] sm:w-[3.5rem] sm:h-[3.5rem] md:w-[3.25rem] md:h-[3.25rem] lg:w-[4rem] lg:h-[4rem] xl:w-[4.75rem] xl:h-[4.75rem] 2xl:w-[6.6875rem] 2xl:h-[6.6875rem] shrink-0 rounded-full bg-[#FFF3CC] flex items-center justify-center p-[0.65rem] sm:p-[0.75rem] md:p-[0.7rem] lg:p-[0.875rem] xl:p-[1rem] 2xl:p-[1.7rem]">
-                  <img
-                    src={card.iconUrl}
-                    alt={card.title}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <div className="flex-1">
-                  <div className="mb-2 sm:mb-2.5 lg:mb-[0.75rem] min-h-[2.5rem] sm:min-h-[2.8rem] md:min-h-[3rem] lg:min-h-[3.6rem] 2xl:min-h-[4.25rem] flex flex-col justify-start">
-                    <Typography
-                      variant="heading-10"
-                      as="h2"
-                      className="font-argestadisplay font-normal text-[#0D2838] leading-tight"
-                    >
-                      {card.title}
-                    </Typography>
-                  </div>
-                  <Typography
-                    variant="body-12"
-                    as="p"
-                    className="font-manrope font-normal text-[#606060]"
-                  >
-                    {card.description}
-                  </Typography>
-                </div>
-              </div>
-
-              {/* Card Bottom: Full Width Image Asset (matching Figma Rectangle 1667 height: 16.1875rem) */}
-              <div className="w-full h-[11.5rem] sm:h-[12.5rem] md:h-[11.5rem] lg:h-[13.5rem] xl:h-[14.5rem] 2xl:h-[16.1875rem] shrink-0 overflow-hidden relative bg-[#EFEAD8]">
-                <img
-                  src={card.imageUrl}
-                  alt={card.title}
-                  className="w-full h-full object-cover object-[center_top] transition duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
-              </div>
-            </div>
+            <PhilanthropyTiltCard key={card.id} card={card} />
           ))}
         </div>
 

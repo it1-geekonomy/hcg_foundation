@@ -12,38 +12,56 @@ export function RelatedPatientStories({ stories }: { stories: PatientStory[] }) 
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  const clickedLinkRef = useRef<boolean>(false);
+  const isDraggingOverThreshold = useRef<boolean>(false);
 
   if (stories.length === 0) return null;
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!scrollContainerRef.current) return;
     setIsDragging(true);
-    clickedLinkRef.current = false;
+    isDraggingOverThreshold.current = false;
     setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
     setScrollLeft(scrollContainerRef.current.scrollLeft);
-    scrollContainerRef.current.setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging || !scrollContainerRef.current) return;
-    e.preventDefault();
-    clickedLinkRef.current = true;
+    if (e.pointerType === "mouse" && e.buttons !== 1) {
+      handlePointerUp(e);
+      return;
+    }
     const x = e.pageX - scrollContainerRef.current.offsetLeft;
     const walk = (x - startX) * 2;
-    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    setIsDragging(false);
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.releasePointerCapture(e.pointerId);
+    if (Math.abs(x - startX) > 6) {
+      isDraggingOverThreshold.current = true;
+      e.preventDefault();
+      try {
+        if (!scrollContainerRef.current.hasPointerCapture(e.pointerId)) {
+          scrollContainerRef.current.setPointerCapture(e.pointerId);
+        }
+      } catch {}
+      scrollContainerRef.current.scrollLeft = scrollLeft - walk;
     }
   };
 
+  const handlePointerUp = (e?: React.PointerEvent) => {
+    setIsDragging(false);
+    if (e && scrollContainerRef.current) {
+      try {
+        if (scrollContainerRef.current.hasPointerCapture(e.pointerId)) {
+          scrollContainerRef.current.releasePointerCapture(e.pointerId);
+        }
+      } catch {}
+    }
+    setTimeout(() => {
+      isDraggingOverThreshold.current = false;
+    }, 50);
+  };
+
   const handleLinkClick = (e: React.MouseEvent) => {
-    if (clickedLinkRef.current) {
+    if (isDraggingOverThreshold.current) {
       e.preventDefault();
+      e.stopPropagation();
     }
   };
 
