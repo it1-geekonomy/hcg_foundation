@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from app.core.security import verify_internal_api_key
-from app.schemas.schemas import SyncEvent, FullSyncRequest
+from app.schemas.schemas import SyncEvent, FullSyncRequest, PruneRequest
 from app.services import sync_service
 
 router = APIRouter(tags=["sync"], dependencies=[Depends(verify_internal_api_key)])
@@ -10,6 +10,12 @@ router = APIRouter(tags=["sync"], dependencies=[Depends(verify_internal_api_key)
 def sync_event(event: SyncEvent):
     """Incremental CMS row upsert/delete from NestJS."""
     return sync_service.upsert_cms_event(event.model_dump())
+
+
+@router.post("/internal/prune")
+def prune_table(payload: PruneRequest):
+    """Remove a CMS table's indexed rows that are not in keep_ids (no longer published)."""
+    return sync_service.prune_cms_table(payload.table, payload.keep_ids)
 
 
 @router.post("/sync")

@@ -13,6 +13,9 @@ export type CardData = {
 
 export const COLLAPSED_WIDTH = 130;
 
+/** sessionStorage flag: the project page was opened from the home carousel, so its "Home" breadcrumb returns there. */
+export const PROJECT_FROM_HOME_KEY = "project_from_home";
+
 /**
  * Exact CMS upload size for homepage projects — desktop / web banner.
  * Matches the design accordion assets (~2:1 landscape). Website uses
@@ -76,6 +79,6 @@ export function mapProjectToCard(
     description: project.shortDescription?.trim() || "No description yet.",
     image: desktop,
     mobileImage: mobile,
-    href: project.slug ? `/projects/${project.slug}?from=home` : undefined,
+    href: project.slug ? `/projects/${project.slug}` : undefined,
   };
 }

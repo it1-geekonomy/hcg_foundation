@@ -12,6 +12,7 @@ export default () => ({
   ai: {
     serviceUrl: process.env.AI_SERVICE_URL ?? 'http://localhost:8001',
     internalKey: process.env.AI_SERVICE_INTERNAL_KEY ?? '',
+    reconcileMinutes: parseInt(process.env.CHATBOT_RECONCILE_MINUTES ?? '60', 10),
   },
   auth: {
     jwtSecret:

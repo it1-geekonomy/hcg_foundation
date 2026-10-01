@@ -2,6 +2,18 @@ from __future__ import annotations
 
 from app.services import corpus, site_pages, vector_store
 
+# Indexed by full_sync itself, never by CMS table sync.
+_CURATED_TABLES = {"static", "knowledge", "site"}
+
+
+def prune_cms_table(table: str, keep_ids: list[str]) -> dict:
+    """Drop indexed rows of a CMS table that are no longer published."""
+    if table in _CURATED_TABLES:
+        return {"status": "skipped", "table": table, "chunks_deleted": 0}
+    keep = {(table, str(i)) for i in keep_ids}
+    deleted = vector_store.delete_stale({table}, keep)
+    return {"status": "pruned", "table": table, "chunks_deleted": deleted}
+
 
 def upsert_cms_event(event: dict) -> dict:
     action = event.get("action")
@@ -56,15 +68,15 @@ def full_sync(force: bool = False) -> dict:
             "corpus_documents": len(docs),
         }
 
-    # Upsert corpus docs without wiping CMS chunks: delete only static/knowledge parents first
+    # Only documents whose text changed are re-embedded (all of them when forced)
     for doc in docs:
-        vector_store.upsert_document(doc)
+        vector_store.upsert_document(doc, force=force)
 
     # Curated docs that were renamed or removed would otherwise linger with old titles/URLs
     # Pages that failed to load keep their previously indexed text
     keep = {(d["table"], str(d["source_id"])) for d in docs}
     keep |= {("site", path) for path in site_failed}
-    stale = vector_store.delete_stale({"static", "knowledge", "site"}, keep)
+    stale = vector_store.delete_stale(_CURATED_TABLES, keep)
 
     vector_store.save_fingerprint(fp)
     return {

@@ -135,18 +135,7 @@ export default function AboutTeamSection() {
   }
 
   if (trustees.length === 0 && teamMembers.length === 0) {
-    return (
-      <section className="bg-[#FFF6D8] px-8 py-16 sm:px-12 md:px-16 lg:px-6 xl:px-6">
-        <Typography
-          variant="label-1"
-          as="div"
-          className="mx-auto max-w-[1260px] rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900"
-        >
-          No published trustees or team members yet. Add them in CMS with status
-          published.
-        </Typography>
-      </section>
-    );
+    return null;
   }
 
   return <TeamSection trustees={trustees} teamMembers={teamMembers} />;
