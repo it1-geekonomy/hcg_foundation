@@ -16,7 +16,6 @@ import {
   CmsDetailCard,
   CmsDetailField,
   CmsRecordActions,
-  CmsSeoCard,
   CmsViewError,
   CmsViewHeader,
   CmsViewLoading,
@@ -205,24 +204,21 @@ export default function AnnualReportViewPage() {
           <dl className="grid gap-4 sm:grid-cols-2">
             <CmsDetailField label="Slug" value={`/${report.slug}`} />
             <CmsDetailField label="Status" value={report.status} />
+            <CmsDetailField
+              label="Short description"
+              value={report.shortDescription}
+              className="sm:col-span-2"
+            />
           </dl>
         </CmsDetailCard>
 
-        <CmsDetailCard title={`Files (3)`}>
+        <CmsDetailCard title="Files (2)">
           <ul className="divide-y divide-cms-border -my-5">
             <li className="py-4">
               <FileRow
-                label="Desktop / Web Banner"
+                label="Banner Image"
                 subLabel="Image file"
                 url={report.annualReportBanner}
-                openLabel="Open"
-              />
-            </li>
-            <li className="py-4">
-              <FileRow
-                label="Mobile Banner"
-                subLabel="Image file"
-                url={report.annualReportMobileBanner}
                 openLabel="Open"
               />
             </li>
@@ -236,12 +232,6 @@ export default function AnnualReportViewPage() {
             </li>
           </ul>
         </CmsDetailCard>
-
-        <CmsSeoCard
-          metaTitle={report.metaTitle}
-          metaDescription={report.metaDescription}
-          schemaCode={report.schemaCode}
-        />
       </div>
 
       <CmsWebsitePreview

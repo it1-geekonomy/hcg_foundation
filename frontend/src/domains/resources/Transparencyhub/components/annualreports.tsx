@@ -389,13 +389,15 @@ export default function AnnualReportsSection({
 
                   {/* Description row - download icon lives at the end of this row */}
                   <div className="flex items-start justify-between gap-2">
-                    <Typography
-                      variant="caption-1"
-                      as="p"
-                      className="line-clamp-4 text-[#606060] font-manrope font-medium"
-                    >
-                      {report.description}
-                    </Typography>
+                    {report.description ? (
+                      <Typography
+                        variant="caption-1"
+                        as="p"
+                        className="line-clamp-4 text-[#606060] font-manrope font-medium"
+                      >
+                        {report.description}
+                      </Typography>
+                    ) : null}
 
                     <button
                       type="button"
@@ -403,7 +405,7 @@ export default function AnnualReportsSection({
                       disabled={isDownloading}
                       aria-busy={isDownloading}
                       aria-label={`Download ${report.title}`}
-                      className="shrink-0 rounded-full p-1 cursor-pointer disabled:cursor-progress disabled:opacity-60"
+                      className="ml-auto shrink-0 rounded-full p-1 cursor-pointer disabled:cursor-progress disabled:opacity-60"
                     >
                       <img src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790839665163-okdjm-solar_download-outline.webp" alt="Download" className="h-6 w-6 sm:h-6 sm:w-6 lg:h-8 lg:w-8" />
                     </button>

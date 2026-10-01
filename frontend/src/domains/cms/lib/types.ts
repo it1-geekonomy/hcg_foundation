@@ -62,9 +62,9 @@ export type AnnualReport = SeoFields & {
   id: string;
   title: string;
   slug: string;
+  shortDescription?: string | null;
   reportYear?: string | null;
   annualReportBanner?: string | null;
-  annualReportMobileBanner?: string | null;
   annualReportFile?: string | null;
   status: ContentStatus;
   deletedAt?: string | null;
@@ -75,6 +75,8 @@ export type AnnualReport = SeoFields & {
 export type AnnualReportFields = SeoFields & {
   title: string;
   slug: string;
+  /** Sent even when empty so clearing it on edit removes the saved text. */
+  shortDescription?: string;
   reportYear?: string;
   status?: ContentStatus;
 };

@@ -3,6 +3,7 @@
 import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import { Textarea } from "@/shared/ui/textarea";
 import type {
   AnnualReport,
   AnnualReportFields,
@@ -11,35 +12,25 @@ import type {
 import { CmsFormField } from "@/domains/cms/ui/CmsFormField";
 import CmsImagePicker from "@/domains/cms/ui/CmsImagePicker";
 import CmsSelect, { CONTENT_STATUS_OPTIONS } from "@/domains/cms/ui/CmsSelect";
-import { SeoFieldsSection } from "@/domains/cms/ui/SeoFieldsSection";
-import {
-  ANNUAL_REPORT_BANNER_SIZE,
-  ANNUAL_REPORT_MOBILE_BANNER_SIZE,
-} from "@/domains/resources/Transparencyhub/constants/annualreport";
+import { ANNUAL_REPORT_BANNER_SIZE } from "@/domains/resources/Transparencyhub/constants/annualreport";
 
 export type AnnualReportFormValues = {
   title: string;
   slug: string;
+  shortDescription: string;
   reportYear: string;
   status: ContentStatus;
-  metaTitle: string;
-  metaDescription: string;
-  schemaCode: string;
   bannerFile: File | null;
-  mobileBannerFile: File | null;
   reportFile: File | null;
 };
 
 export const emptyAnnualReportForm = (): AnnualReportFormValues => ({
   title: "",
   slug: "",
+  shortDescription: "",
   reportYear: "",
   status: "draft",
-  metaTitle: "",
-  metaDescription: "",
-  schemaCode: "",
   bannerFile: null,
-  mobileBannerFile: null,
   reportFile: null,
 });
 
@@ -58,13 +49,10 @@ export function annualReportToFormValues(
   return {
     title: report.title ?? "",
     slug: report.slug ?? "",
+    shortDescription: report.shortDescription ?? "",
     reportYear: report.reportYear ?? "",
     status: report.status ?? "draft",
-    metaTitle: report.metaTitle ?? "",
-    metaDescription: report.metaDescription ?? "",
-    schemaCode: report.schemaCode ?? "",
     bannerFile: null,
-    mobileBannerFile: null,
     reportFile: null,
   };
 }
@@ -75,11 +63,9 @@ export function formValuesToFields(
   return {
     title: form.title.trim(),
     slug: form.slug.trim() || slugifyTitle(form.title),
+    shortDescription: form.shortDescription.trim(),
     reportYear: form.reportYear.trim() || undefined,
     status: form.status,
-    metaTitle: form.metaTitle.trim() || undefined,
-    metaDescription: form.metaDescription.trim() || undefined,
-    schemaCode: form.schemaCode.trim() || undefined,
   };
 }
 
@@ -91,7 +77,6 @@ type AnnualReportFormProps = {
   saving?: boolean;
   error?: string | null;
   existingBannerUrl?: string | null;
-  existingMobileBannerUrl?: string | null;
   existingFileUrl?: string | null;
   slugLocked?: boolean;
   onSlugManualEdit?: () => void;
@@ -109,13 +94,11 @@ export default function AnnualReportForm({
   saving,
   error,
   existingBannerUrl,
-  existingMobileBannerUrl,
   existingFileUrl,
   slugLocked,
   onSlugManualEdit,
 }: AnnualReportFormProps) {
   const bannerUrl = previewUrl(existingBannerUrl);
-  const mobileBannerUrl = previewUrl(existingMobileBannerUrl);
   const fileUrl = previewUrl(existingFileUrl);
 
   return (
@@ -182,12 +165,27 @@ export default function AnnualReportForm({
         </CmsFormField>
 
         <CmsFormField
-          label="Desktop / web banner"
+          label="Short description"
+          htmlFor="shortDescription"
+          hint="Shown under the title on the website's report card. Keep it to one or two sentences."
+        >
+          <Textarea
+            id="shortDescription"
+            placeholder="Our performance, initiatives, and impact in 2024–25."
+            value={value.shortDescription}
+            onChange={(e) =>
+              onChange({ ...value, shortDescription: e.target.value })
+            }
+          />
+        </CmsFormField>
+
+        <CmsFormField
+          label="Banner image"
           htmlFor="annualReportBanner"
-          hint={`WebP or AVIF · recommended size ${ANNUAL_REPORT_BANNER_SIZE.width} × ${ANNUAL_REPORT_BANNER_SIZE.height}px (1920px desktop width banner)`}
+          hint={`WebP or AVIF · exactly ${ANNUAL_REPORT_BANNER_SIZE.width} × ${ANNUAL_REPORT_BANNER_SIZE.height}px`}
         >
           <CmsImagePicker
-            label="desktop banner"
+            label="banner"
             value={{
               file: value.bannerFile,
               url: bannerUrl,
@@ -199,28 +197,6 @@ export default function AnnualReportForm({
               })
             }
             requiredSize={ANNUAL_REPORT_BANNER_SIZE}
-            disabled={saving}
-          />
-        </CmsFormField>
-
-        <CmsFormField
-          label="Mobile banner"
-          htmlFor="annualReportMobileBanner"
-          hint={`WebP or AVIF · recommended size ${ANNUAL_REPORT_MOBILE_BANNER_SIZE.width} × ${ANNUAL_REPORT_MOBILE_BANNER_SIZE.height}px (mobile banner)`}
-        >
-          <CmsImagePicker
-            label="mobile banner"
-            value={{
-              file: value.mobileBannerFile,
-              url: mobileBannerUrl,
-            }}
-            onChange={({ file }) =>
-              onChange({
-                ...value,
-                mobileBannerFile: file,
-              })
-            }
-            requiredSize={ANNUAL_REPORT_MOBILE_BANNER_SIZE}
             disabled={saving}
           />
         </CmsFormField>
@@ -275,15 +251,6 @@ export default function AnnualReportForm({
           />
         </CmsFormField>
       </div>
-
-      <SeoFieldsSection
-        value={{
-          metaTitle: value.metaTitle,
-          metaDescription: value.metaDescription,
-          schemaCode: value.schemaCode,
-        }}
-        onChange={(seo) => onChange({ ...value, ...seo })}
-      />
 
       <div className="flex justify-center pb-4">
         <Button
