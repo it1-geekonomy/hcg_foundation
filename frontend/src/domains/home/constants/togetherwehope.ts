@@ -67,8 +67,8 @@ export const TOGETHER_CONTENT: TogetherContent = {
     value: "482+",
     label: "Community Events",
   },
-  calendarIcon: "/Togethercreatehope/calender.png",
-  eventImage: "/Togethercreatehope/eventimg.png",
+  calendarIcon: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790832087811-t32yp-fi_9358062.webp",
+  eventImage: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790831977514-lzv0f-rectangle-35.webp",
   content: {
     heading: "Creating Healthier Communities Together",
     description:

@@ -25,7 +25,7 @@ import { ActivePill, CardReveal, OverlayBackdrop } from "./overlayFormMotion";
 /* Portrait asset + backdrop                                           */
 /* ------------------------------------------------------------------ */
 
-const PORTRAIT_SRC = "/overlayimg.svg";
+const PORTRAIT_SRC = "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790826374429-54e2f-image-59-1-.webp";
 const PORTRAIT_ALT = "Cancer patient and her daughter embracing, both smiling";
 
 function PortraitWithBackdrop({
