@@ -117,7 +117,7 @@ export default function ProjectViewPage() {
     category: "Project",
     summary: project.shortDescription ?? "",
     fullStory: project.content ?? "",
-    imageUrl: project.projectBanner || project.projectMobileBanner || "https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=800&auto=format&fit=crop",
+    imageUrl: project.projectBanner || project.projectMobileBanner || "",
     mobileImageUrl: project.projectMobileBanner || project.projectBanner || "",
   } : null;
 

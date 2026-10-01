@@ -179,7 +179,7 @@ function startCsrAnimations(): void {
   // 3) Bottom banner: title from left, description + CTA from right (left when stacked)
   lineText(q("bottom-title"), LEFT, 0);
 
-  let resolveDesc: () => void = () => {};
+  let resolveDesc: () => void = () => { };
   const descDone = new Promise<void>((r) => {
     resolveDesc = r;
   });
@@ -333,7 +333,7 @@ export default function CsrPartnerPage() {
               className="flex items-center sm:flex-col sm:items-center sm:justify-center gap-[0.5rem] sm:gap-0 shrink-0"
             >
               <Image
-                src="/Get Involved/CSR Partner/Vector.png"
+                src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790849990827-u27ma-fa7-solid_contact-book.webp"
                 alt="Contact"
                 width={23}
                 height={24}

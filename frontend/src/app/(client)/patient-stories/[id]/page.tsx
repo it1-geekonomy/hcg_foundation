@@ -213,8 +213,8 @@ export default async function StoryDetailPage({
         conditionTag: item.donationState || "Patient Journey",
         excerpt: item.shortDescription || "",
         fullStory: item.content || "",
-        imageUrl: item.patientImage || "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=800&auto=format&fit=crop",
-        heroImageUrl: item.patientImage || "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=1600&auto=format&fit=crop",
+        imageUrl: item.patientImage || "",
+        heroImageUrl: item.patientImage || "",
       };
 
       if (res.data.related?.data) {
@@ -226,8 +226,8 @@ export default async function StoryDetailPage({
           conditionTag: r.donationState || "Patient Journey",
           excerpt: r.shortDescription || "",
           fullStory: r.content || "",
-          imageUrl: r.patientImage || "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=800&auto=format&fit=crop",
-          heroImageUrl: r.patientImage || "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=1600&auto=format&fit=crop",
+          imageUrl: r.patientImage || "",
+          heroImageUrl: r.patientImage || "",
         }));
       }
     } else {
@@ -272,15 +272,17 @@ export default async function StoryDetailPage({
                       fade/scale in at their own cell, in a randomized order,
                       the moment this box scrolls into view. Same behavior
                       as the Projects detail page. */}
-                  <PuzzleImage
-                    key={story.id}
-                    src={story.imageUrl}
-                    alt={story.patientName}
-                    rows={4}
-                    cols={5}
-                    fit="cover"
-                    staggerDuration={1000}
-                  />
+                  {story.imageUrl ? (
+                    <PuzzleImage
+                      key={story.id}
+                      src={story.imageUrl}
+                      alt={story.patientName}
+                      rows={4}
+                      cols={5}
+                      fit="cover"
+                      staggerDuration={1000}
+                    />
+                  ) : null}
                 </div>
                 <ShareStory className="!mt-4 sm:!mt-6" />
               </div>

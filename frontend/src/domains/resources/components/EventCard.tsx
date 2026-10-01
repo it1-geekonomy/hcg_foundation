@@ -34,20 +34,24 @@ export default function EventCard({
 
   const frontContent = (
     <div className="relative h-full w-full overflow-hidden rounded-[6px] bg-[#EFEAD8] shadow-xs transition duration-300">
-      <picture className="h-full w-full block">
-        {event.mobileImageUrl && (
-          <source media="(max-width: 767px)" srcSet={event.mobileImageUrl} />
-        )}
-        <img
-          src={event.imageUrl}
-          alt={event.title}
-          className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-          loading="lazy"
-        />
-      </picture>
+      {event.imageUrl ? (
+        <>
+          <picture className="h-full w-full block">
+            {event.mobileImageUrl && (
+              <source media="(max-width: 767px)" srcSet={event.mobileImageUrl} />
+            )}
+            <img
+              src={event.imageUrl}
+              alt={event.title}
+              className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+              loading="lazy"
+            />
+          </picture>
 
-      {/* Linear Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent pointer-events-none" />
+          {/* Linear Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent pointer-events-none" />
+        </>
+      ) : null}
 
       {/* Floating Glassmorphic Overlay */}
       <div
@@ -90,13 +94,15 @@ export default function EventCard({
       <div className="relative h-full w-full flex flex-col justify-between items-center p-6 sm:p-8 lg:p-10 rounded-[6px] border border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2]">
         {/* Pure, Centered Short Description */}
         <div className="relative z-10 flex-1 flex items-center justify-center text-center my-auto px-2 sm:px-6 w-full">
-          <Typography
-            variant="body-1"
-            as="p"
-            className="text-[#0D2838] max-w-xl"
-          >
-            {event.summary || "Explore the full event details, agenda, and speakers."}
-          </Typography>
+          {event.summary ? (
+            <Typography
+              variant="body-1"
+              as="p"
+              className="text-[#0D2838] max-w-xl"
+            >
+              {event.summary}
+            </Typography>
+          ) : null}
         </div>
 
         {/* Read More Button Constant at Bottom Center */}

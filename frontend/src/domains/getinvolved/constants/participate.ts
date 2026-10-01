@@ -9,27 +9,27 @@ export interface ParticipateCard {
 export const PARTICIPATE_CARDS: ParticipateCard[] = [
   {
     id: "fundraise",
-    iconUrl: "/Get Involved/Participate/Fundraise icon.png",
+    iconUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790848358022-n66ah-vector-13-.webp",
     title: "Fundraise",
     description:
       "Turn your network into meaningful support for cancer patients and families. Every effort helps us reach more lives.",
-    imageUrl: "/Get Involved/Participate/Fundraise.png",
+    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790848289025-ig7i1-rectangle-1660.webp",
   },
   {
     id: "volunteer",
-    iconUrl: "/Get Involved/Participate/Volunteer icon.png",
+    iconUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790848585073-tqkmn-la_donate.webp",
     title: "Volunteer",
     description:
       "Share your skills, time and energy to support our programs and communities. Be a part of meaningful change.",
-    imageUrl: "/Get Involved/Participate/Volunteer.png",
+    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790848482532-j8iol-rectangle-1660-1-.webp",
   },
   {
     id: "intern",
-    iconUrl: "/Get Involved/Participate/Intern icon.png",
+    iconUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790848731820-fwtme-vector-14-.webp",
     title: "Intern",
     description:
       "Gain hands-on experience, build your skills, and work on real-world healthcare initiatives.",
-    imageUrl: "/Get Involved/Participate/Intern.png",
+    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790848659413-so6sh-rectangle-1660-2-.webp",
   },
 ];
 
@@ -45,18 +45,18 @@ export const PARTICIPATE_BENEFITS: ParticipateBenefit[] = [
     id: "impact",
     title: "Real Impact",
     description: "Contribute to meaningful change.",
-    iconUrl: "/Get Involved/Participate/Real Impact icon.png",
+    iconUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790849073104-hif9g-hugeicons_heart-handshake.webp",
   },
   {
     id: "community",
     title: "Be Part of a Community",
     description: "Join a network of like-minded changemakers.",
-    iconUrl: "/Get Involved/Participate/Be Part of a Community icon.png",
+    iconUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790849294533-30kyj-group.webp",
   },
   {
     id: "purpose",
     title: "Grow With Purpose",
     description: "Gain valuable experience and create lasting impact.",
-    iconUrl: "/Get Involved/Participate/Grow With Purpose icon.png",
+    iconUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790849403490-nnaow-icon-park_oval-love.webp",
   },
 ];
