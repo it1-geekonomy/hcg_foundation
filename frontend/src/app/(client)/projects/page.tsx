@@ -7,6 +7,8 @@ import PaginationControls from "@/shared/components/PaginationControls";
 import ProjectCard from "@/domains/resources/components/ProjectCard";
 import { ProjectItem } from "@/domains/resources/constants/projects";
 import { publicProjectsApi } from "@/domains/cms/lib/api";
+import { FolderOpen } from "lucide-react";
+import ContentNotice, { LOAD_ERROR_MESSAGE } from "@/shared/components/ContentNotice";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
@@ -17,7 +19,8 @@ export default function ProjectsPage() {
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   // Responsive itemsPerPage
   useEffect(() => {
@@ -46,7 +49,7 @@ export default function ProjectsPage() {
       setIsFetching(true);
     }
     
-    setError(null);
+    setFailed(false);
     (async () => {
       try {
         const res = await publicProjectsApi.listPublished({
@@ -85,11 +88,11 @@ export default function ProjectsPage() {
           setAllProjects([]);
           setTotalCount(0);
         }
-      } catch (err: any) {
+      } catch {
         if (!cancelled) {
           setAllProjects([]);
           setTotalCount(0);
-          setError(err.message || "Failed to load projects.");
+          setFailed(true);
         }
       } finally {
         if (!cancelled) {
@@ -102,7 +105,7 @@ export default function ProjectsPage() {
     return () => {
       cancelled = true;
     };
-  }, [currentPage, itemsPerPage]);
+  }, [currentPage, itemsPerPage, attempt]);
 
   const totalItems = totalCount ?? 0;
   const itemsPerPg = itemsPerPage || 6;
@@ -155,15 +158,22 @@ export default function ProjectsPage() {
             ))}
           </div>
 
-          {!loading && !error && currentProjects.length === 0 && (
-            <div className="py-12 text-center text-neutral-500">
-              No projects available at the moment.
-            </div>
+          {!loading && !failed && currentProjects.length === 0 && (
+            <ContentNotice
+              icon={FolderOpen}
+              title="New projects are on the way"
+              message="We're preparing updates on the programmes that bring care and support to cancer patients and their families. Please check back soon."
+              className="py-12"
+            />
           )}
-          {error && (
-            <div className="py-12 text-center text-red-500">
-              {error}
-            </div>
+          {failed && (
+            <ContentNotice
+              tone="error"
+              title="We couldn't load our projects right now"
+              message={LOAD_ERROR_MESSAGE}
+              action={{ label: "Try again", onClick: () => setAttempt((n) => n + 1) }}
+              className="py-12"
+            />
           )}
         </div>
 

@@ -22,7 +22,7 @@ export default function ProjectCard({
 }: ProjectCardProps) {
   const router = useRouter();
   const [isFlipped, setIsFlipped] = useState(false);
-  const detailUrl = `/resources/projects/${project.slug || project.id}`;
+  const detailUrl = `/projects/${project.slug || project.id}`;
 
   const handleCardClick = () => {
     if (typeof window !== "undefined") {
