@@ -10,7 +10,8 @@ import ShareStory from "@/shared/components/ShareStory";
 import RelatedEvents from "@/domains/resources/components/RelatedEvents";
 import PuzzleImage from "@/shared/components/Puzzleimage";
 import { EventItem } from "@/domains/resources/constants/events";
-import { publicEventsApi } from "@/domains/cms/lib/api";
+import { isMissingContentError, publicEventsApi } from "@/domains/cms/lib/api";
+import ContentNotice, { LOAD_ERROR_MESSAGE } from "@/shared/components/ContentNotice";
 import { useDetailPageAnimations } from "@/shared/lib/detailPageAnimations";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
@@ -24,6 +25,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
   const [eventItem, setEventItem] = useState<EventItem | null>(null);
   const [relatedEvents, setRelatedEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,6 +35,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
     }
     (async () => {
       setLoading(true);
+      setFailed(false);
       try {
         const res = await publicEventsApi.getBySlug(resolvedParams.id);
         const e = res.data?.detail;
@@ -68,7 +72,10 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
           );
         }
       } catch (err) {
-        if (!cancelled) setEventItem(null);
+        if (!cancelled) {
+          setEventItem(null);
+          setFailed(!isMissingContentError(err));
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -76,11 +83,11 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
     return () => {
       cancelled = true;
     };
-  }, [resolvedParams.id]);
+  }, [resolvedParams.id, attempt]);
 
   useDetailPageAnimations(!loading && Boolean(eventItem), eventItem?.id);
 
-  if (!loading && !eventItem) {
+  if (!loading && !eventItem && !failed) {
     notFound();
   }
 
@@ -102,7 +109,15 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
       />
 
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
-        {loading || !eventItem ? (
+        {failed ? (
+          <ContentNotice
+            tone="error"
+            title="We couldn't load this event right now"
+            message={LOAD_ERROR_MESSAGE}
+            action={{ label: "Try again", onClick: () => setAttempt((n) => n + 1) }}
+            className="py-12"
+          />
+        ) : loading || !eventItem ? (
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-12 sm:gap-10 lg:gap-14 items-start animate-pulse">
             <div className="sm:col-span-7 flex flex-col space-y-4">
               <div className="h-10 bg-black/10 rounded w-3/4"></div>
@@ -127,20 +142,26 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
               </Typography>
 
               {/* Metadata: Date and Location matching Figma Frame 36 */}
-              <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-4 sm:gap-6">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <Calendar className="size-4 text-[#C08600] shrink-0" />
-                  <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
-                    {eventItem.date}
-                  </Typography>
+              {eventItem.date || eventItem.location ? (
+                <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-4 sm:gap-6">
+                  {eventItem.date ? (
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <Calendar className="size-4 text-[#C08600] shrink-0" />
+                      <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
+                        {eventItem.date}
+                      </Typography>
+                    </div>
+                  ) : null}
+                  {eventItem.location ? (
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <MapPin className="size-4 text-[#C08600] shrink-0" />
+                      <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
+                        {eventItem.location}
+                      </Typography>
+                    </div>
+                  ) : null}
                 </div>
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <MapPin className="size-4 text-[#C08600] shrink-0" />
-                  <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
-                    {eventItem.location || "Bangalore"}
-                  </Typography>
-                </div>
-              </div>
+              ) : null}
 
               {/* Story Paragraphs */}
               <div className="mt-4 sm:mt-5 max-h-[25rem] sm:max-h-[30rem] lg:max-h-[35rem] xl:max-h-[40rem] overflow-y-auto no-scrollbar pr-2 sm:pr-4">

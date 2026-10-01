@@ -53,8 +53,8 @@ export const FOOTER_COLORS = {
 export const FOOTER_QUICK_LINKS = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about-us" },
-  { label: "Patient Stories", href: "/journey-of-hope/patient-stories" },
-  { label: "Patient Testimonials", href: "/journey-of-hope/testimonials" },
+  { label: "Patient Stories", href: "/patient-stories" },
+  { label: "Patient Testimonials", href: "/testimonials" },
   { label: "Donate Now", href: "#donate-form" },
   { label: "Contact Us", href: "/contact" },
 ] as const;
@@ -62,8 +62,8 @@ export const FOOTER_QUICK_LINKS = [
 export const FOOTER_INNER_PAGES = [
   { label: "Team", href: "/about-us", scrollTo: "team" },
   { label: "Trustees", href: "/about-us", scrollTo: "trustees" },
-  { label: "Events", href: "/resources/events" },
-  { label: "Projects", href: "/resources/projects" },
+  { label: "Events", href: "/events" },
+  { label: "Projects", href: "/projects" },
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms and Conditions", href: "/terms" },
   { label: "Disclaimer", href: "/terms" },

@@ -14,6 +14,8 @@ import TestimonialCard from "@/domains/journey-of-hope/components/TestimonialCar
 import TestimonialControls from "@/domains/journey-of-hope/components/TestimonialControls";
 import TestimonialVideoModal from "@/domains/journey-of-hope/components/TestimonialVideoModal";
 import { publicPatientTestimonialsApi } from "@/domains/cms/lib/api";
+import { PlayCircle } from "lucide-react";
+import ContentNotice, { LOAD_ERROR_MESSAGE } from "@/shared/components/ContentNotice";
 
 const CONTAINER =
   "max-w-[90rem] 2xl:max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8";
@@ -83,6 +85,8 @@ export default function TestimonialsPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   const [windowWidth, setWindowWidth] = useState<number>(1200);
 
@@ -100,6 +104,7 @@ export default function TestimonialsPage() {
 
     (async () => {
       setLoading(true);
+      setFailed(false);
 
       try {
         const res = await publicPatientTestimonialsApi.listPublished({
@@ -117,8 +122,8 @@ export default function TestimonialsPage() {
 
           setTestimonials(items);
         }
-      } catch (err) {
-        console.error("Failed to load testimonials", err);
+      } catch {
+        if (!cancelled) setFailed(true);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -127,7 +132,7 @@ export default function TestimonialsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [attempt]);
 
   const handleNext = () => {
     if (testimonials.length === 0) return;
@@ -223,7 +228,25 @@ export default function TestimonialsPage() {
           </SlideInLeft>
         </div>
 
-        {/* Horizontal 3D Carousel */}
+        {!loading && failed ? (
+          <ContentNotice
+            tone="error"
+            title="We couldn't load testimonials right now"
+            message={LOAD_ERROR_MESSAGE}
+            action={{ label: "Try again", onClick: () => setAttempt((n) => n + 1) }}
+            headingAs="h3"
+            className="mt-8 py-10 sm:mt-12"
+          />
+        ) : !loading && testimonials.length === 0 ? (
+          <ContentNotice
+            icon={PlayCircle}
+            title="Patient testimonials are coming soon"
+            message="We're recording the voices of patients and families whose journeys we've been part of. Please check back soon to hear their stories."
+            headingAs="h3"
+            className="mt-8 py-10 sm:mt-12"
+          />
+        ) : (
+        /* Horizontal 3D Carousel */
         <div className="relative mt-8 sm:mt-12 w-full h-[16rem] sm:h-[18.5rem] lg:h-[16.5rem] xl:h-[19.5rem] 2xl:h-[22.5rem] overflow-visible flex items-center justify-center">
           {loading ? (
             <div className="animate-pulse flex gap-4 w-full justify-center">
@@ -234,7 +257,7 @@ export default function TestimonialsPage() {
                 />
               ))}
             </div>
-          ) : testimonials.length > 0 ? (
+          ) : (
             testimonials.map((item, idx) => (
               <TestimonialCard
                 key={item.id}
@@ -247,16 +270,9 @@ export default function TestimonialsPage() {
                 onPlayVideo={(url) => setActiveVideoUrl(url)}
               />
             ))
-          ) : (
-            <Typography
-              variant="body-9"
-              as="p"
-              className="text-[#596D79]"
-            >
-              No testimonials available at this time.
-            </Typography>
           )}
         </div>
+        )}
 
         {/* Controls */}
         {testimonials.length > 0 && (

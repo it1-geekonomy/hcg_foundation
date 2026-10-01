@@ -55,7 +55,7 @@ export function mapEventToCarouselSlide(event: {
     description:
       event.shortDescription?.trim() ||
       "Through community outreach programs, free screenings, and educational initiatives, we empower individuals with knowledge and encourage early detection.",
-    href: event.slug ? `/resources/events/${event.slug}` : undefined,
+    href: event.slug ? `/events/${event.slug}` : undefined,
   };
 }
 
@@ -75,7 +75,7 @@ export const TOGETHER_CONTENT: TogetherContent = {
       "Through community outreach programs, free screenings, and educational initiatives, we empower individuals with knowledge and encourage early detection.",
     cta: {
       label: "View All Events",
-      href: "/resources/events",
+      href: "/events",
     },
   },
 };

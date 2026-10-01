@@ -26,7 +26,7 @@ export default function PatientStoryCard({
 }: PatientStoryCardProps) {
   const router = useRouter();
   const [isFlipped, setIsFlipped] = useState(false);
-  const detailUrl = `/journey-of-hope/patient-stories/${story.slug || story.id}`;
+  const detailUrl = `/patient-stories/${story.slug || story.id}`;
 
   const handleCardClick = (e: React.MouseEvent) => {
     if (onClick) {

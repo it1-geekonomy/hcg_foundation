@@ -139,7 +139,7 @@ export default function RelatedEvents({ currentEventId, events }: RelatedEventsP
           Related Events
         </Typography>
         <Link
-          href="/resources/events"
+          href="/events"
           className="inline-flex items-center gap-1 text-[#2D2D2D] transition hover:text-[#B88700]"
         >
           <Typography variant="body-9" as="span" className="font-manrope font-semibold text-[#2D2D2D]">
