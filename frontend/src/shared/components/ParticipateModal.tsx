@@ -166,6 +166,12 @@ export default function ParticipateModal({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleViewResume = () => {
+    if (!resumeFile) return;
+    const fileUrl = URL.createObjectURL(resumeFile);
+    window.open(fileUrl, "_blank", "noopener,noreferrer");
+  };
+
   // Lock body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -431,16 +437,17 @@ export default function ParticipateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/60 backdrop-blur-xs transition-opacity duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-hidden bg-black/60 backdrop-blur-xs transition-opacity duration-300">
       {/* Backdrop overlay click to close */}
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
       {/* Main Modal Container with exact Figma styling: width 640px (40rem), height 860px (53.75rem) for Intern (Frame 556), 736px (46rem) for Fundraise/Volunteer */}
       <div
-        className={`relative z-10 w-full max-w-[40rem] bg-white shadow-2xl overflow-hidden my-auto flex flex-col ${isIntern
-          ? "max-h-[96vh] sm:h-[53.75rem] rounded-[0.625rem]"
-          : "max-h-[95vh] sm:h-[46rem] rounded-[0.625rem]"
-          }`}
+        className={`relative z-10 w-full max-w-[40rem] bg-white shadow-2xl overflow-hidden flex flex-col max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)] ${
+          isIntern
+            ? "h-auto sm:h-[53.75rem] rounded-[0.625rem]"
+            : "h-auto sm:h-[46rem] rounded-[0.625rem]"
+        }`}
       >
         {/* Full Modal Watermark Background Image matching Figma */}
         <div
@@ -460,7 +467,7 @@ export default function ParticipateModal({
         </button>
 
         {/* Modal Scrollable Body */}
-        <div className="relative z-10 p-6 sm:px-12 sm:py-9 overflow-y-auto h-full flex flex-col justify-between">
+        <div className="relative z-10 p-6 sm:px-12 sm:py-9 overflow-y-auto h-full flex flex-col justify-between overscroll-contain">
           {/* Header Title & Subtitle matching Figma 100% */}
           <div className="text-center mx-auto mb-6 sm:mb-8">
             <div className="mb-1">
@@ -989,11 +996,15 @@ export default function ParticipateModal({
                     }}
                   />
                   {resumeFile ? (
-                    <div className="w-full h-[6.19rem] flex items-center justify-between px-4 sm:px-5 border border-solid border-[#FCCC2D] rounded-[0.5rem] bg-[#FFFBF0] transition-colors">
+                    <div
+                      onClick={handleViewResume}
+                      className="w-full h-[6.19rem] flex items-center justify-between px-4 sm:px-5 border border-solid border-[#FCCC2D] rounded-[0.5rem] bg-[#FFFBF0] hover:bg-[#FFF6D6]/60 transition-colors cursor-pointer group"
+                      title="Click to view resume"
+                    >
                       <div className="flex items-center gap-3 min-w-0 mr-3">
-                        <FileText className="size-5 text-[#B87A00] shrink-0" />
+                        <FileText className="size-5 text-[#B87A00] shrink-0 group-hover:scale-110 transition-transform" />
                         <div className="min-w-0">
-                          <p className="font-manrope font-semibold text-[0.82rem] text-[#0D2838] truncate">
+                          <p className="font-manrope font-semibold text-[0.82rem] text-[#0D2838] group-hover:text-[#B87A00] group-hover:underline truncate transition-colors">
                             {resumeFile.name}
                           </p>
                           <p className="font-manrope text-[0.7rem] text-[#7C8B93]">
