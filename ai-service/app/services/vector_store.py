@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from typing import Any
 
 from sqlalchemy import text
@@ -278,6 +279,96 @@ def get_by_title_keywords(keywords: list[str]) -> list[dict]:
         return hits
     finally:
         db.close()
+
+
+def get_by_phrase(phrase: str, max_parents: int = 3) -> list[dict]:
+    """Chunks containing `phrase` as whole words, e.g. a person's name.
+
+    Returns nothing when the phrase appears in more than `max_parents`
+    documents: then it is a common term, not a name worth boosting.
+    """
+    words = [w for w in "".join(c if c.isalnum() else " " for c in phrase).split() if w]
+    if not words:
+        return []
+    pattern = r"\m" + r"\s+".join(words) + r"\M"
+
+    db = _db()
+    try:
+        rows = (
+            db.query(DocumentChunk)
+            .filter(
+                text("(document_chunks.content ~* :p OR document_chunks.title ~* :p)")
+            )
+            .params(p=pattern)
+            .order_by(DocumentChunk.source_table, DocumentChunk.source_id, DocumentChunk.chunk_index)
+            .all()
+        )
+        first: dict[str, DocumentChunk] = {}
+        for row in rows:
+            first.setdefault(f"{row.source_table}#{row.source_id}", row)
+        if len(first) > max_parents:
+            return []
+        return [_named_hit(db, row) for row in first.values()]
+    finally:
+        db.close()
+
+
+def get_by_title_in_text(question: str, tables: set[str], max_parents: int = 3) -> list[dict]:
+    """Documents from `tables` whose title appears in the question, e.g. "what about Sangamesh"."""
+    db = _db()
+    try:
+        rows = (
+            db.query(DocumentChunk)
+            .filter(DocumentChunk.source_table.in_(tables))
+            .order_by(DocumentChunk.source_table, DocumentChunk.source_id, DocumentChunk.chunk_index)
+            .all()
+        )
+        first: dict[str, DocumentChunk] = {}
+        for row in rows:
+            title = (row.title or "").strip()
+            if len(title) < 4:
+                continue
+            words = r"\s+".join(re.escape(w) for w in title.split())
+            if re.search(rf"\b{words}\b", question, re.I):
+                first.setdefault(f"{row.source_table}#{row.source_id}", row)
+        if not first or len(first) > max_parents:
+            return []
+        return [_named_hit(db, row) for row in first.values()]
+    finally:
+        db.close()
+
+
+def list_titles(source_table: str) -> list[str]:
+    """One title per indexed (i.e. published) item of the table, A-Z."""
+    db = _db()
+    try:
+        rows = (
+            db.query(DocumentChunk.source_id, DocumentChunk.title)
+            .filter(DocumentChunk.source_table == source_table)
+            .distinct()
+            .all()
+        )
+        titles = {source_id: (title or "").strip() for source_id, title in rows}
+        return sorted((t for t in titles.values() if t), key=str.lower)
+    finally:
+        db.close()
+
+
+def _named_hit(db: Session, row: DocumentChunk) -> dict:
+    hit = _row_to_hit(row, 0.9)
+    # A name near the end of a chunk has its details in the next one
+    nxt = (
+        db.query(DocumentChunk)
+        .filter(
+            DocumentChunk.source_table == row.source_table,
+            DocumentChunk.source_id == row.source_id,
+            DocumentChunk.chunk_index == row.chunk_index + 1,
+        )
+        .first()
+    )
+    if nxt:
+        hit["content"] = f"{row.content}\n{nxt.content}"
+    return hit
 
 
 def get_all_by_category(category: str) -> list[dict]:

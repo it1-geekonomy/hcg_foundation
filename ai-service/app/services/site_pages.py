@@ -13,8 +13,8 @@ from app.rag import constants as C
 log = logging.getLogger(__name__)
 
 # Listing pages built from CMS rows (events, projects, stories...) are indexed from the CMS itself.
-# "/" is left out: it renders only the intro animation on the server, the sections load in the browser.
 SITE_PAGES = [
+    "/",
     "/about-us",
     C.TEAM_URL,
     "/contact",
@@ -26,6 +26,9 @@ SITE_PAGES = [
     "/getinvolved/grants-and-philanthropy",
     C.TRANSPARENCY_URL,
 ]
+
+# "/" server-renders only the intro animation; the same sections are rendered at /home-content.
+_FETCH_PATHS = {"/": "/home-content"}
 
 _SKIP_TAGS = {
     "script", "style", "noscript", "svg", "template", "head",
@@ -102,7 +105,7 @@ def load_site_pages() -> tuple[list[dict], list[str]]:
     failed: list[str] = []
     for path in SITE_PAGES:
         try:
-            text = html_to_text(_fetch(base + path))
+            text = html_to_text(_fetch(base + _FETCH_PATHS.get(path, path)))
         except Exception as exc:  # noqa: BLE001 - site down should not break the sync
             log.warning("Could not fetch %s%s: %s", base, path, exc)
             failed.append(path)

@@ -5,6 +5,7 @@ import uuid
 
 from app.config import settings
 from app.rag import constants as C
+from app.rag.catalog import answer_catalog_question
 from app.rag.generate import generate_answer, recover_if_needed
 from app.rag.intents import detect_intents, match_fast_intent
 from app.rag.links import clean_answer
@@ -41,13 +42,23 @@ def run_chat(message: str, session_id: str | None = None) -> dict:
             "response_time_ms": int((time.perf_counter() - started) * 1000),
         }
 
+    catalog = answer_catalog_question(user_message)
+    if catalog:
+        append_turn(sid, "user", user_message)
+        append_turn(sid, "assistant", catalog["answer"])
+        return {
+            **catalog,
+            "session_id": sid,
+            "response_time_ms": int((time.perf_counter() - started) * 1000),
+        }
+
     history = get_history(sid)
     search_text = normalize_for_retrieval(user_message)
     rewritten = rewrite_query(search_text, history)
     intents = detect_intents(f"{search_text} {rewritten}")
     queries = build_multi_queries(rewritten, intents)
 
-    hits = hybrid_retrieve(queries, intents)
+    hits = hybrid_retrieve(queries, intents, question=search_text)
     ranked = rerank(hits, intents)
     answer = generate_answer(user_message, ranked)
     answer = recover_if_needed(answer, user_message, ranked, intents)
