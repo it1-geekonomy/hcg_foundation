@@ -67,8 +67,8 @@ def _static_documents() -> list[dict]:
             "content": (
                 "Title: Donate Now\nCategory: Page\n\n"
                 "How can I donate to HCG Foundation? Use the Donate Now option on the website. "
-                "Eligible Indian donations may receive an 80G tax receipt as described in "
-                "registration materials. Do not invent cash, UPI, cheque, or monthly giving "
+                "Eligible donations from Indian donors qualify for an 80G tax receipt. "
+                "Do not invent cash, UPI, cheque, or monthly giving "
                 "unless separately published. "
                 f"Contact: {C.OFFICIAL_EMAIL}, {C.OFFICIAL_PHONE}. Address: {C.OFFICIAL_ADDRESS}."
             ),
