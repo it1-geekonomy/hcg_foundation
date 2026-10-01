@@ -106,9 +106,23 @@ FALLBACK_ANSWER = (
 )
 
 OUT_OF_SCOPE_ANSWER = (
-    "Available information focuses on HCG Foundation’s cancer-care work. "
-    f"I could not find details about that topic. Contact {OFFICIAL_EMAIL} if needed."
+    "I’m here to help with questions about HCG Foundation and its cancer-care work, "
+    "so I can’t answer that. You can ask me about donations, Patient Aid, screening camps, "
+    "volunteering, internships, or events."
 )
+
+SMALL_TALK_ANSWER = (
+    "I’m doing well, thank you for asking! How can I help you today? I can answer questions "
+    "about donating, Patient Aid, screening camps, volunteering, internships and events."
+)
+
+ABOUT_BOT_ANSWER = (
+    "I’m Hope, the HCG Foundation AI Assistant. I can help you find information about "
+    "HCG Foundation’s programs, Patient Aid, donations, screening camps, volunteering, "
+    f"internships, and events. For further assistance, contact {OFFICIAL_EMAIL} or {OFFICIAL_PHONE}."
+)
+
+ACK_ANSWER = "Glad to help! Is there anything else you’d like to know about HCG Foundation?"
 
 SETUP_ANSWER = (
     "I’m still setting up my knowledge base. Please try again in a moment, "
