@@ -49,7 +49,7 @@ const STORAGE_KEY = "hcg-chatbot-v3";
 const TEASER_KEY = "hcg-chatbot-teaser-dismissed";
 const AVATAR_SRC = "/chatbot/hope-avatar.webp";
 const LOGO_SRC = "/chatbot/hcg-logo-color.svg";
-const GREETING = "Hi! I’m Hope 👋\nHow can I help you today?";
+const GREETING = "Hello, and welcome to HCG Foundation.\nHow can I help you today?";
 /** Must match the backend AskQuestionDto limit */
 const MAX_MESSAGE_LENGTH = 1000;
 
@@ -704,8 +704,8 @@ export default function ChatbotWidget() {
                 onClick={toggle}
                 className="text-left font-manrope text-sm leading-snug text-[#2B2B2B]"
               >
-                <span className="font-semibold">Hi! I’m Hope 👋</span> Ask me about donations,
-                programs or volunteering.
+                <span className="block font-semibold text-[#1F1F1F]">Have a question?</span>
+                Ask about donating, our programs or volunteering.
               </button>
               <button
                 type="button"
