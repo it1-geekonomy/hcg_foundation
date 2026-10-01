@@ -5,7 +5,8 @@ import uuid
 
 from app.config import settings
 from app.rag import constants as C
-from app.rag.generate import generate_answer, recover_if_needed
+from app.rag.catalog import answer_catalog_question
+from app.rag.generate import generate_answer, generate_related_answer, recover_if_needed
 from app.rag.intents import detect_intents, match_fast_intent
 from app.rag.links import clean_answer
 from app.rag.memory import append_turn, get_history
@@ -41,22 +42,36 @@ def run_chat(message: str, session_id: str | None = None) -> dict:
             "response_time_ms": int((time.perf_counter() - started) * 1000),
         }
 
+    catalog = answer_catalog_question(user_message)
+    if catalog:
+        append_turn(sid, "user", user_message)
+        append_turn(sid, "assistant", catalog["answer"])
+        return {
+            **catalog,
+            "session_id": sid,
+            "response_time_ms": int((time.perf_counter() - started) * 1000),
+        }
+
     history = get_history(sid)
     search_text = normalize_for_retrieval(user_message)
     rewritten = rewrite_query(search_text, history)
     intents = detect_intents(f"{search_text} {rewritten}")
     queries = build_multi_queries(rewritten, intents)
 
-    hits = hybrid_retrieve(queries, intents)
-    ranked = rerank(hits, intents)
+    hits = hybrid_retrieve(queries, intents, question=search_text)
+    ranked = vector_store.with_neighbor_chunks(rerank(hits, intents))
     answer = generate_answer(user_message, ranked)
-    answer = recover_if_needed(answer, user_message, ranked, intents)
+    if clean_answer(answer) in ("", C.NO_ANSWER_TOKEN):
+        answer = generate_related_answer(user_message, ranked)
+    answer = recover_if_needed(clean_answer(answer) or C.NO_ANSWER_TOKEN, user_message, ranked, intents)
     answer = clean_answer(answer) or C.NO_ANSWER_TOKEN
     sources = pick_sources(ranked, intents, answer)
 
     # If model returned token somehow, or if recovery triggered fallback, clear sources
     if answer.strip() == C.NO_ANSWER_TOKEN or answer.strip() == C.FALLBACK_ANSWER.strip():
         answer = C.FALLBACK_ANSWER
+        sources = []
+    elif answer == C.OUT_OF_SCOPE_ANSWER:
         sources = []
 
     append_turn(sid, "user", user_message)

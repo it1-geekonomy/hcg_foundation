@@ -27,20 +27,26 @@ Rules:
 7. Hospital: Foundation is a trust, not an HCG hospital owner; Patient Aid may use HCG hospital facilities when context says so.
 8. Non-cancer topics (heart attack, diabetes): do NOT say “we do not support X” unless context says so. Say materials focus on cancer care and that topic was not found.
 9. Never dump internal proposal fields (contact person, staff mobiles, partner pitches, budgets) unless asked and present in context. Prefer public pages (Donate, Patient Aid, certificates) over partner proposal documents for FAQs.
-10. Keep answers warm, concise, and visitor-facing. Do not mention embeddings, RAG, or internal systems.
+10. Keep answers warm, concise (usually 2-4 sentences) and visitor-facing, but include the key specifics context gives for the question — dates, numbers, registration details, the related facts that explain the answer. Do not mention embeddings, RAG, or internal systems.
 11. Organisation PAN and FCRA bank account may be shared when the visitor asks — use only the official values above / context. Never share cancelled-cheque images, personal staff phones, or donor names.
 12. Links: only link to a URL shown in a context block's URL field, copied exactly (relative paths like /contact — never add a domain), as Markdown [label](url). Never make up URLs; if a block's URL is "-", do not link it. Donations use the Donate Now form ({C.DONATE_URL}).
 13. Dates: each event block has an "Event status" line — follow it exactly. PAST events must never be called upcoming or current. If no event in context is dated today or later, say in a friendly sentence that no upcoming events are published right now, briefly mention the most recent past events with their dates, and suggest checking the [Events]({C.EVENTS_URL}) page.
 14. The official phone number {C.OFFICIAL_PHONE} is the Foundation's contact / helpline number.
 15. Never write raw "URL:" / "Focus:" field lines. Put links inline in the sentence, e.g. "see [Awareness & Screening Camps](/our-programs/awareness-and-screening-camps)".
 16. Context blocks with Category "Page" hold the actual text of the public website pages — prefer them when describing programs, initiatives and how to get involved.
+17. Answer the question that was asked, directly, in the first sentence. Start with Yes or No only when context states that answer explicitly; when context only says something is not published or not described, say exactly that instead of Yes/No.
+18. Never mention "context", "provided information" or "documents" to the visitor. When a detail is missing, say it is not published on our website.
 """
 
+# Second chance when nothing answers the question directly ("in-kind donations?",
+# "how many locations?"): an honest "not published" plus related facts beats a refusal.
+RELATED_INSTRUCTION = f"""The CONTEXT may not answer this exact question. Decide:
+- If CONTEXT contains facts that are clearly related and genuinely useful to this visitor, reply in 2-4 sentences: first say plainly that the specific detail asked about is not published on our website, then share the related facts, then suggest contacting {C.OFFICIAL_EMAIL} or {C.OFFICIAL_PHONE} for that specific point.
+- Only use facts stated in CONTEXT. Never guess numbers, policies or yes/no answers that CONTEXT does not state.
+- If nothing in CONTEXT is related, reply with exactly: {C.NO_ANSWER_TOKEN}"""
 
-def generate_answer(question: str, contexts: list[dict]) -> str:
-    if not contexts:
-        return C.NO_ANSWER_TOKEN
 
+def _context_text(contexts: list[dict]) -> str:
     blocks = []
     for i, c in enumerate(contexts, 1):
         blocks.append(
@@ -51,8 +57,12 @@ def generate_answer(question: str, contexts: list[dict]) -> str:
             f"{_event_status(c)}"
             f"Content:\n{c.get('content')}"
         )
-    context_text = "\n\n---\n\n".join(blocks)
+    return "\n\n---\n\n".join(blocks)
 
+
+def _complete(question: str, contexts: list[dict], instruction: str) -> str:
+    if not contexts:
+        return C.NO_ANSWER_TOKEN
     try:
         return chat_complete(
             [
@@ -61,9 +71,9 @@ def generate_answer(question: str, contexts: list[dict]) -> str:
                     "role": "user",
                     "content": (
                         f"TODAY: {date.today():%d %B %Y}\n\n"
-                        f"CONTEXT:\n{context_text}\n\n"
+                        f"CONTEXT:\n{_context_text(contexts)}\n\n"
                         f"VISITOR QUESTION:\n{question}\n\n"
-                        "Answer grounded in CONTEXT only."
+                        f"{instruction}"
                     ),
                 },
             ],
@@ -72,6 +82,14 @@ def generate_answer(question: str, contexts: list[dict]) -> str:
         )
     except Exception:
         return C.NO_ANSWER_TOKEN
+
+
+def generate_answer(question: str, contexts: list[dict]) -> str:
+    return _complete(question, contexts, "Answer grounded in CONTEXT only.")
+
+
+def generate_related_answer(question: str, contexts: list[dict]) -> str:
+    return _complete(question, contexts, RELATED_INSTRUCTION)
 
 
 _EVENT_DATE = re.compile(r"Event Date:\s*\w{3} (\w{3} \d{1,2} \d{4})")
@@ -144,7 +162,12 @@ def recover_if_needed(answer: str, question: str, contexts: list[dict], intents:
 
     if "donate" in intents:
         if "donate" in joined or any("donate" in (c.get("title") or "").lower() for c in contexts):
-            return C.DONATE_INTENT_ANSWER
+            return (
+                "I couldn’t find that specific detail on our website. You can donate online "
+                f"through the [Donate Now]({C.DONATE_URL}) form, and eligible Indian donations "
+                "may receive an 80G tax receipt. For anything else about donating, email "
+                f"{C.OFFICIAL_EMAIL} or call {C.OFFICIAL_PHONE}."
+            )
 
     if "contact" in intents:
         return C.CONTACT_ANSWER
@@ -154,11 +177,10 @@ def recover_if_needed(answer: str, question: str, contexts: list[dict], intents:
 
     if "hospital" in intents:
         return (
-            "HCG Foundation is a charitable trust and does not own hospitals. Patients supported "
-            "through its Patient Aid program are treated at HCG hospital facilities, which offer "
-            "discounts to patients approved by the Foundation. A full list of centres isn’t "
-            f"published in our materials — for details, email {C.OFFICIAL_EMAIL} or call "
-            f"{C.OFFICIAL_PHONE}."
+            "HCG Foundation is a registered public charitable trust and does not own hospitals. "
+            "Patients supported through its Patient Aid program are treated at HCG hospitals, "
+            "which give approved patients a discount. For other details, email "
+            f"{C.OFFICIAL_EMAIL} or call {C.OFFICIAL_PHONE}."
         )
 
     if "trustees" in intents or "founder" in intents:
@@ -188,9 +210,6 @@ def recover_if_needed(answer: str, question: str, contexts: list[dict], intents:
 
     # Soft out-of-scope
     if any(k in q for k in ("bitcoin", "loan", "scholarship", "weather", "crypto")):
-        return (
-            "Available information focuses on HCG Foundation’s cancer-care work. "
-            f"I could not find details about that topic. Contact {C.OFFICIAL_EMAIL} if needed."
-        )
+        return C.OUT_OF_SCOPE_ANSWER
 
     return C.FALLBACK_ANSWER

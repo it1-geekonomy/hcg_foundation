@@ -103,7 +103,7 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
   {
     table: 'patient_testimonials',
     idColumn: 'id',
-    textColumns: ['title', 'meta_description'],
+    textColumns: ['title', 'short_description', 'meta_description'],
     statusColumn: 'status',
     category: 'Patient Testimonial',
     titleColumn: 'title',
@@ -112,7 +112,7 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
   {
     table: 'teams',
     idColumn: 'id',
-    textColumns: ['title', 'designation', 'content'],
+    textColumns: ['title', 'designation', 'type', 'content'],
     statusColumn: 'status',
     category: 'Team',
     titleColumn: 'title',
@@ -122,7 +122,7 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
   {
     table: 'annual_reports',
     idColumn: 'id',
-    textColumns: ['title', 'report_year', 'meta_description'],
+    textColumns: ['title', 'report_year', 'short_description', 'meta_description'],
     statusColumn: 'status',
     category: 'Annual Report',
     titleColumn: 'title',

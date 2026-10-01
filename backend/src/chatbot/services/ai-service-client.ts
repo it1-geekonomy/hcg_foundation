@@ -57,6 +57,28 @@ export class AiServiceClient {
     }
   }
 
+  /** Delete indexed rows of `table` whose id is not in `keepIds`; returns chunks removed. */
+  async prune(table: string, keepIds: string[]): Promise<number> {
+    const response = await fetch(`${this.baseUrl}/internal/prune`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Internal-Api-Key': this.apiKey,
+      },
+      body: JSON.stringify({ table, keep_ids: keepIds }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new InternalServerErrorException(
+        `AI service prune failed (${response.status}): ${text}`,
+      );
+    }
+
+    const body = (await response.json()) as { chunks_deleted?: number };
+    return body.chunks_deleted ?? 0;
+  }
+
   async fullSync(force = false): Promise<unknown> {
     const response = await fetch(`${this.baseUrl}/sync`, {
       method: 'POST',

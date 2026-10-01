@@ -17,6 +17,18 @@ function stripHtml(html: string): string {
     .trim();
 }
 
+/** Dummy CMS values ("Lorem ipsum…", Swagger's default "string") must never reach answers. */
+function isPlaceholder(text: string): boolean {
+  return /^string$/i.test(text) || /lorem ipsum/i.test(text);
+}
+
+export type TableSyncResult = {
+  table: string;
+  rowsProcessed: number;
+  failed: number;
+  chunksRemoved: number;
+};
+
 /**
  * NestJS reads published CMS rows and hands rich documents to the Python
  * RAG service. Chunking / embedding / retrieval stay in ai-service.
@@ -30,17 +42,22 @@ export class IngestionService {
     private readonly aiService: AiServiceClient,
   ) {}
 
-  async reindexAll(): Promise<{ table: string; rowsProcessed: number }[]> {
-    const results = [];
+  async reindexAll(): Promise<TableSyncResult[]> {
+    const results: TableSyncResult[] = [];
     for (const tableConfig of SOURCE_TABLES) {
       results.push(await this.reindexTable(tableConfig.table));
     }
-    // Also ask AI service to rebuild static + knowledge corpus fingerprint sync.
+    // Website pages + built-in knowledge (re-embeds only what changed).
     await this.aiService.fullSync(false);
     return results;
   }
 
-  async reindexTable(tableName: string) {
+  /**
+   * Makes the index match the table: pushes every published row (the AI
+   * service skips unchanged ones) and drops rows that were unpublished or
+   * deleted without a sync event reaching the AI service.
+   */
+  async reindexTable(tableName: string): Promise<TableSyncResult> {
     const tableConfig = SOURCE_TABLES.find((t) => t.table === tableName);
     if (!tableConfig) {
       throw new Error(`No source config found for table "${tableName}"`);
@@ -48,12 +65,24 @@ export class IngestionService {
 
     const rows = await this.queryIndexableRows(tableConfig);
 
+    let failed = 0;
     for (const row of rows) {
-      await this.pushRow(tableConfig, row);
+      try {
+        await this.pushRow(tableConfig, row);
+      } catch (err) {
+        failed += 1;
+        this.logger.error(
+          `Chatbot sync failed for ${tableName}#${String(row[tableConfig.idColumn])}: ${(err as Error).message}`,
+        );
+      }
     }
 
-    this.logger.log(`Backfilled ${tableName}: ${rows.length} published rows`);
-    return { table: tableName, rowsProcessed: rows.length };
+    const chunksRemoved = await this.aiService.prune(
+      tableName,
+      rows.map((row) => String(row[tableConfig.idColumn])),
+    );
+
+    return { table: tableName, rowsProcessed: rows.length, failed, chunksRemoved };
   }
 
   async reindexRow(tableName: string, id: string): Promise<void> {
@@ -134,7 +163,7 @@ export class IngestionService {
         if (raw === null || raw === undefined || raw === '') return null;
         const text =
           typeof raw === 'string' ? stripHtml(raw) : String(raw).trim();
-        if (!text) return null;
+        if (!text || isPlaceholder(text)) return null;
         const label = col
           .split('_')
           .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
