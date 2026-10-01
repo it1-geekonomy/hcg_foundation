@@ -9,7 +9,8 @@ import Typography from "@/lib/Typography";
 import { PATIENT_STORIES, PatientStory } from "@/domains/journey-of-hope/constants/stories";
 import ShareStory from "@/shared/components/ShareStory";
 import { RelatedPatientStories } from "@/domains/journey-of-hope/components/RelatedPatientStories";
-import { publicPatientStoriesApi } from "@/domains/cms/lib/api";
+import { isMissingContentError, publicPatientStoriesApi } from "@/domains/cms/lib/api";
+import RefreshNotice from "@/shared/components/RefreshNotice";
 import { DetailTracker } from "@/shared/components/DetailTracker";
 import PuzzleImage from "@/shared/components/Puzzleimage";
 
@@ -196,7 +197,7 @@ export default async function StoryDetailPage({
 
   let story: PatientStory | null = null;
   let relatedStories: PatientStory[] = [];
-  let errorMsg: string | null = null;
+  let failed = false;
   let is404 = false;
 
   // 1. Try fetching from public API
@@ -233,15 +234,14 @@ export default async function StoryDetailPage({
       is404 = true;
     }
   } catch (err) {
-    const message = err instanceof Error ? err.message : "";
-    if (/\b404\b|not found/i.test(message)) {
+    if (isMissingContentError(err)) {
       is404 = true;
     } else {
-      errorMsg = message || "Failed to connect to the server. Please check your connection and try again later.";
+      failed = true;
     }
   }
 
-  if (is404 || (!story && !errorMsg)) {
+  if (is404 || (!story && !failed)) {
     notFound();
   }
 
@@ -253,22 +253,15 @@ export default async function StoryDetailPage({
         bgImageAlt="Patient Stories"
         breadcrumbs={[
           { label: "Home", href: "/#smilestories" },
-          { label: "Journey of Hope", href: "/journey-of-hope/patient-stories" },
+          { label: "Journey of Hope", href: "/patient-stories" },
         ]}
         title="Patient Stories"
       />
 
       {/* Main Story Detail Section */}
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
-        {errorMsg ? (
-          <div className="flex flex-col justify-center items-center py-20 min-h-[40vh] text-center max-w-2xl mx-auto px-4">
-            <Typography variant="heading-3" as="h2" className="text-[#842A2A] mb-4 font-tiempos-headline italic">
-              Connection Issue
-            </Typography>
-            <Typography variant="body-9" as="p" className="text-[#343E43]">
-              {errorMsg}
-            </Typography>
-          </div>
+        {failed ? (
+          <RefreshNotice title="We couldn't load this story right now" className="py-16" />
         ) : story ? (
           <>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-12 sm:gap-8 lg:gap-12 items-start">

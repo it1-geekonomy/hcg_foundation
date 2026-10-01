@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { HeartHandshake, Search, SearchX } from "lucide-react";
+import ContentNotice, { LOAD_ERROR_MESSAGE } from "@/shared/components/ContentNotice";
 import Typography from "@/lib/Typography";
 import Banner from "@/shared/components/Herobannersection";
 import DonateForm from "@/shared/components/DonateForm";
@@ -35,8 +36,8 @@ export default function PatientStoriesPage() {
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [emptyMessage, setEmptyMessage] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -81,7 +82,7 @@ export default function PatientStoriesPage() {
       setIsFetching(true);
     }
     
-    setError(null);
+    setFailed(false);
     (async () => {
       try {
         const res = await publicPatientStoriesApi.listPublished({
@@ -104,21 +105,15 @@ export default function PatientStoriesPage() {
           }));
           setApiStories(mapped);
           setTotalCount(res.meta.total);
-          setEmptyMessage(null);
         } else {
           setApiStories([]);
           setTotalCount(0);
-          setEmptyMessage(res.message?.trim() || null);
         }
-      } catch (err) {
+      } catch {
         if (!cancelled) {
           setApiStories([]);
           setTotalCount(0);
-          setError(
-            err instanceof Error && err.message
-              ? err.message
-              : "Failed to connect to the server. Please check your connection and try again later."
-          );
+          setFailed(true);
         }
       } finally {
         if (!cancelled) {
@@ -130,7 +125,13 @@ export default function PatientStoriesPage() {
     return () => {
       cancelled = true;
     };
-  }, [currentPage, itemsPerPage, debouncedSearch]);
+  }, [currentPage, itemsPerPage, debouncedSearch, attempt]);
+
+  const clearSearch = () => {
+    setSearchTerm("");
+    setDebouncedSearch("");
+    setCurrentPage(1);
+  };
 
   // If the API call succeeded we use those stories; otherwise show a friendly empty state.
   const sourceStories = apiStories ?? [];
@@ -181,28 +182,29 @@ export default function PatientStoriesPage() {
               Loading patient stories...
             </Typography>
           </div>
-        ) : error ? (
-          <div className="flex flex-col justify-center items-center py-20 min-h-[40vh] text-center max-w-2xl mx-auto px-4">
-            <Typography variant="heading-3" as="h2" className="text-[#842A2A] mb-4 font-tiempos-headline italic">
-              Connection Issue
-            </Typography>
-            <Typography variant="body-9" as="p" className="text-[#343E43]">
-              {error}
-            </Typography>
-          </div>
+        ) : failed ? (
+          <ContentNotice
+            tone="error"
+            title="We couldn't load patient stories right now"
+            message={LOAD_ERROR_MESSAGE}
+            action={{ label: "Try again", onClick: () => setAttempt((n) => n + 1) }}
+            className="py-16"
+          />
+        ) : currentStories.length === 0 && debouncedSearch ? (
+          <ContentNotice
+            icon={SearchX}
+            title="No stories match your search"
+            message={`We couldn't find a patient story for “${debouncedSearch}”. Try a different name, or browse all stories.`}
+            action={{ label: "Clear search", onClick: clearSearch }}
+            className="py-16"
+          />
         ) : currentStories.length === 0 ? (
-          <div className="flex flex-col justify-center items-center py-20 min-h-[40vh] text-center max-w-2xl mx-auto px-4">
-            <Typography variant="heading-3" as="h2" className="text-[#0D2838] mb-4 font-tiempos-headline italic">
-              No Stories Found
-            </Typography>
-            <Typography variant="body-9" as="p" className="text-[#343E43]">
-              {emptyMessage
-                ? debouncedSearch
-                  ? `${emptyMessage} for “${debouncedSearch}”.`
-                  : `${emptyMessage}. Please check back later.`
-                : "There are currently no patient stories available to display. Please check back later."}
-            </Typography>
-          </div>
+          <ContentNotice
+            icon={HeartHandshake}
+            title="Patient stories are coming soon"
+            message="We're gathering stories of courage and recovery from the patients and families we support. Please check back soon."
+            className="py-16"
+          />
         ) : (
           <div
             key={`${safePage}-${itemsPerPage}`}

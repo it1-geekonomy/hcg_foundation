@@ -224,7 +224,7 @@ export default function SmileStories() {
             name: item.title,
             date: formatStoryDate(item.storyDate),
             image: item.patientImage || "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=800&auto=format&fit=crop",
-            link: `/journey-of-hope/patient-stories/${item.slug || item.id}`,
+            link: `/patient-stories/${item.slug || item.id}`,
             excerpt: item.shortDescription || "",
           }));
           const fullStories = mapped.length < 4 ? [...mapped, ...mapped, ...mapped, ...mapped].slice(0, 8) : mapped;

@@ -72,7 +72,7 @@ export function RelatedPatientStories({ stories }: { stories: PatientStory[] }) 
           Read More Stories
         </Typography>
         <Link
-          href="/journey-of-hope/patient-stories"
+          href="/patient-stories"
           className="inline-flex items-center gap-1 transition hover:text-[#B88700]"
         >
           <Typography variant="body-9" as="span" className="font-manrope font-semibold text-[#2D2D2D]">

@@ -123,7 +123,7 @@ export default function RelatedProjects({ currentProjectId, projects }: RelatedP
           Related Projects
         </Typography>
         <Link
-          href="/resources/projects"
+          href="/projects"
           className="inline-flex items-center gap-1 text-[#2D2D2D] transition hover:text-[#B88700]"
         >
           <Typography variant="body-9" as="span" className="font-manrope font-semibold text-[#2D2D2D]">

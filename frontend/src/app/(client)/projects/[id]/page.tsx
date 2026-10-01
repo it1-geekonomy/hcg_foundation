@@ -11,7 +11,8 @@ import RelatedProjects from "@/domains/resources/components/RelatedProjects";
 import SwasthiArtTherapySection from "@/domains/resources/components/SwasthiArtTherapySection";
 import PuzzleImage from "@/shared/components/Puzzleimage";
 import { ProjectItem, PROJECTS_DATA } from "@/domains/resources/constants/projects";
-import { publicProjectsApi } from "@/domains/cms/lib/api";
+import { isMissingContentError, publicProjectsApi } from "@/domains/cms/lib/api";
+import ContentNotice, { LOAD_ERROR_MESSAGE } from "@/shared/components/ContentNotice";
 import { useDetailPageAnimations } from "@/shared/lib/detailPageAnimations";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
@@ -24,6 +25,8 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const resolvedParams = use(params);
   const [projectItem, setProjectItem] = useState<ProjectItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [relatedProjects, setRelatedProjects] = useState<ProjectItem[]>([]);
 
   const [fromHome, setFromHome] = useState(false);
@@ -42,6 +45,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     }
     (async () => {
       setLoading(true);
+      setFailed(false);
       try {
         const res = await publicProjectsApi.getBySlug(resolvedParams.id);
         const p = res.data?.detail;
@@ -98,6 +102,8 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             setRelatedProjects(
               PROJECTS_DATA.filter((item) => item.id !== fallback.id).slice(0, 6)
             );
+          } else if (!isMissingContentError(err)) {
+            setFailed(true);
           }
         }
       } finally {
@@ -107,11 +113,11 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     return () => {
       cancelled = true;
     };
-  }, [resolvedParams.id]);
+  }, [resolvedParams.id, attempt]);
 
   useDetailPageAnimations(!loading && Boolean(projectItem), projectItem?.id);
 
-  if (!loading && !projectItem) {
+  if (!loading && !projectItem && !failed) {
     notFound();
   }
 
@@ -143,7 +149,15 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
       />
 
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
-        {loading || !projectItem ? (
+        {failed ? (
+          <ContentNotice
+            tone="error"
+            title="We couldn't load this project right now"
+            message={LOAD_ERROR_MESSAGE}
+            action={{ label: "Try again", onClick: () => setAttempt((n) => n + 1) }}
+            className="py-12"
+          />
+        ) : loading || !projectItem ? (
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-12 sm:gap-10 lg:gap-14 items-start animate-pulse">
             <div className="sm:col-span-7 flex flex-col space-y-4">
               <div className="h-10 bg-black/10 rounded w-3/4"></div>

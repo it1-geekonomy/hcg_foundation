@@ -22,7 +22,7 @@ export default function EventCard({
 }: EventCardProps) {
   const router = useRouter();
   const [isFlipped, setIsFlipped] = useState(false);
-  const detailUrl = `/resources/events/${event.slug || event.id}`;
+  const detailUrl = `/events/${event.slug || event.id}`;
 
   const handleCardClick = () => {
     if (typeof window !== "undefined") {

@@ -1,13 +1,12 @@
-import Bannersection from "@/domains/ourprograms/Swasthigallery/components/bannersection";
+import Bannersection from "@/domains/resources/Transparencyhub/components/banner";
 import DonateForm from "@/shared/components/DonateForm";
-import Artgallery from "@/domains/ourprograms/Swasthigallery/components/artgallery";
+import AnnualReportsSection from "@/domains/resources/Transparencyhub/components/annualreports";
 
 export default function OurTeamPage() {
   return (
     <>
       <Bannersection />
-      <Artgallery />
-        
+      <AnnualReportsSection />
       <div id="donate-form">
         <DonateForm />
         </div>

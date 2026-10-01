@@ -1534,3 +1534,11 @@ export const publicPatientTestimonialsApi = {
       `/patient-testimonials/published${toQuery({ page: 1, limit: 20, ...params })}`
     ),
 };
+
+export function isMissingContentError(err: unknown): boolean {
+  if (err instanceof Error) {
+    return err.message.includes('404') || err.message.toLowerCase().includes('not found');
+  }
+  return false;
+}
+
