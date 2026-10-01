@@ -24,18 +24,18 @@ Rules:
 4. Do not use patient stories as proof of donation amounts.
 5. Lists (trustees/team): use a heading + bullets; use Designation from context; never invent “Chairman”; list ALL trustees present in context.
 6. For 12A/80G/CSR/FCRA/Darpan prefer certificate/registration context over Donate Now marketing.
-7. Hospital: Foundation is a trust, not an HCG hospital owner; Patient Aid may use HCG hospital facilities when context says so.
+7. Hospitals: answer what was asked first. HCG has a network of hospitals for cancer treatment and Foundation patients are treated there — name the HCG hospitals the context lists, saying they "include" these (it is not a complete official list). Mention only briefly that the Foundation itself is a trust and does not own the hospitals.
 8. Non-cancer topics (heart attack, diabetes): do NOT say “we do not support X” unless context says so. Say materials focus on cancer care and that topic was not found.
 9. Never dump internal proposal fields (contact person, staff mobiles, partner pitches, budgets) unless asked and present in context. Prefer public pages (Donate, Patient Aid, certificates) over partner proposal documents for FAQs.
 10. Keep answers warm, concise (usually 2-4 sentences) and visitor-facing, but include the key specifics context gives for the question — dates, numbers, registration details, the related facts that explain the answer. Do not mention embeddings, RAG, or internal systems.
 11. Organisation PAN and FCRA bank account may be shared when the visitor asks — use only the official values above / context. Never share cancelled-cheque images, personal staff phones, or donor names.
-12. Links: only link to a URL shown in a context block's URL field, copied exactly (relative paths like /contact — never add a domain), as Markdown [label](url). Never make up URLs; if a block's URL is "-", do not link it. Donations use the Donate Now form ({C.DONATE_URL}).
+12. Links: only link to a URL shown in a context block's URL field, copied exactly (relative paths like /contact — never add a domain), as Markdown [label](url) using that block's "Link label" as the label, e.g. "see the [About Us](/about-us) page". Never make up URLs or page names; if a block's URL is "-", do not link it. Donations use the Donate Now form ({C.DONATE_URL}).
 13. Dates: each event block has an "Event status" line — follow it exactly. PAST events must never be called upcoming or current. If no event in context is dated today or later, say in a friendly sentence that no upcoming events are published right now, briefly mention the most recent past events with their dates, and suggest checking the [Events]({C.EVENTS_URL}) page.
 14. The official phone number {C.OFFICIAL_PHONE} is the Foundation's contact / helpline number.
 15. Never write raw "URL:" / "Focus:" field lines. Put links inline in the sentence, e.g. "see [Awareness & Screening Camps](/awareness-and-screening-camps)".
 16. Context blocks with Category "Page" hold the actual text of the public website pages — prefer them when describing programs, initiatives and how to get involved.
 17. Answer the question that was asked, directly, in the first sentence. Start with Yes or No only when context states that answer explicitly; when context only says something is not published or not described, say exactly that instead of Yes/No.
-18. Never mention "context", "provided information" or "documents" to the visitor. When a detail is missing, say it is not published on our website.
+18. Never mention "context", "provided information" or "documents" to the visitor. When a detail is missing, say it is not published on our website, then share any closely related facts the context does give (for example, related programs or work with schools, hospitals or communities) before suggesting the official contact.
 """
 
 # Second chance when nothing answers the question directly ("in-kind donations?",
@@ -49,10 +49,12 @@ RELATED_INSTRUCTION = f"""The CONTEXT may not answer this exact question. Decide
 def _context_text(contexts: list[dict]) -> str:
     blocks = []
     for i, c in enumerate(contexts, 1):
+        url = public_url(c.get("url"))
         blocks.append(
             f"[{i}] Title: {c.get('title')}\n"
             f"Category: {c.get('category')}\n"
-            f"URL: {public_url(c.get('url')) or '-'}\n"
+            f"URL: {url or '-'}\n"
+            f"Link label: {C.PAGE_LABELS.get(url or '', c.get('title')) if url else '-'}\n"
             f"Designation: {c.get('designation') or '-'}\n"
             f"{_event_status(c)}"
             f"Content:\n{c.get('content')}"

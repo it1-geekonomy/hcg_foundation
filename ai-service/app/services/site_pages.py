@@ -22,7 +22,6 @@ SITE_PAGES = [
     "/contact",
     C.PATIENT_AID_URL,
     C.AWARENESS_URL,
-    C.SWASTHI_URL,
     C.PARTICIPATE_URL,
     C.CSR_URL,
     C.GRANTS_URL,

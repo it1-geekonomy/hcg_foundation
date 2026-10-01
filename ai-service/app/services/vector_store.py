@@ -427,6 +427,31 @@ def list_titles(source_table: str) -> list[str]:
         db.close()
 
 
+def chunks_matching(pattern: str) -> list[dict]:
+    """Every indexed chunk whose text matches a case-insensitive Postgres regex."""
+    db = _db()
+    try:
+        rows = (
+            db.query(
+                DocumentChunk.source_table,
+                DocumentChunk.source_id,
+                DocumentChunk.title,
+                DocumentChunk.url,
+                DocumentChunk.content,
+            )
+            .filter(text("document_chunks.content ~* :p"))
+            .params(p=pattern)
+            .order_by(DocumentChunk.title)
+            .all()
+        )
+        return [
+            {"table": t, "source_id": s, "title": title or "", "url": url or "", "content": content or ""}
+            for t, s, title, url, content in rows
+        ]
+    finally:
+        db.close()
+
+
 def _named_hit(db: Session, row: DocumentChunk) -> dict:
     hit = _row_to_hit(row, 0.9)
     # A name near the end of a chunk has its details in the next one
