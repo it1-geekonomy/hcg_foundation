@@ -3,10 +3,10 @@ export interface Reel {
   videoSrc: string;
 }
 
-const PLACEHOLDER_VIDEO1 = "/Reels/HCGreel11.mp4";
-const PLACEHOLDER_VIDEO2 = "/Reels/HCGreel2.mp4";
-const PLACEHOLDER_VIDEO3 = "/Reels/HCGreel3.mp4";
-const PLACEHOLDER_VIDEO4 = "/Reels/HCGreel4.mp4";
+const PLACEHOLDER_VIDEO1 = "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790770191811-olvit-hcgreel11.mp4";
+const PLACEHOLDER_VIDEO2 = "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790770230610-4q8r2-hcgreel2.mp4";
+const PLACEHOLDER_VIDEO3 = "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790770254358-5zj63-hcgreel3.mp4";
+const PLACEHOLDER_VIDEO4 = "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790770275138-06dq9-hcgreel4.mp4";
 
 export const reels: Reel[] = [
   { id: "reel-1", videoSrc: PLACEHOLDER_VIDEO1 },

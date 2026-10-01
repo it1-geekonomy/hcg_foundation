@@ -72,7 +72,7 @@ function SidebarNav({
         >
           {/* Logo text is white, so it only reads on the dark sidebar. Collapsed = crop to the mark. */}
           <Image
-            src="/footer/Logo.png"
+            src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790826091485-84k1a-group-3-1-.webp"
             alt="HCG Foundation"
             width={290}
             height={99}

@@ -7,13 +7,13 @@ export const donateTheme = {
 /** @deprecated Prefer donation-currency presets */
 export const donateAmountOptions = ["₹500", "₹1500", "₹2500"];
 
-export const donateIcon = "/Donateform/donateicon.png";
+export const donateIcon = "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790831702666-8yetv-mdi_love.webp";
 export const donateBgImage = "/Donateform/bgimage.png";
 export const donatemobileimg = "/Donateform/formmobileimg.png";
 
 export const donorAvatars = [
-  "/Donateform/Ellipse1.png",
-  "/Donateform/Ellipse2.png",
-  "/Donateform/Ellipse3.png",
-  "/Donateform/Ellipse4.png",
+  "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790831781093-hxawr-ellipse-3.webp",
+  "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790831831543-gcc30-ellipse-3-1-.webp",
+  "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790831870742-2d5i9-ellipse-5.webp",
+  "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790831900381-wam0x-ellipse-6.webp",
 ];

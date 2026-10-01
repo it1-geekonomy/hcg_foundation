@@ -209,7 +209,7 @@ export default function CommunitySection() {
           className="relative w-full h-[500px] md:h-auto md:aspect-[16/8] overflow-hidden rounded"
         >
           <Image
-            src="/community/communitymobile.png"
+            src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790769497613-k9y7g-frame-653-1-.webp"
             alt={communityContent.image.alt}
             fill
             className="object-cover object-top block md:hidden"
