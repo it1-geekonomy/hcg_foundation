@@ -68,7 +68,7 @@ export const TOGETHER_CONTENT: TogetherContent = {
     label: "Community Events",
   },
   calendarIcon: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790832087811-t32yp-fi_9358062.webp",
-  eventImage: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790831977514-lzv0f-rectangle-35.webp",
+  eventImage: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790837353370-8hhig-rectangle-35-1-.webp",
   content: {
     heading: "Creating Healthier Communities Together",
     description:

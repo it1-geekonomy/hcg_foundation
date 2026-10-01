@@ -235,7 +235,7 @@ export default function TogetherWeCreateHope() {
                 src={TOGETHER_CONTENT.eventImage}
                 alt="Community event"
                 fill
-                className="object-cover object-center"
+                className="object-cover object-top"
               />
             </div>
           </div>
