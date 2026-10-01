@@ -199,11 +199,11 @@
 
 @keyframes project-vertical-marquee {
   from {
-    transform: translateY(-50%);
+    transform: translateY(0%);
   }
 
   to {
-    transform: translateY(0%);
+    transform: translateY(-50%);
   }
 }
 
@@ -212,7 +212,50 @@
     animation: none;
   }
 }
+/* Collapsed project card (mobile, below lg) — horizontal title marquee, right → left */
+.project-horizontal-marquee-track {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: max-content;
+  will-change: transform;
+}
 
+.project-horizontal-marquee-track[data-animate="true"] {
+  animation: project-horizontal-marquee linear infinite;
+}
+
+@keyframes project-horizontal-marquee {
+  from {
+    transform: translateX(0%);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Reduced motion: no animation, but the full title stays readable by swiping. */
+@media (prefers-reduced-motion: reduce) {
+  .project-horizontal-marquee-track[data-animate="true"] {
+    animation: none;
+  }
+
+  .project-horizontal-marquee-viewport {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .project-horizontal-marquee-viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Only one copy of the title when not animating */
+  .project-horizontal-marquee-copy {
+    display: none;
+  }
+}
 /* Reels carousel — explicit W×H (9:16), values match reelsLayout in constants/Reels.ts */
 .reel-card {
   width: 220px;

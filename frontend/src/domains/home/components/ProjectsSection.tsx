@@ -134,6 +134,106 @@ function VerticalMarqueeTitle({ title }: { title: string }) {
   );
 }
 
+/**
+ * Mobile counterpart of VerticalMarqueeTitle (below lg).
+ * Same overflow check and duplicate-track loop, but horizontal, right → left.
+ * Any overflow starts the marquee, so a title is never hidden or truncated.
+ * Short titles stay still. Paused while the card is expanded.
+ * Needs the `.project-horizontal-marquee-*` CSS in globals.css.
+ */
+function HorizontalMarqueeTitle({
+  title,
+  paused = false,
+}: {
+  title: string;
+  paused?: boolean;
+}) {
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLSpanElement>(null);
+  const [animate, setAnimate] = useState(false);
+  const [durationSec, setDurationSec] = useState(10);
+
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current;
+    const measure = measureRef.current;
+    if (!viewport || !measure) return;
+
+    const check = () => {
+      const available = viewport.clientWidth;
+      const needed = measure.getBoundingClientRect().width;
+      // Any overflow at all (0.5px for sub-pixel rounding) starts the marquee.
+      const overflows = needed - available > 0.5;
+      setAnimate(overflows);
+      if (overflows) {
+        // ~40px per second, clamp 8–24s
+        setDurationSec(Math.min(24, Math.max(8, needed / 40)));
+      }
+    };
+
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(viewport);
+    ro.observe(measure);
+
+    // Re-measure once web fonts finish loading — widths change.
+    let cancelled = false;
+    if (typeof document !== "undefined" && "fonts" in document) {
+      (document as Document & { fonts: FontFaceSet }).fonts.ready.then(() => {
+        if (!cancelled) check();
+      });
+    }
+
+    return () => {
+      cancelled = true;
+      ro.disconnect();
+    };
+  }, [title]);
+
+  const label = (
+    <Typography
+      variant="heading-7"
+      as="span"
+      className="whitespace-nowrap font-manrope font-semibold text-white [text-overflow:clip] overflow-visible"
+    >
+      {title}
+    </Typography>
+  );
+
+  return (
+    <div
+      ref={viewportRef}
+      className="project-horizontal-marquee-viewport min-w-0 flex-1 overflow-hidden"
+    >
+      <div
+        className="project-horizontal-marquee-track"
+        data-animate={animate ? "true" : "false"}
+        style={
+          animate
+            ? {
+                animationDuration: `${durationSec}s`,
+                animationPlayState: paused ? "paused" : "running",
+              }
+            : undefined
+        }
+      >
+        <span className={`inline-flex shrink-0 ${animate ? "pr-10" : ""}`}>
+          <span ref={measureRef} className="inline-flex">
+            {label}
+          </span>
+        </span>
+        {animate ? (
+          <span
+            className="project-horizontal-marquee-copy inline-flex shrink-0 pr-10"
+            aria-hidden="true"
+          >
+            {label}
+          </span>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function MoreDetailsButton({
   className = "",
   href,
@@ -903,13 +1003,10 @@ export default function ProjectsSection({
                     {card.number}
                   </Typography>
                 </div>
-                <Typography
-                  variant="heading-7"
-                  as="span"
-                  className="truncate font-manrope font-semibold text-white"
-                >
-                  {card.title}
-                </Typography>
+                <HorizontalMarqueeTitle
+                  title={card.title}
+                  paused={index === mobileActiveIndex}
+                />
               </div>
 
               <div
