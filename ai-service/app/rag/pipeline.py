@@ -12,7 +12,7 @@ from app.rag.generate import (
     mentions_internal_terms,
     recover_if_needed,
 )
-from app.rag.intents import detect_intents, match_fast_intent
+from app.rag.intents import detect_intents, is_on_topic, match_fast_intent
 from app.rag.links import clean_answer
 from app.rag.memory import append_turn, get_history
 from app.rag.normalize import normalize_for_retrieval
@@ -75,7 +75,7 @@ def run_chat(message: str, session_id: str | None = None) -> dict:
 
     # If model returned token somehow, or if recovery triggered fallback, clear sources
     if answer.strip() == C.NO_ANSWER_TOKEN or answer.strip() == C.FALLBACK_ANSWER.strip():
-        answer = C.FALLBACK_ANSWER
+        answer = C.FALLBACK_ANSWER if is_on_topic(user_message, intents) else C.OUT_OF_SCOPE_ANSWER
         sources = []
     elif answer == C.OUT_OF_SCOPE_ANSWER:
         sources = []
