@@ -14,7 +14,6 @@ import {
   CmsBadge,
   CmsHtmlContentCard,
   CmsRecordActions,
-  CmsSeoCard,
   CmsViewError,
   CmsViewHeader,
   CmsViewLoading,
@@ -167,17 +166,10 @@ export default function TeamViewPage() {
         <TeamSection trustees={trustees} teamMembers={teamMembers} />
       </CmsWebsitePreview>
 
-      <div className="space-y-4">
-        <CmsHtmlContentCard
-          html={team.content}
-          empty="No content yet — add it in Edit (TinyMCE)."
-        />
-        <CmsSeoCard
-          metaTitle={team.metaTitle}
-          metaDescription={team.metaDescription}
-          schemaCode={team.schemaCode}
-        />
-      </div>
+      <CmsHtmlContentCard
+        html={team.content}
+        empty="No content yet — add it in Edit (TinyMCE)."
+      />
     </div>
   );
 }

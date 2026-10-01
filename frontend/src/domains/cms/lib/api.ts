@@ -184,13 +184,15 @@ function annualReportFormData(
   fields: AnnualReportFields,
   files?: {
     banner?: File | null;
-    mobileBanner?: File | null;
     file?: File | null;
   }
 ) {
   const fd = new FormData();
   fd.append("title", fields.title.trim());
   fd.append("slug", fields.slug.trim());
+  if (fields.shortDescription !== undefined) {
+    fd.append("shortDescription", fields.shortDescription.trim());
+  }
   if (fields.reportYear?.trim()) {
     fd.append("reportYear", fields.reportYear.trim());
   }
@@ -206,13 +208,6 @@ function annualReportFormData(
   }
   if (files?.banner instanceof File) {
     fd.append("annualReportBanner", files.banner, files.banner.name);
-  }
-  if (files?.mobileBanner instanceof File) {
-    fd.append(
-      "annualReportMobileBanner",
-      files.mobileBanner,
-      files.mobileBanner.name
-    );
   }
   if (files?.file instanceof File) {
     fd.append("annualReportFile", files.file, files.file.name);
@@ -1058,7 +1053,6 @@ export const cmsApi = {
     fields: AnnualReportFields,
     files?: {
       banner?: File | null;
-      mobileBanner?: File | null;
       file?: File | null;
     }
   ) =>
@@ -1073,7 +1067,6 @@ export const cmsApi = {
     fields: AnnualReportFields,
     files?: {
       banner?: File | null;
-      mobileBanner?: File | null;
       file?: File | null;
     }
   ) =>

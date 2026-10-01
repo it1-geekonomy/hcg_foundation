@@ -6,37 +6,20 @@ export interface Report {
   pdfUrl: string;
 }
 
-/** Standard recommended banner dimensions for Annual Reports & Transparency Hub */
-export const ANNUAL_REPORT_BANNER_SIZE = { width: 1920, height: 600 } as const;
-export const ANNUAL_REPORT_MOBILE_BANNER_SIZE = { width: 750, height: 600 } as const;
+/** The single annual report banner; uploads must match this size exactly. */
+export const ANNUAL_REPORT_BANNER_SIZE = { width: 557, height: 556 } as const;
 
-function formatReportYear(value?: string | null) {
-  const year = value?.trim();
-  if (!year) return "";
-  return year.replace(/\s*-\s*/g, "–");
-}
-
-/** Map a published CMS annual report onto the transparency hub card. */
+/** Map a published CMS annual report onto the transparency hub card (CMS values only, no defaults). */
 export function mapAnnualReportToCard(report: {
   id: string;
   title?: string | null;
-  reportYear?: string | null;
-  metaDescription?: string | null;
+  shortDescription?: string | null;
   annualReportFile?: string | null;
 }): Report {
-  const year = formatReportYear(report.reportYear);
-  const description =
-    report.metaDescription?.trim() ||
-    (year ? `Our performance, initiatives, and impact in ${year}.` : "");
-
-  const title =
-    report.title?.trim() ||
-    (year ? `Annual Report ${year}` : "Annual Report");
-
   return {
     id: report.id,
-    title,
-    description,
+    title: report.title?.trim() || "",
+    description: report.shortDescription?.trim() || "",
     pages: "",
     pdfUrl: report.annualReportFile?.trim() || "",
   };
