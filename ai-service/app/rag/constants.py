@@ -21,7 +21,6 @@ TRUSTEES = [
 DONATE_URL = "#donate-form"
 PATIENT_AID_URL = "/financial-support-for-pediatric-patients"
 AWARENESS_URL = "/awareness-and-screening-camps"
-SWASTHI_URL = "/swasthi-gallery"
 PARTICIPATE_URL = "/participate"
 CSR_URL = "/csr-partner"
 GRANTS_URL = "/grants-and-philanthropy"
@@ -41,7 +40,6 @@ PAGE_LABELS = {
     DONATE_URL: "Donate Now",
     PATIENT_AID_URL: "Financial Support for Pediatric Patients",
     AWARENESS_URL: "Awareness & Screening Camps",
-    SWASTHI_URL: "Swasti Gallery",
     PARTICIPATE_URL: "Volunteer & Internships",
     CSR_URL: "CSR Partnership",
     GRANTS_URL: "Grants & Philanthropy",
@@ -65,7 +63,6 @@ LEGACY_URLS = {
     "/resources/annual-reports": TRANSPARENCY_URL,
     "/our-programs/financial-support-for-pediatric-patients": PATIENT_AID_URL,
     "/our-programs/awareness-and-screening-camps": AWARENESS_URL,
-    "/our-programs/swasthi-gallery": SWASTHI_URL,
     "/getinvolved/participate": PARTICIPATE_URL,
     "/getinvolved/csr-partner": CSR_URL,
     "/getinvolved/grants-and-philanthropy": GRANTS_URL,
