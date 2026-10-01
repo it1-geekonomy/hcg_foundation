@@ -32,7 +32,7 @@ Rules:
 12. Links: only link to a URL shown in a context block's URL field, copied exactly (relative paths like /contact — never add a domain), as Markdown [label](url). Never make up URLs; if a block's URL is "-", do not link it. Donations use the Donate Now form ({C.DONATE_URL}).
 13. Dates: each event block has an "Event status" line — follow it exactly. PAST events must never be called upcoming or current. If no event in context is dated today or later, say in a friendly sentence that no upcoming events are published right now, briefly mention the most recent past events with their dates, and suggest checking the [Events]({C.EVENTS_URL}) page.
 14. The official phone number {C.OFFICIAL_PHONE} is the Foundation's contact / helpline number.
-15. Never write raw "URL:" / "Focus:" field lines. Put links inline in the sentence, e.g. "see [Awareness & Screening Camps](/our-programs/awareness-and-screening-camps)".
+15. Never write raw "URL:" / "Focus:" field lines. Put links inline in the sentence, e.g. "see [Awareness & Screening Camps](/awareness-and-screening-camps)".
 16. Context blocks with Category "Page" hold the actual text of the public website pages — prefer them when describing programs, initiatives and how to get involved.
 17. Answer the question that was asked, directly, in the first sentence. Start with Yes or No only when context states that answer explicitly; when context only says something is not published or not described, say exactly that instead of Yes/No.
 18. Never mention "context", "provided information" or "documents" to the visitor. When a detail is missing, say it is not published on our website.
@@ -90,6 +90,14 @@ def generate_answer(question: str, contexts: list[dict]) -> str:
 
 def generate_related_answer(question: str, contexts: list[dict]) -> str:
     return _complete(question, contexts, RELATED_INSTRUCTION)
+
+
+_INTERNAL_TERMS = re.compile(r"\bcontext\b|\bprovided (?:information|documents?|text)\b", re.I)
+
+
+def mentions_internal_terms(answer: str) -> bool:
+    """The model sometimes says "the context does not mention..." despite rule 18."""
+    return bool(_INTERNAL_TERMS.search(answer or ""))
 
 
 _EVENT_DATE = re.compile(r"Event Date:\s*\w{3} (\w{3} \d{1,2} \d{4})")

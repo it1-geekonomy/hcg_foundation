@@ -6,7 +6,12 @@ import uuid
 from app.config import settings
 from app.rag import constants as C
 from app.rag.catalog import answer_catalog_question
-from app.rag.generate import generate_answer, generate_related_answer, recover_if_needed
+from app.rag.generate import (
+    generate_answer,
+    generate_related_answer,
+    mentions_internal_terms,
+    recover_if_needed,
+)
 from app.rag.intents import detect_intents, match_fast_intent
 from app.rag.links import clean_answer
 from app.rag.memory import append_turn, get_history
@@ -61,7 +66,8 @@ def run_chat(message: str, session_id: str | None = None) -> dict:
     hits = hybrid_retrieve(queries, intents, question=search_text)
     ranked = vector_store.with_neighbor_chunks(rerank(hits, intents))
     answer = generate_answer(user_message, ranked)
-    if clean_answer(answer) in ("", C.NO_ANSWER_TOKEN):
+    first = clean_answer(answer)
+    if first in ("", C.NO_ANSWER_TOKEN) or mentions_internal_terms(first):
         answer = generate_related_answer(user_message, ranked)
     answer = recover_if_needed(clean_answer(answer) or C.NO_ANSWER_TOKEN, user_message, ranked, intents)
     answer = clean_answer(answer) or C.NO_ANSWER_TOKEN

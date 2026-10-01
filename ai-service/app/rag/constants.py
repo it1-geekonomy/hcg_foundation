@@ -19,14 +19,18 @@ TRUSTEES = [
 # --- Public website routes (must match frontend/src/app/(client)) ---
 # Every page renders the donate form, so donation links scroll to it in place.
 DONATE_URL = "#donate-form"
-PATIENT_AID_URL = "/our-programs/financial-support-for-pediatric-patients"
-AWARENESS_URL = "/our-programs/awareness-and-screening-camps"
-PARTICIPATE_URL = "/getinvolved/participate"
-CSR_URL = "/getinvolved/csr-partner"
-TRANSPARENCY_URL = "/resources/transparency-and-knowledge-hub"
+PATIENT_AID_URL = "/financial-support-for-pediatric-patients"
+AWARENESS_URL = "/awareness-and-screening-camps"
+SWASTHI_URL = "/swasthi-gallery"
+PARTICIPATE_URL = "/participate"
+CSR_URL = "/csr-partner"
+GRANTS_URL = "/grants-and-philanthropy"
+TRANSPARENCY_URL = "/transparency-and-knowledge-hub"
 TEAM_URL = "/about/our-team"
-EVENTS_URL = "/resources/events"
-PROJECTS_URL = "/resources/projects"
+EVENTS_URL = "/events"
+PROJECTS_URL = "/projects"
+PATIENT_STORIES_URL = "/patient-stories"
+TESTIMONIALS_URL = "/testimonials"
 
 PAGE_LABELS = {
     "/": "Home",
@@ -37,12 +41,12 @@ PAGE_LABELS = {
     DONATE_URL: "Donate Now",
     PATIENT_AID_URL: "Financial Support for Pediatric Patients",
     AWARENESS_URL: "Awareness & Screening Camps",
-    "/our-programs/swasthi-gallery": "Swasti Gallery",
+    SWASTHI_URL: "Swasti Gallery",
     PARTICIPATE_URL: "Volunteer & Internships",
     CSR_URL: "CSR Partnership",
-    "/getinvolved/grants-and-philanthropy": "Grants & Philanthropy",
-    "/journey-of-hope/patient-stories": "Patient Stories",
-    "/journey-of-hope/testimonials": "Testimonials",
+    GRANTS_URL: "Grants & Philanthropy",
+    PATIENT_STORIES_URL: "Patient Stories",
+    TESTIMONIALS_URL: "Testimonials",
     EVENTS_URL: "Events",
     PROJECTS_URL: "Projects",
     TRANSPARENCY_URL: "Annual Reports & Newsletters",
@@ -50,7 +54,7 @@ PAGE_LABELS = {
     "/terms": "Terms & Conditions",
 }
 
-# Routes that never existed on the site but may still be stored on older indexed chunks.
+# Old routes that may still be stored on indexed chunks or written by the model.
 LEGACY_URLS = {
     "/donate": DONATE_URL,
     "/patient-aid": PATIENT_AID_URL,
@@ -59,13 +63,30 @@ LEGACY_URLS = {
     "/awareness": AWARENESS_URL,
     "/resources": TRANSPARENCY_URL,
     "/resources/annual-reports": TRANSPARENCY_URL,
+    "/our-programs/financial-support-for-pediatric-patients": PATIENT_AID_URL,
+    "/our-programs/awareness-and-screening-camps": AWARENESS_URL,
+    "/our-programs/swasthi-gallery": SWASTHI_URL,
+    "/getinvolved/participate": PARTICIPATE_URL,
+    "/getinvolved/csr-partner": CSR_URL,
+    "/getinvolved/grants-and-philanthropy": GRANTS_URL,
+    "/resources/transparency-and-knowledge-hub": TRANSPARENCY_URL,
+    "/resources/events": EVENTS_URL,
+    "/resources/projects": PROJECTS_URL,
+    "/journey-of-hope/patient-stories": PATIENT_STORIES_URL,
+    "/journey-of-hope/testimonials": TESTIMONIALS_URL,
+}
+
+LEGACY_DETAIL_PREFIXES = {
+    "/journey-of-hope/patient-stories/": PATIENT_STORIES_URL + "/",
+    "/resources/events/": EVENTS_URL + "/",
+    "/resources/projects/": PROJECTS_URL + "/",
 }
 
 DETAIL_PREFIXES = (
-    "/journey-of-hope/patient-stories/",
-    "/resources/events/",
-    "/resources/projects/",
-    "/about/our-team/",
+    PATIENT_STORIES_URL + "/",
+    EVENTS_URL + "/",
+    PROJECTS_URL + "/",
+    TEAM_URL + "/",
 )
 
 # Organisation compliance details (safe to share when visitors ask)
