@@ -9,7 +9,7 @@ import { ProjectItem } from "@/domains/resources/constants/projects";
 import { publicProjectsApi } from "@/domains/cms/lib/api";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
-const FALLBACK_IMAGE = "/Resources/Resources banner image.png";
+const FALLBACK_IMAGE = "";
 
 interface RelatedProjectsProps {
   currentProjectId?: string;

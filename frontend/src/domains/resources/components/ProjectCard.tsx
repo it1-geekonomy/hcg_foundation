@@ -34,20 +34,24 @@ export default function ProjectCard({
 
   const frontContent = (
     <div className="relative h-full w-full overflow-hidden rounded-[6px] bg-[#EFEAD8] shadow-xs transition duration-300">
-      <picture className="h-full w-full block">
-        {project.mobileImageUrl && (
-          <source media="(max-width: 767px)" srcSet={project.mobileImageUrl} />
-        )}
-        <img
-          src={project.imageUrl}
-          alt={project.title}
-          className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-          loading="lazy"
-        />
-      </picture>
+      {project.imageUrl ? (
+        <>
+          <picture className="h-full w-full block">
+            {project.mobileImageUrl && (
+              <source media="(max-width: 767px)" srcSet={project.mobileImageUrl} />
+            )}
+            <img
+              src={project.imageUrl}
+              alt={project.title}
+              className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+              loading="lazy"
+            />
+          </picture>
 
-      {/* Linear Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent pointer-events-none" />
+          {/* Linear Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent pointer-events-none" />
+        </>
+      ) : null}
 
       {/* Floating Glassmorphic Overlay */}
       <div

@@ -42,13 +42,13 @@ export default function ProjectsPage() {
   useEffect(() => {
     if (itemsPerPage === null) return;
     let cancelled = false;
-    
+
     if (allProjects.length === 0) {
       setLoading(true);
     } else {
       setIsFetching(true);
     }
-    
+
     setFailed(false);
     (async () => {
       try {
@@ -57,7 +57,7 @@ export default function ProjectsPage() {
           limit: itemsPerPage,
         });
         if (cancelled) return;
-        
+
         if (res.data && res.data.length > 0) {
           const mapped: ProjectItem[] = res.data.map((p) => ({
             id: p.id ?? "",
@@ -65,22 +65,16 @@ export default function ProjectsPage() {
             title: p.title ?? "",
             date: p.projectDate
               ? new Date(p.projectDate).toLocaleDateString("en-GB", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })
               : "",
             category: "Projects",
             summary: p.shortDescription ?? "",
             fullStory: p.content ?? "",
-            imageUrl:
-              p.projectBanner ||
-              p.projectMobileBanner ||
-              "/Resources/Resources banner image.png",
-            mobileImageUrl:
-              p.projectMobileBanner ||
-              p.projectBanner ||
-              "/Resources/Resources banner image.png",
+            imageUrl: p.projectBanner || p.projectMobileBanner || "",
+            mobileImageUrl: p.projectMobileBanner || p.projectBanner || "",
           }));
           setAllProjects(mapped);
           setTotalCount(res.meta.total);
@@ -111,7 +105,7 @@ export default function ProjectsPage() {
   const itemsPerPg = itemsPerPage || 6;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPg));
   const safePage = Math.min(currentPage, totalPages);
-  
+
   const currentProjects = allProjects;
 
   const handlePageChange = (page: number) => {
@@ -121,7 +115,7 @@ export default function ProjectsPage() {
   return (
     <main className="min-h-screen bg-[#FFF8E2]">
       <Banner
-        bgImage="/Resources/Resources banner image.png"
+        bgImage=""
         bgImageAlt="Projects"
         breadcrumbs={[
           { label: "Home", href: "/" },
@@ -134,9 +128,8 @@ export default function ProjectsPage() {
         <div className="w-full">
           <div
             key={`${safePage}-${itemsPerPage}`}
-            className={`flex flex-col gap-16 pb-4 lg:pb-0 lg:grid lg:grid-cols-2 lg:gap-x-[2rem] lg:gap-y-[2.5rem] transition-all duration-500 ease-in-out ${
-              isFetching ? "opacity-40 scale-[0.98] blur-[1px] pointer-events-none" : "opacity-100 scale-100 blur-0"
-            }`}
+            className={`flex flex-col gap-16 pb-4 lg:pb-0 lg:grid lg:grid-cols-2 lg:gap-x-[2rem] lg:gap-y-[2.5rem] transition-all duration-500 ease-in-out ${isFetching ? "opacity-40 scale-[0.98] blur-[1px] pointer-events-none" : "opacity-100 scale-100 blur-0"
+              }`}
           >
             {currentProjects.map((projectItem, itemIdx) => (
               <div

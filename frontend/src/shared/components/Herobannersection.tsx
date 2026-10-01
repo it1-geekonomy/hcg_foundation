@@ -47,7 +47,7 @@ export interface BannerBreadcrumb {
 }
 
 export interface BannerProps {
-  bgImage: string;
+  bgImage?: string;
   /** Optional image shown below the lg breakpoint (1024px). Falls back to bgImage if omitted. */
   bgImageMobile?: string;
   bgImageAlt?: string;
@@ -71,28 +71,38 @@ export default function Banner({
   className = "",
   animateTitle = true,
 }: BannerProps) {
+  const hasImage = Boolean(bgImage || bgImageMobile);
+
+  if (!hasImage) {
+    return null;
+  }
+
   return (
-    <section className={`relative isolate grid w-full ${className}`}>
+    <section className={cn("relative isolate grid w-full", className)}>
       {/* Below 1024px */}
-      <Image
-        src={bgImageMobile ?? bgImage}
-        alt={bgImageAlt}
-        width={1920}
-        height={1080}
-        priority
-        sizes="100vw"
-        className="col-start-1 row-start-1 block h-auto w-full object-contain lg:hidden"
-      />
+      {(bgImageMobile ?? bgImage) ? (
+        <Image
+          src={(bgImageMobile ?? bgImage)!}
+          alt={bgImageAlt}
+          width={1920}
+          height={1080}
+          priority
+          sizes="100vw"
+          className="col-start-1 row-start-1 block h-auto w-full object-contain lg:hidden"
+        />
+      ) : null}
       {/* 1024px and up */}
-      <Image
-        src={bgImage}
-        alt={bgImageAlt}
-        width={1920}
-        height={1080}
-        priority
-        sizes="100vw"
-        className="col-start-1 row-start-1 hidden h-auto w-full object-contain lg:block"
-      />
+      {bgImage ? (
+        <Image
+          src={bgImage}
+          alt={bgImageAlt}
+          width={1920}
+          height={1080}
+          priority
+          sizes="100vw"
+          className="col-start-1 row-start-1 hidden h-auto w-full object-contain lg:block"
+        />
+      ) : null}
 
       <div className="relative col-start-1 row-start-1 z-10 flex items-end px-8 py-6 lg:items-center lg:px-6 lg:py-14 xl:px-6 xl:py-20 2xl:px-40">
         <div className="w-full lg:mt-8 xl:mt-10">
