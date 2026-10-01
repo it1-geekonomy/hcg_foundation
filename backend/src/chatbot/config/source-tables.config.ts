@@ -71,7 +71,7 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
     category: 'Event',
     titleColumn: 'title',
     slugColumn: 'slug',
-    buildUrl: (row) => `/resources/events/${slugOrId(row, 'slug')}`,
+    buildUrl: (row) => `/events/${slugOrId(row, 'slug')}`,
   },
   {
     table: 'projects',
@@ -81,7 +81,7 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
     category: 'Project',
     titleColumn: 'title',
     slugColumn: 'slug',
-    buildUrl: (row) => `/resources/projects/${slugOrId(row, 'slug')}`,
+    buildUrl: (row) => `/projects/${slugOrId(row, 'slug')}`,
   },
   {
     table: 'patient_stories',
@@ -97,8 +97,7 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
     category: 'Patient Story',
     titleColumn: 'title',
     slugColumn: 'slug',
-    buildUrl: (row) =>
-      `/journey-of-hope/patient-stories/${slugOrId(row, 'slug')}`,
+    buildUrl: (row) => `/patient-stories/${slugOrId(row, 'slug')}`,
   },
   {
     table: 'patient_testimonials',
@@ -107,7 +106,7 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
     statusColumn: 'status',
     category: 'Patient Testimonial',
     titleColumn: 'title',
-    buildUrl: () => `/journey-of-hope/testimonials`,
+    buildUrl: () => `/testimonials`,
   },
   {
     table: 'teams',
@@ -127,7 +126,7 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
     category: 'Annual Report',
     titleColumn: 'title',
     slugColumn: 'slug',
-    buildUrl: () => `/resources/transparency-and-knowledge-hub`,
+    buildUrl: () => `/transparency-and-knowledge-hub`,
   },
   {
     table: 'awards',
