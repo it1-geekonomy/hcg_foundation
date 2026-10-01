@@ -12,6 +12,7 @@ from app.rag.generate import (
     mentions_internal_terms,
     recover_if_needed,
 )
+from app.rag.hospitals import hospital_context
 from app.rag.intents import detect_intents, is_on_topic, match_fast_intent
 from app.rag.links import clean_answer
 from app.rag.memory import append_turn, get_history
@@ -65,6 +66,10 @@ def run_chat(message: str, session_id: str | None = None) -> dict:
 
     hits = hybrid_retrieve(queries, intents, question=search_text)
     ranked = vector_store.with_neighbor_chunks(rerank(hits, intents))
+    if "hospital" in intents:
+        extra = hospital_context()
+        if extra:
+            ranked = [{**extra, "score": ranked[0]["score"] if ranked else 1.0}] + ranked
     answer = generate_answer(user_message, ranked)
     first = clean_answer(answer)
     if first in ("", C.NO_ANSWER_TOKEN) or mentions_internal_terms(first):

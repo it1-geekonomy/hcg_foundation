@@ -41,7 +41,8 @@ def clean_answer(text: str) -> str:
         label, url = m.group(1), _SITE_PREFIX.sub("", m.group(2)) or "/"
         valid = public_url(url) if not url.startswith(("mailto:", "tel:")) else url
         if valid:
-            return f"[{label}]({valid})"
+            # The model tends to name a page after the document it read ("Swasti Gallery page" -> /about-us)
+            return f"[{C.PAGE_LABELS.get(valid, label)}]({valid})"
         return label if not url.startswith("http") else m.group(0)
 
     def bare(m: re.Match) -> str:

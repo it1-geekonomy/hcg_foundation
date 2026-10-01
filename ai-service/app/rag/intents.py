@@ -157,7 +157,7 @@ def detect_intents(text: str) -> set[str]:
         intents.add("programs")
     if _has(t, r"events?\b"):
         intents.add("events")
-    if _has(t, "hospital"):
+    if _has(t, "hospital", r"cancer cent(?:re|er)"):
         intents.add("hospital")
     if _has(t, "bengaluru", "bangalore", "how many patient"):
         intents.add("patient_count")
