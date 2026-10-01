@@ -12,6 +12,7 @@ import {
 } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   BriefcaseMedical,
@@ -92,6 +93,14 @@ function isInternalUrl(url: string) {
 function SmartLink({ href, children }: { href: string; children: ReactNode }) {
   const className =
     "font-semibold text-[#0D2838] underline decoration-[#E9B510] decoration-2 underline-offset-2 hover:decoration-[#0D2838]";
+  // In-page targets (e.g. #donate-form) scroll without putting the hash in the address bar
+  if (href.startsWith("#")) {
+    return (
+      <button type="button" data-scroll-to={href.slice(1)} className={`${className} cursor-pointer`}>
+        {children}
+      </button>
+    );
+  }
   if (isInternalUrl(href)) {
     return (
       <Link href={href} className={className}>
@@ -281,6 +290,35 @@ export default function ChatbotWidget() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   // Saved chat is restored on first open (not during render) to avoid a hydration mismatch
   const restoredRef = useRef(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  // Section to scroll to once the home page has rendered (current page didn't have it)
+  const pendingScrollRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const id = pendingScrollRef.current;
+    if (!id || pathname !== "/") return;
+    let tries = 0;
+    const timer = window.setInterval(() => {
+      const el = document.getElementById(id);
+      if (el || ++tries > 50) {
+        window.clearInterval(timer);
+        pendingScrollRef.current = null;
+        el?.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 100);
+    return () => window.clearInterval(timer);
+  }, [pathname]);
+
+  function scrollToSection(id: string) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+    pendingScrollRef.current = id;
+    router.push("/");
+  }
 
   useEffect(() => {
     if (sessionStorage.getItem(TEASER_KEY)) return;
@@ -405,12 +443,15 @@ export default function ChatbotWidget() {
   }
 
   function onMessageLinkClick(e: MouseEvent<HTMLDivElement>) {
-    const href = (e.target as HTMLElement).closest("a")?.getAttribute("href") ?? "";
-    if (href.startsWith("#")) {
-      e.preventDefault();
+    const target = e.target as HTMLElement;
+    const scrollTo = target.closest("[data-scroll-to]")?.getAttribute("data-scroll-to");
+    if (scrollTo) {
       setOpen(false);
-      document.getElementById(href.slice(1))?.scrollIntoView({ behavior: "smooth" });
-    } else if (href.startsWith("/") && window.matchMedia("(max-width: 639px)").matches) {
+      scrollToSection(scrollTo);
+      return;
+    }
+    const href = target.closest("a")?.getAttribute("href") ?? "";
+    if (href.startsWith("/") && window.matchMedia("(max-width: 639px)").matches) {
       // The chat covers the whole screen on mobile, so get out of the way of the new page
       setOpen(false);
     }
@@ -602,6 +643,18 @@ export default function ChatbotWidget() {
                                       <ExternalLink className="h-2.5 w-2.5 shrink-0 opacity-60" />
                                     </>
                                   );
+                                  if (source.url.startsWith("#")) {
+                                    return (
+                                      <button
+                                        key={`${source.url}-${source.title}`}
+                                        type="button"
+                                        data-scroll-to={source.url.slice(1)}
+                                        className={`${chip} cursor-pointer`}
+                                      >
+                                        {content}
+                                      </button>
+                                    );
+                                  }
                                   return isInternalUrl(source.url) ? (
                                     <Link
                                       key={`${source.url}-${source.title}`}
