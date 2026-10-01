@@ -100,8 +100,8 @@ export default function PatientStoriesPage() {
             conditionTag: item.donationState || "Patient Journey",
             excerpt: item.shortDescription || "",
             fullStory: item.content || "",
-            imageUrl: item.patientImage || "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=800&auto=format&fit=crop",
-            heroImageUrl: item.patientImage || "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?q=80&w=1600&auto=format&fit=crop",
+            imageUrl: item.patientImage || "",
+            heroImageUrl: item.patientImage || "",
           }));
           setApiStories(mapped);
           setTotalCount(res.meta.total);

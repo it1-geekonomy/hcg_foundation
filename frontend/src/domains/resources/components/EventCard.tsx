@@ -90,13 +90,15 @@ export default function EventCard({
       <div className="relative h-full w-full flex flex-col justify-between items-center p-6 sm:p-8 lg:p-10 rounded-[6px] border border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2]">
         {/* Pure, Centered Short Description */}
         <div className="relative z-10 flex-1 flex items-center justify-center text-center my-auto px-2 sm:px-6 w-full">
-          <Typography
-            variant="body-1"
-            as="p"
-            className="text-[#0D2838] max-w-xl"
-          >
-            {event.summary || "Explore the full event details, agenda, and speakers."}
-          </Typography>
+          {event.summary ? (
+            <Typography
+              variant="body-1"
+              as="p"
+              className="text-[#0D2838] max-w-xl"
+            >
+              {event.summary}
+            </Typography>
+          ) : null}
         </div>
 
         {/* Read More Button Constant at Bottom Center */}
