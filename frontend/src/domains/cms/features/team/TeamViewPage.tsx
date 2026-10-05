@@ -73,12 +73,10 @@ export default function TeamViewPage() {
 
     const isTrustee = team.type === "trustee";
 
-    const merge = (list: Team[], current: Team) => {
-      const others = list
-        .filter((m) => m.id !== current.id)
+    const merge = (list: Team[], current: Team) =>
+      [...list.filter((m) => m.id !== current.id), current]
+        .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
         .map(mapTeamToPerson);
-      return [mapTeamToPerson(current), ...others];
-    };
 
     if (isTrustee) {
       return {
@@ -136,6 +134,9 @@ export default function TeamViewPage() {
               <span className="capitalize">{team.type ?? "team"}</span>
             </CmsBadge>
             <CmsBadge>{team.status}</CmsBadge>
+            {team.displayOrder != null ? (
+              <CmsBadge>Order {team.displayOrder}</CmsBadge>
+            ) : null}
           </>
         }
         meta={
