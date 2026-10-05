@@ -290,12 +290,12 @@ export default function GrantsAndPhilanthropyPage() {
     <main className="min-h-screen bg-[#FFF8E2]">
       <Banner
         bgImage="/Get Involved/Get Involved banner image.png"
-        bgImageAlt="Grants & Philanthropy"
+        bgImageAlt="Grant & Philanthropy"
         breadcrumbs={[
           { label: "Home", href: "/" },
           { label: "Get Involved" },
         ]}
-        title="Grants & Philanthropy"
+        title="Grant & Philanthropy"
       />
 
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
