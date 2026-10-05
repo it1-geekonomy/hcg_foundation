@@ -52,36 +52,38 @@ export function PersonCard({
     setImageFailed(false);
   }, [img]);
 
+  const leaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const handlePointerEnter = (e: React.PointerEvent) => {
     if (e.pointerType === "touch") {
       isTouchRef.current = true;
       return;
     }
     isTouchRef.current = false;
+    if (leaveTimeoutRef.current) {
+      clearTimeout(leaveTimeoutRef.current);
+      leaveTimeoutRef.current = null;
+    }
     setFlipped(true);
   };
 
   const handlePointerLeave = (e: React.PointerEvent) => {
     if (e.pointerType === "touch") return;
-
-    // Verify pointer genuinely left the card's boundary
-    if (cardRef.current) {
-      const rect = cardRef.current.getBoundingClientRect();
-      const x = e.clientX;
-      const y = e.clientY;
-      // Account for the top photo cutout and a 2px tolerance on borders
-      if (
-        x >= rect.left - 2 &&
-        x <= rect.right + 2 &&
-        y >= rect.top - 65 &&
-        y <= rect.bottom + 2
-      ) {
-        return;
-      }
+    if (leaveTimeoutRef.current) {
+      clearTimeout(leaveTimeoutRef.current);
     }
-
-    setFlipped(false);
+    leaveTimeoutRef.current = setTimeout(() => {
+      setFlipped(false);
+    }, 120);
   };
+
+  useEffect(() => {
+    return () => {
+      if (leaveTimeoutRef.current) {
+        clearTimeout(leaveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleClick = (e: React.MouseEvent) => {
     const isTouch =
