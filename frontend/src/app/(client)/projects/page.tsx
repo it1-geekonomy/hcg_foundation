@@ -115,7 +115,7 @@ export default function ProjectsPage() {
   return (
     <main className="min-h-screen bg-[#FFF8E2]">
       <Banner
-        bgImage=""
+        bgImage="/Resources/Resources banner image.png"
         bgImageAlt="Projects"
         breadcrumbs={[
           { label: "Home", href: "/" },
