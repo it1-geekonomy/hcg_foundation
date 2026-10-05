@@ -29,16 +29,10 @@ export default function LegalDocumentPage({
   const updated = formatUpdatedAt(document?.updatedAt);
 
   return (
-    <section className="min-h-screen bg-[#FFF6D8] px-8 py-12 text-[#382E07] sm:px-12 md:px-16 lg:px-6 lg:py-16 xl:px-6 xl:py-20 2xl:px-40">
+    // From sm up the navbar floats over the page (top offset + bar height), so
+    // the top padding clears it before adding breathing room.
+    <section className="min-h-screen bg-[#FFF6D8] px-8 py-12 text-[#382E07] sm:px-12 sm:pt-[calc(clamp(0.75rem,2vw,1.5rem)_+_clamp(3.5rem,6vw,4.5rem)_+_3rem)] md:px-16 lg:px-6 lg:pb-16 xl:px-6 xl:pb-20 2xl:px-40">
       <div className="mx-auto max-w-3xl">
-        <Typography
-          variant="caption-1"
-          as="p"
-          className="mb-3 font-semibold tracking-[0.18em] text-[#6F5E09] uppercase"
-        >
-          HCG Foundation
-        </Typography>
-
         <Typography
           variant="heading-3"
           as="h1"
