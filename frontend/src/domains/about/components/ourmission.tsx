@@ -372,7 +372,7 @@ export default function MissionVision({ className = "" }: MissionVisionProps) {
 
         {/* ---------- Vision, lg only: full width, 2 partitions ---------- */}
         <div className="hidden lg:col-span-2 lg:row-start-4 lg:mt-10 max-w-4xl lg:block xl:hidden">
-          <TitleBar icon="/ourvision/visionicon.png" title="Our Vision" />
+          <TitleBar icon="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790835289594-mb01b-fi_1078327.webp" title="Our Vision" />
 
           <ul className="mt-8 grid grid-cols-2 items-start gap-x-6 gap-y-6">
             {VISION_ITEMS.map((item) => (
