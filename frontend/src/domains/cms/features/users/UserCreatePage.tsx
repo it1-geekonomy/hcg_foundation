@@ -46,7 +46,7 @@ export default function UserCreatePage() {
         backHref="/admin/users"
         backLabel="Back to users"
         title="Create user"
-        description="Admin account only — no SEO fields."
+        description="Admin account only"
       />
 
       <form

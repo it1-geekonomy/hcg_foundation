@@ -2,7 +2,6 @@
 
 import React, { use, useState, useEffect, useRef } from "react";
 import { notFound } from "next/navigation";
-import { Calendar } from "lucide-react";
 import Typography from "@/lib/Typography";
 import Banner from "@/shared/components/Herobannersection";
 import DonateForm from "@/shared/components/DonateForm";
@@ -173,18 +172,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               >
                 {projectItem.title}
               </Typography>
-
-              {/* Metadata: Project date (same treatment as event date/location) */}
-              {projectItem.date && (
-                <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-4 sm:gap-6">
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <Calendar className="size-4 text-[#C08600] shrink-0" />
-                    <Typography variant="body-10" as="span" className="font-argestadisplay font-normal text-[#C08600]">
-                      {projectItem.date}
-                    </Typography>
-                  </div>
-                </div>
-              )}
 
               {/* Story Paragraphs */}
               <div className="mt-4 sm:mt-5 max-h-[25rem] sm:max-h-[30rem] lg:max-h-[35rem] xl:max-h-[40rem] overflow-y-auto no-scrollbar pr-2 sm:pr-4">
