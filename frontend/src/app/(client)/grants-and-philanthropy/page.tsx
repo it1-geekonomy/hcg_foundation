@@ -335,7 +335,7 @@ export default function GrantsAndPhilanthropyPage() {
             <Typography
               variant="heading-2"
               as="h2"
-              className="font-tiempos-headline font-normal italic text-left text-[#0D2838] leading-tight md:text-[1.85rem] lg:text-[2.25rem]"
+              className="font-tiempos-headline font-normal italic text-left text-[#0D2838] leading-tight"
             >
               Creating Lasting Change <br className="hidden md:inline" />
               Through Partnership

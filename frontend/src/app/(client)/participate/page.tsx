@@ -272,12 +272,12 @@ export default function ParticipatePage() {
               <div className="p-5 md:p-3.5 lg:p-7 pt-2.5 md:pt-2 lg:pt-3 flex-1 flex flex-col justify-between bg-[#FFFCF3] rounded-b-[0.25rem]">
                 <div>
                   <div className="mb-2 md:mb-1.5 lg:mb-3">
-                    <Typography variant="heading-10" as="h2" className="font-argestadisplay font-normal text-[#0D2838] md:text-[1.25rem] lg:text-[1.5rem]">
+                    <Typography variant="heading-10" as="h2" className="font-argestadisplay font-normal text-[#0D2838]">
                       {card.title}
                     </Typography>
                   </div>
                   <div className="mb-4 md:mb-3 lg:mb-6">
-                    <Typography variant="body-9" as="p" className="font-manrope font-normal text-[#6C6C6C] md:text-[0.8125rem] lg:text-[0.9375rem] md:leading-relaxed">
+                    <Typography variant="body-9" as="p" className="font-manrope font-normal text-[#6C6C6C]">
                       {card.description}
                     </Typography>
                   </div>

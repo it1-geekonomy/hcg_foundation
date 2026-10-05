@@ -373,7 +373,7 @@ export default function CsrPartnerPage() {
             <Typography
               variant="heading-2"
               as="h2"
-              className="font-tiempos-headline font-normal italic text-left text-[#0D2838] leading-tight md:text-[1.85rem] lg:text-[2.25rem]"
+              className="font-tiempos-headline font-normal italic text-left text-[#0D2838] leading-tight"
             >
               <span className="inline md:block">Together, We Can Create </span>
               <span className="inline md:block">Greater Impact</span>
