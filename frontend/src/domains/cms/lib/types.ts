@@ -20,6 +20,8 @@ export type Team = SeoFields & {
   content?: string | null;
   /** team | trustee — API field name is `type` */
   type: TeamType;
+  /** Ascending; scoped separately for team members and trustees. */
+  displayOrder: number;
   status: ContentStatus;
   deletedAt?: string | null;
   createdAt: string;
@@ -32,6 +34,8 @@ export type TeamFields = SeoFields & {
   type: TeamType;
   designation?: string;
   content?: string;
+  /** Omit on create to append at the end of the list. */
+  displayOrder?: string;
   status?: ContentStatus;
   metaTitle?: string;
   metaDescription?: string;

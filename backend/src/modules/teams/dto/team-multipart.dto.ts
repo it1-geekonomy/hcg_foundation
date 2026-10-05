@@ -21,6 +21,9 @@ export class CreateTeamMultipartDto {
   })
   content?: string;
 
+  @ApiPropertyOptional({ example: 1 })
+  displayOrder?: number;
+
   @ApiProperty({
     enum: TeamType,
     example: TeamType.TEAM,

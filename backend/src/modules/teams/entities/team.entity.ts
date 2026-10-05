@@ -19,6 +19,10 @@ export class Team extends SeoContentEntity {
   @Column({ type: 'text', nullable: true })
   content?: string;
 
+  @Index('idx_teams_display_order')
+  @Column({ name: 'display_order', type: 'int', nullable: false, default: 1 })
+  displayOrder: number;
+
   @Column({
     type: 'enum',
     enumName: 'team_type',

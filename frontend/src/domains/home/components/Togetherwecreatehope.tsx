@@ -79,7 +79,7 @@ function TogetherCarousel({ slides }: { slides: CarouselSlide[] }) {
         <Typography
           variant="body-3"
           as="p"
-          className="max-w-lg text-white/70 lg:mb-12 font-light font-argestadisplay"
+          className="hidden lg:block max-w-lg text-white/70 lg:mb-12 font-light font-argestadisplay"
         >
           {current.description}
         </Typography>

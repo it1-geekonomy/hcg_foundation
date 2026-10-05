@@ -197,6 +197,7 @@ export default function TeamsListPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Designation</TableHead>
+                <TableHead className="w-20">Order</TableHead>
                 {tab === "deleted" ? (
                   <TableHead>Deleted at</TableHead>
                 ) : (
@@ -208,7 +209,7 @@ export default function TeamsListPage() {
             <TableBody>
               {teams.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-cms-muted">
+                  <TableCell colSpan={7} className="text-cms-muted">
                     {tab === "deleted" ? (
                       "No deleted members."
                     ) : (
@@ -257,6 +258,9 @@ export default function TeamsListPage() {
                       </Typography>
                     </TableCell>
                     <TableCell>{team.designation || "—"}</TableCell>
+                    <TableCell className="text-cms-muted">
+                      {team.displayOrder ?? "—"}
+                    </TableCell>
                     <TableCell>
                       {tab === "deleted" ? (
                         <Typography
