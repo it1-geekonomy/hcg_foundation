@@ -243,14 +243,14 @@ export default function ParticipatePage() {
         </div>
 
         {/* 3-Column Vertical Cards Grid matching Figma */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-12 sm:mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-4 lg:gap-8 mb-12 sm:mb-16">
           {PARTICIPATE_CARDS.map((card) => (
             <div
               key={card.id}
               className="group flex flex-col justify-between overflow-hidden rounded-t-[0.375rem] rounded-b-[0.25rem] bg-[#FFFCF3] shadow-xs transition duration-300 hover:shadow-md"
             >
               {/* Card Top: Image Asset */}
-              <div className="w-full h-[15rem] sm:h-[16.25rem] lg:h-[22.1875rem] overflow-hidden relative bg-[#EFEAD8]">
+              <div className="w-full h-[15rem] sm:h-[16.25rem] md:h-[11rem] lg:h-[16.5rem] xl:h-[22.1875rem] overflow-hidden relative bg-[#EFEAD8]">
                 <img
                   src={card.imageUrl}
                   alt={card.title}
@@ -260,7 +260,7 @@ export default function ParticipatePage() {
               </div>
 
               {/* Floating Circular Icon Badge matching Figma Frame 556 */}
-              <div className="-mt-9 lg:-mt-10 ml-6 relative z-10 size-18 lg:size-20 rounded-full bg-[#FFF3CC] flex items-center justify-center border-2 border-white shadow-sm shrink-0 p-3.5 lg:p-4">
+              <div className="-mt-8 md:-mt-7 lg:-mt-10 ml-4 md:ml-4 lg:ml-6 relative z-10 size-16 md:size-14 lg:size-20 rounded-full bg-[#FFF3CC] flex items-center justify-center shrink-0 p-3 md:p-2.5 lg:p-4">
                 <img
                   src={card.iconUrl}
                   alt={card.title}
@@ -269,15 +269,15 @@ export default function ParticipatePage() {
               </div>
 
               {/* Card Body: Title, Description, Apply Button (Rectangle 1663: #FFFCF3) */}
-              <div className="p-6 sm:p-7 pt-3 flex-1 flex flex-col justify-between bg-[#FFFCF3] rounded-b-[0.25rem]">
+              <div className="p-5 md:p-3.5 lg:p-7 pt-2.5 md:pt-2 lg:pt-3 flex-1 flex flex-col justify-between bg-[#FFFCF3] rounded-b-[0.25rem]">
                 <div>
-                  <div className="mb-3">
-                    <Typography variant="heading-10" as="h2" className="font-argestadisplay font-normal text-[#0D2838]">
+                  <div className="mb-2 md:mb-1.5 lg:mb-3">
+                    <Typography variant="heading-10" as="h2" className="font-argestadisplay font-normal text-[#0D2838] md:text-[1.25rem] lg:text-[1.5rem]">
                       {card.title}
                     </Typography>
                   </div>
-                  <div className="mb-6">
-                    <Typography variant="body-9" as="p" className="font-manrope font-normal text-[#6C6C6C]">
+                  <div className="mb-4 md:mb-3 lg:mb-6">
+                    <Typography variant="body-9" as="p" className="font-manrope font-normal text-[#6C6C6C] md:text-[0.8125rem] lg:text-[0.9375rem] md:leading-relaxed">
                       {card.description}
                     </Typography>
                   </div>
@@ -289,16 +289,16 @@ export default function ParticipatePage() {
                     onClick={() =>
                       setActiveModalType(card.id as ParticipateModalType)
                     }
-                    className="inline-flex items-center justify-between w-[9.5rem] sm:w-[10.5rem] lg:w-[11.6875rem] h-[2.75rem] sm:h-[3rem] lg:h-[3.5625rem] pl-3.5 pr-2 py-1.5 lg:pl-[1.1025rem] lg:pr-[0.58rem] lg:py-[0.58rem] gap-2 lg:gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 active:scale-95 cursor-pointer"
+                    className="inline-flex items-center justify-between w-[9.5rem] sm:w-[10.5rem] md:w-[8.5rem] lg:w-[11.6875rem] h-[2.5rem] md:h-[2.5rem] lg:h-[3.5625rem] pl-3.5 pr-2 py-1.5 md:pl-2.5 md:pr-1.5 lg:pl-[1.1025rem] lg:pr-[0.58rem] lg:py-[0.58rem] gap-2 lg:gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 shadow-xs transition duration-300 hover:bg-[#E9B510] hover:scale-105 active:scale-95 cursor-pointer"
                   >
-                    <span className="font-manrope font-semibold text-[0.875rem] sm:text-[1rem] lg:text-[1.125rem] leading-[150%] tracking-[0.02em] text-[#2D2D2D]">
+                    <span className="font-manrope font-semibold text-[0.875rem] sm:text-[1rem] md:text-[0.875rem] lg:text-[1.125rem] leading-[150%] tracking-[0.02em] text-[#2D2D2D]">
                       Apply Now
                     </span>
                     <img
                       src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790849562451-vj014-vector-17-.webp"
                       alt=""
                       aria-hidden="true"
-                      className="w-[1rem] h-[0.8rem] lg:w-[1.2925rem] lg:h-[1.034rem] object-contain shrink-0"
+                      className="w-[1rem] h-[0.8rem] md:w-[0.9rem] md:h-[0.75rem] lg:w-[1.2925rem] lg:h-[1.034rem] object-contain shrink-0"
                     />
                   </button>
                 </div>

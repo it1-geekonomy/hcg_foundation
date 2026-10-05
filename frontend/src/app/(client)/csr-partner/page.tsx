@@ -373,14 +373,15 @@ export default function CsrPartnerPage() {
             <Typography
               variant="heading-2"
               as="h2"
-              className="font-tiempos-headline font-normal italic text-left text-[#0D2838] leading-tight"
+              className="font-tiempos-headline font-normal italic text-left text-[#0D2838] leading-tight md:text-[1.85rem] lg:text-[2.25rem]"
             >
               <span className="inline md:block">Together, We Can Create </span>
               <span className="inline md:block">Greater Impact</span>
             </Typography>
           </div>
-          <div className="flex flex-col items-start gap-[0.625rem] max-w-[32rem]">
-            <div data-anim="bottom-desc">
+          <div className="w-full flex-1 flex flex-col items-start gap-[0.625rem] md:max-w-[45rem]">
+
+            <div data-anim="bottom-desc" className="w-full">
               <Typography
                 variant="body-10"
                 as="p"
@@ -393,7 +394,7 @@ export default function CsrPartnerPage() {
               type="button"
               data-anim="bottom-cta"
               onClick={() => setIsPartnerModalOpen(true)}
-              className="w-auto px-5 sm:px-6 lg:w-[13.1875rem] h-[2.75rem] sm:h-[3.25rem] lg:h-[3.5625rem] inline-flex items-center justify-center gap-2 sm:gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 backdrop-blur-[2.625rem] transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer shrink-0 whitespace-nowrap"
+              className="self-center md:self-start w-auto px-5 sm:px-6 lg:w-[13.1875rem] h-[2.75rem] sm:h-[3.25rem] lg:h-[3.5625rem] inline-flex items-center justify-center gap-2 sm:gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 backdrop-blur-[2.625rem] transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer shrink-0 whitespace-nowrap"
             >
               <Typography
                 variant="button-1"

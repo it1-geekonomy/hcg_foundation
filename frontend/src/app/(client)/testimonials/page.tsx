@@ -217,7 +217,7 @@ export default function TestimonialsPage() {
             <Typography
               variant="body-10"
               as="p"
-              className="font-argestadisplay font-normal text-justify text-[#596D79]"
+              className="font-argestadisplay font-normal text-left text-[#596D79]"
             >
               Every journey is filled with courage, compassion, and
               resilience. Explore inspiring patient stories, community
@@ -246,32 +246,32 @@ export default function TestimonialsPage() {
             className="mt-8 py-10 sm:mt-12"
           />
         ) : (
-        /* Horizontal 3D Carousel */
-        <div className="relative mt-8 sm:mt-12 w-full h-[16rem] sm:h-[18.5rem] lg:h-[16.5rem] xl:h-[19.5rem] 2xl:h-[22.5rem] overflow-visible flex items-center justify-center">
-          {loading ? (
-            <div className="animate-pulse flex gap-4 w-full justify-center">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="w-[30%] h-64 bg-black/10 rounded-xl"
+          /* Horizontal 3D Carousel */
+          <div className="relative mt-8 sm:mt-12 w-full h-[16rem] sm:h-[18.5rem] lg:h-[16.5rem] xl:h-[19.5rem] 2xl:h-[22.5rem] overflow-visible flex items-center justify-center">
+            {loading ? (
+              <div className="animate-pulse flex gap-4 w-full justify-center">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="w-[30%] h-64 bg-black/10 rounded-xl"
+                  />
+                ))}
+              </div>
+            ) : (
+              testimonials.map((item, idx) => (
+                <TestimonialCard
+                  key={item.id}
+                  item={item as any}
+                  diff={getRelativeOffset(idx)}
+                  windowWidth={windowWidth}
+                  onDragEnd={handleDragEnd}
+                  onNext={handleNext}
+                  onPrev={handlePrev}
+                  onPlayVideo={(url) => setActiveVideoUrl(url)}
                 />
-              ))}
-            </div>
-          ) : (
-            testimonials.map((item, idx) => (
-              <TestimonialCard
-                key={item.id}
-                item={item as any}
-                diff={getRelativeOffset(idx)}
-                windowWidth={windowWidth}
-                onDragEnd={handleDragEnd}
-                onNext={handleNext}
-                onPrev={handlePrev}
-                onPlayVideo={(url) => setActiveVideoUrl(url)}
-              />
-            ))
-          )}
-        </div>
+              ))
+            )}
+          </div>
         )}
 
         {/* Controls */}
