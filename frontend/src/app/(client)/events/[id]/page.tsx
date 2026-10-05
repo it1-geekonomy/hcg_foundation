@@ -98,15 +98,14 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
   return (
     <main className="min-h-screen bg-[#FFF8E2]">
       <Banner
-        bgImage={eventItem?.imageUrl || ""}
-        bgImageMobile={eventItem?.mobileImageUrl || ""}
-        bgImageAlt={eventItem?.title || "Events"}
+        bgImage="/Resources/Resources banner image.png"
+        bgImageAlt="Events"
         breadcrumbs={[
           { label: "Home", href: "/#events" },
           { label: "Resources" },
           { label: "Events" },
         ]}
-        title={eventItem?.title || "Events"}
+        title="Events"
       />
 
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>

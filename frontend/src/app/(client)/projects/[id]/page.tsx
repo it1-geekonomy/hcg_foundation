@@ -125,9 +125,8 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   return (
     <main className="min-h-screen bg-[#FFF8E2]">
       <Banner
-        bgImage={projectItem?.imageUrl || ""}
-        bgImageMobile={projectItem?.mobileImageUrl || ""}
-        bgImageAlt={projectItem?.title || "Projects"}
+        bgImage="/Resources/Resources banner image.png"
+        bgImageAlt="Projects"
         breadcrumbs={[
           {
             label: "Home",
@@ -139,7 +138,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           },
           { label: "Resources" },
         ]}
-        title={projectItem?.title || "Projects"}
+        title="Projects"
       />
 
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
