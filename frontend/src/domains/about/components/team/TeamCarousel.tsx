@@ -19,16 +19,18 @@ import { useSyncedLabelHeight } from "./useSyncedLabelHeight";
 const TRACK_TOP_PAD = "5rem";
 /** Minimum horizontal drag (px) before a mouse/touch drag counts as a "next/prev" gesture. */
 const SWIPE_THRESHOLD_PX = 30;
+/** How long (ms) a clicked arrow's target index is trusted while the smooth scroll is still running. */
+const PENDING_TARGET_MS = 650;
 
 /**
  * Desktop track carousel. `visibleCount` / `cardWidthPx` default to the
  * original lg/xl values (3 cards at CARD_W) so the same component can be
  * reused for the 2xl grid when there are more than 4 people.
  *
- * Scrolling model matches the mobile ArrowScrollCarousel: a real
- * overflow-x-auto + snap-x track, with wheel/touch/mouse-drag gestures
- * captured so that exactly one card shifts per physical scroll/swipe/drag,
- * regardless of speed or distance.
+ * Scrolling model: a real overflow-x-auto + snap-x track. Every gesture
+ * (arrow, wheel, touch, mouse drag) moves to an exact card INDEX
+ * (index * step), so the track always lands with whole cards aligned to
+ * the left edge — never half cards — for any visibleCount (1, 2, 3, 4...).
  */
 export function TeamCarousel({
   people,
@@ -43,15 +45,9 @@ export function TeamCarousel({
     visibleCount * cardWidthPx + (visibleCount - 1) * CAROUSEL_GAP_PX;
   const needsCarousel = people.length > visibleCount;
 
-  // Card width is derived purely in CSS (via container query units, set up
-  // below on the scroll container) instead of measured in JS. It resolves
-  // to whichever is smaller: the design width (cardWidthPx), or an equal
-  // share of however much space the scroll container actually has. This is
-  // what prevents the last visible card from being cropped when padding +
-  // arrows + gaps leave less room than visibleCount*cardWidthPx needs (e.g.
-  // at the 2xl breakpoint) — and because it's resolved by the browser's
-  // layout engine on every paint, it's correct immediately, with no
-  // measurement race and no dependency on refresh timing.
+  // Card width is derived purely in CSS (container query units): the smaller
+  // of the design width or an equal share of the available track width, so
+  // exactly `visibleCount` whole cards always fit.
   const totalGapsPx = (visibleCount - 1) * CAROUSEL_GAP_PX;
   const cardWidthExpr = `min(${cardWidthPx}px, calc((100cqw - ${totalGapsPx}px) / ${visibleCount}))`;
 
@@ -72,25 +68,78 @@ export function TeamCarousel({
     setAtEnd(el.scrollLeft >= el.scrollWidth - el.clientWidth - 4);
   }, []);
 
+  /** Exact distance (px) between two neighbouring cards, measured from the DOM. */
   const getCardStep = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return 0;
-    const card = el.querySelector<HTMLElement>("[data-card]");
+    const cards = el.querySelectorAll<HTMLElement>("[data-card]");
+    if (cards.length >= 2) {
+      return (
+        cards[1].getBoundingClientRect().left -
+        cards[0].getBoundingClientRect().left
+      );
+    }
+    const card = cards[0];
     return card ? card.offsetWidth + CAROUSEL_GAP_PX : el.clientWidth;
   }, []);
 
-  /** Advance/retreat by exactly one card. */
+  /** Highest valid card index to land on. */
+  const getMaxIndex = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return 0;
+    const step = getCardStep();
+    if (step <= 0) return 0;
+    return Math.max(0, Math.round((el.scrollWidth - el.clientWidth) / step));
+  }, [getCardStep]);
+
+  // Target index of an in-flight smooth scroll, so rapid arrow clicks keep
+  // stepping from where the carousel is GOING, not from a mid-animation offset.
+  const pendingIndexRef = useRef<number | null>(null);
+  const pendingTimerRef = useRef<number | null>(null);
+
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      const el = scrollRef.current;
+      if (!el) return;
+      const step = getCardStep();
+      const maxIndex = getMaxIndex();
+      const clamped = Math.min(maxIndex, Math.max(0, index));
+
+      pendingIndexRef.current = clamped;
+      if (pendingTimerRef.current != null)
+        window.clearTimeout(pendingTimerRef.current);
+      pendingTimerRef.current = window.setTimeout(() => {
+        pendingIndexRef.current = null;
+      }, PENDING_TARGET_MS);
+
+      el.scrollTo({ left: clamped * step, behavior: "smooth" });
+    },
+    [getCardStep, getMaxIndex],
+  );
+
+  /** Advance/retreat by exactly one card, always landing on a card boundary. */
   const scrollByCard = useCallback(
     (dir: 1 | -1) => {
       const el = scrollRef.current;
       if (!el) return;
-      el.scrollBy({ left: dir * getCardStep(), behavior: "smooth" });
+      const step = getCardStep();
+      if (step <= 0) return;
+      const base =
+        pendingIndexRef.current ?? Math.round(el.scrollLeft / step);
+      scrollToIndex(base + dir);
     },
-    [getCardStep],
+    [getCardStep, scrollToIndex],
   );
 
   const goPrev = () => scrollByCard(-1);
   const goNext = () => scrollByCard(1);
+
+  useEffect(() => {
+    return () => {
+      if (pendingTimerRef.current != null)
+        window.clearTimeout(pendingTimerRef.current);
+    };
+  }, []);
 
   // ---- Gesture capture: wheel, touch — each always moves the carousel by
   // exactly one card, no matter how fast/far/long the gesture is.
@@ -174,9 +223,7 @@ export function TeamCarousel({
 
   // ---- Mouse click-drag (desktop, non-touch pointers only) ----
   // Uses refs (not React state) for the live drag values so every
-  // pointermove reads the current, non-stale drag status — state updates
-  // are batched/async and were causing the first move events after
-  // mousedown to be silently dropped.
+  // pointermove reads the current, non-stale drag status.
   const isDraggingRef = useRef(false);
   const dragStartXRef = useRef(0);
   const dragStartScrollLeftRef = useRef(0);
@@ -203,10 +250,9 @@ export function TeamCarousel({
     const el = scrollRef.current;
     if (!el) return;
     dragMovedRef.current = true;
-    // Live-follow the cursor while dragging (content tracks the pointer, so
-    // dragging right reveals earlier/previous cards); snapped to one card on
-    // release, matching this same direction.
-    el.scrollLeft = dragStartScrollLeftRef.current - (e.clientX - dragStartXRef.current);
+    // Live-follow the cursor while dragging.
+    el.scrollLeft =
+      dragStartScrollLeftRef.current - (e.clientX - dragStartXRef.current);
   };
 
   const endPointerDrag = (e: React.PointerEvent) => {
@@ -218,20 +264,18 @@ export function TeamCarousel({
 
     if (!dragMovedRef.current) return; // plain click, not a drag — nothing to snap
 
-    const totalDelta = e.clientX - dragStartXRef.current;
     const step = getCardStep();
+    if (step <= 0) return;
+
+    const totalDelta = e.clientX - dragStartXRef.current;
     const threshold = step / 4;
 
     let dir: -1 | 0 | 1 = 0;
-    if (totalDelta <= -threshold) dir = 1; // dragged left → advance to next card
-    else if (totalDelta >= threshold) dir = -1; // dragged right → back to previous card
+    if (totalDelta <= -threshold) dir = 1; // dragged left → next card
+    else if (totalDelta >= threshold) dir = -1; // dragged right → previous card
 
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    const target = Math.min(
-      maxScroll,
-      Math.max(0, dragStartScrollLeftRef.current + dir * step),
-    );
-    el.scrollTo({ left: target, behavior: "smooth" });
+    const startIndex = Math.round(dragStartScrollLeftRef.current / step);
+    scrollToIndex(startIndex + dir);
   };
 
   const measureStack = useCallback(() => {
@@ -254,6 +298,15 @@ export function TeamCarousel({
     const onResize = () => {
       updateEdges();
       measureStack();
+      // Re-align to a whole card after the card width changes.
+      const el = scrollRef.current;
+      const step = getCardStep();
+      if (el && step > 0) {
+        el.scrollTo({
+          left: Math.min(getMaxIndex(), Math.round(el.scrollLeft / step)) * step,
+          behavior: "auto",
+        });
+      }
     };
     window.addEventListener("resize", onResize);
 
@@ -273,7 +326,16 @@ export function TeamCarousel({
       window.removeEventListener("resize", onResize);
       ro?.disconnect();
     };
-  }, [measureStack, updateEdges, people.length, labelHeight, cardWidthPx, visibleCount]);
+  }, [
+    measureStack,
+    updateEdges,
+    getCardStep,
+    getMaxIndex,
+    people.length,
+    labelHeight,
+    cardWidthPx,
+    visibleCount,
+  ]);
 
   const arrowRail = (side: "left" | "right") => (
     <div className="flex flex-none flex-col">
@@ -315,9 +377,6 @@ export function TeamCarousel({
           width: `min(${trackWidth}px, 100%)`,
           touchAction: "pan-y",
           scrollSnapType: dragging ? "none" : undefined,
-          // Establishes the container-query context that cardWidthExpr's
-          // `cqw` units resolve against — i.e. this element's own (post
-          // flex-shrink) content width, whatever that ends up being.
           containerType: "inline-size",
         } as CSSProperties}
         className={cx(
@@ -331,9 +390,15 @@ export function TeamCarousel({
           dragging ? "cursor-grabbing" : needsCarousel && "cursor-grab",
         )}
       >
-        <div className="flex gap-6">
+        {/* Gap is set from the same constant used in the card-width math so
+            step size and card size can never drift apart. */}
+        <div className="flex" style={{ gap: CAROUSEL_GAP_PX }}>
           {people.map((p, i) => (
-            <div key={personKey(p, i)} data-card className="flex-none snap-center">
+            <div
+              key={personKey(p, i)}
+              data-card
+              className="flex-none snap-start"
+            >
               <PersonCard
                 {...p}
                 widthClass={CAROUSEL_CARD_WIDTH_CLASS}

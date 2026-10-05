@@ -176,7 +176,7 @@ export function PersonCard({
               <Typography
                 variant="body-9"
                 as="p"
-                className="font-manrope font-semibold text-white truncate"
+                className="font-manrope font-semibold text-white"
               >
                 {name}
               </Typography>
