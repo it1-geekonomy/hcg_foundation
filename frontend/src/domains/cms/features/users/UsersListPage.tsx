@@ -95,7 +95,7 @@ export default function UsersListPage() {
           as="p"
           className="max-w-xl text-cms-muted"
         >
-          CMS admin accounts. Create users separately — this page is the list
+          CMS admin accounts. Create users separately this page is the list
           only.
         </Typography>
         <Link
