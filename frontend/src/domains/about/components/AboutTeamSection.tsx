@@ -9,14 +9,6 @@ import {
 } from "@/domains/about/constants/teams";
 import Typography from "@/lib/Typography";
 
-function sortOldestFirst<T extends { createdAt?: string }>(items: T[]): T[] {
-  return [...items].sort((a, b) => {
-    const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-    const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-    return aTime - bTime;
-  });
-}
-
 /**
  * About Us team block — loads published trustees + team from CMS only.
  * No static / dummy people or photos.
@@ -60,15 +52,11 @@ export default function AboutTeamSection() {
 
         setTrustees(
           trusteesOk
-            ? sortOldestFirst(trusteesResult.value.data ?? []).map(
-                mapTeamToPerson,
-              )
+            ? (trusteesResult.value.data ?? []).map(mapTeamToPerson)
             : [],
         );
         setTeamMembers(
-          teamOk
-            ? sortOldestFirst(teamResult.value.data ?? []).map(mapTeamToPerson)
-            : [],
+          teamOk ? (teamResult.value.data ?? []).map(mapTeamToPerson) : [],
         );
         setError(null);
       } catch (err) {

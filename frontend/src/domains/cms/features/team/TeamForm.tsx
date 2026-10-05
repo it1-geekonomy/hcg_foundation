@@ -38,6 +38,7 @@ export type TeamFormValues = {
   type: TeamType;
   designation: string;
   content: string;
+  displayOrder: string;
   status: ContentStatus;
   teamImageFile: File | null;
   teamImageUrl: string | null;
@@ -48,6 +49,7 @@ export const emptyTeamForm = (): TeamFormValues => ({
   type: "team",
   designation: "",
   content: "",
+  displayOrder: "",
   status: "draft",
   teamImageFile: null,
   teamImageUrl: null,
@@ -59,6 +61,7 @@ export function teamToFormValues(team: Team): TeamFormValues {
     type: team.type ?? "team",
     designation: team.designation ?? "",
     content: team.content ?? "",
+    displayOrder: team.displayOrder != null ? String(team.displayOrder) : "",
     status: team.status ?? "draft",
     teamImageFile: null,
     teamImageUrl: team.teamImage ?? null,
@@ -77,6 +80,7 @@ export function formValuesToFields(form: TeamFormValues): TeamFields {
     type: form.type,
     designation: form.designation.trim() || undefined,
     content: plainContent ? form.content : undefined,
+    displayOrder: form.displayOrder.trim() || undefined,
     status: form.status,
   };
 }
@@ -122,6 +126,7 @@ export function getTeamPatch(
     "type",
     "designation",
     "content",
+    "displayOrder",
     "status",
   ];
 
@@ -129,6 +134,8 @@ export function getTeamPatch(
     const before = prev[key] as string | undefined;
     const after = next[key] as string | undefined;
     if (valuesEqual(key, before, after)) continue;
+    // The backend requires an order ≥ 1; a cleared field keeps the current slot.
+    if (key === "displayOrder" && after === undefined) continue;
     fields[key] = (after === undefined ? "" : after) as never;
   }
 
@@ -236,19 +243,40 @@ export default function TeamForm({
           />
         </CmsFormField>
 
-        <CmsFormField label="Status" htmlFor="status">
-          <CmsSelect
-            id="status"
-            value={value.status}
-            options={CONTENT_STATUS_OPTIONS}
-            onChange={(status) =>
-              onChange({
-                ...value,
-                status: status as ContentStatus,
-              })
-            }
-          />
-        </CmsFormField>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CmsFormField
+            label="Display order"
+            htmlFor="displayOrder"
+            hint={`Position among ${value.type === "trustee" ? "trustees" : "team members"} (1 shows first). Leave blank to add at the end.`}
+          >
+            <Input
+              id="displayOrder"
+              type="number"
+              min={1}
+              step={1}
+              inputMode="numeric"
+              placeholder="e.g. 1"
+              value={value.displayOrder}
+              onChange={(e) =>
+                onChange({ ...value, displayOrder: e.target.value })
+              }
+            />
+          </CmsFormField>
+
+          <CmsFormField label="Status" htmlFor="status">
+            <CmsSelect
+              id="status"
+              value={value.status}
+              options={CONTENT_STATUS_OPTIONS}
+              onChange={(status) =>
+                onChange({
+                  ...value,
+                  status: status as ContentStatus,
+                })
+              }
+            />
+          </CmsFormField>
+        </div>
       </div>
 
       <Button

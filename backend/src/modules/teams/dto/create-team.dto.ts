@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 import { SeoFieldsDto } from '../../../common/dto/seo-fields.dto';
 import { ContentStatus } from '../../../common/enums/content-status.enum';
 import { TeamType } from '../../../common/enums/team-type.enum';
@@ -32,6 +33,16 @@ export class CreateTeamDto extends SeoFieldsDto {
   @IsOptional()
   @IsString()
   content?: string;
+
+  @ApiPropertyOptional({
+    example: 1,
+    description: 'Order of display (ascending). If omitted, item is appended at the end.',
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Type(() => Number)
+  displayOrder?: number;
 
   @ApiProperty({
     enum: TeamType,

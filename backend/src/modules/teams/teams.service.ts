@@ -5,11 +5,18 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ContentStatus } from '../../common/enums/content-status.enum';
+import { TeamType } from '../../common/enums/team-type.enum';
 import {
   buildPaginatedResult,
   PaginatedResult,
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
+import {
+  applyDisplayOrderUpdate,
+  compactDisplayOrderAfterDelete,
+  assignDisplayOrderOnRestore,
+  prepareInsertDisplayOrder,
+} from '../../common/utils/display-order';
 import {
   applyDeletedFilter,
   restoreSoftDeleted,
@@ -40,10 +47,19 @@ export class TeamsService {
       ? await this.cdn.upload(files.teamImage, 'teams')
       : undefined;
 
+    const { displayOrder: requestedOrder, ...rest } = dto;
+    const typeScope = { type: rest.type ?? TeamType.TEAM };
+    const displayOrder = await prepareInsertDisplayOrder(
+      this.repo,
+      requestedOrder,
+      typeScope,
+    );
+
     try {
       const entity = this.repo.create({
-        ...dto,
+        ...rest,
         teamImage,
+        displayOrder,
         status: dto.status ?? ContentStatus.DRAFT,
       });
       return await this.repo.save(entity);
@@ -59,7 +75,8 @@ export class TeamsService {
 
     const qb = this.repo
       .createQueryBuilder('entity')
-      .orderBy('entity.createdAt', 'DESC');
+      .orderBy('entity.displayOrder', 'ASC')
+      .addOrderBy('entity.createdAt', 'DESC');
     applyDeletedFilter(qb, query);
 
     if (query.status) {
@@ -113,7 +130,19 @@ export class TeamsService {
     files?: TeamFiles,
   ): Promise<Team> {
     const entity = await this.findOne(id);
-    Object.assign(entity, dto);
+    const { displayOrder: newOrder, ...rest } = dto;
+    Object.assign(entity, rest);
+
+    if (newOrder !== undefined && newOrder !== entity.displayOrder) {
+      entity.displayOrder = await applyDisplayOrderUpdate(
+        this.repo,
+        id,
+        entity.displayOrder,
+        newOrder,
+        { type: entity.type },
+      );
+    }
+
     const newTeamImage = await this.cdn.replace(
       entity.teamImage,
       files?.teamImage,
@@ -125,10 +154,13 @@ export class TeamsService {
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
+    const removedOrder = entity.displayOrder;
     await this.repo.softRemove(entity);
+    await compactDisplayOrderAfterDelete(this.repo, removedOrder, { type: entity.type });
   }
 
   async restore(id: string): Promise<Team> {
-    return restoreSoftDeleted(this.repo, id, 'Team member');
+    const entity = await restoreSoftDeleted(this.repo, id, 'Team member');
+    return assignDisplayOrderOnRestore(this.repo, entity, { type: entity.type });
   }
 }
