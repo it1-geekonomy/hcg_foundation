@@ -204,9 +204,8 @@ function PhilanthropyTiltCard({ card }: { card: PhilanthropyCard }) {
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         style={{
-          transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) ${
-            tilt.isHovered ? "translateY(-6px) scale(1.01)" : "translateY(0) scale(1)"
-          }`,
+          transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) ${tilt.isHovered ? "translateY(-6px) scale(1.01)" : "translateY(0) scale(1)"
+            }`,
           boxShadow: tilt.isHovered
             ? `${-tilt.x * 16}px ${-tilt.y * 16 + 18}px 32px -8px rgba(13, 40, 56, 0.12), 0 6px 16px -4px rgba(13, 40, 56, 0.06)`
             : "none",
@@ -342,8 +341,8 @@ export default function GrantsAndPhilanthropyPage() {
               Through Partnership
             </Typography>
           </div>
-          <div className="flex flex-col items-start gap-3 sm:gap-3.5 max-w-[32rem]">
-            <div data-anim="bottom-desc">
+          <div className="w-full flex-1 flex flex-col items-start gap-3 sm:gap-3.5 md:max-w-[32rem]">
+            <div data-anim="bottom-desc" className="w-full">
               <Typography variant="body-10" as="p" className="font-argestadisplay font-normal text-left text-[#121212]">
                 Your contribution can help a patient receive care, give a family hope, and help build healthier communities.
               </Typography>
@@ -352,7 +351,7 @@ export default function GrantsAndPhilanthropyPage() {
               type="button"
               data-anim="bottom-cta"
               onClick={() => setIsPartnerModalOpen(true)}
-              className="w-auto px-5 sm:px-6 lg:w-[13.1875rem] h-[2.75rem] sm:h-[3.25rem] lg:h-[3.5625rem] inline-flex items-center justify-center gap-2 sm:gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 backdrop-blur-[42px] transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer shrink-0 whitespace-nowrap"
+              className="self-center md:self-start w-auto px-5 sm:px-6 lg:w-[13.1875rem] h-[2.75rem] sm:h-[3.25rem] lg:h-[3.5625rem] inline-flex items-center justify-center gap-2 sm:gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 backdrop-blur-[42px] transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer shrink-0 whitespace-nowrap"
             >
               <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#2D2D2D] whitespace-nowrap">
                 Partner With Us

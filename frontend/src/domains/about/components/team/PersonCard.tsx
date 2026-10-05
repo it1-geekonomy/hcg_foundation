@@ -63,6 +63,23 @@ export function PersonCard({
 
   const handlePointerLeave = (e: React.PointerEvent) => {
     if (e.pointerType === "touch") return;
+
+    // Verify pointer genuinely left the card's boundary
+    if (cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      const x = e.clientX;
+      const y = e.clientY;
+      // Account for the top photo cutout and a 2px tolerance on borders
+      if (
+        x >= rect.left - 2 &&
+        x <= rect.right + 2 &&
+        y >= rect.top - 65 &&
+        y <= rect.bottom + 2
+      ) {
+        return;
+      }
+    }
+
     setFlipped(false);
   };
 
@@ -95,6 +112,11 @@ export function PersonCard({
 
   const resolvedTopOffsetClass = topOffsetClass ?? DEFAULT_CARD_TOP_OFFSET_CLASS;
 
+  const currentDuration = flipped ? 0.42 : 1.0;
+  const currentEase: [number, number, number, number] = flipped
+    ? [0.25, 1, 0.5, 1]
+    : [0.4, 0.0, 0.2, 1];
+
   return (
     <div
       ref={cardRef}
@@ -108,6 +130,15 @@ export function PersonCard({
       )}
     >
       <div className="relative h-full w-full">
+        {/* Static non-rotating hit zone covering entire card area and top photo cutout */}
+        <div
+          aria-hidden="true"
+          className={cx(
+            "absolute inset-x-0 bottom-0 z-0 pointer-events-auto",
+            resolvedTopOffsetClass,
+          )}
+        />
+
         {/* FRONT FACE (rotates 0 -> 180) */}
         <motion.div
           className={cx(
@@ -120,13 +151,18 @@ export function PersonCard({
             opacity: flipped ? 0 : 1,
           }}
           transition={{
-            rotateY: { duration: 0.5, ease: [0.25, 1, 0.5, 1] },
-            opacity: { duration: 0.01, delay: flipped ? 0.22 : 0.25 },
+            rotateY: { duration: currentDuration, ease: currentEase },
+            opacity: {
+              duration: 0.01,
+              delay: flipped ? currentDuration * 0.45 : currentDuration * 0.5,
+            },
           }}
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
             transformStyle: "preserve-3d",
+            WebkitFontSmoothing: "antialiased",
+            transform: "translateZ(0)",
           }}
         >
           {/* Yellow Card Background */}
@@ -193,7 +229,7 @@ export function PersonCard({
           </div>
         </motion.div>
 
-        {/* BACK FACE (rotates -180 -> 0) — exact matching bounds with door opening animation */}
+        {/* BACK FACE (rotates -180 -> 0) */}
         <motion.div
           className={cx(
             "absolute inset-0 h-full w-full",
@@ -202,16 +238,16 @@ export function PersonCard({
           initial={false}
           animate={{
             rotateY: flipped ? 0 : -180,
-            opacity: flipped ? 1 : 0,
           }}
           transition={{
-            rotateY: { duration: 0.5, ease: [0.25, 1, 0.5, 1] },
-            opacity: { duration: 0.01, delay: flipped ? 0.25 : 0.22 },
+            rotateY: { duration: currentDuration, ease: currentEase },
           }}
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
             transformStyle: "preserve-3d",
+            WebkitFontSmoothing: "antialiased",
+            transform: "translateZ(0)",
           }}
         >
           {/* Yellow Card Background matching front */}
@@ -278,7 +314,7 @@ export function PersonCard({
               </div>
             </div>
 
-            {/* Left Sliding Door: Solid #FDE07F */}
+            {/* Left Sliding Door: Original Solid #FFF3CD */}
             <motion.div
               aria-hidden="true"
               initial={{ x: "0%" }}
@@ -291,7 +327,7 @@ export function PersonCard({
               className="absolute top-0 bottom-0 left-0 w-1/2 z-30 pointer-events-none overflow-hidden border-r border-[#E0D4AE] shadow-md bg-[#FFF3CD]"
             />
 
-            {/* Right Sliding Door: Solid #FDE07F */}
+            {/* Right Sliding Door: Original Solid #FFF3CD */}
             <motion.div
               aria-hidden="true"
               initial={{ x: "0%" }}
