@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { BookOpen, ChevronDown, Check } from "lucide-react";
+import { ChevronDown, Check } from "lucide-react";
 import Typography from "@/lib/Typography";
 
 const VOLUNTEER_AREAS = [
@@ -110,7 +110,11 @@ export default function VolunteerInterestSelect({
         } transition-all cursor-pointer`}
       >
         <div className="flex items-center gap-1.5">
-          <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-1.5" />
+          <img
+            src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269059713-dt428-book.webp"
+            alt=""
+            className="size-4 shrink-0 mr-1.5 object-contain"
+          />
           <Typography
             variant="caption-1"
             as="span"

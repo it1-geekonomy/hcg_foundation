@@ -4,24 +4,24 @@ export const AMOUNTS = ["₹3000", "₹5,000", "₹10,000", "₹15,000", "₹25,
 
 export const IMPACT_ITEMS = [
   {
-    emoji: "🏥",
-    title: "Support Treatment",
-    desc: "Help fund critical cancer treatments",
-  },
-  {
     emoji: "💰",
     title: "Financial Assistance",
-    desc: "Offer financial aid to families in need",
+    desc: "Help cancer patients access quality treatment and care.",
+  },
+  {
+    emoji: "🎗️",
+    title: "Awareness & Prevention",
+    desc: "Support screening camps and early-detection initiatives.",
   },
   {
     emoji: "🤝",
-    title: "Care & Compassion",
-    desc: "Provide emotional and holistic care",
+    title: "Psychological Support",
+    desc: "Provide emotional care and therapy for patients and families.",
   },
   {
-    emoji: "❤️",
-    title: "Hope & Recovery",
-    desc: "Bring hope and strength for tomorrow",
+    emoji: "🔬",
+    title: "Research & Innovation",
+    desc: "Support research to advance cancer diagnosis and treatment.",
   },
 ];
 

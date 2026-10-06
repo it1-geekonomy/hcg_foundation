@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { User, ChevronDown, Check, X, Search, PlusCircle } from "lucide-react";
+import { ChevronDown, Check, X, Search, PlusCircle } from "lucide-react";
 import { City, State, Country } from "country-state-city";
 import Typography from "@/lib/Typography";
 
@@ -194,7 +194,11 @@ export default function LocationSelect({
         } transition-all cursor-pointer`}
       >
         <div className="flex items-center gap-1.5">
-          <User className="size-4 text-[#0D2838] shrink-0 mr-1.5" />
+          <img
+            src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269187397-m4u96-location.webp"
+            alt=""
+            className="size-4 shrink-0 mr-1.5 object-contain"
+          />
           <Typography
             variant="caption-1"
             as="span"

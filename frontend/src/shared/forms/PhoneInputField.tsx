@@ -7,6 +7,7 @@ import {
   DONATION_COUNTRIES,
   getDonationCountry,
 } from "@/domains/home/constants/countries";
+import { nationalPhoneDigits } from "@/shared/lib/phone";
 
 interface PhoneInputFieldProps {
   label?: string;
@@ -52,17 +53,10 @@ export default function PhoneInputField({
     }
   }, [value]);
 
-  // Extract only national digits
-  const nationalDigits = useMemo(() => {
-    if (!value) return "";
-    const trimmed = value.trim();
-    const dialDigits = country.dial.replace(/\D/g, "");
-    let digits = trimmed.replace(/\D/g, "");
-    if (dialDigits && digits.startsWith(dialDigits)) {
-      digits = digits.slice(dialDigits.length);
-    }
-    return digits;
-  }, [value, country.dial]);
+  const nationalDigits = useMemo(
+    () => (value ? nationalPhoneDigits(value, country.dial) : ""),
+    [value, country.dial]
+  );
 
   const handleCountryChange = (nextCode: string) => {
     setSelectedCountryCode(nextCode);
@@ -73,16 +67,7 @@ export default function PhoneInputField({
   };
 
   const handleDigitsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let digits = e.target.value.replace(/\D/g, "");
-    const dialDigits = country.dial.replace(/\D/g, "");
-    if (
-      dialDigits &&
-      digits.startsWith(dialDigits) &&
-      digits.length > dialDigits.length
-    ) {
-      digits = digits.slice(dialDigits.length);
-    }
-    digits = digits.slice(0, 15);
+    const digits = nationalPhoneDigits(e.target.value, country.dial, nationalDigits);
     if (!digits) {
       onChange("");
     } else {
