@@ -20,6 +20,7 @@ from app.rag.normalize import normalize_for_retrieval
 from app.rag.rerank import pick_sources, rerank
 from app.rag.retrieve import hybrid_retrieve
 from app.rag.rewrite import build_multi_queries, rewrite_query
+from app.rag.team import answer_team_question
 from app.services import vector_store
 
 
@@ -48,7 +49,7 @@ def run_chat(message: str, session_id: str | None = None) -> dict:
             "response_time_ms": int((time.perf_counter() - started) * 1000),
         }
 
-    catalog = answer_catalog_question(user_message)
+    catalog = answer_team_question(user_message) or answer_catalog_question(user_message)
     if catalog:
         append_turn(sid, "user", user_message)
         append_turn(sid, "assistant", catalog["answer"])
