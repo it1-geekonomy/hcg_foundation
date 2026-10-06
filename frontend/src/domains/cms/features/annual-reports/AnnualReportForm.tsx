@@ -187,7 +187,7 @@ export default function AnnualReportForm({
         <CmsFormField
           label="Report file"
           htmlFor="annualReportFile"
-          hint="PDF or Word, max 25MB → annualReportFile"
+          hint="PDF only, no size limit → annualReportFile"
         >
           {fileUrl ? (
             <Typography variant="caption-1" as="p" className="mb-2">
@@ -205,7 +205,7 @@ export default function AnnualReportForm({
           <Input
             id="annualReportFile"
             type="file"
-            accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            accept=".pdf,application/pdf"
             onChange={(e) =>
               onChange({
                 ...value,
