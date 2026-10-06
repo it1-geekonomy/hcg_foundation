@@ -126,7 +126,8 @@ for key, what in (('broken_links', 'Chatbot links to pages the website no longer
   docker container prune -f
   docker image prune -f
   docker network prune -f
-  docker builder prune -f --filter until=168h
+  # Keep only the most recent build cache (enough for fast rebuilds); every deploy adds hundreds of MB.
+  docker builder prune -f --keep-storage 4gb
   docker system df
   df -h /
 
