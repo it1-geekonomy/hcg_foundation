@@ -5,7 +5,8 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from typing import Any
+import threading
+from typing import Any, Callable
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -16,6 +17,31 @@ from app.models.document_chunk import DocumentChunk, RagMeta
 from app.services import chunker, embeddings
 
 _FINGERPRINT_KEY = "corpus_fingerprint"
+
+# Bumped on every real index write so answer caches know when they are stale.
+# Process-local: the AI service runs as a single uvicorn worker.
+_index_version = 0
+_version_lock = threading.Lock()
+_change_listeners: list[Callable[[], None]] = []
+
+
+def index_version() -> int:
+    return _index_version
+
+
+def add_change_listener(listener: Callable[[], None]) -> None:
+    _change_listeners.append(listener)
+
+
+def _index_changed() -> None:
+    global _index_version
+    with _version_lock:
+        _index_version += 1
+    for listener in _change_listeners:
+        try:
+            listener()
+        except Exception:
+            pass
 
 
 def _db() -> Session:
@@ -137,6 +163,8 @@ def delete_row(table: str, source_id: str) -> int:
             .delete(synchronize_session=False)
         )
         db.commit()
+        if deleted:
+            _index_changed()
         return int(deleted)
     finally:
         db.close()
@@ -165,6 +193,8 @@ def delete_stale(tables: set[str], keep: set[tuple[str, str]]) -> int:
                 .delete(synchronize_session=False)
             )
         db.commit()
+        if deleted:
+            _index_changed()
         return int(deleted)
     finally:
         db.close()
@@ -247,6 +277,7 @@ def upsert_document(doc: dict, force: bool = False) -> int:
                 )
             )
         db.commit()
+        _index_changed()
         return len(pieces)
     except Exception:
         db.rollback()
@@ -260,6 +291,7 @@ def rebuild_from_documents(docs: list[dict]) -> dict:
     try:
         db.query(DocumentChunk).delete(synchronize_session=False)
         db.commit()
+        _index_changed()
     finally:
         db.close()
 
