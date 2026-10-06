@@ -91,6 +91,7 @@ export default function TeamEditPage() {
         onSubmit={onSubmit}
         submitLabel="Save changes"
         saving={saving}
+        initial={initial}
       />
     </div>
   );

@@ -145,6 +145,11 @@ export const TEAM_TYPE_OPTIONS: CmsSelectOption[] = [
   { value: "trustee", label: "Trustee" },
 ];
 
+export const DISPLAY_ORDER_MODE_OPTIONS: CmsSelectOption[] = [
+  { value: "move", label: "Move here (shift others)" },
+  { value: "swap", label: "Swap with current holder" },
+];
+
 export const TEAM_TYPE_FILTER_OPTIONS: CmsSelectOption[] = [
   { value: "", label: "All types" },
   ...TEAM_TYPE_OPTIONS,

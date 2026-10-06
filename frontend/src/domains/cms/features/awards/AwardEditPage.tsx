@@ -89,6 +89,7 @@ export default function AwardEditPage() {
         onSubmit={onSubmit}
         submitLabel="Save changes"
         saving={saving}
+        initial={initial}
       />
     </div>
   );

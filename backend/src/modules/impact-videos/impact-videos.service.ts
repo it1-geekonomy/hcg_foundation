@@ -13,10 +13,10 @@ import {
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
 import {
-  applyDisplayOrderUpdate,
   assignDisplayOrderOnRestore,
   compactDisplayOrderAfterDelete,
-  prepareInsertDisplayOrder,
+  insertWithDisplayOrder,
+  saveWithDisplayOrder,
 } from '../../common/utils/display-order';
 import {
   applyDeletedFilter,
@@ -57,18 +57,12 @@ export class ImpactVideosService {
     this.validateVideoFile(file);
     const videoUrl = await this.cdn.upload(file, 'impact-videos', 'video');
 
-    const displayOrder = await prepareInsertDisplayOrder(
-      this.repo,
-      dto.displayOrder,
-    );
-
     try {
       const entity = this.repo.create({
         videoUrl,
-        displayOrder,
         status: dto.status ?? ContentStatus.DRAFT,
       });
-      return await this.repo.save(entity);
+      return await insertWithDisplayOrder(this.repo, entity, dto.displayOrder);
     } catch (err) {
       await this.cdn.delete(videoUrl);
       throw err;
@@ -145,23 +139,15 @@ export class ImpactVideosService {
       }
     }
 
-    if (
-      dto.displayOrder !== undefined &&
-      dto.displayOrder !== entity.displayOrder
-    ) {
-      entity.displayOrder = await applyDisplayOrderUpdate(
-        this.repo,
-        id,
-        entity.displayOrder,
-        dto.displayOrder,
-      );
-    }
-
     if (dto.status !== undefined) {
       entity.status = dto.status;
     }
 
-    return await this.repo.save(entity);
+    return saveWithDisplayOrder(this.repo, entity, {
+      previousOrder: entity.displayOrder,
+      requested: dto.displayOrder,
+      mode: dto.orderMode,
+    });
   }
 
   async remove(id: string): Promise<void> {

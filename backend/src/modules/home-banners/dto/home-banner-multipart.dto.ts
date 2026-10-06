@@ -1,4 +1,9 @@
-import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import {
+  ApiPropertyOptional,
+  IntersectionType,
+  PartialType,
+} from '@nestjs/swagger';
+import { DisplayOrderModeDto } from '../../../common/dto/display-order-mode.dto';
 import { CreateHomeBannerDto } from './create-home-banner.dto';
 
 /** Swagger-only shape so file pickers appear on multipart endpoints. */
@@ -25,6 +30,7 @@ export class CreateHomeBannerMultipartDto extends CreateHomeBannerDto {
   profileImage?: unknown;
 }
 
-export class UpdateHomeBannerMultipartDto extends PartialType(
-  CreateHomeBannerMultipartDto,
+export class UpdateHomeBannerMultipartDto extends IntersectionType(
+  PartialType(CreateHomeBannerMultipartDto),
+  DisplayOrderModeDto,
 ) {}

@@ -1,4 +1,9 @@
-import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import {
+  ApiPropertyOptional,
+  IntersectionType,
+  PartialType,
+} from '@nestjs/swagger';
+import { DisplayOrderModeDto } from '../../../common/dto/display-order-mode.dto';
 import { CreateImpactVideoDto } from './create-impact-video.dto';
 
 /** Swagger-only definition for multipart endpoints */
@@ -11,6 +16,7 @@ export class CreateImpactVideoMultipartDto extends CreateImpactVideoDto {
   videoFile?: unknown;
 }
 
-export class UpdateImpactVideoMultipartDto extends PartialType(
-  CreateImpactVideoMultipartDto,
+export class UpdateImpactVideoMultipartDto extends IntersectionType(
+  PartialType(CreateImpactVideoMultipartDto),
+  DisplayOrderModeDto,
 ) {}

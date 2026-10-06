@@ -12,10 +12,10 @@ import {
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
 import {
-  applyDisplayOrderUpdate,
   assignDisplayOrderOnRestore,
   compactDisplayOrderAfterDelete,
-  prepareInsertDisplayOrder,
+  insertWithDisplayOrder,
+  saveWithDisplayOrder,
 } from '../../common/utils/display-order';
 import {
   applyDeletedFilter,
@@ -76,10 +76,6 @@ export class HomeBannersService {
       : undefined;
 
     const { displayOrder: requestedOrder, ...rest } = dto;
-    const displayOrder = await prepareInsertDisplayOrder(
-      this.repo,
-      requestedOrder,
-    );
 
     try {
       const entity = this.repo.create({
@@ -87,10 +83,9 @@ export class HomeBannersService {
         bannerImageUrl,
         mobileBannerImageUrl,
         profileImageUrl,
-        displayOrder,
         isActive: dto.isActive ?? true,
       });
-      return await this.repo.save(entity);
+      return await insertWithDisplayOrder(this.repo, entity, requestedOrder);
     } catch (err) {
       await this.cdn.delete(bannerImageUrl);
       if (mobileBannerImageUrl) await this.cdn.delete(mobileBannerImageUrl);
@@ -146,17 +141,9 @@ export class HomeBannersService {
     files?: HomeBannerFiles,
   ): Promise<HomeBanner> {
     const entity = await this.findOne(id);
-    const { displayOrder: newOrder, ...rest } = dto;
+    const previousOrder = entity.displayOrder;
+    const { displayOrder: requested, orderMode, ...rest } = dto;
     Object.assign(entity, rest);
-
-    if (newOrder !== undefined && newOrder !== entity.displayOrder) {
-      entity.displayOrder = await applyDisplayOrderUpdate(
-        this.repo,
-        id,
-        entity.displayOrder,
-        newOrder,
-      );
-    }
 
     this.assertIsImage(files?.bannerImage, 'bannerImage');
     this.assertIsImage(files?.mobileBannerImage, 'mobileBannerImage');
@@ -174,7 +161,11 @@ export class HomeBannersService {
       (await this.cdn.replace(entity.profileImageUrl, files?.profileImage, CDN_FOLDER)) ??
       entity.profileImageUrl;
 
-    return await this.repo.save(entity);
+    return saveWithDisplayOrder(this.repo, entity, {
+      previousOrder,
+      requested,
+      mode: orderMode,
+    });
   }
 
   async remove(id: string): Promise<void> {

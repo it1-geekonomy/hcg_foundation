@@ -4,10 +4,14 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 import type {
+  DisplayOrderMode,
   HomeBanner,
   HomeBannerFields,
   UpdateHomeBannerPayload,
 } from "@/domains/cms/lib/types";
+import CmsDisplayOrderField, {
+  orderModeForPatch,
+} from "@/domains/cms/ui/CmsDisplayOrderField";
 import CmsImagePicker from "@/domains/cms/ui/CmsImagePicker";
 import { CmsFormField } from "@/domains/cms/ui/CmsFormField";
 import CmsSelect, { ACTIVE_STATUS_OPTIONS } from "@/domains/cms/ui/CmsSelect";
@@ -28,6 +32,7 @@ export type HomeBannerFormValues = {
   profileImageFile: File | null;
   profileImageUrl: string | null;
   displayOrder: string;
+  orderMode: DisplayOrderMode;
   isActive: boolean;
 };
 
@@ -42,7 +47,8 @@ export const emptyHomeBannerForm = (): HomeBannerFormValues => ({
   mobileBannerImageUrl: null,
   profileImageFile: null,
   profileImageUrl: null,
-  displayOrder: "1",
+  displayOrder: "",
+  orderMode: "move",
   isActive: true,
 });
 
@@ -61,7 +67,8 @@ export function homeBannerToFormValues(
     profileImageFile: null,
     profileImageUrl: banner.profileImageUrl ?? null,
     displayOrder:
-      banner.displayOrder != null ? String(banner.displayOrder) : "1",
+      banner.displayOrder != null ? String(banner.displayOrder) : "",
+    orderMode: "move",
     isActive: banner.isActive !== false,
   };
 }
@@ -75,7 +82,7 @@ export function formValuesToFields(
     title: form.title.trim(),
     location: form.location.trim() || undefined,
     shortDescription: form.shortDescription.trim() || undefined,
-    displayOrder: Number.isFinite(order) && order > 0 ? order : 1,
+    displayOrder: Number.isFinite(order) && order > 0 ? order : undefined,
     isActive: form.isActive,
   };
 }
@@ -108,9 +115,16 @@ export function getHomeBannerPatch(
   if (norm(prev.shortDescription) !== norm(next.shortDescription)) {
     fields.shortDescription = next.shortDescription ?? "";
   }
-  if (prev.displayOrder !== next.displayOrder) {
+  // A cleared order keeps the current position.
+  if (next.displayOrder !== undefined && prev.displayOrder !== next.displayOrder) {
     fields.displayOrder = next.displayOrder;
   }
+  const orderMode = orderModeForPatch(
+    initial.displayOrder,
+    current.displayOrder,
+    current.orderMode
+  );
+  if (orderMode) fields.orderMode = orderMode;
   if (prev.isActive !== next.isActive) fields.isActive = next.isActive;
 
   const files = {
@@ -137,6 +151,8 @@ type HomeBannerFormProps = {
   submitLabel: string;
   saving?: boolean;
   mode?: "create" | "edit";
+  /** Loaded values on the edit page; enables the move/swap choice for order changes. */
+  initial?: HomeBannerFormValues;
 };
 
 export default function HomeBannerForm({
@@ -146,6 +162,7 @@ export default function HomeBannerForm({
   submitLabel,
   saving,
   mode = "create",
+  initial,
 }: HomeBannerFormProps) {
   const hasBannerImage = !!value.bannerImageFile || !!value.bannerImageUrl;
 
@@ -174,7 +191,7 @@ export default function HomeBannerForm({
           </CmsFormField>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid items-start gap-4 sm:grid-cols-2">
           <CmsFormField label="Location" htmlFor="location">
             <Input
               id="location"
@@ -186,18 +203,15 @@ export default function HomeBannerForm({
             />
           </CmsFormField>
 
-          <CmsFormField label="Display order" htmlFor="displayOrder">
-            <Input
-              id="displayOrder"
-              type="number"
-              min={1}
-              inputMode="numeric"
-              value={value.displayOrder}
-              onChange={(e) =>
-                onChange({ ...value, displayOrder: e.target.value })
-              }
-            />
-          </CmsFormField>
+          <CmsDisplayOrderField
+            value={value.displayOrder}
+            onChange={(displayOrder) => onChange({ ...value, displayOrder })}
+            mode={value.orderMode}
+            onModeChange={(orderMode) => onChange({ ...value, orderMode })}
+            initialOrder={initial?.displayOrder}
+            itemLabel="banner"
+            listLabel="banners"
+          />
         </div>
 
         <CmsFormField label="Short description" htmlFor="shortDescription">
