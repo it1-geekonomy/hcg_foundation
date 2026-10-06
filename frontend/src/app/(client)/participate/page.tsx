@@ -195,6 +195,8 @@ export default function ParticipatePage() {
 
   return (
     <main className="min-h-screen bg-[#FFF8E2]">
+      {/* Top Hero Banner (Commented out) */}
+      {/*
       <Banner
         bgImage="/Get Involved/Get Involved banner image.png"
         bgImageAlt="Participate"
@@ -204,8 +206,9 @@ export default function ParticipatePage() {
         ]}
         title="Participate"
       />
+      */}
 
-      <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
+      <section className={`${CONTAINER} pt-7 sm:pt-[6.5rem] lg:pt-[10.25rem] pb-8 sm:pb-12 lg:pb-16`}>
         {/* Eyebrow: Our Mission a little up */}
         <div className="flex items-center gap-2 mb-2 sm:mb-2.5">
           <div data-anim="eyebrow" className="flex items-center gap-2">

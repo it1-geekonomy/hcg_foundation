@@ -182,6 +182,8 @@ export default function TestimonialsPage() {
 
   return (
     <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope overflow-x-hidden">
+      {/* Top Hero Banner (Commented out) */}
+      {/*
       <Banner
         bgImage="/journey-of-hope/Journey of Hope banner image.png"
         bgImageAlt="Patient Testimonials"
@@ -191,10 +193,11 @@ export default function TestimonialsPage() {
         ]}
         title="Patient Testimonials"
       />
+      */}
 
       {/* Main Section */}
       <section
-        className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}
+        className={`${CONTAINER} pt-7 sm:pt-[6.5rem] lg:pt-[10.25rem] pb-8 sm:pb-12 lg:pb-16`}
       >
         {/* Header Title & Subtitle */}
         <div className="w-full text-left">

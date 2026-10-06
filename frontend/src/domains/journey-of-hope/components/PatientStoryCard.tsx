@@ -70,16 +70,18 @@ export default function PatientStoryCard({
               {story.patientName}
             </Typography>
           </div>
-          <div className="mt-1 flex items-center gap-1.5 text-white">
-            <Calendar className="size-3.5 sm:size-4 text-white shrink-0" />
-            <Typography
-              variant="body-8"
-              as="span"
-              className="font-manrope font-medium text-white"
-            >
-              {story.date}
-            </Typography>
-          </div>
+          {story.date && story.date.trim() ? (
+            <div className="mt-1 flex items-center gap-1.5 text-white">
+              <Calendar className="size-3.5 sm:size-4 text-white shrink-0" />
+              <Typography
+                variant="body-8"
+                as="span"
+                className="font-manrope font-medium text-white"
+              >
+                {story.date}
+              </Typography>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

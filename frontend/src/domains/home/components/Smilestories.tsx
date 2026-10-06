@@ -94,14 +94,16 @@ function StoryCardSizer({ name, date }: { name: string; date: string }) {
         >
           {name}
         </Typography>
-        <Typography
-          variant="text-2"
-          as="p"
-          className="mt-1 flex items-center gap-2 text-nowrap font-normal font-manrope"
-        >
-          <Calendar className="h-4 w-4" strokeWidth={1.75} />
-          {date}
-        </Typography>
+        {date && date.trim() ? (
+          <Typography
+            variant="text-2"
+            as="p"
+            className="mt-1 flex items-center gap-2 text-nowrap font-normal font-manrope"
+          >
+            <Calendar className="h-4 w-4" strokeWidth={1.75} />
+            {date}
+          </Typography>
+        ) : null}
       </div>
     </div>
   );
@@ -178,14 +180,16 @@ const StoryCard = memo(function StoryCard({
         >
           {name}
         </Typography>
-        <Typography
-          variant="text-2"
-          as="p"
-          className="mt-1 flex items-center gap-2 text-white text-nowrap font-normal font-manrope"
-        >
-          <Calendar className="h-4 w-4" strokeWidth={1.75} />
-          {date}
-        </Typography>
+        {date && date.trim() ? (
+          <Typography
+            variant="text-2"
+            as="p"
+            className="mt-1 flex items-center gap-2 text-white text-nowrap font-normal font-manrope"
+          >
+            <Calendar className="h-4 w-4" strokeWidth={1.75} />
+            {date}
+          </Typography>
+        ) : null}
       </div>
     </div>
   );

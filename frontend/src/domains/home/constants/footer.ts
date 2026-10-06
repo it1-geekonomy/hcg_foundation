@@ -64,7 +64,7 @@ export const FOOTER_INNER_PAGES = [
   { label: "Team", href: "/about-us", scrollTo: "team" },
   { label: "Trustees", href: "/about-us", scrollTo: "trustees" },
   { label: "Events", href: "/events" },
-  { label: "Projects", href: "/projects" },
+  // { label: "Projects", href: "/projects" },
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms and Conditions", href: "/terms" },
   { label: "Disclaimer", href: "/terms" },

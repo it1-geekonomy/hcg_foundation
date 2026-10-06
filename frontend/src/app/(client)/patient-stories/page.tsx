@@ -148,6 +148,8 @@ export default function PatientStoriesPage() {
 
   return (
     <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope">
+      {/* Top Hero Banner (Commented out) */}
+      {/*
       <Banner
         bgImage="/journey-of-hope/Journey of Hope banner image.png"
         bgImageAlt="Patient Stories"
@@ -157,9 +159,10 @@ export default function PatientStoriesPage() {
         ]}
         title="Patient Stories"
       />
+      */}
 
       {/* Main Patient Stories Grid Section */}
-      <section className={`${CONTAINER} py-8 sm:py-10 lg:py-12`}>
+      <section className={`${CONTAINER} pt-7 sm:pt-[6.5rem] lg:pt-[10.25rem] pb-8 sm:pb-10 lg:pb-12`}>
         {/* Search Bar */}
         <div className="mb-10 flex justify-center">
           <div className="relative w-full max-w-lg">

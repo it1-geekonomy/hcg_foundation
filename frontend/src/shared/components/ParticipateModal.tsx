@@ -466,7 +466,7 @@ export default function ParticipateModal({
         </button>
 
         {/* Modal Scrollable Body */}
-        <div className="relative z-10 p-6 sm:px-12 sm:py-9 overflow-y-auto h-full flex flex-col justify-between overscroll-contain">
+        <div className="relative z-10 p-6 sm:px-12 sm:py-9 overflow-y-auto h-full flex flex-col justify-between overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {/* Header Title & Subtitle matching Figma 100% */}
           <div className="text-center mx-auto mb-6 sm:mb-8">
             <div className="mb-1">
