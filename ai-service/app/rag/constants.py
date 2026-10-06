@@ -10,7 +10,7 @@ FOUNDER_ROLE = "Founder and Managing Trustee"
 # --- Public website routes (must match frontend/src/app/(client)) ---
 # Every page renders the donate form, so donation links scroll to it in place.
 DONATE_URL = "#donate-form"
-PATIENT_AID_URL = "/financial-support-for-pediatric-patients"
+PATIENT_AID_URL = "/financial-support-for-patients"
 AWARENESS_URL = "/awareness-and-screening-camps"
 PARTICIPATE_URL = "/participate"
 CSR_URL = "/csr-partner"
@@ -55,6 +55,7 @@ LEGACY_URLS = {
     "/resources": TRANSPARENCY_URL,
     "/resources/annual-reports": TRANSPARENCY_URL,
     "/our-programs/financial-support-for-pediatric-patients": PATIENT_AID_URL,
+    "/financial-support-for-pediatric-patients": PATIENT_AID_URL,
     "/our-programs/awareness-and-screening-camps": AWARENESS_URL,
     "/getinvolved/participate": PARTICIPATE_URL,
     "/getinvolved/csr-partner": CSR_URL,
