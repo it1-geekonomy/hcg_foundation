@@ -149,6 +149,7 @@ export default function HomeBannerViewPage() {
       <div className="flex flex-col gap-10">
         <CmsDetailCard title="Banner Information">
           <dl className="grid gap-4 sm:grid-cols-2">
+            <CmsDetailField label="Name" value={banner.name} />
             <CmsDetailField label="Title" value={banner.title} />
             <CmsDetailField label="Display Order" value={String(banner.displayOrder)} />
           </dl>

@@ -9,9 +9,8 @@ import {
   HERO_NAME_ACCENT_COLOR,
   HERO_OVERLAY_BG,
   HERO_SHORT_VIEWPORT_PX,
-  HERO_TILE_COUNT,
-  HERO_TILE_STEPS,
-  HERO_TILE_Y_FRACTIONS,
+  getHeroTileYFraction,
+  type HeroTileStep,
 } from "@/domains/home/constants/heroTileScroll";
 import {
   HERO_RESET_EVENT,
@@ -42,7 +41,6 @@ export type HeroResponsiveLayout = {
   gapAfterTile: number;
   accentGap: number;
   nameSize: number;
-  locationSize: number;
   taglineSize: number;
   bodySize: number;
   nameGap: number;
@@ -69,7 +67,6 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
       gapAfterTile: isShort ? 8 : 10,
       accentGap: 10,
       nameSize: isShort ? 15 : 16,
-      locationSize: 10,
       taglineSize: isShort ? 11 : 12,
       bodySize: isShort ? 10 : 11,
       nameGap: isShort ? 14 : 16,
@@ -94,7 +91,6 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
       gapAfterTile: isShort ? 12 : 14,
       accentGap: 12,
       nameSize: isShort ? 18 : 20,
-      locationSize: 11,
       taglineSize: isShort ? 12 : 13,
       bodySize: isShort ? 10 : 11,
       nameGap: isShort ? 20 : 24,
@@ -123,7 +119,6 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
       gapAfterTile: isShort ? 14 : 16,
       accentGap: 12,
       nameSize: Math.round(lerp(22, 26, t)),
-      locationSize: Math.round(lerp(13, 15, t)),
       taglineSize: Math.round(lerp(15, 17, t)),
       bodySize: Math.round(lerp(13, 14, t)),
       nameGap: isShort ? 22 : Math.round(lerp(24, 28, t)),
@@ -148,7 +143,6 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
     gapAfterTile: isShort ? 14 : 16,
     accentGap: 14,
     nameSize: isShort ? 24 : 28,
-    locationSize: isShort ? 14 : 16,
     taglineSize: isShort ? 16 : 18,
     bodySize: isShort ? 13 : 15,
     nameGap: isShort ? 22 : 28,
@@ -174,6 +168,7 @@ function isDonationOverlayOpen(): boolean {
 
 function getTileTranslateY(
   step: number,
+  count: number,
   vh: number,
   tileH: number,
   navClearance: number
@@ -185,7 +180,7 @@ function getTileTranslateY(
   const belowXlOffset = w < XL_BREAKPOINT_PX ? 12 : 0;
 
   const rawY =
-    HERO_TILE_Y_FRACTIONS[step] * vh + belowXlOffset + mobileExtra + tabletExtra;
+    getHeroTileYFraction(step, count) * vh + belowXlOffset + mobileExtra + tabletExtra;
 
   return Math.min(Math.max(rawY, navClearance), vh - tileH - 24);
 }
@@ -201,61 +196,52 @@ function renderWordLines(
   direction: 1 | -1,
   wordSpacing: string
 ) {
-  const words = text.trim().split(" ").filter(Boolean);
+  const lines = text
+    .trim()
+    .split(/\r?\n/)
+    .map((line) => line.split(/\s+/).filter(Boolean));
   const translateIn = direction === 1 ? "translateY(110%)" : "translateY(-110%)";
   const translateOut = direction === 1 ? "translateY(-110%)" : "translateY(110%)";
+  let wordIndex = 0;
 
   return (
     <span className="block">
-      {words.map((word, idx) => {
-        const delay = active
-          ? `${Math.min(idx * 18, 300)}ms`
-          : `${Math.min(idx * 8, 120)}ms`;
+      {lines.map((words, lineIdx) => (
+        <span key={lineIdx} className="block">
+          {words.length === 0 ? <br /> : null}
+          {words.map((word, idx) => {
+            const order = wordIndex++;
+            const delay = active
+              ? `${Math.min(order * 18, 300)}ms`
+              : `${Math.min(order * 8, 120)}ms`;
 
-        return (
-          <span
-            key={idx}
-            style={{ display: "inline-block", overflow: "hidden", verticalAlign: "bottom" }}
-          >
-            <span
-              style={{
-                display: "inline-block",
-                transform: active ? "translateY(0)" : exiting ? translateOut : translateIn,
-                opacity: active ? 1 : exiting ? 0 : 0,
-                transition: `transform 650ms cubic-bezier(0.16, 1, 0.3, 1), opacity 400ms ease`,
-                transitionDelay: delay,
-                filter: active ? "blur(0px)" : exiting ? "blur(2px)" : "blur(0px)",
-              }}
-            >
-              {word}
-            </span>
-            {/* A real space (collapsed inside the fixed-width box) so copied and indexed text keeps word breaks */}
-            {idx < words.length - 1 && (
-              <span style={{ display: "inline-block", width: wordSpacing }}> </span>
-            )}
-          </span>
-        );
-      })}
+            return (
+              <span
+                key={idx}
+                style={{ display: "inline-block", overflow: "hidden", verticalAlign: "bottom" }}
+              >
+                <span
+                  style={{
+                    display: "inline-block",
+                    transform: active ? "translateY(0)" : exiting ? translateOut : translateIn,
+                    opacity: active ? 1 : exiting ? 0 : 0,
+                    transition: `transform 650ms cubic-bezier(0.16, 1, 0.3, 1), opacity 400ms ease`,
+                    transitionDelay: delay,
+                    filter: active ? "blur(0px)" : exiting ? "blur(2px)" : "blur(0px)",
+                  }}
+                >
+                  {word}
+                </span>
+                {/* A real space (collapsed inside the fixed-width box) so copied and indexed text keeps word breaks */}
+                {idx < words.length - 1 && (
+                  <span style={{ display: "inline-block", width: wordSpacing }}> </span>
+                )}
+              </span>
+            );
+          })}
+        </span>
+      ))}
     </span>
-  );
-}
-
-function HeroLocationPin({ size, color = "white" }: { size: number; color?: string }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="shrink-0"
-      aria-hidden
-    >
-      <path
-        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"
-        fill={color}
-      />
-    </svg>
   );
 }
 
@@ -266,7 +252,7 @@ function StoryTextBlock({
   direction,
   layout,
 }: {
-  step: (typeof HERO_TILE_STEPS)[0];
+  step: HeroTileStep;
   active: boolean;
   exiting: boolean;
   direction: 1 | -1;
@@ -279,8 +265,8 @@ function StoryTextBlock({
     ...extra,
   });
 
-  const textColumnOffset = 4 + layout.accentGap;
-  const locationIconSize = Math.max(10, Math.round(layout.locationSize * 1.1));
+  const hasHeading = Boolean(step.name);
+  const textColumnOffset = hasHeading ? 4 + layout.accentGap : 0;
 
   return (
     <div
@@ -294,38 +280,27 @@ function StoryTextBlock({
       }}
     >
       <div className="w-full max-w-full">
-        {/* Name + location grouped with accent bar spanning both rows */}
-        <div className="flex items-stretch" style={{ gap: layout.accentGap }}>
-          <span
-            className="w-1 shrink-0 self-stretch rounded-full"
-            style={{ backgroundColor: HERO_NAME_ACCENT_COLOR }}
-            aria-hidden
-          />
-          <div className="min-w-0 flex-1">
-            <div style={textStyle(layout.nameSize, 700, "white", { lineHeight: 1.2 })}>
+        {hasHeading ? (
+          <div className="flex items-stretch" style={{ gap: layout.accentGap }}>
+            <span
+              className="w-1 shrink-0 self-stretch rounded-full"
+              style={{ backgroundColor: HERO_NAME_ACCENT_COLOR }}
+              aria-hidden
+            />
+            <div
+              className="min-w-0 flex-1"
+              style={textStyle(layout.nameSize, 700, "white", { lineHeight: 1.2 })}
+            >
               {renderWordLines(step.name, active, exiting, direction, layout.wordSpacing)}
             </div>
-            <div
-              className="flex items-center"
-              style={{
-                gap: 5,
-                marginTop: 5,
-                ...textStyle(layout.locationSize, 400, "white"),
-              }}
-            >
-              <HeroLocationPin size={locationIconSize} />
-              <span className="min-w-0 leading-snug">
-                {renderWordLines(step.location, active, exiting, direction, layout.wordSpacing)}
-              </span>
-            </div>
           </div>
-        </div>
+        ) : null}
 
         <div
           style={{
             paddingLeft: textColumnOffset,
             ...textStyle(layout.taglineSize, 700, "white", {
-              marginTop: layout.nameGap,
+              marginTop: hasHeading ? layout.nameGap : 0,
               lineHeight: 1.4,
             }),
           }}
@@ -355,7 +330,8 @@ function StoryTextBlock({
 
 type PinMode = "before" | "pinned" | "after";
 
-export default function TileScrollSection() {
+export default function TileScrollSection({ steps }: { steps: HeroTileStep[] }) {
+  const stepCount = steps.length;
   const wrapperRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const tileRef = useRef<HTMLDivElement>(null);
@@ -391,9 +367,9 @@ export default function TileScrollSection() {
     if (!tile) return;
     const vh = window.innerHeight;
     const tileH = tile.offsetHeight;
-    const newY = getTileTranslateY(step, vh, tileH, navClearanceRef.current);
+    const newY = getTileTranslateY(step, stepCount, vh, tileH, navClearanceRef.current);
     tile.style.transform = `translateX(50%) translateY(${newY}px)`;
-  }, []);
+  }, [stepCount]);
 
   const applyStep = useCallback(
     (step: number, force = false) => {
@@ -412,14 +388,17 @@ export default function TileScrollSection() {
     [moveTile]
   );
 
-  const scrollToStep = useCallback((step: number) => {
-    const wrapper = wrapperRef.current;
-    if (!wrapper) return;
-    const vh = window.innerHeight;
-    const total = wrapper.offsetHeight - vh;
-    const targetScrollY = wrapper.offsetTop + (step / (HERO_TILE_COUNT - 1)) * total;
-    window.scrollTo({ top: targetScrollY, behavior: "smooth" });
-  }, []);
+  const scrollToStep = useCallback(
+    (step: number) => {
+      const wrapper = wrapperRef.current;
+      if (!wrapper || stepCount <= 1) return;
+      const vh = window.innerHeight;
+      const total = wrapper.offsetHeight - vh;
+      const targetScrollY = wrapper.offsetTop + (step / (stepCount - 1)) * total;
+      window.scrollTo({ top: targetScrollY, behavior: "smooth" });
+    },
+    [stepCount]
+  );
 
   useEffect(() => {
     const onWheel = (e: WheelEvent) => {
@@ -432,7 +411,7 @@ export default function TileScrollSection() {
 
       const dir = e.deltaY > 0 ? 1 : -1;
       const current = currentStepRef.current;
-      const next = Math.min(HERO_TILE_COUNT - 1, Math.max(0, current + dir));
+      const next = Math.min(stepCount - 1, Math.max(0, current + dir));
       if (next === current) return;
 
       e.preventDefault();
@@ -446,7 +425,7 @@ export default function TileScrollSection() {
 
     window.addEventListener("wheel", onWheel, { passive: false });
     return () => window.removeEventListener("wheel", onWheel);
-  }, [applyStep, scrollToStep]);
+  }, [applyStep, scrollToStep, stepCount]);
 
   useEffect(() => {
     let touchStartY = 0;
@@ -471,7 +450,7 @@ export default function TileScrollSection() {
 
       const dir = delta > 0 ? 1 : -1;
       const current = currentStepRef.current;
-      const next = Math.min(HERO_TILE_COUNT - 1, Math.max(0, current + dir));
+      const next = Math.min(stepCount - 1, Math.max(0, current + dir));
       if (next === current) return false;
 
       e.preventDefault();
@@ -520,7 +499,7 @@ export default function TileScrollSection() {
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [applyStep, scrollToStep]);
+  }, [applyStep, scrollToStep, stepCount]);
 
   const handleScroll = useCallback(() => {
     if (isDonationOverlayOpen()) return;
@@ -539,9 +518,9 @@ export default function TileScrollSection() {
     } else {
       isPinnedRef.current = false;
       setPinMode("after");
-      if (!isResettingRef.current) applyStep(HERO_TILE_COUNT - 1);
+      if (!isResettingRef.current) applyStep(Math.max(0, stepCount - 1));
     }
-  }, [applyStep]);
+  }, [applyStep, stepCount]);
 
   const resetToTop = useCallback(
     (smooth = true) => {
@@ -600,7 +579,11 @@ export default function TileScrollSection() {
   }, [moveTile, syncLayout]);
 
   return (
-    <div ref={wrapperRef} className="relative z-0 h-[400vh]">
+    <div
+      ref={wrapperRef}
+      className="relative z-0"
+      style={{ height: `${Math.max(1, stepCount) * 100}vh` }}
+    >
       <div
         ref={heroRef}
         className={cn(
@@ -610,10 +593,14 @@ export default function TileScrollSection() {
           pinMode === "before" && "relative z-0"
         )}
       >
-        {HERO_TILE_STEPS.map((step, i) => (
+        {steps.map((step, i) => (
           <Image
             key={`bg-${i}`}
-            src={step.backgroundSrc}
+            src={
+              layout.isMobile && step.mobileBackgroundSrc
+                ? step.mobileBackgroundSrc
+                : step.backgroundSrc
+            }
             alt=""
             fill
             priority={i === 0}
@@ -642,7 +629,7 @@ export default function TileScrollSection() {
             backgroundColor: HERO_OVERLAY_BG,
           }}
         >
-          {HERO_TILE_STEPS.map((step, i) => (
+          {steps.map((step, i) => (
             <StoryTextBlock
               key={`story-${i}`}
               step={step}
@@ -669,11 +656,11 @@ export default function TileScrollSection() {
             transform: "translateX(50%) translateY(0)",
           }}
         >
-          {HERO_TILE_STEPS.map((step, i) => (
+          {steps.map((step, i) => (
             <Image
               key={`tile-${i}`}
               src={step.tileImageSrc}
-              alt={step.name}
+              alt={step.name || step.tagline}
               fill
               className={cn(
                 "object-cover transition-opacity duration-500",

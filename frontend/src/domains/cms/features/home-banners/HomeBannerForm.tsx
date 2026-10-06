@@ -22,6 +22,7 @@ export const HOME_MOBILE_BANNER_SIZE = { width: 750, height: 800 } as const;
 export const HOME_PROFILE_IMAGE_SIZE = { width: 119, height: 119 } as const;
 
 export type HomeBannerFormValues = {
+  name: string;
   title: string;
   shortDescription: string;
   bannerImageFile: File | null;
@@ -36,6 +37,7 @@ export type HomeBannerFormValues = {
 };
 
 export const emptyHomeBannerForm = (): HomeBannerFormValues => ({
+  name: "",
   title: "",
   shortDescription: "",
   bannerImageFile: null,
@@ -53,6 +55,7 @@ export function homeBannerToFormValues(
   banner: HomeBanner
 ): HomeBannerFormValues {
   return {
+    name: banner.name ?? "",
     title: banner.title ?? "",
     shortDescription: banner.shortDescription ?? "",
     bannerImageFile: null,
@@ -73,6 +76,7 @@ export function formValuesToFields(
 ): HomeBannerFields {
   const order = Number.parseInt(form.displayOrder.trim(), 10);
   return {
+    name: form.name.trim() || undefined,
     title: form.title.trim(),
     shortDescription: form.shortDescription.trim() || undefined,
     displayOrder: Number.isFinite(order) && order > 0 ? order : undefined,
@@ -100,6 +104,7 @@ export function getHomeBannerPatch(
   const next = formValuesToFields(current);
   const fields: UpdateHomeBannerPayload = {};
 
+  if (norm(prev.name) !== norm(next.name)) fields.name = next.name ?? "";
   if (norm(prev.title) !== norm(next.title)) fields.title = next.title;
   if (norm(prev.shortDescription) !== norm(next.shortDescription)) {
     fields.shortDescription = next.shortDescription ?? "";
@@ -159,11 +164,30 @@ export default function HomeBannerForm({
     <form onSubmit={onSubmit} className="w-full space-y-5">
       <div className="space-y-4 rounded-xl border border-cms-border bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <div className="grid items-start gap-4 sm:grid-cols-2">
-          <CmsFormField label="Title" htmlFor="title">
+          <CmsFormField
+            label="Name"
+            htmlFor="name"
+            hint="Shown as the heading on the homepage banner."
+          >
+            <Input
+              id="name"
+              placeholder="Ananya Nair"
+              maxLength={255}
+              value={value.name}
+              onChange={(e) => onChange({ ...value, name: e.target.value })}
+            />
+          </CmsFormField>
+
+          <CmsFormField
+            label="Title"
+            htmlFor="title"
+            hint="Tagline shown under the name."
+          >
             <Input
               id="title"
               required
-              placeholder="Financial Assistance"
+              placeholder="With courage in her heart and hope ahead."
+              maxLength={255}
               value={value.title}
               onChange={(e) => onChange({ ...value, title: e.target.value })}
             />
