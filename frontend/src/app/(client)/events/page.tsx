@@ -9,7 +9,7 @@ export default function EventsPage() {
   return (
     <main className="min-h-screen bg-[#FFF8E2]">
       <Banner
-        bgImage="/Resources/Resources banner image.png"
+        bgImage="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791296290041-5pkq1-rectangle-186.webp"
         bgImageAlt="Events"
         breadcrumbs={[
           { label: "Home", href: "/" },
