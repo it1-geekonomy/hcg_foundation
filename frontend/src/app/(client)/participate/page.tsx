@@ -217,9 +217,9 @@ export default function ParticipatePage() {
         </div>
 
         {/* Equal Level Row: Title on Left, Paragraph on Right */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-10 sm:mb-14 items-center">
-          <div className="md:col-span-2">
-            <div data-anim="top-title">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 mb-10 sm:mb-14 items-center">
+          <div className="md:col-span-6 lg:col-span-8">
+            <div data-anim="top-title" className="md:max-w-[21rem] lg:max-w-none">
               <Typography
                 variant="heading-2"
                 as="h1"
@@ -229,12 +229,12 @@ export default function ParticipatePage() {
               </Typography>
             </div>
           </div>
-          <div className="md:col-span-1">
+          <div className="md:col-span-6 lg:col-span-4">
             <div data-anim="top-desc">
               <Typography
                 variant="body-10"
                 as="p"
-                className="font-argestadisplay font-normal text-[#596D79] text-left lg:text-justify !leading-relaxed"
+                className="font-argestadisplay font-normal text-[#596D79] text-left !leading-relaxed"
               >
                 Your time, skills and support can bring hope to patients and families. Explore the different ways you can get involved with HCG Foundation.
               </Typography>
