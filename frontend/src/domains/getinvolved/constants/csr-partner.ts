@@ -56,3 +56,52 @@ export const CSR_PARTNER_CARDS: CsrPartnerCard[] = [
     imageUrl: "/Get Involved/CSR Partner/Corporate Employee Volunteering.png",
   },
 ];
+
+export interface PartnerLogo {
+  id: string;
+  src: string;
+  alt: string;
+}
+
+export const PARTNER_LOGOS: PartnerLogo[] = [
+  {
+    id: "partner-1",
+    src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791290803344-5e1d6-11127low_mercklogobluergb-1.webp",
+    alt: "Merck",
+  },
+  {
+    id: "partner-2",
+    src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791291022741-97hjr-whatsapp-image-2025-06-09-at-10.49.11-am-1.webp",
+    alt: "Partner Logo",
+  },
+  {
+    id: "partner-3",
+    src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791291076293-bvdgy-cvc-logo-1.webp",
+    alt: "CVC",
+  },
+  {
+    id: "partner-4",
+    src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791291302794-p0w0m-chf-logo-1.webp",
+    alt: "CHF",
+  },
+  {
+    id: "partner-5",
+    src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791291369207-wwyaj-nes-fircroft-logo-1-png-1.webp",
+    alt: "NES Fircroft",
+  },
+  {
+    id: "partner-6",
+    src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791291464672-kc8xb-efl-logo-1.webp",
+    alt: "EFL",
+  },
+  {
+    id: "partner-7",
+    src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791291510316-kepiq-prestige_group_logo-1.webp",
+    alt: "Prestige Group",
+  },
+  {
+    id: "partner-8",
+    src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791291555815-6sz0x-sd-foundation-logo-1.webp",
+    alt: "SD Foundation",
+  },
+];

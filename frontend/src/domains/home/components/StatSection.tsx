@@ -147,7 +147,7 @@ export default function StatSection() {
   }
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden px-6 pt-4 lg:pt-6 lg:pb-10">
+    <section ref={sectionRef} className="relative overflow-hidden px-6 pt-2 lg:pt-2 lg:pb-2">
       <div ref={headingRef} className="relative max-w-full text-center">
         <Typography
           variant="heading-1"

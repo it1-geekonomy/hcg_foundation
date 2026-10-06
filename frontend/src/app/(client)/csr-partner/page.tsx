@@ -6,6 +6,7 @@ import Typography from "@/lib/Typography";
 import DonateForm from "@/shared/components/DonateForm";
 import PartnerWithUsModal from "@/shared/components/PartnerWithUsModal";
 import { CSR_PARTNER_CARDS } from "@/domains/getinvolved/constants/csr-partner";
+import PartnerLogosMarquee from "@/domains/getinvolved/components/PartnerLogosMarquee";
 import Banner from "@/shared/components/Herobannersection";
 import { DiagonalArrowIcon } from "@/shared/components/icons/ArrowIcons";
 import { cn } from "@/lib/utils";
@@ -213,6 +214,8 @@ export default function CsrPartnerPage() {
 
   return (
     <main className="min-h-screen bg-[#FFF8E2]">
+      {/* Top Hero Banner (Commented out) */}
+      {/*
       <Banner
         bgImage="/Get Involved/Get Involved banner image.png"
         bgImageAlt="CSR Partner"
@@ -222,8 +225,9 @@ export default function CsrPartnerPage() {
         ]}
         title="CSR Partner"
       />
+      */}
 
-      <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
+      <section className={`${CONTAINER} pt-7 sm:pt-[6.5rem] lg:pt-[10.25rem] pb-8 sm:pb-12 lg:pb-16`}>
         {/* Top Header Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[1.5rem] sm:gap-[2rem] lg:gap-[2.5rem] items-start mb-10 sm:mb-14">
           <div data-anim="top-title">
@@ -248,8 +252,11 @@ export default function CsrPartnerPage() {
           </div>
         </div>
 
+        {/* CSR Partner Logos Infinite Moving Marquee (Above Cards Grid) */}
+        <PartnerLogosMarquee />
+
         {/* 2-Column Cards Grid matching Figma (2 columns from 768px+) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[1.5rem] md:gap-[1.75rem] lg:gap-[2.5rem]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-[1.5rem] md:gap-[1.5rem] lg:gap-[1.75rem] xl:gap-[1.75rem] 2xl:gap-[2.5rem]">
           {CSR_PARTNER_CARDS.map((card) => {
             const isActive = activeCardId === card.id;
 
@@ -274,16 +281,16 @@ export default function CsrPartnerPage() {
                 {/* Main Card (Lifts to top-left on hover or active tap) */}
                 <div
                   className={cn(
-                    "relative z-10 rounded-[0.27rem] border border-[#FFDF7C] bg-[#FDF7EB] p-5 sm:p-6 md:p-6 lg:pt-[1.4375rem] lg:pl-[3.725rem] lg:pr-[2.58rem] lg:pb-[2.5rem] flex flex-col justify-start h-full min-h-0 md:min-h-[22rem] lg:min-h-[26.4rem] transition-all duration-500 ease-out",
+                    "relative z-10 rounded-[0.27rem] border border-[#FFDF7C] bg-[#FDF7EB] p-5 sm:p-6 md:p-6 lg:pt-[0.75rem] lg:pb-[1.125rem] lg:px-[1.5rem] xl:pt-[0.75rem] xl:pb-[1.125rem] xl:px-[1.5rem] 2xl:py-[2rem] 2xl:px-[2.5rem] flex flex-col justify-start h-full min-h-0 transition-all duration-500 ease-out",
                     isActive
                       ? "-translate-x-1 -translate-y-1 shadow-[0_12px_28px_rgba(252,204,45,0.18)]"
                       : "group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:shadow-[0_12px_28px_rgba(252,204,45,0.18)]"
                   )}
                 >
                   {/* Card Number */}
-                  <div className="mb-[0.25rem] sm:mb-[0.5rem] text-left">
+                  <div className="mb-[0.15rem] text-left">
                     <Typography
-                      variant="display-3"
+                      variant="heading-2"
                       as="span"
                       className="font-argestadisplay font-normal text-[#596D79]"
                     >
@@ -292,9 +299,9 @@ export default function CsrPartnerPage() {
                   </div>
 
                   {/* Card Title */}
-                  <div className="mb-[0.75rem] sm:mb-[1rem] text-left">
+                  <div className="mb-[0.5rem] sm:mb-[0.625rem] text-left">
                     <Typography
-                      variant="heading-11"
+                      variant="heading-10"
                       as="h2"
                       className="font-argestadisplay font-normal text-[#0D2838]"
                     >
@@ -365,7 +372,6 @@ export default function CsrPartnerPage() {
             </div>
           </div>
         </div>
-
 
         {/* Bottom Impact Banner matching Figma Frame 576 */}
         <div className="mt-[2.5rem] sm:mt-[3.5rem] rounded-[0.25rem] bg-[#FFF4CF] p-[1.25rem] sm:pt-[1.1875rem] sm:pb-[1.6875rem] sm:px-[2rem] md:px-[2rem] lg:px-[2rem] flex flex-col md:flex-row md:items-start md:justify-between gap-[1.5rem] md:gap-[1.5rem]">

@@ -1,18 +1,19 @@
 export const STATS = [
   {
-    value: "50K+",
-    label: "Patients Supported",
-    story: "It began with one person who needed care.",
+    value: "2 Decades",
+    story: "Two Decades of Compassion Countless Lives Touched.",
   },
   {
-    value: "1,200+",
-    label: "Screening Camps",
-    story: "One village at a time, the circle widened.",
+    value: "6,500+",
+    story: "Patients supported for cancer treatment.",
   },
   {
-    value: "15+",
-    label: "Years of Service",
-    story: "Fifteen years later, we are still growing.",
+    value: "2,000+",
+    story: "Cancer awareness & early detection camps.",
+  },
+  {
+    value: "90,000+",
+    story: "Peoples engaged in awareness programs.",
   },
 ];
 
@@ -63,7 +64,7 @@ export const FOOTER_INNER_PAGES = [
   { label: "Team", href: "/about-us", scrollTo: "team" },
   { label: "Trustees", href: "/about-us", scrollTo: "trustees" },
   { label: "Events", href: "/events" },
-  { label: "Projects", href: "/projects" },
+  // { label: "Projects", href: "/projects" },
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms and Conditions", href: "/terms" },
   { label: "Disclaimer", href: "/terms" },
