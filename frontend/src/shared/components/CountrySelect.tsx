@@ -16,6 +16,8 @@ type Props = {
   borderClassName?: string;
   chevronClassName?: string;
   textClassName?: string;
+  /** "name" variant only: replaces the default shape/padding of the trigger box. */
+  boxClassName?: string;
   theme?: "dark" | "light";
   showDialInButton?: boolean;
 };
@@ -28,6 +30,7 @@ export default function CountrySelect({
   borderClassName,
   chevronClassName,
   textClassName,
+  boxClassName = "rounded px-3 py-2.5",
   theme = "dark",
   showDialInButton = true,
 }: Props) {
@@ -81,7 +84,7 @@ export default function CountrySelect({
         className={`flex items-center gap-1.5 bg-transparent text-left font-manrope text-sm ${resolvedText} outline-none ${
           variant === "dial"
             ? "w-auto shrink-0 py-1"
-            : `w-full min-w-0 rounded border px-3 py-2.5 ${resolvedBorder}`
+            : `w-full min-w-0 border ${boxClassName} ${resolvedBorder}`
         }`}
       >
         <CountryFlag
