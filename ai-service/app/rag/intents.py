@@ -123,6 +123,7 @@ def detect_intents(text: str) -> set[str]:
         "financial aid",
         "financial support",
         "afford",
+        r"refer(ral|ring|red)?\b",
     ):
         intents.add("patient_aid")
     if _has(
