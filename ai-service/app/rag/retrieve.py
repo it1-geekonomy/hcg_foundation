@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 from app.config import settings
-from app.services import vector_store
+from app.services import embeddings, vector_store
 
 # "who is Ananya Nair", "tell me about Meera Sreekumar": semantic search ranks a
 # bare name poorly, so the named phrase is also matched word-for-word.
@@ -71,8 +71,11 @@ AUTHORITY_KEYWORDS = {
 def hybrid_retrieve(queries: list[str], intents: set[str], question: str = "") -> list[dict]:
     merged: dict[str, dict] = {}
 
-    for q in queries:
-        for hit in vector_store.search(q, n_results=settings.retrieval_candidate_k):
+    vectors = embeddings.embed_queries(queries)
+    for q, vector in zip(queries, vectors):
+        for hit in vector_store.search(
+            q, n_results=settings.retrieval_candidate_k, query_vector=vector
+        ):
             parent = hit["parent_source_id"]
             prev = merged.get(parent)
             if not prev or hit["similarity"] > prev["similarity"]:

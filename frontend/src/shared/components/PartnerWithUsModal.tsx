@@ -260,328 +260,324 @@ export default function PartnerWithUsModal({
             </div>
 
             <form onSubmit={handleSubmit} noValidate className="w-full max-w-[18.5625rem] mx-auto md:mx-0 pb-6 sm:pb-2">
-                {/* Inputs Group: Frame 560 fields with balanced spacing */}
-                <div className="flex flex-col gap-[0.75rem] sm:gap-[1.125rem] mt-[1rem] sm:mt-[1.5rem]">
-                  {/* 1. Full Name */}
-                  <div className="relative">
-                    <div
-                      className={`min-h-[2.85rem] h-auto pb-[0.25rem] flex flex-col justify-between border-b transition-all ${
-                        errors.fullName
-                          ? "border-red-500"
-                          : "border-[#A3A3A3]/60 focus-within:border-[#FED034]"
+              {/* Inputs Group: Frame 560 fields with balanced spacing */}
+              <div className="flex flex-col gap-[0.75rem] sm:gap-[1.125rem] mt-[1rem] sm:mt-[1.5rem]">
+                {/* 1. Full Name */}
+                <div className="relative">
+                  <div
+                    className={`min-h-[2.85rem] h-auto pb-[0.25rem] flex flex-col justify-between border-b transition-all ${errors.fullName
+                        ? "border-red-500"
+                        : "border-[#A3A3A3]/60 focus-within:border-[#FED034]"
                       }`}
-                    >
-                      <label htmlFor="partner-fullName" className="flex items-center cursor-pointer">
-                        <User className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.625rem]" />
-                        <Typography
-                          variant="caption-1"
-                          as="span"
-                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                        >
-                          Full Name*
-                        </Typography>
-                      </label>
-                      <div className="pl-[1.5rem] w-full">
-                        <textarea
-                          id="partner-fullName"
-                          rows={1}
-                          value={formData.fullName}
-                          onInput={handleAutoResize}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") e.preventDefault();
-                          }}
-                          onChange={(e) => {
-                            handleNameChange(e);
-                            handleAutoResize(e);
-                          }}
-                          className="w-full bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
-                        />
-                      </div>
-                    </div>
-                    {errors.fullName && (
-                      <div className="mt-[0.25rem]">
-                        <span className="text-xs text-red-600 font-manrope block">
-                          {errors.fullName}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 2. Email Address */}
-                  <div className="relative">
-                    <div
-                      className={`min-h-[2.85rem] h-auto pb-[0.25rem] flex flex-col justify-between border-b transition-all ${
-                        errors.email
-                          ? "border-red-500"
-                          : "border-[#A3A3A3]/60 focus-within:border-[#FED034]"
-                      }`}
-                    >
-                      <label htmlFor="partner-email" className="flex items-center cursor-pointer">
-                        <Mail className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.625rem]" />
-                        <Typography
-                          variant="caption-1"
-                          as="span"
-                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                        >
-                          Email Address*
-                        </Typography>
-                      </label>
-                      <div className="pl-[1.5rem] w-full">
-                        <textarea
-                          id="partner-email"
-                          rows={1}
-                          value={formData.email}
-                          onInput={handleAutoResize}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") e.preventDefault();
-                          }}
-                          onChange={(e) => {
-                            handleEmailChange(e);
-                            handleAutoResize(e);
-                          }}
-                          onBlur={handleEmailBlur}
-                          className="w-full bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
-                        />
-                      </div>
-                    </div>
-                    {errors.email && (
-                      <div className="mt-[0.25rem]">
-                        <span className="text-xs text-red-600 font-manrope block">
-                          {errors.email}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 3. Phone Number (Frame 143: 273px x 49.5px -> 17.0625rem x 3.09375rem) */}
-                  <div className="relative min-h-[3.09375rem] h-auto">
-                    <PhoneInputField
-                      label="Phone Number"
-                      placeholder=""
-                      hideLabel
-                      required
-                      error={errors.phone}
-                      containerClassName={`!min-h-[3.09375rem] !h-auto !pb-[0.25rem] ${
-                        errors.phone
-                          ? "!border-red-500"
-                          : "!border-[#A3A3A3]/60 focus-within:!border-[#FED034]"
-                      }`}
-                      value={formData.phone}
-                      onChange={(val) => {
-                        if (errors.phone) {
-                          setErrors((prev) => ({ ...prev, phone: undefined }));
-                        }
-                        setFormData((prev) => ({ ...prev, phone: val || "" }));
-                      }}
-                    />
-                  </div>
-
-                  {/* 4. Organization Name (Optional) */}
-                  <div className="relative">
-                    <div
-                      className="min-h-[2.85rem] h-auto pb-[0.25rem] flex flex-col justify-between border-b border-[#A3A3A3]/60 focus-within:border-[#FED034] transition-all"
-                    >
-                      <label htmlFor="partner-organization" className="flex items-center cursor-pointer">
-                        <Building2 className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.625rem]" />
-                        <Typography
-                          variant="caption-1"
-                          as="span"
-                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                        >
-                          Organization Name (Optional)
-                        </Typography>
-                      </label>
-                      <div className="pl-[1.5rem] w-full">
-                        <textarea
-                          id="partner-organization"
-                          rows={1}
-                          value={formData.organization}
-                          onInput={handleAutoResize}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") e.preventDefault();
-                          }}
-                          onChange={(e) => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              organization: e.target.value,
-                            }));
-                            handleAutoResize(e);
-                          }}
-                          className="w-full bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
-                        />
-                      </div>
+                  >
+                    <label htmlFor="partner-fullName" className="flex items-center cursor-pointer">
+                      <User className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.625rem]" />
+                      <Typography
+                        variant="caption-1"
+                        as="span"
+                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                      >
+                        Full Name*
+                      </Typography>
+                    </label>
+                    <div className="pl-[1.5rem] w-full">
+                      <textarea
+                        id="partner-fullName"
+                        rows={1}
+                        value={formData.fullName}
+                        onInput={handleAutoResize}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") e.preventDefault();
+                        }}
+                        onChange={(e) => {
+                          handleNameChange(e);
+                          handleAutoResize(e);
+                        }}
+                        className="w-full bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
+                      />
                     </div>
                   </div>
-
-                  {/* 5. Your Message* */}
-                  <div className="relative">
-                    <div
-                      className={`min-h-[4.5rem] h-auto pb-[0.25rem] flex flex-col justify-between border-b transition-all ${
-                        errors.message
-                          ? "border-red-500"
-                          : "border-[#A3A3A3]/60 focus-within:border-[#FED034]"
-                      }`}
-                    >
-                      <label htmlFor="partner-message" className="flex items-center cursor-pointer pt-0.5">
-                        <MessageSquare className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.625rem]" />
-                        <Typography
-                          variant="caption-1"
-                          as="span"
-                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                        >
-                          Your Message*
-                        </Typography>
-                      </label>
-                      <div className="pl-[1.5rem] w-full">
-                        <textarea
-                          id="partner-message"
-                          rows={1}
-                          maxLength={500}
-                          value={formData.message}
-                          onInput={handleAutoResize}
-                          onChange={(e) => {
-                            if (errors.message && e.target.value.trim()) {
-                              setErrors((prev) => ({ ...prev, message: undefined }));
-                            }
-                            setFormData((prev) => ({
-                              ...prev,
-                              message: e.target.value,
-                            }));
-                            handleAutoResize(e);
-                          }}
-                          className="w-full min-h-[2.5rem] max-h-[7rem] bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto block py-1"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center mt-1">
-                      {errors.message ? (
-                        <span className="text-xs text-red-600 font-manrope block">
-                          {errors.message}
-                        </span>
-                      ) : (
-                        <span />
-                      )}
-                      <span className="text-[0.7rem] text-[#7C8B93] font-manrope select-none">
-                        {formData.message.length} / 500
+                  {errors.fullName && (
+                    <div className="mt-[0.25rem]">
+                      <span className="text-xs text-red-600 font-manrope block">
+                        {errors.fullName}
                       </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. Email Address */}
+                <div className="relative">
+                  <div
+                    className={`min-h-[2.85rem] h-auto pb-[0.25rem] flex flex-col justify-between border-b transition-all ${errors.email
+                        ? "border-red-500"
+                        : "border-[#A3A3A3]/60 focus-within:border-[#FED034]"
+                      }`}
+                  >
+                    <label htmlFor="partner-email" className="flex items-center cursor-pointer">
+                      <Mail className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.625rem]" />
+                      <Typography
+                        variant="caption-1"
+                        as="span"
+                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                      >
+                        Email Address*
+                      </Typography>
+                    </label>
+                    <div className="pl-[1.5rem] w-full">
+                      <textarea
+                        id="partner-email"
+                        rows={1}
+                        value={formData.email}
+                        onInput={handleAutoResize}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") e.preventDefault();
+                        }}
+                        onChange={(e) => {
+                          handleEmailChange(e);
+                          handleAutoResize(e);
+                        }}
+                        onBlur={handleEmailBlur}
+                        className="w-full bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
+                      />
+                    </div>
+                  </div>
+                  {errors.email && (
+                    <div className="mt-[0.25rem]">
+                      <span className="text-xs text-red-600 font-manrope block">
+                        {errors.email}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. Phone Number (Frame 143: 273px x 49.5px -> 17.0625rem x 3.09375rem) */}
+                <div className="relative min-h-[3.09375rem] h-auto">
+                  <PhoneInputField
+                    label="Phone Number"
+                    placeholder=""
+                    hideLabel
+                    required
+                    error={errors.phone}
+                    containerClassName={`!min-h-[3.09375rem] !h-auto !pb-[0.25rem] ${errors.phone
+                        ? "!border-red-500"
+                        : "!border-[#A3A3A3]/60 focus-within:!border-[#FED034]"
+                      }`}
+                    value={formData.phone}
+                    onChange={(val) => {
+                      if (errors.phone) {
+                        setErrors((prev) => ({ ...prev, phone: undefined }));
+                      }
+                      setFormData((prev) => ({ ...prev, phone: val || "" }));
+                    }}
+                  />
+                </div>
+
+                {/* 4. Organization Name (Optional) */}
+                <div className="relative">
+                  <div
+                    className="min-h-[2.85rem] h-auto pb-[0.25rem] flex flex-col justify-between border-b border-[#A3A3A3]/60 focus-within:border-[#FED034] transition-all"
+                  >
+                    <label htmlFor="partner-organization" className="flex items-center cursor-pointer">
+                      <Building2 className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.625rem]" />
+                      <Typography
+                        variant="caption-1"
+                        as="span"
+                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                      >
+                        Organization Name (Optional)
+                      </Typography>
+                    </label>
+                    <div className="pl-[1.5rem] w-full">
+                      <textarea
+                        id="partner-organization"
+                        rows={1}
+                        value={formData.organization}
+                        onInput={handleAutoResize}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") e.preventDefault();
+                        }}
+                        onChange={(e) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            organization: e.target.value,
+                          }));
+                          handleAutoResize(e);
+                        }}
+                        className="w-full bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
+                      />
                     </div>
                   </div>
                 </div>
 
-                {/* Footer Section: Terms and Submit Button */}
-                <div className="mt-[0.875rem] sm:mt-[1.5rem] flex flex-col gap-[0.75rem]">
-                  {/* Terms and Conditions Checkbox (Figma Component 8: 297px x 18px -> 18.5625rem, gap: 4.5px -> 0.28125rem) */}
-                  <div className="flex flex-col gap-1 w-full">
-                    <div className="flex items-center gap-[0.28125rem] w-full">
-                      <input
-                        type="checkbox"
-                        id="modal-terms"
-                        checked={formData.agreeTerms}
+                {/* 5. Your Message* */}
+                <div className="relative">
+                  <div
+                    className={`min-h-[4.5rem] h-auto pb-[0.25rem] flex flex-col justify-between border-b transition-all ${errors.message
+                        ? "border-red-500"
+                        : "border-[#A3A3A3]/60 focus-within:border-[#FED034]"
+                      }`}
+                  >
+                    <label htmlFor="partner-message" className="flex items-center cursor-pointer pt-0.5">
+                      <MessageSquare className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.625rem]" />
+                      <Typography
+                        variant="caption-1"
+                        as="span"
+                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                      >
+                        Your Message*
+                      </Typography>
+                    </label>
+                    <div className="pl-[1.5rem] w-full">
+                      <textarea
+                        id="partner-message"
+                        rows={1}
+                        maxLength={500}
+                        value={formData.message}
+                        onInput={handleAutoResize}
                         onChange={(e) => {
-                          if (errors.agreeTerms && e.target.checked) {
-                            setErrors((prev) => ({ ...prev, agreeTerms: undefined }));
+                          if (errors.message && e.target.value.trim()) {
+                            setErrors((prev) => ({ ...prev, message: undefined }));
                           }
                           setFormData((prev) => ({
                             ...prev,
-                            agreeTerms: e.target.checked,
+                            message: e.target.value,
                           }));
+                          handleAutoResize(e);
                         }}
-                        className="w-[1.03125rem] h-[1.03125rem] accent-[#FED034] rounded-[0.2rem] cursor-pointer shrink-0"
+                        className="w-full min-h-[2.5rem] max-h-[7rem] bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto block py-1"
                       />
-                      <label
-                        htmlFor="modal-terms"
-                        className="cursor-pointer select-none whitespace-nowrap"
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center mt-1">
+                    {errors.message ? (
+                      <span className="text-xs text-red-600 font-manrope block">
+                        {errors.message}
+                      </span>
+                    ) : (
+                      <span />
+                    )}
+                    <span className="text-[0.7rem] text-[#7C8B93] font-manrope select-none">
+                      {formData.message.length} / 500
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Section: Terms and Submit Button */}
+              <div className="mt-[0.875rem] sm:mt-[1.5rem] flex flex-col gap-[0.75rem]">
+                {/* Terms and Conditions Checkbox (Figma Component 8: 297px x 18px -> 18.5625rem, gap: 4.5px -> 0.28125rem) */}
+                <div className="flex flex-col gap-1 w-full">
+                  <div className="flex items-center gap-[0.28125rem] w-full">
+                    <input
+                      type="checkbox"
+                      id="modal-terms"
+                      checked={formData.agreeTerms}
+                      onChange={(e) => {
+                        if (errors.agreeTerms && e.target.checked) {
+                          setErrors((prev) => ({ ...prev, agreeTerms: undefined }));
+                        }
+                        setFormData((prev) => ({
+                          ...prev,
+                          agreeTerms: e.target.checked,
+                        }));
+                      }}
+                      className="w-[1.03125rem] h-[1.03125rem] accent-[#FED034] rounded-[0.2rem] cursor-pointer shrink-0"
+                    />
+                    <label
+                      htmlFor="modal-terms"
+                      className="cursor-pointer select-none whitespace-nowrap"
+                    >
+                      <Typography
+                        variant="caption-1"
+                        as="span"
+                        className="font-manrope font-medium text-[#7C8B93]"
+                      >
+                        I have read and agree to the{" "}
+                      </Typography>
+                      <a
+                        href="/terms"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline transition-opacity"
                       >
                         <Typography
                           variant="caption-1"
                           as="span"
-                          className="font-manrope font-medium text-[#7C8B93]"
+                          className="font-manrope font-bold text-[#FED034]"
                         >
-                          I have read and agree to the{" "}
+                          Terms & Conditions
                         </Typography>
-                        <a
-                          href="/terms"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:underline transition-opacity"
-                        >
-                          <Typography
-                            variant="caption-1"
-                            as="span"
-                            className="font-manrope font-bold text-[#FED034]"
-                          >
-                            Terms & Conditions
-                          </Typography>
-                        </a>
-                      </label>
-                    </div>
-                    {errors.agreeTerms && (
-                      <span className="text-xs text-red-600 font-manrope block">
-                        {errors.agreeTerms}
-                      </span>
-                    )}
+                      </a>
+                    </label>
                   </div>
-
-                  {/* Submit Button */}
-                  <button
-                    type="submit"
-                    disabled={submitted || submitting}
-                    aria-busy={submitting}
-                    className="w-full mt-[0.35rem] sm:mt-[0.75rem] h-[2.75rem] sm:h-[3.0625rem] bg-[#FED034] text-[#292D32] rounded-[0.415rem] transition duration-200 hover:bg-[#E9BD26] cursor-pointer flex items-center justify-center shrink-0 disabled:opacity-80 disabled:cursor-not-allowed"
-                  >
-                    <Typography
-                      variant="button-1"
-                      as="span"
-                      className="text-[#292D32]"
-                    >
-                      {submitted
-                        ? "Submitted ✓"
-                        : submitting
-                          ? "Submitting…"
-                          : "Submit"}
-                    </Typography>
-                  </button>
-
-                  {submitError && !submitted && (
-                    <div role="alert" className="text-center pt-2 animate-in fade-in duration-300">
-                      <Typography
-                        variant="caption-2"
-                        as="p"
-                        className="font-manrope font-semibold text-red-600"
-                      >
-                        {submitError}
-                      </Typography>
-                    </div>
-                  )}
-
-                  {submitted && (
-                    <div className="text-center pt-2 space-y-0.5 animate-in fade-in duration-300">
-                      <Typography
-                        variant="caption-2"
-                        as="p"
-                        className="font-manrope font-semibold text-[#2E7D32]"
-                      >
-                        Message Sent Successfully!
-                      </Typography>
-                      <Typography
-                        variant="caption-2"
-                        as="p"
-                        className="font-manrope font-normal text-[#2E7D32]"
-                      >
-                        Thank you for reaching out to HCG Foundation. We will respond
-                        to your message shortly.
-                      </Typography>
-                    </div>
+                  {errors.agreeTerms && (
+                    <span className="text-xs text-red-600 font-manrope block">
+                      {errors.agreeTerms}
+                    </span>
                   )}
                 </div>
-              </form>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={submitted || submitting}
+                  aria-busy={submitting}
+                  className="w-full mt-[0.35rem] sm:mt-[0.75rem] h-[2.75rem] sm:h-[3.0625rem] bg-[#FED034] text-[#292D32] rounded-[0.415rem] transition duration-200 hover:bg-[#E9BD26] cursor-pointer flex items-center justify-center shrink-0 disabled:opacity-80 disabled:cursor-not-allowed"
+                >
+                  <Typography
+                    variant="button-1"
+                    as="span"
+                    className="text-[#292D32]"
+                  >
+                    {submitted
+                      ? "Submitted ✓"
+                      : submitting
+                        ? "Submitting…"
+                        : "Submit"}
+                  </Typography>
+                </button>
+
+                {submitError && !submitted && (
+                  <div role="alert" className="text-center pt-2 animate-in fade-in duration-300">
+                    <Typography
+                      variant="caption-2"
+                      as="p"
+                      className="font-manrope font-semibold text-red-600"
+                    >
+                      {submitError}
+                    </Typography>
+                  </div>
+                )}
+
+                {submitted && (
+                  <div className="text-center pt-2 space-y-0.5 animate-in fade-in duration-300">
+                    <Typography
+                      variant="caption-2"
+                      as="p"
+                      className="font-manrope font-semibold text-[#2E7D32]"
+                    >
+                      Message Sent Successfully!
+                    </Typography>
+                    <Typography
+                      variant="caption-2"
+                      as="p"
+                      className="font-manrope font-normal text-[#2E7D32]"
+                    >
+                      Thank you for reaching out to HCG Foundation. We will respond
+                      to your message shortly.
+                    </Typography>
+                  </div>
+                )}
+              </div>
+            </form>
           </div>
         </div>
 
         {/* Right Column: Hero Image Asset */}
         <div className="hidden md:block w-[22.375rem] self-stretch relative shrink-0 bg-[#FDF9F3]">
           <img
-            src="/Get Involved/Partner With Us form/Partner With Us.png"
+            src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791264498996-gkk4r-image-67.webp"
             alt="Be a Part of Someone's Cancer Journey"
             className="w-full h-full object-cover object-left rounded-r-[0.415rem]"
           />

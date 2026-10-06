@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { User, ChevronDown, Check } from "lucide-react";
+import { ChevronDown, Check } from "lucide-react";
 import Typography from "@/lib/Typography";
 
 const GENDER_OPTIONS = ["Male", "Female", "Other"];
@@ -101,7 +101,11 @@ export default function GenderSelect({
         } transition-all cursor-pointer`}
       >
         <div className="flex items-center gap-1.5">
-          <User className="size-4 text-[#0D2838] shrink-0 mr-1.5" />
+          <img
+            src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791267846107-gluso-user-2x.webp"
+            alt=""
+            className="size-4 shrink-0 mr-1.5 object-contain"
+          />
           <Typography
             variant="caption-1"
             as="span"

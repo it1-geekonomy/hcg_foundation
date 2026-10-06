@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Typography from "@/lib/Typography";
 
 interface DobDatePickerProps {
@@ -214,7 +214,11 @@ export default function DobDatePicker({
             className="focus:outline-hidden cursor-pointer p-0 mr-3 flex items-center justify-center border-none bg-transparent leading-none shrink-0"
             aria-label="Toggle calendar"
           >
-            <CalendarIcon className="size-4 text-[#0D2838] shrink-0 hover:text-[#E5A810] transition-colors" />
+            <img
+              src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791268884591-xwrs7-calendar-2.webp"
+              alt=""
+              className="size-4 shrink-0 object-contain hover:opacity-80 transition-opacity"
+            />
           </button>
           <label htmlFor="dob-input" className="cursor-text">
             <Typography

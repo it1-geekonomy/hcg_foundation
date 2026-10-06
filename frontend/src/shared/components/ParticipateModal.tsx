@@ -443,17 +443,16 @@ export default function ParticipateModal({
 
       {/* Main Modal Container with exact Figma styling: width 640px (40rem), height 860px (53.75rem) for Intern (Frame 556), 736px (46rem) for Fundraise/Volunteer */}
       <div
-        className={`relative z-10 w-full max-w-[40rem] bg-white shadow-2xl overflow-hidden flex flex-col max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)] ${
-          isIntern
-            ? "h-auto sm:h-[53.75rem] rounded-[0.625rem]"
-            : "h-auto sm:h-[46rem] rounded-[0.625rem]"
-        }`}
+        className={`relative z-10 w-full max-w-[40rem] bg-white shadow-2xl overflow-hidden flex flex-col max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)] ${isIntern
+          ? "h-auto sm:h-[53.75rem] rounded-[0.625rem]"
+          : "h-auto sm:h-[46rem] rounded-[0.625rem]"
+          }`}
       >
         {/* Full Modal Watermark Background Image matching Figma */}
         <div
           className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-85 pointer-events-none"
           style={{
-            backgroundImage: `url('/Get Involved/Participate/form background image.png')`,
+            backgroundImage: `url('https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791265188879-ilf9y-group-1000006354.webp')`,
           }}
         />
 
@@ -518,733 +517,754 @@ export default function ParticipateModal({
           </div>
 
           <form onSubmit={handleSubmit} noValidate className="w-full max-w-[34rem] mx-auto flex-1 flex flex-col justify-between font-manrope space-y-4 sm:space-y-5">
-              {/* Row 1: Full Name & Phone Number (Figma Frame 560: 544.45px x 41.14px, Gap: 51px) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
-                <div className="relative">
-                  <div
-                    className={`min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${
-                      errors.fullName
+            {/* Row 1: Full Name & Phone Number (Figma Frame 560: 544.45px x 41.14px, Gap: 51px) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
+              <div className="relative">
+                <div
+                  className={`min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${errors.fullName
+                    ? "border-red-500"
+                    : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                    }`}
+                >
+                  <label htmlFor="participate-fullName" className="flex items-center cursor-pointer">
+                    <img
+                      src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791267846107-gluso-user-2x.webp"
+                      alt=""
+                      className="size-4 shrink-0 mr-3 object-contain"
+                    />
+                    <Typography
+                      variant="caption-1"
+                      as="span"
+                      className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                    >
+                      Full Name*
+                    </Typography>
+                  </label>
+                  <div className="pl-7 w-full">
+                    <textarea
+                      id="participate-fullName"
+                      rows={1}
+                      value={formData.fullName}
+                      onInput={handleAutoResize}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") e.preventDefault();
+                      }}
+                      onChange={(e) => {
+                        handleNameChange(e);
+                        handleAutoResize(e);
+                      }}
+                      className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
+                    />
+                  </div>
+                </div>
+                {errors.fullName && (
+                  <span className={FIELD_ERROR_CLASS}>{errors.fullName}</span>
+                )}
+              </div>
+
+              <div className="relative min-h-[2.85rem] h-auto">
+                <PhoneInputField
+                  label="Phone Number"
+                  hideLabel
+                  floatingError
+                  required
+                  error={errors.phone}
+                  value={formData.phone}
+                  onChange={(val) => {
+                    if (errors.phone) {
+                      setErrors((prev) => ({ ...prev, phone: undefined }));
+                    }
+                    setFormData((prev) => ({ ...prev, phone: val || "" }));
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Row 2: Email & Gender (Intern) / Location (Fundraise/Volunteer) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
+              <div className="relative h-full">
+                <div
+                  className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.email
+                    ? "border-red-500"
+                    : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                    }`}
+                >
+                  <label htmlFor="participate-email" className="flex items-center cursor-pointer">
+                    <img
+                      src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791268404784-fpux5-sms.webp"
+                      alt=""
+                      className="size-4 shrink-0 mr-3 object-contain"
+                    />
+                    <Typography
+                      variant="caption-1"
+                      as="span"
+                      className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                    >
+                      Email Address*
+                    </Typography>
+                  </label>
+                  <div className="pl-7 w-full">
+                    <textarea
+                      id="participate-email"
+                      rows={1}
+                      value={formData.email}
+                      onInput={handleAutoResize}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") e.preventDefault();
+                      }}
+                      onChange={(e) => {
+                        handleEmailChange(e);
+                        handleAutoResize(e);
+                      }}
+                      onBlur={handleEmailBlur}
+                      className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
+                    />
+                  </div>
+                </div>
+                {errors.email && (
+                  <span className={FIELD_ERROR_CLASS}>{errors.email}</span>
+                )}
+              </div>
+
+              {isIntern ? (
+                <GenderSelect
+                  value={formData.gender}
+                  error={errors.gender}
+                  onChange={(val) => {
+                    if (errors.gender) {
+                      setErrors((prev) => ({ ...prev, gender: undefined }));
+                    }
+                    setFormData((prev) => ({ ...prev, gender: val }));
+                  }}
+                  className="h-full"
+                />
+              ) : (
+                <LocationSelect
+                  value={formData.location}
+                  error={errors.location}
+                  onChange={(val) => {
+                    if (errors.location) {
+                      setErrors((prev) => ({ ...prev, location: undefined }));
+                    }
+                    setFormData((prev) => ({ ...prev, location: val }));
+                  }}
+                  className="h-full"
+                />
+              )}
+            </div>
+
+            {/* Row 3 (Specific to Intern vs Fundraise/Volunteer) */}
+            {isIntern ? (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
+                  <DobDatePicker
+                    value={formData.dob}
+                    onChange={(val) =>
+                      setFormData((prev) => ({ ...prev, dob: val }))
+                    }
+                    className="h-full"
+                  />
+
+                  <div className="relative h-full">
+                    <div
+                      className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.course
                         ? "border-red-500"
                         : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
-                    }`}
+                        }`}
+                    >
+                      <label htmlFor="participate-course" className="flex items-center cursor-pointer">
+                        <img
+                          src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269059713-dt428-book.webp"
+                          alt=""
+                          className="size-4 shrink-0 mr-3 object-contain"
+                        />
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                        >
+                          Current Course*
+                        </Typography>
+                      </label>
+                      <div className="pl-7 w-full">
+                        <textarea
+                          id="participate-course"
+                          rows={1}
+                          value={formData.course}
+                          onInput={handleAutoResize}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.preventDefault();
+                          }}
+                          onChange={(e) => {
+                            if (errors.course && e.target.value.trim()) {
+                              setErrors((prev) => ({ ...prev, course: undefined }));
+                            }
+                            setFormData({ ...formData, course: e.target.value });
+                            handleAutoResize(e);
+                          }}
+                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
+                        />
+                      </div>
+                    </div>
+                    {errors.course && (
+                      <span className={FIELD_ERROR_CLASS}>{errors.course}</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Address */}
+                <div className="relative">
+                  <div
+                    className={`min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${errors.address
+                      ? "border-red-500"
+                      : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                      }`}
                   >
-                    <label htmlFor="participate-fullName" className="flex items-center cursor-pointer">
-                      <User className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                    <label htmlFor="participate-address" className="flex items-center cursor-pointer">
+                      <img
+                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269187397-m4u96-location.webp"
+                        alt=""
+                        className="size-4 shrink-0 mr-3 object-contain"
+                      />
                       <Typography
                         variant="caption-1"
                         as="span"
                         className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
                       >
-                        Full Name*
+                        Your Address*
                       </Typography>
                     </label>
                     <div className="pl-7 w-full">
                       <textarea
-                        id="participate-fullName"
+                        id="participate-address"
                         rows={1}
-                        value={formData.fullName}
+                        value={formData.address}
                         onInput={handleAutoResize}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") e.preventDefault();
                         }}
                         onChange={(e) => {
-                          handleNameChange(e);
+                          if (errors.address && e.target.value.trim()) {
+                            setErrors((prev) => ({ ...prev, address: undefined }));
+                          }
+                          setFormData({ ...formData, address: e.target.value });
                           handleAutoResize(e);
                         }}
                         className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
                       />
                     </div>
                   </div>
-                  {errors.fullName && (
-                    <span className={FIELD_ERROR_CLASS}>{errors.fullName}</span>
+                  {errors.address && (
+                    <span className={FIELD_ERROR_CLASS}>{errors.address}</span>
                   )}
                 </div>
 
-                <div className="relative min-h-[2.85rem] h-auto">
-                  <PhoneInputField
-                    label="Phone Number"
-                    hideLabel
-                    floatingError
-                    required
-                    error={errors.phone}
-                    value={formData.phone}
+                {/* Languages & Skills */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
+                  <SearchableLanguageSelect
+                    value={formData.languages}
+                    error={errors.languages}
                     onChange={(val) => {
-                      if (errors.phone) {
-                        setErrors((prev) => ({ ...prev, phone: undefined }));
+                      if (errors.languages) {
+                        setErrors((prev) => ({ ...prev, languages: undefined }));
                       }
-                      setFormData((prev) => ({ ...prev, phone: val || "" }));
+                      setFormData((prev) => ({ ...prev, languages: val }));
                     }}
+                    className="h-full"
                   />
-                </div>
-              </div>
 
-              {/* Row 2: Email & Gender (Intern) / Location (Fundraise/Volunteer) */}
+                  <div className="relative h-full">
+                    <div
+                      className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.computerSkills
+                        ? "border-red-500"
+                        : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                        }`}
+                    >
+                      <label htmlFor="participate-skills" className="flex items-center cursor-pointer">
+                        <img
+                          src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269549117-9bb93-magicpen.webp"
+                          alt=""
+                          className="size-4 shrink-0 mr-3 object-contain"
+                        />
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                        >
+                          Skills*
+                        </Typography>
+                      </label>
+                      <div className="pl-7 w-full">
+                        <textarea
+                          id="participate-skills"
+                          rows={1}
+                          value={formData.computerSkills}
+                          onInput={handleAutoResize}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.preventDefault();
+                          }}
+                          onChange={(e) => {
+                            if (errors.computerSkills && e.target.value.trim()) {
+                              setErrors((prev) => ({ ...prev, computerSkills: undefined }));
+                            }
+                            setFormData({
+                              ...formData,
+                              computerSkills: e.target.value,
+                            });
+                            handleAutoResize(e);
+                          }}
+                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
+                        />
+                      </div>
+                    </div>
+                    {errors.computerSkills && (
+                      <span className={FIELD_ERROR_CLASS}>{errors.computerSkills}</span>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : isVolunteer ? (
+              /* Volunteer Row 3: Educational Qualification & Areas of Interest */
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
                 <div className="relative h-full">
                   <div
-                    className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${
-                      errors.email
-                        ? "border-red-500"
-                        : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
-                    }`}
+                    className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.educationalQualification
+                      ? "border-red-500"
+                      : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                      }`}
                   >
-                    <label htmlFor="participate-email" className="flex items-center cursor-pointer">
-                      <Mail className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                    <label htmlFor="participate-qualification" className="flex items-center cursor-pointer">
+                      <img
+                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791268884591-xwrs7-calendar-2.webp"
+                        alt=""
+                        className="size-4 shrink-0 mr-3 object-contain"
+                      />
                       <Typography
                         variant="caption-1"
                         as="span"
                         className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
                       >
-                        Email Address*
+                        Educational Qualification*
                       </Typography>
                     </label>
                     <div className="pl-7 w-full">
                       <textarea
-                        id="participate-email"
+                        id="participate-qualification"
                         rows={1}
-                        value={formData.email}
+                        value={formData.educationalQualification}
                         onInput={handleAutoResize}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") e.preventDefault();
                         }}
                         onChange={(e) => {
-                          handleEmailChange(e);
+                          if (errors.educationalQualification && e.target.value.trim()) {
+                            setErrors((prev) => ({ ...prev, educationalQualification: undefined }));
+                          }
+                          setFormData({
+                            ...formData,
+                            educationalQualification: e.target.value,
+                          });
                           handleAutoResize(e);
                         }}
-                        onBlur={handleEmailBlur}
                         className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
                       />
                     </div>
                   </div>
-                  {errors.email && (
-                    <span className={FIELD_ERROR_CLASS}>{errors.email}</span>
+                  {errors.educationalQualification && (
+                    <span className={FIELD_ERROR_CLASS}>{errors.educationalQualification}</span>
                   )}
                 </div>
 
-                {isIntern ? (
-                  <GenderSelect
-                    value={formData.gender}
-                    error={errors.gender}
-                    onChange={(val) => {
-                      if (errors.gender) {
-                        setErrors((prev) => ({ ...prev, gender: undefined }));
-                      }
-                      setFormData((prev) => ({ ...prev, gender: val }));
-                    }}
-                    className="h-full"
-                  />
-                ) : (
-                  <LocationSelect
-                    value={formData.location}
-                    error={errors.location}
-                    onChange={(val) => {
-                      if (errors.location) {
-                        setErrors((prev) => ({ ...prev, location: undefined }));
-                      }
-                      setFormData((prev) => ({ ...prev, location: val }));
-                    }}
-                    className="h-full"
-                  />
-                )}
+                <VolunteerInterestSelect
+                  value={formData.volunteerInterest}
+                  error={errors.volunteerInterest}
+                  onChange={(val) => {
+                    if (errors.volunteerInterest) {
+                      setErrors((prev) => ({ ...prev, volunteerInterest: undefined }));
+                    }
+                    setFormData((prev) => ({
+                      ...prev,
+                      volunteerInterest: val,
+                    }));
+                  }}
+                  className="h-full"
+                />
               </div>
-
-              {/* Row 3 (Specific to Intern vs Fundraise/Volunteer) */}
-              {isIntern ? (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
-                    <DobDatePicker
-                      value={formData.dob}
-                      onChange={(val) =>
-                        setFormData((prev) => ({ ...prev, dob: val }))
-                      }
-                      className="h-full"
-                    />
-
-                    <div className="relative h-full">
-                      <div
-                        className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${
-                          errors.course
-                            ? "border-red-500"
-                            : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
-                        }`}
-                      >
-                        <label htmlFor="participate-course" className="flex items-center cursor-pointer">
-                          <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3" />
-                          <Typography
-                            variant="caption-1"
-                            as="span"
-                            className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                          >
-                            Current Course*
-                          </Typography>
-                        </label>
-                        <div className="pl-7 w-full">
-                          <textarea
-                            id="participate-course"
-                            rows={1}
-                            value={formData.course}
-                            onInput={handleAutoResize}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") e.preventDefault();
-                            }}
-                            onChange={(e) => {
-                              if (errors.course && e.target.value.trim()) {
-                                setErrors((prev) => ({ ...prev, course: undefined }));
-                              }
-                              setFormData({ ...formData, course: e.target.value });
-                              handleAutoResize(e);
-                            }}
-                            className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
-                          />
-                        </div>
-                      </div>
-                      {errors.course && (
-                        <span className={FIELD_ERROR_CLASS}>{errors.course}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Address */}
-                  <div className="relative">
-                    <div
-                      className={`min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${
-                        errors.address
-                          ? "border-red-500"
-                          : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
-                      }`}
-                    >
-                      <label htmlFor="participate-address" className="flex items-center cursor-pointer">
-                        <MapPin className="size-4 text-[#0D2838] shrink-0 mr-3" />
-                        <Typography
-                          variant="caption-1"
-                          as="span"
-                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                        >
-                          Your Address*
-                        </Typography>
-                      </label>
-                      <div className="pl-7 w-full">
-                        <textarea
-                          id="participate-address"
-                          rows={1}
-                          value={formData.address}
-                          onInput={handleAutoResize}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") e.preventDefault();
-                          }}
-                          onChange={(e) => {
-                            if (errors.address && e.target.value.trim()) {
-                              setErrors((prev) => ({ ...prev, address: undefined }));
-                            }
-                            setFormData({ ...formData, address: e.target.value });
-                            handleAutoResize(e);
-                          }}
-                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
-                        />
-                      </div>
-                    </div>
-                    {errors.address && (
-                      <span className={FIELD_ERROR_CLASS}>{errors.address}</span>
-                    )}
-                  </div>
-
-                  {/* Languages & Skills */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
-                    <SearchableLanguageSelect
-                      value={formData.languages}
-                      error={errors.languages}
-                      onChange={(val) => {
-                        if (errors.languages) {
-                          setErrors((prev) => ({ ...prev, languages: undefined }));
-                        }
-                        setFormData((prev) => ({ ...prev, languages: val }));
-                      }}
-                      className="h-full"
-                    />
-
-                    <div className="relative h-full">
-                      <div
-                        className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${
-                          errors.computerSkills
-                            ? "border-red-500"
-                            : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
-                        }`}
-                      >
-                        <label htmlFor="participate-skills" className="flex items-center cursor-pointer">
-                          <Wrench className="size-4 text-[#0D2838] shrink-0 mr-3" />
-                          <Typography
-                            variant="caption-1"
-                            as="span"
-                            className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                          >
-                            Skills*
-                          </Typography>
-                        </label>
-                        <div className="pl-7 w-full">
-                          <textarea
-                            id="participate-skills"
-                            rows={1}
-                            value={formData.computerSkills}
-                            onInput={handleAutoResize}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") e.preventDefault();
-                            }}
-                            onChange={(e) => {
-                              if (errors.computerSkills && e.target.value.trim()) {
-                                setErrors((prev) => ({ ...prev, computerSkills: undefined }));
-                              }
-                              setFormData({
-                                ...formData,
-                                computerSkills: e.target.value,
-                              });
-                              handleAutoResize(e);
-                            }}
-                            className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
-                          />
-                        </div>
-                      </div>
-                      {errors.computerSkills && (
-                        <span className={FIELD_ERROR_CLASS}>{errors.computerSkills}</span>
-                      )}
-                    </div>
-                  </div>
-                </>
-              ) : isVolunteer ? (
-                /* Volunteer Row 3: Educational Qualification & Areas of Interest */
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
-                  <div className="relative h-full">
-                    <div
-                      className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${
-                        errors.educationalQualification
-                          ? "border-red-500"
-                          : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
-                      }`}
-                    >
-                      <label htmlFor="participate-qualification" className="flex items-center cursor-pointer">
-                        <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3" />
-                        <Typography
-                          variant="caption-1"
-                          as="span"
-                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                        >
-                          Educational Qualification*
-                        </Typography>
-                      </label>
-                      <div className="pl-7 w-full">
-                        <textarea
-                          id="participate-qualification"
-                          rows={1}
-                          value={formData.educationalQualification}
-                          onInput={handleAutoResize}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") e.preventDefault();
-                          }}
-                          onChange={(e) => {
-                            if (errors.educationalQualification && e.target.value.trim()) {
-                              setErrors((prev) => ({ ...prev, educationalQualification: undefined }));
-                            }
-                            setFormData({
-                              ...formData,
-                              educationalQualification: e.target.value,
-                            });
-                            handleAutoResize(e);
-                          }}
-                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
-                        />
-                      </div>
-                    </div>
-                    {errors.educationalQualification && (
-                      <span className={FIELD_ERROR_CLASS}>{errors.educationalQualification}</span>
-                    )}
-                  </div>
-
-                  <VolunteerInterestSelect
-                    value={formData.volunteerInterest}
-                    error={errors.volunteerInterest}
-                    onChange={(val) => {
-                      if (errors.volunteerInterest) {
-                        setErrors((prev) => ({ ...prev, volunteerInterest: undefined }));
-                      }
-                      setFormData((prev) => ({
-                        ...prev,
-                        volunteerInterest: val,
-                      }));
-                    }}
-                    className="h-full"
-                  />
-                </div>
-              ) : (
-                /* Specific to Fundraise (Frame 582: Gap 51px) */
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
-                  <div className="relative h-full">
-                    <div
-                      className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${
-                        errors.fundraisingGoal
-                          ? "border-red-500"
-                          : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
-                      }`}
-                    >
-                      <label htmlFor="participate-goal" className="flex items-center cursor-pointer">
-                        <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3" />
-                        <Typography
-                          variant="caption-1"
-                          as="span"
-                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                        >
-                          Fundraising Goal*
-                        </Typography>
-                      </label>
-                      <div className="pl-7 w-full">
-                        <textarea
-                          id="participate-goal"
-                          rows={1}
-                          value={formData.fundraisingGoal}
-                          onInput={handleAutoResize}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") e.preventDefault();
-                          }}
-                          onChange={(e) => {
-                            if (errors.fundraisingGoal && e.target.value.trim()) {
-                              setErrors((prev) => ({ ...prev, fundraisingGoal: undefined }));
-                            }
-                            setFormData({
-                              ...formData,
-                              fundraisingGoal: e.target.value,
-                            });
-                            handleAutoResize(e);
-                          }}
-                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
-                        />
-                      </div>
-                    </div>
-                    {errors.fundraisingGoal && (
-                      <span className={FIELD_ERROR_CLASS}>{errors.fundraisingGoal}</span>
-                    )}
-                  </div>
-
-                  <div className="relative h-full">
-                    <div
-                      className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${
-                        errors.reason
-                          ? "border-red-500"
-                          : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
-                      }`}
-                    >
-                      <label htmlFor="participate-reason" className="flex items-center cursor-pointer">
-                        <BookOpen className="size-4 text-[#0D2838] shrink-0 mr-3" />
-                        <Typography
-                          variant="caption-1"
-                          as="span"
-                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                        >
-                          Why are you fundraising?*
-                        </Typography>
-                      </label>
-                      <div className="pl-7 w-full">
-                        <textarea
-                          id="participate-reason"
-                          rows={1}
-                          value={formData.reason}
-                          onInput={handleAutoResize}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") e.preventDefault();
-                          }}
-                          onChange={(e) => {
-                            if (errors.reason && e.target.value.trim()) {
-                              setErrors((prev) => ({ ...prev, reason: undefined }));
-                            }
-                            setFormData({ ...formData, reason: e.target.value });
-                            handleAutoResize(e);
-                          }}
-                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
-                        />
-                      </div>
-                    </div>
-                    {errors.reason && (
-                      <span className={FIELD_ERROR_CLASS}>{errors.reason}</span>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Bottom section: Attach Resume for Intern, Why would you like to volunteer? for Volunteer, Your Message for Fundraise */}
-              {isIntern ? (
-                <div className="relative">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    id="intern-resume"
-                    accept=".pdf,.doc,.docx"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const fileError = !RESUME_TYPES.has(file.type)
-                        ? "Resume must be a PDF, DOC, or DOCX file"
-                        : file.size > MAX_RESUME_BYTES
-                          ? "Resume must be 5 MB or smaller"
-                          : undefined;
-                      if (fileError) {
-                        e.target.value = "";
-                        setErrors((prev) => ({ ...prev, resumeFile: fileError }));
-                        return;
-                      }
-                      setResumeFile(file);
-                      if (errors.resumeFile) {
-                        setErrors((prev) => ({ ...prev, resumeFile: undefined }));
-                      }
-                    }}
-                  />
-                  {resumeFile ? (
-                    <div
-                      onClick={handleViewResume}
-                      className="w-full h-[6.19rem] flex items-center justify-between px-4 sm:px-5 border border-solid border-[#FCCC2D] rounded-[0.5rem] bg-[#FFFBF0] hover:bg-[#FFF6D6]/60 transition-colors cursor-pointer group"
-                      title="Click to view resume"
-                    >
-                      <div className="flex items-center gap-3 min-w-0 mr-3">
-                        <FileText className="size-5 text-[#B87A00] shrink-0 group-hover:scale-110 transition-transform" />
-                        <div className="min-w-0">
-                          <p className="font-manrope font-semibold text-[0.82rem] text-[#0D2838] group-hover:text-[#B87A00] group-hover:underline truncate transition-colors">
-                            {resumeFile.name}
-                          </p>
-                          <p className="font-manrope text-[0.7rem] text-[#7C8B93]">
-                            {(resumeFile.size / 1024 / 1024).toFixed(2)} MB • Ready to submit
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setResumeFile(null);
-                          if (fileInputRef.current) fileInputRef.current.value = "";
-                        }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-md border border-red-200 transition-colors shrink-0 cursor-pointer shadow-2xs"
-                        title="Remove resume"
-                      >
-                        <Trash2 className="size-3.5" />
-                        <span>Delete</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <label
-                      htmlFor="intern-resume"
-                      className={`w-full h-[6.19rem] flex flex-col items-center justify-center gap-[0.625rem] border ${
-                        errors.resumeFile
-                          ? "border-solid border-red-500 bg-red-50/20"
-                          : "border-dashed border-[#A3A3A3] bg-white/65 hover:border-[#FCCC2D]"
-                      } rounded-[0.5rem] cursor-pointer transition-colors`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <FileText className={`size-4 ${errors.resumeFile ? "text-red-500" : "text-[#7C8B93]"}`} />
-                        <span className="font-manrope font-medium text-[0.78rem] leading-[150%] tracking-[0.03em] text-[#0D2838]">
-                          Attach Resume*
-                        </span>
-                      </div>
-                      <span className="font-manrope font-medium text-[0.5rem] leading-[150%] tracking-[0.01em] text-[#7C8B93]">
-                        Upload your resume(PDF,DOC) - Max 5 MB
-                      </span>
-                    </label>
-                  )}
-                  {errors.resumeFile && (
-                    <span className={FIELD_ERROR_CLASS}>{errors.resumeFile}</span>
-                  )}
-                </div>
-              ) : isVolunteer ? (
-                /* Why would you like to volunteer?* for Volunteer */
-                <div className="relative">
+            ) : (
+              /* Specific to Fundraise (Frame 582: Gap 51px) */
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
+                <div className="relative h-full">
                   <div
-                    className={`min-h-[5.54rem] h-auto pb-1.5 flex flex-col justify-between border-b transition-all ${
-                      errors.whyVolunteer
-                        ? "border-red-500"
-                        : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
-                    }`}
+                    className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.fundraisingGoal
+                      ? "border-red-500"
+                      : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                      }`}
                   >
-                    <label htmlFor="participate-whyVolunteer" className="flex items-center cursor-pointer pt-0.5">
-                      <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                    <label htmlFor="participate-goal" className="flex items-center cursor-pointer">
+                      <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3" />
                       <Typography
                         variant="caption-1"
                         as="span"
                         className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
                       >
-                        Why would you like to volunteer?*
+                        Fundraising Goal*
                       </Typography>
                     </label>
                     <div className="pl-7 w-full">
                       <textarea
-                        id="participate-whyVolunteer"
+                        id="participate-goal"
                         rows={1}
-                        maxLength={500}
-                        value={formData.whyVolunteer || formData.message}
+                        value={formData.fundraisingGoal}
                         onInput={handleAutoResize}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") e.preventDefault();
+                        }}
                         onChange={(e) => {
-                          if (errors.whyVolunteer && e.target.value.trim()) {
-                            setErrors((prev) => ({ ...prev, whyVolunteer: undefined }));
+                          if (errors.fundraisingGoal && e.target.value.trim()) {
+                            setErrors((prev) => ({ ...prev, fundraisingGoal: undefined }));
                           }
                           setFormData({
                             ...formData,
-                            whyVolunteer: e.target.value,
-                            message: e.target.value,
+                            fundraisingGoal: e.target.value,
                           });
                           handleAutoResize(e);
                         }}
-                        className="w-full min-h-[2.5rem] max-h-[8rem] bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto block leading-normal py-1"
+                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
                       />
                     </div>
                   </div>
-                  <div className="flex justify-between items-center mt-1">
-                    {errors.whyVolunteer ? (
-                      <span className="text-xs text-red-600 font-manrope block">
-                        {errors.whyVolunteer}
-                      </span>
-                    ) : (
-                      <span />
-                    )}
-                    <span className="text-[0.7rem] text-[#7C8B93] font-manrope select-none">
-                      {(formData.whyVolunteer || formData.message).length} / 500
-                    </span>
-                  </div>
+                  {errors.fundraisingGoal && (
+                    <span className={FIELD_ERROR_CLASS}>{errors.fundraisingGoal}</span>
+                  )}
                 </div>
-              ) : (
-                /* Your Message for Fundraise */
-                <div className="relative">
+
+                <div className="relative h-full">
                   <div
-                    className={`min-h-[5.54rem] h-auto pb-1.5 flex flex-col justify-between border-b transition-all ${
-                      errors.message
-                        ? "border-red-500"
-                        : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
-                    }`}
+                    className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.reason
+                      ? "border-red-500"
+                      : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                      }`}
                   >
-                    <label htmlFor="participate-message" className="flex items-center cursor-pointer pt-0.5">
-                      <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                    <label htmlFor="participate-reason" className="flex items-center cursor-pointer">
+                      <img
+                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269059713-dt428-book.webp"
+                        alt=""
+                        className="size-4 shrink-0 mr-3 object-contain"
+                      />
                       <Typography
                         variant="caption-1"
                         as="span"
                         className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
                       >
-                        Your Message*
+                        Why are you fundraising?*
                       </Typography>
                     </label>
                     <div className="pl-7 w-full">
                       <textarea
-                        id="participate-message"
+                        id="participate-reason"
                         rows={1}
-                        maxLength={500}
-                        value={formData.message}
+                        value={formData.reason}
                         onInput={handleAutoResize}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") e.preventDefault();
+                        }}
                         onChange={(e) => {
-                          if (errors.message && e.target.value.trim()) {
-                            setErrors((prev) => ({ ...prev, message: undefined }));
+                          if (errors.reason && e.target.value.trim()) {
+                            setErrors((prev) => ({ ...prev, reason: undefined }));
                           }
-                          setFormData({ ...formData, message: e.target.value });
+                          setFormData({ ...formData, reason: e.target.value });
                           handleAutoResize(e);
                         }}
-                        className="w-full min-h-[2.5rem] max-h-[8rem] bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto block leading-normal py-1"
+                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
                       />
                     </div>
                   </div>
-                  <div className="flex justify-between items-center mt-1">
-                    {errors.message ? (
-                      <span className="text-xs text-red-600 font-manrope block">
-                        {errors.message}
-                      </span>
-                    ) : (
-                      <span />
-                    )}
-                    <span className="text-[0.7rem] text-[#7C8B93] font-manrope select-none">
-                      {formData.message.length} / 500
-                    </span>
-                  </div>
+                  {errors.reason && (
+                    <span className={FIELD_ERROR_CLASS}>{errors.reason}</span>
+                  )}
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Terms and Conditions Checkbox */}
-              <div className="relative flex flex-col gap-1 pt-1">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="participate-terms"
-                    checked={formData.agreeTerms}
-                    onChange={(e) => {
-                      if (errors.agreeTerms && e.target.checked) {
-                        setErrors((prev) => ({ ...prev, agreeTerms: undefined }));
-                      }
-                      setFormData({ ...formData, agreeTerms: e.target.checked });
-                    }}
-                    className="size-4 accent-[#FCCC2D] rounded-sm cursor-pointer"
-                  />
-                  <label
-                    htmlFor="participate-terms"
-                    className="cursor-pointer"
+            {/* Bottom section: Attach Resume for Intern, Why would you like to volunteer? for Volunteer, Your Message for Fundraise */}
+            {isIntern ? (
+              <div className="relative">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  id="intern-resume"
+                  accept=".pdf,.doc,.docx"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const fileError = !RESUME_TYPES.has(file.type)
+                      ? "Resume must be a PDF, DOC, or DOCX file"
+                      : file.size > MAX_RESUME_BYTES
+                        ? "Resume must be 5 MB or smaller"
+                        : undefined;
+                    if (fileError) {
+                      e.target.value = "";
+                      setErrors((prev) => ({ ...prev, resumeFile: fileError }));
+                      return;
+                    }
+                    setResumeFile(file);
+                    if (errors.resumeFile) {
+                      setErrors((prev) => ({ ...prev, resumeFile: undefined }));
+                    }
+                  }}
+                />
+                {resumeFile ? (
+                  <div
+                    onClick={handleViewResume}
+                    className="w-full h-[6.19rem] flex items-center justify-between px-4 sm:px-5 border border-solid border-[#FCCC2D] rounded-[0.5rem] bg-[#FFFBF0] hover:bg-[#FFF6D6]/60 transition-colors cursor-pointer group"
+                    title="Click to view resume"
                   >
-                    <Typography variant="caption-1" as="span" className="font-manrope font-normal text-[#596D79]">
-                      I have read and agree to the{" "}
-                    </Typography>
-                    <a
-                      href="/terms"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:underline transition-opacity"
+                    <div className="flex items-center gap-3 min-w-0 mr-3">
+                      <FileText className="size-5 text-[#B87A00] shrink-0 group-hover:scale-110 transition-transform" />
+                      <div className="min-w-0">
+                        <p className="font-manrope font-semibold text-[0.82rem] text-[#0D2838] group-hover:text-[#B87A00] group-hover:underline truncate transition-colors">
+                          {resumeFile.name}
+                        </p>
+                        <p className="font-manrope text-[0.7rem] text-[#7C8B93]">
+                          {(resumeFile.size / 1024 / 1024).toFixed(2)} MB • Ready to submit
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setResumeFile(null);
+                        if (fileInputRef.current) fileInputRef.current.value = "";
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-md border border-red-200 transition-colors shrink-0 cursor-pointer shadow-2xs"
+                      title="Remove resume"
                     >
-                      <Typography variant="caption-1" as="span" className="font-manrope font-medium text-[#E5A810]">
-                        Terms & Conditions
-                      </Typography>
-                    </a>
+                      <Trash2 className="size-3.5" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                ) : (
+                  <label
+                    htmlFor="intern-resume"
+                    className={`w-full h-[6.19rem] flex flex-col items-center justify-center gap-[0.625rem] border ${errors.resumeFile
+                      ? "border-solid border-red-500 bg-red-50/20"
+                      : "border-dashed border-[#A3A3A3] bg-white/65 hover:border-[#FCCC2D]"
+                      } rounded-[0.5rem] cursor-pointer transition-colors`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <img
+                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269859574-9yagf-fi_4212312.webp"
+                        alt=""
+                        className="size-4 shrink-0 object-contain"
+                      />
+                      <span className="font-manrope font-medium text-[0.78rem] leading-[150%] tracking-[0.03em] text-[#0D2838]">
+                        Attach Resume*
+                      </span>
+                    </div>
+                    <span className="font-manrope font-medium text-[0.5rem] leading-[150%] tracking-[0.01em] text-[#7C8B93]">
+                      Upload your resume(PDF,DOC) - Max 5 MB
+                    </span>
                   </label>
-                </div>
-                {errors.agreeTerms && (
-                  <span className={FIELD_ERROR_CLASS}>{errors.agreeTerms}</span>
+                )}
+                {errors.resumeFile && (
+                  <span className={FIELD_ERROR_CLASS}>{errors.resumeFile}</span>
                 )}
               </div>
+            ) : isVolunteer ? (
+              /* Why would you like to volunteer?* for Volunteer */
+              <div className="relative">
+                <div
+                  className={`min-h-[5.54rem] h-auto pb-1.5 flex flex-col justify-between border-b transition-all ${errors.whyVolunteer
+                    ? "border-red-500"
+                    : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                    }`}
+                >
+                  <label htmlFor="participate-whyVolunteer" className="flex items-center cursor-pointer pt-0.5">
+                    <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                    <Typography
+                      variant="caption-1"
+                      as="span"
+                      className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                    >
+                      Why would you like to volunteer?*
+                    </Typography>
+                  </label>
+                  <div className="pl-7 w-full">
+                    <textarea
+                      id="participate-whyVolunteer"
+                      rows={1}
+                      maxLength={500}
+                      value={formData.whyVolunteer || formData.message}
+                      onInput={handleAutoResize}
+                      onChange={(e) => {
+                        if (errors.whyVolunteer && e.target.value.trim()) {
+                          setErrors((prev) => ({ ...prev, whyVolunteer: undefined }));
+                        }
+                        setFormData({
+                          ...formData,
+                          whyVolunteer: e.target.value,
+                          message: e.target.value,
+                        });
+                        handleAutoResize(e);
+                      }}
+                      className="w-full min-h-[2.5rem] max-h-[8rem] bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto block leading-normal py-1"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  {errors.whyVolunteer ? (
+                    <span className="text-xs text-red-600 font-manrope block">
+                      {errors.whyVolunteer}
+                    </span>
+                  ) : (
+                    <span />
+                  )}
+                  <span className="text-[0.7rem] text-[#7C8B93] font-manrope select-none">
+                    {(formData.whyVolunteer || formData.message).length} / 500
+                  </span>
+                </div>
+              </div>
+            ) : (
+              /* Your Message for Fundraise */
+              <div className="relative">
+                <div
+                  className={`min-h-[5.54rem] h-auto pb-1.5 flex flex-col justify-between border-b transition-all ${errors.message
+                    ? "border-red-500"
+                    : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
+                    }`}
+                >
+                  <label htmlFor="participate-message" className="flex items-center cursor-pointer pt-0.5">
+                    <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                    <Typography
+                      variant="caption-1"
+                      as="span"
+                      className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                    >
+                      Your Message*
+                    </Typography>
+                  </label>
+                  <div className="pl-7 w-full">
+                    <textarea
+                      id="participate-message"
+                      rows={1}
+                      maxLength={500}
+                      value={formData.message}
+                      onInput={handleAutoResize}
+                      onChange={(e) => {
+                        if (errors.message && e.target.value.trim()) {
+                          setErrors((prev) => ({ ...prev, message: undefined }));
+                        }
+                        setFormData({ ...formData, message: e.target.value });
+                        handleAutoResize(e);
+                      }}
+                      className="w-full min-h-[2.5rem] max-h-[8rem] bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto block leading-normal py-1"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  {errors.message ? (
+                    <span className="text-xs text-red-600 font-manrope block">
+                      {errors.message}
+                    </span>
+                  ) : (
+                    <span />
+                  )}
+                  <span className="text-[0.7rem] text-[#7C8B93] font-manrope select-none">
+                    {formData.message.length} / 500
+                  </span>
+                </div>
+              </div>
+            )}
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={submitted || submitting}
-                aria-busy={submitting}
-                className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#2E1C12] rounded-md transition duration-200 hover:bg-[#F5C21B] active:scale-[0.99] cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed"
-              >
-                <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#2E1C12]">
-                  {submitted
-                    ? "Submitted ✓"
-                    : submitting
-                      ? "Submitting…"
-                      : "Submit Application"}
+            {/* Terms and Conditions Checkbox */}
+            <div className="relative flex flex-col gap-1 pt-1">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="participate-terms"
+                  checked={formData.agreeTerms}
+                  onChange={(e) => {
+                    if (errors.agreeTerms && e.target.checked) {
+                      setErrors((prev) => ({ ...prev, agreeTerms: undefined }));
+                    }
+                    setFormData({ ...formData, agreeTerms: e.target.checked });
+                  }}
+                  className="size-4 accent-[#FCCC2D] rounded-sm cursor-pointer"
+                />
+                <label
+                  htmlFor="participate-terms"
+                  className="cursor-pointer"
+                >
+                  <Typography variant="caption-1" as="span" className="font-manrope font-normal text-[#596D79]">
+                    I have read and agree to the{" "}
+                  </Typography>
+                  <a
+                    href="/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline transition-opacity"
+                  >
+                    <Typography variant="caption-1" as="span" className="font-manrope font-medium text-[#E5A810]">
+                      Terms & Conditions
+                    </Typography>
+                  </a>
+                </label>
+              </div>
+              {errors.agreeTerms && (
+                <span className={FIELD_ERROR_CLASS}>{errors.agreeTerms}</span>
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={submitted || submitting}
+              aria-busy={submitting}
+              className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#2E1C12] rounded-md transition duration-200 hover:bg-[#F5C21B] active:scale-[0.99] cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed"
+            >
+              <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#2E1C12]">
+                {submitted
+                  ? "Submitted ✓"
+                  : submitting
+                    ? "Submitting…"
+                    : "Submit Application"}
+              </Typography>
+            </button>
+
+            {submitError && !submitted && (
+              <div role="alert" className="text-center pt-2 animate-in fade-in duration-300">
+                <Typography
+                  variant="caption-2"
+                  as="p"
+                  className="font-manrope font-semibold text-red-600"
+                >
+                  {submitError}
                 </Typography>
-              </button>
+              </div>
+            )}
 
-              {submitError && !submitted && (
-                <div role="alert" className="text-center pt-2 animate-in fade-in duration-300">
-                  <Typography
-                    variant="caption-2"
-                    as="p"
-                    className="font-manrope font-semibold text-red-600"
-                  >
-                    {submitError}
-                  </Typography>
-                </div>
-              )}
-
-              {submitted && (
-                <div className="text-center pt-2 space-y-0.5 animate-in fade-in duration-300">
-                  <Typography
-                    variant="caption-2"
-                    as="p"
-                    className="font-manrope font-semibold text-[#2E7D32]"
-                  >
-                    {successMessage || "Application Submitted Successfully!"}
-                  </Typography>
-                  <Typography
-                    variant="caption-2"
-                    as="p"
-                    className="font-manrope font-normal text-[#2E7D32]"
-                  >
-                    Thank you for reaching out to HCG Foundation. Our team will review your application and get in touch with you soon.
-                  </Typography>
-                </div>
-              )}
-            </form>
+            {submitted && (
+              <div className="text-center pt-2 space-y-0.5 animate-in fade-in duration-300">
+                <Typography
+                  variant="caption-2"
+                  as="p"
+                  className="font-manrope font-semibold text-[#2E7D32]"
+                >
+                  {successMessage || "Application Submitted Successfully!"}
+                </Typography>
+                <Typography
+                  variant="caption-2"
+                  as="p"
+                  className="font-manrope font-normal text-[#2E7D32]"
+                >
+                  Thank you for reaching out to HCG Foundation. Our team will review your application and get in touch with you soon.
+                </Typography>
+              </div>
+            )}
+          </form>
         </div>
       </div>
     </div>
