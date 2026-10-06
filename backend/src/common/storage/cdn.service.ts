@@ -11,7 +11,6 @@ const CV_TYPES = new Set([
 const VIDEO_TYPES = new Set(['video/mp4', 'video/webm']);
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
-const MAX_DOCUMENT_BYTES = 25 * 1024 * 1024;
 const MAX_CV_BYTES = 5 * 1024 * 1024;
 
 export type CdnFileKind = 'image' | 'document' | 'video' | 'cv';
@@ -90,10 +89,7 @@ export class CdnService {
 
     if (kind === 'document') {
       if (!DOCUMENT_TYPES.has(file.mimetype)) {
-        throw new BadRequestException('Only PDF documents are allowed (max 25MB).');
-      }
-      if (file.size > MAX_DOCUMENT_BYTES) {
-        throw new BadRequestException('Document must be 25MB or smaller.');
+        throw new BadRequestException('Only PDF documents are allowed.');
       }
       return;
     }
