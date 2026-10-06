@@ -265,7 +265,10 @@ function StoryTextBlock({
     ...extra,
   });
 
-  const hasHeading = Boolean(step.name);
+  // Without a name, the title takes the heading slot so it isn't left at tagline size.
+  const heading = step.name || step.tagline;
+  const subheading = step.name ? step.tagline : "";
+  const hasHeading = Boolean(heading);
   const textColumnOffset = hasHeading ? 4 + layout.accentGap : 0;
 
   return (
@@ -291,28 +294,30 @@ function StoryTextBlock({
               className="min-w-0 flex-1"
               style={textStyle(layout.nameSize, 700, "white", { lineHeight: 1.2 })}
             >
-              {renderWordLines(step.name, active, exiting, direction, layout.wordSpacing)}
+              {renderWordLines(heading, active, exiting, direction, layout.wordSpacing)}
             </div>
+          </div>
+        ) : null}
+
+        {subheading ? (
+          <div
+            style={{
+              paddingLeft: textColumnOffset,
+              ...textStyle(layout.taglineSize, 700, "white", {
+                marginTop: layout.nameGap,
+                lineHeight: 1.4,
+              }),
+            }}
+          >
+            {renderWordLines(subheading, active, exiting, direction, layout.wordSpacing)}
           </div>
         ) : null}
 
         <div
           style={{
             paddingLeft: textColumnOffset,
-            ...textStyle(layout.taglineSize, 700, "white", {
-              marginTop: hasHeading ? layout.nameGap : 0,
-              lineHeight: 1.4,
-            }),
-          }}
-        >
-          {renderWordLines(step.tagline, active, exiting, direction, layout.wordSpacing)}
-        </div>
-
-        <div
-          style={{
-            paddingLeft: textColumnOffset,
             ...textStyle(layout.bodySize, 400, "rgba(255,255,255,0.95)", {
-              marginTop: layout.taglineGap,
+              marginTop: subheading ? layout.taglineGap : layout.nameGap,
               lineHeight: 1.65,
             }),
           }}
