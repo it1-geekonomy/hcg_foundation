@@ -217,7 +217,7 @@ export default function ParticipatePage() {
         </div>
 
         {/* Equal Level Row: Title on Left, Paragraph on Right */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 mb-10 sm:mb-14 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 mb-10 sm:mb-14 items-start">
           <div className="md:col-span-6 lg:col-span-8">
             <div data-anim="top-title" className="md:max-w-[21rem] lg:max-w-none">
               <Typography

@@ -368,7 +368,7 @@ export default function CsrPartnerPage() {
 
 
         {/* Bottom Impact Banner matching Figma Frame 576 */}
-        <div className="mt-[2.5rem] sm:mt-[3.5rem] rounded-[0.25rem] bg-[#FFF4CF] p-[1.25rem] sm:pt-[1.1875rem] sm:pb-[1.6875rem] sm:pl-[3.375rem] sm:pr-[2.875rem] flex flex-col md:flex-row md:items-center md:justify-between gap-[1.5rem] md:gap-[2rem]">
+        <div className="mt-[2.5rem] sm:mt-[3.5rem] rounded-[0.25rem] bg-[#FFF4CF] p-[1.25rem] sm:pt-[1.1875rem] sm:pb-[1.6875rem] sm:px-[2rem] md:px-[2rem] lg:px-[2rem] flex flex-col md:flex-row md:items-start md:justify-between gap-[1.5rem] md:gap-[1.5rem]">
           <div data-anim="bottom-title" className="shrink-0">
             <Typography
               variant="heading-2"

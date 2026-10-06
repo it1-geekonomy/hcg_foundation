@@ -330,7 +330,7 @@ export default function GrantsAndPhilanthropyPage() {
         </div>
 
         {/* Bottom Impact Banner matching Figma Frame 576 */}
-        <div className="mt-10 sm:mt-14 lg:mt-16 rounded-xl bg-[#FFF4CF] px-6 sm:px-10 lg:pl-[3.375rem] lg:pr-[2.875rem] py-6 sm:py-8 lg:pt-[2.25rem] lg:pb-[1.6875rem] flex flex-col md:flex-row md:items-center md:justify-between gap-6 sm:gap-8 lg:gap-10 xl:gap-12 2xl:gap-16">
+        <div className="mt-10 sm:mt-14 lg:mt-16 rounded-xl bg-[#FFF4CF] px-6 md:px-[2rem] lg:px-[2rem] py-6 sm:py-8 lg:pt-[2.25rem] lg:pb-[1.6875rem] flex flex-col md:flex-row md:items-start md:justify-between gap-6 md:gap-[1.5rem] lg:gap-[1.5rem] xl:gap-12 2xl:gap-16">
           <div data-anim="bottom-title" className="shrink-0">
             <Typography
               variant="heading-2"
