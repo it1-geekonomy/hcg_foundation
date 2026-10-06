@@ -3,8 +3,8 @@ import { BaseEntity } from '../../../common/entities/base.entity';
 
 @Entity('home_banners')
 export class HomeBanner extends BaseEntity {
-  @Column({ type: 'varchar', length: 255, nullable: false })
-  name: string;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  name?: string;
 
   @Column({ type: 'varchar', length: 255, nullable: false })
   title: string;

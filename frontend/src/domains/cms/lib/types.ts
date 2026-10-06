@@ -118,9 +118,7 @@ export type AwardFields = {
 
 export type HomeBanner = {
   id: string;
-  name: string;
   title: string;
-  location?: string | null;
   shortDescription?: string | null;
   bannerImageUrl: string;
   mobileBannerImageUrl?: string | null;
@@ -133,9 +131,7 @@ export type HomeBanner = {
 };
 
 export type HomeBannerFields = {
-  name: string;
   title: string;
-  location?: string;
   shortDescription?: string;
   /** Omit on create to append at the end of the list. */
   displayOrder?: number;

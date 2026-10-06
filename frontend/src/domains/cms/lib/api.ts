@@ -317,25 +317,13 @@ function awardPatchFormData(
   return fd;
 }
 
-function homeBannerFormData(
-  fields: HomeBannerFields,
-  files?: {
-    bannerImage?: File | null;
-    mobileBannerImage?: File | null;
-    profileImage?: File | null;
-  }
-) {
-  const fd = new FormData();
-  fd.append("name", fields.name.trim());
-  fd.append("title", fields.title.trim());
-  if (fields.location?.trim()) fd.append("location", fields.location.trim());
-  if (fields.shortDescription?.trim()) {
-    fd.append("shortDescription", fields.shortDescription.trim());
-  }
-  if (fields.displayOrder != null) {
-    fd.append("displayOrder", String(fields.displayOrder));
-  }
-  fd.append("isActive", fields.isActive ? "true" : "false");
+type HomeBannerFiles = {
+  bannerImage?: File | null;
+  mobileBannerImage?: File | null;
+  profileImage?: File | null;
+};
+
+function appendHomeBannerFiles(fd: FormData, files?: HomeBannerFiles) {
   if (files?.bannerImage instanceof File) {
     fd.append("bannerImage", files.bannerImage, files.bannerImage.name);
   }
@@ -349,16 +337,25 @@ function homeBannerFormData(
   if (files?.profileImage instanceof File) {
     fd.append("profileImage", files.profileImage, files.profileImage.name);
   }
+}
+
+function homeBannerFormData(fields: HomeBannerFields, files?: HomeBannerFiles) {
+  const fd = new FormData();
+  fd.append("title", fields.title.trim());
+  if (fields.shortDescription?.trim()) {
+    fd.append("shortDescription", fields.shortDescription.trim());
+  }
+  if (fields.displayOrder != null) {
+    fd.append("displayOrder", String(fields.displayOrder));
+  }
+  fd.append("isActive", fields.isActive ? "true" : "false");
+  appendHomeBannerFiles(fd, files);
   return fd;
 }
 
 function homeBannerPatchFormData(
   fields: Partial<HomeBannerFields>,
-  files?: {
-    bannerImage?: File | null;
-    mobileBannerImage?: File | null;
-    profileImage?: File | null;
-  }
+  files?: HomeBannerFiles
 ) {
   const fd = new FormData();
   const append = (key: keyof HomeBannerFields, value?: string | number | boolean | null) => {
@@ -373,26 +370,12 @@ function homeBannerPatchFormData(
     }
     fd.append(key, value == null ? "" : String(value));
   };
-  append("name", fields.name);
   append("title", fields.title);
-  append("location", fields.location);
   append("shortDescription", fields.shortDescription);
   append("displayOrder", fields.displayOrder);
   append("orderMode", fields.orderMode);
   append("isActive", fields.isActive);
-  if (files?.bannerImage instanceof File) {
-    fd.append("bannerImage", files.bannerImage, files.bannerImage.name);
-  }
-  if (files?.mobileBannerImage instanceof File) {
-    fd.append(
-      "mobileBannerImage",
-      files.mobileBannerImage,
-      files.mobileBannerImage.name
-    );
-  }
-  if (files?.profileImage instanceof File) {
-    fd.append("profileImage", files.profileImage, files.profileImage.name);
-  }
+  appendHomeBannerFiles(fd, files);
   return fd;
 }
 
@@ -867,11 +850,7 @@ export const cmsApi = {
 
   createHomeBanner: (
     fields: HomeBannerFields,
-    files: {
-      bannerImage: File;
-      mobileBannerImage?: File | null;
-      profileImage?: File | null;
-    }
+    files: HomeBannerFiles & { bannerImage: File }
   ) =>
     requestFormData<ApiEnvelope<HomeBanner>>(
       "/home-banners",
@@ -882,11 +861,7 @@ export const cmsApi = {
   updateHomeBanner: (
     id: string,
     fields: UpdateHomeBannerPayload,
-    files?: {
-      bannerImage?: File | null;
-      mobileBannerImage?: File | null;
-      profileImage?: File | null;
-    }
+    files?: HomeBannerFiles
   ) =>
     requestFormData<ApiEnvelope<HomeBanner>>(
       `/home-banners/${id}`,

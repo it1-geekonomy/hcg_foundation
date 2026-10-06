@@ -18,6 +18,8 @@ export type CmsImageRequiredSize = {
 };
 
 const ALLOWED_TYPES = new Set(["image/webp", "image/avif"]);
+/** Resized images are re-encoded as WebP, so common source formats are fine too. */
+const RESIZE_ALLOWED_TYPES = new Set([...ALLOWED_TYPES, "image/png", "image/jpeg"]);
 const MAX_BYTES = 5 * 1024 * 1024;
 
 function readImageSize(file: File): Promise<{ width: number; height: number }> {
@@ -37,6 +39,39 @@ function readImageSize(file: File): Promise<{ width: number; height: number }> {
   });
 }
 
+/** Centre-crops to the target aspect ratio, scales to the exact size and re-encodes as WebP. */
+async function resizeImage(file: File, size: CmsImageRequiredSize): Promise<File> {
+  const bitmap = await createImageBitmap(file);
+  try {
+    const targetRatio = size.width / size.height;
+    let sw = bitmap.width;
+    let sh = bitmap.height;
+    if (sw / sh > targetRatio) sw = Math.round(sh * targetRatio);
+    else sh = Math.round(sw / targetRatio);
+    const sx = Math.round((bitmap.width - sw) / 2);
+    const sy = Math.round((bitmap.height - sh) / 2);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = size.width;
+    canvas.height = size.height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas not supported");
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(bitmap, sx, sy, sw, sh, 0, 0, size.width, size.height);
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/webp", 0.92)
+    );
+    if (!blob || blob.type !== "image/webp") {
+      throw new Error("WebP encoding not supported");
+    }
+    const name = `${file.name.replace(/\.[^.]+$/, "")}.webp`;
+    return new File([blob], name, { type: "image/webp" });
+  } finally {
+    bitmap.close();
+  }
+}
+
 type CmsImagePickerProps = {
   value: CmsImageValue;
   onChange: (next: CmsImageValue) => void;
@@ -45,16 +80,25 @@ type CmsImagePickerProps = {
   disabled?: boolean;
   /** When set, only images matching this exact pixel size are accepted. */
   requiredSize?: CmsImageRequiredSize;
+  /** When set, any size is accepted and the image is cropped/resized to this size before upload. */
+  resizeTo?: CmsImageRequiredSize;
 };
 
 export default function CmsImagePicker({
   value,
   onChange,
   label = "image",
-  accept = "image/webp,image/avif,.webp,.avif",
+  accept,
   disabled,
   requiredSize,
+  resizeTo,
 }: CmsImagePickerProps) {
+  const resizing = !requiredSize && !!resizeTo;
+  const acceptTypes =
+    accept ??
+    (resizing
+      ? "image/webp,image/avif,image/png,image/jpeg,.webp,.avif,.png,.jpg,.jpeg"
+      : "image/webp,image/avif,.webp,.avif");
   const inputId = useId();
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -71,8 +115,9 @@ export default function CmsImagePicker({
   }, [localPreview]);
 
   const previewSrc = localPreview || value.url;
-  const sizeLabel = requiredSize
-    ? `${requiredSize.width} × ${requiredSize.height}px`
+  const targetSize = requiredSize ?? resizeTo;
+  const sizeLabel = targetSize
+    ? `${targetSize.width} × ${targetSize.height}px`
     : null;
 
   const openPicker = () => {
@@ -90,8 +135,12 @@ export default function CmsImagePicker({
       onChange({ file: null, url: value.url });
       return;
     }
-    if (!ALLOWED_TYPES.has(file.type)) {
-      cmsToast.error("Only WebP or AVIF images are allowed.");
+    if (!(resizing ? RESIZE_ALLOWED_TYPES : ALLOWED_TYPES).has(file.type)) {
+      cmsToast.error(
+        resizing
+          ? "Only WebP, AVIF, PNG or JPEG images are allowed."
+          : "Only WebP or AVIF images are allowed."
+      );
       return;
     }
     if (file.size > MAX_BYTES) {
@@ -114,6 +163,13 @@ export default function CmsImagePicker({
         cmsToast.error("Could not verify image resolution. Try another file.");
         return;
       }
+    } else if (resizing && resizeTo) {
+      try {
+        file = await resizeImage(file, resizeTo);
+      } catch {
+        cmsToast.error("Could not resize this image. Try another file or browser.");
+        return;
+      }
     }
     onChange({ file, url: null });
   };
@@ -124,7 +180,7 @@ export default function CmsImagePicker({
         ref={fileRef}
         id={inputId}
         type="file"
-        accept={accept}
+        accept={acceptTypes}
         className="sr-only"
         disabled={disabled}
         onChange={(e) => {
@@ -137,7 +193,9 @@ export default function CmsImagePicker({
 
       {sizeLabel ? (
         <div className="inline-flex w-fit items-center gap-2 rounded-md border border-cms-border bg-cms-subtle px-2.5 py-1 text-xs">
-          <span className="font-medium text-cms-muted">Required size</span>
+          <span className="font-medium text-cms-muted">
+            {requiredSize ? "Required size" : "Saved at"}
+          </span>
           <span className="font-semibold text-cms-ink tabular-nums">
             {sizeLabel}
           </span>
@@ -233,9 +291,11 @@ export default function CmsImagePicker({
                 as="p"
                 className="max-w-[300px] text-cms-muted"
               >
-                {sizeLabel
+                {requiredSize
                   ? `Attach a WebP or AVIF image at exactly ${sizeLabel} (max 5MB)`
-                  : "Click or drop a WebP or AVIF image (max 5MB)"}
+                  : resizing
+                    ? `Any size WebP, AVIF, PNG or JPEG (max 5MB) · resized to ${sizeLabel}`
+                    : "Click or drop a WebP or AVIF image (max 5MB)"}
               </Typography>
             </div>
           )}
