@@ -47,6 +47,10 @@ export class Donor extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   message?: string | null;
 
+  @ApiPropertyOptional({ example: 'Support Treatment' })
+  @Column({ name: 'donation_category', type: 'varchar', length: 255, nullable: false, default: 'General Funds' })
+  donationCategory!: string;
+
   @ApiProperty({ example: '5000.00' })
   @Column({ type: 'numeric', precision: 12, scale: 2, nullable: false })
   amount!: string;

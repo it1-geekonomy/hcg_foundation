@@ -101,6 +101,15 @@ export class CreateDonationDto {
   @IsString()
   message?: string;
 
+  @ApiPropertyOptional({
+    example: 'Support Treatment',
+    description: 'The category the donor wants their funds to go towards.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  donationCategory?: string;
+
   @ApiProperty({
     example: 50,
     description: 'Donation amount in the selected currency major units',

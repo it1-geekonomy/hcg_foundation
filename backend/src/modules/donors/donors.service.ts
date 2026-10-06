@@ -63,6 +63,7 @@ export class DonorsService {
     const currency = normalizeDonationCurrency(dto.currency, isInternational);
     const pan = isInternational ? '' : dto.pan?.trim() || '';
     const message = dto.message?.trim() || '';
+    const donationCategory = dto.donationCategory?.trim() || 'General Funds';
 
     if (!isInternational && currency !== 'INR') {
       throw new BadRequestException(
@@ -85,6 +86,7 @@ export class DonorsService {
           international: isInternational ? 'true' : 'false',
           pan: this.note(pan, 20),
           message: this.note(message),
+          donationCategory: this.note(donationCategory, 255),
           amount,
           currency,
         },
@@ -164,6 +166,7 @@ export class DonorsService {
         isInternational: notes.international === 'true',
         pan: notes.pan?.trim() || null,
         message: notes.message?.trim() || null,
+        donationCategory: notes.donationCategory?.trim() || 'General Funds',
         amount,
         currency: notes.currency || order.currency || 'INR',
         status: DonationStatus.PAID,
