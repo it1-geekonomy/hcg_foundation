@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import time
-import uuid
 
 from app.config import settings
 from app.rag import constants as C
@@ -15,7 +14,7 @@ from app.rag.generate import (
 from app.rag.hospitals import hospital_context
 from app.rag.intents import detect_intents, is_on_topic, match_fast_intent
 from app.rag.links import clean_answer
-from app.rag.memory import append_turn, get_history
+from app.rag.memory import append_turn, get_history, resolve_session_id
 from app.rag.normalize import normalize_for_retrieval
 from app.rag.rerank import pick_sources, rerank
 from app.rag.retrieve import hybrid_retrieve
@@ -26,7 +25,7 @@ from app.services import vector_store
 
 def run_chat(message: str, session_id: str | None = None) -> dict:
     started = time.perf_counter()
-    sid = session_id or str(uuid.uuid4())
+    sid = resolve_session_id(session_id)
     user_message = (message or "").strip()
 
     # Fast intents — skip LLM

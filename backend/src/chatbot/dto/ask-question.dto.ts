@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class AskQuestionDto {
@@ -10,10 +10,11 @@ export class AskQuestionDto {
   question: string;
 
   @ApiPropertyOptional({
-    description: 'Optional conversation session id for follow-ups',
+    description:
+      'Session id returned by a previous reply, for follow-ups. Omit to start a new conversation.',
+    format: 'uuid',
   })
   @IsOptional()
-  @IsString()
-  @MaxLength(100)
+  @IsUUID('4', { message: 'sessionId must be a session id returned by the chatbot' })
   sessionId?: string;
 }
