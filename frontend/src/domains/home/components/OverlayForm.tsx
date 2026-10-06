@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Check } from "lucide-react";
 import { LayoutGroup } from "framer-motion";
 import {
   IMPACT_ITEMS,
+  OVERLAY_AMOUNT_PRESETS,
 } from "@/domains/home/constants/overlayform";
 import Typography from "@/lib/Typography";
 import DonateDetailsModal from "@/shared/components/DonateDetailsModal";
@@ -21,11 +22,64 @@ import {
 } from "@/domains/home/constants/donation-currency";
 import { ActivePill, CardReveal, OverlayBackdrop } from "./overlayFormMotion";
 
+/** Shrinks the card only when it is taller than the viewport, so nothing is cut off or scrolled. */
+function FitViewport({ className, children }: { className?: string; children: ReactNode }) {
+  const frameRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const frame = frameRef.current;
+    const inner = innerRef.current;
+    if (!frame || !inner) return;
+
+    let frameId = 0;
+    const fit = () => {
+      const host = frame.parentElement;
+      if (!host || host.clientHeight === 0) return;
+      inner.style.transform = "none";
+      frame.style.height = "auto";
+      const available = host.clientHeight;
+      const needed = inner.offsetHeight;
+      const next = needed > available + 1 && needed > 0 ? available / needed : 1;
+      if (next < 0.999) {
+        inner.style.transformOrigin = "top center";
+        inner.style.transform = `scale(${next})`;
+        frame.style.height = `${Math.floor(needed * next)}px`;
+      } else {
+        inner.style.transform = "";
+        inner.style.transformOrigin = "";
+        frame.style.height = "";
+      }
+    };
+
+    const schedule = () => {
+      cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(fit);
+    };
+
+    fit();
+    const observer = new ResizeObserver(schedule);
+    observer.observe(inner);
+    window.addEventListener("resize", schedule);
+    return () => {
+      cancelAnimationFrame(frameId);
+      observer.disconnect();
+      window.removeEventListener("resize", schedule);
+    };
+  }, []);
+
+  return (
+    <div ref={frameRef} className={className}>
+      <div ref={innerRef}>{children}</div>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* Portrait asset + backdrop                                           */
 /* ------------------------------------------------------------------ */
 
-const PORTRAIT_SRC = "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790826374429-54e2f-image-59-1-.webp";
+const PORTRAIT_SRC = "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791283199024-7slhm-donation-pop-up-1.webp";
 const PORTRAIT_ALT = "Cancer patient and her daughter embracing, both smiling";
 
 function PortraitWithBackdrop({
@@ -75,10 +129,10 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
   const currency: DonationCurrencyCode = country.currency;
   const currencyMeta = getDonationCurrency(currency);
 
-  // Default to the FIRST preset amount for the current currency.
   const [selectedPreset, setSelectedPreset] = useState<number | null>(
-    currencyMeta.presets[0] ?? null,
+    OVERLAY_AMOUNT_PRESETS[0],
   );
+  const [selectedImpact, setSelectedImpact] = useState<string | null>(null);
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customAmount, setCustomAmount] = useState("");
   const [agreedTo80G, setAgreedTo80G] = useState(false);
@@ -110,11 +164,10 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
 
   const changeCountry = (nextCode: string) => {
     const next = getDonationCountry(nextCode);
-    const meta = getDonationCurrency(next.currency);
     setCountryCode(next.code);
     setShowCustomInput(false);
     setCustomAmount("");
-    setSelectedPreset(meta.presets[0] ?? null);
+    setSelectedPreset(OVERLAY_AMOUNT_PRESETS[0]);
     setTermsError(false);
   };
 
@@ -169,6 +222,8 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
     termsError,
     setTermsError,
     onDonateClick: openDetailsForm,
+    selectedImpact,
+    onSelectImpact: setSelectedImpact,
   };
 
   return (
@@ -181,12 +236,16 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
       >
         <div className="flex h-full items-center justify-center lg:hidden">
           <LayoutGroup id="overlay-compact">
-            <ModalBelow1024 {...amountProps} onClose={onClose} />
+            <FitViewport className="flex w-full justify-center">
+              <ModalBelow1024 {...amountProps} onClose={onClose} />
+            </FitViewport>
           </LayoutGroup>
         </div>
         <div className="hidden lg:flex lg:h-full lg:items-center lg:justify-center">
           <LayoutGroup id="overlay-wide">
-            <Modal1024Up {...amountProps} onClose={onClose} />
+            <FitViewport className="flex w-full justify-center">
+              <Modal1024Up {...amountProps} onClose={onClose} />
+            </FitViewport>
           </LayoutGroup>
         </div>
       </OverlayBackdrop>
@@ -229,6 +288,8 @@ type AmountProps = {
   termsError: boolean;
   setTermsError: (value: boolean) => void;
   onDonateClick: () => void;
+  selectedImpact: string | null;
+  onSelectImpact: (title: string | null) => void;
 };
 
 /* ------------------------------------------------------------------ */
@@ -283,36 +344,79 @@ function Heading({ className = "", centerOnMobile = false }: { className?: strin
   );
 }
 
+function GoldCheckbox({
+  checked,
+  onChange,
+  ariaLabel,
+  invalid = false,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  ariaLabel?: string;
+  invalid?: boolean;
+}) {
+  return (
+    <span className="relative flex h-3.5 w-3.5 shrink-0 lg:h-4 lg:w-4">
+      <input
+        type="checkbox"
+        checked={checked}
+        aria-label={ariaLabel}
+        aria-invalid={invalid || undefined}
+        onChange={(e) => onChange(e.target.checked)}
+        className={`peer h-3.5 w-3.5 cursor-pointer appearance-none rounded-[4px] border-[1.5px] bg-white transition-colors focus-visible:ring-2 focus-visible:ring-[#FCCC2D]/60 focus-visible:outline-none lg:h-4 lg:w-4 ${
+          invalid
+            ? "border-[#B45309]"
+            : "border-[#3A342C] checked:border-[#E2B000] checked:bg-[#FCCC2D]"
+        }`}
+      />
+      <Check
+        strokeWidth={3}
+        className="pointer-events-none absolute inset-0 m-auto h-2.5 w-2.5 text-[#3A2E00] opacity-0 peer-checked:opacity-100 lg:h-3 lg:w-3"
+      />
+    </span>
+  );
+}
+
 function ImpactItems({
   className,
-  centerOnMobile = false,
+  selectedImpact,
+  onSelectImpact,
 }: {
   className: string;
-  centerOnMobile?: boolean;
+  selectedImpact: string | null;
+  onSelectImpact: (title: string | null) => void;
 }) {
- 
-  const rowClasses = centerOnMobile
-    ? "flex min-w-0 items-start gap-2.5 text-left"
-    : "flex min-w-0 items-start gap-2.5";
   return (
-    <div className={className}>
-      {IMPACT_ITEMS.map((item) => (
-        <div key={item.title} className={rowClasses}>
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F9BF16]/10">
-            <Typography variant="body-7" as="span">
-              {item.emoji}
-            </Typography>
-          </span>
-          <div className="min-w-0">
-            <Typography variant="body-7" as="p" className="!text-left font-bold font-manrope text-[#1C1C1C]">
+    <div className={className} role="group" aria-label="Choose where your donation helps">
+      {IMPACT_ITEMS.map((item) => {
+        const checked = selectedImpact === item.title;
+        return (
+          <label
+            key={item.title}
+            className="grid min-w-0 cursor-pointer grid-cols-[auto_1fr] items-center gap-x-2.5 text-left"
+          >
+            <GoldCheckbox
+              checked={checked}
+              ariaLabel={item.title}
+              onChange={(next) => onSelectImpact(next ? item.title : null)}
+            />
+            <Typography
+              variant="body-7"
+              as="p"
+              className="col-start-2 !text-left font-bold font-manrope text-[#1C1C1C]"
+            >
               {item.title}
             </Typography>
-            <Typography variant="body-6" as="p" className="!text-left leading-snug text-[#9D9590] font-manrope font-normal">
+            <Typography
+              variant="body-6"
+              as="p"
+              className="col-start-2 !text-left leading-tight text-[#9D9590] font-manrope font-normal"
+            >
               {item.desc}
             </Typography>
-          </div>
-        </div>
-      ))}
+          </label>
+        );
+      })}
     </div>
   );
 }
@@ -361,7 +465,7 @@ function AmountPicker({
       </Typography>
 
       <div className={gridClassName}>
-        {currencyMeta.presets.map((amount) => {
+        {OVERLAY_AMOUNT_PRESETS.map((amount) => {
           const active = amount === selectedPreset;
           return (
             <button
@@ -407,7 +511,7 @@ function AmountPicker({
             <Typography variant="body-8" as="span" className="relative font-semibold font-manrope">
               {isCustom && customAmount
                 ? formatDonationAmount(Number(customAmount), currency)
-                : "More"}
+                : "Other"}
             </Typography>
           </button>
         )}
@@ -477,24 +581,16 @@ function TermsCheckbox({
   setTermsError,
 }: Pick<AmountProps, "agreedTo80G" | "setAgreedTo80G" | "termsError" | "setTermsError">) {
   return (
-    <div className="mt-2 flex flex-col gap-1.5">
-      <label className="flex min-w-0 cursor-pointer items-center gap-3">
-        <span className="relative flex h-4 w-4 shrink-0">
-          <input
-            type="checkbox"
-            checked={agreedTo80G}
-            aria-invalid={termsError}
-            onChange={(e) => {
-              setAgreedTo80G(e.target.checked);
-              if (e.target.checked) setTermsError(false);
-            }}
-            className="peer h-4 w-4 cursor-pointer appearance-none rounded-[3px] border border-black bg-transparent transition-colors checked:bg-[#FCCC2D] checked:border-[#FCCC2D] focus-visible:ring-2 focus-visible:ring-[#FCCC2D]/50 focus-visible:outline-none"
-          />
-          <Check
-            strokeWidth={3}
-            className="pointer-events-none absolute inset-0 m-auto h-3 w-3 text-[#3A2E00] opacity-0 peer-checked:opacity-100"
-          />
-        </span>
+    <div className="mt-1.5 flex flex-col gap-1">
+      <label className="flex min-w-0 cursor-pointer items-start gap-2.5">
+        <GoldCheckbox
+          checked={agreedTo80G}
+          invalid={termsError}
+          onChange={(checked) => {
+            setAgreedTo80G(checked);
+            if (checked) setTermsError(false);
+          }}
+        />
         <Typography
           variant="caption-1"
           as="span"
@@ -535,7 +631,7 @@ function Modal1024Up({
 
   return (
     <CardReveal
-      frameClassName="mx-auto max-h-full w-full max-w-[820px] xl:max-w-[860px] 2xl:max-w-[900px]"
+      frameClassName="mx-auto w-full max-w-[820px] xl:max-w-[860px] 2xl:max-w-[900px]"
       className="relative w-full overflow-hidden overflow-clip overscroll-none rounded-xl bg-white shadow-2xl"
     >
       <CloseButton
@@ -544,9 +640,9 @@ function Modal1024Up({
       />
 
       {/* Heading spans the full width of the card, above the image + content row */}
-      <div className="relative z-30 flex w-full flex-col px-6 pt-4 2xl:px-8 2xl:pt-5 [@media(max-height:760px)]:!pt-2">
+      <div className="relative z-30 flex w-full flex-col px-6 pt-3 2xl:px-8 2xl:pt-4 [@media(max-height:820px)]:!pt-2">
         <Heading className="w-full" />
-        <div className="mt-2 [@media(max-height:760px)]:!mt-1 flex items-stretch lg:gap-5 xl:gap-6 2xl:gap-7">
+        <div className="mt-1.5 [@media(max-height:820px)]:!mt-1 flex items-stretch lg:gap-4 xl:gap-5 2xl:gap-6">
           <div className="relative -ml-6 -mb-4 w-[54%] max-w-[400px] shrink-0 xl:max-w-[420px] 2xl:-ml-8 2xl:-mb-5 2xl:max-w-[440px]">
             <PortraitWithBackdrop
               className="h-full w-full"
@@ -555,22 +651,25 @@ function Modal1024Up({
             />
           </div>
 
-          <div className="relative z-20 flex min-w-0 flex-1 flex-col justify-center pb-4 2xl:pb-5 [@media(max-height:760px)]:!pb-2">
-            {/* Vertical rhythm between impact rows tightened (2.5 -> 1.5) */}
-            <ImpactItems className="grid grid-cols-1 gap-y-1.5 [@media(max-height:760px)]:gap-y-1" />
+          <div className="relative z-20 flex min-w-0 flex-1 flex-col justify-center pb-3 2xl:pb-4 [@media(max-height:820px)]:!pb-2">
+            <ImpactItems
+              className="grid grid-cols-1 gap-y-1 [@media(max-height:820px)]:gap-y-0.5"
+              selectedImpact={amountProps.selectedImpact}
+              onSelectImpact={amountProps.onSelectImpact}
+            />
 
-            <div className="mt-3 [@media(max-height:760px)]:!mt-2">
+            <div className="mt-2 [@media(max-height:820px)]:!mt-1.5">
               <CountryBlock
                 countryCode={countryCode}
                 changeCountry={changeCountry}
                 currencyMeta={currencyMeta}
-                className="flex flex-col gap-1 mb-2 w-full"
+                className="flex flex-col gap-0.5 mb-1.5 w-full"
               />
 
               <AmountPicker
                 {...amountProps}
-                gridClassName="mt-2 grid grid-cols-3 gap-2"
-                pillWidthClassName="w-full justify-center text-center px-2 py-1.5"
+                gridClassName="mt-1.5 grid grid-cols-4 gap-1.5"
+                pillWidthClassName="w-full justify-center text-center px-1.5 py-1.5"
                 inputSpanClassName="w-full"
               />
 
@@ -584,7 +683,7 @@ function Modal1024Up({
               <DonateButton
                 onDonateClick={onDonateClick}
                 showHeart={false}
-                className="mt-3 [@media(max-height:760px)]:!mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#FDC61D] px-10 py-2.5 [@media(max-height:760px)]:!py-2 cursor-pointer"
+                className="mt-2 [@media(max-height:820px)]:!mt-1.5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#FDC61D] px-10 py-2 cursor-pointer"
               />
             </div>
 
@@ -608,34 +707,36 @@ function ModalBelow1024({
 
   return (
     <CardReveal
-      frameClassName="mx-auto my-1 max-h-full w-[calc(100%-1rem)] max-w-[380px] sm:w-[calc(100%-2rem)] sm:max-w-[400px] md:max-w-[460px]"
-      className="relative w-full overflow-y-auto overscroll-contain rounded-xl bg-white shadow-2xl sm:overflow-hidden"
+      frameClassName="mx-auto w-[calc(100%-0.5rem)] max-w-[420px] sm:w-[calc(100%-1rem)] sm:max-w-[440px] md:max-w-[480px]"
+      className="relative w-full overflow-hidden overscroll-none rounded-xl bg-white shadow-2xl"
     >
       <CloseButton
         onClose={onClose}
         className="absolute right-2.5 top-2.5 z-10 flex h-5 w-5 items-center justify-center rounded-sm bg-black leading-none text-[#F9BF16] transition"
       />
-      <Heading className="px-4 pr-9 pt-3" centerOnMobile />
+      <Heading className="px-8 pr-10 pt-2.5 sm:px-10" centerOnMobile />
 
-      {/* No photo anywhere below 1024px; everything stacked and centered */}
-      <div className="mt-1.5 flex flex-col items-center gap-1.5 px-4">
+      <div className="mt-1 flex flex-col items-center gap-1 px-8 pb-2.5 sm:px-10">
         <div className="flex min-w-0 w-full flex-1 flex-col items-center pb-0">
-          {/* Impact rows + form share ONE column so left/right edges line up */}
-          <div className="mx-auto w-full max-w-[300px]">
-            <ImpactItems className="grid grid-cols-1 gap-y-1.5" centerOnMobile />
+          <div className="mx-auto w-full">
+            <ImpactItems
+              className="grid grid-cols-1 gap-y-1"
+              selectedImpact={amountProps.selectedImpact}
+              onSelectImpact={amountProps.onSelectImpact}
+            />
 
-            <div className="mt-2.5 w-full">
+            <div className="mt-2 w-full">
               <CountryBlock
                 countryCode={countryCode}
                 changeCountry={changeCountry}
                 currencyMeta={currencyMeta}
-                className="flex flex-col gap-1 mb-2 w-full"
+                className="mb-1.5 flex w-full flex-col gap-0.5"
               />
 
               <AmountPicker
                 {...amountProps}
-                gridClassName="mt-1.5 grid grid-cols-3 gap-1"
-                pillWidthClassName="w-full justify-center text-center px-1.5 py-1"
+                gridClassName="mt-1 grid grid-cols-4 gap-1"
+                pillWidthClassName="w-full justify-center text-center px-1 py-1"
                 inputSpanClassName="w-full"
               />
 
@@ -648,13 +749,12 @@ function ModalBelow1024({
 
               <DonateButton
                 onDonateClick={onDonateClick}
-                className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#FDC61D] px-6 py-2 cursor-pointer"
+                className="mx-auto mt-2 flex h-11 w-[220px] items-center justify-center gap-2 rounded-xl bg-[#FDC61D] cursor-pointer"
               />
             </div>
           </div>
         </div>
       </div>
-      <div className="h-1.5" />
     </CardReveal>
   );
 }

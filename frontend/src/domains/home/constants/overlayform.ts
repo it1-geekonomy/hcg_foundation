@@ -1,25 +1,21 @@
 /** Put the woman/mother-daughter photo at: public/formimage.png */
 
-export const AMOUNTS = ["₹3000", "₹5,000", "₹10,000", "₹15,000", "₹25,000"];
+export const OVERLAY_AMOUNT_PRESETS = [500, 1000, 5000] as const;
 
 export const IMPACT_ITEMS = [
   {
-    emoji: "💰",
     title: "Financial Assistance",
     desc: "Help cancer patients access quality treatment and care.",
   },
   {
-    emoji: "🎗️",
     title: "Awareness & Prevention",
     desc: "Support screening camps and early-detection initiatives.",
   },
   {
-    emoji: "🤝",
     title: "Psychological Support",
     desc: "Provide emotional care and therapy for patients and families.",
   },
   {
-    emoji: "🔬",
     title: "Research & Innovation",
     desc: "Support research to advance cancer diagnosis and treatment.",
   },
