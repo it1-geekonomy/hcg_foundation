@@ -198,6 +198,12 @@ export class DonorsService {
       status: query.status ?? DonationStatus.PAID,
     });
 
+    if (query.donationCategory) {
+      qb.andWhere('donor.donationCategory = :donationCategory', {
+        donationCategory: query.donationCategory,
+      });
+    }
+
     if (query.search) {
       qb.andWhere(
         '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search OR donor.country ILIKE :search OR donor.countryCode ILIKE :search OR donor.city ILIKE :search)',

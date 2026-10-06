@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Resend } from 'resend';
+import { DonationCategory } from '../../common/enums/donation-category.enum';
 import { Donor } from '../donors/entities/donor.entity';
 import { DonationCertificateService } from './donation-certificate.service';
 import { DonationReceiptService } from './donation-receipt.service';
@@ -84,6 +85,7 @@ export class EmailService {
           amountLabel,
           receipt,
           dateLabel,
+          category: donor.donationCategory || DonationCategory.GENERAL_FUNDS,
           hasPdf,
         }),
         attachments,
@@ -113,9 +115,11 @@ export class EmailService {
     amountLabel: string;
     receipt: string;
     dateLabel: string;
+    category: string;
     hasPdf: boolean;
   }) {
     const name = this.escape(params.fullName);
+    const category = this.escape(params.category);
     const amount = this.escape(params.amountLabel);
     const receipt = this.escape(params.receipt);
     const date = this.escape(params.dateLabel);
@@ -213,7 +217,7 @@ export class EmailService {
                       </tr>
                       <tr>
                         <td style="padding:8px 0;font-size:13px;color:#8A93A5;">Donation for</td>
-                        <td align="right" style="padding:8px 0;font-size:13px;font-weight:600;color:#1A2744;">General Fund</td>
+                        <td align="right" style="padding:8px 0;font-size:13px;font-weight:600;color:#1A2744;">${category}</td>
                       </tr>
                     </table>
                   </td>

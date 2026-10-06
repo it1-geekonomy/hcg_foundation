@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { DonationCategory } from '../../../common/enums/donation-category.enum';
 import { DonationStatus } from '../../../common/enums/donation-status.enum';
 
 export class ListDonorsQueryDto {
@@ -34,4 +35,12 @@ export class ListDonorsQueryDto {
   @IsOptional()
   @IsEnum(DonationStatus)
   status?: DonationStatus;
+
+  @ApiPropertyOptional({
+    enum: DonationCategory,
+    description: 'Only donations made towards this category',
+  })
+  @IsOptional()
+  @IsEnum(DonationCategory)
+  donationCategory?: DonationCategory;
 }

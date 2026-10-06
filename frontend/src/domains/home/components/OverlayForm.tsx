@@ -10,6 +10,7 @@ import {
 } from "@/domains/home/constants/overlayform";
 import Typography from "@/lib/Typography";
 import DonateDetailsModal from "@/shared/components/DonateDetailsModal";
+import type { DonationCategory } from "@/shared/lib/donors-api";
 import CountrySelect from "@/shared/components/CountrySelect";
 import {
   DEFAULT_COUNTRY_CODE,
@@ -132,7 +133,7 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
   const [selectedPreset, setSelectedPreset] = useState<number | null>(
     OVERLAY_AMOUNT_PRESETS[0],
   );
-  const [selectedImpact, setSelectedImpact] = useState<string | null>(null);
+  const [selectedImpact, setSelectedImpact] = useState<DonationCategory | null>(null);
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customAmount, setCustomAmount] = useState("");
   const [agreedTo80G, setAgreedTo80G] = useState(false);
@@ -255,6 +256,7 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
           amount={donationAmount}
           currency={currency}
           countryCode={countryCode}
+          donationCategory={selectedImpact ?? undefined}
           onClose={() => setDetailsOpen(false)}
           onAmountChange={(next) => {
             setCustomAmount(String(next));
@@ -288,8 +290,8 @@ type AmountProps = {
   termsError: boolean;
   setTermsError: (value: boolean) => void;
   onDonateClick: () => void;
-  selectedImpact: string | null;
-  onSelectImpact: (title: string | null) => void;
+  selectedImpact: DonationCategory | null;
+  onSelectImpact: (category: DonationCategory | null) => void;
 };
 
 /* ------------------------------------------------------------------ */
@@ -383,8 +385,8 @@ function ImpactItems({
   onSelectImpact,
 }: {
   className: string;
-  selectedImpact: string | null;
-  onSelectImpact: (title: string | null) => void;
+  selectedImpact: DonationCategory | null;
+  onSelectImpact: (category: DonationCategory | null) => void;
 }) {
   return (
     <div className={className} role="group" aria-label="Choose where your donation helps">

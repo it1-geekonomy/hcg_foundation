@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import Typography from "@/lib/Typography";
 import { cn } from "@/lib/utils";
+import { DONATION_CATEGORIES } from "@/shared/lib/donors-api";
 
 export type CmsSelectOption = {
   value: string;
@@ -153,6 +154,11 @@ export const DISPLAY_ORDER_MODE_OPTIONS: CmsSelectOption[] = [
 export const TEAM_TYPE_FILTER_OPTIONS: CmsSelectOption[] = [
   { value: "", label: "All types" },
   ...TEAM_TYPE_OPTIONS,
+];
+
+export const DONATION_CATEGORY_FILTER_OPTIONS: CmsSelectOption[] = [
+  { value: "", label: "All categories" },
+  ...DONATION_CATEGORIES.map((category) => ({ value: category, label: category })),
 ];
 
 export const DONATION_STATUS_OPTIONS: CmsSelectOption[] = [
