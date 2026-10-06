@@ -73,40 +73,47 @@ export default function EventCard({
             {event.title}
           </Typography>
         </div>
-        <div className="flex items-center gap-[0.35rem] sm:gap-[0.5rem] xl:gap-[0.7rem] min-w-0 text-left pt-1">
-          <img
-            src="/Resources/calendar.png"
-            alt="Calendar"
-            className="size-[0.875rem] sm:size-[1.15rem] xl:size-[1.39rem] shrink-0 object-contain"
-          />
-          <div className="text-left min-w-0 overflow-hidden">
-            <Typography variant="body-8" as="span" className="text-white block truncate">
-              Event Date: {event.date}
-            </Typography>
+        {event.date && event.date.trim() ? (
+          <div className="flex items-center gap-[0.35rem] sm:gap-[0.5rem] xl:gap-[0.7rem] min-w-0 text-left pt-1">
+            <img
+              src="/Resources/calendar.png"
+              alt="Calendar"
+              className="size-[0.875rem] sm:size-[1.15rem] xl:size-[1.39rem] shrink-0 object-contain"
+            />
+            <div className="text-left min-w-0 overflow-hidden">
+              <Typography variant="body-8" as="span" className="text-white block truncate">
+                Event Date: {event.date}
+              </Typography>
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </div>
   );
 
   const renderBackContent = (flipped: boolean) => (
     <MirrorReveal isOpen={flipped} delay={0} duration={0.82}>
-      <div className="relative h-full w-full flex flex-col justify-between items-center p-6 sm:p-8 lg:p-10 rounded-[6px] border border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2]">
-        {/* Pure, Centered Short Description */}
-        <div className="relative z-10 flex-1 flex items-center justify-center text-center my-auto px-2 sm:px-6 w-full">
+      <div className="relative h-full w-full flex flex-col justify-between items-center p-4 sm:p-5 lg:p-6 rounded-[6px] border border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2]">
+        {/* Scrollable Story Description matching Patient Stories pattern */}
+        <div className="min-h-0 flex-1 w-full overflow-y-auto pr-1.5 space-y-2.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {event.summary ? (
-            <Typography
-              variant="body-1"
-              as="p"
-              className="text-[#0D2838] max-w-xl"
-            >
-              {event.summary}
-            </Typography>
+            event.summary
+              .split("\n\n")
+              .map((paragraph, idx) => (
+                <Typography
+                  key={idx}
+                  variant="body-1"
+                  as="p"
+                  className="font-manrope leading-relaxed font-normal text-[#0D2838] text-left"
+                >
+                  {paragraph}
+                </Typography>
+              ))
           ) : null}
         </div>
 
         {/* Read More Button Constant at Bottom Center */}
-        <div className="relative z-10 w-full flex justify-center shrink-0 pt-3">
+        <div className="relative z-10 w-full flex justify-center shrink-0 pt-3 border-t border-[#E0D4AE]/50 mt-2">
           <Link
             href={detailUrl}
             data-no-drag="true"

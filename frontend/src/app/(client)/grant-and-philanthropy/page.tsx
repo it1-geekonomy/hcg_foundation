@@ -214,7 +214,7 @@ function PhilanthropyTiltCard({ card }: { card: PhilanthropyCard }) {
             : "transform 600ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 600ms cubic-bezier(0.23, 1, 0.32, 1)",
           transformStyle: "preserve-3d",
         }}
-        className="group relative flex flex-col justify-between overflow-hidden rounded-[0.375rem] bg-[#FFFCF3] h-full min-h-0 md:min-h-[24rem] lg:min-h-[28.3125rem] 2xl:min-h-[28.3125rem] cursor-pointer will-change-transform"
+        className="group relative flex flex-col justify-between overflow-hidden rounded-[0.375rem] bg-[#FFFCF3] h-full min-h-0 md:min-h-[22rem] lg:min-h-[22.5rem] xl:min-h-[23rem] 2xl:min-h-[28.3125rem] cursor-pointer will-change-transform"
       >
 
         {/* Card Top: Circular Icon Badge + Title + Description */}
@@ -223,14 +223,14 @@ function PhilanthropyTiltCard({ card }: { card: PhilanthropyCard }) {
             transform: tilt.isHovered ? "translateZ(26px)" : "translateZ(0)",
             transition: "transform 200ms ease-out",
           }}
-          className="p-4 sm:p-5 md:p-4 lg:p-[1.25rem] xl:p-[1.5rem] 2xl:p-[2rem] flex items-start gap-3 sm:gap-4 md:gap-3.5 lg:gap-4 xl:gap-[1.25rem] 2xl:gap-[2.38rem] bg-[#FFFCF3]"
+          className="p-4 sm:p-5 md:p-4 lg:p-[1rem] xl:p-[1.125rem] 2xl:p-[2rem] flex items-start gap-3 sm:gap-4 md:gap-3.5 lg:gap-3.5 xl:gap-[1rem] 2xl:gap-[2.38rem] bg-[#FFFCF3]"
         >
           <div
             style={{
               transform: tilt.isHovered ? "translateZ(18px) scale(1.05)" : "translateZ(0) scale(1)",
               transition: "transform 200ms ease-out",
             }}
-            className="w-[3rem] h-[3rem] sm:w-[3.5rem] sm:h-[3.5rem] md:w-[3.25rem] md:h-[3.25rem] lg:w-[4rem] lg:h-[4rem] xl:w-[4.75rem] xl:h-[4.75rem] 2xl:w-[6.6875rem] 2xl:h-[6.6875rem] shrink-0 rounded-full bg-[#FFF3CC] flex items-center justify-center p-[0.65rem] sm:p-[0.75rem] md:p-[0.7rem] lg:p-[0.875rem] xl:p-[1rem] 2xl:p-[1.7rem] shadow-xs"
+            className="w-[3rem] h-[3rem] sm:w-[3.5rem] sm:h-[3.5rem] md:w-[3.25rem] md:h-[3.25rem] lg:w-[3.25rem] lg:h-[3.25rem] xl:w-[3.5rem] xl:h-[3.5rem] 2xl:w-[6.6875rem] 2xl:h-[6.6875rem] shrink-0 rounded-full bg-[#FFF3CC] flex items-center justify-center p-[0.65rem] sm:p-[0.75rem] md:p-[0.7rem] lg:p-[0.7rem] xl:p-[0.75rem] 2xl:p-[1.7rem] shadow-xs"
           >
             <img
               src={card.iconUrl}
@@ -239,14 +239,28 @@ function PhilanthropyTiltCard({ card }: { card: PhilanthropyCard }) {
             />
           </div>
           <div className="flex-1">
-            <div className="mb-2 sm:mb-2.5 lg:mb-[0.75rem] min-h-[2.5rem] sm:min-h-[2.8rem] md:min-h-[3rem] lg:min-h-[3.6rem] 2xl:min-h-[4.25rem] flex flex-col justify-start">
-              <Typography
-                variant="heading-10"
-                as="h2"
-                className="font-argestadisplay font-normal text-[#0D2838] leading-tight"
-              >
-                {card.title}
-              </Typography>
+            <div className="mb-1.5 sm:mb-2 lg:mb-[0.35rem] min-h-0 lg:min-h-[2.4rem] xl:min-h-[2.5rem] 2xl:min-h-[4.25rem] flex flex-col justify-start">
+              {/* Mobile, Tablet (< 1024px) & Large Desktop (≥ 1536px): Original heading-10 */}
+              <div className="lg:hidden 2xl:block">
+                <Typography
+                  variant="heading-10"
+                  as="h2"
+                  className="font-argestadisplay font-normal text-[#0D2838] leading-tight"
+                >
+                  {card.title}
+                </Typography>
+              </div>
+
+              {/* Laptop only (1024px to 1535px): Compact body-1 */}
+              <div className="hidden lg:block 2xl:hidden">
+                <Typography
+                  variant="body-1"
+                  as="h2"
+                  className="font-argestadisplay font-normal !text-[#0D2838] !leading-tight !text-left"
+                >
+                  {card.title}
+                </Typography>
+              </div>
             </div>
             <Typography
               variant="body-12"
@@ -264,7 +278,7 @@ function PhilanthropyTiltCard({ card }: { card: PhilanthropyCard }) {
             transform: tilt.isHovered ? "translateZ(14px)" : "translateZ(0)",
             transition: "transform 200ms ease-out",
           }}
-          className="w-full h-[11.5rem] sm:h-[12.5rem] md:h-[11.5rem] lg:h-[13.5rem] xl:h-[14.5rem] 2xl:h-[16.1875rem] shrink-0 overflow-hidden relative bg-[#EFEAD8]"
+          className="w-full h-[11.5rem] sm:h-[12.5rem] md:h-[11rem] lg:h-[10.5rem] xl:h-[11rem] 2xl:h-[16.1875rem] shrink-0 overflow-hidden relative bg-[#EFEAD8]"
         >
           <img
             src={card.imageUrl}
@@ -288,6 +302,8 @@ export default function GrantsAndPhilanthropyPage() {
 
   return (
     <main className="min-h-screen bg-[#FFF8E2]">
+      {/* Top Hero Banner (Commented out) */}
+      {/*
       <Banner
         bgImage="/Get Involved/Get Involved banner image.png"
         bgImageAlt="Grant & Philanthropy"
@@ -297,8 +313,9 @@ export default function GrantsAndPhilanthropyPage() {
         ]}
         title="Grant & Philanthropy"
       />
+      */}
 
-      <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
+      <section className={`${CONTAINER} pt-7 sm:pt-[6.5rem] lg:pt-[10.25rem] pb-8 sm:pb-12 lg:pb-16`}>
         {/* Header Section */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 lg:gap-12 items-start mb-10 sm:mb-14">
           <div className="md:col-span-6 lg:col-span-7">

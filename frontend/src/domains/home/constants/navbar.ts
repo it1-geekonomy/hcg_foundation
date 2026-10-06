@@ -30,7 +30,7 @@ export const navLinks = [
     hasDropdown: true,
     dropdownItems: [
       { label: "Transparency & Knowledge Hub", href: "/transparency-and-knowledge-hub" },
-      { label: "Projects", href: "/projects" },
+      // { label: "Projects", href: "/projects" },
       { label: "Events", href: "/events" },
     ],
   },
