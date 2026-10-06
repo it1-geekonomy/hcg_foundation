@@ -1,7 +1,8 @@
 """Answers "how many ..." / "list all ..." questions from the index itself.
 
 Retrieval hands the model only a handful of chunks, so it cannot count or list
-everything the website has published; the index can.
+everything the website has published; the index can. Trustees and team are
+handled in team.py.
 """
 
 from __future__ import annotations
@@ -17,8 +18,6 @@ _CATALOG = [
     (r"testimonials?", "patient_testimonials", "testimonial", "testimonials", C.TESTIMONIALS_URL),
     (r"\bevents?\b", "events", "event", "events", C.EVENTS_URL),
     (r"\bprojects?\b", "projects", "project", "projects", C.PROJECTS_URL),
-    (r"team\s+members?|\bteam\b|\bstaff\b|\bemploy|\bworkforce\b|\bheadcount\b|people\s+work",
-     "teams", "team member", "team members", C.TEAM_URL),
     (r"\bawards?\b", "awards", "award", "awards", "/about-us"),
     (r"annual\s+reports?", "annual_reports", "annual report", "annual reports", C.TRANSPARENCY_URL),
     (r"\bblogs?\b|\barticles?\b", "blogs", "blog post", "blog posts", None),
@@ -28,8 +27,6 @@ _COUNT = re.compile(r"\bhow\s+(?:many|much)\b|\btotal\b|\bcount\b|\bnumber\s+of\
 _LIST = re.compile(r"\blist\b|\bnames?\s+of\b|\ball\s+(?:the\s+)?(?:\w+\s+)?\w+\b|\bwhich\b.*\bare\s+there\b", re.I)
 # Upcoming/past events depend on dates, which the normal pipeline handles.
 _TIME = re.compile(r"\b(?:upcoming|next|past|previous|recent|latest|last|this\s+(?:week|month|year))\b", re.I)
-# The Our Team page shows featured members only, not the organisation's total headcount.
-_HEADCOUNT = re.compile(r"\bstaff\b|\bemploy|\bworkforce\b|\bheadcount\b|people\s+work", re.I)
 
 _COUNT_PREVIEW = 10
 _LIST_LIMIT = 25
@@ -52,15 +49,7 @@ def answer_catalog_question(question: str) -> dict | None:
     see_all = f" You can read them all on the [{label}]({url}) page." if url else ""
     sources = [{"title": label, "url": url}] if url else []
 
-    if table == "teams" and counting and _HEADCOUNT.search(q):
-        answer = "HCG Foundation’s total staff count is not published on our website."
-        if n:
-            answer += (
-                f" The [{label}]({url}) page features {n} team "
-                f"{'member' if n == 1 else 'members'}: {', '.join(titles[:_LIST_LIMIT])}."
-            )
-        answer += f" For staffing details, contact {C.OFFICIAL_EMAIL} or {C.OFFICIAL_PHONE}."
-    elif n == 0:
+    if n == 0:
         answer = f"There are no {plural} published on the website right now."
     elif n == 1:
         answer = f"There is 1 {singular} published on the website: {titles[0]}.{see_all}"

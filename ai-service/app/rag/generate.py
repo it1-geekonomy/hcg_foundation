@@ -194,10 +194,11 @@ def recover_if_needed(answer: str, question: str, contexts: list[dict], intents:
         )
 
     if "trustees" in intents or "founder" in intents:
-        lines = ["**HCG Foundation Board of Trustees**"]
-        lines.extend(f"- {name} — {role}" for name, role in C.TRUSTEES)
-        lines.append(f"See [Our Team & Trustees]({C.TEAM_URL}) for their profiles.")
-        return "\n".join(lines)
+        from app.rag.team import list_answer
+
+        board = list_answer(trustees=True, team=False)
+        if board:
+            return board["answer"]
 
     if "terms" in intents:
         return (

@@ -219,7 +219,7 @@ def _static_documents() -> list[dict]:
             "table": "static",
             "source_id": "founder",
             "title": f"{C.FOUNDER_NAME} — {C.FOUNDER_ROLE}",
-            "url": C.TEAM_URL,
+            "url": C.TRUSTEES_URL,
             "category": "Trustee",
             "designation": C.FOUNDER_ROLE,
             "content": (
@@ -227,18 +227,6 @@ def _static_documents() -> list[dict]:
                 f"Category: Trustee\n"
                 f"Designation: {C.FOUNDER_ROLE}\n\n"
                 f"{C.FOUNDER_NAME} is the {C.FOUNDER_ROLE} of HCG Foundation."
-            ),
-        },
-        {
-            "table": "static",
-            "source_id": "board-of-trustees",
-            "title": "Board of Trustees",
-            "url": C.TEAM_URL,
-            "category": "Trustee",
-            "content": (
-                "Title: Board of Trustees\nCategory: Trustee\n\n"
-                "HCG Foundation's Board of Trustees, as published on the About Us > Our Team page:\n"
-                + "\n".join(f"- {name} — {role}" for name, role in C.TRUSTEES)
             ),
         },
     ]
@@ -303,7 +291,7 @@ def _title_from_txt(path: Path) -> tuple[str, str, str]:
     elif "financial" in lower:
         url = C.TRANSPARENCY_URL
     elif "trustee" in lower or "founder" in lower:
-        url = C.TEAM_URL
+        url = C.TRUSTEES_URL
     elif "contact" in lower:
         url = "/contact"
     return stem, category, url
