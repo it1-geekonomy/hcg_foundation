@@ -3,6 +3,9 @@ export type ContentStatus = "draft" | "published" | "archived";
 /** Backend field `type` — team member vs trustee */
 export type TeamType = "team" | "trustee";
 
+/** "move" shifts the rows in between; "swap" trades places with the row at the target. */
+export type DisplayOrderMode = "move" | "swap";
+
 /** @deprecated use TeamType */
 export type TeamMemberType = TeamType;
 
@@ -36,6 +39,8 @@ export type TeamFields = SeoFields & {
   content?: string;
   /** Omit on create to append at the end of the list. */
   displayOrder?: string;
+  /** PATCH only: how a changed displayOrder is applied (backend default "move"). */
+  orderMode?: DisplayOrderMode;
   status?: ContentStatus;
   metaTitle?: string;
   metaDescription?: string;
@@ -102,7 +107,10 @@ export type AwardFields = {
   title: string;
   year?: string;
   description?: string;
+  /** Omit on create to append at the end of the list. */
   displayOrder?: string;
+  /** PATCH only: how a changed displayOrder is applied (backend default "move"). */
+  orderMode?: DisplayOrderMode;
   status?: ContentStatus;
 };
 
@@ -127,7 +135,10 @@ export type HomeBannerFields = {
   title: string;
   location?: string;
   shortDescription?: string;
-  displayOrder: number;
+  /** Omit on create to append at the end of the list. */
+  displayOrder?: number;
+  /** PATCH only: how a changed displayOrder is applied (backend default "move"). */
+  orderMode?: DisplayOrderMode;
   isActive: boolean;
 };
 
@@ -183,7 +194,10 @@ export type ProjectFields = SeoFields & {
   projectDate?: string;
   content?: string;
   shortDescription?: string;
+  /** Omit on create to append at the end of the list. */
   displayOrder?: number;
+  /** PATCH only: how a changed displayOrder is applied (backend default "move"). */
+  orderMode?: DisplayOrderMode;
   status?: ContentStatus;
 };
 

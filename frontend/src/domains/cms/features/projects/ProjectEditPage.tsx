@@ -90,6 +90,7 @@ export default function ProjectEditPage() {
         submitLabel="Save changes"
         saving={saving}
         slugLocked
+        initial={initial}
       />
     </div>
   );

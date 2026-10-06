@@ -91,6 +91,7 @@ export default function HomeBannerEditPage() {
         onSubmit={onSubmit}
         submitLabel="Save changes"
         saving={saving}
+        initial={initial}
       />
     </div>
   );
