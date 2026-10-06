@@ -12,7 +12,9 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { IsEnum } from 'class-validator';
 import { DONATION_CURRENCIES } from '../donation-currency';
+import { DonationCategory } from '../../../common/enums/donation-category.enum';
 
 export class CreateDonationDto {
   @ApiProperty({ example: 'Anita Sharma' })
@@ -102,13 +104,13 @@ export class CreateDonationDto {
   message?: string;
 
   @ApiPropertyOptional({
-    example: 'Support Treatment',
+    enum: DonationCategory,
+    default: DonationCategory.GENERAL_FUNDS,
     description: 'The category the donor wants their funds to go towards.',
   })
   @IsOptional()
-  @IsString()
-  @MaxLength(255)
-  donationCategory?: string;
+  @IsEnum(DonationCategory)
+  donationCategory?: DonationCategory;
 
   @ApiProperty({
     example: 50,

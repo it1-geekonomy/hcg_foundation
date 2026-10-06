@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Column, Entity, Index } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { DonationStatus } from '../../../common/enums/donation-status.enum';
+import { DonationCategory } from '../../../common/enums/donation-category.enum';
 
 /**
  * Donors — independent table, no FKs, no SEO.
@@ -47,9 +48,16 @@ export class Donor extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   message?: string | null;
 
-  @ApiPropertyOptional({ example: 'Support Treatment' })
-  @Column({ name: 'donation_category', type: 'varchar', length: 255, nullable: false, default: 'General Funds' })
-  donationCategory!: string;
+  @ApiPropertyOptional({ enum: DonationCategory, default: DonationCategory.GENERAL_FUNDS })
+  @Column({
+    name: 'donation_category',
+    type: 'enum',
+    enum: DonationCategory,
+    enumName: 'donation_category_enum',
+    nullable: false,
+    default: DonationCategory.GENERAL_FUNDS,
+  })
+  donationCategory!: DonationCategory;
 
   @ApiProperty({ example: '5000.00' })
   @Column({ type: 'numeric', precision: 12, scale: 2, nullable: false })

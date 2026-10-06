@@ -21,6 +21,7 @@ import { ListDonorsQueryDto } from './dto/list-donors-query.dto';
 import { VerifyDonationDto } from './dto/verify-donation.dto';
 import { Donor } from './entities/donor.entity';
 import { EmailService } from '../email/email.service';
+import { DonationCategory } from '../../common/enums/donation-category.enum';
 
 export type DonationCheckout = {
   orderId: string;
@@ -63,7 +64,7 @@ export class DonorsService {
     const currency = normalizeDonationCurrency(dto.currency, isInternational);
     const pan = isInternational ? '' : dto.pan?.trim() || '';
     const message = dto.message?.trim() || '';
-    const donationCategory = dto.donationCategory?.trim() || 'General Funds';
+    const donationCategory = dto.donationCategory || DonationCategory.GENERAL_FUNDS;
 
     if (!isInternational && currency !== 'INR') {
       throw new BadRequestException(
@@ -166,7 +167,7 @@ export class DonorsService {
         isInternational: notes.international === 'true',
         pan: notes.pan?.trim() || null,
         message: notes.message?.trim() || null,
-        donationCategory: notes.donationCategory?.trim() || 'General Funds',
+        donationCategory: (notes.donationCategory as DonationCategory) || DonationCategory.GENERAL_FUNDS,
         amount,
         currency: notes.currency || order.currency || 'INR',
         status: DonationStatus.PAID,
