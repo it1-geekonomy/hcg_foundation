@@ -172,10 +172,12 @@ export class IngestionService {
       })
       .filter(Boolean);
 
+    const category = tableConfig.categoryFor?.(row) ?? tableConfig.category;
+
     // Title + Category + Designation first so chunking cannot bury the role.
     const header = [
       `Title: ${title}`,
-      `Category: ${tableConfig.category}`,
+      `Category: ${category}`,
       designation ? `Designation: ${designation}` : null,
     ]
       .filter(Boolean)
@@ -194,7 +196,7 @@ export class IngestionService {
       content,
       title,
       url: tableConfig.buildUrl(row),
-      category: tableConfig.category,
+      category,
       slug: slug ?? undefined,
       designation: designation ?? undefined,
     });

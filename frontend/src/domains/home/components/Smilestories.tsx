@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Calendar } from "lucide-react";
@@ -19,6 +19,20 @@ import FlipCard from "@/shared/components/FlipCard";
 import MirrorReveal from "@/shared/components/MirrorReveal";
 import { DiagonalArrowIcon } from "@/shared/components/icons/ArrowIcons";
 import { publicPatientStoriesApi } from "@/domains/cms/lib/api";
+
+/** Items requested per API call. The loop below keeps fetching pages until none are left. */
+const PAGE_SIZE = 50;
+/** Safety net so a misbehaving API can never cause an endless request loop. */
+const MAX_PAGES = 1000;
+/**
+ * The track renders: [CLONES tail cards | every story | CLONES head cards].
+ * The clones on each side are what you see when the loop restarts or when you
+ * drag past either end, so they must cover at least one screen width. The
+ * number is re-measured at runtime and only ever grows (up to MAX_CLONES).
+ * Lists shorter than the clone count are repeated to fill it.
+ */
+const MIN_CLONES = 16;
+const MAX_CLONES = 80;
 
 function formatStoryDate(dateStr?: string | null): string {
   if (!dateStr) return "";
@@ -71,27 +85,38 @@ function StoryCardSizer({ name, date }: { name: string; date: string }) {
   );
 }
 
-function StoryCard({
+/**
+ * memo(): with hundreds of cards, a single hover-flip used to re-render every
+ * card (the flipped index lives in the parent). All props below are primitives
+ * or stable references, so only the card that really changed re-renders.
+ */
+const StoryCard = memo(function StoryCard({
   name,
   date,
   image,
   objectPosition,
   excerpt,
+  link,
+  index,
   isFlipped,
-  onFlipChange,
-  onCardClick,
+  onFlip,
+  onOpen,
 }: {
   name: string;
   date: string;
   image: string;
   objectPosition?: string;
   excerpt?: string;
+  link: string;
+  index: number;
   isFlipped?: boolean;
-  onFlipChange?: (flipped: boolean) => void;
-  onCardClick?: (e: React.MouseEvent) => void;
+  onFlip?: (index: number, flipped: boolean) => void;
+  onOpen?: (link: string) => void;
 }) {
   const [internalFlipped, setInternalFlipped] = useState(false);
   const currentFlipped = isFlipped !== undefined ? isFlipped : internalFlipped;
+  const onFlipChange = (f: boolean) => onFlip?.(index, f);
+  const onCardClick = (_e?: React.MouseEvent) => onOpen?.(link);
 
   const handleFlipChange = (f: boolean) => {
     if (isFlipped === undefined) setInternalFlipped(f);
@@ -209,30 +234,82 @@ function StoryCard({
       </div>
     </div>
   );
-}
+});
+
+/**
+ * Data source switch.
+ *  true  -> load EVERY published story from the CMS (all pages, no cap).
+ *           The constants are only used as a fallback if the CMS request
+ *           fails or returns nothing.
+ *  false -> use only the static stories from
+ *           "@/domains/home/constants/smile" (no network calls).
+ */
+const USE_CMS = true;
+
+const staticStories = fallbackStories.map((s) => ({ ...s, excerpt: "" }));
 
 export default function SmileStories() {
-  const [apiStories, setApiStories] = useState<any[] | null>(null);
+  const [apiStories, setApiStories] = useState<any[] | null>(
+    USE_CMS ? null : staticStories,
+  );
 
   useEffect(() => {
+    if (!USE_CMS) return;
     let cancelled = false;
     (async () => {
       try {
-        const res = await publicPatientStoriesApi.listPublished({
-          page: 1,
-          limit: 12,
-        });
+        // Fetch EVERY published story: keep requesting pages until the API
+        // has nothing more to give.
+        const all: any[] = [];
+        const seen = new Set<string | number>();
+        let page = 1;
+        let totalPages: number | null = null;
+
+        while (page <= MAX_PAGES) {
+          const res: any = await publicPatientStoriesApi.listPublished({
+            page,
+            limit: PAGE_SIZE,
+          });
+          if (cancelled) return;
+
+          const batch: any[] = res?.data ?? [];
+          if (batch.length === 0) break;
+
+          // Dedupe: if the API ignores `page` and returns the same items,
+          // stop instead of looping forever.
+          let added = 0;
+          for (const item of batch) {
+            const key = item.id ?? item.slug ?? item.title;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            all.push(item);
+            added += 1;
+          }
+          if (added === 0) break;
+
+          // Use the API's page info when it provides it (field names may differ).
+          const metaTotal =
+            res?.meta?.totalPages ??
+            res?.pagination?.totalPages ??
+            res?.totalPages ??
+            null;
+          if (typeof metaTotal === "number") totalPages = metaTotal;
+          if (totalPages !== null && page >= totalPages) break;
+
+          page += 1;
+        }
+
         if (cancelled) return;
-        if (res.data && res.data.length > 0) {
-          const mapped = res.data.map((item) => ({
+
+        if (all.length > 0) {
+          const mapped = all.map((item) => ({
             name: item.title,
             date: formatStoryDate(item.storyDate),
             image: item.patientImage || "",
             link: `/patient-stories/${item.slug || item.id}`,
             excerpt: item.shortDescription || "",
           }));
-          const fullStories = mapped.length < 4 ? [...mapped, ...mapped, ...mapped, ...mapped].slice(0, 8) : mapped;
-          setApiStories(fullStories);
+          setApiStories(mapped);
         } else {
           setApiStories(fallbackStories.map(s => ({ ...s, excerpt: "" })));
         }
@@ -260,8 +337,29 @@ export default function SmileStories() {
 
 function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
   const router = useRouter();
-  const isInfinite = apiStories.length >= 4;
-  const displayStories = isInfinite ? [...apiStories, ...apiStories, ...apiStories] : apiStories;
+
+  // Track layout:  [ tail clones | ALL stories | head clones ]
+  //                  prefix        one loop        suffix
+  // The visible window is always inside the middle part plus a little of the
+  // clones, so the jump back by exactly one loop length at the end is
+  // invisible - while dragging in either direction as well as when auto
+  // scrolling. Only N + 2*clones cards are in the DOM (not 3*N).
+  const [cloneCount, setCloneCount] = useState(MIN_CLONES);
+  const reps = Math.max(1, Math.ceil(cloneCount / Math.max(1, apiStories.length)));
+  const baseStories = useMemo(
+    () => Array.from({ length: reps }, () => apiStories).flat(),
+    [apiStories, reps],
+  );
+  const baseCount = baseStories.length; // always >= cloneCount
+  const isInfinite = baseCount > 0;
+  const displayStories = useMemo(
+    () => [
+      ...baseStories.slice(baseCount - cloneCount),
+      ...baseStories,
+      ...baseStories.slice(0, cloneCount),
+    ],
+    [baseStories, baseCount, cloneCount],
+  );
 
   const sectionRef = useRef<HTMLElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -273,7 +371,8 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
   const [headingVisible, setHeadingVisible] = useState(false);
 
   const offsetRef = useRef(0); // kept wrapped inside [0, oneSetWidth)
-  const oneSetWidthRef = useRef(0);
+  const oneSetWidthRef = useRef(0); // length of one full loop (all stories)
+  const prefixWidthRef = useRef(0); // width of the tail clones before the first story
 
   const isDraggingRef = useRef(false);
   const didDragRef = useRef(false); // true if the current pointer gesture moved past the threshold
@@ -292,7 +391,7 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
 
   const applyTransform = () => {
     if (!trackRef.current) return;
-    const shift = offsetRef.current + oneSetWidthRef.current;
+    const shift = offsetRef.current + prefixWidthRef.current;
     trackRef.current.style.transform = `translate3d(-${shift}px, 0, 0)`;
   };
 
@@ -306,9 +405,35 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
   };
 
   const measure = () => {
-    if (!trackRef.current || !isInfinite) return;
-    oneSetWidthRef.current = trackRef.current.scrollWidth / 3;
-    offsetRef.current = wrap(offsetRef.current, oneSetWidthRef.current);
+    const track = trackRef.current;
+    if (!track || !isInfinite) return;
+    const kids = track.children;
+    const firstClone = kids[0] as HTMLElement | undefined;
+    const firstStory = kids[cloneCount] as HTMLElement | undefined;
+    const firstHead = kids[cloneCount + baseCount] as HTMLElement | undefined;
+    if (!firstClone || !firstStory || !firstHead) return;
+
+    const left = (el: HTMLElement) => el.getBoundingClientRect().left;
+    // Exact distances taken from real card positions (include every gap).
+    // scrollWidth / 3 is slightly short (last card has no trailing gap) and
+    // made the wrap jump by a few pixels.
+    const prefix = left(firstStory) - left(firstClone);
+    const loop = left(firstHead) - left(firstStory);
+    if (loop <= 0) return;
+
+    // Clones must cover a whole screen on each side - grow if not.
+    const step = (kids[1] as HTMLElement | undefined)
+      ? left(kids[1] as HTMLElement) - left(firstClone)
+      : 0;
+    const viewportW = viewportRef.current?.clientWidth ?? 0;
+    if (step > 0 && viewportW > 0) {
+      const needed = Math.min(MAX_CLONES, Math.ceil(viewportW / step) + 2);
+      if (needed > cloneCount) setCloneCount(needed);
+    }
+
+    prefixWidthRef.current = prefix;
+    oneSetWidthRef.current = loop;
+    offsetRef.current = wrap(offsetRef.current, loop);
     applyTransform();
   };
 
@@ -399,6 +524,12 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasEntered]);
+
+  // Cards were added/removed (clone count changed) -> re-measure.
+  useEffect(() => {
+    scheduleMeasure();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseCount, cloneCount]);
 
   useEffect(() => {
     if (!hasEntered || !isInfinite) return;
@@ -514,11 +645,20 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
     }
   };
 
-  const handleCardClick = (link: string) => {
-    if (isInfinite && didDragRef.current) return; // it was a drag, not a click - don't navigate
-    if (isInfinite) saveOffset();
-    router.push(link);
-  };
+  const handleCardClick = useCallback(
+    (link: string) => {
+      if (didDragRef.current) return; // it was a drag, not a click - don't navigate
+      saveOffset();
+      router.push(link);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [router],
+  );
+
+  const handleFlip = useCallback((index: number, flipped: boolean) => {
+    setActiveFlippedIndex(flipped ? index : null);
+    isFlippedRef.current = flipped;
+  }, []);
 
   return (
     <section ref={sectionRef} className="relative w-full lg:py-20">
@@ -582,12 +722,10 @@ function SmileStoriesCarousel({ apiStories }: { apiStories: any[] }) {
             >
               <StoryCard
                 {...story}
+                index={i}
                 isFlipped={activeFlippedIndex === i}
-                onFlipChange={(flipped) => {
-                  setActiveFlippedIndex(flipped ? i : null);
-                  isFlippedRef.current = flipped;
-                }}
-                onCardClick={() => handleCardClick(story.link)}
+                onFlip={handleFlip}
+                onOpen={handleCardClick}
               />
             </div>
           ))}

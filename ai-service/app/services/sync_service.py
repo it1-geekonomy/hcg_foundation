@@ -55,6 +55,7 @@ def full_sync(force: bool = False) -> dict:
     curated pages/files and can force a fingerprint rewrite.
     """
     site_docs, site_failed = site_pages.load_site_pages()
+    broken = site_pages.broken_links(skip={d["source_id"] for d in site_docs})
     docs = corpus.load_corpus_documents() + site_docs
     fp = vector_store.compute_fingerprint(docs)
     current = vector_store.load_fingerprint()
@@ -66,6 +67,8 @@ def full_sync(force: bool = False) -> dict:
             "fingerprint": fp,
             "indexed_chunks": vector_store.indexed_count(),
             "corpus_documents": len(docs),
+            "site_pages_failed": site_failed,
+            "broken_links": broken,
         }
 
     # Only documents whose text changed are re-embedded (all of them when forced)
@@ -85,6 +88,7 @@ def full_sync(force: bool = False) -> dict:
         "corpus_documents": len(docs),
         "site_pages_indexed": len(site_docs),
         "site_pages_failed": site_failed,
+        "broken_links": broken,
         "stale_chunks_deleted": stale,
         "indexed_chunks": vector_store.indexed_count(),
     }

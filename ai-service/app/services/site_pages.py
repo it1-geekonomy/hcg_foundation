@@ -18,7 +18,6 @@ log = logging.getLogger(__name__)
 SITE_PAGES = [
     "/",
     "/about-us",
-    C.TEAM_URL,
     "/contact",
     C.PATIENT_AID_URL,
     C.AWARENESS_URL,
@@ -95,6 +94,23 @@ def _fetch(url: str) -> str:
     req = urllib.request.Request(url, headers={"User-Agent": "HCG-Chatbot-Indexer"})
     with urllib.request.urlopen(req, timeout=90) as res:
         return res.read().decode("utf-8", errors="ignore")
+
+
+def broken_links(skip: set[str] | None = None) -> list[str]:
+    """Pages the chatbot links to that the website no longer serves (e.g. a renamed route)."""
+    base = (settings.site_crawl_url or "").rstrip("/")
+    if not base:
+        return []
+    broken: list[str] = []
+    for path in sorted({p.split("#")[0] or "/" for p in C.PAGE_LABELS if not p.startswith("#")}):
+        if skip and path in skip:
+            continue
+        try:
+            _fetch(base + _FETCH_PATHS.get(path, path))
+        except Exception as exc:  # noqa: BLE001
+            log.warning("Chatbot link target %s is not reachable: %s", path, exc)
+            broken.append(path)
+    return broken
 
 
 def load_site_pages() -> tuple[list[dict], list[str]]:

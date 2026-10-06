@@ -22,6 +22,9 @@ def public_url(url: str | None) -> str | None:
     """Return a valid public route for ``url``, or None if the site has no such page."""
     u = (url or "").strip()
     u = C.LEGACY_URLS.get(u.rstrip("/") or "/", u)
+    for old, new in C.LEGACY_SECTION_PREFIXES.items():
+        if u.startswith(old):
+            u = new
     for old, new in C.LEGACY_DETAIL_PREFIXES.items():
         if u.startswith(old):
             u = new + u[len(old):]
