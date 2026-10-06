@@ -341,6 +341,7 @@ function appendHomeBannerFiles(fd: FormData, files?: HomeBannerFiles) {
 
 function homeBannerFormData(fields: HomeBannerFields, files?: HomeBannerFiles) {
   const fd = new FormData();
+  if (fields.name?.trim()) fd.append("name", fields.name.trim());
   fd.append("title", fields.title.trim());
   if (fields.shortDescription?.trim()) {
     fd.append("shortDescription", fields.shortDescription.trim());
@@ -370,6 +371,7 @@ function homeBannerPatchFormData(
     }
     fd.append(key, value == null ? "" : String(value));
   };
+  append("name", fields.name);
   append("title", fields.title);
   append("shortDescription", fields.shortDescription);
   append("displayOrder", fields.displayOrder);

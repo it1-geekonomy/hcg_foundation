@@ -86,18 +86,18 @@ function StoryCardSizer({ name, date }: { name: string; date: string }) {
       className="pointer-events-none invisible flex select-none flex-col justify-between overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-transparent pt-[1.4223rem] pl-[1.475rem] pr-[1.4223rem] pb-0"
     >
       <div className="aspect-[21.177/23.021] w-full shrink-0" />
-      <div className="flex flex-col justify-between pt-[1.4rem] pb-4">
+      <div className="flex flex-col justify-start pt-[1.4rem] pb-4">
         <Typography
           variant="heading-8"
           as="p"
-          className="text-left font-semibold font-manrope"
+          className="text-left font-semibold font-manrope wrap-anywhere text-pretty"
         >
           {name}
         </Typography>
         <Typography
           variant="text-2"
           as="p"
-          className="mt-1 flex items-center gap-2 text-nowrap font-normal font-manrope"
+          className="mt-2 flex items-center gap-2 text-nowrap font-normal font-manrope"
         >
           <Calendar className="h-4 w-4" strokeWidth={1.75} />
           {date}
@@ -165,23 +165,21 @@ const StoryCard = memo(function StoryCard({
         ) : null}
       </div>
 
-      {/* name pinned to the top of the footer, date pinned to the bottom.
-          Every card in the row is the same height (the tallest one), so names
-          all start on the same line and dates all sit on the same line.
-          When no name wraps, the footer is only as tall as its content, so the
-          name and date stay close together. */}
-      <div className="flex flex-1 flex-col justify-between pt-[1.4rem] pb-4">
+      {/* Every card in the row is stretched to the tallest one; the date stays
+          directly under the name so a short name leaves its spare height below
+          the date instead of opening a gap between name and date. */}
+      <div className="flex flex-1 flex-col justify-start pt-[1.4rem] pb-4">
         <Typography
           variant="heading-8"
           as="p"
-          className="text-left text-white font-semibold font-manrope"
+          className="text-left text-white font-semibold font-manrope wrap-anywhere text-pretty"
         >
           {name}
         </Typography>
         <Typography
           variant="text-2"
           as="p"
-          className="mt-1 flex items-center gap-2 text-white text-nowrap font-normal font-manrope"
+          className="mt-2 flex items-center gap-2 text-white text-nowrap font-normal font-manrope"
         >
           <Calendar className="h-4 w-4" strokeWidth={1.75} />
           {date}
