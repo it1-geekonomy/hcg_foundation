@@ -67,11 +67,17 @@ def rerank(hits: list[dict], intents: set[str]) -> list[dict]:
             if category in ("team", "patient story"):
                 score -= 0.25
 
-        if "patient_aid" in intents:
+        # "eligible" also triggers patient_aid in 80G/donation questions, where donate pages must win
+        if "patient_aid" in intents and not intents & {"donate", "certificate", "fcra", "bank", "pan"}:
             if "patient aid" in title or "patient-aid" in title:
                 score += 0.40
             if title.strip() == "patient aid" or title.startswith("patient aid"):
                 score += 0.10
+            # The live page carries the actual referral steps
+            if h.get("table") == "site" and h.get("url") == C.PATIENT_AID_URL:
+                score += 0.65
+            if "proposal" in title:
+                score -= 0.35
 
         if "internship" in intents:
             if "intern" in title:
