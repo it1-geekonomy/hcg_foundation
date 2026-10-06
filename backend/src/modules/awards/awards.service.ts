@@ -14,10 +14,10 @@ import {
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
 import {
-  applyDisplayOrderUpdate,
-  compactDisplayOrderAfterDelete,
   assignDisplayOrderOnRestore,
-  prepareInsertDisplayOrder,
+  compactDisplayOrderAfterDelete,
+  insertWithDisplayOrder,
+  saveWithDisplayOrder,
 } from '../../common/utils/display-order';
 import {
   applyDeletedFilter,
@@ -52,19 +52,16 @@ export class AwardsService {
     const awardImageUrl = await this.cdn.upload(files.awardImage, 'awards');
 
     const { displayOrder: requestedOrder, ...rest } = dto;
-    const displayOrder = await prepareInsertDisplayOrder(
-      this.repo,
-      requestedOrder,
-    );
 
     try {
       const entity = this.repo.create({
         ...rest,
         awardImageUrl,
-        displayOrder,
         status: dto.status ?? ContentStatus.DRAFT,
       });
-      return await this.saveOrThrow(entity);
+      return await this.saveOrThrow(() =>
+        insertWithDisplayOrder(this.repo, entity, requestedOrder),
+      );
     } catch (err) {
       await this.cdn.delete(awardImageUrl);
       throw err;
@@ -132,18 +129,9 @@ export class AwardsService {
     files?: AwardFiles,
   ): Promise<Award> {
     const entity = await this.findOne(id);
-    const { displayOrder: newOrder, ...rest } = dto;
+    const previousOrder = entity.displayOrder;
+    const { displayOrder: requested, orderMode, ...rest } = dto;
     Object.assign(entity, rest);
-
-    const currentOrder = entity.displayOrder ?? 1;
-    if (newOrder !== undefined && newOrder !== currentOrder) {
-      entity.displayOrder = await applyDisplayOrderUpdate(
-        this.repo,
-        id,
-        currentOrder,
-        newOrder,
-      );
-    }
 
     entity.awardImageUrl =
       (await this.cdn.replace(
@@ -151,30 +139,30 @@ export class AwardsService {
         files?.awardImage,
         'awards',
       )) ?? entity.awardImageUrl;
-    return this.saveOrThrow(entity);
+    return this.saveOrThrow(() =>
+      saveWithDisplayOrder(this.repo, entity, {
+        previousOrder,
+        requested,
+        mode: orderMode,
+      }),
+    );
   }
 
   async remove(id: string): Promise<void> {
     const entity = await this.findOne(id);
-    const removedOrder = entity.displayOrder ?? 1;
+    const removedOrder = entity.displayOrder;
     await this.repo.softRemove(entity);
     await compactDisplayOrderAfterDelete(this.repo, removedOrder);
   }
 
   async restore(id: string): Promise<Award> {
     const entity = await restoreSoftDeleted(this.repo, id, 'Award');
-    if (entity.displayOrder == null) {
-      entity.displayOrder = 1;
-    }
-    return assignDisplayOrderOnRestore(this.repo, entity as Award & {
-      id: string;
-      displayOrder: number;
-    });
+    return assignDisplayOrderOnRestore(this.repo, entity);
   }
 
-  private async saveOrThrow(entity: Award): Promise<Award> {
+  private async saveOrThrow(save: () => Promise<Award>): Promise<Award> {
     try {
-      return await this.repo.save(entity);
+      return await save();
     } catch (err) {
       if (this.isUniqueViolation(err)) {
         throw new ConflictException(
