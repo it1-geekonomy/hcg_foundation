@@ -1,4 +1,10 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  IntersectionType,
+  PartialType,
+} from '@nestjs/swagger';
+import { DisplayOrderModeDto } from '../../../common/dto/display-order-mode.dto';
 import { TeamType } from '../../../common/enums/team-type.enum';
 
 /** Swagger-only shape so file pickers appear on multipart endpoints. */
@@ -43,6 +49,7 @@ export class CreateTeamMultipartDto {
   schemaCode?: string;
 }
 
-export class UpdateTeamMultipartDto extends PartialType(
-  CreateTeamMultipartDto,
+export class UpdateTeamMultipartDto extends IntersectionType(
+  PartialType(CreateTeamMultipartDto),
+  DisplayOrderModeDto,
 ) {}
