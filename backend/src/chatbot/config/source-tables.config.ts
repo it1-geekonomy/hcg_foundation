@@ -22,6 +22,8 @@ export interface SourceTableConfig {
   textColumns: string[];
   statusColumn?: 'status' | 'is_active';
   category: SourceCategory;
+  /** Per-row category when one table holds several kinds (teams: trustee / team). */
+  categoryFor?: (row: Record<string, unknown>) => SourceCategory;
   /** Build a public URL from the row. */
   buildUrl: (row: Record<string, unknown>) => string;
   /** Optional designation / role field. */
@@ -114,9 +116,12 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
     textColumns: ['title', 'designation', 'type', 'content'],
     statusColumn: 'status',
     category: 'Team',
+    categoryFor: (row) => (row.type === 'trustee' ? 'Trustee' : 'Team'),
     titleColumn: 'title',
     designationColumn: 'designation',
-    buildUrl: (row) => `/about/our-team/${String(row.id ?? '')}`,
+    // Members are shown in the Trustees / Team sections of the About Us page.
+    buildUrl: (row) =>
+      row.type === 'trustee' ? '/about-us#trustees' : '/about-us#team',
   },
   {
     table: 'annual_reports',

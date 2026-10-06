@@ -427,6 +427,36 @@ def list_titles(source_table: str) -> list[str]:
         db.close()
 
 
+def documents(source_table: str) -> list[dict]:
+    """Every indexed document of a table, with its chunks joined back in order."""
+    db = _db()
+    try:
+        rows = (
+            db.query(DocumentChunk)
+            .filter(DocumentChunk.source_table == source_table)
+            .order_by(DocumentChunk.source_id, DocumentChunk.chunk_index)
+            .all()
+        )
+        docs: dict[str, dict] = {}
+        for row in rows:
+            doc = docs.get(row.source_id)
+            if doc:
+                doc["content"] += "\n" + (row.content or "")
+                continue
+            docs[row.source_id] = {
+                "table": source_table,
+                "source_id": row.source_id,
+                "title": (row.title or "").strip(),
+                "url": row.url or "",
+                "category": row.category or "",
+                "designation": (row.designation or "").strip(),
+                "content": row.content or "",
+            }
+        return list(docs.values())
+    finally:
+        db.close()
+
+
 def chunks_matching(pattern: str) -> list[dict]:
     """Every indexed chunk whose text matches a case-insensitive Postgres regex."""
     db = _db()

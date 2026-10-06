@@ -7,15 +7,6 @@ OFFICIAL_ADDRESS = (
 FOUNDER_NAME = "Dr. B.S. Ajaikumar"
 FOUNDER_ROLE = "Founder and Managing Trustee"
 
-# Mirrors the About Us > Our Team page on the website.
-TRUSTEES = [
-    (FOUNDER_NAME, FOUNDER_ROLE),
-    ("Ms. Anjali Ajaikumar Rossi", "Trustee"),
-    ("Dr. Ganesh Nayak", "Trustee"),
-    ("Prof. (Dr.) Ramesh S Bilimagga", "Trustee"),
-    ("Mr. Satish Shenoy", "Trustee"),
-]
-
 # --- Public website routes (must match frontend/src/app/(client)) ---
 # Every page renders the donate form, so donation links scroll to it in place.
 DONATE_URL = "#donate-form"
@@ -23,9 +14,11 @@ PATIENT_AID_URL = "/financial-support-for-pediatric-patients"
 AWARENESS_URL = "/awareness-and-screening-camps"
 PARTICIPATE_URL = "/participate"
 CSR_URL = "/csr-partner"
-GRANTS_URL = "/grants-and-philanthropy"
+GRANTS_URL = "/grant-and-philanthropy"
 TRANSPARENCY_URL = "/transparency-and-knowledge-hub"
-TEAM_URL = "/about/our-team"
+# Trustees and team are sections of the About Us page; the chatbot widget scrolls to them.
+TEAM_URL = "/about-us#team"
+TRUSTEES_URL = "/about-us#trustees"
 EVENTS_URL = "/events"
 PROJECTS_URL = "/projects"
 PATIENT_STORIES_URL = "/patient-stories"
@@ -35,7 +28,8 @@ PAGE_LABELS = {
     "/": "Home",
     "/about-us": "About Us",
     "/about/our-story": "Our Story",
-    TEAM_URL: "Our Team & Trustees",
+    TEAM_URL: "Our Team",
+    TRUSTEES_URL: "Board of Trustees",
     "/contact": "Contact Us",
     DONATE_URL: "Donate Now",
     PATIENT_AID_URL: "Financial Support for Pediatric Patients",
@@ -66,11 +60,18 @@ LEGACY_URLS = {
     "/getinvolved/participate": PARTICIPATE_URL,
     "/getinvolved/csr-partner": CSR_URL,
     "/getinvolved/grants-and-philanthropy": GRANTS_URL,
+    "/grants-and-philanthropy": GRANTS_URL,
     "/resources/transparency-and-knowledge-hub": TRANSPARENCY_URL,
     "/resources/events": EVENTS_URL,
     "/resources/projects": PROJECTS_URL,
     "/journey-of-hope/patient-stories": PATIENT_STORIES_URL,
     "/journey-of-hope/testimonials": TESTIMONIALS_URL,
+    "/about/our-team": TEAM_URL,
+}
+
+# Old detail routes whose items now live in a section of one page.
+LEGACY_SECTION_PREFIXES = {
+    "/about/our-team/": TEAM_URL,
 }
 
 LEGACY_DETAIL_PREFIXES = {
@@ -83,7 +84,6 @@ DETAIL_PREFIXES = (
     PATIENT_STORIES_URL + "/",
     EVENTS_URL + "/",
     PROJECTS_URL + "/",
-    TEAM_URL + "/",
 )
 
 # Organisation compliance details (safe to share when visitors ask)
