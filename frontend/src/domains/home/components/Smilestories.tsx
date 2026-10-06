@@ -1,6 +1,14 @@
 "use client";
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Calendar } from "lucide-react";
@@ -72,38 +80,111 @@ function formatStoryDate(dateStr?: string | null): string {
 }
 
 /**
- * Invisible copy of the card's front layout. It sits in normal flow, so the
- * card's height comes from its content: when a name wraps to 2 lines the
- * footer (and therefore the whole card) gets taller. Because the carousel
- * track is a flex row, every card is then stretched to the tallest one.
+ * Every card reserves exactly this many name lines (heading-8 line-height is 1.5),
+ * so all cards are the same height no matter how long any one name is.
+ */
+const NAME_BOX_CLASS = "flex h-[3em] flex-col justify-end";
+/** Long names shrink in steps down to this fraction of the base size to fit the box. */
+const NAME_MIN_SCALE = 0.5;
+const NAME_SCALE_STEP = 0.05;
+
+const nameFitCallbacks = new WeakMap<Element, () => void>();
+let nameFitObserver: ResizeObserver | null = null;
+
+/** One shared observer for every card: card width changes on resize/breakpoints. */
+function observeNameBox(el: Element, onResize: () => void) {
+  if (typeof ResizeObserver === "undefined") return () => {};
+  nameFitObserver ??= new ResizeObserver((entries) => {
+    for (const entry of entries) nameFitCallbacks.get(entry.target)?.();
+  });
+  nameFitCallbacks.set(el, onResize);
+  nameFitObserver.observe(el);
+  return () => {
+    nameFitObserver?.unobserve(el);
+    nameFitCallbacks.delete(el);
+  };
+}
+
+/** Name in a fixed 2-line box; never truncated, long names get a smaller font instead. */
+function StoryCardName({ name }: { name: string }) {
+  const textRef = useRef<HTMLSpanElement>(null);
+
+  useLayoutEffect(() => {
+    const text = textRef.current;
+    const box = text?.parentElement;
+    if (!text || !box) return;
+
+    let lastWidth = -1;
+    const fit = (force = false) => {
+      const width = box.clientWidth;
+      if (!force && width === lastWidth) return;
+      lastWidth = width;
+
+      let scale = 1;
+      text.style.fontSize = "";
+      const maxHeight = box.clientHeight + 1;
+      while (text.offsetHeight > maxHeight && scale > NAME_MIN_SCALE) {
+        scale = Math.max(NAME_MIN_SCALE, scale - NAME_SCALE_STEP);
+        text.style.fontSize = `${scale}em`;
+      }
+    };
+
+    fit(true);
+    let cancelled = false;
+    // Manrope may swap in after first paint and change how many lines a name takes.
+    document.fonts?.ready.then(() => {
+      if (!cancelled) fit(true);
+    });
+    const stop = observeNameBox(box, () => fit());
+    return () => {
+      cancelled = true;
+      stop();
+    };
+  }, [name]);
+
+  return (
+    <Typography
+      variant="heading-8"
+      as="p"
+      className={`${NAME_BOX_CLASS} text-left text-white font-semibold font-manrope`}
+    >
+      <span ref={textRef} className="block wrap-anywhere text-pretty">
+        {name}
+      </span>
+    </Typography>
+  );
+}
+
+/**
+ * Invisible copy of the card's front layout. It sits in normal flow and gives
+ * the card its height. The name box and date row are fixed-height, so every
+ * card measures the same.
  *
  * NOTE: the footer classes here MUST match the footer in StoryCard's front.
  */
-function StoryCardSizer({ name, date }: { name: string; date: string }) {
+function StoryCardSizer() {
   return (
     <div
       aria-hidden="true"
       className="pointer-events-none invisible flex select-none flex-col justify-between overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-transparent pt-[1.4223rem] pl-[1.475rem] pr-[1.4223rem] pb-0"
     >
       <div className="aspect-[21.177/23.021] w-full shrink-0" />
-      <div className="flex flex-col justify-start pt-[1.4rem] pb-4">
+      <div className="flex flex-col justify-start pt-4 pb-4">
         <Typography
           variant="heading-8"
           as="p"
-          className="text-left font-semibold font-manrope wrap-anywhere text-pretty"
+          className={`${NAME_BOX_CLASS} font-semibold font-manrope`}
         >
-          {name}
+          {null}
         </Typography>
-        {date && date.trim() ? (
-          <Typography
-            variant="text-2"
-            as="p"
-            className="mt-1 flex items-center gap-2 text-nowrap font-normal font-manrope"
-          >
-            <Calendar className="h-4 w-4" strokeWidth={1.75} />
-            {date}
-          </Typography>
-        ) : null}
+        <Typography
+          variant="text-2"
+          as="p"
+          className="mt-1 flex items-center gap-2 text-nowrap font-normal font-manrope"
+        >
+          <Calendar className="h-4 w-4" strokeWidth={1.75} />
+          &nbsp;
+        </Typography>
       </div>
     </div>
   );
@@ -167,17 +248,9 @@ const StoryCard = memo(function StoryCard({
         ) : null}
       </div>
 
-      {/* Every card in the row is stretched to the tallest one; the date stays
-          directly under the name so a short name leaves its spare height below
-          the date instead of opening a gap between name and date. */}
-      <div className="flex flex-1 flex-col justify-start pt-[1.4rem] pb-4">
-        <Typography
-          variant="heading-8"
-          as="p"
-          className="text-left text-white font-semibold font-manrope wrap-anywhere text-pretty"
-        >
-          {name}
-        </Typography>
+      {/* The name sits at the bottom of its 2-line box, right on top of the date. */}
+      <div className="flex flex-1 flex-col justify-start pt-4 pb-4">
+        <StoryCardName name={name} />
         {date && date.trim() ? (
           <Typography
             variant="text-2"
@@ -253,7 +326,7 @@ const StoryCard = memo(function StoryCard({
   return (
     // flex-1 = fill the (stretched) carousel item; the sizer gives the minimum height
     <div className="relative w-full flex-1">
-      <StoryCardSizer name={name} date={date} />
+      <StoryCardSizer />
 
       {/* the real flip card fills whatever height the row ends up with */}
       <div className="absolute inset-0">
