@@ -19,11 +19,18 @@ import {
   TableRow,
 } from "@/shared/ui/table";
 import { cmsApi } from "@/domains/cms/lib/api";
-import type { DonationStatus, Donor } from "@/domains/cms/lib/types";
+import type {
+  DonationCategory,
+  DonationStatus,
+  Donor,
+} from "@/domains/cms/lib/types";
 import { cmsErrorMessage } from "@/domains/cms/ui/CmsViewChrome";
 import { CmsPagination, type PaginationMeta } from "@/domains/cms/ui/CmsPagination";
 import CmsSearchInput from "@/domains/cms/ui/CmsSearchInput";
-import CmsSelect, { DONATION_STATUS_OPTIONS } from "@/domains/cms/ui/CmsSelect";
+import CmsSelect, {
+  DONATION_CATEGORY_FILTER_OPTIONS,
+  DONATION_STATUS_OPTIONS,
+} from "@/domains/cms/ui/CmsSelect";
 
 const PAGE_SIZE = 10;
 
@@ -46,6 +53,7 @@ export default function DonorsListPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<DonationStatus | "">("paid");
+  const [category, setCategory] = useState<DonationCategory | "">("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,6 +66,7 @@ export default function DonorsListPage() {
         limit: PAGE_SIZE,
         search: search || undefined,
         status: status || undefined,
+        donationCategory: category || undefined,
       });
       setDonors(res.data ?? []);
       setMeta(res.meta ?? emptyMeta);
@@ -66,7 +75,7 @@ export default function DonorsListPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, status]);
+  }, [page, search, status, category]);
 
   useEffect(() => {
     void load();
@@ -121,6 +130,16 @@ export default function DonorsListPage() {
                 setStatus(next as DonationStatus | "");
               }}
             />
+            <CmsSelect
+              size="sm"
+              className="sm:w-56"
+              value={category}
+              options={DONATION_CATEGORY_FILTER_OPTIONS}
+              onChange={(next) => {
+                setPage(1);
+                setCategory(next as DonationCategory | "");
+              }}
+            />
           </div>
 
           <div className="overflow-x-auto">
@@ -129,6 +148,7 @@ export default function DonorsListPage() {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Amount</TableHead>
+                  <TableHead>Category</TableHead>
                   <TableHead>Country</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Date</TableHead>
@@ -137,7 +157,7 @@ export default function DonorsListPage() {
               <TableBody>
                 {donors.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-cms-muted">
+                    <TableCell colSpan={6} className="text-cms-muted">
                       No donations yet.
                     </TableCell>
                   </TableRow>
@@ -154,6 +174,9 @@ export default function DonorsListPage() {
                       </TableCell>
                       <TableCell>
                         {formatAmount(donor.amount, donor.currency)}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {donor.donationCategory || "General Funds"}
                       </TableCell>
                       <TableCell>
                         <span className="block">

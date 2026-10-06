@@ -30,6 +30,7 @@ import type {
   TeamFields,
   AdminUser,
   ContentStatus,
+  DonationCategory,
   DonationStatus,
   Donor,
   TeamType,
@@ -55,6 +56,8 @@ export type ListQuery = {
   /** Filter teams by type (team | trustee) — query param `type` */
   type?: TeamType;
   pageType?: LegalPageType;
+  /** Donors only — query param `donationCategory` */
+  donationCategory?: DonationCategory;
   includeDeleted?: boolean;
   onlyDeleted?: boolean;
 };
@@ -67,6 +70,9 @@ function toQuery(params?: ListQuery) {
   if (params?.status) q.set("status", params.status);
   if (params?.type) q.set("type", params.type);
   if (params?.pageType) q.set("pageType", params.pageType);
+  if (params?.donationCategory) {
+    q.set("donationCategory", params.donationCategory);
+  }
   if (params?.includeDeleted === true) q.set("includeDeleted", "true");
   if (params?.onlyDeleted === true) q.set("onlyDeleted", "true");
   const s = q.toString();

@@ -24,6 +24,17 @@ export type DonorRecord = {
   receiptNumber?: string | null;
 };
 
+/** Must match the backend DonationCategory enum values. */
+export const DONATION_CATEGORIES = [
+  "Financial Assistance",
+  "Awareness & Prevention",
+  "Psychological Support",
+  "Research & Innovation",
+  "General Funds",
+] as const;
+
+export type DonationCategory = (typeof DONATION_CATEGORIES)[number];
+
 export type CreateDonationPayload = {
   fullName: string;
   phone: string;
@@ -35,6 +46,8 @@ export type CreateDonationPayload = {
   currency?: string;
   pan?: string;
   message?: string;
+  /** Omitted → backend records "General Funds". */
+  donationCategory?: DonationCategory;
   amount: number;
 };
 

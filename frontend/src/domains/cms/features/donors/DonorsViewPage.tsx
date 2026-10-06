@@ -95,6 +95,10 @@ export default function DonorsViewPage() {
           <dl>
             <CmsDetailRow label="Amount" value={`${donor.currency} ${donor.amount}`} />
             <CmsDetailRow
+              label="Category"
+              value={donor.donationCategory || "General Funds"}
+            />
+            <CmsDetailRow
               label="Status"
               value={<span className="capitalize">{donor.status}</span>}
             />
