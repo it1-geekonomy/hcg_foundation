@@ -279,12 +279,14 @@ def search(
     query: str,
     *,
     n_results: int | None = None,
+    query_vector: list[float] | None = None,
 ) -> list[dict]:
     k = n_results or settings.retrieval_candidate_k
     if indexed_count() == 0:
         return []
 
-    query_vector = embeddings.embed_text(query)
+    if query_vector is None:
+        query_vector = embeddings.embed_text(query)
     vector_literal = "[" + ",".join(str(float(v)) for v in query_vector) + "]"
 
     db = _db()
