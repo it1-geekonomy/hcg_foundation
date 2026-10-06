@@ -20,6 +20,7 @@ import {
 } from "@/domains/home/constants/donation-currency";
 import CountryFlag from "@/shared/components/CountryFlag";
 import { donorsApi } from "@/shared/lib/donors-api";
+import { nationalPhoneDigits } from "@/shared/lib/phone";
 import CountrySelect from "@/shared/components/CountrySelect";
 
 type RazorpaySuccess = {
@@ -68,20 +69,6 @@ function FieldLabel({
       {children}
     </label>
   );
-}
-
-function nationalPhoneDigits(value: string, dialCode: string) {
-  let digits = value.replace(/\D/g, "");
-  const dialDigits = dialCode.replace(/\D/g, "");
-  if (
-    dialDigits &&
-    digits.startsWith(dialDigits) &&
-    digits.length > dialDigits.length
-  ) {
-    digits = digits.slice(dialDigits.length);
-  }
-  const maxNational = Math.max(6, 15 - dialDigits.length);
-  return digits.slice(0, maxNational);
 }
 
 export default function DonateDetailsModal({
@@ -448,7 +435,7 @@ export default function DonateDetailsModal({
       value={phone}
       onChange={(e) =>
         setPhone(
-          nationalPhoneDigits(e.target.value, phoneCountry.dial)
+          nationalPhoneDigits(e.target.value, phoneCountry.dial, phone)
         )
       }
       className="min-w-0 flex-1 bg-transparent py-1.5 font-manrope text-sm text-white outline-none placeholder:text-white/30"
