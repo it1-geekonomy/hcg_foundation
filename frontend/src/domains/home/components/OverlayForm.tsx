@@ -307,7 +307,7 @@ function ImpactItems({
             <Typography variant="body-7" as="p" className="!text-left font-bold font-manrope text-[#1C1C1C]">
               {item.title}
             </Typography>
-            <Typography variant="body-6" as="p" className="!text-left leading-snug text-[#9D9590] font-manrope font-normal lg:whitespace-nowrap">
+            <Typography variant="body-6" as="p" className="!text-left leading-snug text-[#9D9590] font-manrope font-normal">
               {item.desc}
             </Typography>
           </div>
