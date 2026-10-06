@@ -47,6 +47,8 @@ type StoredChat = {
 };
 
 const STORAGE_KEY = "hcg-chatbot-v3";
+/** Must match the backend AskQuestionDto sessionId rule */
+const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const TEASER_KEY = "hcg-chatbot-teaser-dismissed";
 const AVATAR_SRC = "/chatbot/hope-avatar.webp";
 const LOGO_SRC = "/chatbot/hcg-logo-color.svg";
@@ -230,52 +232,38 @@ function FormattedText({ text }: { text: string }) {
   return <div className="space-y-2">{blocks}</div>;
 }
 
-function HopeAvatar({ size = 44, className = "" }: { size?: number; className?: string }) {
+/** `sizeClassName` (e.g. "h-8 w-8 2xl:h-10 2xl:w-10") lets the avatar scale per breakpoint; `size` is the image resolution. */
+function HopeAvatar({
+  size = 44,
+  sizeClassName,
+  className = "",
+}: {
+  size?: number;
+  sizeClassName?: string;
+  className?: string;
+}) {
   return (
     <Image
       src={AVATAR_SRC}
       alt=""
       width={size}
       height={size}
-      className={`shrink-0 rounded-full object-cover ${className}`}
-      style={{ width: size, height: size }}
+      className={`shrink-0 rounded-full object-cover ${sizeClassName ?? ""} ${className}`}
+      style={sizeClassName ? undefined : { width: size, height: size }}
     />
   );
 }
 
-/** Launcher avatar framed by two soft yellow halos with an online dot. */
+const MESSAGE_AVATAR = "h-8 w-8 2xl:h-10 2xl:w-10";
+
 function HopeBadge({ size = 88 }: { size?: number }) {
-  const inner = Math.round(size * 0.78);
-  return (
-    <span
-      className="relative flex shrink-0 items-center justify-center rounded-full"
-      style={{ width: size, height: size }}
-    >
-      <span aria-hidden className="absolute inset-0 rounded-full bg-[#FCE7A0]/55" />
-      <span
-        className="relative flex items-center justify-center rounded-full bg-[#FDF3D2] ring-2 ring-[#FCE29A]"
-        style={{ width: inner, height: inner }}
-      >
-        <HopeAvatar size={Math.round(inner * 0.84)} />
-      </span>
-      <span
-        aria-hidden
-        className="absolute rounded-full bg-[#5CC45C]"
-        style={{
-          width: Math.round(size * 0.15),
-          height: Math.round(size * 0.15),
-          right: size * 0.08,
-          bottom: size * 0.08,
-        }}
-      />
-    </span>
-  );
+  return <HopeAvatar size={size} className="shadow-[0_8px_20px_-6px_rgba(60,48,10,0.45)]" />;
 }
 
 function TypingIndicator() {
   return (
-    <div className="flex items-center gap-3">
-      <HopeAvatar />
+    <div className="flex items-center gap-2.5 2xl:gap-3">
+      <HopeAvatar size={40} sizeClassName={MESSAGE_AVATAR} />
       <div className="flex items-end gap-1 pt-3" aria-label="Hope is typing">
         {[6, 8, 5].map((dot, i) => (
           <motion.span
@@ -380,8 +368,20 @@ export default function ChatbotWidget() {
       const raw = sessionStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       const stored = JSON.parse(raw) as StoredChat;
-      setMessages(stored.messages ?? []);
-      setSessionId(stored.sessionId);
+      const restored = stored.messages ?? [];
+      const last = restored[restored.length - 1];
+      // Page was refreshed while a reply was still loading
+      if (last?.role === "user") {
+        restored.push({
+          id: newId(),
+          role: "bot",
+          text: "The page was refreshed before I could reply. Tap Try again to ask that again.",
+          at: Date.now(),
+          retryQuestion: last.text,
+        });
+      }
+      setMessages(restored);
+      setSessionId(stored.sessionId && UUID_V4.test(stored.sessionId) ? stored.sessionId : undefined);
     } catch {
       // ignore corrupt storage
     }
@@ -535,19 +535,19 @@ export default function ChatbotWidget() {
             exit={{ opacity: 0, y: 24, scale: 0.96 }}
             transition={{ type: "spring", stiffness: 380, damping: 32 }}
             style={{ transformOrigin: "bottom right" }}
-            className="fixed inset-0 z-[60] flex flex-col overflow-hidden bg-[#FBF8EC] sm:inset-auto sm:right-6 sm:bottom-[148px] sm:h-[min(660px,calc(100dvh-11rem))] lg:bottom-[132px] sm:w-[420px] sm:rounded-[28px] sm:shadow-[0_24px_60px_-16px_rgba(60,48,10,0.35)] sm:ring-1 sm:ring-black/5"
+            className="fixed inset-0 z-[60] flex flex-col overflow-hidden bg-[#FBF8EC] sm:inset-auto sm:right-6 sm:bottom-[136px] sm:h-[min(560px,calc(100dvh-10rem))] sm:w-[360px] sm:rounded-3xl sm:shadow-[0_24px_60px_-16px_rgba(60,48,10,0.35)] sm:ring-1 sm:ring-black/5 lg:bottom-[120px] xl:h-[min(600px,calc(100dvh-10rem))] xl:w-[380px] 2xl:bottom-[132px] 2xl:h-[min(660px,calc(100dvh-11rem))] 2xl:w-[420px] 2xl:rounded-[28px]"
           >
             {/* Header */}
-            <div className="flex shrink-0 items-center gap-3 bg-[linear-gradient(100deg,#CDEAF1_0%,#FBF1C9_48%,#F9D5DE_100%)] px-5 py-4 sm:px-7">
-              <HopeAvatar size={42} />
+            <div className="flex shrink-0 items-center gap-2.5 bg-[linear-gradient(100deg,#CDEAF1_0%,#FBF1C9_48%,#F9D5DE_100%)] px-4 py-3 sm:px-5 2xl:gap-3 2xl:px-7 2xl:py-4">
+              <HopeAvatar size={42} sizeClassName="h-9 w-9 2xl:h-[42px] 2xl:w-[42px]" />
               <div className="min-w-0 flex-1">
                 <p
                   id="hcg-chatbot-title"
-                  className="truncate font-manrope text-[17px] leading-tight font-semibold text-[#1F1F1F]"
+                  className="truncate font-manrope text-[15px] leading-tight font-semibold text-[#1F1F1F] 2xl:text-[17px]"
                 >
                   AI Assistant
                 </p>
-                <p className="mt-0.5 flex items-center gap-1.5 font-manrope text-[13px] text-[#3D3D3D]">
+                <p className="mt-0.5 flex items-center gap-1.5 font-manrope text-xs text-[#3D3D3D] 2xl:text-[13px]">
                   <span className="h-2 w-2 rounded-full bg-[#5CC45C]" />
                   Online
                 </p>
@@ -559,7 +559,7 @@ export default function ChatbotWidget() {
                 height={33}
                 unoptimized
                 priority
-                className="h-8 w-auto shrink-0"
+                className="h-7 w-auto shrink-0 2xl:h-8"
               />
               {!isEmpty ? (
                 <button
@@ -567,7 +567,7 @@ export default function ChatbotWidget() {
                   onClick={resetChat}
                   aria-label="Start a new conversation"
                   title="New conversation"
-                  className="flex h-9 w-9 items-center justify-center rounded-full text-[#1F1F1F]/70 transition hover:bg-white/60 hover:text-[#1F1F1F]"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-[#1F1F1F]/70 transition hover:bg-white/60 hover:text-[#1F1F1F] 2xl:h-9 2xl:w-9"
                 >
                   <RotateCcw className="h-4 w-4" />
                 </button>
@@ -576,10 +576,10 @@ export default function ChatbotWidget() {
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close chat"
-                className="-mr-1.5 flex h-9 w-9 items-center justify-center rounded-full text-[#1F1F1F] transition hover:bg-white/60"
+                className="-mr-1.5 flex h-8 w-8 items-center justify-center rounded-full text-[#1F1F1F] transition hover:bg-white/60 2xl:h-9 2xl:w-9"
               >
                 <ChevronDown className="h-6 w-6 sm:hidden" />
-                <X className="hidden h-6 w-6 sm:block" strokeWidth={1.75} />
+                <X className="hidden h-5 w-5 sm:block 2xl:h-6 2xl:w-6" strokeWidth={1.75} />
               </button>
             </div>
 
@@ -588,36 +588,44 @@ export default function ChatbotWidget() {
               ref={listRef}
               aria-live="polite"
               onClick={onMessageLinkClick}
-              className="flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-6 sm:px-7"
+              className={`flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 [container-name:chat] [container-type:size] [scrollbar-width:none] sm:px-5 2xl:space-y-5 2xl:px-7 [&::-webkit-scrollbar]:hidden ${
+                isEmpty ? "py-3" : "py-5 2xl:py-6"
+              }`}
             >
               {isEmpty ? (
+                // Sizes use cqh (% of the chat body height) so the welcome content fills the space it has.
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="flex flex-col items-center pt-2 text-center"
+                  className="flex min-h-full flex-col items-center justify-center text-center"
                 >
-                  <HopeAvatar size={80} />
-                  <h2 className="mt-5 font-tiempos-headline text-[26px] leading-tight text-[#1F1F1F] italic">
+                  <HopeAvatar
+                    size={80}
+                    sizeClassName="hidden h-[clamp(40px,16cqh,80px)] w-[clamp(40px,16cqh,80px)] welcome-sm:block"
+                  />
+                  <h2 className="font-tiempos-headline text-[length:clamp(18px,5.6cqh,24px)] leading-tight text-[#1F1F1F] italic welcome-sm:mt-[clamp(8px,4cqh,20px)]">
                     Hey! How can we help you? <span className="not-italic">👋</span>
                   </h2>
-                  <p className="mt-3 max-w-[17rem] font-tiempos-text text-[15px] leading-relaxed text-[#7A7A7A]">
+                  <p className="mt-[clamp(4px,2cqh,10px)] hidden max-w-[17rem] font-tiempos-text text-[length:clamp(12px,3.2cqh,15px)] leading-relaxed text-[#7A7A7A] welcome-md:block">
                     I can help you with information, programs, donations and more.
                   </p>
 
-                  <div className="mt-6 flex w-full flex-col gap-3">
+                  <div className="mt-[clamp(12px,6cqh,28px)] flex w-full flex-col gap-[clamp(6px,2.4cqh,12px)]">
                     {SUGGESTIONS.map(({ label, icon: Icon, iconClass }) => (
                       <button
                         key={label}
                         type="button"
                         onClick={() => void sendQuestion(label)}
-                        className="group flex w-full items-center gap-3 rounded-full border border-[#E6E0CC] bg-white px-5 py-3.5 text-left transition hover:border-[#FCCC2D] hover:bg-[#FFFCF0] hover:shadow-sm"
+                        className="group flex w-full items-center gap-[clamp(10px,2.6cqh,12px)] rounded-full border border-[#E6E0CC] bg-white px-[clamp(14px,4cqh,20px)] py-[clamp(6px,2.8cqh,14px)] text-left transition hover:border-[#FCCC2D] hover:bg-[#FFFCF0] hover:shadow-sm"
                       >
-                        <Icon className={`h-[18px] w-[18px] shrink-0 ${iconClass}`} />
-                        <span className="flex-1 font-manrope text-[15px] text-[#2B2B2B]">
+                        <Icon
+                          className={`h-[clamp(16px,3.6cqh,18px)] w-[clamp(16px,3.6cqh,18px)] shrink-0 ${iconClass}`}
+                        />
+                        <span className="flex-1 font-manrope text-[length:clamp(13px,3.2cqh,15px)] text-[#2B2B2B]">
                           {label}
                         </span>
-                        <ChevronRight className="h-5 w-5 shrink-0 text-[#1F1F1F] transition group-hover:translate-x-0.5" />
+                        <ChevronRight className="h-[clamp(16px,4cqh,20px)] w-[clamp(16px,4cqh,20px)] shrink-0 text-[#1F1F1F] transition group-hover:translate-x-0.5" />
                       </button>
                     ))}
                   </div>
@@ -631,21 +639,23 @@ export default function ChatbotWidget() {
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.2 }}
-                      className={`flex items-start gap-3 ${isUser ? "justify-end" : "justify-start"}`}
+                      className={`flex items-start gap-2.5 2xl:gap-3 ${isUser ? "justify-end" : "justify-start"}`}
                     >
-                      {!isUser ? <HopeAvatar /> : null}
-                      <div className={`flex max-w-[80%] flex-col ${isUser ? "items-end" : "items-start"}`}>
+                      {!isUser ? <HopeAvatar size={40} sizeClassName={MESSAGE_AVATAR} /> : null}
+                      <div
+                        className={`flex max-w-[85%] flex-col 2xl:max-w-[80%] ${isUser ? "items-end" : "items-start"}`}
+                      >
                         <div
-                          className={`font-manrope text-[15px] leading-relaxed text-[#2B2B2B] ${
+                          className={`font-manrope text-[14px] leading-relaxed text-[#2B2B2B] 2xl:text-[15px] ${
                             isUser
-                              ? "rounded-2xl rounded-br-sm bg-[#FCE38D] py-3 pr-3 pl-4"
+                              ? "rounded-2xl rounded-br-sm bg-[#FCE38D] py-2.5 pr-2.5 pl-3.5 2xl:py-3 2xl:pr-3 2xl:pl-4"
                               : msg.retryQuestion
-                                ? "rounded-2xl rounded-tl-sm border border-[#F3C4C4] bg-[#FDEDED] px-4 py-3"
-                                : "rounded-2xl rounded-tl-sm bg-[#F1E9CD] px-4 py-3"
+                                ? "rounded-2xl rounded-tl-sm border border-[#F3C4C4] bg-[#FDEDED] px-3.5 py-2.5 2xl:px-4 2xl:py-3"
+                                : "rounded-2xl rounded-tl-sm bg-[#F1E9CD] px-3.5 py-2.5 2xl:px-4 2xl:py-3"
                           }`}
                         >
                           {isUser ? (
-                            <div className="flex items-end gap-3">
+                            <div className="flex items-end gap-2 2xl:gap-3">
                               <p className="whitespace-pre-wrap">{msg.text}</p>
                               <CheckCheck className="mb-0.5 h-3.5 w-3.5 shrink-0 text-[#6B5D2A]" aria-hidden />
                             </div>
@@ -730,10 +740,10 @@ export default function ChatbotWidget() {
             </div>
 
             {/* Composer */}
-            <div className="shrink-0 px-5 pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-7">
+            <div className="shrink-0 px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-5 2xl:px-7 2xl:pb-[max(1.25rem,env(safe-area-inset-bottom))]">
               <form
                 onSubmit={onSubmit}
-                className="flex items-end gap-2 rounded-[28px] border border-[#ECE6D2] bg-white py-1.5 pr-1.5 pl-5 shadow-[0_2px_10px_-4px_rgba(60,48,10,0.12)] transition focus-within:border-[#FCCC2D] focus-within:ring-4 focus-within:ring-[#FCCC2D]/20"
+                className="flex items-end gap-2 rounded-[28px] border border-[#ECE6D2] bg-white py-1 pr-1 pl-4 2xl:py-1.5 2xl:pr-1.5 2xl:pl-5 shadow-[0_2px_10px_-4px_rgba(60,48,10,0.12)] transition focus-within:border-[#FCCC2D] focus-within:ring-4 focus-within:ring-[#FCCC2D]/20"
               >
                 <textarea
                   ref={inputRef}
@@ -747,15 +757,15 @@ export default function ChatbotWidget() {
                   maxLength={MAX_MESSAGE_LENGTH}
                   placeholder="Type your message..."
                   aria-label="Ask the HCG Foundation AI Assistant"
-                  className="max-h-[120px] min-w-0 flex-1 resize-none self-center bg-transparent py-2 font-manrope text-[15px] leading-relaxed text-[#1F1F1F] outline-none placeholder:text-[#9A9A9A]"
+                  className="max-h-[120px] min-w-0 flex-1 resize-none self-center bg-transparent py-2 font-manrope text-base leading-relaxed sm:text-[14px] 2xl:text-[15px] text-[#1F1F1F] outline-none placeholder:text-[#9A9A9A]"
                 />
                 <button
                   type="submit"
                   disabled={loading || !input.trim()}
                   aria-label="Send message"
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#FCCC2D] text-[#1F1F1F] transition hover:bg-[#FDC61D] disabled:opacity-60"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FCCC2D] text-[#1F1F1F] transition hover:bg-[#FDC61D] disabled:opacity-60 2xl:h-12 2xl:w-12"
                 >
-                  <Send className="h-5 w-5 -translate-x-px translate-y-px" strokeWidth={2.25} />
+                  <Send className="h-4 w-4 -translate-x-px translate-y-px 2xl:h-5 2xl:w-5" strokeWidth={2.25} />
                 </button>
               </form>
               {input.length >= MAX_MESSAGE_LENGTH * 0.8 ? (
@@ -788,12 +798,12 @@ export default function ChatbotWidget() {
               initial={{ opacity: 0, y: 8, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.95 }}
-              className="relative hidden max-w-[250px] rounded-2xl rounded-br-sm bg-[#FBF8EC] py-3 pr-8 pl-4 shadow-[0_12px_32px_-8px_rgba(60,48,10,0.35)] ring-1 ring-[#E6E0CC] sm:block"
+              className="relative hidden max-w-[230px] rounded-2xl rounded-br-sm bg-[#FBF8EC] py-2.5 pr-8 pl-3.5 shadow-[0_12px_32px_-8px_rgba(60,48,10,0.35)] ring-1 ring-[#E6E0CC] sm:block 2xl:max-w-[250px] 2xl:py-3 2xl:pl-4"
             >
               <button
                 type="button"
                 onClick={toggle}
-                className="text-left font-manrope text-sm leading-snug text-[#2B2B2B]"
+                className="text-left font-manrope text-[13px] leading-snug text-[#2B2B2B] 2xl:text-sm"
               >
                 <span className="block font-semibold text-[#1F1F1F]">Have a question?</span>
                 Ask about donating, our programs or volunteering.
@@ -817,7 +827,7 @@ export default function ChatbotWidget() {
           whileTap={{ scale: 0.94 }}
           aria-label={open ? "Close chat" : "Open HCG Foundation AI Assistant"}
           aria-expanded={open}
-          className="relative flex h-[72px] w-[72px] items-center justify-center rounded-full"
+          className="relative flex h-[60px] w-[60px] items-center justify-center rounded-full 2xl:h-[72px] 2xl:w-[72px]"
         >
           {!open ? (
             <motion.span
@@ -838,11 +848,18 @@ export default function ChatbotWidget() {
               className="flex items-center justify-center"
             >
               {open ? (
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FCCC2D] shadow-[0_10px_24px_-8px_rgba(60,48,10,0.5)]">
+                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FCCC2D] shadow-[0_10px_24px_-8px_rgba(60,48,10,0.5)] 2xl:h-12 2xl:w-12">
                   <X className="h-5 w-5 text-[#1F1F1F]" strokeWidth={2} />
                 </span>
               ) : (
-                <HopeBadge size={72} />
+                <>
+                  <span className="flex 2xl:hidden">
+                    <HopeBadge size={52} />
+                  </span>
+                  <span className="hidden 2xl:flex">
+                    <HopeBadge size={62} />
+                  </span>
+                </>
               )}
             </motion.span>
           </AnimatePresence>
