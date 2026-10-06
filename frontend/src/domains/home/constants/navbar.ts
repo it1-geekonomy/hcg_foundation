@@ -10,8 +10,11 @@ export const navLinks = [
     href: "#",
      hasDropdown: true,
     dropdownItems: [
-      { label: "Financial Support for Patients", href: "/financial-support-for-patients" },
+      { label: "Patient Aid", href: "/patient-aid" },
       { label: "Awareness & Screening Camps", href: "/awareness-and-screening-camps" },
+      { label: "Swasthi Art Gallery", href: "/swasti-art-gallery" },
+      {label: "Pink Hope Support Group", href: "/pink-hope-support-group" },
+      {label: "Research & Innovation", href: "/research-and-innovation" },
     ],
   },
   {

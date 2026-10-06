@@ -48,7 +48,7 @@ export interface BannerBreadcrumb {
 
 export interface BannerProps {
   bgImage?: string;
-  /** Optional image shown below the lg breakpoint (1024px). Falls back to bgImage if omitted. */
+  /** Optional image shown below 1536px. Falls back to bgImage if omitted. */
   bgImageMobile?: string;
   bgImageAlt?: string;
   breadcrumbs?: BannerBreadcrumb[];
@@ -79,7 +79,7 @@ export default function Banner({
 
   return (
     <section className={cn("relative isolate grid w-full", className)}>
-      {/* Below 1024px */}
+      {/* Mobile image through 1535px. Desktop photo starts at 1536px. */}
       {(bgImageMobile ?? bgImage) ? (
         <Image
           src={(bgImageMobile ?? bgImage)!}
@@ -88,10 +88,9 @@ export default function Banner({
           height={1080}
           priority
           sizes="100vw"
-          className="col-start-1 row-start-1 block h-auto w-full object-contain lg:hidden"
+          className="col-start-1 row-start-1 block h-auto w-full object-contain lg:!h-[48vw] xl:!h-[42vw] lg:object-cover lg:object-center 2xl:hidden"
         />
       ) : null}
-      {/* 1024px and up */}
       {bgImage ? (
         <Image
           src={bgImage}
@@ -100,9 +99,14 @@ export default function Banner({
           height={1080}
           priority
           sizes="100vw"
-          className="col-start-1 row-start-1 hidden h-auto w-full object-contain lg:block"
+          className="col-start-1 row-start-1 hidden h-auto w-full object-contain 2xl:block"
         />
       ) : null}
+
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(119,91,0,0.42)_0%,rgba(64,39,0,0.15)_100%)]"
+      />
 
       <div className="relative col-start-1 row-start-1 z-10 flex items-end px-8 py-6 lg:items-center lg:px-6 lg:py-14 xl:px-6 xl:py-20 2xl:px-40">
         <div className="w-full lg:mt-8 xl:mt-10">

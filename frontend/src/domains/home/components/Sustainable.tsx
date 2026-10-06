@@ -89,7 +89,7 @@ export default function SustainableGoalsSection() {
   return (
     <section
       ref={sectionRef}
-      className="w-full bg-[#FFF6D8] px-4 md:px-4 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40"
+      className="w-full bg-[#FFF6D8] px-4 md:px-4 lg:py-8 xl:py-8 lg:px-6 xl:px-6 2xl:px-40"
     >
       <div className="flex w-full flex-col overflow-hidden rounded-sm lg:flex-row bg-gradient-to-r from-[#4B4B4B] to-[#B1B1B1] lg:flex-row lg:items-center lg:items-center">
         {/* Box heading: rendered below lg (centered) and at lg+ (left-aligned) */}

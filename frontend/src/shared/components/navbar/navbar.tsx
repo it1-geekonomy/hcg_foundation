@@ -20,6 +20,12 @@ export default function Navbar() {
   const desktopNavRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setOpenDesktopDropdown(null);
+    setOpenDropdown(null);
+    setIsMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
@@ -98,6 +104,9 @@ export default function Navbar() {
           <Link
             href="/"
             onClick={() => {
+              setOpenDesktopDropdown(null);
+              setOpenDropdown(null);
+              setIsMenuOpen(false);
               sessionStorage.setItem("nav_action", "logo");
               window.dispatchEvent(new Event("nav_action_event"));
             }}
@@ -128,6 +137,7 @@ export default function Navbar() {
                     key={i}
                     href={link.href}
                     onClick={(e) => {
+                      setOpenDesktopDropdown(null);
                       if (link.href !== "/") return;
                       if (pathname === "/") {
                         handleHomeNav(e);
