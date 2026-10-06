@@ -11,6 +11,7 @@ TYPO_MAP = {
     "banglore": "bangalore",
     "trustis": "trustees",
     "trusties": "trustees",
+    "ajaykumar": "ajaikumar",
     "anual": "annual",
     "reciept": "receipt",
     "intership": "internship",

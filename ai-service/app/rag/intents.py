@@ -13,7 +13,6 @@ _EXACT = {
     r"^(bye|bye\s+bye|goodbye|see\s*you|good\s*night)[\s!.]*$": "bye",
     r"^(help|menu|what\s+can\s+you\s+do)[\s!.]*$": "help",
     r"^(donate|donation)[\s!.]*$": "donate",
-    r"^who\s+is\s+the\s+founder[\s?!.]*$": "founder",
 }
 
 
@@ -55,14 +54,6 @@ def match_fast_intent(message: str) -> dict | None:
                     "answer": C.DONATE_INTENT_ANSWER,
                     "sources": [
                         {"title": C.PAGE_LABELS[C.DONATE_URL], "url": C.DONATE_URL}
-                    ],
-                }
-            if intent == "founder":
-                return {
-                    "intent": intent,
-                    "answer": C.FOUNDER_INTENT_ANSWER,
-                    "sources": [
-                        {"title": C.PAGE_LABELS[C.TEAM_URL], "url": C.TEAM_URL}
                     ],
                 }
     return None

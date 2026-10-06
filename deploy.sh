@@ -107,8 +107,16 @@ main() {
   log "Chatbot knowledge sync (website pages + built-in knowledge)"
   local force_sync=False
   [[ "$REINDEX_CHATBOT" == "true" ]] && force_sync=True
-  if ! compose exec -T ai-service python -c \
-    "from app.services.sync_service import full_sync; print(full_sync(force=$force_sync))" 2>&1 \
+  # A renamed or removed page shows up here: the chatbot would link to a 404 and keep the page's old text.
+  if ! compose exec -T ai-service python -c "
+from app.services.sync_service import full_sync
+r = full_sync(force=$force_sync)
+print(r)
+for key, what in (('broken_links', 'Chatbot links to pages the website no longer serves'),
+                  ('site_pages_failed', 'Chatbot could not read these pages and kept their old text')):
+    if r.get(key):
+        print('!!  %s: %s (update ai-service/app/rag/constants.py and site_pages.py)' % (what, ', '.join(r[key])))
+" 2>&1 \
     | grep -v 'Multiple definitions in dictionary'; then
     warn "Chatbot sync failed. The site is live; re-run with REINDEX_CHATBOT=true."
   fi

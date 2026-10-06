@@ -90,13 +90,27 @@ function isInternalUrl(url: string) {
   }
 }
 
+/** "#donate-form" or "/about-us#team" → the section to scroll to (and the page it lives on). */
+function sectionTarget(url: string): { path: string; id: string } | null {
+  const hash = url.indexOf("#");
+  if (hash < 0 || !(url.startsWith("#") || url.startsWith("/"))) return null;
+  const id = url.slice(hash + 1);
+  return id ? { path: url.slice(0, hash), id } : null;
+}
+
 function SmartLink({ href, children }: { href: string; children: ReactNode }) {
   const className =
     "font-semibold text-[#0D2838] underline decoration-[#E9B510] decoration-2 underline-offset-2 hover:decoration-[#0D2838]";
-  // In-page targets (e.g. #donate-form) scroll without putting the hash in the address bar
-  if (href.startsWith("#")) {
+  // Section targets (e.g. #donate-form, /about-us#team) scroll without putting the hash in the address bar
+  const section = sectionTarget(href);
+  if (section) {
     return (
-      <button type="button" data-scroll-to={href.slice(1)} className={`${className} cursor-pointer`}>
+      <button
+        type="button"
+        data-scroll-to={section.id}
+        data-scroll-path={section.path}
+        className={`${className} cursor-pointer`}
+      >
         {children}
       </button>
     );
@@ -292,32 +306,53 @@ export default function ChatbotWidget() {
   const restoredRef = useRef(false);
   const router = useRouter();
   const pathname = usePathname();
-  // Section to scroll to once the home page has rendered (current page didn't have it)
-  const pendingScrollRef = useRef<string | null>(null);
+  // Section to scroll to once its page has rendered (sections like About Us > Team load async)
+  const pendingScrollRef = useRef<{ path: string; id: string } | null>(null);
+  const scrollPollRef = useRef<number | null>(null);
+
+  const stopScrollPoll = useCallback(() => {
+    if (scrollPollRef.current !== null) window.clearInterval(scrollPollRef.current);
+    scrollPollRef.current = null;
+  }, []);
+
+  const scrollWhenRendered = useCallback(
+    (id: string) => {
+      stopScrollPoll();
+      let tries = 0;
+      scrollPollRef.current = window.setInterval(() => {
+        const el = document.getElementById(id);
+        if (el || ++tries > 80) {
+          stopScrollPoll();
+          el?.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+    },
+    [stopScrollPoll],
+  );
+
+  useEffect(() => stopScrollPoll, [stopScrollPoll]);
 
   useEffect(() => {
-    const id = pendingScrollRef.current;
-    if (!id || pathname !== "/") return;
-    let tries = 0;
-    const timer = window.setInterval(() => {
-      const el = document.getElementById(id);
-      if (el || ++tries > 50) {
-        window.clearInterval(timer);
-        pendingScrollRef.current = null;
-        el?.scrollIntoView({ behavior: "smooth" });
-      }
-    }, 100);
-    return () => window.clearInterval(timer);
-  }, [pathname]);
+    const pending = pendingScrollRef.current;
+    if (!pending || pathname !== pending.path) return;
+    pendingScrollRef.current = null;
+    scrollWhenRendered(pending.id);
+  }, [pathname, scrollWhenRendered]);
 
-  function scrollToSection(id: string) {
+  function scrollToSection(id: string, path: string) {
     const el = document.getElementById(id);
-    if (el) {
+    if (el && (!path || path === pathname)) {
       el.scrollIntoView({ behavior: "smooth" });
       return;
     }
-    pendingScrollRef.current = id;
-    router.push("/");
+    // Page-less targets like "#donate-form" fall back to the home page
+    const target = path || "/";
+    if (target === pathname) {
+      scrollWhenRendered(id);
+      return;
+    }
+    pendingScrollRef.current = { path: target, id };
+    router.push(target);
   }
 
   useEffect(() => {
@@ -444,10 +479,11 @@ export default function ChatbotWidget() {
 
   function onMessageLinkClick(e: MouseEvent<HTMLDivElement>) {
     const target = e.target as HTMLElement;
-    const scrollTo = target.closest("[data-scroll-to]")?.getAttribute("data-scroll-to");
+    const section = target.closest("[data-scroll-to]");
+    const scrollTo = section?.getAttribute("data-scroll-to");
     if (scrollTo) {
       setOpen(false);
-      scrollToSection(scrollTo);
+      scrollToSection(scrollTo, section?.getAttribute("data-scroll-path") ?? "");
       return;
     }
     const href = target.closest("a")?.getAttribute("href") ?? "";
@@ -643,12 +679,14 @@ export default function ChatbotWidget() {
                                       <ExternalLink className="h-2.5 w-2.5 shrink-0 opacity-60" />
                                     </>
                                   );
-                                  if (source.url.startsWith("#")) {
+                                  const section = sectionTarget(source.url);
+                                  if (section) {
                                     return (
                                       <button
                                         key={`${source.url}-${source.title}`}
                                         type="button"
-                                        data-scroll-to={source.url.slice(1)}
+                                        data-scroll-to={section.id}
+                                        data-scroll-path={section.path}
                                         className={`${chip} cursor-pointer`}
                                       >
                                         {content}
