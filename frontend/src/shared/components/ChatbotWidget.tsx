@@ -50,7 +50,7 @@ const STORAGE_KEY = "hcg-chatbot-v3";
 /** Must match the backend AskQuestionDto sessionId rule */
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const TEASER_KEY = "hcg-chatbot-teaser-dismissed";
-const AVATAR_SRC = "/chatbot/hope-avatar.webp";
+const AVATAR_SRC = "/chatbot/hope-avatar.svg";
 const LOGO_SRC = "/chatbot/hcg-logo-color.svg";
 const GREETING = "Hello, and welcome to HCG Foundation.\nHow can I help you today?";
 /** Must match the backend AskQuestionDto limit */
@@ -248,7 +248,8 @@ function HopeAvatar({
       alt=""
       width={size}
       height={size}
-      className={`shrink-0 rounded-full object-cover ${sizeClassName ?? ""} ${className}`}
+      unoptimized
+      className={`shrink-0 object-contain ${sizeClassName ?? ""} ${className}`}
       style={sizeClassName ? undefined : { width: size, height: size }}
     />
   );
@@ -257,7 +258,7 @@ function HopeAvatar({
 const MESSAGE_AVATAR = "h-8 w-8 2xl:h-10 2xl:w-10";
 
 function HopeBadge({ size = 88 }: { size?: number }) {
-  return <HopeAvatar size={size} className="shadow-[0_8px_20px_-6px_rgba(60,48,10,0.45)]" />;
+  return <HopeAvatar size={size} className="drop-shadow-[0_6px_10px_rgba(60,48,10,0.35)]" />;
 }
 
 function TypingIndicator() {
