@@ -27,7 +27,6 @@ TESTIMONIALS_URL = "/testimonials"
 PAGE_LABELS = {
     "/": "Home",
     "/about-us": "About Us",
-    "/about/our-story": "Our Story",
     TEAM_URL: "Our Team",
     TRUSTEES_URL: "Board of Trustees",
     "/contact": "Contact Us",
@@ -67,6 +66,7 @@ LEGACY_URLS = {
     "/journey-of-hope/patient-stories": PATIENT_STORIES_URL,
     "/journey-of-hope/testimonials": TESTIMONIALS_URL,
     "/about/our-team": TEAM_URL,
+    "/about/our-story": "/about-us",
 }
 
 # Old detail routes whose items now live in a section of one page.
