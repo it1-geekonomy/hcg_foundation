@@ -7,6 +7,7 @@ import {
   getDonationCountry,
   isIndiaCountry,
 } from "@/domains/home/constants/countries";
+import { nationalPhoneDigits } from "@/shared/lib/phone";
 
 // NOTE: adjust this to the exact Figma hex if it differs — closest
 // warm-cream card tone matched from the reference screenshots.
@@ -34,20 +35,6 @@ interface FormErrors {
   phone?: string;
   email?: string;
   message?: string;
-}
-
-function nationalPhoneDigits(value: string, dialCode: string) {
-  let digits = value.replace(/\D/g, "");
-  const dialDigits = dialCode.replace(/\D/g, "");
-  if (
-    dialDigits &&
-    digits.startsWith(dialDigits) &&
-    digits.length > dialDigits.length
-  ) {
-    digits = digits.slice(dialDigits.length);
-  }
-  const maxNational = Math.max(6, 15 - dialDigits.length);
-  return digits.slice(0, maxNational);
 }
 
 export default function ContactFormSection() {
@@ -249,11 +236,13 @@ export default function ContactFormSection() {
                       ...prev,
                       phone: undefined,
                     }));
+                    const typed = e.target.value;
                     setFormData((prev) => ({
                       ...prev,
                       phone: nationalPhoneDigits(
-                        e.target.value,
-                        country.dial
+                        typed,
+                        country.dial,
+                        prev.phone
                       ),
                     }));
                   }}
