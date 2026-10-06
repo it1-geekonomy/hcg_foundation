@@ -1,3 +1,5 @@
+import type { DonationCategory } from "@/shared/lib/donors-api";
+
 export type ContentStatus = "draft" | "published" | "archived";
 
 /** Backend field `type` — team member vs trustee */
@@ -267,6 +269,8 @@ export type UpdateLegalPagePayload = Partial<CreateLegalPagePayload>;
 
 export type DonationStatus = "pending" | "paid" | "failed" | "refunded";
 
+export type { DonationCategory };
+
 export type Donor = {
   id: string;
   fullName: string;
@@ -278,6 +282,8 @@ export type Donor = {
   isInternational: boolean;
   pan?: string | null;
   message?: string | null;
+  /** Where the donor chose to direct the money (default "General Funds"). */
+  donationCategory: DonationCategory;
   amount: string;
   currency: string;
   receiptNumber?: string | null;

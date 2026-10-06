@@ -17,6 +17,7 @@ import {
   setCharacterSpacing,
 } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
+import { DonationCategory } from '../../common/enums/donation-category.enum';
 import type { Donor } from '../donors/entities/donor.entity';
 
 function hex(color: string): RGB {
@@ -268,7 +269,7 @@ export class DonationCertificateService {
     const values = [
       this.formatAmount(donor.amount, donor.currency),
       this.formatDate(donor.createdAt ?? new Date()),
-      this.capitalize('General Fund'),
+      donor.donationCategory || DonationCategory.GENERAL_FUNDS,
       String(donor.receiptNumber || donor.razorpayPaymentId || '—'),
       donor.pan?.trim().toUpperCase() || '—',
     ];

@@ -19,7 +19,7 @@ import {
   getDonationCurrency,
 } from "@/domains/home/constants/donation-currency";
 import CountryFlag from "@/shared/components/CountryFlag";
-import { donorsApi } from "@/shared/lib/donors-api";
+import { type DonationCategory, donorsApi } from "@/shared/lib/donors-api";
 import { nationalPhoneDigits } from "@/shared/lib/phone";
 import CountrySelect from "@/shared/components/CountrySelect";
 
@@ -50,6 +50,8 @@ type Props = {
   amount: number;
   currency: DonationCurrencyCode;
   countryCode: string;
+  /** Where the donor wants the money to go; omitted → General Funds. */
+  donationCategory?: DonationCategory;
   onClose: () => void;
   onAmountChange?: (amount: number) => void;
 };
@@ -75,6 +77,7 @@ export default function DonateDetailsModal({
   amount,
   currency,
   countryCode,
+  donationCategory,
   onClose,
   onAmountChange,
 }: Props) {
@@ -188,6 +191,7 @@ export default function DonateDetailsModal({
         currency,
         pan: international ? undefined : pan.replace(/\s/g, "") || undefined,
         message: message.trim() || undefined,
+        donationCategory,
         amount: amountValue,
       });
 

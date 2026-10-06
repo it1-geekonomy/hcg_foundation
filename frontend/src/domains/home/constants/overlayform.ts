@@ -1,8 +1,11 @@
+import type { DonationCategory } from "@/shared/lib/donors-api";
+
 /** Put the woman/mother-daughter photo at: public/formimage.png */
 
 export const OVERLAY_AMOUNT_PRESETS = [500, 1000, 5000] as const;
 
-export const IMPACT_ITEMS = [
+/** Titles are sent as the donation category, so they must stay DonationCategory values. */
+export const IMPACT_ITEMS: { title: DonationCategory; desc: string }[] = [
   {
     title: "Financial Assistance",
     desc: "Help cancer patients access quality treatment and care.",
