@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { Check } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { LayoutGroup } from "framer-motion";
 import {
   IMPACT_ITEMS,
@@ -71,7 +71,7 @@ function FitViewport({ className, children }: { className?: string; children: Re
 
   return (
     <div ref={frameRef} className={className}>
-      <div ref={innerRef}>{children}</div>
+      <div ref={innerRef} className="w-full">{children}</div>
     </div>
   );
 }
@@ -230,7 +230,7 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
   return (
     <>
       <OverlayBackdrop
-        className="fixed inset-0 z-50 h-[100dvh] overflow-hidden overflow-clip overscroll-none p-2 lg:p-3"
+        className="fixed inset-0 z-50 h-[100dvh] overflow-hidden overflow-clip overscroll-none p-2 lg:px-6 lg:py-8"
         role="dialog"
         aria-modal={true}
         aria-labelledby="donation-modal-title"
@@ -311,9 +311,8 @@ function CloseButton({
       aria-label="Close donation form"
       className={className}
     >
-      <Typography variant="caption-1" as="span" className="leading-none text-[#FCCC2D]">
-        ✕
-      </Typography>
+      <X className="h-4 w-4" strokeWidth={2} aria-hidden />
+
     </button>
   );
 }
@@ -336,7 +335,7 @@ function Heading({ className = "", centerOnMobile = false }: { className?: strin
       <Typography
         variant="body-9"
         as="p"
-        className={`mt-1 max-w-2xl leading-snug text-[#302F2F]/90 font-argestadisplay font-normal ${descAlign}`}
+        className={`mt-2 max-w-2xl leading-relaxed text-[#3A3836] font-argestadisplay font-normal ${descAlign}`}
       >
         Your contribution helps provide life-saving treatment, emotional
         care, and financial support to cancer patients and their families
@@ -365,10 +364,10 @@ function GoldCheckbox({
         aria-label={ariaLabel}
         aria-invalid={invalid || undefined}
         onChange={(e) => onChange(e.target.checked)}
-        className={`peer h-3.5 w-3.5 cursor-pointer appearance-none rounded-[4px] border-[1.5px] bg-white transition-colors focus-visible:ring-2 focus-visible:ring-[#FCCC2D]/60 focus-visible:outline-none lg:h-4 lg:w-4 ${
+        className={`peer h-3.5 w-3.5 cursor-pointer appearance-none rounded-[5px] border-[1.5px] bg-white transition-colors focus-visible:ring-2 focus-visible:ring-[#FCCC2D]/60 focus-visible:outline-none lg:h-4 lg:w-4 ${
           invalid
             ? "border-[#B45309]"
-            : "border-[#3A342C] checked:border-[#E2B000] checked:bg-[#FCCC2D]"
+            : "border-[#BDB3A3] hover:border-[#8F8576] checked:border-[#E2B000] checked:bg-[#FCCC2D]"
         }`}
       />
       <Check
@@ -395,7 +394,7 @@ function ImpactItems({
         return (
           <label
             key={item.title}
-            className="grid min-w-0 cursor-pointer grid-cols-[auto_1fr] items-center gap-x-2.5 text-left"
+            className="grid min-w-0 cursor-pointer grid-cols-[auto_1fr] items-center gap-x-3 gap-y-0.5 text-left"
           >
             <GoldCheckbox
               checked={checked}
@@ -405,14 +404,14 @@ function ImpactItems({
             <Typography
               variant="body-7"
               as="p"
-              className="col-start-2 !text-left font-bold font-manrope text-[#1C1C1C]"
+              className="col-start-2 !text-left font-semibold font-manrope text-[#1C1C1C]"
             >
               {item.title}
             </Typography>
             <Typography
               variant="body-6"
               as="p"
-              className="col-start-2 !text-left leading-tight text-[#9D9590] font-manrope font-normal"
+              className="col-start-2 !text-left !text-[0.875rem] leading-snug tracking-normal text-[#6F6863] font-manrope font-normal"
             >
               {item.desc}
             </Typography>
@@ -424,11 +423,14 @@ function ImpactItems({
 }
 
 
+/** Shared look for every input box in the form: soft warm border, pill shape, one height. */
+const FIELD_BORDER = "border-[#E6DFD2]";
+const FIELD_HOVER = "hover:border-[#C9BEAC]";
+
 const pillBase =
-  "relative rounded-xl border bg-white font-semibold transition-colors duration-300";
-const pillActive = "border-gray-900 text-white";
-const pillInactive =
-  "border-gray-200 text-[#1C1C1C] hover:border-gray-400";
+  "relative flex h-11 cursor-pointer items-center justify-center rounded-full border bg-white font-semibold transition-colors duration-300";
+const pillActive = "border-[#1C1C1C] text-white";
+const pillInactive = `${FIELD_BORDER} ${FIELD_HOVER} text-[#2B2B2B]`;
 
 function AmountPicker({
   selectedPreset,
@@ -461,7 +463,7 @@ function AmountPicker({
       <Typography
         variant="body-8"
         as="p"
-        className="font-semibold font-manrope uppercase tracking-widest text-[#6B6660]"
+        className="font-semibold font-manrope tracking-normal text-[#1C1C1C]"
       >
         Choose an amount
       </Typography>
@@ -486,7 +488,7 @@ function AmountPicker({
 
         {showCustomInput ? (
           <div
-            className={`${inputSpanClassName} flex items-center justify-center gap-1 rounded-xl border border-[#D4CEC5] bg-white px-3 py-2`}
+            className={`${inputSpanClassName} flex h-11 items-center justify-center gap-1 rounded-full border border-[#1C1C1C] bg-white px-3`}
           >
             <Typography variant="body-8" as="span" className="font-semibold font-manrope text-gray-700">
               {currencyMeta.symbol}
@@ -500,7 +502,7 @@ function AmountPicker({
               onKeyDown={onCustomAmountKeyDown}
               onBlur={onCustomAmountBlur}
               placeholder="0"
-              className="w-14 min-w-0 font-semibold font-manrope text-[#1C1C1C] outline-none placeholder:font-normal placeholder:text-gray-400"
+              className="w-14 min-w-0 bg-transparent font-semibold font-manrope text-[#1C1C1C] outline-none placeholder:font-normal placeholder:text-gray-400"
             />
           </div>
         ) : (
@@ -545,33 +547,44 @@ function CountryBlock({
   changeCountry,
   currencyMeta,
   className = "flex flex-col gap-2 mb-3 w-full max-w-[280px] sm:max-w-[320px]",
+  inlineCurrency = false,
 }: Pick<AmountProps, "countryCode" | "changeCountry" | "currencyMeta"> & {
   className?: string;
+  /** Show the currency on the label row instead of its own line under the select. */
+  inlineCurrency?: boolean;
 }) {
+  const currencyNote = (
+    <Typography
+      variant="caption-1"
+      as="span"
+      className="font-manrope font-normal text-[#6F6863]"
+    >
+      Currency: {currencyMeta.label}
+    </Typography>
+  );
+
   return (
     <div className={className}>
-      <Typography
-        variant="body-8"
-        as="span"
-        className="font-medium text-black font-manrope"
-      >
-        Country
-      </Typography>
+      <div className="flex items-baseline justify-between gap-3">
+        <Typography
+          variant="body-8"
+          as="span"
+          className="font-semibold font-manrope tracking-normal text-[#1C1C1C]"
+        >
+          Country
+        </Typography>
+        {inlineCurrency ? currencyNote : null}
+      </div>
       <CountrySelect
         value={countryCode}
         onChange={changeCountry}
         variant="name"
-        borderClassName="border-black"
-        chevronClassName="text-black"
-        textClassName="text-black"
+        borderClassName={`${FIELD_BORDER} ${FIELD_HOVER}`}
+        boxClassName="h-11 gap-2.5 rounded-full bg-[#FBF9F4] px-4 transition-colors"
+        chevronClassName="text-[#6F6863]"
+        textClassName="text-[#1C1C1C]"
       />
-      <Typography
-        variant="caption-1"
-        as="span"
-        className="font-manrope font-light text-black/60"
-      >
-        Currency: {currencyMeta.label}
-      </Typography>
+      {inlineCurrency ? null : currencyNote}
     </div>
   );
 }
@@ -583,8 +596,8 @@ function TermsCheckbox({
   setTermsError,
 }: Pick<AmountProps, "agreedTo80G" | "setAgreedTo80G" | "termsError" | "setTermsError">) {
   return (
-    <div className="mt-1.5 flex flex-col gap-1">
-      <label className="flex min-w-0 cursor-pointer items-start gap-2.5">
+    <div className="mt-3 flex flex-col gap-1">
+      <label className="flex min-w-0 cursor-pointer items-start gap-3">
         <GoldCheckbox
           checked={agreedTo80G}
           invalid={termsError}
@@ -596,10 +609,10 @@ function TermsCheckbox({
         <Typography
           variant="caption-1"
           as="span"
-          className="min-w-0 flex-1 font-manrope font-light leading-snug text-black/80"
+          className="min-w-0 flex-1 font-manrope font-normal leading-relaxed text-[#4A4540]"
         >
           I have read and agree to the applicable{" "}
-          <span className="font-semibold text-[#FCCC2D]">
+          <span className="font-semibold text-[#B88A00]">
             80G Terms &amp; Conditions
           </span>{" "}
           for this donation.
@@ -611,7 +624,7 @@ function TermsCheckbox({
           variant="caption-1"
           as="p"
           role="alert"
-          className="pl-7 font-manrope font-light leading-snug text-[#B45309]"
+          className="pl-7 font-manrope font-normal leading-snug text-[#B45309]"
         >
           Please agree to the 80G Terms &amp; Conditions to continue.
         </Typography>
@@ -633,45 +646,46 @@ function Modal1024Up({
 
   return (
     <CardReveal
-      frameClassName="mx-auto w-full max-w-[820px] xl:max-w-[860px] 2xl:max-w-[900px]"
+      frameClassName="mx-auto w-full max-w-[940px] xl:max-w-[960px] 2xl:max-w-[1000px]"
       className="relative w-full overflow-hidden overflow-clip overscroll-none rounded-xl bg-white shadow-2xl"
     >
       <CloseButton
         onClose={onClose}
-        className="absolute right-4 top-4 z-[60] flex h-8 w-8 items-center justify-center bg-black text-[#F9BF16] transition hover:bg-gray-800"
+        className="absolute right-4 top-4 z-[60] flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#F4F0E8] text-[#1C1C1C] transition-colors hover:bg-[#EAE3D5]"
       />
 
       {/* Heading spans the full width of the card, above the image + content row */}
-      <div className="relative z-30 flex w-full flex-col px-6 pt-3 2xl:px-8 2xl:pt-4 [@media(max-height:820px)]:!pt-2">
-        <Heading className="w-full" />
-        <div className="mt-1.5 [@media(max-height:820px)]:!mt-1 flex items-stretch lg:gap-4 xl:gap-5 2xl:gap-6">
-          <div className="relative -ml-6 -mb-4 w-[54%] max-w-[400px] shrink-0 xl:max-w-[420px] 2xl:-ml-8 2xl:-mb-5 2xl:max-w-[440px]">
+      <div className="relative z-30 flex w-full flex-col px-8 pt-5 2xl:px-10 2xl:pt-6">
+        <Heading className="w-full pr-10" />
+        <div className="mt-2 flex items-stretch lg:gap-6 xl:gap-8">
+          <div className="relative -ml-8 -mb-5 w-[46%] max-w-[420px] shrink-0 xl:max-w-[440px] 2xl:-ml-10 2xl:-mb-6 2xl:max-w-[460px]">
             <PortraitWithBackdrop
               className="h-full w-full"
               priority
-              sizes="(min-width: 1536px) 440px, (min-width: 1280px) 420px, (min-width: 1024px) 400px, 0px"
+              sizes="(min-width: 1536px) 460px, (min-width: 1280px) 440px, (min-width: 1024px) 420px, 0px"
             />
           </div>
 
-          <div className="relative z-20 flex min-w-0 flex-1 flex-col justify-center pb-3 2xl:pb-4 [@media(max-height:820px)]:!pb-2">
+          <div className="relative z-20 flex min-w-0 max-w-[470px] flex-1 flex-col justify-center pb-5 2xl:pb-6">
             <ImpactItems
-              className="grid grid-cols-1 gap-y-1 [@media(max-height:820px)]:gap-y-0.5"
+              className="grid grid-cols-1 gap-y-2.5"
               selectedImpact={amountProps.selectedImpact}
               onSelectImpact={amountProps.onSelectImpact}
             />
 
-            <div className="mt-2 [@media(max-height:820px)]:!mt-1.5">
+            <div className="mt-4 border-t border-[#EFE9DD] pt-4">
               <CountryBlock
                 countryCode={countryCode}
                 changeCountry={changeCountry}
                 currencyMeta={currencyMeta}
-                className="flex flex-col gap-0.5 mb-1.5 w-full"
+                inlineCurrency
+                className="mb-3 flex w-full flex-col gap-1.5"
               />
 
               <AmountPicker
                 {...amountProps}
-                gridClassName="mt-1.5 grid grid-cols-4 gap-1.5"
-                pillWidthClassName="w-full justify-center text-center px-1.5 py-1.5"
+                gridClassName="mt-1.5 grid grid-cols-4 gap-2"
+                pillWidthClassName="w-full px-2"
                 inputSpanClassName="w-full"
               />
 
@@ -685,10 +699,9 @@ function Modal1024Up({
               <DonateButton
                 onDonateClick={onDonateClick}
                 showHeart={false}
-                className="mt-2 [@media(max-height:820px)]:!mt-1.5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#FDC61D] px-10 py-2 cursor-pointer"
+                className="mt-3 flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#FDC61D] px-10 shadow-[0_8px_20px_-10px_rgba(226,176,0,0.8)] transition-colors hover:bg-[#F2B800]"
               />
             </div>
-
           </div>
         </div>
       </div>
@@ -714,31 +727,31 @@ function ModalBelow1024({
     >
       <CloseButton
         onClose={onClose}
-        className="absolute right-2.5 top-2.5 z-10 flex h-5 w-5 items-center justify-center rounded-sm bg-black leading-none text-[#F9BF16] transition"
+        className="absolute right-3 top-3 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#F4F0E8] leading-none text-[#1C1C1C] transition-colors hover:bg-[#EAE3D5]"
       />
-      <Heading className="px-8 pr-10 pt-2.5 sm:px-10" centerOnMobile />
+      <Heading className="px-6 pr-10 pt-5 sm:px-8" centerOnMobile />
 
-      <div className="mt-1 flex flex-col items-center gap-1 px-8 pb-2.5 sm:px-10">
+      <div className="mt-4 flex flex-col items-center gap-1 px-6 pb-5 sm:px-8">
         <div className="flex min-w-0 w-full flex-1 flex-col items-center pb-0">
           <div className="mx-auto w-full">
             <ImpactItems
-              className="grid grid-cols-1 gap-y-1"
+              className="grid grid-cols-1 gap-y-2.5"
               selectedImpact={amountProps.selectedImpact}
               onSelectImpact={amountProps.onSelectImpact}
             />
 
-            <div className="mt-2 w-full">
+            <div className="mt-4 w-full border-t border-[#EFE9DD] pt-4">
               <CountryBlock
                 countryCode={countryCode}
                 changeCountry={changeCountry}
                 currencyMeta={currencyMeta}
-                className="mb-1.5 flex w-full flex-col gap-0.5"
+                className="mb-3 flex w-full flex-col gap-1.5"
               />
 
               <AmountPicker
                 {...amountProps}
-                gridClassName="mt-1 grid grid-cols-4 gap-1"
-                pillWidthClassName="w-full justify-center text-center px-1 py-1"
+                gridClassName="mt-1.5 grid grid-cols-4 gap-2"
+                pillWidthClassName="w-full px-1"
                 inputSpanClassName="w-full"
               />
 
@@ -751,7 +764,7 @@ function ModalBelow1024({
 
               <DonateButton
                 onDonateClick={onDonateClick}
-                className="mx-auto mt-2 flex h-11 w-[220px] items-center justify-center gap-2 rounded-xl bg-[#FDC61D] cursor-pointer"
+                className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#FDC61D] cursor-pointer shadow-[0_8px_20px_-10px_rgba(226,176,0,0.8)]"
               />
             </div>
           </div>

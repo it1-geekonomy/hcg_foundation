@@ -107,7 +107,7 @@ export function ActivePill() {
     <motion.span
       aria-hidden="true"
       layoutId="overlay-amount-pill"
-      className="absolute inset-0 rounded-xl bg-gray-900"
+      className="absolute inset-0 rounded-full bg-[#1C1C1C]"
       transition={skip ? instant : { type: "spring", stiffness: 520, damping: 38 }}
     />
   );

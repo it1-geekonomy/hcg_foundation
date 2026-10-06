@@ -219,8 +219,8 @@ export default function PartnerWithUsModal({
       {/* Click outside backdrop to close */}
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
-      {/* Modal Card Container: statically locked and centered in viewport */}
-      <div className="relative z-10 w-full max-w-[22.5rem] sm:max-w-[24rem] md:max-w-[44.3125rem] bg-[#FDF9F3] rounded-[0.415rem] shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)] md:h-auto">
+      {/* Modal Card Container: locked and centered in viewport (does not move), matching ParticipateModal */}
+      <div className="relative z-10 w-full max-w-[22.5rem] sm:max-w-[24rem] md:max-w-[44.3125rem] bg-[#FDF9F3] rounded-[0.415rem] shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)] md:max-h-[min(44rem,calc(100dvh-2rem))]">
         {/* Close Button placed at top right of the modal container */}
         <button
           type="button"
@@ -231,8 +231,8 @@ export default function PartnerWithUsModal({
           <X className="size-[1.125rem] stroke-[2.2]" />
         </button>
 
-        {/* Left Column: Form Content (smooth scrolling on mobile, padded bottom) */}
-        <div className="relative w-full md:w-[22.3rem] shrink-0 px-[1.25rem] sm:px-[1.5rem] md:pl-[2.5rem] md:pr-[0.75rem] pt-[1.25rem] sm:pt-[1.5rem] md:pt-[1.75rem] pb-[1rem] sm:pb-[1.5rem] flex flex-col justify-start overflow-y-auto md:overflow-hidden min-h-0 overscroll-contain">
+        {/* Left Column: Form Content (scrollable when screen height is short, no scroll stick) */}
+        <div className="relative w-full md:w-[22.3rem] px-[1.25rem] sm:px-[1.5rem] md:pl-[2.5rem] md:pr-[1rem] pt-[1.25rem] sm:pt-[1.5rem] md:pt-[1.75rem] pb-[2rem] sm:pb-[2.5rem] flex flex-col justify-start overflow-y-auto max-h-[calc(100dvh-2rem)] md:max-h-[min(42.5rem,calc(100dvh-2rem))] min-h-0 overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <div>
             {/* Frame 298: Title + Subtitle using design-system Typography */}
             <div className="w-full max-w-[19.3175rem] mx-auto md:mx-0 space-y-[0.35rem] sm:space-y-[0.5rem]">
@@ -575,7 +575,7 @@ export default function PartnerWithUsModal({
         </div>
 
         {/* Right Column: Hero Image Asset */}
-        <div className="hidden md:block w-[22.375rem] self-stretch relative shrink-0 bg-[#FDF9F3]">
+        <div className="hidden md:block w-[22.375rem] self-stretch relative shrink-0 bg-[#FDF9F3] overflow-hidden">
           <img
             src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791264498996-gkk4r-image-67.webp"
             alt="Be a Part of Someone's Cancer Journey"
