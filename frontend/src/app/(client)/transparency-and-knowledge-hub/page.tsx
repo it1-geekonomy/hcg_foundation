@@ -5,7 +5,7 @@ import AnnualReportsSection from "@/domains/resources/Transparencyhub/components
 export default function OurTeamPage() {
   return (
     <>
-      <Bannersection />
+      {/* <Bannersection /> */}
       <AnnualReportsSection />
       <div id="donate-form">
         <DonateForm />

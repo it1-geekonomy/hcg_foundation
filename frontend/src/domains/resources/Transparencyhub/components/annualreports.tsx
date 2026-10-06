@@ -302,7 +302,7 @@ export default function AnnualReportsSection({
   }
 
   return (
-    <section className="bg-[#FFF8E2] pt-6 pb-6 px-8 sm:px-12 md:px-16 lg:py-20 lg:px-6 xl:px-6 2xl:px-40">
+    <section className="bg-[#FFF8E2] pt-6 sm:pt-20 md:pt-22 pb-6 px-8 sm:px-12 md:px-16 lg:py-28 lg:px-6 xl:px-6 2xl:px-40">
       <div ref={headingRef} className="text-center">
         {/* Dot + label reveal together as one row */}
         <div

@@ -22,15 +22,20 @@ export function IntroSequence({
     useState(false);
 
   useEffect(() => {
-    if (
-      typeof phase !== "number"
-    ) {
-      setShowCopy(false);
-      return;
+    if (typeof phase !== "number") {
+      const resetTimer = window.setTimeout(() => {
+        setShowCopy(false);
+      }, 0);
+
+      return () => {
+        window.clearTimeout(resetTimer);
+      };
     }
 
-    setStage("seed");
-    setShowCopy(false);
+    const resetTimer = window.setTimeout(() => {
+      setStage("seed");
+      setShowCopy(false);
+    }, 0);
 
     const timers = [
       setTimeout(
@@ -67,8 +72,10 @@ export function IntroSequence({
       ),
     ];
 
-    return () =>
+    return () => {
+      window.clearTimeout(resetTimer);
       timers.forEach(clearTimeout);
+    };
   }, [phase]);
 
   useEffect(() => {
@@ -228,11 +235,7 @@ export function IntroSequence({
                         ],
                       }}
                     >
-                      <p className="text-sm font-medium uppercase tracking-[0.4em] text-[#FFD43B] sm:text-base">
-                        {stat.label}
-                      </p>
-
-                      <p className="mt-2.5 text-lg leading-snug text-white/75 sm:mt-3 sm:text-2xl">
+                      <p className="text-lg leading-snug text-white/75 sm:text-2xl">
                         {stat.story}
                       </p>
                     </motion.div>
