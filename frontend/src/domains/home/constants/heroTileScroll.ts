@@ -7,12 +7,14 @@
  * - Breakpoint logic handled in component via getResponsiveValues()
  */
 
+import type { HomeBanner } from "@/domains/cms/lib/types";
+
 export type HeroTileStep = {
   name: string;
-  location: string;
   tagline: string;
   body: string;
   backgroundSrc: string;
+  mobileBackgroundSrc?: string;
   tileImageSrc: string;
 };
 
@@ -33,10 +35,10 @@ const HOME_TILE_4 = "/home/dr4.png";
 // HERO TILE STEPS - Story data
 // ============================================================================
 
-export const HERO_TILE_STEPS: HeroTileStep[] = [
+/** Shown only when the CMS has no active home banners or the API is unreachable. */
+export const HERO_FALLBACK_STEPS: HeroTileStep[] = [
   {
     name: "Ananya Nair",
-    location: "Bengaluru, Karnataka",
     tagline: "With courage in her heart and hope ahead.",
     body: "Ananya faced her cancer journey with quiet strength and unwavering hope. With access to timely treatment, financial assistance, and compassionate care, she continues to move forward surrounded by a community that believes in her recovery.",
     backgroundSrc: HOME_BG_1,
@@ -44,7 +46,6 @@ export const HERO_TILE_STEPS: HeroTileStep[] = [
   },
   {
     name: "Meera Sreekumar",
-    location: "Bengaluru, Karnataka",
     tagline: "A journey of courage, care, and hope.",
     body: "Meera was diagnosed with breast cancer and faced the challenges of treatment with determination. With access to timely care, financial assistance, and emotional support, she continues her journey toward recovery with renewed confidence.",
     backgroundSrc: HOME_BG_2,
@@ -52,7 +53,6 @@ export const HERO_TILE_STEPS: HeroTileStep[] = [
   },
   {
     name: "Rahul Sharma",
-    location: "Bengaluru, Karnataka",
     tagline: "With courage in her heart and hope ahead.",
     body: "Rahul is undergoing treatment for colorectal cancer and requires continued medical care and regular follow-ups. The increasing cost of treatment has placed financial pressure on his family. Timely support can help him continue his treatment and focus on his recovery.",
     backgroundSrc: HOME_BG_3,
@@ -60,7 +60,6 @@ export const HERO_TILE_STEPS: HeroTileStep[] = [
   },
   {
     name: "Rohit Kumar",
-    location: "Bengaluru, Karnataka",
     tagline: "Strength through treatment, hope for tomorrow.",
     body: "Rohit is receiving treatment for oral cancer and needs ongoing medical care, medication, and follow-up support. Managing treatment expenses has become challenging for his family. Community support can help him continue his care and move forward with renewed hope.",
     backgroundSrc: HOME_BG_4,
@@ -68,20 +67,34 @@ export const HERO_TILE_STEPS: HeroTileStep[] = [
   },
 ];
 
-export const HERO_TILE_COUNT = HERO_TILE_STEPS.length;
+export function mapHomeBannerToHeroStep(banner: HomeBanner): HeroTileStep {
+  const background = banner.bannerImageUrl?.trim() ?? "";
+  return {
+    name: banner.name?.trim() ?? "",
+    tagline: banner.title?.trim() ?? "",
+    body: banner.shortDescription?.trim() ?? "",
+    backgroundSrc: background,
+    mobileBackgroundSrc: banner.mobileBannerImageUrl?.trim() || undefined,
+    tileImageSrc: banner.profileImageUrl?.trim() || background,
+  };
+}
 
 // ============================================================================
 // SCROLL ANIMATION POSITIONS
 // ============================================================================
 
-/**
- * Y position of each tile as fraction of viewport height
- * Step 0: 6% from top
- * Step 1: 30% from top
- * Step 2: 54% from top
- * Step 3: 78% from top
- */
-export const HERO_TILE_Y_FRACTIONS = [0.06, 0.3, 0.54, 0.78] as const;
+/** Tile Y range as a fraction of viewport height (first step → last step). */
+const HERO_TILE_Y_START = 0.06;
+const HERO_TILE_Y_END = 0.78;
+
+/** Evenly spaces the tile between start and end (4 steps → 6%, 30%, 54%, 78%). */
+export function getHeroTileYFraction(step: number, count: number): number {
+  if (count <= 1) return HERO_TILE_Y_START;
+  return (
+    HERO_TILE_Y_START +
+    (step / (count - 1)) * (HERO_TILE_Y_END - HERO_TILE_Y_START)
+  );
+}
 
 // ============================================================================
 // STYLING CONSTANTS

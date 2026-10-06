@@ -225,6 +225,15 @@ export default function HomeBannersListPage() {
                       )}
                     </TableCell>
                     <TableCell>
+                      {banner.name?.trim() ? (
+                        <Typography
+                          variant="caption-1"
+                          as="div"
+                          className="text-cms-muted"
+                        >
+                          {banner.name}
+                        </Typography>
+                      ) : null}
                       <div className="font-medium text-cms-ink">{banner.title}</div>
                       {banner.shortDescription?.trim() ? (
                         <Typography
