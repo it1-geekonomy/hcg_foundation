@@ -2,12 +2,16 @@ import Financialsupport from "@/domains/ourprograms/FinancialSupport/components/
 import DonateForm from "@/shared/components/DonateForm";
 import HopeSection from "@/domains/ourprograms/FinancialSupport/components/hopesection";
 import HowToRefer from "@/domains/ourprograms/FinancialSupport/components/howtoreferpatient";
+import SmileStories from "@/domains/home/components/Smilestories";
 
 export default function OurTeamPage() {
   return (
     <>
       <Financialsupport />
       <HopeSection />
+      <div className="bg-[#FFF8E2]">
+        <SmileStories variant="fullStory" />
+      </div>
       <HowToRefer />
 
       <div id="donate-form">

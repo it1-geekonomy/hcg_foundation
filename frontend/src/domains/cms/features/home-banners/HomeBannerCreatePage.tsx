@@ -19,10 +19,6 @@ export default function HomeBannerCreatePage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (saving) return;
-    if (!form.name.trim()) {
-      cmsToast.error("Name is required");
-      return;
-    }
     if (!form.title.trim()) {
       cmsToast.error("Title is required");
       return;
@@ -53,8 +49,8 @@ export default function HomeBannerCreatePage() {
         title="Add home banner"
         description={
           <>
-            Upload banner images and set visibility to <strong>Active</strong> to
-            show on the website.
+            Add the banner image, title and description, and set visibility to{" "}
+            <strong>Active</strong> to show it on the website.
           </>
         }
       />

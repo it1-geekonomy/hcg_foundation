@@ -148,43 +148,39 @@ export default function HomeBannerViewPage() {
 
       <div className="flex flex-col gap-10">
         <CmsDetailCard title="Banner Information">
-          <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <CmsDetailField label="Name" value={banner.name} />
-            <CmsDetailField label="Location" value={banner.location || "—"} />
+          <dl className="grid gap-4 sm:grid-cols-2">
+            <CmsDetailField label="Title" value={banner.title} />
             <CmsDetailField label="Display Order" value={String(banner.displayOrder)} />
           </dl>
         </CmsDetailCard>
 
         <CmsDetailCard title="Images">
-          <div className="grid gap-4 sm:grid-cols-3">
-          <CmsMediaTile
-            src={banner.bannerImageUrl}
-            alt={banner.title}
-            empty="No banner image"
-            className="h-56"
-          />
-          {banner.mobileBannerImageUrl || banner.profileImageUrl ? (
-            <div className="grid grid-cols-2 gap-3">
-              {banner.mobileBannerImageUrl ? (
-                <CmsMediaTile
-                  src={banner.mobileBannerImageUrl}
-                  label="Mobile"
-                  className="h-28"
-                />
-              ) : null}
-              {banner.profileImageUrl ? (
-                <CmsMediaTile
-                  src={banner.profileImageUrl}
-                  label="Profile"
-                  className="h-28"
-                />
-              ) : null}
-            </div>
-          ) : null}
+          <div className="grid items-start gap-4 sm:grid-cols-[3fr_1fr_0.75fr]">
+            <CmsMediaTile
+              src={banner.bannerImageUrl}
+              alt={banner.title}
+              label="Desktop"
+              empty="No banner image"
+              className="aspect-[1920/750] w-full"
+            />
+            <CmsMediaTile
+              src={banner.mobileBannerImageUrl}
+              alt={`${banner.title} (mobile)`}
+              label="Mobile"
+              empty="No mobile banner"
+              className="aspect-[750/800] w-full"
+            />
+            <CmsMediaTile
+              src={banner.profileImageUrl}
+              alt={`${banner.title} (profile)`}
+              label="Profile"
+              empty="No profile image"
+              className="aspect-square w-full"
+            />
           </div>
         </CmsDetailCard>
 
-        <CmsDetailCard title="Short description">
+        <CmsDetailCard title="Description">
           {banner.shortDescription?.trim() ? (
             <Typography
               variant="label-1"
