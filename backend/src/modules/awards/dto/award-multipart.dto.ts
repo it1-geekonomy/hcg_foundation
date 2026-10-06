@@ -1,4 +1,9 @@
-import { ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import {
+  ApiPropertyOptional,
+  IntersectionType,
+  PartialType,
+} from '@nestjs/swagger';
+import { DisplayOrderModeDto } from '../../../common/dto/display-order-mode.dto';
 import { CreateAwardDto } from './create-award.dto';
 
 /** Swagger-only shape so the file picker appears on multipart endpoints. */
@@ -11,6 +16,7 @@ export class CreateAwardMultipartDto extends CreateAwardDto {
   awardImage?: unknown;
 }
 
-export class UpdateAwardMultipartDto extends PartialType(
-  CreateAwardMultipartDto,
+export class UpdateAwardMultipartDto extends IntersectionType(
+  PartialType(CreateAwardMultipartDto),
+  DisplayOrderModeDto,
 ) {}

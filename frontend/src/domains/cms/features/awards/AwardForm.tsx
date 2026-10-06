@@ -3,8 +3,16 @@
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
-import type { Award, AwardFields, ContentStatus } from "@/domains/cms/lib/types";
+import type {
+  Award,
+  AwardFields,
+  ContentStatus,
+  DisplayOrderMode,
+} from "@/domains/cms/lib/types";
 import { AWARD_IMAGE_SIZE } from "@/domains/about/constants/awards";
+import CmsDisplayOrderField, {
+  orderModeForPatch,
+} from "@/domains/cms/ui/CmsDisplayOrderField";
 import CmsImagePicker from "@/domains/cms/ui/CmsImagePicker";
 import { CmsFormField } from "@/domains/cms/ui/CmsFormField";
 import CmsSelect, { CONTENT_STATUS_OPTIONS } from "@/domains/cms/ui/CmsSelect";
@@ -14,6 +22,7 @@ export type AwardFormValues = {
   year: string;
   description: string;
   displayOrder: string;
+  orderMode: DisplayOrderMode;
   status: ContentStatus;
   awardImageFile: File | null;
   awardImageUrl: string | null;
@@ -23,7 +32,8 @@ export const emptyAwardForm = (): AwardFormValues => ({
   title: "",
   year: "",
   description: "",
-  displayOrder: "1",
+  displayOrder: "",
+  orderMode: "move",
   status: "draft",
   awardImageFile: null,
   awardImageUrl: null,
@@ -35,7 +45,8 @@ export function awardToFormValues(award: Award): AwardFormValues {
     year: award.year != null ? String(award.year) : "",
     description: award.description ?? "",
     displayOrder:
-      award.displayOrder != null ? String(award.displayOrder) : "1",
+      award.displayOrder != null ? String(award.displayOrder) : "",
+    orderMode: "move",
     status: award.status ?? "draft",
     awardImageFile: null,
     awardImageUrl: award.awardImageUrl ?? null,
@@ -79,8 +90,17 @@ export function getAwardPatch(
     const before = prev[key];
     const after = next[key];
     if (norm(before) === norm(after)) continue;
+    // A cleared order keeps the current position.
+    if (key === "displayOrder" && after === undefined) continue;
     fields[key] = (after === undefined ? "" : after) as never;
   }
+
+  const orderMode = orderModeForPatch(
+    initial.displayOrder,
+    current.displayOrder,
+    current.orderMode
+  );
+  if (orderMode) fields.orderMode = orderMode;
 
   const file = current.awardImageFile;
   return {
@@ -97,6 +117,8 @@ type AwardFormProps = {
   submitLabel: string;
   saving?: boolean;
   requireImage?: boolean;
+  /** Loaded values on the edit page; enables the move/swap choice for order changes. */
+  initial?: AwardFormValues;
 };
 
 export default function AwardForm({
@@ -106,6 +128,7 @@ export default function AwardForm({
   submitLabel,
   saving,
   requireImage = false,
+  initial,
 }: AwardFormProps) {
   const hasImage = Boolean(value.awardImageFile || value.awardImageUrl);
 
@@ -122,7 +145,7 @@ export default function AwardForm({
           />
         </CmsFormField>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid items-start gap-4 sm:grid-cols-2">
           <CmsFormField label="Year" htmlFor="year">
             <Input
               id="year"
@@ -134,18 +157,15 @@ export default function AwardForm({
             />
           </CmsFormField>
 
-          <CmsFormField label="Display order" htmlFor="displayOrder">
-            <Input
-              id="displayOrder"
-              type="number"
-              min={1}
-              inputMode="numeric"
-              value={value.displayOrder}
-              onChange={(e) =>
-                onChange({ ...value, displayOrder: e.target.value })
-              }
-            />
-          </CmsFormField>
+          <CmsDisplayOrderField
+            value={value.displayOrder}
+            onChange={(displayOrder) => onChange({ ...value, displayOrder })}
+            mode={value.orderMode}
+            onModeChange={(orderMode) => onChange({ ...value, orderMode })}
+            initialOrder={initial?.displayOrder}
+            itemLabel="award"
+            listLabel="awards"
+          />
         </div>
 
         <CmsFormField

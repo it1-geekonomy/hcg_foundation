@@ -13,10 +13,10 @@ import {
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
 import {
-  applyDisplayOrderUpdate,
-  compactDisplayOrderAfterDelete,
   assignDisplayOrderOnRestore,
-  prepareInsertDisplayOrder,
+  compactDisplayOrderAfterDelete,
+  insertWithDisplayOrder,
+  saveWithDisplayOrder,
 } from '../../common/utils/display-order';
 import {
   applyDeletedFilter,
@@ -53,20 +53,18 @@ export class ProjectsService {
       : null;
 
     const { displayOrder: requestedOrder, ...rest } = dto;
-    const displayOrder = await prepareInsertDisplayOrder(
-      this.repo,
-      requestedOrder,
-    );
 
     try {
       const entity = this.repo.create({
         ...rest,
         projectBanner,
         projectMobileBanner,
-        displayOrder,
         status: dto.status ?? ContentStatus.DRAFT,
       });
-      return await this.saveOrThrow(entity, dto.slug);
+      return await this.saveOrThrow(
+        () => insertWithDisplayOrder(this.repo, entity, requestedOrder),
+        dto.slug,
+      );
     } catch (err) {
       await this.cdn.delete(projectBanner);
       await this.cdn.delete(projectMobileBanner);
@@ -168,17 +166,9 @@ export class ProjectsService {
     files?: ProjectFiles,
   ): Promise<Project> {
     const entity = await this.findOne(id);
-    const { displayOrder: newOrder, ...rest } = dto;
+    const previousOrder = entity.displayOrder;
+    const { displayOrder: requested, orderMode, ...rest } = dto;
     Object.assign(entity, rest);
-
-    if (newOrder !== undefined && newOrder !== entity.displayOrder) {
-      entity.displayOrder = await applyDisplayOrderUpdate(
-        this.repo,
-        id,
-        entity.displayOrder,
-        newOrder,
-      );
-    }
 
     entity.projectBanner = await this.cdn.replace(
       entity.projectBanner,
@@ -190,7 +180,15 @@ export class ProjectsService {
       files?.projectMobileBanner,
       'projects',
     );
-    return this.saveOrThrow(entity, dto.slug ?? entity.slug);
+    return this.saveOrThrow(
+      () =>
+        saveWithDisplayOrder(this.repo, entity, {
+          previousOrder,
+          requested,
+          mode: orderMode,
+        }),
+      dto.slug ?? entity.slug,
+    );
   }
 
   async remove(id: string): Promise<void> {
@@ -206,11 +204,11 @@ export class ProjectsService {
   }
 
   private async saveOrThrow(
-    entity: Project,
+    save: () => Promise<Project>,
     slug?: string,
   ): Promise<Project> {
     try {
-      return await this.repo.save(entity);
+      return await save();
     } catch (err) {
       if (this.isUniqueViolation(err)) {
         throw new ConflictException(

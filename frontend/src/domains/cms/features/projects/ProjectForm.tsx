@@ -8,8 +8,12 @@ import { Textarea } from "@/shared/ui/textarea";
 import type {
   CmsProject,
   ContentStatus,
+  DisplayOrderMode,
   ProjectFields,
 } from "@/domains/cms/lib/types";
+import CmsDisplayOrderField, {
+  orderModeForPatch,
+} from "@/domains/cms/ui/CmsDisplayOrderField";
 import CmsImagePicker from "@/domains/cms/ui/CmsImagePicker";
 import { CmsFormField } from "@/domains/cms/ui/CmsFormField";
 import CmsDatePicker from "@/domains/cms/ui/CmsDatePicker";
@@ -46,6 +50,7 @@ export type ProjectFormValues = {
   metaDescription: string;
   schemaCode: string;
   displayOrder: string;
+  orderMode: DisplayOrderMode;
   projectBannerFile: File | null;
   projectBannerUrl: string | null;
   projectMobileBannerFile: File | null;
@@ -62,7 +67,8 @@ export const emptyProjectForm = (): ProjectFormValues => ({
   metaTitle: "",
   metaDescription: "",
   schemaCode: "",
-  displayOrder: "1",
+  displayOrder: "",
+  orderMode: "move",
   projectBannerFile: null,
   projectBannerUrl: null,
   projectMobileBannerFile: null,
@@ -90,7 +96,8 @@ export function projectToFormValues(project: CmsProject): ProjectFormValues {
     metaDescription: project.metaDescription ?? "",
     schemaCode: project.schemaCode ?? "",
     displayOrder:
-      project.displayOrder != null ? String(project.displayOrder) : "1",
+      project.displayOrder != null ? String(project.displayOrder) : "",
+    orderMode: "move",
     projectBannerFile: null,
     projectBannerUrl: project.projectBanner ?? null,
     projectMobileBannerFile: null,
@@ -113,7 +120,7 @@ export function formValuesToFields(form: ProjectFormValues): ProjectFields {
     projectDate: form.projectDate.trim() || undefined,
     shortDescription: form.shortDescription.trim() || undefined,
     content: plainContent ? form.content : undefined,
-    displayOrder: Number.isFinite(order) && order > 0 ? order : 1,
+    displayOrder: Number.isFinite(order) && order > 0 ? order : undefined,
     status: form.status,
     metaTitle: form.metaTitle.trim() || undefined,
     metaDescription: form.metaDescription.trim() || undefined,
@@ -177,8 +184,17 @@ export function getProjectPatch(
           : norm(before as string | undefined) ===
             norm(after as string | undefined);
     if (equal) continue;
+    // A cleared order keeps the current position.
+    if (key === "displayOrder" && after === undefined) continue;
     fields[key] = (after === undefined ? "" : after) as never;
   }
+
+  const orderMode = orderModeForPatch(
+    initial.displayOrder,
+    current.displayOrder,
+    current.orderMode
+  );
+  if (orderMode) fields.orderMode = orderMode;
 
   const files = {
     projectBanner: current.projectBannerFile,
@@ -203,6 +219,8 @@ type ProjectFormProps = {
   saving?: boolean;
   slugLocked?: boolean;
   onSlugManualEdit?: () => void;
+  /** Loaded values on the edit page; enables the move/swap choice for order changes. */
+  initial?: ProjectFormValues;
 };
 
 export default function ProjectForm({
@@ -213,6 +231,7 @@ export default function ProjectForm({
   saving,
   slugLocked,
   onSlugManualEdit,
+  initial,
 }: ProjectFormProps) {
   return (
     <form onSubmit={onSubmit} className="w-full space-y-5">
@@ -246,7 +265,7 @@ export default function ProjectForm({
           />
         </CmsFormField>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid items-start gap-4 sm:grid-cols-2">
           <CmsFormField label="Date" htmlFor="projectDate">
             <CmsDatePicker
               id="projectDate"
@@ -255,22 +274,15 @@ export default function ProjectForm({
             />
           </CmsFormField>
 
-          <CmsFormField
-            label="Display order"
-            htmlFor="displayOrder"
-            hint="Lower numbers appear first on the website"
-          >
-            <Input
-              id="displayOrder"
-              type="number"
-              min={1}
-              inputMode="numeric"
-              value={value.displayOrder}
-              onChange={(e) =>
-                onChange({ ...value, displayOrder: e.target.value })
-              }
-            />
-          </CmsFormField>
+          <CmsDisplayOrderField
+            value={value.displayOrder}
+            onChange={(displayOrder) => onChange({ ...value, displayOrder })}
+            mode={value.orderMode}
+            onModeChange={(orderMode) => onChange({ ...value, orderMode })}
+            initialOrder={initial?.displayOrder}
+            itemLabel="project"
+            listLabel="projects"
+          />
         </div>
 
         <CmsFormField

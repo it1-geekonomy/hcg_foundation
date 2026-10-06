@@ -6,6 +6,7 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import type {
   ContentStatus,
+  DisplayOrderMode,
   Team,
   TeamFields,
   TeamType,
@@ -17,6 +18,9 @@ import CmsSelect, {
   CONTENT_STATUS_OPTIONS,
   TEAM_TYPE_OPTIONS,
 } from "@/domains/cms/ui/CmsSelect";
+import CmsDisplayOrderField, {
+  orderModeForPatch,
+} from "@/domains/cms/ui/CmsDisplayOrderField";
 
 const CmsRichTextEditor = dynamic(
   () => import("@/domains/cms/ui/CmsRichTextEditor"),
@@ -39,6 +43,7 @@ export type TeamFormValues = {
   designation: string;
   content: string;
   displayOrder: string;
+  orderMode: DisplayOrderMode;
   status: ContentStatus;
   teamImageFile: File | null;
   teamImageUrl: string | null;
@@ -50,6 +55,7 @@ export const emptyTeamForm = (): TeamFormValues => ({
   designation: "",
   content: "",
   displayOrder: "",
+  orderMode: "move",
   status: "draft",
   teamImageFile: null,
   teamImageUrl: null,
@@ -62,6 +68,7 @@ export function teamToFormValues(team: Team): TeamFormValues {
     designation: team.designation ?? "",
     content: team.content ?? "",
     displayOrder: team.displayOrder != null ? String(team.displayOrder) : "",
+    orderMode: "move",
     status: team.status ?? "draft",
     teamImageFile: null,
     teamImageUrl: team.teamImage ?? null,
@@ -139,6 +146,14 @@ export function getTeamPatch(
     fields[key] = (after === undefined ? "" : after) as never;
   }
 
+  // Swap only applies within the same list; a type change always moves.
+  const orderMode = orderModeForPatch(
+    initial.displayOrder,
+    current.displayOrder,
+    current.orderMode
+  );
+  if (orderMode && initial.type === current.type) fields.orderMode = orderMode;
+
   const file = current.teamImageFile;
   return {
     fields,
@@ -154,6 +169,8 @@ type TeamFormProps = {
   submitLabel: string;
   saving?: boolean;
   error?: string | null;
+  /** Loaded values on the edit page; enables the move/swap choice for order changes. */
+  initial?: TeamFormValues;
 };
 
 export default function TeamForm({
@@ -163,7 +180,10 @@ export default function TeamForm({
   submitLabel,
   saving,
   error,
+  initial,
 }: TeamFormProps) {
+  const isTrustee = value.type === "trustee";
+
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-3xl space-y-5">
       {error ? (
@@ -243,25 +263,17 @@ export default function TeamForm({
           />
         </CmsFormField>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <CmsFormField
-            label="Display order"
-            htmlFor="displayOrder"
-            hint={`Position among ${value.type === "trustee" ? "trustees" : "team members"} (1 shows first). Leave blank to add at the end.`}
-          >
-            <Input
-              id="displayOrder"
-              type="number"
-              min={1}
-              step={1}
-              inputMode="numeric"
-              placeholder="e.g. 1"
-              value={value.displayOrder}
-              onChange={(e) =>
-                onChange({ ...value, displayOrder: e.target.value })
-              }
-            />
-          </CmsFormField>
+        <div className="grid items-start gap-4 sm:grid-cols-2">
+          <CmsDisplayOrderField
+            value={value.displayOrder}
+            onChange={(displayOrder) => onChange({ ...value, displayOrder })}
+            mode={value.orderMode}
+            onModeChange={(orderMode) => onChange({ ...value, orderMode })}
+            initialOrder={initial?.displayOrder}
+            itemLabel={isTrustee ? "trustee" : "team member"}
+            listLabel={isTrustee ? "trustees" : "team members"}
+            allowSwap={!initial || initial.type === value.type}
+          />
 
           <CmsFormField label="Status" htmlFor="status">
             <CmsSelect

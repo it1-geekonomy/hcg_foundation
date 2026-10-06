@@ -12,10 +12,10 @@ import {
 } from '../../common/interfaces/paginated.interface';
 import { CdnFile, CdnService } from '../../common/storage/cdn.service';
 import {
-  applyDisplayOrderUpdate,
-  compactDisplayOrderAfterDelete,
   assignDisplayOrderOnRestore,
-  prepareInsertDisplayOrder,
+  compactDisplayOrderAfterDelete,
+  insertWithDisplayOrder,
+  saveWithDisplayOrder,
 } from '../../common/utils/display-order';
 import {
   applyDeletedFilter,
@@ -48,21 +48,18 @@ export class TeamsService {
       : undefined;
 
     const { displayOrder: requestedOrder, ...rest } = dto;
-    const typeScope = { type: rest.type ?? TeamType.TEAM };
-    const displayOrder = await prepareInsertDisplayOrder(
-      this.repo,
-      requestedOrder,
-      typeScope,
-    );
+    const type = rest.type ?? TeamType.TEAM;
 
     try {
       const entity = this.repo.create({
         ...rest,
+        type,
         teamImage,
-        displayOrder,
         status: dto.status ?? ContentStatus.DRAFT,
       });
-      return await this.repo.save(entity);
+      return await insertWithDisplayOrder(this.repo, entity, requestedOrder, {
+        type,
+      });
     } catch (err) {
       if (teamImage) await this.cdn.delete(teamImage);
       throw err;
@@ -130,18 +127,10 @@ export class TeamsService {
     files?: TeamFiles,
   ): Promise<Team> {
     const entity = await this.findOne(id);
-    const { displayOrder: newOrder, ...rest } = dto;
+    const previousOrder = entity.displayOrder;
+    const previousType = entity.type;
+    const { displayOrder: requested, orderMode, ...rest } = dto;
     Object.assign(entity, rest);
-
-    if (newOrder !== undefined && newOrder !== entity.displayOrder) {
-      entity.displayOrder = await applyDisplayOrderUpdate(
-        this.repo,
-        id,
-        entity.displayOrder,
-        newOrder,
-        { type: entity.type },
-      );
-    }
 
     const newTeamImage = await this.cdn.replace(
       entity.teamImage,
@@ -149,7 +138,13 @@ export class TeamsService {
       'teams',
     );
     entity.teamImage = newTeamImage ?? undefined;
-    return await this.repo.save(entity);
+    return saveWithDisplayOrder(this.repo, entity, {
+      previousOrder,
+      previousScope: { type: previousType },
+      requested,
+      scope: { type: entity.type },
+      mode: orderMode,
+    });
   }
 
   async remove(id: string): Promise<void> {

@@ -1,166 +1,237 @@
-import { ConflictException } from '@nestjs/common';
-import { log } from 'console';
-import { ObjectLiteral, Repository } from 'typeorm';
+import { BadRequestException } from '@nestjs/common';
+import { EntityManager, ObjectLiteral, Repository } from 'typeorm';
+
+/**
+ * Ordered CMS lists (team, trustees, awards, projects, banners, impact videos)
+ * keep display_order as 1..n among non-deleted rows of one scope (e.g. per team
+ * type). Changing a row's order moves the others to make room instead of
+ * rejecting numbers that are already taken.
+ */
+
+export type DisplayOrderMode = 'move' | 'swap';
+type Scope = Record<string, unknown> | undefined;
+type OrderedEntity = ObjectLiteral & { id?: string; displayOrder?: number | null };
 
 function tableName(repo: Repository<ObjectLiteral>): string {
   return repo.metadata.tableName;
 }
 
-/** Highest display_order among non-deleted rows (0 if none). */
-export async function getActiveMaxDisplayOrder(
+function column(repo: Repository<ObjectLiteral>, property: string): string {
+  return repo.metadata.findColumnWithPropertyName(property)?.databaseName ?? property;
+}
+
+function scopeSql(
   repo: Repository<ObjectLiteral>,
+  scope: Scope,
+  params: unknown[],
+): string {
+  return Object.entries(scope ?? {})
+    .map(([key, value]) => {
+      params.push(value);
+      return ` AND "${column(repo, key)}" = $${params.length}`;
+    })
+    .join('');
+}
+
+/** Serialises order changes per list, including inserts into an empty one. */
+async function lockScope(
+  manager: EntityManager,
+  repo: Repository<ObjectLiteral>,
+  scope: Scope,
+): Promise<void> {
+  const key = `display_order:${tableName(repo)}:${JSON.stringify(scope ?? {})}`;
+  await manager.query('SELECT pg_advisory_xact_lock(hashtext($1))', [key]);
+}
+
+async function countActive(
+  manager: EntityManager,
+  repo: Repository<ObjectLiteral>,
+  scope: Scope,
   excludeId?: string,
-  scope?: Record<string, any>,
 ): Promise<number> {
-  const qb = repo
-    .createQueryBuilder('entity')
-    .select('MAX(entity.displayOrder)', 'max')
-    .where('entity.deletedAt IS NULL');
+  const params: unknown[] = [];
+  let sql = `SELECT COUNT(*)::int AS n FROM "${tableName(repo)}" WHERE deleted_at IS NULL`;
   if (excludeId) {
-    qb.andWhere('entity.id != :excludeId', { excludeId });
+    params.push(excludeId);
+    sql += ` AND id != $${params.length}`;
   }
-  if (scope) {
-    for (const [key, value] of Object.entries(scope)) {
-      qb.andWhere(`entity.${key} = :${key}`, { [key]: value });
-    }
-  }
-  const row = await qb.getRawOne<{ max: string | null }>();
-  return Number(row?.max ?? 0);
+  sql += scopeSql(repo, scope, params);
+  const rows: { n: number }[] = await manager.query(sql, params);
+  return Number(rows[0]?.n ?? 0);
 }
 
-async function isDisplayOrderTaken(
+/** Adds `delta` to display_order of active rows in [from, to] (either bound optional). */
+async function shift(
+  manager: EntityManager,
   repo: Repository<ObjectLiteral>,
-  order: number,
+  scope: Scope,
+  delta: 1 | -1,
+  range: { from?: number; to?: number },
   excludeId?: string,
-  scope?: Record<string, any>,
-): Promise<boolean> {
-  const qb = repo
-    .createQueryBuilder('entity')
-    .where('entity.deletedAt IS NULL')
-    .andWhere('entity.displayOrder = :order', { order });
+): Promise<void> {
+  const params: unknown[] = [delta];
+  let sql =
+    `UPDATE "${tableName(repo)}" SET display_order = display_order + $1 ` +
+    `WHERE deleted_at IS NULL`;
+  if (range.from !== undefined) {
+    params.push(range.from);
+    sql += ` AND display_order >= $${params.length}`;
+  }
+  if (range.to !== undefined) {
+    params.push(range.to);
+    sql += ` AND display_order <= $${params.length}`;
+  }
   if (excludeId) {
-    qb.andWhere('entity.id != :excludeId', { excludeId });
+    params.push(excludeId);
+    sql += ` AND id != $${params.length}`;
   }
-  if (scope) {
-    for (const [key, value] of Object.entries(scope)) {
-      qb.andWhere(`entity.${key} = :${key}`, { [key]: value });
-    }
-  }
-  const count = await qb.getCount();
-  return count > 0;
+  sql += scopeSql(repo, scope, params);
+  await manager.query(sql, params);
 }
 
-function duplicateOrderError(order: number): ConflictException {
-  return new ConflictException(
-    `Display order ${order} is already in use. Choose a different display order.`,
+function clamp(value: number, max: number): number {
+  return Math.min(Math.max(1, Math.trunc(value)), Math.max(1, max));
+}
+
+/** Rejects positions that don't exist in the list instead of silently changing them. */
+function requireInRange(requested: number, max: number): number {
+  const value = Math.trunc(requested);
+  if (value >= 1 && value <= max) return value;
+  throw new BadRequestException(
+    max <= 1
+      ? `Display order ${requested} is not available: this list has only 1 position, so use 1.`
+      : `Display order ${requested} is not available: choose a position from 1 to ${max}.`,
   );
 }
 
 /**
- * Pick order for a new row.
- * Omit `requested` to append at the end (max + 1).
- * If `requested` is already used → 409 Conflict.
+ * Saves a new row at `requested` (or at the end), moving rows at that
+ * position and after it down by one.
  */
-export async function prepareInsertDisplayOrder(
-  repo: Repository<ObjectLiteral>,
-  requested?: number,
-  scope?: Record<string, any>,
-): Promise<number> {
-  const max = await getActiveMaxDisplayOrder(repo, undefined, scope);
-  if (requested === undefined || requested === null) {
-    return max + 1;
-  }
-
-  const order = Math.max(1, requested);
-  if (await isDisplayOrderTaken(repo, order, undefined, scope)) {
-    throw duplicateOrderError(order);
-  }
-  return order;
+export async function insertWithDisplayOrder<T extends OrderedEntity>(
+  repo: Repository<T>,
+  entity: T,
+  requested: number | null | undefined,
+  scope?: Scope,
+): Promise<T> {
+  const base = repo as unknown as Repository<ObjectLiteral>;
+  return repo.manager.transaction(async (manager) => {
+    await lockScope(manager, base, scope);
+    const count = await countActive(manager, base, scope);
+    const target = requested == null ? count + 1 : requireInRange(requested, count + 1);
+    await shift(manager, base, scope, 1, { from: target });
+    (entity as OrderedEntity).displayOrder = target;
+    return manager.save(repo.target, entity) as Promise<T>;
+  });
 }
 
+export type DisplayOrderChange = {
+  /** Order and scope the row had before this update. */
+  previousOrder: number | null | undefined;
+  previousScope?: Scope;
+  /** Requested order; undefined keeps the current one (or appends when the scope changed). */
+  requested?: number | null;
+  /** Scope after this update (e.g. the new team type). */
+  scope?: Scope;
+  mode?: DisplayOrderMode;
+};
+
 /**
- * Change display order on update.
- * Same order as now → no-op.
- * Target already used by another row → 409 Conflict.
+ * Saves an updated row, re-ordering its list:
+ * - move (default): the row takes the requested position and the rows in
+ *   between shift by one (1,2,3,4 → moving 3 to 1 gives 3,1,2,4);
+ * - swap: the row trades positions with the row at the requested position;
+ * - scope change (e.g. team → trustee): the gap in the old list closes and
+ *   the row is placed in the new list at the requested position or the end.
  */
-export async function applyDisplayOrderUpdate(
-  repo: Repository<ObjectLiteral>,
-  entityId: string,
-  oldOrder: number,
-  newOrder: number,
-  scope?: Record<string, any>,
-): Promise<number> {
-  if (oldOrder === newOrder) {
-    return oldOrder;
+export async function saveWithDisplayOrder<T extends OrderedEntity>(
+  repo: Repository<T>,
+  entity: T,
+  change: DisplayOrderChange,
+): Promise<T> {
+  const base = repo as unknown as Repository<ObjectLiteral>;
+  const id = String(entity.id);
+  const sameScope =
+    JSON.stringify(change.previousScope ?? {}) === JSON.stringify(change.scope ?? {});
+  const previous = change.previousOrder ?? undefined;
+
+  if (sameScope && (change.requested == null || change.requested === previous)) {
+    return repo.save(entity);
   }
 
-  const target = Math.max(1, newOrder);
-  if (await isDisplayOrderTaken(repo, target, entityId, scope)) {
-    throw duplicateOrderError(target);
-  }
-  return target;
+  return repo.manager.transaction(async (manager) => {
+    const scopes = sameScope ? [change.scope] : [change.previousScope, change.scope];
+    // Fixed lock order so two opposite scope changes cannot deadlock
+    for (const s of scopes.sort((a, b) =>
+      JSON.stringify(a ?? {}).localeCompare(JSON.stringify(b ?? {})),
+    )) {
+      await lockScope(manager, base, s);
+    }
+
+    let target: number;
+    if (!sameScope) {
+      if (previous !== undefined) {
+        await shift(manager, base, change.previousScope, -1, { from: previous + 1 }, id);
+      }
+      const others = await countActive(manager, base, change.scope, id);
+      target =
+        change.requested == null ? others + 1 : requireInRange(change.requested, others + 1);
+      await shift(manager, base, change.scope, 1, { from: target }, id);
+    } else {
+      const total = await countActive(manager, base, change.scope);
+      target = requireInRange(change.requested as number, total);
+      if (previous === undefined) {
+        await shift(manager, base, change.scope, 1, { from: target }, id);
+      } else if (change.mode === 'swap') {
+        const params: unknown[] = [previous, target, id];
+        await manager.query(
+          `UPDATE "${tableName(base)}" SET display_order = $1 ` +
+            `WHERE deleted_at IS NULL AND display_order = $2 AND id != $3` +
+            scopeSql(base, change.scope, params),
+          params,
+        );
+      } else if (target < previous) {
+        await shift(manager, base, change.scope, 1, { from: target, to: previous - 1 }, id);
+      } else if (target > previous) {
+        await shift(manager, base, change.scope, -1, { from: previous + 1, to: target }, id);
+      }
+    }
+
+    (entity as OrderedEntity).displayOrder = target;
+    return manager.save(repo.target, entity) as Promise<T>;
+  });
 }
 
 /** After soft-delete: 2→1, 3→2, etc. for rows above the removed slot. */
-export async function compactDisplayOrderAfterDelete(
-  repo: Repository<ObjectLiteral>,
-  deletedOrder: number,
-  scope?: Record<string, any>,
+export async function compactDisplayOrderAfterDelete<T extends ObjectLiteral>(
+  repo: Repository<T>,
+  deletedOrder: number | null | undefined,
+  scope?: Scope,
 ): Promise<void> {
-  const qb = repo.createQueryBuilder().update();
-  qb.set({ displayOrder: () => "display_order - 1" });
-  qb.where("deleted_at IS NULL");
-  qb.andWhere("display_order > :deletedOrder", { deletedOrder });
-  
-  if (scope) {
-    for (const [key, value] of Object.entries(scope)) {
-      qb.andWhere(`${key} = :${key}`, { [key]: value });
-    }
-  }
-  await qb.execute();
+  if (deletedOrder == null) return;
+  const base = repo as unknown as Repository<ObjectLiteral>;
+  await repo.manager.transaction(async (manager) => {
+    await lockScope(manager, base, scope);
+    await shift(manager, base, scope, -1, { from: deletedOrder + 1 });
+  });
 }
 
 /**
- * Put a restored row back at its original display_order.
- * Soft-deleted rows keep their old order; after compact the live list is 1..n.
- * Re-insert at that original slot (clamped to max+1) and shift siblings.
+ * Put a restored row back at its original display_order (clamped to the end
+ * of the list), moving the rows from that position down by one.
  */
-export async function restoreDisplayOrderAtOriginal(
-  repo: Repository<ObjectLiteral>,
-  entityId: string,
-  originalOrder: number,
-  scope?: Record<string, any>,
-): Promise<number> {
-  const maxOthers = await getActiveMaxDisplayOrder(repo, entityId, scope);
-  const target = Math.max(1, Math.min(originalOrder || 1, maxOthers + 1));
-
-  const qb = repo.createQueryBuilder().update();
-  qb.set({ displayOrder: () => "display_order + 1" });
-  qb.where("deleted_at IS NULL");
-  qb.andWhere("display_order >= :target", { target });
-  qb.andWhere("id != :entityId", { entityId });
-
-  if (scope) {
-    for (const [key, value] of Object.entries(scope)) {
-      qb.andWhere(`${key} = :${key}`, { [key]: value });
-    }
-  }
-  await qb.execute();
-
-  return target;
-}
-
-export async function assignDisplayOrderOnRestore<T extends ObjectLiteral>(
+export async function assignDisplayOrderOnRestore<T extends OrderedEntity>(
   repo: Repository<T>,
-  entity: T & { id: string; displayOrder: number },
-  scope?: Record<string, any>,
+  entity: T & { id: string },
+  scope?: Scope,
 ): Promise<T> {
-  const originalOrder = entity.displayOrder ?? 1;
-  entity.displayOrder = await restoreDisplayOrderAtOriginal(
-    repo as Repository<ObjectLiteral>,
-    entity.id,
-    originalOrder,
-    scope,
-  );
-  return repo.save(entity);
+  const base = repo as unknown as Repository<ObjectLiteral>;
+  return repo.manager.transaction(async (manager) => {
+    await lockScope(manager, base, scope);
+    const others = await countActive(manager, base, scope, entity.id);
+    const target = clamp(entity.displayOrder ?? 1, others + 1);
+    await shift(manager, base, scope, 1, { from: target }, entity.id);
+    (entity as OrderedEntity).displayOrder = target;
+    return manager.save(repo.target, entity) as Promise<T>;
+  });
 }

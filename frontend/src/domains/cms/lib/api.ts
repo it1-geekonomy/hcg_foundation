@@ -262,6 +262,7 @@ function teamPatchFormData(
   append("designation", fields.designation);
   append("content", fields.content);
   append("displayOrder", fields.displayOrder);
+  append("orderMode", fields.orderMode);
   append("status", fields.status);
   append("metaTitle", fields.metaTitle);
   append("metaDescription", fields.metaDescription);
@@ -302,6 +303,7 @@ function awardPatchFormData(
   append("year", fields.year);
   append("description", fields.description);
   append("displayOrder", fields.displayOrder);
+  append("orderMode", fields.orderMode);
   append("status", fields.status);
   if (awardImageFile instanceof File) {
     fd.append("awardImage", awardImageFile, awardImageFile.name);
@@ -324,7 +326,9 @@ function homeBannerFormData(
   if (fields.shortDescription?.trim()) {
     fd.append("shortDescription", fields.shortDescription.trim());
   }
-  fd.append("displayOrder", String(fields.displayOrder));
+  if (fields.displayOrder != null) {
+    fd.append("displayOrder", String(fields.displayOrder));
+  }
   fd.append("isActive", fields.isActive ? "true" : "false");
   if (files?.bannerImage instanceof File) {
     fd.append("bannerImage", files.bannerImage, files.bannerImage.name);
@@ -368,6 +372,7 @@ function homeBannerPatchFormData(
   append("location", fields.location);
   append("shortDescription", fields.shortDescription);
   append("displayOrder", fields.displayOrder);
+  append("orderMode", fields.orderMode);
   append("isActive", fields.isActive);
   if (files?.bannerImage instanceof File) {
     fd.append("bannerImage", files.bannerImage, files.bannerImage.name);
@@ -526,6 +531,7 @@ function projectPatchFormData(
   if (fields.displayOrder !== undefined) {
     fd.append("displayOrder", String(fields.displayOrder));
   }
+  append("orderMode", fields.orderMode);
   if (files?.projectBanner instanceof File) {
     fd.append("projectBanner", files.projectBanner, files.projectBanner.name);
   }
