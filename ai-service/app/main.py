@@ -1,9 +1,20 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
+from app.rag import warmup
 from app.routers import sync, chat, health
 
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    warmup.start()
+    yield
+
+
 app = FastAPI(
+    lifespan=lifespan,
     title="HCG Foundation Chatbot AI Service",
     description=(
         "Quality RAG chatbot: intents, query rewrite, multi-query retrieval, "

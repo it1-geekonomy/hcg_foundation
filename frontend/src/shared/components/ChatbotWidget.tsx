@@ -56,6 +56,7 @@ const GREETING = "Hello, and welcome to HCG Foundation.\nHow can I help you toda
 /** Must match the backend AskQuestionDto limit */
 const MAX_MESSAGE_LENGTH = 1000;
 
+/** Labels must match SUGGESTED_QUESTIONS in ai-service/app/rag/warmup.py (pre-answered for instant replies) */
 const SUGGESTIONS = [
   { label: "How can I donate?", icon: Heart, iconClass: "fill-[#E5383B] text-[#E5383B]" },
   { label: "What programs do you run?", icon: BriefcaseMedical, iconClass: "text-[#2F80ED]" },

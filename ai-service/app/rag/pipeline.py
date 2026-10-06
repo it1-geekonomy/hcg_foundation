@@ -3,6 +3,7 @@ from __future__ import annotations
 import time
 
 from app.config import settings
+from app.rag import answer_cache
 from app.rag import constants as C
 from app.rag.catalog import answer_catalog_question
 from app.rag.generate import (
@@ -59,6 +60,20 @@ def run_chat(message: str, session_id: str | None = None) -> dict:
         }
 
     history = get_history(sid)
+    # Opening questions don't depend on history, so their answers can be reused
+    cacheable = not history
+    index_version = vector_store.index_version()
+    if cacheable:
+        cached = answer_cache.get(user_message)
+        if cached:
+            append_turn(sid, "user", user_message)
+            append_turn(sid, "assistant", cached["answer"])
+            return {
+                **cached,
+                "session_id": sid,
+                "response_time_ms": int((time.perf_counter() - started) * 1000),
+            }
+
     search_text = normalize_for_retrieval(user_message)
     rewritten = rewrite_query(search_text, history)
     intents = detect_intents(f"{search_text} {rewritten}")
@@ -87,6 +102,8 @@ def run_chat(message: str, session_id: str | None = None) -> dict:
 
     append_turn(sid, "user", user_message)
     append_turn(sid, "assistant", answer)
+    if cacheable:
+        answer_cache.put(user_message, answer, sources, index_version)
 
     return {
         "answer": answer,
