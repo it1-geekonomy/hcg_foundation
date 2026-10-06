@@ -10,7 +10,7 @@ export const navLinks = [
     href: "#",
      hasDropdown: true,
     dropdownItems: [
-      { label: "Financial Support for Pediatric Patients", href: "/financial-support-for-patients" },
+      { label: "Financial Support for Patients", href: "/financial-support-for-patients" },
       { label: "Awareness & Screening Camps", href: "/awareness-and-screening-camps" },
     ],
   },

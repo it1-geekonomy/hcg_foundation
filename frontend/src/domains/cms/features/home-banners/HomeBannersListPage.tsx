@@ -155,7 +155,7 @@ export default function HomeBannersListPage() {
         <CardContent>
           <div className="mb-4 flex flex-col gap-2 sm:flex-row">
             <CmsSearchInput
-              placeholder="Search name / title…"
+              placeholder="Search title…"
               value={search}
               onDebouncedChange={(next) => {
                 setPage(1);
@@ -226,13 +226,15 @@ export default function HomeBannersListPage() {
                     </TableCell>
                     <TableCell>
                       <div className="font-medium text-cms-ink">{banner.title}</div>
-                      <Typography
-                        variant="caption-1"
-                        as="div"
-                        className="text-cms-muted"
-                      >
-                        {banner.name}
-                      </Typography>
+                      {banner.shortDescription?.trim() ? (
+                        <Typography
+                          variant="caption-1"
+                          as="div"
+                          className="line-clamp-1 max-w-md text-cms-muted"
+                        >
+                          {banner.shortDescription}
+                        </Typography>
+                      ) : null}
                     </TableCell>
                     <TableCell className="text-cms-muted">{banner.displayOrder}</TableCell>
                     <TableCell>

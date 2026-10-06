@@ -18,12 +18,11 @@ import CmsSelect, { ACTIVE_STATUS_OPTIONS } from "@/domains/cms/ui/CmsSelect";
 
 export const HOME_BANNER_SIZE = { width: 1920, height: 750 } as const;
 export const HOME_MOBILE_BANNER_SIZE = { width: 750, height: 800 } as const;
-export const HOME_PROFILE_IMAGE_SIZE = { width: 400, height: 400 } as const;
+/** Matches the existing hero thumbnails (public/home/dr*.png); shown at up to 96px. */
+export const HOME_PROFILE_IMAGE_SIZE = { width: 119, height: 119 } as const;
 
 export type HomeBannerFormValues = {
-  name: string;
   title: string;
-  location: string;
   shortDescription: string;
   bannerImageFile: File | null;
   bannerImageUrl: string | null;
@@ -37,9 +36,7 @@ export type HomeBannerFormValues = {
 };
 
 export const emptyHomeBannerForm = (): HomeBannerFormValues => ({
-  name: "",
   title: "",
-  location: "",
   shortDescription: "",
   bannerImageFile: null,
   bannerImageUrl: null,
@@ -56,9 +53,7 @@ export function homeBannerToFormValues(
   banner: HomeBanner
 ): HomeBannerFormValues {
   return {
-    name: banner.name ?? "",
     title: banner.title ?? "",
-    location: banner.location ?? "",
     shortDescription: banner.shortDescription ?? "",
     bannerImageFile: null,
     bannerImageUrl: banner.bannerImageUrl ?? null,
@@ -78,9 +73,7 @@ export function formValuesToFields(
 ): HomeBannerFields {
   const order = Number.parseInt(form.displayOrder.trim(), 10);
   return {
-    name: form.name.trim(),
     title: form.title.trim(),
-    location: form.location.trim() || undefined,
     shortDescription: form.shortDescription.trim() || undefined,
     displayOrder: Number.isFinite(order) && order > 0 ? order : undefined,
     isActive: form.isActive,
@@ -107,11 +100,7 @@ export function getHomeBannerPatch(
   const next = formValuesToFields(current);
   const fields: UpdateHomeBannerPayload = {};
 
-  if (norm(prev.name) !== norm(next.name)) fields.name = next.name;
   if (norm(prev.title) !== norm(next.title)) fields.title = next.title;
-  if (norm(prev.location) !== norm(next.location)) {
-    fields.location = next.location ?? "";
-  }
   if (norm(prev.shortDescription) !== norm(next.shortDescription)) {
     fields.shortDescription = next.shortDescription ?? "";
   }
@@ -169,37 +158,14 @@ export default function HomeBannerForm({
   return (
     <form onSubmit={onSubmit} className="w-full space-y-5">
       <div className="space-y-4 rounded-xl border border-cms-border bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <CmsFormField label="Name" htmlFor="name" hint="Internal label">
-            <Input
-              id="name"
-              required
-              placeholder="Hero Banner 1"
-              value={value.name}
-              onChange={(e) => onChange({ ...value, name: e.target.value })}
-            />
-          </CmsFormField>
-
+        <div className="grid items-start gap-4 sm:grid-cols-2">
           <CmsFormField label="Title" htmlFor="title">
             <Input
               id="title"
               required
-              placeholder="Welcome to HCG Foundation"
+              placeholder="Financial Assistance"
               value={value.title}
               onChange={(e) => onChange({ ...value, title: e.target.value })}
-            />
-          </CmsFormField>
-        </div>
-
-        <div className="grid items-start gap-4 sm:grid-cols-2">
-          <CmsFormField label="Location" htmlFor="location">
-            <Input
-              id="location"
-              placeholder="Homepage Hero Section"
-              value={value.location}
-              onChange={(e) =>
-                onChange({ ...value, location: e.target.value })
-              }
             />
           </CmsFormField>
 
@@ -214,10 +180,15 @@ export default function HomeBannerForm({
           />
         </div>
 
-        <CmsFormField label="Short description" htmlFor="shortDescription">
+        <CmsFormField
+          label="Description"
+          htmlFor="shortDescription"
+          hint="Line breaks are kept as typed."
+        >
           <Textarea
             id="shortDescription"
-            placeholder="Brief line shown with the banner"
+            rows={5}
+            placeholder="Text shown under the title on the banner"
             value={value.shortDescription}
             onChange={(e) =>
               onChange({ ...value, shortDescription: e.target.value })
@@ -228,7 +199,7 @@ export default function HomeBannerForm({
         <CmsFormField
           label="Banner image"
           htmlFor="bannerImage"
-          hint={`WebP or AVIF · recommended size ${HOME_BANNER_SIZE.width} × ${HOME_BANNER_SIZE.height}px (1920px desktop width banner)`}
+          hint={`WebP or AVIF · exactly ${HOME_BANNER_SIZE.width} × ${HOME_BANNER_SIZE.height}px`}
         >
           <CmsImagePicker
             label="banner image"
@@ -251,7 +222,7 @@ export default function HomeBannerForm({
         <CmsFormField
           label="Mobile banner"
           htmlFor="mobileBannerImage"
-          hint={`WebP or AVIF · recommended size ${HOME_MOBILE_BANNER_SIZE.width} × ${HOME_MOBILE_BANNER_SIZE.height}px (mobile banner)`}
+          hint={`WebP or AVIF · exactly ${HOME_MOBILE_BANNER_SIZE.width} × ${HOME_MOBILE_BANNER_SIZE.height}px`}
         >
           <CmsImagePicker
             label="mobile banner"
@@ -274,7 +245,7 @@ export default function HomeBannerForm({
         <CmsFormField
           label="Profile image"
           htmlFor="profileImage"
-          hint={`WebP or AVIF · recommended size ${HOME_PROFILE_IMAGE_SIZE.width} × ${HOME_PROFILE_IMAGE_SIZE.height}px (square profile avatar)`}
+          hint={`Any size · automatically centre-cropped and resized to ${HOME_PROFILE_IMAGE_SIZE.width} × ${HOME_PROFILE_IMAGE_SIZE.height}px`}
         >
           <CmsImagePicker
             label="profile image"
@@ -289,7 +260,7 @@ export default function HomeBannerForm({
                 profileImageUrl: next.url,
               })
             }
-            requiredSize={HOME_PROFILE_IMAGE_SIZE}
+            resizeTo={HOME_PROFILE_IMAGE_SIZE}
             disabled={saving}
           />
         </CmsFormField>
@@ -311,7 +282,6 @@ export default function HomeBannerForm({
           type="submit"
           disabled={
             saving ||
-            !value.name.trim() ||
             !value.title.trim() ||
             (mode === "create" && !value.bannerImageFile) ||
             (mode === "edit" && !hasBannerImage)

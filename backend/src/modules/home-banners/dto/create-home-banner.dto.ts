@@ -11,11 +11,11 @@ import {
 } from 'class-validator';
 
 export class CreateHomeBannerDto {
-  @ApiProperty({ example: 'Hero Banner 1' })
+  @ApiPropertyOptional({ example: 'Hero Banner 1' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(255)
-  name: string;
+  name?: string;
 
   @ApiProperty({ example: 'Welcome to HCG Foundation' })
   @IsString()

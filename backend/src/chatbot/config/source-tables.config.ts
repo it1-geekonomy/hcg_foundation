@@ -163,7 +163,7 @@ export const SOURCE_TABLES: SourceTableConfig[] = [
   {
     table: 'home_banners',
     idColumn: 'id',
-    textColumns: ['name', 'title', 'location', 'short_description'],
+    textColumns: ['title', 'short_description'],
     statusColumn: 'is_active',
     category: 'Page',
     titleColumn: 'title',
