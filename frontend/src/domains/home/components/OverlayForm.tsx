@@ -32,16 +32,21 @@ import {
 import { ActivePill, CardReveal, OverlayBackdrop } from "./overlayFormMotion";
 
 /**
- * Shrinks the card only when it is taller than the viewport. Never below `minScale`, so text
- * stays readable; past that the nearest `[data-fit-host]` ancestor scrolls instead.
+ * Shrinks the card only when it is taller than the nearest `[data-fit-host]` ancestor, never
+ * below `minScale`.
+ *
+ * With `fillWidth`, the card is laid out wider before scaling so it still spans the full
+ * width afterwards; the wider layout wraps less text, so it also needs less shrinking.
  */
 function FitViewport({
   className,
   minScale = 0,
+  fillWidth = false,
   children,
 }: {
   className?: string;
   minScale?: number;
+  fillWidth?: boolean;
   children: ReactNode;
 }) {
   const frameRef = useRef<HTMLDivElement>(null);
@@ -52,6 +57,14 @@ function FitViewport({
     const inner = innerRef.current;
     if (!frame || !inner) return;
 
+    const layoutAt = (scale: number) => {
+      const widen = fillWidth && scale < 0.999;
+      inner.style.width = widen ? `${100 / scale}%` : "";
+      inner.style.marginInline = widen ? `${50 - 50 / scale}%` : "";
+      inner.style.flexShrink = widen ? "0" : "";
+      return inner.offsetHeight;
+    };
+
     let frameId = 0;
     const fit = () => {
       const host = frame.closest<HTMLElement>("[data-fit-host]") ?? frame.parentElement;
@@ -59,9 +72,20 @@ function FitViewport({
       inner.style.transform = "none";
       frame.style.height = "auto";
       const available = host.clientHeight;
-      const needed = inner.offsetHeight;
-      const fit = needed > available + 1 && needed > 0 ? available / needed : 1;
-      const next = Math.max(fit, minScale);
+      let needed = layoutAt(1);
+      let next = needed > available + 1 && needed > 0 ? available / needed : 1;
+      if (fillWidth && next < 0.999) {
+        let lo = next;
+        let hi = 1;
+        for (let i = 0; i < 7; i++) {
+          const mid = (lo + hi) / 2;
+          if (layoutAt(mid) * mid <= available) lo = mid;
+          else hi = mid;
+        }
+        next = lo;
+      }
+      next = Math.max(next, minScale);
+      needed = layoutAt(next);
       if (next < 0.999) {
         inner.style.transformOrigin = "top center";
         inner.style.transform = `scale(${next})`;
@@ -87,7 +111,7 @@ function FitViewport({
       observer.disconnect();
       window.removeEventListener("resize", schedule);
     };
-  }, [minScale]);
+  }, [minScale, fillWidth]);
 
   return (
     <div ref={frameRef} className={className}>
@@ -255,10 +279,10 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
         aria-modal={true}
         aria-labelledby="donation-modal-title"
       >
-        <div data-fit-host className="h-full overflow-y-auto overscroll-contain lg:hidden">
+        <div data-fit-host className="h-full overflow-hidden overscroll-none lg:hidden">
           <div className="flex min-h-full items-center justify-center">
             <LayoutGroup id="overlay-compact">
-              <FitViewport className="flex w-full justify-center" minScale={0.92}>
+              <FitViewport className="flex w-full justify-center" fillWidth>
                 <ModalBelow1024 {...amountProps} onClose={onClose} />
               </FitViewport>
             </LayoutGroup>
@@ -455,7 +479,7 @@ function ImpactItems({
                 // e.detail is 2 on the second click of a double-click, so a double-click always ends unselected.
                 onSelectImpact(selected || e.detail >= 2 ? null : item.title)
               }
-              className={`grid min-w-0 select-none cursor-pointer grid-cols-[auto_1fr] content-start items-center gap-x-3 gap-y-0.5 rounded-xl border px-3 py-2 text-left transition-[background-color,border-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FCCC2D]/60 lg:gap-x-2.5 lg:gap-y-1 lg:px-2.5 lg:py-2 ${
+              className={`grid min-w-0 select-none cursor-pointer grid-cols-[auto_1fr] content-start items-center gap-x-3 gap-y-0.5 rounded-xl border px-3 py-1.5 text-left transition-[background-color,border-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FCCC2D]/60 lg:gap-x-2.5 lg:gap-y-1 lg:px-2.5 lg:py-2 ${
                 selected
                   ? "border-[#E8B923] bg-[#FFF8E1] shadow-[0_0_0_3px_rgba(252,204,45,0.16)]"
                   : "border-[#EEE8DC] bg-white hover:border-[#DCCFB8] hover:bg-[#FDFBF6]"
@@ -463,7 +487,7 @@ function ImpactItems({
             >
               <span
                 aria-hidden
-                className={`row-span-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-200 lg:row-span-1 lg:h-6 lg:w-6 lg:rounded-md ${
+                className={`row-span-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors duration-200 lg:row-span-1 lg:h-6 lg:w-6 lg:rounded-md ${
                   selected ? "bg-[#FCCC2D] text-[#3A2E00]" : "bg-[#F6F1E6] text-[#9A7400]"
                 }`}
               >
@@ -812,24 +836,24 @@ function ModalBelow1024({
         onClose={onClose}
         className="absolute right-3 top-3 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#F4F0E8] leading-none text-[#1C1C1C] transition-colors hover:bg-[#EAE3D5]"
       />
-      <Heading className="px-5 pr-12 pt-5 sm:px-7" />
+      <Heading className="px-5 pr-12 pt-4 sm:px-7 sm:pt-5" />
 
-      <div className="mt-4 flex flex-col items-center gap-1 px-5 pb-5 sm:px-7">
+      <div className="mt-3 flex flex-col items-center gap-1 px-5 pb-4 sm:mt-4 sm:px-7 sm:pb-5">
         <div className="flex min-w-0 w-full flex-1 flex-col items-center pb-0">
           <div className="mx-auto w-full">
             <ImpactItems
-              className="grid grid-cols-1 gap-2"
+              className="grid grid-cols-1 gap-1.5 sm:gap-2"
               selectedImpact={amountProps.selectedImpact}
               onSelectImpact={amountProps.onSelectImpact}
             />
 
-            <div className="mt-4 w-full border-t border-[#EFE9DD] pt-4">
+            <div className="mt-3 w-full border-t border-[#EFE9DD] pt-3 sm:mt-4 sm:pt-4">
               <CountryBlock
                 countryCode={countryCode}
                 changeCountry={changeCountry}
                 currencyMeta={currencyMeta}
                 inlineCurrency
-                className="mb-3 flex w-full flex-col gap-1.5"
+                className="mb-2.5 flex w-full flex-col gap-1.5 sm:mb-3"
               />
 
               <AmountPicker
@@ -849,7 +873,7 @@ function ModalBelow1024({
               <DonateButton
                 onDonateClick={onDonateClick}
                 showHeart={false}
-                className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#FDC61D] cursor-pointer shadow-[0_8px_20px_-10px_rgba(226,176,0,0.8)]"
+                className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#FDC61D] cursor-pointer shadow-[0_8px_20px_-10px_rgba(226,176,0,0.8)] sm:mt-4 sm:h-12"
               />
             </div>
           </div>
