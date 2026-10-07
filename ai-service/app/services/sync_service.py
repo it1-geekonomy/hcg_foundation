@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.services import corpus, site_pages, vector_store
+from app.services import corpus, site_pages, site_routes, vector_store
 
 # Indexed by full_sync itself, never by CMS table sync.
 _CURATED_TABLES = {"static", "knowledge", "site"}
@@ -54,8 +54,10 @@ def full_sync(force: bool = False) -> dict:
     CMS rows are upserted separately by NestJS; this endpoint refreshes
     curated pages/files and can force a fingerprint rewrite.
     """
+    # Learn the website's current pages first, so new/renamed pages are indexed and linked
+    site_routes.refresh()
     site_docs, site_failed = site_pages.load_site_pages()
-    broken = site_pages.broken_links(skip={d["source_id"] for d in site_docs})
+    broken = site_routes.broken()
     docs = corpus.load_corpus_documents() + site_docs
     fp = vector_store.compute_fingerprint(docs)
     current = vector_store.load_fingerprint()
