@@ -16,7 +16,6 @@ import CmsDisplayOrderField, {
 } from "@/domains/cms/ui/CmsDisplayOrderField";
 import CmsImagePicker from "@/domains/cms/ui/CmsImagePicker";
 import { CmsFormField } from "@/domains/cms/ui/CmsFormField";
-import CmsDatePicker from "@/domains/cms/ui/CmsDatePicker";
 import CmsSelect, { CONTENT_STATUS_OPTIONS } from "@/domains/cms/ui/CmsSelect";
 import { SeoFieldsSection } from "@/domains/cms/ui/SeoFieldsSection";
 import {
@@ -42,7 +41,6 @@ const CmsRichTextEditor = dynamic(
 export type ProjectFormValues = {
   title: string;
   slug: string;
-  projectDate: string;
   shortDescription: string;
   content: string;
   status: ContentStatus;
@@ -60,7 +58,6 @@ export type ProjectFormValues = {
 export const emptyProjectForm = (): ProjectFormValues => ({
   title: "",
   slug: "",
-  projectDate: "",
   shortDescription: "",
   content: "",
   status: "draft",
@@ -88,7 +85,6 @@ export function projectToFormValues(project: CmsProject): ProjectFormValues {
   return {
     title: project.title ?? "",
     slug: project.slug ?? "",
-    projectDate: project.projectDate ?? "",
     shortDescription: project.shortDescription ?? "",
     content: project.content ?? "",
     status: project.status ?? "draft",
@@ -117,7 +113,6 @@ export function formValuesToFields(form: ProjectFormValues): ProjectFields {
   return {
     title: form.title.trim(),
     slug: form.slug.trim() || slugifyTitle(form.title),
-    projectDate: form.projectDate.trim() || undefined,
     shortDescription: form.shortDescription.trim() || undefined,
     content: plainContent ? form.content : undefined,
     displayOrder: Number.isFinite(order) && order > 0 ? order : undefined,
@@ -162,7 +157,6 @@ export function getProjectPatch(
   const keys: (keyof ProjectFields)[] = [
     "title",
     "slug",
-    "projectDate",
     "shortDescription",
     "content",
     "displayOrder",
@@ -266,14 +260,6 @@ export default function ProjectForm({
         </CmsFormField>
 
         <div className="grid items-start gap-4 sm:grid-cols-2">
-          <CmsFormField label="Date" htmlFor="projectDate">
-            <CmsDatePicker
-              id="projectDate"
-              value={value.projectDate}
-              onChange={(projectDate) => onChange({ ...value, projectDate })}
-            />
-          </CmsFormField>
-
           <CmsDisplayOrderField
             value={value.displayOrder}
             onChange={(displayOrder) => onChange({ ...value, displayOrder })}

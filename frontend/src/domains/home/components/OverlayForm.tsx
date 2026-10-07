@@ -325,7 +325,7 @@ function Heading({ className = "", centerOnMobile = false }: { className?: strin
       <Typography
         variant="heading-2"
         as="h2"
-        className={`font-serif leading-tight text-black ${align}`}
+        className={`font-serif leading-tight text-black lg:!text-[2.125rem] lg:!leading-[1.15] xl:!text-[2.25rem] ${align}`}
       >
         <span className="font-medium font-tiempos-fine tracking-wide">Bring Hope</span>{" "}
         <span className="bg-[#F9BF16] bg-clip-text text-transparent font-medium font-tiempos-fine tracking-wide">
@@ -335,7 +335,7 @@ function Heading({ className = "", centerOnMobile = false }: { className?: strin
       <Typography
         variant="body-9"
         as="p"
-        className={`mt-2 max-w-2xl leading-relaxed text-[#3A3836] font-argestadisplay font-normal ${descAlign}`}
+        className={`mt-2 max-w-2xl leading-relaxed text-[#3A3836] font-argestadisplay font-normal lg:mt-1.5 lg:max-w-[36rem] lg:!text-[0.9375rem] lg:!leading-[1.55] ${descAlign}`}
       >
         Your contribution helps provide life-saving treatment, emotional
         care, and financial support to cancer patients and their families
@@ -404,14 +404,14 @@ function ImpactItems({
             <Typography
               variant="body-7"
               as="p"
-              className="col-start-2 !text-left font-semibold font-manrope text-[#1C1C1C]"
+              className="col-start-2 !text-left font-semibold font-manrope text-[#1C1C1C] lg:!text-[0.9rem] lg:!leading-snug"
             >
               {item.title}
             </Typography>
             <Typography
               variant="body-6"
               as="p"
-              className="col-start-2 !text-left !text-[0.875rem] leading-snug tracking-normal text-[#6F6863] font-manrope font-normal"
+              className="col-start-2 !text-left !text-[0.875rem] leading-snug tracking-normal text-[#6F6863] font-manrope font-normal lg:!text-[0.8125rem]"
             >
               {item.desc}
             </Typography>
@@ -428,7 +428,9 @@ const FIELD_BORDER = "border-[#E6DFD2]";
 const FIELD_HOVER = "hover:border-[#C9BEAC]";
 
 const pillBase =
-  "relative flex h-11 cursor-pointer items-center justify-center rounded-full border bg-white font-semibold transition-colors duration-300";
+  "relative flex h-11 cursor-pointer items-center justify-center rounded-full border bg-white font-semibold transition-colors duration-300 lg:h-10";
+/** Desktop-only size for field labels and pill text; mobile keeps the type scale. */
+const LG_FIELD_TEXT = "lg:!text-[0.875rem]";
 const pillActive = "border-[#1C1C1C] text-white";
 const pillInactive = `${FIELD_BORDER} ${FIELD_HOVER} text-[#2B2B2B]`;
 
@@ -463,7 +465,7 @@ function AmountPicker({
       <Typography
         variant="body-8"
         as="p"
-        className="font-semibold font-manrope tracking-normal text-[#1C1C1C]"
+        className={`font-semibold font-manrope tracking-normal text-[#1C1C1C] ${LG_FIELD_TEXT}`}
       >
         Choose an amount
       </Typography>
@@ -479,7 +481,7 @@ function AmountPicker({
               className={`${pillWidthClassName} ${pillBase} ${active ? pillActive : pillInactive}`}
             >
               {active ? <ActivePill /> : null}
-              <Typography variant="body-8" as="span" className="relative font-semibold font-manrope">
+              <Typography variant="body-8" as="span" className={`relative font-semibold font-manrope ${LG_FIELD_TEXT}`}>
                 {formatDonationAmount(amount, currency)}
               </Typography>
             </button>
@@ -488,9 +490,9 @@ function AmountPicker({
 
         {showCustomInput ? (
           <div
-            className={`${inputSpanClassName} flex h-11 items-center justify-center gap-1 rounded-full border border-[#1C1C1C] bg-white px-3`}
+            className={`${inputSpanClassName} flex h-11 items-center justify-center gap-1 rounded-full border border-[#1C1C1C] bg-white px-3 lg:h-10`}
           >
-            <Typography variant="body-8" as="span" className="font-semibold font-manrope text-gray-700">
+            <Typography variant="body-8" as="span" className={`font-semibold font-manrope text-gray-700 ${LG_FIELD_TEXT}`}>
               {currencyMeta.symbol}
             </Typography>
             <input
@@ -502,7 +504,7 @@ function AmountPicker({
               onKeyDown={onCustomAmountKeyDown}
               onBlur={onCustomAmountBlur}
               placeholder="0"
-              className="w-14 min-w-0 bg-transparent font-semibold font-manrope text-[#1C1C1C] outline-none placeholder:font-normal placeholder:text-gray-400"
+              className="w-14 min-w-0 bg-transparent font-semibold font-manrope text-[#1C1C1C] outline-none placeholder:font-normal placeholder:text-gray-400 lg:text-[0.875rem]"
             />
           </div>
         ) : (
@@ -512,7 +514,7 @@ function AmountPicker({
             className={`${pillWidthClassName} ${pillBase} ${isCustom ? pillActive : pillInactive}`}
           >
             {isCustom ? <ActivePill /> : null}
-            <Typography variant="body-8" as="span" className="relative font-semibold font-manrope">
+            <Typography variant="body-8" as="span" className={`relative font-semibold font-manrope ${LG_FIELD_TEXT}`}>
               {isCustom && customAmount
                 ? formatDonationAmount(Number(customAmount), currency)
                 : "Other"}
@@ -535,7 +537,7 @@ function DonateButton({
 }) {
   return (
     <button onClick={onDonateClick} className={className}>
-      <Typography variant="button-6" as="span" className="font-bold font-manrope text-gray-900">
+      <Typography variant="button-6" as="span" className="font-bold font-manrope text-gray-900 lg:!text-[0.9375rem]">
         {showHeart ? "❤️ " : ""}DONATE NOW →
       </Typography>
     </button>
@@ -569,7 +571,7 @@ function CountryBlock({
         <Typography
           variant="body-8"
           as="span"
-          className="font-semibold font-manrope tracking-normal text-[#1C1C1C]"
+          className={`font-semibold font-manrope tracking-normal text-[#1C1C1C] ${LG_FIELD_TEXT}`}
         >
           Country
         </Typography>
@@ -580,7 +582,7 @@ function CountryBlock({
         onChange={changeCountry}
         variant="name"
         borderClassName={`${FIELD_BORDER} ${FIELD_HOVER}`}
-        boxClassName="h-11 gap-2.5 rounded-full bg-[#FBF9F4] px-4 transition-colors"
+        boxClassName="h-11 gap-2.5 rounded-full bg-[#FBF9F4] px-4 transition-colors lg:h-10"
         chevronClassName="text-[#6F6863]"
         textClassName="text-[#1C1C1C]"
       />
@@ -646,34 +648,34 @@ function Modal1024Up({
 
   return (
     <CardReveal
-      frameClassName="mx-auto w-full max-w-[940px] xl:max-w-[960px] 2xl:max-w-[1000px]"
+      frameClassName="mx-auto w-full max-w-[800px] xl:max-w-[840px] 2xl:max-w-[880px]"
       className="relative w-full overflow-hidden overflow-clip overscroll-none rounded-xl bg-white shadow-2xl"
     >
       <CloseButton
         onClose={onClose}
-        className="absolute right-4 top-4 z-[60] flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-[#F4F0E8] text-[#1C1C1C] transition-colors hover:bg-[#EAE3D5]"
+        className="absolute right-4 top-4 z-[60] flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#F4F0E8] text-[#1C1C1C] transition-colors hover:bg-[#EAE3D5]"
       />
 
       {/* Heading spans the full width of the card, above the image + content row */}
-      <div className="relative z-30 flex w-full flex-col px-8 pt-5 2xl:px-10 2xl:pt-6">
+      <div className="relative z-30 flex w-full flex-col px-7 pt-5 2xl:px-8">
         <Heading className="w-full pr-10" />
-        <div className="mt-2 flex items-stretch lg:gap-6 xl:gap-8">
-          <div className="relative -ml-8 -mb-5 w-[46%] max-w-[420px] shrink-0 xl:max-w-[440px] 2xl:-ml-10 2xl:-mb-6 2xl:max-w-[460px]">
+        <div className="mt-2 flex items-stretch gap-6 xl:gap-7">
+          <div className="relative -ml-7 -mb-4 w-[42%] max-w-[340px] shrink-0 xl:max-w-[360px] 2xl:-ml-8 2xl:max-w-[380px]">
             <PortraitWithBackdrop
               className="h-full w-full"
               priority
-              sizes="(min-width: 1536px) 460px, (min-width: 1280px) 440px, (min-width: 1024px) 420px, 0px"
+              sizes="(min-width: 1536px) 380px, (min-width: 1280px) 360px, (min-width: 1024px) 340px, 0px"
             />
           </div>
 
-          <div className="relative z-20 flex min-w-0 max-w-[470px] flex-1 flex-col justify-center pb-5 2xl:pb-6">
+          <div className="relative z-20 flex min-w-0 max-w-[440px] flex-1 flex-col justify-center pb-4">
             <ImpactItems
-              className="grid grid-cols-1 gap-y-2.5"
+              className="grid grid-cols-1 gap-y-2"
               selectedImpact={amountProps.selectedImpact}
               onSelectImpact={amountProps.onSelectImpact}
             />
 
-            <div className="mt-4 border-t border-[#EFE9DD] pt-4">
+            <div className="mt-3.5 border-t border-[#EFE9DD] pt-3.5">
               <CountryBlock
                 countryCode={countryCode}
                 changeCountry={changeCountry}
@@ -699,7 +701,7 @@ function Modal1024Up({
               <DonateButton
                 onDonateClick={onDonateClick}
                 showHeart={false}
-                className="mt-3 flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#FDC61D] px-10 shadow-[0_8px_20px_-10px_rgba(226,176,0,0.8)] transition-colors hover:bg-[#F2B800]"
+                className="mt-3 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#FDC61D] px-10 shadow-[0_8px_20px_-10px_rgba(226,176,0,0.8)] transition-colors hover:bg-[#F2B800]"
               />
             </div>
           </div>
