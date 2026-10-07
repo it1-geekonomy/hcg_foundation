@@ -138,8 +138,7 @@ export default function DonateSection() {
           as="p"
           className="w-full max-w-sm leading-relaxed text-white/70 font-argestadisplay font-bold"
         >
-          Your contribution helps us provide care, support and hope to those
-          who need it most.
+          Your support provides cancer care, emotional support, and financial aid to those in need.
         </Typography>
       </DonateItem>
 
