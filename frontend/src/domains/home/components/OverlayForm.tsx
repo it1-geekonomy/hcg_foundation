@@ -382,9 +382,7 @@ function Heading({ className = "" }: { className?: string }) {
         as="p"
         className="mt-1.5 max-w-2xl !text-[0.875rem] !leading-[1.5] text-pretty text-[#3A3836] font-argestadisplay font-normal lg:mt-1 lg:max-w-[36rem] lg:!text-[0.9375rem]"
       >
-        Your contribution helps provide life-saving treatment, emotional
-        care, and financial support to cancer patients and their families
-        in need.
+        Your support provides cancer care, emotional support, and financial aid to those in need.
       </Typography>
     </div>
   );
