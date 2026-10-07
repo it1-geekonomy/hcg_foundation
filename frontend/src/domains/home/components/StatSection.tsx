@@ -96,17 +96,16 @@ export default function StatSection() {
     };
   }, [onScroll, updateProgress]);
 
-  // stat cards reveal — no longer disconnects after the first hit, so
-  // `active` toggles true/false on every enter/exit. This lets each
-  // StatCard's gif reload every time the section re-enters view, in
-  // either scroll direction (down into it, or back up into it).
+  // Start the stat gifs once, the first time the section enters view.
   useEffect(() => {
     const node = sectionRef.current;
     if (!node) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        setActive(entries[0]?.isIntersecting ?? false);
+        if (!entries[0]?.isIntersecting) return;
+        setActive(true);
+        observer.disconnect();
       },
       { threshold: 0.25 },
     );
