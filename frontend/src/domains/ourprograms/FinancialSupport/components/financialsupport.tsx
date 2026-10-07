@@ -3,8 +3,8 @@ import Banner from "@/shared/components/Herobannersection";
 // Content is data, kept separate from markup so the same Banner
 // can be reused across pages by swapping this object out.
 const FINANCIALSUPPORT_BANNER = {
-  bgImage: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791350114118-7pc1c-rectangle-184-2-.webp",
-  bgImageMobile: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791350271997-hhlw8-rectangle-1661-1-.webp",
+  bgImage: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791376405836-2h06b-rectangle-184-7-.webp",
+  bgImageMobile: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791376489425-a4fjn-rectangle-1661-2-.webp",
   bgImageAlt: "finance",
   breadcrumbs: [
     { label: "Home", href: "/" },
