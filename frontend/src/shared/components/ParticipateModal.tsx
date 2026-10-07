@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import {
   X,
   User,
@@ -24,6 +24,95 @@ import GenderSelect from "@/shared/forms/GenderSelect";
 import DobDatePicker from "@/shared/forms/DobDatePicker";
 import Typography from "@/lib/Typography";
 import { participateApi } from "@/shared/lib/participate-api";
+
+/**
+ * Shrinks the card only when it is taller than the nearest `[data-fit-host]` ancestor, never
+ * below `minScale`.
+ *
+ * With `fillWidth`, the card is laid out wider before scaling so it still spans the full
+ * width afterwards; the wider layout wraps less text, so it also needs less shrinking.
+ */
+function FitViewport({
+  className,
+  minScale = 0,
+  fillWidth = false,
+  children,
+}: {
+  className?: string;
+  minScale?: number;
+  fillWidth?: boolean;
+  children: React.ReactNode;
+}) {
+  const frameRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const frame = frameRef.current;
+    const inner = innerRef.current;
+    if (!frame || !inner) return;
+
+    const layoutAt = (scale: number) => {
+      const widen = fillWidth && scale < 0.999;
+      inner.style.width = widen ? `${100 / scale}%` : "";
+      inner.style.marginInline = widen ? `${50 - 50 / scale}%` : "";
+      inner.style.flexShrink = widen ? "0" : "";
+      return inner.offsetHeight;
+    };
+
+    let frameId = 0;
+    const fit = () => {
+      const host = frame.closest<HTMLElement>("[data-fit-host]") ?? frame.parentElement;
+      if (!host || host.clientHeight === 0) return;
+      inner.style.transform = "none";
+      frame.style.height = "auto";
+      const available = host.clientHeight;
+      let needed = layoutAt(1);
+      let next = needed > available + 1 && needed > 0 ? available / needed : 1;
+      if (fillWidth && next < 0.999) {
+        let lo = next;
+        let hi = 1;
+        for (let i = 0; i < 7; i++) {
+          const mid = (lo + hi) / 2;
+          if (layoutAt(mid) * mid <= available) lo = mid;
+          else hi = mid;
+        }
+        next = lo;
+      }
+      next = Math.max(next, minScale);
+      needed = layoutAt(next);
+      if (next < 0.999) {
+        inner.style.transformOrigin = "top center";
+        inner.style.transform = `scale(${next})`;
+        frame.style.height = `${Math.floor(needed * next)}px`;
+      } else {
+        inner.style.transform = "";
+        inner.style.transformOrigin = "";
+        frame.style.height = "";
+      }
+    };
+
+    const schedule = () => {
+      cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(fit);
+    };
+
+    fit();
+    const observer = new ResizeObserver(schedule);
+    observer.observe(inner);
+    window.addEventListener("resize", schedule);
+    return () => {
+      cancelAnimationFrame(frameId);
+      observer.disconnect();
+      window.removeEventListener("resize", schedule);
+    };
+  }, [minScale, fillWidth]);
+
+  return (
+    <div ref={frameRef} className={className}>
+      <div ref={innerRef} className="w-full">{children}</div>
+    </div>
+  );
+}
 
 const RESUME_TYPES = new Set([
   "application/pdf",
@@ -435,20 +524,26 @@ export default function ParticipateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-hidden bg-black/60 backdrop-blur-xs transition-opacity duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden overflow-clip overscroll-none bg-black/60 backdrop-blur-xs transition-opacity duration-300">
       {/* Backdrop overlay click to close */}
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
-      {/* Main Modal Container with exact Figma styling: width 640px (40rem), height 860px (53.75rem) for Intern (Frame 556), 736px (46rem) for Fundraise/Volunteer */}
       <div
-        className={`relative z-10 w-full max-w-[40rem] bg-white shadow-2xl overflow-hidden flex flex-col max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)] ${isIntern
-          ? "h-auto sm:h-[53.75rem] rounded-[0.625rem]"
-          : "h-auto sm:h-[46rem] rounded-[0.625rem]"
-          }`}
+        data-fit-host
+        className="relative z-10 w-full h-full flex items-center justify-center overflow-hidden overscroll-none pointer-events-none"
       >
+        <div className="flex min-h-full w-full items-center justify-center">
+          <FitViewport className="flex w-full justify-center pointer-events-auto" fillWidth>
+            {/* Main Modal Container with exact Figma styling: width 640px (40rem), height 860px (53.75rem) for Intern (Frame 556), 736px (46rem) for Fundraise/Volunteer */}
+            <div
+              className={`relative z-10 mx-auto w-[calc(100%-0.5rem)] max-w-[40rem] sm:w-full bg-white shadow-2xl overflow-hidden flex flex-col rounded-[0.625rem] ${isIntern
+                ? "h-auto sm:h-[53.75rem]"
+                : "h-auto sm:h-[46rem]"
+                }`}
+            >
         {/* Full Modal Watermark Background Image matching Figma */}
         <div
-          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-85 pointer-events-none"
+          className="absolute inset-0 z-0 bg-contain sm:bg-cover bg-center bg-no-repeat opacity-85 pointer-events-none"
           style={{
             backgroundImage: `url('https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791265188879-ilf9y-group-1000006354.webp')`,
           }}
@@ -457,31 +552,31 @@ export default function ParticipateModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 sm:top-5 sm:right-5 z-20 p-2 text-[#6C6048] hover:text-[#2E1C12] transition-colors rounded-full hover:bg-black/5 cursor-pointer"
+          className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 z-20 flex size-7 sm:size-8 items-center justify-center text-[#596D79] hover:text-[#0D2838] bg-[#F4F0E8] hover:bg-[#EAE3D5] transition-colors rounded-full cursor-pointer shadow-2xs"
           aria-label="Close modal"
         >
-          <X className="size-5 sm:size-6" />
+          <X className="size-4 sm:size-4.5 stroke-[2.2]" />
         </button>
 
-        {/* Modal Scrollable Body */}
-        <div className="relative z-10 p-6 sm:px-12 sm:py-9 overflow-y-auto h-full flex flex-col justify-between overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        {/* Modal Body: overflow-hidden to prevent scrolling */}
+        <div className="relative z-10 p-3.5 sm:px-10 sm:py-7 md:px-12 md:py-8 overflow-hidden h-full flex flex-col justify-between">
           {/* Header Title & Subtitle matching Figma 100% */}
-          <div className="text-center mx-auto mb-6 sm:mb-8">
-            <div className="mb-1">
-              <h2 className="font-tiempos-headline font-normal italic text-[#0D2838] text-[1.4275rem] leading-[100%] tracking-[0.03em] text-center">
+          <div className="text-center mx-auto px-7 sm:px-10 mb-2 sm:mb-6 md:mb-8">
+            <div className="mb-0.5 sm:mb-1">
+              <h2 className="font-tiempos-headline font-normal italic text-[#0D2838] text-[1.1rem] sm:text-[1.35rem] md:text-[1.4275rem] leading-[115%] sm:leading-[100%] tracking-[0.03em] text-center">
                 {isIntern && "Apply for Internship at"}
                 {isFundraise && "Start a Fundraising Campaign at"}
                 {!isIntern && !isFundraise && "Become a Volunteer at"}
               </h2>
             </div>
-            <div className="mb-3">
+            <div className="mb-1 sm:mb-2.5 md:mb-3">
               <span
                 style={{
                   backgroundImage: "linear-gradient(90deg, #208CCC 0%, #FABE3B 50%, #9D0037 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
-                className="font-manrope font-bold text-[1.4275rem] leading-[100%] tracking-[0.01em] inline-block text-center select-none"
+                className="font-manrope font-bold text-[1.2rem] sm:text-[1.35rem] md:text-[1.4275rem] leading-[100%] tracking-[0.01em] inline-block text-center select-none"
               >
                 HCG Foundation
               </span>
@@ -494,7 +589,7 @@ export default function ParticipateModal({
                   : "w-full max-w-[28.125rem]"
                 } mx-auto`}
             >
-              <p className="font-manrope font-normal text-[0.677rem] leading-[150%] tracking-[0.01em] text-[#596D79] text-center">
+              <p className="font-manrope font-normal text-[0.62rem] sm:text-[0.65rem] md:text-[0.677rem] leading-[140%] sm:leading-[150%] tracking-[0.01em] text-[#596D79] text-center">
                 {isIntern && (
                   <>
                     Passionate about making a difference? Join the HCG Foundation Internship Program to gain hands-on experience, learn from experts, and build skills for your future career.
@@ -514,12 +609,12 @@ export default function ParticipateModal({
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} noValidate className="w-full max-w-[34rem] mx-auto flex-1 flex flex-col justify-between font-manrope space-y-4 sm:space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="w-full max-w-[34rem] mx-auto flex-1 flex flex-col justify-between font-manrope space-y-2 sm:space-y-4 md:space-y-5">
             {/* Row 1: Full Name & Phone Number (Figma Frame 560: 544.45px x 41.14px, Gap: 51px) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-x-[3.19rem] sm:gap-y-4">
               <div className="relative">
                 <div
-                  className={`min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${errors.fullName
+                  className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${errors.fullName
                     ? "border-red-500"
                     : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                     }`}
@@ -560,7 +655,7 @@ export default function ParticipateModal({
                 )}
               </div>
 
-              <div className="relative min-h-[2.85rem] h-auto">
+              <div className="relative min-h-[2.35rem] sm:min-h-[2.85rem] h-auto">
                 <PhoneInputField
                   label="Phone Number"
                   hideLabel
@@ -579,10 +674,10 @@ export default function ParticipateModal({
             </div>
 
             {/* Row 2: Email & Gender (Intern) / Location (Fundraise/Volunteer) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-x-[3.19rem] sm:gap-y-4">
               <div className="relative h-full">
                 <div
-                  className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.email
+                  className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.email
                     ? "border-red-500"
                     : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                     }`}
@@ -654,7 +749,7 @@ export default function ParticipateModal({
             {/* Row 3 (Specific to Intern vs Fundraise/Volunteer) */}
             {isIntern ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-x-[3.19rem] sm:gap-y-4">
                   <DobDatePicker
                     value={formData.dob}
                     onChange={(val) =>
@@ -665,7 +760,7 @@ export default function ParticipateModal({
 
                   <div className="relative h-full">
                     <div
-                      className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.course
+                      className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.course
                         ? "border-red-500"
                         : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                         }`}
@@ -713,7 +808,7 @@ export default function ParticipateModal({
                 {/* Address */}
                 <div className="relative">
                   <div
-                    className={`min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${errors.address
+                    className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${errors.address
                       ? "border-red-500"
                       : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                       }`}
@@ -758,7 +853,7 @@ export default function ParticipateModal({
                 </div>
 
                 {/* Languages & Skills */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-x-[3.19rem] sm:gap-y-4">
                   <SearchableLanguageSelect
                     value={formData.languages}
                     error={errors.languages}
@@ -773,7 +868,7 @@ export default function ParticipateModal({
 
                   <div className="relative h-full">
                     <div
-                      className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.computerSkills
+                      className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.computerSkills
                         ? "border-red-500"
                         : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                         }`}
@@ -823,10 +918,10 @@ export default function ParticipateModal({
               </>
             ) : isVolunteer ? (
               /* Volunteer Row 3: Educational Qualification & Areas of Interest */
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-x-[3.19rem] sm:gap-y-4">
                 <div className="relative h-full">
                   <div
-                    className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.educationalQualification
+                    className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.educationalQualification
                       ? "border-red-500"
                       : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                       }`}
@@ -890,10 +985,10 @@ export default function ParticipateModal({
               </div>
             ) : (
               /* Specific to Fundraise (Frame 582: Gap 51px) */
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-x-[3.19rem]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-x-[3.19rem] sm:gap-y-4">
                 <div className="relative h-full">
                   <div
-                    className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.fundraisingGoal
+                    className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.fundraisingGoal
                       ? "border-red-500"
                       : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                       }`}
@@ -942,7 +1037,7 @@ export default function ParticipateModal({
 
                 <div className="relative h-full">
                   <div
-                    className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.reason
+                    className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.reason
                       ? "border-red-500"
                       : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                       }`}
@@ -1019,7 +1114,7 @@ export default function ParticipateModal({
                 {resumeFile ? (
                   <div
                     onClick={handleViewResume}
-                    className="w-full h-[6.19rem] flex items-center justify-between px-4 sm:px-5 border border-solid border-[#FCCC2D] rounded-[0.5rem] bg-[#FFFBF0] hover:bg-[#FFF6D6]/60 transition-colors cursor-pointer group"
+                    className="w-full h-[3.6rem] sm:h-[5.5rem] md:h-[6.19rem] flex items-center justify-between px-3 sm:px-5 border border-solid border-[#FCCC2D] rounded-[0.5rem] bg-[#FFFBF0] hover:bg-[#FFF6D6]/60 transition-colors cursor-pointer group"
                     title="Click to view resume"
                   >
                     <div className="flex items-center gap-3 min-w-0 mr-3">
@@ -1051,7 +1146,7 @@ export default function ParticipateModal({
                 ) : (
                   <label
                     htmlFor="intern-resume"
-                    className={`w-full h-[6.19rem] flex flex-col items-center justify-center gap-[0.625rem] border ${errors.resumeFile
+                    className={`w-full h-[3.6rem] sm:h-[5.5rem] md:h-[6.19rem] flex flex-col items-center justify-center gap-1 sm:gap-[0.625rem] border ${errors.resumeFile
                       ? "border-solid border-red-500 bg-red-50/20"
                       : "border-dashed border-[#A3A3A3] bg-white/65 hover:border-[#FCCC2D]"
                       } rounded-[0.5rem] cursor-pointer transition-colors`}
@@ -1079,7 +1174,7 @@ export default function ParticipateModal({
               /* Why would you like to volunteer?* for Volunteer */
               <div className="relative">
                 <div
-                  className={`min-h-[5.54rem] h-auto pb-1.5 flex flex-col justify-between border-b transition-all ${errors.whyVolunteer
+                  className={`min-h-[3.6rem] sm:min-h-[4.8rem] md:min-h-[5.54rem] h-auto pb-1 sm:pb-1.5 flex flex-col justify-between border-b transition-all ${errors.whyVolunteer
                     ? "border-red-500"
                     : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                     }`}
@@ -1116,11 +1211,11 @@ export default function ParticipateModal({
                         });
                         handleAutoResize(e);
                       }}
-                      className="w-full min-h-[2.5rem] max-h-[8rem] bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto block leading-normal py-1"
+                      className="w-full min-h-[1.6rem] sm:min-h-[2.2rem] md:min-h-[2.5rem] max-h-[4.5rem] sm:max-h-[6.5rem] md:max-h-[8rem] bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto block leading-normal py-0.5 sm:py-1"
                     />
                   </div>
                 </div>
-                <div className="flex justify-between items-center mt-1">
+                <div className="flex justify-between items-center mt-0.5 sm:mt-1">
                   {errors.whyVolunteer ? (
                     <span className="text-xs text-red-600 font-manrope block">
                       {errors.whyVolunteer}
@@ -1137,7 +1232,7 @@ export default function ParticipateModal({
               /* Your Message for Fundraise */
               <div className="relative">
                 <div
-                  className={`min-h-[5.54rem] h-auto pb-1.5 flex flex-col justify-between border-b transition-all ${errors.message
+                  className={`min-h-[3.6rem] sm:min-h-[4.8rem] md:min-h-[5.54rem] h-auto pb-1 sm:pb-1.5 flex flex-col justify-between border-b transition-all ${errors.message
                     ? "border-red-500"
                     : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                     }`}
@@ -1170,11 +1265,11 @@ export default function ParticipateModal({
                         setFormData({ ...formData, message: e.target.value });
                         handleAutoResize(e);
                       }}
-                      className="w-full min-h-[2.5rem] max-h-[8rem] bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto block leading-normal py-1"
+                      className="w-full min-h-[1.6rem] sm:min-h-[2.2rem] md:min-h-[2.5rem] max-h-[4.5rem] sm:max-h-[6.5rem] md:max-h-[8rem] bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto block leading-normal py-0.5 sm:py-1"
                     />
                   </div>
                 </div>
-                <div className="flex justify-between items-center mt-1">
+                <div className="flex justify-between items-center mt-0.5 sm:mt-1">
                   {errors.message ? (
                     <span className="text-xs text-red-600 font-manrope block">
                       {errors.message}
@@ -1190,7 +1285,7 @@ export default function ParticipateModal({
             )}
 
             {/* Terms and Conditions Checkbox */}
-            <div className="relative flex flex-col gap-1 pt-1">
+            <div className="relative flex flex-col gap-1 pt-0.5 sm:pt-1">
               <div className="flex items-center gap-2">
                 <span className="relative inline-flex items-center justify-center shrink-0">
                   <input
@@ -1239,7 +1334,7 @@ export default function ParticipateModal({
               type="submit"
               disabled={submitted || submitting}
               aria-busy={submitting}
-              className="w-full mt-4 py-3.5 px-6 bg-[#FCCC2D] text-[#2E1C12] rounded-md transition duration-200 hover:bg-[#F5C21B] active:scale-[0.99] cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed"
+              className="w-full mt-2 sm:mt-3 md:mt-4 py-2.5 sm:py-3 md:py-3.5 px-6 bg-[#FCCC2D] text-[#2E1C12] rounded-md transition duration-200 hover:bg-[#F5C21B] active:scale-[0.99] cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed"
             >
               <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#2E1C12]">
                 {submitted
@@ -1281,6 +1376,9 @@ export default function ParticipateModal({
               </div>
             )}
           </form>
+        </div>
+      </div>
+          </FitViewport>
         </div>
       </div>
     </div>

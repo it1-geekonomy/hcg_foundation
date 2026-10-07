@@ -310,7 +310,7 @@ export default function TeamSection({
 
       {teamPeople.length > 0 ? (
         <>
-          <SectionLabel label="Teams" id="team" />
+          <SectionLabel label="Team" id="team" />
           <div className="-mx-8 mb-4 sm:hidden">
             <CoverflowCarousel people={teamPeople} label="Team members" />
           </div>

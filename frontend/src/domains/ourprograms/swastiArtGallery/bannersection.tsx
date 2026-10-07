@@ -8,7 +8,7 @@ const ABOUT_US_BANNER = {
   bgImageAlt: "Doctors, nurses and families smiling together outside the hospital",
   breadcrumbs: [
     { label: "Home", href: "/" },
-    { label: "Our Program" },
+    { label: "Our Programs" },
   ],
   title: (
     <>
