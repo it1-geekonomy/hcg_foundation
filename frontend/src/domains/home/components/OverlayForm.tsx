@@ -18,6 +18,7 @@ import {
 } from "@/domains/home/constants/overlayform";
 import Typography from "@/lib/Typography";
 import DonateDetailsModal from "@/shared/components/DonateDetailsModal";
+import { Terms80GLink } from "@/shared/components/Terms80GDialog";
 import type { DonationCategory } from "@/shared/lib/donors-api";
 import CountrySelect from "@/shared/components/CountrySelect";
 import {
@@ -719,9 +720,13 @@ function TermsCheckbox({
           className="min-w-0 flex-1 font-manrope font-normal leading-relaxed text-[#4A4540] lg:!leading-snug"
         >
           I have read and agree to the applicable{" "}
-          <span className="font-semibold text-[#B88A00]">
-            80G Terms &amp; Conditions
-          </span>{" "}
+          <Terms80GLink
+            className="font-semibold text-[#B88A00]"
+            onAgree={() => {
+              setAgreedTo80G(true);
+              setTermsError(false);
+            }}
+          />{" "}
           for this donation.
         </Typography>
       </label>
