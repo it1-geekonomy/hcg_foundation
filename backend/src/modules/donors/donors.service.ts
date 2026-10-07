@@ -106,13 +106,35 @@ export class DonorsService {
         countryCode,
       };
     } catch (err) {
+      const reason = this.razorpayErrorReason(err);
       this.logger.error(
-        `Razorpay order failed: ${err instanceof Error ? err.message : 'unknown error'}`,
+        `Razorpay order failed (${currency} ${amount}, international=${isInternational}): ${reason}`,
       );
+      if (currency !== 'INR' && /currency|international/i.test(reason)) {
+        throw new BadRequestException(
+          `Donations in ${currency} are not available right now. Please donate in INR or contact us.`,
+        );
+      }
       throw new BadRequestException(
         'Could not start payment. Please try again.',
       );
     }
+  }
+
+  /** The Razorpay SDK rejects with `{ statusCode, error: { code, description } }`, not an Error. */
+  private razorpayErrorReason(err: unknown): string {
+    if (err instanceof Error) return err.message;
+    const e = err as {
+      statusCode?: number;
+      error?: { code?: string; description?: string; field?: string };
+    };
+    const parts = [
+      e?.statusCode ? `HTTP ${e.statusCode}` : '',
+      e?.error?.code ?? '',
+      e?.error?.description ?? '',
+      e?.error?.field ? `(field: ${e.error.field})` : '',
+    ].filter(Boolean);
+    return parts.length ? parts.join(' ') : JSON.stringify(err ?? 'unknown error');
   }
 
   async verifyPayment(dto: VerifyDonationDto): Promise<Donor> {

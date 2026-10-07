@@ -30,7 +30,7 @@ function ArrowIcon({ className = "" }: { className?: string }) {
       fill="none"
       stroke="currentColor"
       strokeWidth="1.5"
-      className={`size-[22px] shrink-0 ${className}`}
+      className={`shrink-0 ${className || "size-4"}`}
       aria-hidden="true"
     >
       <path d="M7 17L17 7M9 7h8v8" />
@@ -41,13 +41,13 @@ function ArrowIcon({ className = "" }: { className?: string }) {
 function ChevronLeftIcon({ className = "" }: { className?: string }) {
   return (
     <svg
-      width="20"
-      height="20"
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="2.25"
-      className={`size-5 shrink-0 ${className}`}
+      className={`size-3.5 shrink-0 ${className}`}
       aria-hidden="true"
     >
       <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
@@ -58,13 +58,13 @@ function ChevronLeftIcon({ className = "" }: { className?: string }) {
 function ChevronRightIcon({ className = "" }: { className?: string }) {
   return (
     <svg
-      width="20"
-      height="20"
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="2.25"
-      className={`size-5 shrink-0 ${className}`}
+      className={`size-3.5 shrink-0 ${className}`}
       aria-hidden="true"
     >
       <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
@@ -238,24 +238,32 @@ function MoreDetailsButton({
   className = "",
   href,
   previewMode,
+  compact = false,
 }: {
   className?: string;
   href?: string;
   previewMode?: boolean;
+  compact?: boolean;
 }) {
-  const classes = `inline-flex w-fit shrink-0 items-center justify-center gap-2 overflow-visible bg-[#FFD43B] px-5 py-3.5 uppercase tracking-wider text-neutral-900 transition-colors hover:bg-[#f0c527] ${className}`;
+  const classes = `inline-flex w-fit shrink-0 items-center justify-center overflow-visible bg-[#FFD43B] uppercase tracking-wider text-neutral-900 transition-colors hover:bg-[#f0c527] ${
+    compact ? "gap-1.5 px-3 py-2" : "gap-1.5 px-4 py-2.5"
+  } ${className}`;
+  const label = (
+    <Typography
+      variant="button-3"
+      as="span"
+      className="uppercase text-neutral-900"
+    >
+      More details
+    </Typography>
+  );
+  const icon = <ArrowIcon className={compact ? "size-3.5" : "size-4"} />;
 
   if (previewMode || !href) {
     return (
       <span className={`${classes} cursor-default opacity-90`}>
-        <Typography
-          variant="button-1"
-          as="span"
-          className="uppercase text-neutral-900"
-        >
-          More details
-        </Typography>
-        <ArrowIcon />
+        {label}
+        {icon}
       </span>
     );
   }
@@ -266,14 +274,8 @@ function MoreDetailsButton({
       className={classes}
       onClick={() => sessionStorage.setItem(PROJECT_FROM_HOME_KEY, "1")}
     >
-      <Typography
-        variant="button-1"
-        as="span"
-        className="uppercase text-neutral-900"
-      >
-        More details
-      </Typography>
-      <ArrowIcon />
+      {label}
+      {icon}
     </Link>
   );
 }
@@ -778,7 +780,7 @@ export default function ProjectsSection({
   return (
     <section
       ref={sectionRef}
-      className={`bg-[#FFF6D8] px-8 py-8 text-black sm:px-12 md:px-16 lg:px-6 lg:py-14 xl:px-6 xl:py-30 2xl:px-40 ${className}`}
+      className={`bg-[#FFF6D8] px-8 py-6 text-black sm:px-12 md:px-16 lg:px-6 lg:py-8 xl:px-6 xl:py-20 2xl:px-40 ${className}`}
     >
       <div className="max-w-full">
         {showHeader ? (
@@ -816,7 +818,7 @@ export default function ProjectsSection({
 
         <div
           ref={containerRef}
-          className="hidden h-[480px] w-full overflow-hidden rounded-2xl lg:block xl:h-[600px]"
+          className="hidden h-[420px] w-full overflow-hidden rounded-2xl lg:block xl:h-[520px] 2xl:h-[600px]"
           onMouseLeave={() => setActiveIndex(resetIndex)}
         >
           <div
@@ -876,7 +878,7 @@ export default function ProjectsSection({
               <VerticalMarqueeTitle title={card.title} />
 
               <div
-                className="card-panel pointer-events-none absolute top-5 right-5 bottom-5 z-30 flex h-[calc(100%-2.5rem)] w-[clamp(15rem,60%,24rem)] flex-col overflow-hidden rounded-2xl bg-[#8D8D8D66] p-6 opacity-0 shadow-2xl backdrop-blur-xl xl:w-[clamp(18rem,48%,30rem)]"
+                className="card-panel pointer-events-none absolute top-8 right-4 bottom-8 z-30 flex w-[min(15.5rem,42%)] flex-col overflow-hidden rounded-2xl bg-[#8D8D8D66] p-4 opacity-0 shadow-2xl backdrop-blur-xl xl:top-10 xl:right-5 xl:bottom-10 xl:w-[min(17.5rem,32%)] 2xl:w-[min(26rem,46%)]"
                 style={{ transformOrigin: "top right" }}
               >
                 <div className="panel-badge mb-3 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black/70 text-white">
@@ -902,12 +904,13 @@ export default function ProjectsSection({
                   <Typography
                     variant="body-7"
                     as="p"
-                    className={`panel-desc mb-4 min-h-0 flex-1 font-manrope font-light text-white ${SCROLL_DESC_CLASS}`}
+                    className={`panel-desc mb-3 min-h-0 flex-1 font-manrope font-light text-white ${SCROLL_DESC_CLASS}`}
                   >
                     {card.description}
                   </Typography>
 
                   <MoreDetailsButton
+                    compact
                     className="panel-cta shrink-0 font-manrope font-semibold pointer-events-auto"
                     href={card.href}
                     previewMode={previewMode}
@@ -1011,7 +1014,7 @@ export default function ProjectsSection({
                   <Typography
                     variant="body-7"
                     as="p"
-                    className={`m-panel-desc mb-4 max-h-[7.5rem] font-manrope font-light text-white ${SCROLL_DESC_CLASS}`}
+                    className={`m-panel-desc mb-3 max-h-[7.5rem] font-manrope font-light text-white ${SCROLL_DESC_CLASS}`}
                     onClick={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
                   >
@@ -1036,7 +1039,7 @@ export default function ProjectsSection({
               onClick={handlePrev}
               disabled={clampedWindowStart === 0}
               aria-label="Previous projects"
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFD43B] text-neutral-900 transition-colors hover:bg-[#f0c527] disabled:cursor-not-allowed disabled:opacity-40 [&>svg]:size-4 sm:h-11 sm:w-11 sm:[&>svg]:size-5"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FFD43B] text-neutral-900 transition-colors hover:bg-[#f0c527] disabled:cursor-not-allowed disabled:bg-[#FFE9A0]"
             >
               <ChevronLeftIcon />
             </button>
@@ -1045,7 +1048,7 @@ export default function ProjectsSection({
               onClick={handleNext}
               disabled={clampedWindowStart >= maxWindowStart}
               aria-label="Next projects"
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFD43B] text-neutral-900 transition-colors hover:bg-[#f0c527] disabled:cursor-not-allowed disabled:opacity-40 [&>svg]:size-4 sm:h-11 sm:w-11 sm:[&>svg]:size-5"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FFD43B] text-neutral-900 transition-colors hover:bg-[#f0c527] disabled:cursor-not-allowed disabled:bg-[#FFE9A0]"
             >
               <ChevronRightIcon />
             </button>
