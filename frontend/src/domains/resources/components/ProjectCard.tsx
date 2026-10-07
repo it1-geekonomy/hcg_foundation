@@ -62,7 +62,6 @@ export default function ProjectCard({
         }}
         className="absolute left-[0.75rem] right-[0.75rem] bottom-[0.75rem] xl:left-[1.1rem] xl:right-[1.28rem] xl:bottom-[1.51rem] flex flex-col justify-center gap-[0.5rem] p-[1rem] lg:py-[1.25rem] lg:px-[1.5rem] xl:pl-[1.74rem] xl:pr-[2rem] rounded-[6px] border border-white/10 bg-[#838383]/40 backdrop-blur-[55px] text-white transition duration-300 group-hover:bg-[#838383]/50 cursor-pointer"
       >
-        {/* Title + Date stacked full width */}
         <div className="w-full text-left">
           <Typography
             variant="heading-8"
@@ -72,18 +71,6 @@ export default function ProjectCard({
           >
             {project.title}
           </Typography>
-        </div>
-        <div className="flex items-center gap-[0.35rem] sm:gap-[0.5rem] xl:gap-[0.7rem] min-w-0 text-left pt-1">
-          <img
-            src="/Resources/calendar.png"
-            alt="Calendar"
-            className="size-[0.875rem] sm:size-[1.15rem] xl:size-[1.39rem] shrink-0 object-contain"
-          />
-          <div className="text-left min-w-0 overflow-hidden">
-            <Typography variant="body-8" as="span" className="text-white block truncate">
-              Project Date: {project.date}
-            </Typography>
-          </div>
         </div>
       </div>
     </div>

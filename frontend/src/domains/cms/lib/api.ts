@@ -467,9 +467,6 @@ function projectFormData(
   const fd = new FormData();
   fd.append("title", fields.title.trim());
   fd.append("slug", fields.slug.trim());
-  if (fields.projectDate?.trim()) {
-    fd.append("projectDate", fields.projectDate.trim());
-  }
   if (fields.content?.trim()) fd.append("content", fields.content);
   if (fields.shortDescription?.trim()) {
     fd.append("shortDescription", fields.shortDescription.trim());
@@ -512,7 +509,6 @@ function projectPatchFormData(
   };
   append("title", fields.title);
   append("slug", fields.slug);
-  append("projectDate", fields.projectDate);
   append("content", fields.content);
   append("shortDescription", fields.shortDescription);
   append("status", fields.status);
