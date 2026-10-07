@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, User, Mail, Building2, MessageSquare } from "lucide-react";
+import { X, User, Mail, Building2, Check } from "lucide-react";
 import PhoneInputField from "@/shared/forms/PhoneInputField";
 import Typography from "@/lib/Typography";
 import { participateApi } from "@/shared/lib/participate-api";
@@ -419,7 +419,11 @@ export default function PartnerWithUsModal({
                       }`}
                   >
                     <label htmlFor="partner-message" className="flex items-center cursor-pointer pt-0.5">
-                      <MessageSquare className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.625rem]" />
+                      <img
+                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791346766683-uabg5-messages.webp"
+                        alt=""
+                        className="size-[0.875rem] object-contain shrink-0 mr-[0.625rem]"
+                      />
                       <Typography
                         variant="caption-1"
                         as="span"
@@ -469,21 +473,27 @@ export default function PartnerWithUsModal({
                 {/* Terms and Conditions Checkbox (Figma Component 8: 297px x 18px -> 18.5625rem, gap: 4.5px -> 0.28125rem) */}
                 <div className="flex flex-col gap-1 w-full">
                   <div className="flex items-center gap-[0.28125rem] w-full">
-                    <input
-                      type="checkbox"
-                      id="modal-terms"
-                      checked={formData.agreeTerms}
-                      onChange={(e) => {
-                        if (errors.agreeTerms && e.target.checked) {
-                          setErrors((prev) => ({ ...prev, agreeTerms: undefined }));
-                        }
-                        setFormData((prev) => ({
-                          ...prev,
-                          agreeTerms: e.target.checked,
-                        }));
-                      }}
-                      className="w-[1.03125rem] h-[1.03125rem] accent-[#FED034] rounded-[0.2rem] cursor-pointer shrink-0"
-                    />
+                    <span className="relative inline-flex items-center justify-center shrink-0">
+                      <input
+                        type="checkbox"
+                        id="modal-terms"
+                        checked={formData.agreeTerms}
+                        onChange={(e) => {
+                          if (errors.agreeTerms && e.target.checked) {
+                            setErrors((prev) => ({ ...prev, agreeTerms: undefined }));
+                          }
+                          setFormData((prev) => ({
+                            ...prev,
+                            agreeTerms: e.target.checked,
+                          }));
+                        }}
+                        className="peer w-[1.03125rem] h-[1.03125rem] cursor-pointer appearance-none rounded-[0.2rem] border border-[#FED034] bg-white transition-colors checked:bg-[#FED034] checked:border-[#FED034] focus-visible:outline-none"
+                      />
+                      <Check
+                        strokeWidth={3}
+                        className="pointer-events-none absolute inset-0 m-auto size-3 text-[#0D2838] opacity-0 peer-checked:opacity-100 transition-opacity"
+                      />
+                    </span>
                     <label
                       htmlFor="modal-terms"
                       className="cursor-pointer select-none whitespace-nowrap"
