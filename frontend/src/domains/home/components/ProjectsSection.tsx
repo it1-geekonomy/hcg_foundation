@@ -2,7 +2,6 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -491,7 +490,6 @@ export default function ProjectsSection({
       const panel = card.querySelector<HTMLElement>(".card-panel");
       const panelBadge = card.querySelector<HTMLElement>(".panel-badge");
       const title = card.querySelector<HTMLElement>(".panel-title");
-      const date = card.querySelector<HTMLElement>(".panel-date");
       const desc = card.querySelector<HTMLElement>(".panel-desc");
       const cta = card.querySelector<HTMLElement>(".panel-cta");
       if (
@@ -502,7 +500,6 @@ export default function ProjectsSection({
         !panel ||
         !panelBadge ||
         !title ||
-        !date ||
         !desc ||
         !cta
       )
@@ -574,22 +571,16 @@ export default function ProjectsSection({
             panelStart + 0.12
           )
           .fromTo(
-            date,
+            desc,
             { opacity: 0, y: 12 },
             { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.35 },
             panelStart + 0.18
           )
           .fromTo(
-            desc,
-            { opacity: 0, y: 12 },
-            { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.35 },
-            panelStart + 0.24
-          )
-          .fromTo(
             cta,
             { opacity: 0, y: 10 },
             { opacity: 1, y: 0, duration: reduceMotion ? 0.001 : 0.35 },
-            panelStart + 0.3
+            panelStart + 0.24
           )
           .call(() => {
             panel.style.pointerEvents = "auto";
@@ -637,7 +628,6 @@ export default function ProjectsSection({
       const panel = card.querySelector<HTMLElement>(".m-card-panel");
       const panelBadge = card.querySelector<HTMLElement>(".m-panel-badge");
       const title = card.querySelector<HTMLElement>(".m-panel-title");
-      const date = card.querySelector<HTMLElement>(".m-panel-date");
       const desc = card.querySelector<HTMLElement>(".m-panel-desc");
       const cta = card.querySelector<HTMLElement>(".m-panel-cta");
       if (
@@ -647,7 +637,6 @@ export default function ProjectsSection({
         !panel ||
         !panelBadge ||
         !title ||
-        !date ||
         !desc ||
         !cta
       )
@@ -713,22 +702,16 @@ export default function ProjectsSection({
             panelStart + 0.09
           )
           .fromTo(
-            date,
+            desc,
             { opacity: 0, y: 10 },
             { opacity: 1, y: 0, duration: instant ? 0.001 : 0.28 },
             panelStart + 0.14
           )
           .fromTo(
-            desc,
-            { opacity: 0, y: 10 },
-            { opacity: 1, y: 0, duration: instant ? 0.001 : 0.28 },
-            panelStart + 0.19
-          )
-          .fromTo(
             cta,
             { opacity: 0, y: 8 },
             { opacity: 1, y: 0, duration: instant ? 0.001 : 0.28 },
-            panelStart + 0.24
+            panelStart + 0.19
           )
           .call(() => {
             panel.style.pointerEvents = "auto";
@@ -916,24 +899,6 @@ export default function ProjectsSection({
 
                 {/* Short title → sits low (design). Long title → sits under title. Only desc scrolls. */}
                 <div className="mt-auto flex min-h-0 max-h-[55%] flex-col">
-                  <div className="panel-date mb-3 flex shrink-0 items-center gap-2 text-white/90">
-                    <div className="relative h-4 w-4">
-                      <Image
-                        src="/calendar1.png"
-                        alt=""
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                    <Typography
-                      variant="text-2"
-                      as="span"
-                      className="font-manrope font-normal text-white"
-                    >
-                      Project Date: {card.date}
-                    </Typography>
-                  </div>
-
                   <Typography
                     variant="body-7"
                     as="p"
@@ -1040,24 +1005,6 @@ export default function ProjectsSection({
                       className="m-panel-title min-w-0 font-manrope font-bold text-white"
                     >
                       {card.title}
-                    </Typography>
-                  </div>
-
-                  <div className="m-panel-date mb-3 flex items-center gap-2 text-white/90">
-                    <div className="relative h-4 w-4">
-                      <Image
-                        src="/calendar1.png"
-                        alt=""
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                    <Typography
-                      variant="text-2"
-                      as="span"
-                      className="font-manrope font-normal text-white"
-                    >
-                      Project Date: {card.date}
                     </Typography>
                   </div>
 

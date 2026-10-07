@@ -2,7 +2,6 @@ export type CardData = {
   id?: string;
   number: string;
   title: string;
-  date: string;
   description: string;
   /** Desktop accordion image (homepage lg+) */
   image: string;
@@ -38,17 +37,6 @@ export const PROJECT_MOBILE_BANNER_SIZE = {
   height: 960,
 } as const;
 
-export function formatProjectCardDate(value?: string | null): string {
-  if (!value?.trim()) return "—";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  return d.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 export function mapProjectToCard(
   project: {
     id?: string;
@@ -56,7 +44,6 @@ export function mapProjectToCard(
     slug?: string;
     projectBanner?: string | null;
     projectMobileBanner?: string | null;
-    projectDate?: string | null;
     shortDescription?: string | null;
     displayOrder?: number | null;
   },
@@ -75,7 +62,6 @@ export function mapProjectToCard(
     id: project.id,
     number: String(project.displayOrder ?? index + 1),
     title: project.title,
-    date: formatProjectCardDate(project.projectDate),
     description: project.shortDescription?.trim() || "No description yet.",
     image: desktop,
     mobileImage: mobile,

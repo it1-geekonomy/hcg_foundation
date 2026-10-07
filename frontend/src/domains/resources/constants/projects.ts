@@ -2,7 +2,6 @@ export interface ProjectItem {
   id: string;
   slug: string;
   title: string;
-  date: string;
   category?: string;
   summary?: string;
   fullStory: string;
@@ -15,7 +14,6 @@ export const PROJECTS_DATA: ProjectItem[] = [
     id: "1",
     slug: "art-gallery-art-therapy-sessions",
     title: "Art Gallery & Art Therapy Sessions",
-    date: "19 December 2025",
     category: "Wellness",
     summary:
       "Creative workshops and therapeutic art sessions providing cancer patients and their families a safe space to express emotions, reduce anxiety, and find hope.",
@@ -29,7 +27,6 @@ Conducted under the guidance of professional artists, therapists, and volunteers
     id: "2",
     slug: "cancer-awareness-screening",
     title: "Cancer Awareness & Screening",
-    date: "19 December 2025",
     category: "Awareness",
     summary:
       "Free early detection screening camps and educational sessions organized across underserved rural and urban communities.",
@@ -45,7 +42,6 @@ Through these initiatives, the foundation strives to bridge healthcare dispariti
     id: "3",
     slug: "hpv-vaccination-program",
     title: "HPV Vaccination Program",
-    date: "19 December 2025",
     category: "Community Event",
     summary:
       "Protecting young women through subsidized and free Cervical Cancer HPV vaccination drives in partnership with local schools and healthcare workers.",
@@ -61,7 +57,6 @@ By prioritizing preventive oncology, HCG Foundation aims to reduce the burden of
     id: "4",
     slug: "art-therapy-wellness",
     title: "Art Therapy & Wellness",
-    date: "19 December 2025",
     category: "Wellness",
     summary:
       "Interactive group healing sessions, music therapy, and guided meditation sessions designed for oncology patients and caregivers.",
@@ -77,7 +72,6 @@ HCG Foundation remains committed to expanding holistic wellness initiatives that
     id: "5",
     slug: "christmas-new-year-celebration",
     title: "Christmas & New Year Celebration",
-    date: "25 December 2025",
     category: "Celebration",
     summary:
       "Festive holiday celebrations bringing smiles, gift distribution, and joyous music performances to pediatric and adult cancer wards.",
@@ -93,7 +87,6 @@ Moments of joy play a vital role in patient recovery, reminding patients that th
     id: "6",
     slug: "pediatric-oncology-support-drive",
     title: "Pediatric Oncology Support Drive",
-    date: "10 January 2026",
     category: "Community Event",
     summary:
       "Dedicated nutritional aid, educational scholarship kits, and emotional support programs for young brave heart cancer warriors.",
@@ -109,7 +102,6 @@ HCG Foundation stands beside every child and family, ensuring no young warrior w
     id: "7",
     slug: "art-therapy-wellness-session",
     title: "Art Therapy & Wellness",
-    date: "19 Dec 2025",
     category: "Wellness",
     summary:
       "Expressive art workshops providing oncology patients a creative sanctuary for healing and emotional well-being.",
@@ -121,7 +113,6 @@ HCG Foundation stands beside every child and family, ensuring no young warrior w
     id: "8",
     slug: "cancer-awareness-screening-drive",
     title: "Cancer Awareness & Screening",
-    date: "19 Dec 2025",
     category: "Awareness",
     summary:
       "Comprehensive cancer screening and early detection camps organized for community healthcare access.",
@@ -133,7 +124,6 @@ HCG Foundation stands beside every child and family, ensuring no young warrior w
     id: "9",
     slug: "hpv-vaccination-community-drive",
     title: "HPV Vaccination Program",
-    date: "19 Dec 2025",
     category: "Community Event",
     summary:
       "Protecting young women through subsidized and free Cervical Cancer HPV vaccination drives in partnership with local schools and healthcare workers.",
@@ -145,7 +135,6 @@ HCG Foundation stands beside every child and family, ensuring no young warrior w
     id: "10",
     slug: "swasti-art-therapy-and-wellness",
     title: "Art Therapy & Wellness",
-    date: "19 Dec 2025",
     category: "Wellness",
     summary:
       "Interactive group healing sessions, music therapy, and guided meditation sessions designed for oncology patients and caregivers.",
@@ -157,7 +146,6 @@ HCG Foundation stands beside every child and family, ensuring no young warrior w
     id: "11",
     slug: "cancer-awareness-rural-screening",
     title: "Cancer Awareness & Screening",
-    date: "19 Dec 2025",
     category: "Awareness",
     summary:
       "Free early detection screening camps and educational sessions organized across underserved rural and urban communities.",
@@ -169,7 +157,6 @@ HCG Foundation stands beside every child and family, ensuring no young warrior w
     id: "12",
     slug: "art-therapy-caregivers-wellness",
     title: "Art Therapy & Wellness",
-    date: "19 Dec 2025",
     category: "Wellness",
     summary:
       "Creative workshops and therapeutic art sessions providing cancer patients and their families a safe space to express emotions, reduce anxiety, and find hope.",
