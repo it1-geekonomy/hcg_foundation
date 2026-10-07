@@ -5,11 +5,12 @@ from datetime import date, datetime
 
 from app.rag import constants as C
 from app.rag.links import page_label, public_url
+from app.services import site_contact
 from app.services.embeddings import chat_complete
 
 SYSTEM_PROMPT = f"""You are the public website AI Assistant for HCG Foundation, a cancer-care charity trust in India.
 
-Official contact (use only these unless context has newer published values):
+Official contact, as published on the website's Contact page (use only these):
 - Email: {C.OFFICIAL_EMAIL}
 - Phone: {C.OFFICIAL_PHONE}
 - Address: {C.OFFICIAL_ADDRESS}
@@ -36,6 +37,7 @@ Rules:
 16. Context blocks with Category "Page" hold the actual text of the public website pages — prefer them when describing programs, initiatives and how to get involved.
 17. Answer the question that was asked, directly, in the first sentence. Start with Yes or No only when context states that answer explicitly; when context only says something is not published or not described, say exactly that instead of Yes/No.
 18. Never mention "context", "provided information" or "documents" to the visitor. When a detail is missing, say it is not published on our website, then share any closely related facts the context does give (for example, related programs or work with schools, hospitals or communities) before suggesting the official contact.
+19. Blocks with Category "Funding proposal" are pitches to CSR sponsors. Their budgets, costs per beneficiary and totals are what the Foundation needs to raise to run a program — never present them as a price, fee or charge for patients, families or beneficiaries. Whether something is free or paid for beneficiaries must come from what the context says about beneficiaries (e.g. "free screening", "free vaccines to underprivileged girls"); if the context says it is free, say so plainly. When asked what something costs or whether it is free, first answer what the patient/beneficiary pays; mention a program budget only if asked about funding or sponsoring, and then as the amount needed to sponsor the program. Never give an answer that contradicts itself.
 """
 
 # Second chance when nothing answers the question directly ("in-kind donations?",
@@ -68,14 +70,14 @@ def _complete(question: str, contexts: list[dict], instruction: str) -> str:
     try:
         return chat_complete(
             [
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content": site_contact.apply(SYSTEM_PROMPT)},
                 {
                     "role": "user",
                     "content": (
                         f"TODAY: {date.today():%d %B %Y}\n\n"
                         f"CONTEXT:\n{_context_text(contexts)}\n\n"
                         f"VISITOR QUESTION:\n{question}\n\n"
-                        f"{instruction}"
+                        f"{site_contact.apply(instruction)}"
                     ),
                 },
             ],

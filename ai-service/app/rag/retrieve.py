@@ -28,6 +28,28 @@ _TITLED_TABLES = {
 }
 
 
+# "Is X free?" / "how much does X cost?": the sentence that says X is free for
+# beneficiaries often sits in a long chunk that semantic search ranks low, while
+# sponsor budgets for X rank high and get misread as fees.
+_COST_QUESTION = re.compile(
+    r"\b(?:free|cost|costs|price|fees?|charges?|charged|pay|paid|afford|expensive)\b", re.I
+)
+_FREE_TERMS = r"free|no\s+cost|free\s+of\s+cost|without\s+charge|subsidi[sz]ed"
+_TOPIC_STOPWORDS = {
+    "the", "and", "for", "are", "you", "your", "our", "does", "how", "much", "what", "any",
+    "there", "can", "will", "get", "have", "has", "need", "this", "that", "with", "from",
+    "hcg", "foundation", "free", "cost", "costs", "price", "fee", "fees", "charge", "charges",
+    "charged", "pay", "paid", "afford", "expensive", "is", "it", "at", "do", "of", "to", "in",
+}
+
+
+def _cost_topic_stems(question: str) -> list[str]:
+    if not _COST_QUESTION.search(question or ""):
+        return []
+    words = re.findall(r"[a-z]{3,}", question.lower())
+    return sorted({w.rstrip("s")[:6] for w in words if w not in _TOPIC_STOPWORDS})
+
+
 def _named_phrases(queries: list[str]) -> set[str]:
     phrases: set[str] = set()
     for q in queries:
@@ -87,6 +109,11 @@ def hybrid_retrieve(queries: list[str], intents: set[str], question: str = "") -
         named.extend(vector_store.get_by_phrase(phrase))
     if question:
         named.extend(vector_store.get_by_title_in_text(question, _TITLED_TABLES))
+    stems = _cost_topic_stems(question)
+    if stems:
+        topic = "|".join(re.escape(s) for s in stems)
+        pattern = rf"\m({topic})[^.]{{0,80}}\m({_FREE_TERMS})\M|\m({_FREE_TERMS})\M[^.]{{0,80}}\m({topic})"
+        named.extend(vector_store.get_by_pattern(pattern, stems))
     for hit in named:
         parent = hit["parent_source_id"]
         prev = merged.get(parent)

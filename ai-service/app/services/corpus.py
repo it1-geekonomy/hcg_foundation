@@ -7,6 +7,7 @@ from pathlib import Path
 
 from app.config import settings
 from app.rag import constants as C
+from app.services import site_contact
 
 
 def _static_documents() -> list[dict]:
@@ -244,6 +245,7 @@ _OFFICIAL_VARIANTS = {
 
 
 def sanitize_knowledge_text(text: str) -> str:
+    published_phone = re.sub(r"\D", "", site_contact.current()["phone"])[-10:]
     lines = []
     for line in (text or "").splitlines():
         lower = line.lower().strip()
@@ -271,6 +273,8 @@ def sanitize_knowledge_text(text: str) -> str:
             digits = re.sub(r"\D", "", m.group(0))
             if digits in _OFFICIAL_VARIANTS or digits.endswith("8046607760"):
                 return C.OFFICIAL_PHONE
+            if digits[-10:] == published_phone:
+                return m.group(0)
             return "[contact via website]"
 
         lines.append(_MOBILE_RE.sub(repl, line))
@@ -327,6 +331,10 @@ def load_knowledge_files() -> list[dict]:
     return docs
 
 
+_PROPOSAL = re.compile(r"\bproposal\b", re.I)
+_BUDGET = re.compile(r"\bbudget\b", re.I)
+
+
 def load_geekonomy_documents() -> list[dict]:
     """Whitelist PDF/DOCX/PPTX from knowledge/source-docs."""
     from app.services import doc_extract
@@ -356,6 +364,13 @@ def load_geekonomy_documents() -> list[dict]:
             )
         title, category, url = classify_doc(path)
         rel = path.relative_to(root).as_posix()
+        note = ""
+        if _PROPOSAL.search(cleaned) and _BUDGET.search(cleaned):
+            category = "Funding proposal"
+            note = (
+                "Document type: funding proposal to CSR sponsors. Its budgets and costs are what "
+                "the Foundation needs to raise, not fees charged to patients or beneficiaries.\n"
+            )
         docs.append(
             {
                 "table": "knowledge",
@@ -364,7 +379,7 @@ def load_geekonomy_documents() -> list[dict]:
                 "url": url,
                 "category": category,
                 "content": (
-                    f"Title: {title}\nCategory: {category}\nSource file: {rel}\n\n"
+                    f"Title: {title}\nCategory: {category}\nSource file: {rel}\n{note}\n"
                     f"{cleaned}"
                 ),
             }
