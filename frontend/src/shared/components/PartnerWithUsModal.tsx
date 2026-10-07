@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, User, Mail, Building2, Check } from "lucide-react";
+import { X, Check } from "lucide-react";
 import PhoneInputField from "@/shared/forms/PhoneInputField";
 import Typography from "@/lib/Typography";
 import { participateApi } from "@/shared/lib/participate-api";
@@ -271,7 +271,11 @@ export default function PartnerWithUsModal({
                       }`}
                   >
                     <label htmlFor="partner-fullName" className="flex items-center cursor-pointer">
-                      <User className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.625rem]" />
+                      <img
+                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791267846107-gluso-user-2x.webp"
+                        alt=""
+                        className="size-[0.875rem] object-contain shrink-0 mr-[0.625rem]"
+                      />
                       <Typography
                         variant="caption-1"
                         as="span"
@@ -315,7 +319,11 @@ export default function PartnerWithUsModal({
                       }`}
                   >
                     <label htmlFor="partner-email" className="flex items-center cursor-pointer">
-                      <Mail className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.625rem]" />
+                      <img
+                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791268404784-fpux5-sms.webp"
+                        alt=""
+                        className="size-[0.875rem] object-contain shrink-0 mr-[0.625rem]"
+                      />
                       <Typography
                         variant="caption-1"
                         as="span"
@@ -379,7 +387,11 @@ export default function PartnerWithUsModal({
                     className="min-h-[2.85rem] h-auto pb-[0.25rem] flex flex-col justify-between border-b border-[#A3A3A3]/60 focus-within:border-[#FED034] transition-all"
                   >
                     <label htmlFor="partner-organization" className="flex items-center cursor-pointer">
-                      <Building2 className="size-[0.875rem] text-[#0D2838] shrink-0 mr-[0.625rem]" />
+                      <img
+                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269059713-dt428-book.webp"
+                        alt=""
+                        className="size-[0.875rem] object-contain shrink-0 mr-[0.625rem]"
+                      />
                       <Typography
                         variant="caption-1"
                         as="span"

@@ -368,12 +368,16 @@ export default function GrantsAndPhilanthropyPage() {
               type="button"
               data-anim="bottom-cta"
               onClick={() => setIsPartnerModalOpen(true)}
-              className="self-center md:self-start w-auto px-5 sm:px-6 lg:w-[13.1875rem] h-[2.75rem] sm:h-[3.25rem] lg:h-[3.5625rem] inline-flex items-center justify-center gap-2 sm:gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 backdrop-blur-[42px] transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer shrink-0 whitespace-nowrap"
+              className="self-center md:self-start w-auto px-5 sm:px-6 lg:w-[11rem] h-[2.75rem] sm:h-[3.25rem] lg:h-[3.5625rem] inline-flex items-center justify-center gap-2 sm:gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 backdrop-blur-[2.625rem] transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer shrink-0 whitespace-nowrap"
             >
-              <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#2D2D2D] whitespace-nowrap">
+              <Typography
+                variant="button-3"
+                as="span"
+                className="font-manrope font-semibold text-[#2D2D2D] whitespace-nowrap"
+              >
                 Partner With Us
               </Typography>
-              <DiagonalArrowIcon className="w-[0.9rem] h-[0.75rem] sm:w-[1.1rem] sm:h-[0.9rem] lg:w-[1.2925rem] lg:h-[1.034rem] shrink-0 text-[#2D2D2D]" />
+              <DiagonalArrowIcon className="w-[0.8rem] h-[0.7rem] sm:w-[1rem] sm:h-[0.825rem] shrink-0 text-[#2D2D2D]" />
             </button>
           </div>
         </div>
