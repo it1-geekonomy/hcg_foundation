@@ -249,9 +249,16 @@ export function PersonCard({
           initial={false}
           animate={{
             rotateY: flipped ? 0 : -180,
+            opacity: flipped ? 1 : 0,
           }}
+          // iOS Safari ignores backface-visibility under a filtered ancestor (the mobile coverflow),
+          // so the back face also swaps opacity at the half-turn, mirroring the front face.
           transition={{
             rotateY: { duration: currentDuration, ease: currentEase },
+            opacity: {
+              duration: 0.01,
+              delay: flipped ? currentDuration * 0.45 : currentDuration * 0.5,
+            },
           }}
           style={{
             backfaceVisibility: "hidden",
