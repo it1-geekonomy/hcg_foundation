@@ -516,30 +516,6 @@ def chunks_matching(pattern: str) -> list[dict]:
         db.close()
 
 
-def get_by_pattern(pattern: str, rank_terms: list[str], max_parents: int = 3) -> list[dict]:
-    """Documents with a chunk matching a Postgres regex, best first by how many of
-    ``rank_terms`` that chunk mentions."""
-    db = _db()
-    try:
-        rows = (
-            db.query(DocumentChunk)
-            .filter(text("document_chunks.content ~* :p"))
-            .params(p=pattern)
-            .all()
-        )
-        best: dict[str, tuple[int, DocumentChunk]] = {}
-        for row in rows:
-            lower = (row.content or "").lower()
-            score = sum(1 for t in rank_terms if t in lower)
-            parent = f"{row.source_table}#{row.source_id}"
-            if parent not in best or score > best[parent][0]:
-                best[parent] = (score, row)
-        top = sorted(best.values(), key=lambda item: item[0], reverse=True)[:max_parents]
-        return [_named_hit(db, row) for _, row in top]
-    finally:
-        db.close()
-
-
 def _named_hit(db: Session, row: DocumentChunk) -> dict:
     hit = _row_to_hit(row, 0.9)
     # A name near the end of a chunk has its details in the next one

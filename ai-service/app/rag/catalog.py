@@ -23,9 +23,7 @@ _CATALOG = [
     (r"\bblogs?\b|\barticles?\b", "blogs", "blog post", "blog posts", None),
 ]
 
-_COUNT = re.compile(r"\bhow\s+many\b|\btotal\s+(?:number|count)\b|\bcount\b|\bnumber\s+of\b", re.I)
-# "how much does it cost to sponsor the project" asks about money, not a count
-_MONEY = re.compile(r"\bhow\s+much\b|\bcosts?\b|\bprice\b|\bbudget\b|\bfees?\b|\bsponsor|\bfund|₹|\brs\.?\b|\binr\b", re.I)
+_COUNT = re.compile(r"\bhow\s+(?:many|much)\b|\btotal\b|\bcount\b|\bnumber\s+of\b", re.I)
 _LIST = re.compile(r"\blist\b|\bnames?\s+of\b|\ball\s+(?:the\s+)?(?:\w+\s+)?\w+\b|\bwhich\b.*\bare\s+there\b", re.I)
 # Upcoming/past events depend on dates, which the normal pipeline handles.
 _TIME = re.compile(r"\b(?:upcoming|next|past|previous|recent|latest|last|this\s+(?:week|month|year))\b", re.I)
@@ -37,7 +35,7 @@ _LIST_LIMIT = 25
 def answer_catalog_question(question: str) -> dict | None:
     q = question or ""
     counting = bool(_COUNT.search(q))
-    if not (counting or _LIST.search(q)) or _TIME.search(q) or _MONEY.search(q):
+    if not (counting or _LIST.search(q)) or _TIME.search(q):
         return None
 
     match = next((entry for entry in _CATALOG if re.search(entry[0], q, re.I)), None)

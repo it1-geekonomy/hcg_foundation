@@ -21,14 +21,14 @@ from app.rag.rerank import pick_sources, rerank
 from app.rag.retrieve import hybrid_retrieve
 from app.rag.rewrite import build_multi_queries, rewrite_query
 from app.rag.team import answer_team_question
-from app.services import site_contact, vector_store
+from app.services import vector_store
 
 
 def run_chat(message: str, session_id: str | None = None) -> dict:
     result = _answer(message, session_id)
-    # Every reply path (fast intents, catalog, cache, RAG) gets the same link and contact
-    # check, against the pages and contact details the website currently publishes
-    result["answer"] = site_contact.apply(clean_answer(result["answer"]))
+    # Every reply path (fast intents, catalog, cache, RAG) gets the same link check,
+    # against the pages the website currently has
+    result["answer"] = clean_answer(result["answer"])
     result["sources"] = valid_sources(result.get("sources"))
     return result
 
