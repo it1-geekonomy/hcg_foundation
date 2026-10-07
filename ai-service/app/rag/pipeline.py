@@ -14,7 +14,7 @@ from app.rag.generate import (
 )
 from app.rag.hospitals import hospital_context
 from app.rag.intents import detect_intents, is_on_topic, match_fast_intent
-from app.rag.links import clean_answer
+from app.rag.links import clean_answer, valid_sources
 from app.rag.memory import append_turn, get_history, resolve_session_id
 from app.rag.normalize import normalize_for_retrieval
 from app.rag.rerank import pick_sources, rerank
@@ -25,6 +25,15 @@ from app.services import vector_store
 
 
 def run_chat(message: str, session_id: str | None = None) -> dict:
+    result = _answer(message, session_id)
+    # Every reply path (fast intents, catalog, cache, RAG) gets the same link check,
+    # against the pages the website currently has
+    result["answer"] = clean_answer(result["answer"])
+    result["sources"] = valid_sources(result.get("sources"))
+    return result
+
+
+def _answer(message: str, session_id: str | None) -> dict:
     started = time.perf_counter()
     sid = resolve_session_id(session_id)
     user_message = (message or "").strip()
