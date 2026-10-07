@@ -8,7 +8,7 @@ const FINANCIALSUPPORT_BANNER = {
   bgImageAlt: "finance",
   breadcrumbs: [
     { label: "Home", href: "/" },
-    { label: "Our Program" },
+    { label: "Our Programs" },
   ],
   title: (
     <>

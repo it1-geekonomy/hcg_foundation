@@ -1,0 +1,29 @@
+import type { SupportGroupBlock } from "../components/whypatientjoins";
+
+export const HEART_ICON =
+  "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791357600101-eokje-vector-1-.webp";
+
+export const DEFAULT_BLOCKS: SupportGroupBlock[] = [
+  {
+    heading: "Why patients join",
+    paragraphs: [
+      {
+        label: "A sense of belonging:",
+        text: "Group members feel they are not alone. The Support Group operates like a surrogate family where members feel supported, cared for and accepted for themselves. Reduces Isolation – Groups develop a sense of community through shared feelings and experiences, and they feel connected with other members and these connections can help them to cope better with their treatments.",
+      },
+      {
+        label: "Empathy:",
+        text: "People outside the support group may not understand the experiences of people who have cancer, or they may dismiss their feelings. In the group, people have experienced and understood. Feeling Safe – Inside the group many patients feel protected and safe to express their feelings. Outside the group patients will try to hide their feelings/emotions which would later put them into depression.",
+      },
+    ],
+  },
+  {
+    heading: "The role of the support group",
+    bullets: [
+      "They realized that they could understand the problems, the anxieties, the fears of a woman diagnosed with breast cancer better than anyone else",
+      "They realized that they were the best suited to inform patients about the different treatment options, the various side effects associated with the treatments and the best way to handle them",
+      "They realized that women would be comfortable talking to them about their worries and uncertainties, some of which may be too minor or embarrassing to be discussed with the doctors",
+      "They realized that they could give women suffering from breast cancer a lot of hope and show them that it was possible to lead a normal life after cancer",
+    ],
+  },
+];
