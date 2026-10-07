@@ -9,18 +9,31 @@ from html.parser import HTMLParser
 
 from app.config import settings
 from app.rag import constants as C
+from app.services import site_routes
 
 log = logging.getLogger(__name__)
 
-# Every public page with text of its own. Listing pages (patient stories,
-# events, projects) render only in the browser and hold nothing but CMS items,
-# which are indexed from the CMS itself, as are /terms and /privacy.
+# Listing pages render only in the browser and hold nothing but CMS items, which
+# are indexed from the CMS itself, as are /terms and /privacy.
+_CMS_PAGES = {
+    C.PATIENT_STORIES_URL,
+    C.EVENTS_URL,
+    C.PROJECTS_URL,
+    "/privacy",
+    "/terms",
+    "/home-content",
+}
+
+# Used only until the site's pages have been learned from its menu (site_routes).
 SITE_PAGES = [
     "/",
     "/about-us",
     "/contact",
     C.PATIENT_AID_URL,
     C.AWARENESS_URL,
+    C.SWASTI_URL,
+    C.PINK_HOPE_URL,
+    C.RESEARCH_URL,
     C.PARTICIPATE_URL,
     C.CSR_URL,
     C.GRANTS_URL,
@@ -96,21 +109,11 @@ def _fetch(url: str) -> str:
         return res.read().decode("utf-8", errors="ignore")
 
 
-def broken_links(skip: set[str] | None = None) -> list[str]:
-    """Pages the chatbot links to that the website no longer serves (e.g. a renamed route)."""
-    base = (settings.site_crawl_url or "").rstrip("/")
-    if not base:
-        return []
-    broken: list[str] = []
-    for path in sorted({p.split("#")[0] or "/" for p in C.PAGE_LABELS if not p.startswith("#")}):
-        if skip and path in skip:
-            continue
-        try:
-            _fetch(base + _FETCH_PATHS.get(path, path))
-        except Exception as exc:  # noqa: BLE001
-            log.warning("Chatbot link target %s is not reachable: %s", path, exc)
-            broken.append(path)
-    return broken
+def pages_to_index() -> list[str]:
+    learned = site_routes.routes()
+    if not learned:
+        return list(SITE_PAGES)
+    return sorted(p for p in learned if p not in _CMS_PAGES and not p.startswith(C.DETAIL_PREFIXES))
 
 
 def load_site_pages() -> tuple[list[dict], list[str]]:
@@ -121,7 +124,7 @@ def load_site_pages() -> tuple[list[dict], list[str]]:
 
     docs: list[dict] = []
     failed: list[str] = []
-    for path in SITE_PAGES:
+    for path in pages_to_index():
         try:
             text = html_to_text(_fetch(base + _FETCH_PATHS.get(path, path)))
         except Exception as exc:  # noqa: BLE001 - site down should not break the sync
@@ -131,7 +134,7 @@ def load_site_pages() -> tuple[list[dict], list[str]]:
         if len(text) < 80:
             failed.append(path)
             continue
-        title = C.PAGE_LABELS.get(path, path)
+        title = (site_routes.routes() or {}).get(path) or C.PAGE_LABELS.get(path, path)
         docs.append(
             {
                 "table": "site",

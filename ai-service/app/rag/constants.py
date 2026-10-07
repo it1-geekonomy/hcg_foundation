@@ -10,8 +10,11 @@ FOUNDER_ROLE = "Founder and Managing Trustee"
 # --- Public website routes (must match frontend/src/app/(client)) ---
 # Every page renders the donate form, so donation links scroll to it in place.
 DONATE_URL = "#donate-form"
-PATIENT_AID_URL = "/financial-support-for-patients"
+PATIENT_AID_URL = "/patient-aid"
 AWARENESS_URL = "/awareness-and-screening-camps"
+SWASTI_URL = "/swasti-art-gallery"
+PINK_HOPE_URL = "/pink-hope-support-group"
+RESEARCH_URL = "/research-and-innovation"
 PARTICIPATE_URL = "/participate"
 CSR_URL = "/csr-partner"
 GRANTS_URL = "/grant-and-philanthropy"
@@ -31,8 +34,11 @@ PAGE_LABELS = {
     TRUSTEES_URL: "Board of Trustees",
     "/contact": "Contact Us",
     DONATE_URL: "Donate Now",
-    PATIENT_AID_URL: "Financial Support for Pediatric Patients",
+    PATIENT_AID_URL: "Patient Aid",
     AWARENESS_URL: "Awareness & Screening Camps",
+    SWASTI_URL: "Swasthi Art Gallery",
+    PINK_HOPE_URL: "Pink Hope Support Group",
+    RESEARCH_URL: "Research & Innovation",
     PARTICIPATE_URL: "Volunteer & Internships",
     CSR_URL: "CSR Partnership",
     GRANTS_URL: "Grants & Philanthropy",
@@ -48,7 +54,7 @@ PAGE_LABELS = {
 # Old routes that may still be stored on indexed chunks or written by the model.
 LEGACY_URLS = {
     "/donate": DONATE_URL,
-    "/patient-aid": PATIENT_AID_URL,
+    "/financial-support-for-patients": PATIENT_AID_URL,
     "/internship": PARTICIPATE_URL,
     "/partnerships": CSR_URL,
     "/awareness": AWARENESS_URL,
