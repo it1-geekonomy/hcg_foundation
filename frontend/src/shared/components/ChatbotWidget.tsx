@@ -524,7 +524,7 @@ export default function ChatbotWidget() {
   const isEmpty = messages.length === 0;
 
   return (
-    <>
+    <div data-chatbot className="contents">
       <AnimatePresence>
         {open ? (
           <motion.div
@@ -870,6 +870,6 @@ export default function ChatbotWidget() {
           ) : null}
         </motion.button>
       </div>
-    </>
+    </div>
   );
 }
