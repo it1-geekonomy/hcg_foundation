@@ -258,20 +258,29 @@ export default function TogetherWeCreateHope() {
 
             <Link
               href={TOGETHER_CONTENT.content.cta.href}
-              className="mt-2 mb-4 inline-flex h-12 w-fit shrink-0 items-stretch overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D] lg:mb-0"
+              className="mt-2 mb-4 inline-flex w-fit shrink-0 items-stretch max-sm:self-center overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D] lg:mb-0 lg:h-12"
             >
-              <span className="flex h-full items-center px-4">
+              <span className="flex items-center px-2.5 py-1.5 sm:px-3 sm:py-2 lg:h-full lg:px-4 lg:py-0">
+                {/* < lg: same type as the About CTA */}
+                <Typography
+                  variant="button-3"
+                  as="span"
+                  className="font-manrope font-semibold tracking-wide text-[#090909] lg:hidden"
+                >
+                  {TOGETHER_CONTENT.content.cta.label}
+                </Typography>
+                {/* lg+: original */}
                 <Typography
                   variant="button-1"
                   as="span"
-                  className="font-manrope font-bold tracking-wide text-[#090909]"
+                  className="hidden font-manrope font-bold tracking-wide text-[#090909] lg:block"
                 >
                   {TOGETHER_CONTENT.content.cta.label}
                 </Typography>
               </span>
 
-              <span className="flex h-full w-12 shrink-0 items-center justify-center border-[3px] border-[#FCCC2D] bg-black">
-                <ArrowUpRight className="h-4 w-4 text-[#FFFFFF]" />
+              <span className="flex w-7 shrink-0 items-center justify-center border-2 border-[#FCCC2D] bg-black sm:w-8 lg:h-full lg:w-12 lg:border-[3px]">
+                <ArrowUpRight className="h-3 w-3 text-[#FFFFFF] sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4" />
               </span>
             </Link>
           </div>

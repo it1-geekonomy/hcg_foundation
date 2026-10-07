@@ -258,19 +258,31 @@ export default function CommunitySection() {
             </Typography>
 
             <button
-              type="button"
-              onClick={scrollToDonateForm}
-              className="inline-flex items-center gap-2 bg-[#FCCC2D] px-5 py-2 transition-colors hover:bg-[#e0b410] md:px-6 md:py-2.5 lg:py-3"
-            >
-              <Typography
-                variant="button-1"
-                as="span"
-                className="font-manrope font-medium text-[#373737]"
-              >
-                {communityContent.overlay.buttonText}
-              </Typography>
-              <ArrowUpRight className="h-5 w-5 text-[#373737]" strokeWidth={2.5} />
-            </button>
+  type="button"
+  onClick={scrollToDonateForm}
+  className="inline-flex items-center gap-1.5 bg-[#FCCC2D] px-2.5 py-1.5 transition-colors hover:bg-[#e0b410] sm:gap-2 sm:px-3 sm:py-2 lg:gap-2 lg:px-6 lg:py-3"
+>
+  {/* < lg: same type as the About CTA */}
+  <Typography
+    variant="button-3"
+    as="span"
+    className="font-manrope font-semibold text-[#373737] lg:hidden"
+  >
+    {communityContent.overlay.buttonText}
+  </Typography>
+  {/* lg+: original */}
+  <Typography
+    variant="button-1"
+    as="span"
+    className="hidden font-manrope font-medium text-[#373737] lg:block"
+  >
+    {communityContent.overlay.buttonText}
+  </Typography>
+  <ArrowUpRight
+    className="h-3 w-3 text-[#373737] sm:h-3.5 sm:w-3.5 lg:h-5 lg:w-5"
+    strokeWidth={2.5}
+  />
+</button>
           </div>
         </div>
       </div>

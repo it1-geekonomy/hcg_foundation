@@ -547,7 +547,7 @@ export default function ChatbotWidget() {
                   id="hcg-chatbot-title"
                   className="truncate font-manrope text-[15px] leading-tight font-semibold text-[#1F1F1F] 2xl:text-[17px]"
                 >
-                  AI Assistant
+                  Ask HCGF 
                 </p>
                 <p className="mt-0.5 flex items-center gap-1.5 font-manrope text-xs text-[#3D3D3D] 2xl:text-[13px]">
                   <span className="h-2 w-2 rounded-full bg-[#5CC45C]" />
@@ -807,8 +807,7 @@ export default function ChatbotWidget() {
                 onClick={toggle}
                 className="text-left font-manrope text-[13px] leading-snug text-[#2B2B2B] 2xl:text-sm"
               >
-                <span className="block font-semibold text-[#1F1F1F]">Have a question?</span>
-                Ask about donating, our programs or volunteering.
+                <span className="block font-semibold text-[#1F1F1F]">How can HCGF help?</span>
               </button>
               <button
                 type="button"
