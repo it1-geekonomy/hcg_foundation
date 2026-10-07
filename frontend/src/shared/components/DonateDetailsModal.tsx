@@ -43,8 +43,14 @@ declare global {
   }
 }
 
+// 16px on phones stops iOS Safari from zooming into the focused field.
 const underlineInput =
-  "w-full bg-transparent py-1.5 font-manrope text-sm text-white outline-none placeholder:text-white/30";
+  "block w-full min-w-0 bg-transparent py-2 font-manrope text-base leading-6 text-white outline-none placeholder:text-white/55 sm:text-sm";
+
+const underlineField =
+  "min-w-0 border-b border-white/35 transition-colors focus-within:border-[#FCCC2D]";
+
+const MAX_AMOUNT_DIGITS = 10;
 
 type Props = {
   amount: number;
@@ -58,15 +64,17 @@ type Props = {
 
 function FieldLabel({
   htmlFor,
+  className = "",
   children,
 }: {
   htmlFor: string;
+  className?: string;
   children: ReactNode;
 }) {
   return (
     <label
       htmlFor={htmlFor}
-      className="mb-1 block font-manrope text-[13px] font-normal text-white/85"
+      className={`block font-manrope text-[13px] font-medium leading-snug text-white/85 sm:text-sm ${className}`}
     >
       {children}
     </label>
@@ -94,6 +102,7 @@ export default function DonateDetailsModal({
   const [amountDraft, setAmountDraft] = useState(String(amount));
   const [editingAmount, setEditingAmount] = useState(false);
   const amountInputRef = useRef<HTMLInputElement>(null);
+  const messageRef = useRef<HTMLTextAreaElement>(null);
 
   const currencyMeta = getDonationCurrency(currency);
   const formattedAmount = formatDonationAmount(amountValue, currency);
@@ -129,6 +138,14 @@ export default function DonateDetailsModal({
   useEffect(() => {
     if (editingAmount) amountInputRef.current?.focus();
   }, [editingAmount]);
+
+  // Grow the message box with its text (CSS max-height caps it at 3 lines).
+  useEffect(() => {
+    const el = messageRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [message]);
 
   useEffect(() => {
     const scrollY = window.scrollY;
@@ -252,14 +269,16 @@ export default function DonateDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-[#1c1c1c]/70 px-4 py-8 backdrop-blur-[2px] sm:items-center"
+      className="fixed inset-0 z-[70] overflow-y-auto overscroll-contain bg-[#1c1c1c]/70 backdrop-blur-[2px]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="donate-details-title"
       onClick={onClose}
     >
+      {/* min-h-full centres the panel when it fits and lets the overlay scroll when it doesn't */}
+      <div className="flex min-h-full items-center justify-center px-3 py-4 sm:p-6">
       <div
-        className="relative w-full max-w-[540px] rounded-md border border-white/15 p-5 shadow-2xl backdrop-blur-md sm:p-10"
+        className="relative w-full max-w-[560px] rounded-md border border-white/15 px-5 py-6 shadow-2xl backdrop-blur-md sm:px-10 sm:py-8"
         style={{ backgroundColor: donateTheme.glassBg }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -267,9 +286,9 @@ export default function DonateDetailsModal({
           type="button"
           onClick={onClose}
           aria-label="Close donation form"
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded text-white/70 transition hover:text-[#FCCC2D]"
+          className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-[#FCCC2D] sm:right-3 sm:top-3"
         >
-          <X className="h-4 w-4" />
+          <X className="h-5 w-5" />
         </button>
 
         {receipt ? (
@@ -291,7 +310,7 @@ export default function DonateDetailsModal({
             <Typography
               variant="body-7"
               as="p"
-              className="mt-3 px-4 font-argestadisplay font-light leading-snug text-white/70"
+              className="mt-3 wrap-break-word px-2 font-argestadisplay font-light leading-snug text-white/70 sm:px-4"
             >
               Your donation of {formattedAmount} {currency} was received.
             </Typography>
@@ -311,15 +330,15 @@ export default function DonateDetailsModal({
             </button>
           </div>
         ) : (
-          <form onSubmit={onSubmit} className="flex flex-col">
-            <div className="mb-8 flex flex-col items-center gap-2 text-center">
+          <form onSubmit={onSubmit} className="flex flex-col gap-4 sm:gap-5">
+            <div className="flex flex-col items-center gap-1.5 px-8 text-center">
               <div className="flex items-center gap-2">
                 <Image
                   src={donateIcon}
                   alt=""
                   width={26}
                   height={26}
-                  className="h-7 w-7"
+                  className="h-6 w-6 sm:h-7 sm:w-7"
                 />
                 <h3
                   id="donate-details-title"
@@ -333,27 +352,22 @@ export default function DonateDetailsModal({
               <Typography
                 variant="body-7"
                 as="p"
-                className="max-w-[360px] px-2 font-argestadisplay font-light leading-snug text-white/70"
+                className="hidden max-w-[360px] font-argestadisplay font-light leading-snug text-white/70 [@media(min-width:640px)_and_(min-height:761px)]:block"
               >
                 Your contribution helps us provide care, support and hope to
                 those who need it most.
               </Typography>
             </div>
 
-            <div className="mb-6">
-              <div>
-                <Typography
-                  variant="body-8"
-                  as="p"
-                  className="mb-2 font-manrope font-normal text-white"
-                >
+            <div className="flex flex-col gap-2">
+                <FieldLabel htmlFor="donate-amount" className="sr-only sm:not-sr-only">
                   Chosen Amount
-                </Typography>
-                <div className="flex items-stretch gap-3">
-                  <div className="flex min-h-[44px] flex-1 items-center rounded border border-[#FCCC2D] bg-[#8A7A28] px-4">
+                </FieldLabel>
+                <div className="flex items-stretch gap-2 sm:gap-3">
+                  <div className="flex min-h-[44px] min-w-0 flex-1 items-center rounded border border-[#FCCC2D] bg-[#8A7A28] px-4">
                     {editingAmount ? (
                       <div className="flex w-full min-w-0 items-center gap-1">
-                        <span className="shrink-0 font-manrope text-sm font-medium text-white">
+                        <span className="shrink-0 font-manrope text-base font-medium text-white sm:text-sm">
                           {currencyMeta.symbol}
                         </span>
                         <input
@@ -361,6 +375,7 @@ export default function DonateDetailsModal({
                           id="donate-amount"
                           type="text"
                           inputMode="decimal"
+                          maxLength={MAX_AMOUNT_DIGITS}
                           value={amountDraft}
                           onChange={(e) =>
                             setAmountDraft(
@@ -376,14 +391,14 @@ export default function DonateDetailsModal({
                               commitAmount();
                             }
                           }}
-                          className="w-full min-w-0 bg-transparent font-manrope text-sm font-medium text-white outline-none"
+                          className="w-full min-w-0 bg-transparent font-manrope text-base font-medium text-white outline-none sm:text-sm"
                         />
                       </div>
                     ) : (
                       <Typography
                         variant="body-8"
                         as="span"
-                        className="font-manrope font-medium text-white"
+                        className="min-w-0 truncate font-manrope font-medium text-white"
                       >
                         {formattedAmount}
                       </Typography>
@@ -392,143 +407,145 @@ export default function DonateDetailsModal({
                   <button
                     type="button"
                     onClick={editingAmount ? commitAmount : startAmountEdit}
-                    className="min-h-[44px] shrink-0 rounded border border-white/45 px-5 font-manrope text-xs font-semibold tracking-[0.12em] text-white transition hover:border-[#FCCC2D] hover:text-[#FCCC2D]"
+                    className="min-h-[44px] w-[72px] shrink-0 rounded border border-white/45 font-manrope text-xs font-semibold tracking-[0.12em] text-white transition hover:border-[#FCCC2D] hover:text-[#FCCC2D] sm:w-20"
                   >
                     {editingAmount ? "DONE" : "EDIT"}
                   </button>
                 </div>
-              </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
-              <div className="min-w-0">
-                <FieldLabel htmlFor="donate-full-name">Full Name*</FieldLabel>
-                <div className="border-b border-white/35">
-                  <input
-                    id="donate-full-name"
-                    required
-                    name="fullName"
-                    autoComplete="name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className={underlineInput}
-                  />
-                </div>
-              </div>
-
-<div className="min-w-0">
-  <FieldLabel htmlFor="donate-phone">Phone Number*</FieldLabel>
-
-  <div className="flex items-center border-b border-white/35">
- <CountrySelect
-  value={phoneCountryCode}
-  onChange={(nextCode) => {
-    setPhoneCountryCode(nextCode);
-    setPhone("");
-  }}
-  variant="dial"
-/>
-
-    <input
-      id="donate-phone"
-      required
-      name="phone"
-      type="tel"
-      autoComplete="tel"
-      inputMode="numeric"
-      value={phone}
-      onChange={(e) =>
-        setPhone(
-          nationalPhoneDigits(e.target.value, phoneCountry.dial, phone)
-        )
-      }
-      className="min-w-0 flex-1 bg-transparent py-1.5 font-manrope text-sm text-white outline-none placeholder:text-white/30"
-    />
-  </div>
-
-  {/* {international ? (
-    <p className="mt-1.5 font-manrope text-[11px] font-light text-white/60">
-      International cards and wallets are supported via Razorpay.
-    </p>
-  ) : null} */}
-</div>
-
-              <div className="min-w-0">
-                <FieldLabel htmlFor="donate-email">Email Address*</FieldLabel>
-                <div className="border-b border-white/35">
-                  <input
-                    id="donate-email"
-                    required
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={underlineInput}
-                  />
-                </div>
-              </div>
-
-              <div className="min-w-0">
-                <FieldLabel htmlFor="donate-city">City*</FieldLabel>
-                <div className="border-b border-white/35">
-                  <input
-                    id="donate-city"
-                    required
-                    name="city"
-                    autoComplete="address-level2"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className={underlineInput}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {!international ? (
-              <div className="mt-6">
-                <FieldLabel htmlFor="donate-pan">
-                  ID Card{" "}
-                  <span className="text-white/55">
-                    (PAN or Aadhaar – Optional, required only for 80G
-                    certificate)
-                  </span>
+            {/* Placeholders carry the labels (labels stay for screen readers) so every field is a single row */}
+            <div className="grid grid-cols-2 items-start gap-x-4 gap-y-3 sm:gap-x-6 sm:gap-y-4">
+              <div className={underlineField}>
+                <FieldLabel htmlFor="donate-full-name" className="sr-only">
+                  Full Name
                 </FieldLabel>
-                <div className="border-b border-white/35">
+                <input
+                  id="donate-full-name"
+                  required
+                  name="fullName"
+                  autoComplete="name"
+                  placeholder="Full Name*"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className={underlineInput}
+                />
+              </div>
+
+              <div className={underlineField}>
+                <FieldLabel htmlFor="donate-city" className="sr-only">
+                  City
+                </FieldLabel>
+                <input
+                  id="donate-city"
+                  required
+                  name="city"
+                  autoComplete="address-level2"
+                  placeholder="City*"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className={underlineInput}
+                />
+              </div>
+
+              <div className="col-span-2 sm:col-span-1">
+                <FieldLabel htmlFor="donate-phone" className="sr-only">
+                  Phone Number
+                </FieldLabel>
+                <div className={`flex items-center gap-2 ${underlineField}`}>
+                  <CountrySelect
+                    value={phoneCountryCode}
+                    onChange={(nextCode) => {
+                      setPhoneCountryCode(nextCode);
+                      setPhone("");
+                    }}
+                    variant="dial"
+                  />
+                  <input
+                    id="donate-phone"
+                    required
+                    name="phone"
+                    type="tel"
+                    autoComplete="tel"
+                    inputMode="numeric"
+                    placeholder="Phone Number*"
+                    value={phone}
+                    onChange={(e) =>
+                      setPhone(
+                        nationalPhoneDigits(e.target.value, phoneCountry.dial, phone),
+                      )
+                    }
+                    className={`${underlineInput} flex-1`}
+                  />
+                </div>
+              </div>
+
+              <div className={`col-span-2 sm:col-span-1 ${underlineField}`}>
+                <FieldLabel htmlFor="donate-email" className="sr-only">
+                  Email Address
+                </FieldLabel>
+                <input
+                  id="donate-email"
+                  required
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="Email Address*"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={underlineInput}
+                />
+              </div>
+
+              {!international ? (
+                <div className={`col-span-2 sm:col-span-1 ${underlineField}`}>
+                  <FieldLabel htmlFor="donate-pan" className="sr-only">
+                    ID Card (PAN or Aadhaar – optional, required only for 80G
+                    certificate)
+                  </FieldLabel>
                   <input
                     id="donate-pan"
                     name="pan"
+                    placeholder="PAN / Aadhaar (for 80G)"
+                    title="Optional – required only for the 80G tax certificate"
                     value={pan}
                     onChange={(e) => setPan(e.target.value)}
                     maxLength={20}
                     className={underlineInput}
                   />
                 </div>
-              </div>
-            ) : null}
+              ) : null}
 
-            <div className="mt-6">
-              <FieldLabel htmlFor="donate-message">
-                Leave a Message of Hope :)
-              </FieldLabel>
-              <div className="border-b border-white/35">
+              <div
+                className={`col-span-2 ${international ? "" : "sm:col-span-1"} ${underlineField}`}
+              >
+                <FieldLabel htmlFor="donate-message" className="sr-only">
+                  Leave a Message of Hope
+                </FieldLabel>
                 <textarea
+                  ref={messageRef}
                   id="donate-message"
                   name="message"
-                  rows={2}
+                  rows={1}
+                  placeholder="Message of hope (optional)"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  className={`${underlineInput} resize-none`}
+                  className={`${underlineInput} max-h-[5.5rem] resize-none overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
                 />
               </div>
             </div>
 
             {error ? (
-              <p className="mt-4 font-manrope text-sm text-[#FFE08A]">{error}</p>
+              <p
+                role="alert"
+                className="-my-1 font-manrope text-sm text-[#FFE08A]"
+              >
+                {error}
+              </p>
             ) : null}
 
-            <div className="mt-8 flex min-w-0 items-start gap-3">
-              <div className="flex shrink-0 -space-x-2 pt-0.5">
+            <div className="hidden min-w-0 items-center gap-3 [@media(min-width:640px)_and_(min-height:761px)]:flex">
+              <div className="flex shrink-0 -space-x-2">
                 {donorAvatars.map((src, i) => (
                   <Image
                     key={src}
@@ -544,37 +561,40 @@ export default function DonateDetailsModal({
               <Typography
                 variant="body-8"
                 as="p"
-                className="min-w-0 flex-1 font-manrope text-[11px] font-light leading-snug text-white/90 sm:text-sm"
+                className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/90"
               >
                 126 kind donors have contributed this month. Join with them
-                today.❤️
+                today. ❤️
               </Typography>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="mt-6 w-full rounded bg-[#FCCC2D] py-3.5 font-manrope font-bold text-[#3A2E00] disabled:opacity-60 cursor-pointer"
-            >
-              <Typography variant="button-1" as="span">
-                {loading
-                  ? "Please wait…"
-                  : `Pay Securely ${formattedAmount}`}
-              </Typography>
-            </button>
-
-            <div className="mt-4 flex items-center justify-center gap-1.5">
-              <Lock className="h-4 w-4 text-white/70" />
-              <Typography
-                variant="caption-1"
-                as="span"
-                className="font-manrope font-light text-white/60"
+            <div className="flex flex-col gap-2.5">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full cursor-pointer rounded bg-[#FCCC2D] px-4 py-3 font-manrope font-bold text-[#3A2E00] transition-opacity disabled:opacity-60"
               >
-                Secure Payment • Trusted by Thousands
-              </Typography>
+                <Typography variant="button-1" as="span" className="block truncate">
+                  {loading
+                    ? "Please wait…"
+                    : `Pay Securely ${formattedAmount}`}
+                </Typography>
+              </button>
+
+              <div className="flex items-center justify-center gap-1.5">
+                <Lock className="h-4 w-4 text-white/70" />
+                <Typography
+                  variant="caption-1"
+                  as="span"
+                  className="font-manrope font-light text-white/60"
+                >
+                  Secure Payment • Trusted by Thousands
+                </Typography>
+              </div>
             </div>
           </form>
         )}
+      </div>
       </div>
     </div>
   );

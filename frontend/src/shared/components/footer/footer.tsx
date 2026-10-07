@@ -23,11 +23,11 @@ function FooterHeading({ children }: { children: React.ReactNode }) {
 
 function Logo() {
   return (
-    <div className="flex items-center space-x-3 justify-center lg:justify-start">
+    <div className="flex shrink-0 items-center space-x-3 justify-center lg:justify-start">
       <img
         src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790826091485-84k1a-group-3-1-.webp"
         alt="HCG Foundation Logo"
-        className="h-20 w-auto object-contain"
+        className="h-14 w-auto object-contain lg:h-20"
       />
     </div>
   );
@@ -51,28 +51,49 @@ const InstagramIcon = () => (
   </svg>
 );
 
+function SocialLinks({ className = "" }: { className?: string }) {
+  return (
+    <div className={`gap-3 lg:gap-4 ${className}`}>
+      {FOOTER_SOCIAL_LINKS.map((social) => (
+        <a
+          key={social.name}
+          href={social.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={social.name}
+          className="w-9 h-9 lg:w-10 lg:h-10 bg-[#FDB723] rounded-full flex items-center justify-center hover:bg-yellow-500 transition-colors"
+        >
+          {social.name === "Instagram" && <InstagramIcon />}
+          {social.name === "LinkedIn" && <LinkedinIcon />}
+          {social.name === "Facebook" && <FacebookIcon />}
+        </a>
+      ))}
+    </div>
+  );
+}
+
 export default function Footer() {
   return (
     <footer className="bg-[#373737] text-white">
-      <div className={`${CONTAINER} py-8`}>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-[minmax(280px,320px)_1fr] gap-x-6 md:gap-x-8 gap-y-10 lg:gap-y-0 lg:gap-x-0">
-          <div className="col-span-2 md:col-span-3 lg:col-span-1 space-y-8 lg:max-w-xs lg:shrink-0">
-            <div className="space-y-8 lg:space-y-6">
+      <div className={`${CONTAINER} py-7 lg:py-8`}>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-[minmax(280px,320px)_1fr] gap-x-6 md:gap-x-8 gap-y-6 md:gap-y-10 lg:gap-y-0 lg:gap-x-0">
+          <div className="col-span-2 md:col-span-3 lg:col-span-1 space-y-5 lg:space-y-8 lg:max-w-xs lg:shrink-0">
+            <div className="flex items-center justify-center gap-3 lg:block lg:space-y-6">
               <Logo />
 
               <Typography variant="body-8"
                 as="p"
-                className="text-gray-300 max-w-[280px] text-center lg:text-left mx-auto lg:mx-0"
+                className="min-w-0 max-w-[240px] text-left leading-snug text-gray-300 lg:max-w-[280px] lg:leading-normal"
               >
                 The HCG Foundation is approved under sec 80G of the IT Act.
               </Typography>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 lg:space-y-4">
               <Typography variant="body-9" as="h4" className="text-white text-center lg:text-left">
                 Subscribe to our Newsletter
               </Typography>
-              <div className="flex w-full max-w-[280px] h-12 rounded-md overflow-hidden border border-[#FDB723] mx-auto lg:mx-0">
+              <div className="flex w-full max-w-[320px] lg:max-w-[280px] h-12 rounded-md overflow-hidden border border-[#FDB723] mx-auto lg:mx-0">
                 <input
                   type="email"
                   placeholder="Enter your email address"
@@ -89,10 +110,10 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="col-span-2 md:col-span-3 lg:col-span-1 grid grid-cols-[auto_auto] justify-evenly md:grid-cols-3 md:justify-normal gap-x-6 md:gap-x-8 gap-y-10 lg:flex lg:flex-row lg:items-start lg:justify-end lg:gap-x-10 xl:gap-x-14 2xl:gap-x-28">
+          <div className="col-span-2 md:col-span-3 lg:col-span-1 grid grid-cols-[auto_auto] justify-between md:grid-cols-3 md:justify-normal gap-x-4 md:gap-x-8 gap-y-6 md:gap-y-10 border-t border-white/10 pt-6 md:border-0 md:pt-0 lg:flex lg:flex-row lg:items-start lg:justify-end lg:gap-x-10 xl:gap-x-14 2xl:gap-x-28">
           <div className="col-span-1">
             <FooterHeading>QUICK LINKS</FooterHeading>
-            <ul className="mt-8 space-y-3">
+            <ul className="mt-3 space-y-1.5 min-[375px]:whitespace-nowrap md:whitespace-normal lg:mt-8 lg:space-y-3">
               {FOOTER_QUICK_LINKS.map((item) => (
                 <li key={item.label}>
                   <Link href={item.href} className="hover:text-[#FDB723] transition-colors text-white">
@@ -107,7 +128,7 @@ export default function Footer() {
 
           <div className="col-span-1">
             <FooterHeading>INNER PAGES</FooterHeading>
-            <ul className="mt-8 space-y-3">
+            <ul className="mt-3 space-y-1.5 min-[375px]:whitespace-nowrap md:whitespace-normal lg:mt-8 lg:space-y-3">
               {FOOTER_INNER_PAGES.map((item) => (
                 <li key={item.label}>
                   <Link
@@ -137,48 +158,40 @@ export default function Footer() {
           </div>
 
           <div className="col-span-2 md:col-span-1">
-            <FooterHeading>CONTACT US</FooterHeading>
-            <div className="mt-8 space-y-4">
-              <div className="flex items-start space-x-4 max-w-[260px]">
+            {/* Phones: socials share the heading row instead of taking a row of their own */}
+            <div className="flex items-center justify-between gap-4">
+              <FooterHeading>CONTACT US</FooterHeading>
+              <SocialLinks className="flex md:hidden" />
+            </div>
+            <div className="mt-3 space-y-3 lg:mt-8 lg:space-y-4">
+              <div className="flex items-start gap-3 lg:gap-4 md:max-w-[260px]">
                 <MapPin className="w-5 h-5 text-[#787878] flex-shrink-0 mt-0.5" />
                 <Typography variant="body-8" as="p" className="text-white">
                   {FOOTER_CONTACT_INFO.address}
                 </Typography>
               </div>
 
-              <div className="flex items-center space-x-4">
-                <Phone className="w-5 h-5 text-[#787878] flex-shrink-0" />
-                <a href={FOOTER_CONTACT_INFO.phoneLink}>
-                  <Typography variant="body-8" as="span" className="text-white hover:text-[#FDB723] transition-colors">
-                    {FOOTER_CONTACT_INFO.phone}
-                  </Typography>
-                </a>
-              </div>
-
-              <div className="flex items-center space-x-4">
-                <Mail className="w-5 h-5 text-[#787878] flex-shrink-0" />
-                <a href={FOOTER_CONTACT_INFO.emailLink}>
-                  <Typography variant="body-8" as="span" className="text-white hover:text-[#FDB723] transition-colors">
-                    {FOOTER_CONTACT_INFO.email}
-                  </Typography>
-                </a>
-              </div>
-
-                           <div className="flex space-x-4 pt-2">
-                {FOOTER_SOCIAL_LINKS.map((social) => (
-                  <a
-                    key={social.name}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 bg-[#FDB723] rounded-full flex items-center justify-center hover:bg-yellow-500 transition-colors"
-                  >
-                    {social.name === "Instagram" && <InstagramIcon />}
-                    {social.name === "LinkedIn" && <LinkedinIcon />}
-                    {social.name === "Facebook" && <FacebookIcon />}
+              <div className="flex flex-wrap gap-x-6 gap-y-3 md:flex-col md:gap-y-3 lg:gap-y-4">
+                <div className="flex items-center gap-3 lg:gap-4">
+                  <Phone className="w-5 h-5 text-[#787878] flex-shrink-0" />
+                  <a href={FOOTER_CONTACT_INFO.phoneLink}>
+                    <Typography variant="body-8" as="span" className="text-white hover:text-[#FDB723] transition-colors">
+                      {FOOTER_CONTACT_INFO.phone}
+                    </Typography>
                   </a>
-                ))}
+                </div>
+
+                <div className="flex min-w-0 items-center gap-3 lg:gap-4">
+                  <Mail className="w-5 h-5 text-[#787878] flex-shrink-0" />
+                  <a href={FOOTER_CONTACT_INFO.emailLink} className="min-w-0 break-all">
+                    <Typography variant="body-8" as="span" className="text-white hover:text-[#FDB723] transition-colors">
+                      {FOOTER_CONTACT_INFO.email}
+                    </Typography>
+                  </a>
+                </div>
               </div>
+
+              <SocialLinks className="hidden md:flex pt-2" />
             </div>
           </div>
           </div>

@@ -43,6 +43,7 @@ export type HeroResponsiveLayout = {
   nameSize: number;
   taglineSize: number;
   bodySize: number;
+  bodyLineHeight?: number;
   nameGap: number;
   taglineGap: number;
   wordSpacing: string;
@@ -57,20 +58,23 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
     const tileWidth = isShort ? 48 : 52;
     return {
       isMobile: true,
-      overlayWidth: "58%",
+      overlayWidth: "65%",
       tileWidth,
       tileBorder: 2,
-      contentTopPx,
+      // Small phones start the copy higher so the longest stories still fit above the fold.
+      contentTopPx: height < 720 ? height * 0.4 : contentTopPx,
       contentLeft: 30,
-      contentRight: 10,
+      // Clears the fixed "Donate Now" side tab (~34px wide on phones).
+      contentRight: 44,
       contentBottom: isShort ? 18 : 22,
       gapAfterTile: isShort ? 8 : 10,
       accentGap: 10,
-      nameSize: isShort ? 15 : 16,
-      taglineSize: isShort ? 11 : 12,
-      bodySize: isShort ? 10 : 11,
-      nameGap: isShort ? 14 : 16,
-      taglineGap: isShort ? 10 : 12,
+      nameSize: isShort ? 18 : 20,
+      taglineSize: isShort ? 13 : 14,
+      bodySize: isShort ? 13 : 14,
+      bodyLineHeight: height < 700 ? 1.4 : isShort ? 1.45 : 1.55,
+      nameGap: isShort ? 10 : 16,
+      taglineGap: isShort ? 8 : 12,
       wordSpacing: "0.25em",
     };
   }
@@ -92,7 +96,7 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
       accentGap: 12,
       nameSize: isShort ? 18 : 20,
       taglineSize: isShort ? 12 : 13,
-      bodySize: isShort ? 10 : 11,
+      bodySize: isShort ? 11 : 12,
       nameGap: isShort ? 20 : 24,
       taglineGap: isShort ? 12 : 14,
       wordSpacing: "0.25em",
@@ -120,7 +124,7 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
       accentGap: 12,
       nameSize: Math.round(lerp(22, 26, t)),
       taglineSize: Math.round(lerp(15, 17, t)),
-      bodySize: Math.round(lerp(13, 14, t)),
+      bodySize: Math.round(lerp(14, 15, t)),
       nameGap: isShort ? 22 : Math.round(lerp(24, 28, t)),
       taglineGap: isShort ? 14 : Math.round(lerp(14, 16, t)),
       wordSpacing: "0.28em",
@@ -144,7 +148,7 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
     accentGap: 14,
     nameSize: isShort ? 24 : 28,
     taglineSize: isShort ? 16 : 18,
-    bodySize: isShort ? 13 : 15,
+    bodySize: isShort ? 14 : 16,
     nameGap: isShort ? 22 : 28,
     taglineGap: isShort ? 14 : 16,
     wordSpacing: "0.3em",
@@ -258,10 +262,15 @@ function StoryTextBlock({
   direction: 1 | -1;
   layout: HeroResponsiveLayout;
 }) {
+  // The phone panel is narrow and sits over busy photos, so text gets a soft shadow there for legibility.
+  const mobileShadow: CSSProperties = layout.isMobile
+    ? { textShadow: "0 1px 3px rgba(0,0,0,0.28)" }
+    : {};
   const textStyle = (size: number, weight: number, color: string, extra?: CSSProperties) => ({
     fontSize: size,
     fontWeight: weight,
     color,
+    ...mobileShadow,
     ...extra,
   });
 
@@ -316,9 +325,9 @@ function StoryTextBlock({
         <div
           style={{
             paddingLeft: textColumnOffset,
-            ...textStyle(layout.bodySize, 400, "rgba(255,255,255,0.95)", {
+            ...textStyle(layout.bodySize, layout.isMobile ? 500 : 400, layout.isMobile ? "white" : "rgba(255,255,255,0.95)", {
               marginTop: subheading ? layout.taglineGap : layout.nameGap,
-              lineHeight: 1.65,
+              lineHeight: layout.bodyLineHeight ?? 1.65,
             }),
           }}
         >
