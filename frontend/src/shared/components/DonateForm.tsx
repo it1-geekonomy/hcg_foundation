@@ -6,6 +6,7 @@ import Script from "next/script";
 import { Check, Lock } from "lucide-react";
 import Typography from "@/lib/Typography";
 import DonateDetailsModal from "@/shared/components/DonateDetailsModal";
+import { Terms80GLink } from "@/shared/components/Terms80GDialog";
 import CountrySelect from "@/shared/components/CountrySelect";
 import {
   donateTheme,
@@ -275,9 +276,13 @@ export default function DonateSection() {
             className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/80"
           >
             I have read and agree to the applicable{" "}
-            <span className="font-semibold text-[#FCCC2D]">
-              80G Terms &amp; Conditions
-            </span>{" "}
+            <Terms80GLink
+              className="font-semibold text-[#FCCC2D]"
+              onAgree={() => {
+                setAgreedTo80G(true);
+                setTermsError(false);
+              }}
+            />{" "}
             for this donation.
           </Typography>
         </label>

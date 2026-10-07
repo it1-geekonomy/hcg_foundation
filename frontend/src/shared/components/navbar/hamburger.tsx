@@ -17,7 +17,7 @@ export function HamburgerButton({ isMenuOpen, onToggle }: HamburgerButtonProps) 
       onClick={onToggle}
       aria-label="Toggle menu"
       aria-expanded={isMenuOpen}
-      className="xl:hidden shrink-0 relative h-6 w-6 p-2 text-white box-content"
+      className="lg:hidden shrink-0 relative h-6 w-6 p-2 text-white box-content"
     >
       <Menu
         className={`absolute inset-0 m-auto h-6 w-6 transition-all duration-300 ease-in-out ${
@@ -62,7 +62,7 @@ export function MobileMenuPanel({
 
   return (
     <div
-      className={`xl:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+      className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
         isMenuOpen ? "max-h-[36rem] opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-2"
       }`}
     >
@@ -70,117 +70,91 @@ export function MobileMenuPanel({
           background photo shows evenly on all open sides, matching the
           existing left/right inset from the parent container. */}
       <div className="mx-[clamp(1rem,3vw,1.5rem)] mb-[clamp(1rem,3vw,1.5rem)] mt-1 rounded-lg overflow-hidden max-sm:mx-0 max-sm:mb-0 max-sm:mt-0 max-sm:rounded-none">
-        <div className="flex flex-col items-start gap-1 bg-black/[0.18] px-[clamp(1rem,3vw,1.5rem)] pb-3 pt-3 border-t border-white/10 text-left max-h-[70vh] overflow-y-auto overscroll-contain max-sm:bg-transparent max-sm:max-h-[calc(100dvh-3.5rem)]">
-          {navLinks.map((link, i) => {
-            const isOpen = openDropdown === i;
-            const isChildActive =
-              link.hasDropdown && link.dropdownItems?.some((item) => item.href === pathname);
-            const isLinkActive = link.href === pathname || isChildActive;
+        <div className="flex flex-col bg-black/[0.18] px-[clamp(1rem,3vw,1.5rem)] pb-4 pt-1 border-t border-white/10 text-left max-h-[70vh] overflow-y-auto overscroll-contain max-sm:bg-transparent max-sm:max-h-[calc(100dvh-3.5rem)]">
+          <ul className="flex flex-col divide-y divide-white/[0.07]">
+            {navLinks.map((link, i) => {
+              const isOpen = openDropdown === i;
+              const isChildActive =
+                link.hasDropdown && link.dropdownItems?.some((item) => item.href === pathname);
+              const isLinkActive = link.href === pathname || isChildActive;
+              const rowClass = `flex w-full items-center justify-between gap-3 py-3.5 text-left font-manrope text-base leading-snug transition-colors duration-200 ${
+                isLinkActive ? "font-semibold text-[#FED034]" : "font-medium text-white/90 hover:text-white"
+              }`;
 
-            return (
-              <div key={i} className="w-full">
-                {link.hasDropdown ? (
-                  <button
-                    onClick={() => toggleDropdown(i)}
-                    className={`w-full flex items-center justify-between gap-2 py-3.5 text-left transition-all duration-300 ease-in-out delay-[var(--stagger-delay)] ${
-                      isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
-                    }`}
-                    style={
-                      {
-                        "--stagger-delay": isMenuOpen ? `${i * 60}ms` : "0ms",
-                      } as React.CSSProperties
-                    }
-                  >
-                    <Typography
-                      variant="text-2"
-                      as="span"
-                      className={`text-white transition-colors duration-300 ${
-                        isLinkActive ? "font-bold" : "font-medium"
-                      }`}
+              return (
+                <li
+                  key={i}
+                  className={`transition-[opacity,transform] duration-300 ease-out ${
+                    isMenuOpen ? "translate-x-0 opacity-100" : "-translate-x-2 opacity-0"
+                  }`}
+                  style={{ transitionDelay: isMenuOpen ? `${i * 40}ms` : "0ms" }}
+                >
+                  {link.hasDropdown ? (
+                    <button
+                      type="button"
+                      onClick={() => toggleDropdown(i)}
+                      aria-expanded={isOpen}
+                      className={rowClass}
                     >
                       {link.label}
-                    </Typography>
-                    <ChevronDown
-                      className={`h-4 w-4 shrink-0 text-white transition-all duration-300 ease-in-out ${
-                        isOpen ? "rotate-180" : ""
-                      }`}
-                      strokeWidth={2.5}
-                    />
-                  </button>
-                ) : (
-                  <Link
-                    href={link.href}
-                    onClick={(event) => {
-                      setIsMenuOpen(false);
-                      if (link.href === "/" && onHomeNav) onHomeNav(event);
-                    }}
-                    className={`flex items-center py-3.5 transition-all duration-300 ease-in-out delay-[var(--stagger-delay)] ${
-                      isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
-                    }`}
-                    style={
-                      {
-                        "--stagger-delay": isMenuOpen ? `${i * 60}ms` : "0ms",
-                      } as React.CSSProperties
-                    }
-                  >
-                    <Typography
-                      variant="text-2"
-                      as="span"
-                      className={`text-white transition-colors duration-300 ${
-                        isLinkActive ? "font-bold" : "font-medium"
-                      }`}
+                      <ChevronDown
+                        className={`h-4 w-4 shrink-0 transition-transform duration-300 ease-out ${
+                          isOpen ? "rotate-180 text-[#FED034]" : "text-white/60"
+                        }`}
+                        strokeWidth={2}
+                      />
+                    </button>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      onClick={(event) => {
+                        setIsMenuOpen(false);
+                        if (link.href === "/" && onHomeNav) onHomeNav(event);
+                      }}
+                      aria-current={link.href === pathname ? "page" : undefined}
+                      className={rowClass}
                     >
                       {link.label}
-                    </Typography>
-                  </Link>
-                )}
+                    </Link>
+                  )}
 
-                {/* Dropdown sub-items — paper roll accordion, squared corners */}
-                {link.hasDropdown && link.dropdownItems && (
-                  <div
-                    className={`grid w-full transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                      isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                    }`}
-                  >
-                    <div className="w-full min-h-0 overflow-hidden">
-                      <div className="flex flex-col gap-1 pl-4 border-l-2 border-[#FED034]/50 ml-1 mb-2 pt-1">
-                        {link.dropdownItems.map((item, j) => {
-                          const isItemActive = item.href === pathname;
+                  {link.hasDropdown && link.dropdownItems && (
+                    <div
+                      className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+                        isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                      }`}
+                    >
+                      <div className="min-h-0 overflow-hidden">
+                        <ul className="mb-3 ml-1 flex flex-col border-l border-white/15">
+                          {link.dropdownItems.map((item) => {
+                            const isItemActive = item.href === pathname;
 
-                          return (
-                            <Link
-                              key={j}
-                              href={item.href}
-                              onClick={() => setIsMenuOpen(false)}
-                              className={`group/item relative flex items-center overflow-hidden rounded-none py-2 pl-3 pr-3 transition-all duration-300 ease-out delay-[var(--stagger-delay)] ${
-                                isOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
-                              }`}
-                              style={
-                                {
-                                  "--stagger-delay": isOpen ? `${j * 50}ms` : "0ms",
-                                } as React.CSSProperties
-                              }
-                            >
-                              <span className="absolute inset-0 origin-left scale-x-0 bg-[#FED034]/10 transition-transform duration-300 ease-out group-hover/item:scale-x-100" />
-                              <Typography
-                                variant="text-2"
-                                as="span"
-                                className={`relative z-10 text-white transition-colors duration-300 ${
-                                  isItemActive ? "font-bold" : "font-medium"
-                                }`}
-                              >
-                                {item.label}
-                              </Typography>
-                            </Link>
-                          );
-                        })}
+                            return (
+                              <li key={item.href}>
+                                <Link
+                                  href={item.href}
+                                  onClick={() => setIsMenuOpen(false)}
+                                  aria-current={isItemActive ? "page" : undefined}
+                                  tabIndex={isOpen ? 0 : -1}
+                                  className={`-ml-px flex border-l-2 py-2 pl-4 pr-2 font-manrope text-[15px] leading-snug transition-colors duration-200 ${
+                                    isItemActive
+                                      ? "border-[#FED034] font-semibold text-[#FED034]"
+                                      : "border-transparent font-medium text-white/70 hover:border-white/40 hover:text-white"
+                                  }`}
+                                >
+                                  {item.label}
+                                </Link>
+                              </li>
+                            );
+                          })}
+                        </ul>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                  )}
+                </li>
+              );
+            })}
+          </ul>
 
           {/* Donate Button — only inside hamburger below sm (640px) */}
           <Link
@@ -190,16 +164,12 @@ export function MobileMenuPanel({
               setIsMenuOpen(false);
               onDonate();
             }}
-            className={`sm:hidden mt-3 inline-flex justify-center px-5 py-2.5 bg-[#FED034] ${
-              isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
+            className={`sm:hidden mt-3 flex w-full justify-center bg-[#FED034] px-5 py-3 transition-[opacity,transform,background-color] duration-300 ease-out hover:bg-[#FFDA55] ${
+              isMenuOpen ? "translate-x-0 opacity-100" : "-translate-x-2 opacity-0"
             }`}
-            style={
-              {
-                "--stagger-delay": isMenuOpen ? `${navLinks.length * 60}ms` : "0ms",
-              } as React.CSSProperties
-            }
+            style={{ transitionDelay: isMenuOpen ? `${navLinks.length * 40}ms` : "0ms" }}
           >
-            <Typography variant="button-4" as="span" className="text-[#262626] font-bold">
+            <Typography variant="button-4" as="span" className="font-manrope font-bold text-[#262626]">
               {donateButton.label}
             </Typography>
           </Link>

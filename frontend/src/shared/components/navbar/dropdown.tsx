@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, ChevronRight } from "lucide-react";
@@ -22,7 +23,43 @@ interface DesktopDropdownProps {
   isActive: boolean;
   isOpen: boolean;
   onToggle: () => void;
+  onOpen?: () => void;
+  onClose?: () => void;
   onItemClick?: () => void;
+}
+
+/** Hover grace period so moving the mouse from the trigger into the panel doesn't close it. */
+const HOVER_CLOSE_DELAY_MS = 140;
+
+/** Shared top-level nav label styling: steady weight (no layout shift) with a gold underline for hover/active. */
+export function NavLabel({
+  label,
+  isActive,
+  isOpen = false,
+}: {
+  label: string;
+  isActive: boolean;
+  isOpen?: boolean;
+}) {
+  return (
+    <span className="relative inline-flex flex-col">
+      <Typography
+        variant="text-2"
+        as="span"
+        className={`whitespace-nowrap font-manrope font-medium transition-colors duration-200 lg:max-xl:!text-[15px] ${
+          isActive || isOpen ? "text-white" : "text-white/85 group-hover/nav:text-white"
+        }`}
+      >
+        {label}
+      </Typography>
+      <span
+        aria-hidden="true"
+        className={`absolute -bottom-1.5 left-0 h-[2px] w-full origin-left rounded-full bg-[#FED034] transition-transform duration-300 ease-out ${
+          isActive ? "scale-x-100" : "scale-x-0 group-hover/nav:scale-x-100"
+        }`}
+      />
+    </span>
+  );
 }
 
 export default function DesktopDropdown({
@@ -30,108 +67,102 @@ export default function DesktopDropdown({
   isActive,
   isOpen,
   onToggle,
+  onOpen,
+  onClose,
   onItemClick,
 }: DesktopDropdownProps) {
   const pathname = usePathname();
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelClose = () => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  };
+
+  useEffect(() => cancelClose, []);
 
   return (
-    <div className="relative">
+    <div
+      className="relative"
+      onPointerEnter={(e) => {
+        if (e.pointerType !== "mouse") return;
+        cancelClose();
+        onOpen?.();
+      }}
+      onPointerLeave={(e) => {
+        if (e.pointerType !== "mouse") return;
+        cancelClose();
+        closeTimer.current = setTimeout(() => onClose?.(), HOVER_CLOSE_DELAY_MS);
+      }}
+    >
       <button
+        type="button"
         onClick={onToggle}
         aria-expanded={isOpen}
-        className="relative flex items-center gap-1 py-1"
+        aria-haspopup="true"
+        className="group/nav relative flex items-center gap-1.5 py-1"
       >
-        <Typography
-          variant="text-2"
-          as="span"
-          className={`font-manrope text-white transition-colors duration-300 ${
-            isActive ? "font-bold" : "font-medium"
-          }`}
-        >
-          {link.label}
-        </Typography>
+        <NavLabel label={link.label} isActive={isActive} isOpen={isOpen} />
         <ChevronDown
-          className={`h-4 w-4 text-white transition-all duration-300 ease-in-out ${
+          className={`h-4 w-4 text-white/80 transition-transform duration-300 ease-out ${
             isOpen ? "rotate-180" : "rotate-0"
           }`}
-          strokeWidth={2.5}
+          strokeWidth={2}
         />
       </button>
 
-      {/* Desktop dropdown — xl and up only. Below 1280px the hamburger menu is separate. */}
+      {/* pt bridges the gap to the panel so hover isn't lost between trigger and menu. */}
       <div
-        className={`absolute left-1/2 top-full w-72 -translate-x-1/2 pt-5 transition-all duration-300 ${
+        className={`absolute left-1/2 top-full z-10 -translate-x-1/2 pt-4 transition-[opacity,transform,visibility] duration-200 ease-out ${
           isOpen
-            ? "pointer-events-auto translate-y-0 opacity-100"
-            : "pointer-events-none -translate-y-1 opacity-0"
+            ? "visible translate-y-0 opacity-100"
+            : "invisible -translate-y-1.5 opacity-0"
         }`}
       >
-        <div
-          className={`absolute left-1/2 top-3.5 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-[#FED034] bg-[#141414] shadow-[-4px_-4px_12px_rgba(254,208,52,0.25)] transition-transform duration-300 ease-out ${
-            isOpen ? "scale-100" : "scale-0"
-          }`}
-        />
+        <div className="relative min-w-[15rem] overflow-hidden rounded-xl border border-white/10 bg-[#1b1813]/95 p-1.5 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.55)] backdrop-blur-xl">
+          <span
+            aria-hidden="true"
+            className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#FED034]/80 to-transparent"
+          />
+          <ul className="flex flex-col">
+            {link.dropdownItems?.map((item, j) => {
+              const isItemActive = item.href === pathname;
 
-        <div
-          className={`grid w-full transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-          }`}
-        >
-          <div className="w-full min-h-0 overflow-hidden">
-            <div className="relative w-full overflow-hidden rounded-xl border border-[#FED034]/80 bg-[#141414]/95 shadow-[0_18px_50px_rgba(0,0,0,0.5),0_0_28px_rgba(254,208,52,0.22)] backdrop-blur-md">
-              <span
-                aria-hidden="true"
-                className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#FED034] to-transparent"
-              />
-              <div className="flex flex-col gap-0.5 p-2 pt-3">
-                {link.dropdownItems?.map((item, j) => {
-                  const isItemActive = item.href === pathname;
-
-                  return (
-                    <Link
-                      key={j}
-                      href={item.href}
-                      onClick={onItemClick}
-                      className={`group/item relative flex items-center justify-between overflow-hidden rounded-lg px-3.5 py-2.5 transition-all duration-300 ease-out delay-[var(--stagger-delay)] ${
-                        isOpen ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
-                      } ${isItemActive ? "bg-[#FED034]/15" : "hover:bg-white/[0.04]"}`}
-                      style={
-                        {
-                          "--stagger-delay": isOpen ? `${j * 45}ms` : "0ms",
-                        } as React.CSSProperties
-                      }
-                    >
-                      <span
-                        aria-hidden="true"
-                        className={`absolute top-1/2 left-0 w-[3px] -translate-y-1/2 rounded-r bg-[#FED034] transition-all duration-300 ${
-                          isItemActive ? "h-2/3" : "h-0 group-hover/item:h-1/2"
-                        }`}
-                      />
-                      <Typography
-                        variant="text-2"
-                        as="span"
-                        className={`relative z-10 pl-1.5 font-manrope transition-colors duration-300 ${
-                          isItemActive
-                            ? "font-bold text-[#FED034]"
-                            : "font-medium text-white group-hover/item:text-[#FED034]"
-                        }`}
-                      >
-                        {item.label}
-                      </Typography>
-                      <ChevronRight
-                        className={`relative z-10 h-4 w-4 shrink-0 transition-all duration-300 ease-out ${
-                          isItemActive
-                            ? "translate-x-0 text-[#FED034] opacity-100"
-                            : "-translate-x-2 text-[#FED034] opacity-0 group-hover/item:translate-x-0 group-hover/item:opacity-100"
-                        }`}
-                        strokeWidth={2.5}
-                      />
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+              return (
+                <li
+                  key={item.href}
+                  className={`transition-[opacity,transform] duration-200 ease-out ${
+                    isOpen ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"
+                  }`}
+                  style={{ transitionDelay: isOpen ? `${40 + j * 30}ms` : "0ms" }}
+                >
+                  <Link
+                    href={item.href}
+                    onClick={onItemClick}
+                    aria-current={isItemActive ? "page" : undefined}
+                    tabIndex={isOpen ? 0 : -1}
+                    className={`group/item flex items-center justify-between gap-6 whitespace-nowrap rounded-lg px-3.5 py-2.5 font-manrope text-[15px] leading-snug transition-colors duration-150 ${
+                      isItemActive
+                        ? "bg-[#FED034]/10 font-semibold text-[#FED034]"
+                        : "font-medium text-white/85 hover:bg-white/[0.06] hover:text-white"
+                    }`}
+                  >
+                    {item.label}
+                    <ChevronRight
+                      className={`h-4 w-4 shrink-0 text-[#FED034] transition-[opacity,transform] duration-200 ease-out ${
+                        isItemActive
+                          ? "translate-x-0 opacity-100"
+                          : "-translate-x-1.5 opacity-0 group-hover/item:translate-x-0 group-hover/item:opacity-100"
+                      }`}
+                      strokeWidth={2.25}
+                    />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </div>
     </div>
