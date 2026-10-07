@@ -354,8 +354,7 @@ export default function DonateDetailsModal({
                 as="p"
                 className="hidden max-w-[360px] font-argestadisplay font-light leading-snug text-white/70 [@media(min-width:640px)_and_(min-height:761px)]:block"
               >
-                Your contribution helps us provide care, support and hope to
-                those who need it most.
+                Your support provides cancer care, emotional support, and financial aid to those in need.
               </Typography>
             </div>
 
