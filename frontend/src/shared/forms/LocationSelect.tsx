@@ -234,7 +234,7 @@ export default function LocationSelect({
 
       {/* Dropdown Container */}
       {isOpen && (
-        <div className="absolute right-0 w-full min-w-[250px] max-w-[90vw] top-full mt-1.5 z-50 bg-white border border-[#E5E0D0] rounded-lg shadow-2xl overflow-hidden font-manrope animate-in fade-in-50 zoom-in-95 duration-150">
+        <div className="absolute left-0 sm:left-auto sm:right-0 w-[calc(100%-3.5rem)] sm:w-full max-w-[16rem] sm:max-w-none top-full mt-1 z-50 bg-white border border-[#E5E0D0] rounded-lg shadow-2xl overflow-hidden font-manrope animate-in fade-in-50 zoom-in-95 duration-150">
           {!isOtherMode ? (
             <>
               {/* Search Box */}
@@ -260,7 +260,7 @@ export default function LocationSelect({
               </div>
 
               {/* Suggestions List */}
-              <div className="max-h-48 overflow-y-auto p-1.5 space-y-0.5">
+              <div className="max-h-[8.5rem] sm:max-h-48 overflow-y-auto p-1.5 space-y-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 {filteredLocations.length > 0 ? (
                   filteredLocations.map((loc) => {
                     const isSelected =
