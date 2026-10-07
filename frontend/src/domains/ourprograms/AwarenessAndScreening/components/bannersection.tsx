@@ -3,8 +3,8 @@ import Banner from "@/shared/components/Herobannersection";
 // Content is data, kept separate from markup so the same Banner
 // can be reused across pages by swapping this object out.
 const AWARENESS_BANNER = {
-  bgImage: "/aboutus/aboutus.png",
-  bgImageMobile: "/aboutus/aboutus-mobile.png",
+  bgImage: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791349881523-oy3f1-rectangle-1657.webp",
+  bgImageMobile: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791350002174-w08ev-rectangle-1657-2-.webp",
   bgImageAlt: "awareness",
   breadcrumbs: [
     { label: "Home", href: "/" },

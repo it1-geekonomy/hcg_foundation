@@ -28,7 +28,7 @@ export default function StatCard({ stat, active }: { stat: Stat; active: boolean
         transitionDelay: `${stat.delay}s`,
       }}
     >
-      <div className="relative h-56 w-[202px] lg:h-64">
+      <div className="relative h-40 w-[min(100%,144px)] sm:h-56 sm:w-[202px] lg:h-64">
         {active && (
           <Image
             key={reloadKey}

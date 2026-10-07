@@ -5,15 +5,13 @@ import {
   X,
   User,
   Mail,
-  Calendar,
   BookOpen,
   MapPin,
-  Globe,
   Laptop,
-  MessageSquare,
   Award,
   Target,
   ChevronDown,
+  Check,
   FileText,
   Wrench,
   Trash2,
@@ -901,7 +899,11 @@ export default function ParticipateModal({
                       }`}
                   >
                     <label htmlFor="participate-goal" className="flex items-center cursor-pointer">
-                      <Calendar className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                      <img
+                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791268884591-xwrs7-calendar-2.webp"
+                        alt=""
+                        className="size-4 shrink-0 mr-3 object-contain"
+                      />
                       <Typography
                         variant="caption-1"
                         as="span"
@@ -1083,7 +1085,11 @@ export default function ParticipateModal({
                     }`}
                 >
                   <label htmlFor="participate-whyVolunteer" className="flex items-center cursor-pointer pt-0.5">
-                    <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                    <img
+                      src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791346766683-uabg5-messages.webp"
+                      alt=""
+                      className="size-4 shrink-0 mr-3 object-contain"
+                    />
                     <Typography
                       variant="caption-1"
                       as="span"
@@ -1137,7 +1143,11 @@ export default function ParticipateModal({
                     }`}
                 >
                   <label htmlFor="participate-message" className="flex items-center cursor-pointer pt-0.5">
-                    <MessageSquare className="size-4 text-[#0D2838] shrink-0 mr-3" />
+                    <img
+                      src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791346766683-uabg5-messages.webp"
+                      alt=""
+                      className="size-4 shrink-0 mr-3 object-contain"
+                    />
                     <Typography
                       variant="caption-1"
                       as="span"
@@ -1182,18 +1192,24 @@ export default function ParticipateModal({
             {/* Terms and Conditions Checkbox */}
             <div className="relative flex flex-col gap-1 pt-1">
               <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="participate-terms"
-                  checked={formData.agreeTerms}
-                  onChange={(e) => {
-                    if (errors.agreeTerms && e.target.checked) {
-                      setErrors((prev) => ({ ...prev, agreeTerms: undefined }));
-                    }
-                    setFormData({ ...formData, agreeTerms: e.target.checked });
-                  }}
-                  className="size-4 accent-[#FCCC2D] rounded-sm cursor-pointer"
-                />
+                <span className="relative inline-flex items-center justify-center shrink-0">
+                  <input
+                    type="checkbox"
+                    id="participate-terms"
+                    checked={formData.agreeTerms}
+                    onChange={(e) => {
+                      if (errors.agreeTerms && e.target.checked) {
+                        setErrors((prev) => ({ ...prev, agreeTerms: undefined }));
+                      }
+                      setFormData({ ...formData, agreeTerms: e.target.checked });
+                    }}
+                    className="peer size-4 cursor-pointer appearance-none rounded-[3px] border border-[#FED034] bg-white transition-colors checked:bg-[#FED034] checked:border-[#FED034] focus-visible:outline-none"
+                  />
+                  <Check
+                    strokeWidth={3}
+                    className="pointer-events-none absolute inset-0 m-auto size-3 text-[#0D2838] opacity-0 peer-checked:opacity-100 transition-opacity"
+                  />
+                </span>
                 <label
                   htmlFor="participate-terms"
                   className="cursor-pointer"

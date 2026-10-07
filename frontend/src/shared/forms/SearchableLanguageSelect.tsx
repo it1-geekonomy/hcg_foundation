@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Globe, ChevronDown, Search, Check, X, PlusCircle } from "lucide-react";
+import { ChevronDown, Search, Check, X, PlusCircle } from "lucide-react";
 import Typography from "@/lib/Typography";
 
 export const INDIAN_LANGUAGES = [
@@ -152,7 +152,11 @@ export default function SearchableLanguageSelect({
         } transition-all cursor-pointer select-none`}
       >
         <div className="flex items-center gap-1.5">
-          <Globe className="size-4 text-[#0D2838] shrink-0 mr-1.5" />
+          <img
+            src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791348739236-e7aer-global-search.webp"
+            alt=""
+            className="size-4 shrink-0 mr-1.5 object-contain"
+          />
           <Typography
             variant="caption-1"
             as="span"
