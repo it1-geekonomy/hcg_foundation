@@ -1,8 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { Check, X } from "lucide-react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import {
+  Check,
+  HandCoins,
+  HeartHandshake,
+  Microscope,
+  ShieldCheck,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { LayoutGroup } from "framer-motion";
 import {
   IMPACT_ITEMS,
@@ -23,8 +31,19 @@ import {
 } from "@/domains/home/constants/donation-currency";
 import { ActivePill, CardReveal, OverlayBackdrop } from "./overlayFormMotion";
 
-/** Shrinks the card only when it is taller than the viewport, so nothing is cut off or scrolled. */
-function FitViewport({ className, children }: { className?: string; children: ReactNode }) {
+/**
+ * Shrinks the card only when it is taller than the viewport. Never below `minScale`, so text
+ * stays readable; past that the nearest `[data-fit-host]` ancestor scrolls instead.
+ */
+function FitViewport({
+  className,
+  minScale = 0,
+  children,
+}: {
+  className?: string;
+  minScale?: number;
+  children: ReactNode;
+}) {
   const frameRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
 
@@ -35,13 +54,14 @@ function FitViewport({ className, children }: { className?: string; children: Re
 
     let frameId = 0;
     const fit = () => {
-      const host = frame.parentElement;
+      const host = frame.closest<HTMLElement>("[data-fit-host]") ?? frame.parentElement;
       if (!host || host.clientHeight === 0) return;
       inner.style.transform = "none";
       frame.style.height = "auto";
       const available = host.clientHeight;
       const needed = inner.offsetHeight;
-      const next = needed > available + 1 && needed > 0 ? available / needed : 1;
+      const fit = needed > available + 1 && needed > 0 ? available / needed : 1;
+      const next = Math.max(fit, minScale);
       if (next < 0.999) {
         inner.style.transformOrigin = "top center";
         inner.style.transform = `scale(${next})`;
@@ -67,7 +87,7 @@ function FitViewport({ className, children }: { className?: string; children: Re
       observer.disconnect();
       window.removeEventListener("resize", schedule);
     };
-  }, []);
+  }, [minScale]);
 
   return (
     <div ref={frameRef} className={className}>
@@ -230,17 +250,19 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
   return (
     <>
       <OverlayBackdrop
-        className="fixed inset-0 z-50 h-[100dvh] overflow-hidden overflow-clip overscroll-none p-2 lg:px-6 lg:py-8"
+        className="fixed inset-0 z-50 h-[100dvh] overflow-hidden overflow-clip overscroll-none p-2 lg:px-6 lg:py-[max(2.5rem,8vh)]"
         role="dialog"
         aria-modal={true}
         aria-labelledby="donation-modal-title"
       >
-        <div className="flex h-full items-center justify-center lg:hidden">
-          <LayoutGroup id="overlay-compact">
-            <FitViewport className="flex w-full justify-center">
-              <ModalBelow1024 {...amountProps} onClose={onClose} />
-            </FitViewport>
-          </LayoutGroup>
+        <div data-fit-host className="h-full overflow-y-auto overscroll-contain lg:hidden">
+          <div className="flex min-h-full items-center justify-center">
+            <LayoutGroup id="overlay-compact">
+              <FitViewport className="flex w-full justify-center" minScale={0.92}>
+                <ModalBelow1024 {...amountProps} onClose={onClose} />
+              </FitViewport>
+            </LayoutGroup>
+          </div>
         </div>
         <div className="hidden lg:flex lg:h-full lg:items-center lg:justify-center">
           <LayoutGroup id="overlay-wide">
@@ -317,15 +339,13 @@ function CloseButton({
   );
 }
 
-function Heading({ className = "", centerOnMobile = false }: { className?: string; centerOnMobile?: boolean }) {
-  const align = centerOnMobile ? "text-center" : "";
-  const descAlign = centerOnMobile ? "mx-auto text-center" : "";
+function Heading({ className = "" }: { className?: string }) {
   return (
     <div className={className}>
       <Typography
         variant="heading-2"
         as="h2"
-        className={`font-serif leading-tight text-black lg:!text-[2.125rem] lg:!leading-[1.15] xl:!text-[2.25rem] ${align}`}
+        className="font-serif leading-tight text-black lg:!text-[2rem] lg:!leading-[1.15] 2xl:!text-[2.125rem]"
       >
         <span className="font-medium font-tiempos-fine tracking-wide">Bring Hope</span>{" "}
         <span className="bg-[#F9BF16] bg-clip-text text-transparent font-medium font-tiempos-fine tracking-wide">
@@ -335,7 +355,7 @@ function Heading({ className = "", centerOnMobile = false }: { className?: strin
       <Typography
         variant="body-9"
         as="p"
-        className={`mt-2 max-w-2xl leading-relaxed text-[#3A3836] font-argestadisplay font-normal lg:mt-1.5 lg:max-w-[36rem] lg:!text-[0.9375rem] lg:!leading-[1.55] ${descAlign}`}
+        className="mt-1.5 max-w-2xl !text-[0.875rem] !leading-[1.5] text-pretty text-[#3A3836] font-argestadisplay font-normal lg:mt-1 lg:max-w-[36rem] lg:!text-[0.9375rem]"
       >
         Your contribution helps provide life-saving treatment, emotional
         care, and financial support to cancer patients and their families
@@ -387,40 +407,100 @@ function ImpactItems({
   selectedImpact: DonationCategory | null;
   onSelectImpact: (category: DonationCategory | null) => void;
 }) {
+  const labelId = useId();
+
   return (
-    <div className={className} role="group" aria-label="Choose where your donation helps">
-      {IMPACT_ITEMS.map((item) => {
-        const checked = selectedImpact === item.title;
-        return (
-          <label
-            key={item.title}
-            className="grid min-w-0 cursor-pointer grid-cols-[auto_1fr] items-center gap-x-3 gap-y-0.5 text-left"
+    <div>
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <Typography
+          id={labelId}
+          variant="body-8"
+          as="p"
+          className={`font-semibold font-manrope tracking-normal text-[#1C1C1C] ${LG_FIELD_TEXT}`}
+        >
+          Choose a cause
+        </Typography>
+        {selectedImpact ? (
+          <button
+            type="button"
+            onClick={() => onSelectImpact(null)}
+            className="inline-flex cursor-pointer items-center gap-1 rounded-full text-[#8A6A00] transition-colors hover:text-[#5C4600] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FCCC2D]/60"
           >
-            <GoldCheckbox
-              checked={checked}
-              ariaLabel={item.title}
-              onChange={(next) => onSelectImpact(next ? item.title : null)}
-            />
-            <Typography
-              variant="body-7"
-              as="p"
-              className="col-start-2 !text-left font-semibold font-manrope text-[#1C1C1C] lg:!text-[0.9rem] lg:!leading-snug"
-            >
-              {item.title}
+            <X className="h-3 w-3" strokeWidth={2.5} aria-hidden />
+            <Typography variant="caption-1" as="span" className="font-manrope font-semibold">
+              Clear
             </Typography>
-            <Typography
-              variant="body-6"
-              as="p"
-              className="col-start-2 !text-left !text-[0.875rem] leading-snug tracking-normal text-[#6F6863] font-manrope font-normal lg:!text-[0.8125rem]"
+          </button>
+        ) : (
+          <Typography
+            variant="caption-1"
+            as="span"
+            className="font-manrope font-normal text-[#6F6863]"
+          >
+            Optional
+          </Typography>
+        )}
+      </div>
+
+      <div className={className} role="group" aria-labelledby={labelId}>
+        {IMPACT_ITEMS.map((item) => {
+          const selected = selectedImpact === item.title;
+          const Icon = IMPACT_ICONS[item.title] ?? HandCoins;
+          return (
+            <button
+              key={item.title}
+              type="button"
+              aria-pressed={selected}
+              onClick={(e) =>
+                // e.detail is 2 on the second click of a double-click, so a double-click always ends unselected.
+                onSelectImpact(selected || e.detail >= 2 ? null : item.title)
+              }
+              className={`grid min-w-0 select-none cursor-pointer grid-cols-[auto_1fr] content-start items-center gap-x-3 gap-y-0.5 rounded-xl border px-3 py-2 text-left transition-[background-color,border-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FCCC2D]/60 lg:gap-x-2.5 lg:gap-y-1 lg:px-2.5 lg:py-2 ${
+                selected
+                  ? "border-[#E8B923] bg-[#FFF8E1] shadow-[0_0_0_3px_rgba(252,204,45,0.16)]"
+                  : "border-[#EEE8DC] bg-white hover:border-[#DCCFB8] hover:bg-[#FDFBF6]"
+              }`}
             >
-              {item.desc}
-            </Typography>
-          </label>
-        );
-      })}
+              <span
+                aria-hidden
+                className={`row-span-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-200 lg:row-span-1 lg:h-6 lg:w-6 lg:rounded-md ${
+                  selected ? "bg-[#FCCC2D] text-[#3A2E00]" : "bg-[#F6F1E6] text-[#9A7400]"
+                }`}
+              >
+                {selected ? (
+                  <Check className="h-4 w-4 lg:h-3.5 lg:w-3.5" strokeWidth={3} />
+                ) : (
+                  <Icon className="h-4 w-4 lg:h-3.5 lg:w-3.5" strokeWidth={2} />
+                )}
+              </span>
+              <Typography
+                variant="body-7"
+                as="span"
+                className="min-w-0 !text-left !text-[0.875rem] !leading-tight font-semibold font-manrope text-[#1C1C1C] lg:!text-[0.8125rem]"
+              >
+                {item.title}
+              </Typography>
+              <Typography
+                variant="caption-1"
+                as="span"
+                className="col-start-2 block !text-left !leading-[1.4] text-pretty font-manrope font-normal text-[#6F6863] lg:col-span-2 lg:col-start-1"
+              >
+                {item.desc}
+              </Typography>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
+
+const IMPACT_ICONS: Partial<Record<DonationCategory, LucideIcon>> = {
+  "Financial Assistance": HandCoins,
+  "Awareness & Prevention": ShieldCheck,
+  "Psychological Support": HeartHandshake,
+  "Research & Innovation": Microscope,
+};
 
 
 /** Shared look for every input box in the form: soft warm border, pill shape, one height. */
@@ -428,7 +508,7 @@ const FIELD_BORDER = "border-[#E6DFD2]";
 const FIELD_HOVER = "hover:border-[#C9BEAC]";
 
 const pillBase =
-  "relative flex h-11 cursor-pointer items-center justify-center rounded-full border bg-white font-semibold transition-colors duration-300 lg:h-10";
+  "relative flex h-11 cursor-pointer items-center justify-center rounded-full border bg-white font-semibold transition-colors duration-300 lg:h-9";
 /** Desktop-only size for field labels and pill text; mobile keeps the type scale. */
 const LG_FIELD_TEXT = "lg:!text-[0.875rem]";
 const pillActive = "border-[#1C1C1C] text-white";
@@ -490,7 +570,7 @@ function AmountPicker({
 
         {showCustomInput ? (
           <div
-            className={`${inputSpanClassName} flex h-11 items-center justify-center gap-1 rounded-full border border-[#1C1C1C] bg-white px-3 lg:h-10`}
+            className={`${inputSpanClassName} flex h-11 items-center justify-center gap-1 rounded-full border border-[#1C1C1C] bg-white px-3 lg:h-9`}
           >
             <Typography variant="body-8" as="span" className={`font-semibold font-manrope text-gray-700 ${LG_FIELD_TEXT}`}>
               {currencyMeta.symbol}
@@ -581,8 +661,9 @@ function CountryBlock({
         value={countryCode}
         onChange={changeCountry}
         variant="name"
+        theme="light"
         borderClassName={`${FIELD_BORDER} ${FIELD_HOVER}`}
-        boxClassName="h-11 gap-2.5 rounded-full bg-[#FBF9F4] px-4 transition-colors lg:h-10"
+        boxClassName="h-11 gap-2.5 rounded-full bg-[#FBF9F4] px-4 transition-colors lg:h-9"
         chevronClassName="text-[#6F6863]"
         textClassName="text-[#1C1C1C]"
       />
@@ -598,7 +679,7 @@ function TermsCheckbox({
   setTermsError,
 }: Pick<AmountProps, "agreedTo80G" | "setAgreedTo80G" | "termsError" | "setTermsError">) {
   return (
-    <div className="mt-3 flex flex-col gap-1">
+    <div className="mt-3 flex flex-col gap-1 lg:mt-2.5">
       <label className="flex min-w-0 cursor-pointer items-start gap-3">
         <GoldCheckbox
           checked={agreedTo80G}
@@ -611,7 +692,7 @@ function TermsCheckbox({
         <Typography
           variant="caption-1"
           as="span"
-          className="min-w-0 flex-1 font-manrope font-normal leading-relaxed text-[#4A4540]"
+          className="min-w-0 flex-1 font-manrope font-normal leading-relaxed text-[#4A4540] lg:!leading-snug"
         >
           I have read and agree to the applicable{" "}
           <span className="font-semibold text-[#B88A00]">
@@ -648,7 +729,7 @@ function Modal1024Up({
 
   return (
     <CardReveal
-      frameClassName="mx-auto w-full max-w-[800px] xl:max-w-[840px] 2xl:max-w-[880px]"
+      frameClassName="mx-auto w-full max-w-[800px] 2xl:max-w-[860px]"
       className="relative w-full overflow-hidden overflow-clip overscroll-none rounded-xl bg-white shadow-2xl"
     >
       <CloseButton
@@ -657,25 +738,25 @@ function Modal1024Up({
       />
 
       {/* Heading spans the full width of the card, above the image + content row */}
-      <div className="relative z-30 flex w-full flex-col px-7 pt-5 2xl:px-8">
+      <div className="relative z-30 flex w-full flex-col px-7 pt-4 2xl:px-8 2xl:pt-5">
         <Heading className="w-full pr-10" />
         <div className="mt-2 flex items-stretch gap-6 xl:gap-7">
-          <div className="relative -ml-7 -mb-4 w-[42%] max-w-[340px] shrink-0 xl:max-w-[360px] 2xl:-ml-8 2xl:max-w-[380px]">
+          <div className="relative -ml-7 -mb-4 w-[42%] max-w-[340px] shrink-0 2xl:-ml-8 2xl:max-w-[360px]">
             <PortraitWithBackdrop
               className="h-full w-full"
               priority
-              sizes="(min-width: 1536px) 380px, (min-width: 1280px) 360px, (min-width: 1024px) 340px, 0px"
+              sizes="(min-width: 1536px) 360px, (min-width: 1024px) 340px, 0px"
             />
           </div>
 
           <div className="relative z-20 flex min-w-0 max-w-[440px] flex-1 flex-col justify-center pb-4">
             <ImpactItems
-              className="grid grid-cols-1 gap-y-2"
+              className="grid grid-cols-2 gap-2"
               selectedImpact={amountProps.selectedImpact}
               onSelectImpact={amountProps.onSelectImpact}
             />
 
-            <div className="mt-3.5 border-t border-[#EFE9DD] pt-3.5">
+            <div className="mt-3 border-t border-[#EFE9DD] pt-3">
               <CountryBlock
                 countryCode={countryCode}
                 changeCountry={changeCountry}
@@ -701,7 +782,7 @@ function Modal1024Up({
               <DonateButton
                 onDonateClick={onDonateClick}
                 showHeart={false}
-                className="mt-3 flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#FDC61D] px-10 shadow-[0_8px_20px_-10px_rgba(226,176,0,0.8)] transition-colors hover:bg-[#F2B800]"
+                className="mt-3 flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#FDC61D] px-10 shadow-[0_8px_20px_-10px_rgba(226,176,0,0.8)] transition-colors hover:bg-[#F2B800]"
               />
             </div>
           </div>
@@ -731,13 +812,13 @@ function ModalBelow1024({
         onClose={onClose}
         className="absolute right-3 top-3 z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#F4F0E8] leading-none text-[#1C1C1C] transition-colors hover:bg-[#EAE3D5]"
       />
-      <Heading className="px-6 pr-10 pt-5 sm:px-8" centerOnMobile />
+      <Heading className="px-5 pr-12 pt-5 sm:px-7" />
 
-      <div className="mt-4 flex flex-col items-center gap-1 px-6 pb-5 sm:px-8">
+      <div className="mt-4 flex flex-col items-center gap-1 px-5 pb-5 sm:px-7">
         <div className="flex min-w-0 w-full flex-1 flex-col items-center pb-0">
           <div className="mx-auto w-full">
             <ImpactItems
-              className="grid grid-cols-1 gap-y-2.5"
+              className="grid grid-cols-1 gap-2"
               selectedImpact={amountProps.selectedImpact}
               onSelectImpact={amountProps.onSelectImpact}
             />
@@ -747,6 +828,7 @@ function ModalBelow1024({
                 countryCode={countryCode}
                 changeCountry={changeCountry}
                 currencyMeta={currencyMeta}
+                inlineCurrency
                 className="mb-3 flex w-full flex-col gap-1.5"
               />
 
@@ -766,6 +848,7 @@ function ModalBelow1024({
 
               <DonateButton
                 onDonateClick={onDonateClick}
+                showHeart={false}
                 className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#FDC61D] cursor-pointer shadow-[0_8px_20px_-10px_rgba(226,176,0,0.8)]"
               />
             </div>
