@@ -1,10 +1,99 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { X, Check } from "lucide-react";
 import PhoneInputField from "@/shared/forms/PhoneInputField";
 import Typography from "@/lib/Typography";
 import { participateApi } from "@/shared/lib/participate-api";
+
+/**
+ * Shrinks the card only when it is taller than the nearest `[data-fit-host]` ancestor, never
+ * below `minScale`.
+ *
+ * With `fillWidth`, the card is laid out wider before scaling so it still spans the full
+ * width afterwards; the wider layout wraps less text, so it also needs less shrinking.
+ */
+function FitViewport({
+  className,
+  minScale = 0,
+  fillWidth = false,
+  children,
+}: {
+  className?: string;
+  minScale?: number;
+  fillWidth?: boolean;
+  children?: React.ReactNode;
+}) {
+  const frameRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const frame = frameRef.current;
+    const inner = innerRef.current;
+    if (!frame || !inner) return;
+
+    const layoutAt = (scale: number) => {
+      const widen = fillWidth && scale < 0.999;
+      inner.style.width = widen ? `${100 / scale}%` : "";
+      inner.style.marginInline = widen ? `${50 - 50 / scale}%` : "";
+      inner.style.flexShrink = widen ? "0" : "";
+      return inner.offsetHeight;
+    };
+
+    let frameId = 0;
+    const fit = () => {
+      const host = frame.closest<HTMLElement>("[data-fit-host]") ?? frame.parentElement;
+      if (!host || host.clientHeight === 0) return;
+      inner.style.transform = "none";
+      frame.style.height = "auto";
+      const available = host.clientHeight;
+      let needed = layoutAt(1);
+      let next = needed > available + 1 && needed > 0 ? available / needed : 1;
+      if (fillWidth && next < 0.999) {
+        let lo = next;
+        let hi = 1;
+        for (let i = 0; i < 7; i++) {
+          const mid = (lo + hi) / 2;
+          if (layoutAt(mid) * mid <= available) lo = mid;
+          else hi = mid;
+        }
+        next = lo;
+      }
+      next = Math.max(next, minScale);
+      needed = layoutAt(next);
+      if (next < 0.999) {
+        inner.style.transformOrigin = "top center";
+        inner.style.transform = `scale(${next})`;
+        frame.style.height = `${Math.floor(needed * next)}px`;
+      } else {
+        inner.style.transform = "";
+        inner.style.transformOrigin = "";
+        frame.style.height = "";
+      }
+    };
+
+    const schedule = () => {
+      cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(fit);
+    };
+
+    fit();
+    const observer = new ResizeObserver(schedule);
+    observer.observe(inner);
+    window.addEventListener("resize", schedule);
+    return () => {
+      cancelAnimationFrame(frameId);
+      observer.disconnect();
+      window.removeEventListener("resize", schedule);
+    };
+  }, [minScale, fillWidth]);
+
+  return (
+    <div ref={frameRef} className={className}>
+      <div ref={innerRef} className="w-full">{children}</div>
+    </div>
+  );
+}
 
 interface PartnerWithUsModalProps {
   isOpen: boolean;
@@ -215,27 +304,41 @@ export default function PartnerWithUsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-[0.75rem] sm:p-[1.5rem] overflow-hidden bg-black/60 backdrop-blur-[0.25rem] transition-opacity duration-300">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden overflow-clip overscroll-none bg-black/60 backdrop-blur-xs transition-opacity duration-300">
       {/* Click outside backdrop to close */}
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
-      {/* Modal Card Container: locked and centered in viewport (does not move), matching ParticipateModal */}
-      <div className="relative z-10 w-full max-w-[22.5rem] sm:max-w-[24rem] md:max-w-[44.3125rem] bg-[#FDF9F3] rounded-[0.415rem] shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-2rem)] md:max-h-[min(44rem,calc(100dvh-2rem))]">
-        {/* Close Button placed at top right of the modal container */}
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute top-[0.875rem] right-[0.875rem] sm:top-[1.25rem] sm:right-[1.25rem] z-30 size-[1.95rem] flex items-center justify-center text-[#596D79] hover:text-[#0D2838] transition-colors rounded-full hover:bg-black/5 cursor-pointer"
-          aria-label="Close modal"
-        >
-          <X className="size-[1.125rem] stroke-[2.2]" />
-        </button>
+      <div
+        data-fit-host
+        className="relative z-10 w-full h-full flex items-center justify-center overflow-hidden overscroll-none pointer-events-none"
+      >
+        <div className="flex min-h-full w-full items-center justify-center">
+          <FitViewport className="flex w-full justify-center pointer-events-auto" fillWidth>
+            {/* Modal Card Container */}
+            <div className="relative z-10 mx-auto w-[calc(100%-0.5rem)] max-w-[22.5rem] sm:max-w-[24rem] md:max-w-[44.3125rem] bg-[#FDF9F3] rounded-[0.415rem] shadow-2xl overflow-hidden flex flex-col md:flex-row">
+              {/* Full Modal Watermark Background Image for Mobile (< 768px) */}
+              <div
+                className="absolute inset-0 z-0 bg-contain bg-center bg-no-repeat opacity-85 pointer-events-none md:hidden"
+                style={{
+                  backgroundImage: `url('https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791265188879-ilf9y-group-1000006354.webp')`,
+                }}
+              />
 
-        {/* Left Column: Form Content (scrollable when screen height is short, no scroll stick) */}
-        <div className="relative w-full md:w-[22.3rem] px-[1.25rem] sm:px-[1.5rem] md:pl-[2.5rem] md:pr-[1rem] pt-[1.25rem] sm:pt-[1.5rem] md:pt-[1.75rem] pb-[2rem] sm:pb-[2.5rem] flex flex-col justify-start overflow-y-auto max-h-[calc(100dvh-2rem)] md:max-h-[min(42.5rem,calc(100dvh-2rem))] min-h-0 overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          <div>
-            {/* Frame 298: Title + Subtitle using design-system Typography */}
-            <div className="w-full max-w-[19.3175rem] mx-auto md:mx-0 space-y-[0.35rem] sm:space-y-[0.5rem]">
+              {/* Close Button placed at top right of the modal container */}
+              <button
+                type="button"
+                onClick={onClose}
+                className="absolute top-[0.875rem] right-[0.875rem] sm:top-[1.25rem] sm:right-[1.25rem] z-30 size-[1.95rem] flex items-center justify-center text-[#596D79] hover:text-[#0D2838] transition-colors rounded-full bg-[#F4F0E8] hover:bg-[#EAE3D5] shadow-2xs cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X className="size-[1.125rem] stroke-[2.2]" />
+              </button>
+
+              {/* Left Column: Form Content (fits any screen without scroll) */}
+              <div className="relative w-full md:w-[22.3rem] px-[1.25rem] sm:px-[1.5rem] md:pl-[2.5rem] md:pr-[1rem] pt-[1.25rem] sm:pt-[1.5rem] md:pt-[1.75rem] pb-[1.5rem] sm:pb-[2rem] flex flex-col justify-start overflow-hidden min-h-0">
+                <div>
+                  {/* Frame 298: Title + Subtitle using design-system Typography */}
+                  <div className="w-full max-w-[19.3175rem] mx-auto md:mx-0 space-y-[0.35rem] sm:space-y-[0.5rem] pr-8 md:pr-0">
               <Typography
                 variant="heading-5"
                 as="h2"
@@ -596,13 +699,16 @@ export default function PartnerWithUsModal({
           </div>
         </div>
 
-        {/* Right Column: Hero Image Asset */}
-        <div className="hidden md:block w-[22.375rem] self-stretch relative shrink-0 bg-[#FDF9F3] overflow-hidden">
-          <img
-            src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791264498996-gkk4r-image-67.webp"
-            alt="Be a Part of Someone's Cancer Journey"
-            className="w-full h-full object-cover object-left rounded-r-[0.415rem]"
-          />
+              {/* Right Column: Hero Image Asset */}
+              <div className="hidden md:block w-[22.375rem] self-stretch relative shrink-0 bg-[#FDF9F3] overflow-hidden">
+                <img
+                  src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791264498996-gkk4r-image-67.webp"
+                  alt="Be a Part of Someone's Cancer Journey"
+                  className="w-full h-full object-cover object-left rounded-r-[0.415rem]"
+                />
+              </div>
+            </div>
+          </FitViewport>
         </div>
       </div>
     </div>
