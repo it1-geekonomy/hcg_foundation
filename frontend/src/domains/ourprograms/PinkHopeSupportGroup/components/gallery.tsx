@@ -6,18 +6,19 @@ import Typography from "@/lib/Typography";
 
 // Paste your image links here later (one per tile).
 const GALLERY_IMAGES: { src: string; alt: string }[] = [
-  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791290621395-7zwo4-rectangle-210-2-.webp", alt: "Art therapy session with a patient" },
-  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791290658903-fgdmt-rectangle-211-2-.webp", alt: "Patients and volunteers with art work" },
-  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791290692028-i4wr5-rectangle-212-2-.webp", alt: "Patient with caregiver smiling" },
-  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791290723585-aneac-rectangle-213-1-.webp", alt: "Gallery visitors at an exhibition" },
-  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791290752449-4se9s-rectangle-214-1-.webp", alt: "Guests at a Swasthi event" },
-  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791290783876-k9tp7-rectangle-210-3-.webp", alt: "Family at the gallery" },
-  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791290819057-5z5zu-rectangle-211-3-.webp", alt: "Mother and child showing their artwork" },
-  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791290849899-ejtzo-rectangle-212-3-.webp", alt: "Child painting with a therapist" },
-  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791290888818-qz5hc-rectangle-213-2-.webp", alt: "Group art workshop" },
-  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791290918708-rnt3f-rectangle-214-2-.webp", alt: "Patient drawing in bed" },
+  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356245600-7oqve-rectangle-210-4-.webp", alt: "Art therapy session with a patient" },
+  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356345002-y58ti-rectangle-211-4-.webp", alt: "Patients and volunteers with art work" },
+  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356381758-vfduz-rectangle-212-4-.webp", alt: "Patient with caregiver smiling" },
+  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356414992-dec74-rectangle-213-3-.webp", alt: "Gallery visitors at an exhibition" },
+  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356459093-35t5o-rectangle-210-5-.webp", alt: "Guests at a Swasthi event" },
+  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356497605-7539h-rectangle-211-5-.webp", alt: "Family at the gallery" },
+  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356530502-ikhta-rectangle-212-5-.webp", alt: "Mother and child showing their artwork" },
+  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356569601-tvwf5-rectangle-213-4-.webp", alt: "Child painting with a therapist" },
 ];
-const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
+
+// Same horizontal padding as the "Why patients join" section.
+const SECTION_PADDING =
+  "w-full overflow-x-hidden px-8 sm:px-12 md:px-16 lg:px-6 xl:px-6 2xl:px-40";
 
 const TILE =
   "block w-full h-auto rounded-[0.375rem] pointer-events-none select-none";
@@ -140,8 +141,8 @@ export default function SwasthiGallerySection() {
   };
 
   return (
-    <section className="bg-[#FFF8E2]">
-      <div className={`${CONTAINER} py-2 sm:py-4 lg:py-6 flex flex-col space-y-[1.5rem] sm:space-y-[2rem]`}>
+    <section className={`bg-[#FFF8E2] ${SECTION_PADDING}`}>
+      <div className="flex w-full flex-col space-y-[1.5rem] py-2 sm:space-y-[2rem] sm:py-4 lg:py-6">
         <div>
           <Typography
             variant="heading-6"
@@ -164,8 +165,8 @@ export default function SwasthiGallerySection() {
             <ChevronLeft />
           </button>
 
-          {/* Below lg: one row, same column widths, leftover images scroll.
-              lg and up: the original wrapping grid. */}
+          {/* Below lg: one row, leftover images scroll one at a time.
+              lg and up: fixed grid, 4 columns x 2 rows. */}
           <div
             ref={scrollerRef}
             onScroll={updateEdges}
@@ -177,7 +178,7 @@ export default function SwasthiGallerySection() {
               grabbing ? "cursor-grabbing" : "cursor-grab lg:cursor-auto"
             }`}
           >
-            <div className="flex w-max gap-3 sm:gap-4 lg:grid lg:w-full lg:grid-cols-5 lg:gap-5">
+            <div className="flex w-max gap-3 sm:gap-4 lg:grid lg:w-full lg:grid-cols-4 lg:gap-5">
               {GALLERY_IMAGES.map((img, index) => (
                 <div
                   key={img.src}

@@ -221,7 +221,7 @@ export function CoverflowCarousel({ people, label }: { people: Person[]; label: 
       aria-label={label}
       tabIndex={0}
       onKeyDown={onKeyDown}
-      className="relative w-full overflow-x-clip outline-none"
+      className="relative isolate w-full overflow-x-clip outline-none"
     >
       <div
         ref={zoneRef}

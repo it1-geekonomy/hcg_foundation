@@ -3,8 +3,8 @@ import Banner from "@/shared/components/Herobannersection";
 // Content is data, kept separate from markup so the same Banner
 // can be reused across pages by swapping this object out.
 const ABOUT_US_BANNER = {
-  bgImage: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791355872607-t1jvw-rectangle-1657-3-.webp",
-  bgImageMobile: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791355910138-1iyaw-rectangle-1665.webp",
+  bgImage: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791364092691-xw7xb-rectangle-184-6-.webp",
+  bgImageMobile: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791364135403-ssp4y-rectangle-1666.webp",
   bgImageAlt: "Doctors, nurses and families smiling together outside the hospital",
   breadcrumbs: [
     { label: "Home", href: "/" },
@@ -12,9 +12,7 @@ const ABOUT_US_BANNER = {
   ],
   title: (
     <>
-      Pink Hope Patient 
-      <br />
-      Support Group
+      Research and Innovation
     </>
   ),
 };
