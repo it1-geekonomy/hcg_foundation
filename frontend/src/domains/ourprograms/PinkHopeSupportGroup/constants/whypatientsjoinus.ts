@@ -5,7 +5,7 @@ export const HEART_ICON =
 
 export const DEFAULT_BLOCKS: SupportGroupBlock[] = [
   {
-    heading: "Why patients join",
+    heading: "Why patients join?",
     paragraphs: [
       {
         label: "A sense of belonging:",
