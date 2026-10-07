@@ -26,7 +26,7 @@ const ART_GALLERY_CARDS = [
 ];
 
 const PARAGRAPH_CLASS = "font-argestadisplay font-normal text-left text-[#596D79]";
-const SUBHEADING_CLASS = "font-argestadisplay font-normal underline underline-offset-[0.35em] decoration-1 text-[#262626]";
+const SUBHEADING_CLASS = "font-argestadisplay font-normal text-[#262626]";
 const CARD_STAGGER_MS = 120;
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
