@@ -279,7 +279,7 @@ export default function TeamSection({
       {allTrustees.length > 0 ? (
         <>
           <SectionLabel label="Trustees" id="trustees" />
-          <div className="-mx-8 mb-10 sm:hidden">
+          <div className="-mx-8 mb-2 sm:hidden">
             <CoverflowCarousel people={allTrustees} label="Trustees" />
           </div>
           <div className="mb-4 hidden sm:block lg:hidden">
@@ -311,7 +311,7 @@ export default function TeamSection({
       {teamPeople.length > 0 ? (
         <>
           <SectionLabel label="Team" id="team" />
-          <div className="-mx-8 mb-4 sm:hidden">
+          <div className="-mx-8 mb-0 sm:hidden">
             <CoverflowCarousel people={teamPeople} label="Team members" />
           </div>
           <div className="hidden sm:block lg:hidden">
