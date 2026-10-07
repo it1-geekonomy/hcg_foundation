@@ -178,7 +178,6 @@ export type CmsProject = SeoFields & {
   slug: string;
   projectBanner?: string | null;
   projectMobileBanner?: string | null;
-  projectDate?: string | null;
   content?: string | null;
   shortDescription?: string | null;
   displayOrder: number;
@@ -191,7 +190,6 @@ export type CmsProject = SeoFields & {
 export type ProjectFields = SeoFields & {
   title: string;
   slug: string;
-  projectDate?: string;
   content?: string;
   shortDescription?: string;
   /** Omit on create to append at the end of the list. */

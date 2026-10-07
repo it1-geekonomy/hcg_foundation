@@ -182,7 +182,6 @@ export default function ProjectsListPage() {
                 <TableHead className="w-14">Banner</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead className="w-16">Order</TableHead>
-                <TableHead>Date</TableHead>
                 {tab === "deleted" ? (
                   <TableHead>Deleted at</TableHead>
                 ) : (
@@ -194,7 +193,7 @@ export default function ProjectsListPage() {
             <TableBody>
               {projects.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-cms-muted">
+                  <TableCell colSpan={5} className="text-cms-muted">
                     {tab === "deleted" ? (
                       "No deleted projects."
                     ) : (
@@ -236,7 +235,6 @@ export default function ProjectsListPage() {
                       </Typography>
                     </TableCell>
                     <TableCell>{project.displayOrder ?? "—"}</TableCell>
-                    <TableCell>{project.projectDate || "—"}</TableCell>
                     <TableCell>
                       {tab === "deleted" ? (
                         <Typography

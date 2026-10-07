@@ -96,7 +96,6 @@ export default function RelatedProjects({ currentProjectId, projects }: RelatedP
               id: p.id ?? "",
               slug: p.slug ?? "",
               title: p.title ?? "",
-              date: p.projectDate ? new Date(p.projectDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "",
               category: "Projects",
               summary: p.shortDescription ?? "",
               fullStory: p.content ?? "",
