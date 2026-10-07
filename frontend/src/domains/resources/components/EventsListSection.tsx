@@ -37,13 +37,13 @@ export default function EventsListSection({ previewEvent }: { previewEvent?: Eve
   useEffect(() => {
     if (itemsPerPage === null) return;
     let cancelled = false;
-    
+
     if (allEvents.length === 0) {
       setLoading(true);
     } else {
       setIsFetching(true);
     }
-    
+
     setError(null);
     (async () => {
       try {
@@ -52,7 +52,7 @@ export default function EventsListSection({ previewEvent }: { previewEvent?: Eve
           limit: itemsPerPage,
         });
         if (cancelled) return;
-        
+
         if (res.data && res.data.length > 0) {
           const mapped: EventItem[] = res.data.map((e) => ({
             id: e.id ?? "",
@@ -60,10 +60,10 @@ export default function EventsListSection({ previewEvent }: { previewEvent?: Eve
             title: e.title ?? "",
             date: e.eventDate
               ? new Date(e.eventDate).toLocaleDateString("en-GB", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })
               : "",
             category: "Community Event",
             summary: e.shortDescription ?? "",
@@ -112,7 +112,7 @@ export default function EventsListSection({ previewEvent }: { previewEvent?: Eve
   const itemsPerPg = itemsPerPage || 6;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPg));
   const safePage = Math.min(currentPage, totalPages);
-  
+
   const currentEvents = allEvents;
 
   const handlePageChange = (page: number) => {
@@ -124,9 +124,8 @@ export default function EventsListSection({ previewEvent }: { previewEvent?: Eve
       <div className="w-full">
         <div
           key={`${safePage}-${itemsPerPage}`}
-          className={`flex flex-col gap-16 pb-24 lg:pb-0 lg:grid lg:grid-cols-2 lg:gap-x-[2rem] lg:gap-y-[2.5rem] transition-all duration-500 ease-in-out ${
-            isFetching ? "opacity-40 scale-[0.98] blur-[1px] pointer-events-none" : "opacity-100 scale-100 blur-0"
-          }`}
+          className={`flex flex-col gap-16 pb-24 lg:pb-0 lg:grid lg:grid-cols-2 lg:gap-x-[2.5rem] lg:gap-y-[2.5rem] max-w-[80rem] mx-auto transition-all duration-500 ease-in-out ${isFetching ? "opacity-40 scale-[0.98] blur-[1px] pointer-events-none" : "opacity-100 scale-100 blur-0"
+            }`}
         >
           {currentEvents.map((eventItem, itemIdx) => (
             <div
