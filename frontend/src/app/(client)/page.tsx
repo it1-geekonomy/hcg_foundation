@@ -21,7 +21,7 @@ export default function ClientPage() {
       <div className={gradientClass}>
         <StatSection />
       </div>
-      {/* <HomeProjectsSection /> */}
+      <HomeProjectsSection />
       <div className={gradientClass}>
         <Smilestories />
         <HopeSection />

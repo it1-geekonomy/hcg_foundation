@@ -22,6 +22,27 @@ type Props = {
   showDialInButton?: boolean;
 };
 
+/** Search box + list (max 11rem / 35vh) + borders; used to decide whether the panel fits below. */
+function estimatedPanelHeight() {
+  return 48 + Math.min(176, window.innerHeight * 0.35);
+}
+
+/** Top/bottom edges of the nearest ancestor that clips overflow, capped to the viewport. */
+function visibleBounds(el: HTMLElement) {
+  let top = 0;
+  let bottom = window.innerHeight;
+  for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) {
+    const { overflowY } = getComputedStyle(node);
+    if (overflowY !== "visible") {
+      const rect = node.getBoundingClientRect();
+      top = Math.max(top, rect.top);
+      bottom = Math.min(bottom, rect.bottom);
+      break;
+    }
+  }
+  return { top, bottom };
+}
+
 export default function CountrySelect({
   id,
   value,
@@ -35,6 +56,7 @@ export default function CountrySelect({
   showDialInButton = true,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [dropUp, setDropUp] = useState(false);
   const [query, setQuery] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -68,6 +90,17 @@ export default function CountrySelect({
     }
   }, [open]);
 
+  const toggleOpen = () => {
+    if (!open && rootRef.current) {
+      const rect = rootRef.current.getBoundingClientRect();
+      const bounds = visibleBounds(rootRef.current);
+      const spaceBelow = bounds.bottom - rect.bottom;
+      const spaceAbove = rect.top - bounds.top;
+      setDropUp(spaceBelow < estimatedPanelHeight() && spaceAbove > spaceBelow);
+    }
+    setOpen((prev) => !prev);
+  };
+
   const isLight = theme === "light";
   const resolvedText = textClassName ?? (isLight ? "text-[#0D2838]" : "text-white");
   const resolvedChevron = chevronClassName ?? (isLight ? "text-[#0D2838]/70" : "text-white/70");
@@ -80,7 +113,7 @@ export default function CountrySelect({
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={toggleOpen}
         className={`flex items-center gap-1.5 bg-transparent text-left font-manrope text-sm ${resolvedText} outline-none ${
           variant === "dial"
             ? "w-auto shrink-0 py-1"
@@ -108,7 +141,9 @@ export default function CountrySelect({
 
       {open ? (
         <div
-          className={`absolute top-full z-[70] mt-1 overflow-hidden rounded-md border shadow-xl ${
+          className={`absolute z-[70] overflow-hidden rounded-md border shadow-xl ${
+            dropUp ? "bottom-full mb-1" : "top-full mt-1"
+          } ${
             isLight
               ? "border-[#E5E0D0] bg-white text-[#0D2838]"
               : "border-white/20 bg-[#2a2a2a] text-white"

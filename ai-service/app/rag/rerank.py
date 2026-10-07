@@ -153,7 +153,8 @@ def pick_sources(hits: list[dict], intents: set[str], answer: str = "") -> list[
         if h["score"] < best - margin:
             break
         url = public_url(h.get("url"))
-        if not url:
+        # Home-page content (hero banners etc.) is no useful "Learn more" target
+        if not url or url == "/":
             continue
         title = source_label(h, url)
         raw_title = (h.get("title") or "").lower()

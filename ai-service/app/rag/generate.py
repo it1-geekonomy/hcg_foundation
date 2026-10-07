@@ -4,7 +4,7 @@ import re
 from datetime import date, datetime
 
 from app.rag import constants as C
-from app.rag.links import public_url
+from app.rag.links import page_label, public_url
 from app.services.embeddings import chat_complete
 
 SYSTEM_PROMPT = f"""You are the public website AI Assistant for HCG Foundation, a cancer-care charity trust in India.
@@ -54,7 +54,7 @@ def _context_text(contexts: list[dict]) -> str:
             f"[{i}] Title: {c.get('title')}\n"
             f"Category: {c.get('category')}\n"
             f"URL: {url or '-'}\n"
-            f"Link label: {C.PAGE_LABELS.get(url or '', c.get('title')) if url else '-'}\n"
+            f"Link label: {page_label(url, c.get('title') or '') if url else '-'}\n"
             f"Designation: {c.get('designation') or '-'}\n"
             f"{_event_status(c)}"
             f"Content:\n{c.get('content')}"
@@ -165,7 +165,7 @@ def recover_if_needed(answer: str, question: str, contexts: list[dict], intents:
         ):
             return (
                 "For Patient Aid support, review the "
-                f"[Financial Support for Pediatric Patients]({C.PATIENT_AID_URL}) page "
+                f"[Patient Aid]({C.PATIENT_AID_URL}) page "
                 "and contact the Foundation to apply. "
                 f"Email {C.OFFICIAL_EMAIL} or call {C.OFFICIAL_PHONE}."
             )

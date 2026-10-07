@@ -113,7 +113,6 @@ export default function ProjectViewPage() {
     id: project.id ?? "",
     slug: project.slug ?? "",
     title: project.title ?? "",
-    date: project.projectDate ? new Date(project.projectDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "",
     category: "Project",
     summary: project.shortDescription ?? "",
     fullStory: project.content ?? "",
@@ -141,20 +140,15 @@ export default function ProjectViewPage() {
             >
               /{project.slug}
             </Typography>
-            <Typography
-              variant="label-1"
-              as="p"
-              className="mt-1 text-cms-muted"
-            >
-              {[
-                project.projectDate || null,
-                project.displayOrder != null
-                  ? `Order ${project.displayOrder}`
-                  : null,
-              ]
-                .filter(Boolean)
-                .join(" · ") || "No date set"}
-            </Typography>
+            {project.displayOrder != null ? (
+              <Typography
+                variant="label-1"
+                as="p"
+                className="mt-1 text-cms-muted"
+              >
+                Order {project.displayOrder}
+              </Typography>
+            ) : null}
           </>
         }
         actions={
