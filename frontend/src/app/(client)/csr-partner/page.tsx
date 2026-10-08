@@ -297,9 +297,9 @@ export default function CsrPartnerPage() {
                       {card.number.replace(/^0+/, "")}.
                     </Typography>
                     <Typography
-                      variant="heading-9"
+                      variant="heading-8"
                       as="h2"
-                      className="font-argestadisplay font-normal text-[#0D2838] break-words"
+                      className="font-argestadisplay font-normal text-[#0D2838] break-words !text-left"
                     >
                       {card.title}
                     </Typography>
