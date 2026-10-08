@@ -3,23 +3,16 @@ import { publicLegalApi } from "@/domains/cms/lib/api";
 import LegalDocumentPage from "@/domains/legal/components/LegalDocumentPage";
 import DonateForm from "@/shared/components/DonateForm";
 import AnimatedLegalContent from "@/domains/privacypolicy/Animatedtext";
+import { PAGE_SEO, buildMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
-  try {
-    const doc = await publicLegalApi.getPublishedTerms();
-    return {
-      title:
-        doc?.metaTitle?.trim() || doc?.title?.trim() || "Terms & Conditions",
-      description:
-        doc?.metaDescription?.trim() ||
-        "Terms & Conditions for The HCG Foundation.",
-    };
-  } catch {
-    return {
-      title: "Terms & Conditions",
-      description: "Terms & Conditions for The HCG Foundation.",
-    };
-  }
+  const fallback = PAGE_SEO["/terms"];
+  const doc = await publicLegalApi.getPublishedTerms().catch(() => null);
+  return buildMetadata({
+    path: "/terms",
+    title: doc?.metaTitle?.trim() || fallback.title,
+    description: doc?.metaDescription?.trim() || fallback.description,
+  });
 }
 
 export default async function TermsAndConditionsPage() {

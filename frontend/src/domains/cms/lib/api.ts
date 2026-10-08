@@ -41,6 +41,8 @@ import type {
   UpdateLeadsInternshipPayload,
   UpdateLegalPagePayload,
   UpdatePartnershipInquiryPayload,
+  UpdateVolunteerPayload,
+  Volunteer,
 } from "./types";
 
 const API_BASE =
@@ -1358,6 +1360,51 @@ export const cmsApi = {
 
   restoreLeadsContact: (id: string) =>
     request<ApiEnvelope<LeadsContact>>(`/leads-contact/${id}/restore`, {
+      method: "POST",
+    }),
+
+  listVolunteers: (params?: ListQuery) =>
+    request<Paginated<Volunteer>>(
+      `/volunteer${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  listDeletedVolunteers: (
+    params?: Omit<ListQuery, "onlyDeleted" | "includeDeleted" | "status">
+  ) =>
+    request<Paginated<Volunteer>>(
+      `/volunteer/deleted${toQuery({ page: 1, limit: 20, ...params })}`
+    ),
+
+  getVolunteer: async (id: string) => {
+    try {
+      return await request<ApiEnvelope<Volunteer>>(`/volunteer/${id}`);
+    } catch (err) {
+      const deleted = await request<Paginated<Volunteer>>(
+        `/volunteer/deleted${toQuery({ page: 1, limit: 100 })}`
+      );
+      const found = deleted.data?.find((item) => item.id === id);
+      if (!found) throw err;
+      return {
+        statusCode: 200,
+        message: "Fetched from recently deleted",
+        data: found,
+      };
+    }
+  },
+
+  updateVolunteer: (id: string, payload: UpdateVolunteerPayload) =>
+    request<ApiEnvelope<Volunteer>>(`/volunteer/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  deleteVolunteer: (id: string) =>
+    request<{ message?: string; statusCode?: number }>(`/volunteer/${id}`, {
+      method: "DELETE",
+    }),
+
+  restoreVolunteer: (id: string) =>
+    request<ApiEnvelope<Volunteer>>(`/volunteer/${id}/restore`, {
       method: "POST",
     }),
 

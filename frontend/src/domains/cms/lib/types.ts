@@ -418,6 +418,32 @@ export type UpdateLeadsContactPayload = Partial<{
   message: string;
 }>;
 
+export type Volunteer = {
+  id: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  cityLocation: string;
+  educationalQualification: string;
+  areasOfInterest: string;
+  reason: string;
+  termsAccepted: boolean;
+  deletedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UpdateVolunteerPayload = Partial<{
+  fullName: string;
+  phone: string;
+  email: string;
+  cityLocation: string;
+  educationalQualification: string;
+  areasOfInterest: string;
+  reason: string;
+  termsAccepted: boolean;
+}>;
+
 export type Paginated<T> = {
   message?: string;
   statusCode?: number;

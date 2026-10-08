@@ -216,7 +216,7 @@ export default function TeamSection({
           <span className="w-[3px] flex-none rounded-full bg-[#FCCC2D]" />
           <Typography
             variant="heading-2"
-            as="h1"
+            as="h2"
             className="font-tiempos-headline text-[#382E07]"
           >
             {HEAD_WORDS.map((f, i) => (

@@ -1,14 +1,5 @@
-﻿import Typography from "@/lib/Typography";
+﻿import VolunteersListPage from "@/domains/cms/features/volunteers/VolunteersListPage";
 
-export default function Page() {
-  return (
-    <div className="p-6">
-      <Typography variant="heading-8" as="h1" className="font-semibold">
-        Admin Volunteers
-      </Typography>
-      <Typography variant="label-1" as="p" className="text-cms-muted">
-        TODO: implement admin volunteers screen.
-      </Typography>
-    </div>
-  );
+export default function AdminVolunteersPage() {
+  return <VolunteersListPage />;
 }

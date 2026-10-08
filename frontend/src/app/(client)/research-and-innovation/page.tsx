@@ -2,6 +2,10 @@ import Innovation from "@/domains/ourprograms/ResearchAndInnovation/components/i
 import DonateForm from "@/shared/components/DonateForm";
 import Bannersection from "@/domains/ourprograms/ResearchAndInnovation/components/bannersection";
 import OtherInitiatives from "@/domains/ourprograms/ResearchAndInnovation/components/otherInitiatives";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata("/research-and-innovation");
+
 export default function OurTeamPage() {
   return (
     <>

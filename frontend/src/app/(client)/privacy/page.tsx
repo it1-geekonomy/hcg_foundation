@@ -3,22 +3,16 @@ import { publicLegalApi } from "@/domains/cms/lib/api";
 import LegalDocumentPage from "@/domains/legal/components/LegalDocumentPage";
 import DonateForm from "@/shared/components/DonateForm";
 import AnimatedLegalContent from "@/domains/privacypolicy/Animatedtext";
+import { PAGE_SEO, buildMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
-  try {
-    const doc = await publicLegalApi.getPublishedPrivacyPolicy();
-    return {
-      title: doc?.metaTitle?.trim() || doc?.title?.trim() || "Privacy Policy",
-      description:
-        doc?.metaDescription?.trim() ||
-        "Privacy Policy for The HCG Foundation.",
-    };
-  } catch {
-    return {
-      title: "Privacy Policy",
-      description: "Privacy Policy for The HCG Foundation.",
-    };
-  }
+  const fallback = PAGE_SEO["/privacy"];
+  const doc = await publicLegalApi.getPublishedPrivacyPolicy().catch(() => null);
+  return buildMetadata({
+    path: "/privacy",
+    title: doc?.metaTitle?.trim() || fallback.title,
+    description: doc?.metaDescription?.trim() || fallback.description,
+  });
 }
 
 export default async function PrivacyPolicyPage() {

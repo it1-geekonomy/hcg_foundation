@@ -59,6 +59,8 @@ export interface BannerProps {
   className?: string;
   animateTitle?: boolean;
   titleClassName?: string;
+  /** Detail pages pass "p" so the item's own title stays the page's only H1. */
+  titleAs?: "h1" | "p";
 }
 
 export default function Banner({
@@ -70,6 +72,7 @@ export default function Banner({
   titleClassName,
   className = "",
   animateTitle = true,
+  titleAs = "h1",
 }: BannerProps) {
   const hasImage = Boolean(bgImage || bgImageMobile);
 
@@ -147,7 +150,7 @@ export default function Banner({
 
           <Typography
             variant="heading-2"
-            as="h1"
+            as={titleAs}
             className={cn("font-normal font-tiempos-headline text-[#FFFFFF]", titleClassName)}
           >
             {animateTitle ? renderTitleWithAnimation(title, titleClassName || "italic tracking-[0.03em] text-[#FFFFFF]") : title}

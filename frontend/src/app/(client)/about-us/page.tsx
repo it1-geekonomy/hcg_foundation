@@ -5,6 +5,9 @@ import Statsection from "@/domains/about/components/statsection";
 import WhatWeStandFor from "@/domains/about/components/whatwestand";
 import AboutTeamSection from "@/domains/about/components/AboutTeamSection";
 import AboutAwardsSection from "@/domains/about/components/AboutAwardsSection";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata("/about-us");
 
 export default function OurTeamPage() {
   return (
