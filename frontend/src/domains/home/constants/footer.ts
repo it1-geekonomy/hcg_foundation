@@ -67,7 +67,6 @@ export const FOOTER_INNER_PAGES = [
   // { label: "Projects", href: "/projects" },
   { label: "Privacy Policy", href: "/privacy" },
   { label: "Terms and Conditions", href: "/terms" },
-  { label: "Disclaimer", href: "/terms" },
 ] as const;
 
 export const FOOTER_CONTACT_INFO = {

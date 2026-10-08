@@ -12,11 +12,14 @@ import {
 import HomeProjectsSection from "@/domains/home/components/HomeProjectsSection";
 import DonateForm from "@/shared/components/DonateForm";
 
+
 const gradientClass = "bg-[linear-gradient(180deg,#FFE486_0%,#FFF6D8_100%)]";
 
 export default function ClientPage() {
   return (
     <>
+      {/* The hero's slide text loads on the client, so the page's H1 lives here in the server HTML. */}
+      <h1 className="sr-only">HCG Foundation: Donate for Cancer Care &amp; Patient Support</h1>
       <BannerSection />
       <div className={gradientClass}>
         <StatSection />

@@ -16,6 +16,7 @@ import {
   PanelsTopLeft,
   Handshake,
   GraduationCap,
+  HandHelping,
   Mail,
   MessageSquareQuote,
 } from "lucide-react";
@@ -104,6 +105,11 @@ export const adminMenuGroups: AdminMenuGroup[] = [
         label: "Internship Leads",
         href: "/admin/leads-internship",
         icon: GraduationCap,
+      },
+      {
+        label: "Volunteers",
+        href: "/admin/volunteers",
+        icon: HandHelping,
       },
       {
         label: "Partnership Inquiries",

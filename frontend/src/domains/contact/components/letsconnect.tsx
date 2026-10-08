@@ -66,7 +66,7 @@ export default function ClientContact() {
           <SlideInLeft>
             <Typography
               variant="heading-3"
-              as="h1"
+              as="h2"
               className="font-tiempos-headline font-medium italic !text-left text-[#0D2838]"
             >
               Let&apos;s Connect

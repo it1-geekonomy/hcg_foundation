@@ -1,14 +1,5 @@
-import Typography from "@/lib/Typography";
+import VolunteerViewPage from "@/domains/cms/features/volunteers/VolunteerViewPage";
 
-export default function AdminVolunteersByIdPage() {
-  return (
-    <div className="p-6">
-      <Typography variant="heading-8" as="h1" className="font-semibold">
-        Admin Volunteers Id
-      </Typography>
-      <Typography variant="label-1" as="p" className="text-cms-muted">
-        TODO: implement admin volunteers id screen.
-      </Typography>
-    </div>
-  );
+export default function AdminVolunteerByIdPage() {
+  return <VolunteerViewPage />;
 }

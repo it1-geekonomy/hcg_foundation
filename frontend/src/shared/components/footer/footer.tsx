@@ -89,25 +89,7 @@ export default function Footer() {
               </Typography>
             </div>
 
-            <div className="space-y-3 lg:space-y-4">
-              <Typography variant="body-9" as="h4" className="text-white text-center lg:text-left">
-                Subscribe to our Newsletter
-              </Typography>
-              <div className="flex w-full max-w-[320px] lg:max-w-[280px] h-12 rounded-md overflow-hidden border border-[#FDB723] mx-auto lg:mx-0">
-                <input
-                  type="email"
-                  placeholder="Enter your email address"
-                  className="flex-1 min-w-0 h-full px-4 bg-[#FDB723] text-gray-900 placeholder:text-[#373737] font-manrope border-0 outline-none focus:outline-none"
-                  style={{ fontSize: "1rem" }}
-                />
-                <button
-                  type="button"
-                  className="w-12 h-full shrink-0 bg-black border-3 border-[#FDB723] flex items-center justify-center transition-colors"
-                >
-                  <ArrowUpRight className="w-4 h-4 text-[#FDB723]" />
-                </button>
-              </div>
-            </div>
+
           </div>
 
           <div className="col-span-2 md:col-span-3 lg:col-span-1 grid grid-cols-[auto_auto] justify-between md:grid-cols-3 md:justify-normal gap-x-4 md:gap-x-8 gap-y-6 md:gap-y-10 border-t border-white/10 pt-6 md:border-0 md:pt-0 lg:flex lg:flex-row lg:items-start lg:justify-end lg:gap-x-10 xl:gap-x-14 2xl:gap-x-28">

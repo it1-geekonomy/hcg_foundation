@@ -136,6 +136,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           { label: "Resources" },
         ]}
         title="Projects"
+        titleAs="p"
       />
 
       <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
