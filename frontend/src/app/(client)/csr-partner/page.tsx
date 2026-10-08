@@ -299,7 +299,7 @@ export default function CsrPartnerPage() {
                     <Typography
                       variant="heading-9"
                       as="h2"
-                      className="font-argestadisplay font-normal text-[#0D2838] break-words"
+                      className="font-argestadisplay font-normal text-[#0D2838] break-words !text-left"
                     >
                       {card.title}
                     </Typography>
