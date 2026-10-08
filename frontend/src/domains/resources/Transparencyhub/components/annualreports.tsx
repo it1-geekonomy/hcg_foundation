@@ -157,9 +157,9 @@ export default function AnnualReportsSection({
   const totalPages = Math.ceil(reports.length / perPage);
   const visibleReports = reports.slice(page * perPage, page * perPage + perPage);
 
-  // Page counts: as soon as the reports load, show cached counts immediately,
-  // count the visible cards first (all in parallel), then count the rest in the
-  // background so other pages are already filled in when the user switches.
+  // Page counts: show cached counts immediately, count the visible cards first
+  // (all in parallel), and only AFTER they finish count the rest in the
+  // background, so the background work never slows down the visible cards.
   useEffect(() => {
     if (reports.length === 0) return;
 
@@ -188,7 +188,6 @@ export default function AnnualReportsSection({
       setPageCounts((prev) => ({ ...prev, [rep.id]: label }));
     }
 
-    // Visible cards first, all in parallel
     const visibleIds = new Set(
       reports
         .slice(page * perPage, page * perPage + perPage)
@@ -196,10 +195,12 @@ export default function AnnualReportsSection({
     );
     const first = pending.filter((r) => visibleIds.has(r.id));
     const rest = pending.filter((r) => !visibleIds.has(r.id));
-    first.forEach((r) => void run(r));
 
-    // Everything else in the background, 3 at a time
     (async () => {
+      // 1. Visible cards first, all in parallel
+      await Promise.all(first.map((r) => run(r)));
+
+      // 2. Then everything else, 3 at a time
       const queue = [...rest];
       const worker = async () => {
         while (queue.length && mounted.current) await run(queue.shift()!);
