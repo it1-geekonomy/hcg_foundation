@@ -2,41 +2,13 @@
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { ChevronDown, Check, X, Search, PlusCircle } from "lucide-react";
-import { City, State, Country } from "country-state-city";
 import Typography from "@/lib/Typography";
 
-// Pre-compute state name map for India using country-state-city library
-const indianStatesMap = new Map(
-  (State.getStatesOfCountry("IN") || []).map((s) => [s.isoCode, s.name])
-);
-
-// All Indian cities sourced directly from country-state-city library
-const ALL_INDIAN_CITIES = (City.getCitiesOfCountry("IN") || []).map((c) => {
-  const state = indianStatesMap.get(c.stateCode) || "";
-  return {
-    label: state ? `${c.name}, ${state}` : c.name,
-    name: c.name,
-    state,
-  };
-});
-
-// All Indian States from country-state-city library
-const ALL_INDIAN_STATES = (State.getStatesOfCountry("IN") || []).map((s) => ({
-  label: `${s.name}, India`,
-  name: s.name,
-}));
-
-// All World Countries from country-state-city library
-const ALL_COUNTRIES = (Country.getAllCountries() || []).map((c) => ({
-  label: c.name,
-  name: c.name,
-}));
-
-// Default initial list sourced directly from library
-const DEFAULT_LOCATIONS = [
-  ...ALL_INDIAN_STATES.slice(0, 10).map((s) => s.label),
-  ...ALL_INDIAN_CITIES.slice(0, 20).map((c) => c.label),
-];
+let cachedIndianCities: any[] = [];
+let cachedIndianStates: any[] = [];
+let cachedCountries: any[] = [];
+let cachedDefaultLocations: string[] = [];
+let isLoaded = false;
 
 interface LocationSelectProps {
   value: string;
@@ -59,6 +31,7 @@ export default function LocationSelect({
   const [searchQuery, setSearchQuery] = useState("");
   const [isOtherMode, setIsOtherMode] = useState(false);
   const [customInput, setCustomInput] = useState("");
+  const [dataReady, setDataReady] = useState(isLoaded);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -93,9 +66,25 @@ export default function LocationSelect({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
-  // Focus appropriate input when open or entering "Other" mode
   useEffect(() => {
     if (isOpen) {
+      if (!isLoaded) {
+        import("country-state-city").then(({ City, State, Country }) => {
+          const indianStatesMap = new Map((State.getStatesOfCountry("IN") || []).map((s) => [s.isoCode, s.name]));
+          cachedIndianCities = (City.getCitiesOfCountry("IN") || []).map((c) => {
+            const state = indianStatesMap.get(c.stateCode) || "";
+            return { label: state ? `${c.name}, ${state}` : c.name, name: c.name, state };
+          });
+          cachedIndianStates = (State.getStatesOfCountry("IN") || []).map((s) => ({ label: `${s.name}, India`, name: s.name }));
+          cachedCountries = (Country.getAllCountries() || []).map((c) => ({ label: c.name, name: c.name }));
+          cachedDefaultLocations = [
+            ...cachedIndianStates.slice(0, 10).map((s) => s.label),
+            ...cachedIndianCities.slice(0, 20).map((c) => c.label),
+          ];
+          isLoaded = true;
+          setDataReady(true);
+        });
+      }
       if (isOtherMode) {
         customInputRef.current?.focus();
       } else {
@@ -106,20 +95,21 @@ export default function LocationSelect({
 
   // Dynamic filter using country-state-city library
   const filteredLocations = useMemo(() => {
+    if (!dataReady) return [];
     const q = searchQuery.trim().toLowerCase();
     if (!q) {
-      return DEFAULT_LOCATIONS;
+      return cachedDefaultLocations;
     }
 
     // 1. Cities where name starts with query
-    const startsCities = ALL_INDIAN_CITIES.filter((c) =>
+    const startsCities = cachedIndianCities.filter((c) =>
       c.name.toLowerCase().startsWith(q)
     )
       .slice(0, 15)
       .map((c) => c.label);
 
     // 2. Cities where name contains query
-    const containsCities = ALL_INDIAN_CITIES.filter(
+    const containsCities = cachedIndianCities.filter(
       (c) =>
         !c.name.toLowerCase().startsWith(q) &&
         c.name.toLowerCase().includes(q)
@@ -128,12 +118,12 @@ export default function LocationSelect({
       .map((c) => c.label);
 
     // 3. States matching query
-    const matchedStates = ALL_INDIAN_STATES.filter((s) =>
+    const matchedStates = cachedIndianStates.filter((s) =>
       s.name.toLowerCase().includes(q)
     ).map((s) => s.label);
 
     // 4. Countries matching query
-    const matchedCountries = ALL_COUNTRIES.filter((cnt) =>
+    const matchedCountries = cachedCountries.filter((cnt) =>
       cnt.name.toLowerCase().includes(q)
     )
       .slice(0, 10)
