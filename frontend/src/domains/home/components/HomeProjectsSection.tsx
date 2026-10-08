@@ -13,7 +13,7 @@ const PROGRAM_HREFS = [
   "/awareness-and-screening-camps",
   "/swasti-art-gallery",
   "/pink-hope-support-group",
-  "/research-and-innovation",
+  "/innovation-and-technology",
 ];
 
 export default function HomeProjectsSection() {

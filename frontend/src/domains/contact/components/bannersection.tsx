@@ -1,8 +1,8 @@
 import Banner from "@/shared/components/Herobannersection";
 
 const CONTACT_US_BANNER = {
-  bgImage: "/aboutus/aboutus.png",
-  bgImageMobile: "/aboutus/aboutus-mobile.png",
+  bgImage: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791448332093-oqh4r-rectangle-1668-1-.webp",
+  bgImageMobile: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791448390178-ydtnp-rectangle-1668-2-.webp",
   bgImageAlt: "Doctors, nurses and families smiling together outside the hospital",
   breadcrumbs: [
     { label: "Home", href: "/" },
