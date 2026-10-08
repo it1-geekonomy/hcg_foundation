@@ -41,12 +41,16 @@ export default function HomeClient() {
     return false;
   });
 
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    setMounted(true);
+    
     const handleNavAction = () => {
       const action = sessionStorage.getItem("nav_action");
       const cameFromDetails = sessionStorage.getItem("came_from_details");
       
-      // Clear both flags to prevent them from affecting future navigations
+      // Clear flags
       sessionStorage.removeItem("nav_action");
       sessionStorage.removeItem("came_from_details");
       
@@ -67,12 +71,11 @@ export default function HomeClient() {
           }, 100);
         }
       } else if (cameFromDetails) {
-        // Back button navigation fallback
         setReady(true);
         setShowDonationOverlay(false);
         setTimeout(() => {
-           document.getElementById(cameFromDetails)?.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 100);
+           document.getElementById(cameFromDetails)?.scrollIntoView({ behavior: "auto", block: "start" });
+        }, 0);
       }
     };
 
@@ -84,30 +87,30 @@ export default function HomeClient() {
 
   return (
     <>
-      {!ready && (
-        <IntroSequence
-          onDone={() => {
-            setReady(true);
-          }}
-        />
-      )}
+      <ClientLayout>
+        <ClientPage />
+      </ClientLayout>
 
-      {ready && (
-        <>
-          <ClientLayout>
-            <ClientPage />
-          </ClientLayout>
+      <div suppressHydrationWarning>
+        <AnimatePresence>
+          {showDonationOverlay && (
+            <OverlayForm
+              key="donation-overlay"
+              onClose={() => setShowDonationOverlay(false)}
+            />
+          )}
+        </AnimatePresence>
 
-          <AnimatePresence>
-            {showDonationOverlay && (
-              <OverlayForm
-                key="donation-overlay"
-                onClose={() => setShowDonationOverlay(false)}
-              />
-            )}
-          </AnimatePresence>
-        </>
-      )}
+        <AnimatePresence>
+          {!ready && (
+            <IntroSequence
+              onDone={() => {
+                setReady(true);
+              }}
+            />
+          )}
+        </AnimatePresence>
+      </div>
     </>
   );
 }
