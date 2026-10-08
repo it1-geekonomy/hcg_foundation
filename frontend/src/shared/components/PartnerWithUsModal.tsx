@@ -37,7 +37,29 @@ function FitViewport({
       inner.style.width = widen ? `${100 / scale}%` : "";
       inner.style.marginInline = widen ? `${50 - 50 / scale}%` : "";
       inner.style.flexShrink = widen ? "0" : "";
-      return inner.offsetHeight;
+
+      let neededHeight = Math.max(inner.offsetHeight, inner.scrollHeight);
+      const submitBtn = inner.querySelector<HTMLElement>("button[type='submit']");
+      if (submitBtn) {
+        const innerRect = inner.getBoundingClientRect();
+        const btnRect = submitBtn.getBoundingClientRect();
+        const btnBottom = btnRect.bottom - innerRect.top + 20;
+        if (btnBottom > neededHeight) {
+          neededHeight = btnBottom;
+        }
+      }
+      const formOrBody = inner.querySelector<HTMLElement>("form, [class*='overflow-y-auto']");
+      if (formOrBody) {
+        const scrollHeight =
+          formOrBody.scrollHeight +
+          (formOrBody.getBoundingClientRect().top - inner.getBoundingClientRect().top) +
+          10;
+        if (scrollHeight > neededHeight) {
+          neededHeight = scrollHeight;
+        }
+      }
+
+      return neededHeight;
     };
 
     let frameId = 0;
@@ -46,7 +68,7 @@ function FitViewport({
       if (!host || host.clientHeight === 0) return;
       inner.style.transform = "none";
       frame.style.height = "auto";
-      const available = host.clientHeight;
+      const available = Math.max(host.clientHeight - 8, 100);
       let needed = layoutAt(1);
       let next = needed > available + 1 && needed > 0 ? available / needed : 1;
       if (fillWidth && next < 0.999) {
@@ -80,6 +102,8 @@ function FitViewport({
     fit();
     const observer = new ResizeObserver(schedule);
     observer.observe(inner);
+    const formEl = inner.querySelector("form");
+    if (formEl) observer.observe(formEl);
     window.addEventListener("resize", schedule);
     return () => {
       cancelAnimationFrame(frameId);
@@ -167,7 +191,15 @@ export default function PartnerWithUsModal({
   const handleAutoResize = (e: React.FormEvent<HTMLTextAreaElement>) => {
     const el = e.currentTarget;
     el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
+    const computedMax = parseFloat(window.getComputedStyle(el).maxHeight);
+    if (computedMax && !isNaN(computedMax) && el.scrollHeight > computedMax) {
+      el.style.height = `${computedMax}px`;
+      el.style.overflowY = "auto";
+    } else {
+      el.style.height = `${el.scrollHeight}px`;
+      el.style.overflowY = "hidden";
+    }
+    window.dispatchEvent(new Event("resize"));
   };
 
   // Lock body scroll when modal is active
@@ -334,8 +366,8 @@ export default function PartnerWithUsModal({
                 <X className="size-[1.125rem] stroke-[2.2]" />
               </button>
 
-              {/* Left Column: Form Content (fits any screen without scroll) */}
-              <div className="relative w-full md:w-[22.3rem] px-[1.25rem] sm:px-[1.5rem] md:pl-[2.5rem] md:pr-[1rem] pt-[1.25rem] sm:pt-[1.5rem] md:pt-[1.75rem] pb-[1.5rem] sm:pb-[2rem] flex flex-col justify-start overflow-hidden min-h-0">
+              {/* Left Column: Form Content */}
+              <div className="relative w-full md:w-[22.3rem] px-[1.25rem] sm:px-[1.5rem] md:pl-[2.5rem] md:pr-[1rem] pt-[1.25rem] sm:pt-[1.5rem] md:pt-[1.75rem] pb-[1.5rem] sm:pb-[2rem] flex flex-col justify-start overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden min-h-0">
                 <div>
                   {/* Frame 298: Title + Subtitle using design-system Typography */}
                   <div className="w-full max-w-[19.3175rem] mx-auto md:mx-0 space-y-[0.35rem] sm:space-y-[0.5rem] pr-8 md:pr-0">
@@ -388,19 +420,12 @@ export default function PartnerWithUsModal({
                       </Typography>
                     </label>
                     <div className="pl-[1.5rem] w-full">
-                      <textarea
+                      <input
+                        type="text"
                         id="partner-fullName"
-                        rows={1}
                         value={formData.fullName}
-                        onInput={handleAutoResize}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.preventDefault();
-                        }}
-                        onChange={(e) => {
-                          handleNameChange(e);
-                          handleAutoResize(e);
-                        }}
-                        className="w-full bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
+                        onChange={handleNameChange}
+                        className="w-full bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope block py-0 h-[1.3rem]"
                       />
                     </div>
                   </div>
@@ -436,20 +461,13 @@ export default function PartnerWithUsModal({
                       </Typography>
                     </label>
                     <div className="pl-[1.5rem] w-full">
-                      <textarea
+                      <input
+                        type="email"
                         id="partner-email"
-                        rows={1}
                         value={formData.email}
-                        onInput={handleAutoResize}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.preventDefault();
-                        }}
-                        onChange={(e) => {
-                          handleEmailChange(e);
-                          handleAutoResize(e);
-                        }}
+                        onChange={handleEmailChange}
                         onBlur={handleEmailBlur}
-                        className="w-full bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
+                        className="w-full bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope block py-0 h-[1.3rem]"
                       />
                     </div>
                   </div>
@@ -519,7 +537,7 @@ export default function PartnerWithUsModal({
                           }));
                           handleAutoResize(e);
                         }}
-                        className="w-full bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
+                        className="w-full bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope resize-none min-h-[1.2rem] max-h-[2.4rem] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden block py-0"
                       />
                     </div>
                   </div>
@@ -564,7 +582,7 @@ export default function PartnerWithUsModal({
                           }));
                           handleAutoResize(e);
                         }}
-                        className="w-full min-h-[2.5rem] max-h-[7rem] bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto block py-1"
+                        className="w-full min-h-[2.5rem] max-h-[4.5rem] sm:max-h-[7rem] bg-transparent text-[0.8125rem] leading-normal font-normal text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden block py-1"
                       />
                     </div>
                   </div>

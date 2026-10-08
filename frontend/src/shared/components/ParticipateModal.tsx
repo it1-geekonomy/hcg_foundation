@@ -56,7 +56,29 @@ function FitViewport({
       inner.style.width = widen ? `${100 / scale}%` : "";
       inner.style.marginInline = widen ? `${50 - 50 / scale}%` : "";
       inner.style.flexShrink = widen ? "0" : "";
-      return inner.offsetHeight;
+
+      let neededHeight = Math.max(inner.offsetHeight, inner.scrollHeight);
+      const submitBtn = inner.querySelector<HTMLElement>("button[type='submit']");
+      if (submitBtn) {
+        const innerRect = inner.getBoundingClientRect();
+        const btnRect = submitBtn.getBoundingClientRect();
+        const btnBottom = btnRect.bottom - innerRect.top + 20;
+        if (btnBottom > neededHeight) {
+          neededHeight = btnBottom;
+        }
+      }
+      const modalBody = inner.querySelector<HTMLElement>("[data-modal-body]");
+      if (modalBody) {
+        const bodyScroll =
+          modalBody.scrollHeight +
+          (modalBody.getBoundingClientRect().top - inner.getBoundingClientRect().top) +
+          10;
+        if (bodyScroll > neededHeight) {
+          neededHeight = bodyScroll;
+        }
+      }
+
+      return neededHeight;
     };
 
     let frameId = 0;
@@ -65,7 +87,7 @@ function FitViewport({
       if (!host || host.clientHeight === 0) return;
       inner.style.transform = "none";
       frame.style.height = "auto";
-      const available = host.clientHeight;
+      const available = Math.max(host.clientHeight - 8, 100);
       let needed = layoutAt(1);
       let next = needed > available + 1 && needed > 0 ? available / needed : 1;
       if (fillWidth && next < 0.999) {
@@ -99,6 +121,10 @@ function FitViewport({
     fit();
     const observer = new ResizeObserver(schedule);
     observer.observe(inner);
+    const formEl = inner.querySelector("form");
+    if (formEl) observer.observe(formEl);
+    const modalBodyEl = inner.querySelector("[data-modal-body]");
+    if (modalBodyEl) observer.observe(modalBodyEl);
     window.addEventListener("resize", schedule);
     return () => {
       cancelAnimationFrame(frameId);
@@ -248,7 +274,15 @@ export default function ParticipateModal({
   const handleAutoResize = (e: React.FormEvent<HTMLTextAreaElement>) => {
     const el = e.currentTarget;
     el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
+    const computedMax = parseFloat(window.getComputedStyle(el).maxHeight);
+    if (computedMax && !isNaN(computedMax) && el.scrollHeight > computedMax) {
+      el.style.height = `${computedMax}px`;
+      el.style.overflowY = "auto";
+    } else {
+      el.style.height = `${el.scrollHeight}px`;
+      el.style.overflowY = "hidden";
+    }
+    window.dispatchEvent(new Event("resize"));
   };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -558,10 +592,10 @@ export default function ParticipateModal({
           <X className="size-4 sm:size-4.5 stroke-[2.2]" />
         </button>
 
-        {/* Modal Body: overflow-hidden to prevent scrolling */}
-        <div className="relative z-10 p-3.5 sm:px-10 sm:py-7 md:px-12 md:py-8 overflow-hidden h-full flex flex-col justify-between">
+        {/* Modal Body */}
+        <div data-modal-body className="relative z-10 py-2 px-3.5 sm:px-10 sm:py-7 md:px-12 md:py-8 overflow-visible sm:overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden h-auto sm:h-full flex flex-col justify-between">
           {/* Header Title & Subtitle matching Figma 100% */}
-          <div className="text-center mx-auto px-7 sm:px-10 mb-2 sm:mb-6 md:mb-8">
+          <div className="text-center mx-auto px-7 sm:px-10 mb-1.5 sm:mb-6 md:mb-8">
             <div className="mb-0.5 sm:mb-1">
               <h2 className="font-tiempos-headline font-normal italic text-[#0D2838] text-[1.1rem] sm:text-[1.35rem] md:text-[1.4275rem] leading-[115%] sm:leading-[100%] tracking-[0.03em] text-center">
                 {isIntern && "Apply for Internship at"}
@@ -609,7 +643,7 @@ export default function ParticipateModal({
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} noValidate className="w-full max-w-[34rem] mx-auto flex-1 flex flex-col justify-between font-manrope space-y-2 sm:space-y-4 md:space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="w-full max-w-[34rem] mx-auto flex-1 flex flex-col justify-between font-manrope space-y-1.5 sm:space-y-4 md:space-y-5">
             {/* Row 1: Full Name & Phone Number (Figma Frame 560: 544.45px x 41.14px, Gap: 51px) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-x-[3.19rem] sm:gap-y-4">
               <div className="relative">
@@ -634,19 +668,12 @@ export default function ParticipateModal({
                     </Typography>
                   </label>
                   <div className="pl-7 w-full">
-                    <textarea
+                    <input
+                      type="text"
                       id="participate-fullName"
-                      rows={1}
                       value={formData.fullName}
-                      onInput={handleAutoResize}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") e.preventDefault();
-                      }}
-                      onChange={(e) => {
-                        handleNameChange(e);
-                        handleAutoResize(e);
-                      }}
-                      className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
+                      onChange={handleNameChange}
+                      className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope block py-0 h-[1.3rem]"
                     />
                   </div>
                 </div>
@@ -697,20 +724,13 @@ export default function ParticipateModal({
                     </Typography>
                   </label>
                   <div className="pl-7 w-full">
-                    <textarea
+                    <input
+                      type="email"
                       id="participate-email"
-                      rows={1}
                       value={formData.email}
-                      onInput={handleAutoResize}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") e.preventDefault();
-                      }}
-                      onChange={(e) => {
-                        handleEmailChange(e);
-                        handleAutoResize(e);
-                      }}
+                      onChange={handleEmailChange}
                       onBlur={handleEmailBlur}
-                      className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
+                      className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope block py-0 h-[1.3rem]"
                     />
                   </div>
                 </div>
@@ -795,7 +815,7 @@ export default function ParticipateModal({
                             setFormData({ ...formData, course: e.target.value });
                             handleAutoResize(e);
                           }}
-                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
+                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none min-h-[1.2rem] max-h-[2.4rem] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden block py-0"
                         />
                       </div>
                     </div>
@@ -843,7 +863,7 @@ export default function ParticipateModal({
                           setFormData({ ...formData, address: e.target.value });
                           handleAutoResize(e);
                         }}
-                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block"
+                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none min-h-[1.2rem] max-h-[2.4rem] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden block py-0"
                       />
                     </div>
                   </div>
@@ -906,7 +926,7 @@ export default function ParticipateModal({
                             });
                             handleAutoResize(e);
                           }}
-                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
+                          className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none min-h-[1.2rem] max-h-[2.4rem] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden block py-0"
                         />
                       </div>
                     </div>
@@ -959,7 +979,7 @@ export default function ParticipateModal({
                           });
                           handleAutoResize(e);
                         }}
-                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
+                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none min-h-[1.2rem] max-h-[2.4rem] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden block py-0"
                       />
                     </div>
                   </div>
@@ -1026,7 +1046,7 @@ export default function ParticipateModal({
                           });
                           handleAutoResize(e);
                         }}
-                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
+                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none min-h-[1.2rem] max-h-[2.4rem] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden block py-0"
                       />
                     </div>
                   </div>
@@ -1072,7 +1092,7 @@ export default function ParticipateModal({
                           setFormData({ ...formData, reason: e.target.value });
                           handleAutoResize(e);
                         }}
-                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-hidden block min-h-[1.2rem] py-0"
+                        className="w-full bg-transparent text-[0.82rem] leading-normal font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none min-h-[1.2rem] max-h-[2.4rem] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden block py-0"
                       />
                     </div>
                   </div>
@@ -1146,7 +1166,7 @@ export default function ParticipateModal({
                 ) : (
                   <label
                     htmlFor="intern-resume"
-                    className={`w-full h-[3.6rem] sm:h-[5.5rem] md:h-[6.19rem] flex flex-col items-center justify-center gap-1 sm:gap-[0.625rem] border ${errors.resumeFile
+                    className={`w-full h-[2.85rem] sm:h-[5.5rem] md:h-[6.19rem] flex flex-col items-center justify-center gap-1 sm:gap-[0.625rem] border ${errors.resumeFile
                       ? "border-solid border-red-500 bg-red-50/20"
                       : "border-dashed border-[#A3A3A3] bg-white/65 hover:border-[#FCCC2D]"
                       } rounded-[0.5rem] cursor-pointer transition-colors`}
@@ -1211,7 +1231,7 @@ export default function ParticipateModal({
                         });
                         handleAutoResize(e);
                       }}
-                      className="w-full min-h-[1.6rem] sm:min-h-[2.2rem] md:min-h-[2.5rem] max-h-[4.5rem] sm:max-h-[6.5rem] md:max-h-[8rem] bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto block leading-normal py-0.5 sm:py-1"
+                      className="w-full min-h-[1.6rem] sm:min-h-[2.2rem] md:min-h-[2.5rem] max-h-[3.8rem] sm:max-h-[6rem] bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden block leading-normal py-0.5 sm:py-1"
                     />
                   </div>
                 </div>
@@ -1265,7 +1285,7 @@ export default function ParticipateModal({
                         setFormData({ ...formData, message: e.target.value });
                         handleAutoResize(e);
                       }}
-                      className="w-full min-h-[1.6rem] sm:min-h-[2.2rem] md:min-h-[2.5rem] max-h-[4.5rem] sm:max-h-[6.5rem] md:max-h-[8rem] bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto block leading-normal py-0.5 sm:py-1"
+                      className="w-full min-h-[1.6rem] sm:min-h-[2.2rem] md:min-h-[2.5rem] max-h-[3.8rem] sm:max-h-[6rem] bg-transparent text-[0.82rem] font-medium text-[#0D2838] focus:outline-hidden font-manrope resize-none overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden block leading-normal py-0.5 sm:py-1"
                     />
                   </div>
                 </div>
@@ -1334,7 +1354,7 @@ export default function ParticipateModal({
               type="submit"
               disabled={submitted || submitting}
               aria-busy={submitting}
-              className="w-full mt-2 sm:mt-3 md:mt-4 py-2.5 sm:py-3 md:py-3.5 px-6 bg-[#FCCC2D] text-[#2E1C12] rounded-md transition duration-200 hover:bg-[#F5C21B] active:scale-[0.99] cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed"
+              className="w-full mt-1.5 sm:mt-3 md:mt-4 py-2 sm:py-3 md:py-3.5 px-6 bg-[#FCCC2D] text-[#2E1C12] rounded-md transition duration-200 hover:bg-[#F5C21B] active:scale-[0.99] cursor-pointer disabled:opacity-80 disabled:cursor-not-allowed"
             >
               <Typography variant="button-1" as="span" className="font-manrope font-semibold text-[#2E1C12]">
                 {submitted
