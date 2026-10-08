@@ -63,7 +63,9 @@ export function CoverflowCarousel({ people, label }: { people: Person[]; label: 
 
       slide.style.transform = `translate3d(${rel * SPREAD * 100 * spread}%, ${(1 - reveal) * 28}px, 0) scale(${scale})`;
       slide.style.opacity = String(fade * reveal);
-      slide.style.filter = `brightness(${1 - near * SIDE_DIM}) saturate(${1 - near * 0.25})`;
+      // Even a no-op filter keeps the centre card on its own filtered layer, which softens its text.
+      slide.style.filter =
+        near > 0.001 ? `brightness(${1 - near * SIDE_DIM}) saturate(${1 - near * 0.25})` : "";
       slide.style.zIndex = String(100 - Math.round(abs * 10));
       slide.style.pointerEvents = fade * reveal < 0.5 ? "none" : "";
 
@@ -248,7 +250,9 @@ export function CoverflowCarousel({ people, label }: { people: Person[]; label: 
               }}
               aria-hidden={i !== active}
               onClickCapture={(e) => onSlideClickCapture(e, i)}
-              className="absolute inset-0 opacity-0 will-change-transform"
+              // No will-change-transform: Chrome then freezes each card's raster at the scale it
+              // first painted at, so a side card (painted at ~0.8x) stays blurry once it's centred.
+              className="absolute inset-0 opacity-0"
             >
               {/* Cards fade to transparent and some photos are cut-outs; keep cards behind from bleeding through. */}
               <div
