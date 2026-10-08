@@ -5,6 +5,20 @@ import { Donor } from '../donors/entities/donor.entity';
 import { DonationCertificateService } from './donation-certificate.service';
 import { DonationReceiptService } from './donation-receipt.service';
 
+export type QuotaScope = 'daily' | 'monthly' | 'rate';
+
+export type ReceiptEmailResult =
+  | { status: 'sent'; id?: string }
+  | { status: 'skipped'; reason: string }
+  | { status: 'quota'; scope: QuotaScope }
+  | { status: 'error'; message: string };
+
+const QUOTA_ERRORS: Partial<Record<string, QuotaScope>> = {
+  daily_quota_exceeded: 'daily',
+  monthly_quota_exceeded: 'monthly',
+  rate_limit_exceeded: 'rate',
+};
+
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
@@ -26,19 +40,23 @@ export class EmailService {
     this.resend = new Resend(apiKey);
   }
 
-  async sendDonationReceipt(donor: Donor): Promise<void> {
+  isEnabled(): boolean {
+    return this.resend !== null;
+  }
+
+  async sendDonationReceipt(donor: Donor): Promise<ReceiptEmailResult> {
     if (!this.resend) {
       this.logger.warn(
         `Skipping donation receipt for ${donor.email} because RESEND_API_KEY is missing.`,
       );
-      return;
+      return { status: 'skipped', reason: 'RESEND_API_KEY is missing' };
     }
 
     if (!donor.email) {
       this.logger.warn(
         'Skipping donation receipt because donor provided no email.',
       );
-      return;
+      return { status: 'skipped', reason: 'Donor provided no email' };
     }
 
     let certPdf: Buffer;
@@ -92,21 +110,27 @@ export class EmailService {
       });
 
       if (error) {
+        const quota = QUOTA_ERRORS[error.name];
+        if (quota) {
+          this.logger.warn(
+            `Resend ${quota} limit reached; receipt for ${donor.email} stays queued (${error.message})`,
+          );
+          return { status: 'quota', scope: quota };
+        }
         this.logger.error(
           `Failed to send receipt to ${donor.email}: ${error.message}`,
         );
-        return;
+        return { status: 'error', message: `${error.name}: ${error.message}` };
       }
 
       this.logger.log(
         `Donation receipt + certificate sent to ${donor.email} (ID: ${data?.id})`,
       );
+      return { status: 'sent', id: data?.id };
     } catch (err) {
-      this.logger.error(
-        `Error sending email to ${donor.email}: ${
-          err instanceof Error ? err.message : 'Unknown error'
-        }`,
-      );
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      this.logger.error(`Error sending email to ${donor.email}: ${message}`);
+      return { status: 'error', message };
     }
   }
 
