@@ -289,7 +289,7 @@ export default function InnovationAndTechnology() {
 
         <div
           ref={gridRef}
-          className="mt-[clamp(1rem,2vw,1.5rem)] grid grid-cols-1 gap-[clamp(1rem,2vw,1.5rem)] sm:grid-cols-2 lg:grid-cols-4"
+          className="mt-[clamp(1rem,2vw,1.5rem)] grid grid-cols-1 gap-[clamp(1rem,2vw,1.5rem)] sm:grid-cols-2 xl:grid-cols-4"
         >
           {INNOVATION_COMPANIES.map((company, idx) => (
             <article
