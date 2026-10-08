@@ -104,4 +104,16 @@ export const PARTNER_LOGOS: PartnerLogo[] = [
     src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791291555815-6sz0x-sd-foundation-logo-1.webp",
     alt: "SD Foundation",
   },
+  {
+    id: "partner-9",
+    src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791434542053-okh93-corporatelogomark_rgb_hr-2-1.webp",
+    alt: "corporatelogomark",
+
+  },
+  {
+    id: "partner-10",
+    src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791434575068-jpbo7-image-93.webp",
+    alt: "jpbo7",
+
+  },
 ];
