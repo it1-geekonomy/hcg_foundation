@@ -21,7 +21,7 @@ export const PHILANTHROPY_CARDS: PhilanthropyCard[] = [
     title: "Support Cancer Awareness & Early Detection",
     description:
       "Support or partner for awareness programmes, oral cancer camps, early detection, and timely treatment.",
-    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790846127207-0jx6p-rectangle-1667-1-.webp",
+    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791437479993-mgrye-rectangle-1667-1-.webp",
   },
   {
     id: "create-philanthropic-partnership",
