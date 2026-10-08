@@ -42,7 +42,7 @@ export const INNOVATION_COMPANIES: InnovationCompany[] = [
     name: "RayIoT",
     logo: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791436637389-zgg4n-image-89.webp",
     description:
-    "A contactless monitoring platform that tracks breathing, sleep and presence through everyday Wi-Fi-enabled devices, enabling remote monitoring of patients at home during and after treatment.",
+    "A contactless monitoring platform that tracks breathing, sleep and presence through everyday Wi-Fi-enabled devices, enabling remote monitoring of patients at home during and after treatment. also can you change deep holistics description A preventive health platform that offers an at-home blood test with 100+ advanced diagnostics and one-to-one expert consultations, turning results into personalised guidance for early risk awareness and healthier living.",
   },
   {
     id: "ayurythm",
