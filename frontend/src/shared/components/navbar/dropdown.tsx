@@ -73,6 +73,7 @@ export default function DesktopDropdown({
 }: DesktopDropdownProps) {
   const pathname = usePathname();
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastPointerType = useRef<string>("");
 
   const cancelClose = () => {
     if (closeTimer.current) {
@@ -99,7 +100,16 @@ export default function DesktopDropdown({
     >
       <button
         type="button"
-        onClick={onToggle}
+        onPointerDown={(e) => {
+          lastPointerType.current = e.pointerType;
+        }}
+        onClick={(e) => {
+          // With a mouse, hover already opened the menu, so a click must not close it.
+          // Touch and keyboard (detail === 0) still toggle normally.
+          const viaMouse = e.detail > 0 && lastPointerType.current === "mouse";
+          if (viaMouse && isOpen) return;
+          onToggle();
+        }}
         aria-expanded={isOpen}
         aria-haspopup="true"
         className="group/nav relative flex items-center gap-1.5 py-1"
@@ -113,15 +123,29 @@ export default function DesktopDropdown({
         />
       </button>
 
-      {/* pt bridges the gap to the panel so hover isn't lost between trigger and menu. */}
+      {/* Hover bridge: only as wide as the trigger, so it can never overlap a neighbouring
+          dropdown. Inert while closed. */}
       <div
-        className={`absolute left-1/2 top-full z-10 -translate-x-1/2 pt-4 transition-[opacity,transform,visibility] duration-200 ease-out ${
+        aria-hidden="true"
+        className={`absolute inset-x-0 top-full h-4 ${isOpen ? "" : "pointer-events-none"}`}
+      />
+
+      {/* Panel wrapper never captures the pointer itself (its transparent pt-4 gap and any
+          extra width would otherwise sit on top of neighbouring triggers). Only the visible
+          card is interactive, and only while open. */}
+      <div
+        aria-hidden={!isOpen}
+        className={`pointer-events-none absolute left-1/2 top-full z-10 -translate-x-1/2 pt-4 transition-[opacity,transform,visibility] duration-200 ease-out ${
           isOpen
             ? "visible translate-y-0 opacity-100"
             : "invisible -translate-y-1.5 opacity-0"
         }`}
       >
-        <div className="relative min-w-[15rem] overflow-hidden rounded-xl border border-white/10 bg-[#1b1813]/95 p-1.5 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.55)] backdrop-blur-xl">
+        <div
+          className={`relative min-w-[15rem] overflow-hidden rounded-xl border border-white/10 bg-[#1b1813]/95 p-1.5 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.55)] backdrop-blur-xl ${
+            isOpen ? "pointer-events-auto" : "pointer-events-none"
+          }`}
+        >
           <span
             aria-hidden="true"
             className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#FED034]/80 to-transparent"
