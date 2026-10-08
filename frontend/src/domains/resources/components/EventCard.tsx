@@ -27,7 +27,8 @@ export default function EventCard({
 
   const handleCardClick = () => {
     if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      sessionStorage.setItem("events_page_scroll", String(window.scrollY));
+      sessionStorage.setItem("came_from_details_type", "events_listing");
     }
     router.push(detailUrl);
   };
@@ -120,7 +121,8 @@ export default function EventCard({
             onClick={(e) => {
               e.stopPropagation();
               if (typeof window !== "undefined") {
-                window.scrollTo({ top: 0, behavior: "smooth" });
+                sessionStorage.setItem("events_page_scroll", String(window.scrollY));
+                sessionStorage.setItem("came_from_details_type", "events_listing");
               }
             }}
             className="inline-flex items-center justify-center whitespace-nowrap h-[1.75rem] lg:h-[2.5rem] xl:h-[3rem] w-auto xl:w-[9.5rem] px-[0.75rem] lg:px-[1.25rem] gap-[0.45rem] rounded-[6px] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
