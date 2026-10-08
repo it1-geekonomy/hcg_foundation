@@ -312,9 +312,8 @@ export default async function StoryDetailPage({
                           variant="body-10"
                           as="p"
                           className="font-argestadisplay font-normal text-[#343E43]"
-                        >
-                          {paragraph}
-                        </Typography>
+                          dangerouslySetInnerHTML={{ __html: paragraph }}
+                        />
                       ))}
                     </div>
                   )}
