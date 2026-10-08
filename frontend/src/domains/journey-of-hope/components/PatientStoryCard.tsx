@@ -37,7 +37,7 @@ export default function PatientStoryCard({
   };
 
   const frontContent = (
-    <div className="group relative flex flex-col justify-between h-full w-full overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-[rgba(255,255,255,0.55)] bg-[rgba(0,0,0,0.23)] backdrop-blur-[1.30625rem] pt-[1.4223rem] pl-[1.475rem] pr-[1.4223rem] pb-0 transition-all duration-500 hover:border-[rgba(255,255,255,0.75)]">
+    <div className="group relative flex flex-col justify-between h-full w-full overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-[rgba(255,255,255,0.55)] bg-[rgba(0,0,0,0.23)] backdrop-blur-[1.30625rem] pt-[1.15rem] pl-[1.2rem] pr-[1.15rem] pb-0 transition-all duration-500 hover:border-[rgba(255,255,255,0.75)]">
       {/* Inner Image: Rectangle 31 in Figma (21.177rem x 23.021rem, radius 1.2643rem) */}
       <div className="relative z-10 w-full aspect-[21.177/23.021] overflow-hidden rounded-[1.2643rem] shadow-xs pointer-events-none bg-black/10">
         {story.imageUrl ? (
@@ -57,7 +57,7 @@ export default function PatientStoryCard({
           e.stopPropagation();
           handleCardClick(e);
         }}
-        className="relative z-10 h-[6.375rem] flex items-center justify-between pointer-events-auto cursor-pointer"
+        className="relative z-10 h-[5.25rem] flex items-center justify-between pointer-events-auto cursor-pointer"
       >
         {/* Left: Patient Name & Date */}
         <div className="flex flex-col text-white min-w-0 w-full">
@@ -88,7 +88,7 @@ export default function PatientStoryCard({
 
   const renderBackContent = (flipped: boolean) => (
     <MirrorReveal isOpen={flipped} delay={0} duration={0.82}>
-      <div className="relative h-full w-full flex flex-col justify-between items-center p-[1.425rem] rounded-[1.2643rem] border-[0.0527rem] border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2]">
+      <div className="relative h-full w-full flex flex-col justify-between items-center p-4 lg:p-[1.2rem] rounded-[1.2643rem] border-[0.0527rem] border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2]">
         {/* Scrollable Story Description matching Team & Trustees pattern */}
         <div className="min-h-0 flex-1 overflow-y-auto pr-1.5 space-y-2.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {(story.excerpt || story.quote) ? (
