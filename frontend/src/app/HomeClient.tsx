@@ -3,14 +3,22 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 
-import ClientLayout from "@/app/(client)/layout";
-import ClientPage from "@/app/(client)/page";
-import { IntroSequence, OverlayForm } from "@/domains/home/components";
+import dynamic from "next/dynamic";
 
-export default function HomeClient() {
+const IntroSequence = dynamic(
+  () => import("@/domains/home/components/IntroSequence").then((m) => m.IntroSequence),
+  { ssr: false }
+);
+const OverlayForm = dynamic(
+  () => import("@/domains/home/components/OverlayForm"),
+  { ssr: false }
+);
+
+export default function HomeClient({ children, isBot }: { children: React.ReactNode; isBot?: boolean }) {
   const [scrollTarget, setScrollTarget] = useState<string | null>(null);
 
   const [ready, setReady] = useState(() => {
+    if (isBot) return true;
     if (typeof window !== "undefined") {
       const h = window.location.hash;
       const navAction = sessionStorage.getItem("nav_action");
@@ -122,9 +130,7 @@ export default function HomeClient() {
 
   return (
     <>
-      <ClientLayout>
-        <ClientPage />
-      </ClientLayout>
+      {children}
 
       <div suppressHydrationWarning>
         <AnimatePresence>
