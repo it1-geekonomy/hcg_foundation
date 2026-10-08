@@ -80,6 +80,8 @@ export class R2StorageService {
         Key: key,
         Body: params.buffer,
         ContentType: params.contentType,
+        // Keys embed a random UUID, so an object's bytes never change.
+        CacheControl: 'public, max-age=31536000, immutable',
       }),
     );
 
