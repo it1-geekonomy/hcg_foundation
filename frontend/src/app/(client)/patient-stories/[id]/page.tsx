@@ -4,7 +4,6 @@ import Script from "next/script";
 import { notFound } from "next/navigation";
 import { Calendar } from "lucide-react";
 import DonateForm from "@/shared/components/DonateForm";
-import Banner from "@/shared/components/Herobannersection";
 import Typography from "@/lib/Typography";
 import { PATIENT_STORIES, PatientStory } from "@/domains/journey-of-hope/constants/stories";
 import ShareStory from "@/shared/components/ShareStory";
@@ -248,18 +247,10 @@ export default async function StoryDetailPage({
   return (
     <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope">
       <DetailTracker type="smilestories" />
-      <Banner
-        bgImage="/journey-of-hope/Journey of Hope banner image.png"
-        bgImageAlt="Patient Stories"
-        breadcrumbs={[
-          { label: "Home", href: "/#smilestories" },
-          { label: "Journey of Hope", href: "/patient-stories" },
-        ]}
-        title="Patient Stories"
-      />
 
-      {/* Main Story Detail Section */}
-      <section className={`${CONTAINER} py-8 sm:py-12 lg:py-16`}>
+      {/* Main Story Detail Section
+          Top padding clears the fixed navbar (banner removed). */}
+      <section className={`${CONTAINER} pt-6 sm:pt-26 lg:pt-30 pb-8 sm:pb-12 lg:pb-16`}>
         {failed ? (
           <RefreshNotice title="We couldn't load this story right now" className="py-16" />
         ) : story ? (
@@ -310,11 +301,11 @@ export default async function StoryDetailPage({
                 <div className="mt-4 sm:mt-5 max-h-[25rem] sm:max-h-[30rem] lg:max-h-[35rem] xl:max-h-[40rem] overflow-y-auto no-scrollbar pr-2 sm:pr-4">
                   {story.fullStory.includes("<") ? (
                     <div
-                      className="prose prose-stone max-w-none text-justify text-[#343E43] prose-headings:!text-[#0D2838] prose-a:!text-[#FCCC2D] [&_*]:!bg-transparent [&_p]:!text-[#343E43] [&_span]:!text-[#343E43] [&_div]:!text-[#343E43] [&_strong]:!text-[#343E43] [&_h1]:!text-[#0D2838] [&_h2]:!text-[#0D2838] [&_h3]:!text-[#0D2838] [&_h4]:!text-[#0D2838] [&_h5]:!text-[#0D2838] [&_h6]:!text-[#0D2838] [&_li]:!text-[#343E43] [&_td]:!text-[#343E43] [&_th]:!text-[#0D2838]"
+                      className="prose prose-stone max-w-none text-left [&_*]:!text-left text-[#343E43] prose-headings:!text-[#0D2838] prose-a:!text-[#FCCC2D] [&_*]:!bg-transparent [&_p]:!text-[#343E43] [&_span]:!text-[#343E43] [&_div]:!text-[#343E43] [&_strong]:!text-[#343E43] [&_h1]:!text-[#0D2838] [&_h2]:!text-[#0D2838] [&_h3]:!text-[#0D2838] [&_h4]:!text-[#0D2838] [&_h5]:!text-[#0D2838] [&_h6]:!text-[#0D2838] [&_li]:!text-[#343E43] [&_td]:!text-[#343E43] [&_th]:!text-[#0D2838]"
                       dangerouslySetInnerHTML={{ __html: story.fullStory }}
                     />
                   ) : (
-                    <div className="space-y-3.5 text-justify">
+                    <div className="space-y-3.5 text-left">
                       {story.fullStory.split("\n\n").map((paragraph, index) => (
                         <Typography
                           key={index}
