@@ -192,6 +192,32 @@ function ReelCard({
   onToggleMute: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    const el = videoRef.current?.closest(".reel-card");
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setShouldLoad(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "200px 0px", threshold: 0.01 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !shouldLoad) return;
+    video.load();
+    void video.play().catch(() => {
+      // Autoplay may be blocked until user interaction; muted loop still works on most devices.
+    });
+  }, [shouldLoad]);
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -210,13 +236,12 @@ function ReelCard({
     >
       <video
         ref={videoRef}
-        src={reel.videoSrc}
+        src={shouldLoad ? reel.videoSrc : undefined}
         className="h-full w-full object-cover"
-        autoPlay
         muted={muted}
         loop
         playsInline
-        preload="metadata"
+        preload="none"
       />
 
       <button

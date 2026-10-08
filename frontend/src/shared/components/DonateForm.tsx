@@ -377,10 +377,6 @@ export default function DonateSection() {
   return (
     <section ref={sectionRef} className="w-full bg-[#FFF6D8]">
       <DonateMotionProvider inView={inView} live={live}>
-        <Script
-          src="https://checkout.razorpay.com/v1/checkout.js"
-          strategy="lazyOnload"
-        />
         {detailsOpen ? (
           <DonateDetailsModal
             amount={donationAmount}
