@@ -96,37 +96,39 @@ export default function VolunteerInterestSelect({
   };
 
   return (
-    <div className={`relative h-full ${className}`} ref={containerRef}>
+    <div className={`relative flex flex-col ${className}`} ref={containerRef}>
       {/* Main bar */}
       <div
         onClick={() => {
           setIsOpen((prev) => !prev);
           setIsOtherMode(false);
         }}
-        className={`min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b ${
+        className={`min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b ${
           error
             ? "border-red-500"
             : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
         } transition-all cursor-pointer`}
       >
-        <div className="flex items-center gap-1.5">
-          <img
-            src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269059713-dt428-book.webp"
-            alt=""
-            className="size-4 shrink-0 mr-1.5 object-contain"
-          />
-          <Typography
-            variant="caption-1"
-            as="span"
-            className="font-medium font-manrope text-[#0D2838] select-none leading-normal"
-          >
-            Areas of Interest*
-          </Typography>
-          <ChevronDown
-            className={`size-3.5 text-[#0D2838] shrink-0 transition-transform duration-200 ${
-              isOpen ? "rotate-180" : ""
-            }`}
-          />
+        <div className="flex items-center w-full">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <img
+              src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269059713-dt428-book.webp"
+              alt=""
+              className="size-4 shrink-0 mr-1.5 object-contain"
+            />
+            <Typography
+              variant="caption-1"
+              as="span"
+              className="font-medium font-manrope text-[#0D2838] select-none leading-normal"
+            >
+              Areas of Interest*
+            </Typography>
+            <ChevronDown
+              className={`size-3.5 text-[#0D2838] shrink-0 transition-transform duration-200 ${
+                isOpen ? "rotate-180" : ""
+              }`}
+            />
+          </div>
         </div>
         <div className="pl-7 w-full">
           <span className="text-[0.82rem] leading-normal font-medium font-manrope text-[#0D2838] break-words whitespace-normal block min-h-[1.2rem]">
@@ -143,7 +145,7 @@ export default function VolunteerInterestSelect({
         />
       </div>
       {error && (
-        <span className="pointer-events-none absolute left-0 right-0 top-full mt-0.5 block text-xs leading-3.5 text-red-600 font-manrope">
+        <span className="block text-[0.72rem] text-red-600 font-manrope font-medium mt-1.5 leading-tight">
           {error}
         </span>
       )}

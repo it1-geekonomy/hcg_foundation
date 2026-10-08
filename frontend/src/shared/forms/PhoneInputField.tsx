@@ -77,22 +77,20 @@ export default function PhoneInputField({
 
   if (hideLabel) {
     return (
-      <div className="relative">
+      <div className="relative flex flex-col">
         <div
-          className={`${
-            nationalDigits.trim()
-              ? "min-h-[2.2rem] h-auto pb-1"
-              : "h-[41.14px] pb-0.5"
-          } flex flex-col justify-between border-b ${
+          className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b ${
             error
               ? "border-red-500"
               : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
           } transition-all ${containerClassName}`}
         >
-          <label className="block text-[0.72rem] leading-tight font-medium text-[#0D2838]">
-            {label}
-            {required ? "*" : ""}
-          </label>
+          <div className="flex items-center w-full">
+            <label className="block text-[0.72rem] leading-tight font-medium text-[#0D2838]">
+              {label}
+              {required ? "*" : ""}
+            </label>
+          </div>
           <div className="flex items-center gap-1.5 w-full">
             <CountrySelect
               value={selectedCountryCode}
@@ -114,21 +112,11 @@ export default function PhoneInputField({
             />
           </div>
         </div>
-        {error && floatingError ? (
-          <span className="pointer-events-none absolute left-0 right-0 top-full mt-0.5 block text-xs leading-3.5 text-red-600 font-manrope">
+        {error && (
+          <span className="block text-[0.72rem] text-red-600 font-manrope font-medium mt-1.5 leading-tight">
             {error}
           </span>
-        ) : error ? (
-          <div className="mt-0.5">
-            <Typography
-              variant="caption-1"
-              as="span"
-              className="font-manrope font-normal text-red-600 text-xs block"
-            >
-              {error}
-            </Typography>
-          </div>
-        ) : null}
+        )}
       </div>
     );
   }
