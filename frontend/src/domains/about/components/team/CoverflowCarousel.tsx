@@ -268,24 +268,6 @@ export function CoverflowCarousel({ people, label }: { people: Person[]; label: 
           ))}
         </div>
       </div>
-
-      {count > 1 ? (
-        <div className="mt-4 flex items-center justify-center gap-1.5">
-          {people.map((person, i) => (
-            <button
-              key={personKey(person, i)}
-              type="button"
-              aria-label={`Show ${person.name}`}
-              aria-current={i === active}
-              onClick={() => settleOn(i)}
-              className={cx(
-                "h-1.5 rounded-full transition-all duration-300",
-                i === active ? "w-5 bg-[#382E07]" : "w-1.5 bg-[#382E07]/25",
-              )}
-            />
-          ))}
-        </div>
-      ) : null}
     </div>
   );
 }
