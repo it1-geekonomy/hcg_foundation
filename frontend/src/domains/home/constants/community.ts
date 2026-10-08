@@ -32,7 +32,7 @@ export const communityContent = {
     buttonText: "DONATE NOW",
   },
   image: {
-    src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790768833622-r7jpv-frame-76.webp",
+    src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791376327067-jaja8-frame-666.webp",
     alt: "Two women sharing a warm, hopeful moment together",
   },
 };
