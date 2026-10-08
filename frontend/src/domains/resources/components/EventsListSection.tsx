@@ -10,7 +10,16 @@ const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-
 
 export default function EventsListSection({ previewEvent }: { previewEvent?: EventItem | null }) {
   const [allEvents, setAllEvents] = useState<EventItem[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(() => {
+    if (typeof window !== "undefined") {
+      const savedPage = sessionStorage.getItem("events_current_page");
+      if (savedPage) {
+        const p = parseInt(savedPage, 10);
+        if (!isNaN(p) && p > 0) return p;
+      }
+    }
+    return 1;
+  });
   const [itemsPerPage, setItemsPerPage] = useState<number | null>(null);
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -108,6 +117,22 @@ export default function EventsListSection({ previewEvent }: { previewEvent?: Eve
     };
   }, [currentPage, itemsPerPage, previewEvent]);
 
+  // Scroll restoration when coming back from event details
+  useEffect(() => {
+    if (!loading && allEvents.length > 0) {
+      const savedScroll = sessionStorage.getItem("events_page_scroll");
+      if (savedScroll) {
+        sessionStorage.removeItem("events_page_scroll");
+        const top = parseInt(savedScroll, 10);
+        if (!isNaN(top)) {
+          requestAnimationFrame(() => {
+            window.scrollTo({ top, behavior: "instant" });
+          });
+        }
+      }
+    }
+  }, [loading, allEvents]);
+
   const totalItems = totalCount ?? (previewEvent ? 1 : 0);
   const itemsPerPg = itemsPerPage || 6;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPg));
@@ -117,6 +142,9 @@ export default function EventsListSection({ previewEvent }: { previewEvent?: Eve
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("events_current_page", String(page));
+    }
   };
 
   return (
