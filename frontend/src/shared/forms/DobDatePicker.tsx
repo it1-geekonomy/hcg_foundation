@@ -199,10 +199,10 @@ export default function DobDatePicker({
   };
 
   return (
-    <div className={`relative h-full ${className}`} ref={containerRef}>
+    <div className={`relative flex flex-col ${className}`} ref={containerRef}>
       {/* Trigger Bar */}
       <div
-        className="min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
+        className="min-h-[2.35rem] sm:min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b border-[#A3A3A399] focus-within:border-[#FCCC2D] transition-all"
       >
         <div className="flex items-center">
           <button
