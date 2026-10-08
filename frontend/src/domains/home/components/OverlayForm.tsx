@@ -116,7 +116,9 @@ function FitViewport({
 
   return (
     <div ref={frameRef} className={className}>
-      <div ref={innerRef} className="w-full">{children}</div>
+      {/* self-start: if the frame's fixed height stretched this box, content growth (e.g. the
+          terms error) would never resize it and the ResizeObserver would not refit. */}
+      <div ref={innerRef} className="w-full self-start">{children}</div>
     </div>
   );
 }
@@ -275,7 +277,7 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
   return (
     <>
       <OverlayBackdrop
-        className="fixed inset-0 z-50 h-[100dvh] overflow-hidden overflow-clip overscroll-none p-2 lg:px-6 lg:py-[max(2.5rem,8vh)]"
+        className="fixed inset-0 z-50 h-[100dvh] overflow-hidden overflow-clip overscroll-none px-2 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-4 sm:pt-[max(1.5rem,env(safe-area-inset-top))] sm:pb-[max(1.5rem,env(safe-area-inset-bottom))] lg:px-6 lg:pt-[max(2.5rem,8vh)] lg:pb-[max(2.5rem,8vh)]"
         role="dialog"
         aria-modal={true}
         aria-labelledby="donation-modal-title"
