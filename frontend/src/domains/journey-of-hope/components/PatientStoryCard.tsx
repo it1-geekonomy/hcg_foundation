@@ -100,9 +100,8 @@ export default function PatientStoryCard({
                   variant="body-9"
                   as="p"
                   className="font-manrope leading-relaxed font-normal !text-[#0D2838] text-left"
-                >
-                  {paragraph}
-                </Typography>
+                  dangerouslySetInnerHTML={{ __html: paragraph }}
+                />
               ))
           ) : null}
         </div>

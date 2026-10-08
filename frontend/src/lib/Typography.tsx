@@ -11,7 +11,7 @@ import {
 } from "./type-scale";
 
 type TypographyOwnProps = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   /** Figma text style id from typography/specs.ts */
   variant?: TypographyVariant;
   as?: React.ElementType;
