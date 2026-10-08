@@ -324,19 +324,16 @@ export default function CsrPartnerPage() {
         {/* Contact Info Strip: yellow bar at left edge of container, info centered */}
         <div
           data-anim="contact"
-          className="relative mt-[2rem] sm:mt-[2.5rem] w-full flex items-center justify-center min-h-[3.5rem]"
+          className="relative mt-[2rem] sm:mt-[2.5rem] w-full flex sm:items-center justify-start sm:justify-center min-h-[3.5rem]"
         >
           {/* Yellow line at the left edge of the container */}
-          <div
-            data-anim="contact-bar"
-            className="absolute left-0 top-0 bottom-0 w-[0.25rem] bg-[#FCCC2D] shrink-0"
-          />
+
 
           {/* Centered Contact Info */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-[0.5rem] sm:gap-[2rem] text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-[0.5rem] sm:gap-[2rem] text-left sm:text-left">
             <div
               data-anim="contact-label"
-              className="flex items-center justify-center sm:flex-col sm:items-center sm:justify-center gap-[0.5rem] sm:gap-0 shrink-0"
+              className="flex items-center justify-center items-start sm:flex-col sm:items-center sm:justify-center gap-[0.5rem] sm:gap-0 shrink-0"
             >
               <Image
                 src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790849990827-u27ma-fa7-solid_contact-book.webp"
@@ -364,7 +361,7 @@ export default function CsrPartnerPage() {
               <Typography
                 variant="body-10"
                 as="span"
-                className="font-argestadisplay font-normal text-[#596D79]"
+                className="font-argestadisplay font-normal text-[#596D79] text-left"
               >
                 +91 8046607760
               </Typography>
