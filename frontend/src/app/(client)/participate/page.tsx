@@ -225,7 +225,7 @@ export default function ParticipatePage() {
             <div data-anim="top-title" className="md:max-w-[21rem] lg:max-w-none">
               <Typography
                 variant="heading-2"
-                as="h1"
+                as="h2"
                 className="font-tiempos-headline font-normal italic text-left text-[#0D2838] lg:whitespace-nowrap"
               >
                 Find Your Way to Make an Impact

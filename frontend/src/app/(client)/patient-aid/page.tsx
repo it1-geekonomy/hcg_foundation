@@ -3,6 +3,9 @@ import DonateForm from "@/shared/components/DonateForm";
 import HopeSection from "@/domains/ourprograms/FinancialSupport/components/hopesection";
 import HowToRefer from "@/domains/ourprograms/FinancialSupport/components/howtoreferpatient";
 import SmileStories from "@/domains/home/components/Smilestories";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata("/patient-aid");
 
 export default function OurTeamPage() {
   return (
