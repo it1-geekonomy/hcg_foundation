@@ -259,9 +259,7 @@ export default function SupportGroupSection({
                       className="font-normal font-argestadisplay text-[#293239]"
                     >
                       {p.label && (
-                        <>
-                          {split(p.label, pi * 2, "underline underline-offset-2")}{" "}
-                        </>
+                        <strong className="font-bold">{split(p.label, pi * 2)} </strong>
                       )}
                       {split(p.text, pi * 2 + 1)}
                     </Typography>

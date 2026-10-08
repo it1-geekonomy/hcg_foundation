@@ -150,9 +150,11 @@ export default function VolunteerInterestSelect({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 w-full min-w-[240px] max-w-[90vw] top-full mt-1.5 z-50 bg-white border border-[#E5E0D0] rounded-lg shadow-2xl overflow-hidden font-manrope animate-in fade-in-50 zoom-in-95 duration-150">
+        <div
+          className="absolute left-0 sm:left-auto sm:right-0 w-[calc(100%-3.5rem)] sm:w-full max-w-[16rem] sm:max-w-none top-full mt-1 z-50 bg-white border border-[#E5E0D0] rounded-lg shadow-2xl overflow-hidden font-manrope animate-in fade-in-50 zoom-in-95 duration-150"
+        >
           {!isOtherMode ? (
-            <div className="p-1.5 space-y-0.5 max-h-56 overflow-y-auto">
+            <div className="p-1 sm:p-1.5 space-y-0.5 max-h-[8rem] sm:max-h-52 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {VOLUNTEER_AREAS.map((area) => {
                 const isSelected =
                   value === area ||
@@ -163,7 +165,7 @@ export default function VolunteerInterestSelect({
                   <div
                     key={area}
                     onClick={() => handleSelect(area)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-md cursor-pointer text-[0.78rem] font-medium transition-colors ${
+                    className={`flex items-center justify-between px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-md cursor-pointer text-[0.75rem] sm:text-[0.78rem] font-medium transition-colors ${
                       isSelected
                         ? "bg-[#FFF4D4] text-[#0D2838] font-semibold"
                         : "text-[#0D2838] hover:bg-[#FAF8F5]"
