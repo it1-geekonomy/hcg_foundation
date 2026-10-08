@@ -1,16 +1,18 @@
 import {
   BannerSection,
   StatSection,
-  Smilestories,
   HopeSection,
   Community,
-  FloatingImages,
   Togetherwecreatehope,
-  Sustainable,
-  Reelsection,
 } from "@/domains/home/index";
 import HomeProjectsSection from "@/domains/home/components/HomeProjectsSection";
-import DonateForm from "@/shared/components/DonateForm";
+import dynamic from "next/dynamic";
+
+const DonateForm = dynamic(() => import("@/shared/components/DonateForm"));
+const Reelsection = dynamic(() => import("@/domains/home/components/Reelsection"));
+const FloatingImages = dynamic(() => import("@/domains/home/components/FloatingImages"));
+const Smilestories = dynamic(() => import("@/domains/home/components/Smilestories"));
+const Sustainable = dynamic(() => import("@/domains/home/components/Sustainable"));
 
 
 const gradientClass = "bg-[linear-gradient(180deg,#FFE486_0%,#FFF6D8_100%)]";
