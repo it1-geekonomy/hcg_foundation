@@ -11,7 +11,7 @@ import Banner from "@/shared/components/Herobannersection";
 import { DiagonalArrowIcon } from "@/shared/components/icons/ArrowIcons";
 import { cn } from "@/lib/utils";
 
-const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
+const CONTAINER = "max-w-[70rem] xl:max-w-[74rem] 2xl:max-w-[78rem] mx-auto px-4 sm:px-6 lg:px-8";
 
 /* ------------------------------------------------------------------ */
 /* Slide-in animations                                                 */
@@ -227,9 +227,9 @@ export default function CsrPartnerPage() {
       />
       */}
 
-      <section className={`${CONTAINER} pt-7 sm:pt-[6.5rem] lg:pt-[10.25rem] pb-8 sm:pb-12 lg:pb-16`}>
+      <section className={`${CONTAINER} pt-7 sm:pt-[5rem] lg:pt-[6.5rem] xl:pt-[7rem] 2xl:pt-[7.5rem] pb-8 sm:pb-12 lg:pb-16`}>
         {/* Top Header Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[1.5rem] sm:gap-[2rem] lg:gap-[2.5rem] items-start mb-10 sm:mb-14">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-[1.5rem] sm:gap-[2rem] lg:gap-[2.5rem] items-start mb-8 sm:mb-10 lg:mb-12">
           <div data-anim="top-title">
             <Typography
               variant="heading-2"
@@ -256,7 +256,7 @@ export default function CsrPartnerPage() {
         <PartnerLogosMarquee />
 
         {/* 2-Column Cards Grid matching Figma (2 columns from 768px+) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[1.5rem] md:gap-[1.5rem] lg:gap-[1.75rem] xl:gap-[1.75rem] 2xl:gap-[2.5rem]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4 md:gap-4 lg:gap-4 xl:gap-4.5 2xl:gap-5">
           {CSR_PARTNER_CARDS.map((card) => {
             const isActive = activeCardId === card.id;
 
@@ -281,29 +281,25 @@ export default function CsrPartnerPage() {
                 {/* Main Card (Lifts to top-left on hover or active tap) */}
                 <div
                   className={cn(
-                    "relative z-10 rounded-[0.27rem] border border-[#FFDF7C] bg-[#FDF7EB] p-5 sm:p-6 md:p-6 lg:pt-[0.75rem] lg:pb-[1.125rem] lg:px-[1.5rem] xl:pt-[0.75rem] xl:pb-[1.125rem] xl:px-[1.5rem] 2xl:py-[2rem] 2xl:px-[2.5rem] flex flex-col justify-start h-full min-h-0 transition-all duration-500 ease-out",
+                    "relative z-10 rounded-[0.27rem] border border-[#FFDF7C] bg-[#FDF7EB] p-3.5 sm:p-4 md:p-4 lg:py-2.5 lg:px-4 xl:py-3 xl:px-4.5 2xl:py-3.5 2xl:px-5 flex flex-col justify-start h-full min-h-0 transition-all duration-500 ease-out",
                     isActive
                       ? "-translate-x-1 -translate-y-1 shadow-[0_12px_28px_rgba(252,204,45,0.18)]"
                       : "group-hover:-translate-x-1 group-hover:-translate-y-1 group-hover:shadow-[0_12px_28px_rgba(252,204,45,0.18)]"
                   )}
                 >
-                  {/* Card Number */}
-                  <div className="mb-[0.15rem] text-left">
+                  {/* Card Number & Title in One Line */}
+                  <div className="flex items-baseline gap-2 sm:gap-2.5 mb-2 text-left">
                     <Typography
-                      variant="heading-2"
+                      variant="heading-9"
                       as="span"
-                      className="font-argestadisplay font-normal text-[#596D79]"
+                      className="font-argestadisplay font-normal text-[#596D79] shrink-0"
                     >
-                      {card.number}
+                      {card.number.replace(/^0+/, "")}.
                     </Typography>
-                  </div>
-
-                  {/* Card Title */}
-                  <div className="mb-[0.5rem] sm:mb-[0.625rem] text-left">
                     <Typography
-                      variant="heading-10"
+                      variant="heading-9"
                       as="h2"
-                      className="font-argestadisplay font-normal text-[#0D2838]"
+                      className="font-argestadisplay font-normal text-[#0D2838] break-words"
                     >
                       {card.title}
                     </Typography>
@@ -314,7 +310,7 @@ export default function CsrPartnerPage() {
                     <Typography
                       variant="body-11"
                       as="p"
-                      className="font-argestadisplay font-normal text-left text-[#596D79] !leading-relaxed"
+                      className="font-argestadisplay font-normal text-left text-[#596D79] !leading-relaxed break-words"
                     >
                       {card.description}
                     </Typography>
@@ -325,19 +321,22 @@ export default function CsrPartnerPage() {
           })}
         </div>
 
-        {/* Contact Info Strip under Card 05 */}
+        {/* Contact Info Strip: yellow bar at left edge of container, info centered */}
         <div
           data-anim="contact"
-          className="mt-[2rem] sm:mt-[2.5rem] flex items-start sm:items-center gap-[0.75rem] sm:gap-[1.5rem]"
+          className="relative mt-[2rem] sm:mt-[2.5rem] w-full flex items-center justify-center min-h-[3.5rem]"
         >
+          {/* Yellow line at the left edge of the container */}
           <div
             data-anim="contact-bar"
-            className="w-[0.25rem] self-stretch min-h-[3.5rem] bg-[#FCCC2D] shrink-0"
+            className="absolute left-0 top-0 bottom-0 w-[0.25rem] bg-[#FCCC2D] shrink-0"
           />
-          <div className="flex flex-col sm:flex-row sm:items-center gap-[0.5rem] sm:gap-[2rem] min-w-0">
+
+          {/* Centered Contact Info */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-[0.5rem] sm:gap-[2rem] text-center sm:text-left">
             <div
               data-anim="contact-label"
-              className="flex items-center sm:flex-col sm:items-center sm:justify-center gap-[0.5rem] sm:gap-0 shrink-0"
+              className="flex items-center justify-center sm:flex-col sm:items-center sm:justify-center gap-[0.5rem] sm:gap-0 shrink-0"
             >
               <Image
                 src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790849990827-u27ma-fa7-solid_contact-book.webp"
@@ -354,7 +353,7 @@ export default function CsrPartnerPage() {
                 Contact Us :
               </Typography>
             </div>
-            <div data-anim="contact-details" className="flex flex-col text-left min-w-0">
+            <div data-anim="contact-details" className="flex flex-col text-center sm:text-left min-w-0">
               <Typography
                 variant="body-10"
                 as="span"
@@ -400,7 +399,7 @@ export default function CsrPartnerPage() {
               type="button"
               data-anim="bottom-cta"
               onClick={() => setIsPartnerModalOpen(true)}
-              className="self-center md:self-start w-auto px-5 sm:px-6 lg:w-[11rem] h-[2.75rem] sm:h-[3.25rem] lg:h-[3.5625rem] inline-flex items-center justify-center gap-2 sm:gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 backdrop-blur-[2.625rem] transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer shrink-0 whitespace-nowrap"
+              className="self-center md:self-start w-auto min-w-[11rem] px-5 sm:px-6 lg:px-6 h-[2.75rem] sm:h-[3.25rem] lg:h-[3.5625rem] inline-flex items-center justify-center gap-2 sm:gap-[0.58rem] bg-[#FCCC2D] text-[#2D2D2D] rounded-[0.375rem] border border-white/10 backdrop-blur-[2.625rem] transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer shrink-0 whitespace-nowrap"
             >
               <Typography
                 variant="button-3"
