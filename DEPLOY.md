@@ -175,34 +175,34 @@ Restore:
 gunzip -c backups/hcg_YYYY-MM-DD.sql.gz | docker compose --env-file .env.prod -f docker-compose.prod.yml exec -T postgres psql -U hcg -d hcg_db
 ```
 
-## Adding a domain and HTTPS later
+## Domain and HTTPS
 
-1. At your DNS provider, add an **A record** for the domain pointing to `YOUR_IP`.
-2. Issue a certificate (replace the domain and email):
+The site is served at `https://www.hcgfoundation.org`. `nginx/default.conf`
+redirects plain HTTP, the bare domain and the IP there, and expects the
+certificate at `certbot/conf/live/hcgfoundation.org/`. **nginx does not start
+without that certificate**, so on a new server issue it before deploying this
+config (with an HTTP-only `default.conf` that serves `/.well-known/acme-challenge/`).
+
+1. DNS: an **A record** `@` → `YOUR_IP` and a **CNAME** `www` → `hcgfoundation.org`
+   (no AAAA record pointing elsewhere).
+2. Issue the certificate:
 
    ```bash
    cd /opt/hcg
    docker compose --env-file .env.prod -f docker-compose.prod.yml --profile certbot run --rm certbot certonly \
      --webroot -w /var/www/certbot -d hcgfoundation.org -d www.hcgfoundation.org \
-     --email you@example.com --agree-tos --no-eff-email
+     --email hcgfoundation@gmail.com --agree-tos --no-eff-email
    ```
 
-3. In `nginx/default.conf`, change the port-80 server to redirect to HTTPS and
-   add a `listen 443 ssl` server with the same `location` blocks plus:
-
-   ```nginx
-   ssl_certificate     /etc/letsencrypt/live/hcgfoundation.org/fullchain.pem;
-   ssl_certificate_key /etc/letsencrypt/live/hcgfoundation.org/privkey.pem;
-   ```
-
-4. Set `PUBLIC_URL=https://hcgfoundation.org` in `.env.prod`, then:
+3. Set `PUBLIC_URL=https://www.hcgfoundation.org` in `.env.prod`. The frontend
+   bakes this in at build time, so rebuild it:
 
    ```bash
    docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build frontend ai-service
-   docker compose --env-file .env.prod -f docker-compose.prod.yml restart nginx
+   docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --force-recreate nginx
    ```
 
-5. Renew certificates automatically (root crontab, `crontab -e`):
+4. Renew certificates automatically (root crontab, `crontab -e`):
 
    ```
    0 3 * * 1 cd /opt/hcg && docker compose --env-file .env.prod -f docker-compose.prod.yml --profile certbot run --rm certbot renew && docker compose --env-file .env.prod -f docker-compose.prod.yml exec nginx nginx -s reload
