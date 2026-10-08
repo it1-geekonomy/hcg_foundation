@@ -14,6 +14,7 @@ import {
   cmsErrorMessage,
   formatCmsDateTime,
 } from "@/domains/cms/ui/CmsViewChrome";
+import ReceiptEmailStatus from "./ReceiptEmailStatus";
 
 function statusTone(status?: string) {
   if (status === "paid") return "success" as const;
@@ -103,6 +104,10 @@ export default function DonorsViewPage() {
               value={<span className="capitalize">{donor.status}</span>}
             />
             <CmsDetailRow label="Receipt" value={donor.receiptNumber} />
+            <CmsDetailRow label="Receipt email" value={<ReceiptEmailStatus {...donor} />} />
+            {donor.receiptEmailError && donor.receiptEmailStatus !== "sent" ? (
+              <CmsDetailRow label="Email note" value={donor.receiptEmailError} />
+            ) : null}
             <CmsDetailRow
               label="Razorpay order"
               value={

@@ -30,6 +30,10 @@ export default () => ({
     publicUrl: process.env.R2_PUBLIC_URL ?? '',
     region: process.env.R2_REGION ?? 'auto',
   },
+  email: {
+    /** Resend free plan: 100 emails per UTC day. 0 = no cap (paid plans). */
+    dailyLimit: parseInt(process.env.RESEND_DAILY_LIMIT ?? '100', 10),
+  },
   razorpay: {
     keyId: process.env.RAZORPAY_KEY_ID ?? '',
     keySecret: process.env.RAZORPAY_KEY_SECRET ?? '',

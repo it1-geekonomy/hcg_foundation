@@ -32,6 +32,7 @@ import type {
   ContentStatus,
   DonationCategory,
   DonationStatus,
+  ReceiptEmailStatus,
   Donor,
   TeamType,
   UpdateFundraisingCampaignPayload,
@@ -58,6 +59,8 @@ export type ListQuery = {
   pageType?: LegalPageType;
   /** Donors only — query param `donationCategory` */
   donationCategory?: DonationCategory;
+  /** Donors only — query param `receiptEmailStatus` */
+  receiptEmailStatus?: ReceiptEmailStatus;
   includeDeleted?: boolean;
   onlyDeleted?: boolean;
 };
@@ -72,6 +75,9 @@ function toQuery(params?: ListQuery) {
   if (params?.pageType) q.set("pageType", params.pageType);
   if (params?.donationCategory) {
     q.set("donationCategory", params.donationCategory);
+  }
+  if (params?.receiptEmailStatus) {
+    q.set("receiptEmailStatus", params.receiptEmailStatus);
   }
   if (params?.includeDeleted === true) q.set("includeDeleted", "true");
   if (params?.onlyDeleted === true) q.set("onlyDeleted", "true");

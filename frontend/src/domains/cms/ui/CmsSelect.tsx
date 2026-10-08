@@ -168,6 +168,14 @@ export const DONATION_STATUS_OPTIONS: CmsSelectOption[] = [
   { value: "refunded", label: "Refunded" },
 ];
 
+export const RECEIPT_EMAIL_STATUS_FILTER_OPTIONS: CmsSelectOption[] = [
+  { value: "", label: "All emails" },
+  { value: "sent", label: "Email sent" },
+  { value: "queued", label: "Email queued" },
+  { value: "failed", label: "Email failed" },
+  { value: "skipped", label: "No email" },
+];
+
 export const CAMPAIGN_STATUS_OPTIONS: CmsSelectOption[] = [
   { value: "pending", label: "Pending" },
   { value: "approved", label: "Approved" },

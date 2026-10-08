@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import { DonationCategory } from '../../../common/enums/donation-category.enum';
 import { DonationStatus } from '../../../common/enums/donation-status.enum';
+import { ReceiptEmailStatus } from '../../../common/enums/receipt-email-status.enum';
 
 export class ListDonorsQueryDto {
   @ApiPropertyOptional({ default: 1, minimum: 1 })
@@ -43,4 +44,12 @@ export class ListDonorsQueryDto {
   @IsOptional()
   @IsEnum(DonationCategory)
   donationCategory?: DonationCategory;
+
+  @ApiPropertyOptional({
+    enum: ReceiptEmailStatus,
+    description: 'Only donations whose receipt email is in this state',
+  })
+  @IsOptional()
+  @IsEnum(ReceiptEmailStatus)
+  receiptEmailStatus?: ReceiptEmailStatus;
 }
