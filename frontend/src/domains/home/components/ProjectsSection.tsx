@@ -277,11 +277,13 @@ function MoreDetailsButton({
   href,
   previewMode,
   compact = false,
+  ariaLabel,
 }: {
   className?: string;
   href?: string;
   previewMode?: boolean;
   compact?: boolean;
+  ariaLabel?: string;
 }) {
   const classes = `inline-flex w-fit shrink-0 items-center justify-center overflow-visible bg-[#FFD43B] uppercase tracking-wider text-neutral-900 transition-colors hover:bg-[#f0c527] ${
     compact
@@ -315,6 +317,7 @@ function MoreDetailsButton({
       href={href}
       className={classes}
       onClick={() => sessionStorage.setItem(PROJECT_FROM_HOME_KEY, "1")}
+      aria-label={ariaLabel}
     >
       {label}
       {icon}
@@ -955,6 +958,7 @@ export default function ProjectsSection({
                     className="panel-cta shrink-0 font-manrope font-semibold pointer-events-auto"
                     href={card.href}
                     previewMode={previewMode}
+                    ariaLabel={`More details about ${card.title}`}
                   />
                 </div>
               </div>
@@ -1066,6 +1070,7 @@ export default function ProjectsSection({
                     className="m-panel-cta font-manrope font-semibold"
                     href={card.href}
                     previewMode={previewMode}
+                    ariaLabel={`More details about ${card.title}`}
                   />
                 </div>
               </div>

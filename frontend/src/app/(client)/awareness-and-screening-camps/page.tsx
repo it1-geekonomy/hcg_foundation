@@ -4,18 +4,20 @@ import Cancerscreening from "@/domains/ourprograms/AwarenessAndScreening/compone
 import ReferralProcess from "@/domains/ourprograms/AwarenessAndScreening/components/referalprocess";
 import Screeningsection from "@/domains/ourprograms/AwarenessAndScreening/components/screeningsection";
 import { pageMetadata } from "@/lib/seo";
+import ProjectTracker from "@/shared/components/ProjectTracker";
 
 export const metadata = pageMetadata("/awareness-and-screening-camps");
 export default function OurTeamPage() {
   return (
     <>
+      <ProjectTracker />
       <Bannersection />
       <Cancerscreening /> 
       <ReferralProcess /> 
       <Screeningsection />   
       <div id="donate-form">
         <DonateForm />
-        </div>
+      </div>
     </>
   );
 }
