@@ -128,6 +128,8 @@ function FitViewport({
 /* ------------------------------------------------------------------ */
 
 const PORTRAIT_SRC = "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791283199024-7slhm-donation-pop-up-1.webp";
+/** Background image used only below 1024px (the desktop modal keeps PORTRAIT_SRC). */
+const PORTRAIT_SRC_COMPACT = "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791454899916-wb1zg-donation-pop-up-1-2-.webp";
 const PORTRAIT_ALT = "Cancer patient and her daughter embracing, both smiling";
 
 function PortraitWithBackdrop({
@@ -484,7 +486,7 @@ function ImpactItems({
               className={`grid min-w-0 select-none cursor-pointer grid-cols-[auto_1fr] content-start items-center gap-x-3 gap-y-0.5 rounded-xl border px-3 py-1.5 text-left transition-[background-color,border-color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FCCC2D]/60 lg:gap-x-2.5 lg:gap-y-1 lg:px-2.5 lg:py-2 ${
                 selected
                   ? "border-[#E8B923] bg-[#FFF8E1] shadow-[0_0_0_3px_rgba(252,204,45,0.16)]"
-                  : "border-[#EEE8DC] bg-white hover:border-[#DCCFB8] hover:bg-[#FDFBF6]"
+                  : "border-[#EEE8DC] bg-transparent hover:border-[#DCCFB8] hover:bg-white/40 lg:bg-white lg:hover:bg-[#FDFBF6]"
               }`}
             >
               <span
@@ -844,8 +846,21 @@ function ModalBelow1024({
       />
       <Heading className="px-5 pr-12 pt-4 sm:px-7 sm:pt-5" />
 
-      <div className="mt-3 flex flex-col items-center gap-1 px-5 pb-4 sm:mt-4 sm:px-7 sm:pb-5">
-        <div className="flex min-w-0 w-full flex-1 flex-col items-center pb-0">
+      {/* Portrait as the background from just under the description to the bottom of the card
+          (below 1024px only). Flat white overlay, no gradient; content sits above both. */}
+      <div className="relative mt-3 flex flex-col items-center gap-1 px-5 pb-4 sm:mt-4 sm:px-7 sm:pb-5">
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+          <Image
+            src={PORTRAIT_SRC_COMPACT}
+            alt=""
+            fill
+            sizes="(max-width: 1023px) 480px, 0px"
+            className="object-cover object-top"
+          />
+          <div className="absolute inset-0 bg-white/50" />
+        </div>
+
+        <div className="relative z-10 flex min-w-0 w-full flex-1 flex-col items-center pb-0">
           <div className="mx-auto w-full">
             <ImpactItems
               className="grid grid-cols-1 gap-1.5 sm:gap-2"
