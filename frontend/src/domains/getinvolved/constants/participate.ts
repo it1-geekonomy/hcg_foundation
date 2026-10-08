@@ -29,7 +29,7 @@ export const PARTICIPATE_CARDS: ParticipateCard[] = [
     title: "Intern",
     description:
       "Gain hands-on experience, build your skills, and work on real-world healthcare initiatives.",
-    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790848659413-so6sh-rectangle-1660-2-.webp",
+    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791449788914-5r68b-rectangle-1660-1-.webp",
   },
 ];
 

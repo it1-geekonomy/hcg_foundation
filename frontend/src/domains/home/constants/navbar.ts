@@ -14,7 +14,7 @@ export const navLinks = [
       { label: "Awareness & Screening Camps", href: "/awareness-and-screening-camps" },
       { label: "Swasthi Art Gallery", href: "/swasti-art-gallery" },
       {label: "Pink Hope Support Group", href: "/pink-hope-support-group" },
-      {label: "Research & Innovation", href: "/research-and-innovation" },
+      {label: "Innovation and Technology", href: "/innovation-and-technology" },
     ],
   },
   {

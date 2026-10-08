@@ -4,7 +4,7 @@ import Bannersection from "@/domains/ourprograms/ResearchAndInnovation/component
 import OtherInitiatives from "@/domains/ourprograms/ResearchAndInnovation/components/otherInitiatives";
 import { pageMetadata } from "@/lib/seo";
 
-export const metadata = pageMetadata("/research-and-innovation");
+export const metadata = pageMetadata("/innovation-and-technology");
 
 export default function OurTeamPage() {
   return (

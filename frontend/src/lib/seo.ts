@@ -55,8 +55,8 @@ export const PAGE_SEO = {
     description:
       "Facing breast cancer? You don't have to do it alone. Pink Hope connects patients with survivors who understand, listen and share hope.",
   },
-  "/research-and-innovation": {
-    title: "Research & Innovation | HCG Foundation",
+  "/innovation-and-technology": {
+    title: "Innovation and Technology | HCG Foundation",
     description:
       "Learn about HCG Foundation's research and innovation work in cancer care. Details are coming soon, so check back for updates.",
   },
