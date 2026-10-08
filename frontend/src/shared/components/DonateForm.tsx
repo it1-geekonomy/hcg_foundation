@@ -379,7 +379,7 @@ export default function DonateSection() {
       <DonateMotionProvider inView={inView} live={live}>
         <Script
           src="https://checkout.razorpay.com/v1/checkout.js"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
         {detailsOpen ? (
           <DonateDetailsModal

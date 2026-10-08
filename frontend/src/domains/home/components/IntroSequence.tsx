@@ -21,6 +21,8 @@ export function IntroSequence({
   const [showCopy, setShowCopy] =
     useState(false);
 
+
+
   useEffect(() => {
     if (typeof phase !== "number") {
       const resetTimer = window.setTimeout(() => {

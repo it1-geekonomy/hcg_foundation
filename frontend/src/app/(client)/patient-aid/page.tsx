@@ -4,12 +4,14 @@ import HopeSection from "@/domains/ourprograms/FinancialSupport/components/hopes
 import HowToRefer from "@/domains/ourprograms/FinancialSupport/components/howtoreferpatient";
 import SmileStories from "@/domains/home/components/Smilestories";
 import { pageMetadata } from "@/lib/seo";
+import ProjectTracker from "@/shared/components/ProjectTracker";
 
 export const metadata = pageMetadata("/patient-aid");
 
 export default function OurTeamPage() {
   return (
     <>
+      <ProjectTracker />
       <Financialsupport />
       <HopeSection />
       <div className="bg-[#FFF8E2]">
@@ -19,7 +21,7 @@ export default function OurTeamPage() {
 
       <div id="donate-form">
         <DonateForm />
-        </div>
+      </div>
     </>
   );
 }

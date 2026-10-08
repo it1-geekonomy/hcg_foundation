@@ -370,6 +370,7 @@ function Heading({ className = "" }: { className?: string }) {
   return (
     <div className={className}>
       <Typography
+        id="donation-modal-title"
         variant="heading-2"
         as="h2"
         className="font-serif leading-tight text-black lg:!text-[2rem] lg:!leading-[1.15] 2xl:!text-[2.125rem]"
@@ -721,7 +722,7 @@ function TermsCheckbox({
         >
           I have read and agree to the applicable{" "}
           <Terms80GLink
-            className="font-semibold text-[#B88A00]"
+            className="font-semibold text-[#7A5A00]"
             onAgree={() => {
               setAgreedTo80G(true);
               setTermsError(false);
