@@ -4,7 +4,10 @@ const nextConfig: NextConfig = {
   output: "standalone",
   allowedDevOrigins: ["10.0.0.216"],
   devIndicators: false,
+
   images: {
+    unoptimized: true,
+
     remotePatterns: [
       {
         protocol: "https",
@@ -20,7 +23,7 @@ const nextConfig: NextConfig = {
         protocol: "http",
         hostname: "hcgfoundation.org",
         pathname: "/**",
-      }
+      },
     ],
   },
 };
