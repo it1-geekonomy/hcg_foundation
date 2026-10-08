@@ -60,11 +60,12 @@ export default function PatientStoryCard({
         className="relative z-10 h-[6.375rem] flex items-center justify-between pointer-events-auto cursor-pointer"
       >
         {/* Left: Patient Name & Date */}
-        <div className="flex flex-col text-white min-w-0">
+        <div className="flex flex-col text-white min-w-0 w-full">
           <Typography
-            variant="heading-8"
+            variant="body-7"
             as="h3"
-            className="font-manrope font-bold text-white"
+            className="font-manrope font-bold text-white break-words !leading-snug !text-left line-clamp-2"
+            title={story.patientName}
           >
             {story.patientName}
           </Typography>
