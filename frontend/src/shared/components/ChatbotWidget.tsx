@@ -27,7 +27,7 @@ import {
   Send,
   X,
 } from "lucide-react";
-import { ChatbotApiError, chatbotApi } from "@/shared/lib/chatbot-api";
+import { chatbotApi } from "@/shared/lib/chatbot-api";
 
 type ChatRole = "bot" | "user";
 
@@ -455,16 +455,13 @@ export default function ChatbotWidget() {
           sources: res.data?.sources ?? [],
         },
       ]);
-    } catch (err) {
-      const rateLimited = err instanceof ChatbotApiError && err.status === 429;
+    } catch {
       setMessages((prev) => [
         ...prev,
         {
           id: newId(),
           role: "bot",
-          text: rateLimited
-            ? "You’re sending messages a little too quickly. Please wait a minute, then tap Try again."
-            : "I’m having trouble connecting right now. Please check your connection and try again.",
+          text: "I couldn’t reply just now. Please try again in a moment.",
           at: Date.now(),
           retryQuestion: trimmed,
         },
