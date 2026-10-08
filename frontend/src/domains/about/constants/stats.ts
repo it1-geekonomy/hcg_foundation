@@ -7,20 +7,13 @@ export interface Stat {
   label: ReactNode;
 }
 
+/** Every label is exactly two lines, so all four columns align. */
 const withBreak = (before: string, after: string): ReactNode =>
-  createElement(
-    "span",
-    null,
-    before,
-    " ",
-    createElement("br", { className: "" }),
-    " ",
-    after
-  );
+  createElement("span", null, before, createElement("br"), after);
 
 export const stats: Stat[] = [
-  { value: "4,192+", label: withBreak("Patients Assisted", "Financially") },
-  { value: "482+", label: withBreak("Awareness &", "Detection Camps") },
-  { value: "700+", label: withBreak("Students Benefited", "Through Healthy Habits") },
-  { value: "52,000+", label: withBreak("Awareness Program", "Participants") },
+  { value: "6,500+", label: withBreak("Patients Assisted", "Financially") },
+  { value: "2,000+", label: withBreak("Awareness Program", "Conducted") },
+  { value: "90,000+", label: withBreak("People Benefited Through", "Awareness Program") },
+  { value: "4,700+", label: withBreak("Students Benefited Through", "Healthy Habits") },
 ];

@@ -108,17 +108,15 @@ export default function StatsHighlight({ className = "" }: StatsHighlightProps) 
       ref={sectionRef}
       className={`w-full overflow-x-hidden bg-[#FFF8E2] pb-8 pt-0 lg:pt-0 lg:pb-14 xl:pb-20 px-8 sm:px-12 md:px-16 lg:px-6 xl:px-6 2xl:pl-40 2xl:pr-40 min-[1536px]:max-[1800px]:!pr-16 ${className}`}
     >
-      <div className="grid grid-cols-2 sm:grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
-        {stats.map((stat, index) => {
-          const animatedValue = useCountUp(stat.value, animate);
+      <div className="grid grid-cols-2 sm:grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4 lg:gap-x-0">
+  {stats.map((stat, index) => {
+    const animatedValue = useCountUp(stat.value, animate);
 
-          return (
-            <div
-              key={index}
-              className={`relative min-w-0 text-center lg:text-left lg:pl-10 lg:pr-10 xl:pl-12 xl:pr-12 2xl:pl-14 2xl:pr-14 lg:first:pl-0 lg:last:pr-0 ${
-                index === 2 ? "min-[1536px]:max-[1800px]:!pr-4" : ""
-              }`}
-            >
+    return (
+      <div
+        key={index}
+        className="relative min-w-0 text-center lg:text-left lg:pl-5 lg:pr-3 xl:pl-6 xl:pr-4 2xl:pl-10 2xl:pr-6 lg:first:pl-0 lg:last:pr-0"
+      >
               {/* Divider (fades top/bottom), hidden before the first item and below lg */}
               {index !== 0 && (
                 <span
@@ -144,22 +142,20 @@ export default function StatsHighlight({ className = "" }: StatsHighlightProps) 
                 {animatedValue}
               </Typography>
 
-              {/* Description: default variant everywhere except lg, where it's hidden */}
-              <Typography
-                variant="body-2"
-                as="p"
-                className="lg:hidden xl:block mt-2 font-normal font-argestadisplay text-[#8F8F8F]"
-              >
-                {stat.label}
-              </Typography>
-              {/* Description: body-7 variant, shown only at lg */}
-              <Typography
-                variant="body-6"
-                as="p"
-                className="hidden lg:block xl:hidden mt-2 font-normal font-argestadisplay text-[#8F8F8F]"
-              >
-                {stat.label}
-              </Typography>
+<Typography
+  variant="body-2"
+  as="p"
+  className="lg:hidden xl:block mt-2 w-full font-normal font-argestadisplay text-[#8F8F8F]"
+>
+  {stat.label}
+</Typography>
+<Typography
+  variant="body-6"
+  as="p"
+  className="hidden lg:block xl:hidden mt-2 w-full font-normal font-argestadisplay text-[#8F8F8F]"
+>
+  {stat.label}
+</Typography>
             </div>
           );
         })}
