@@ -80,8 +80,8 @@ export const FOOTER_CONTACT_INFO = {
 
 export const FOOTER_SOCIAL_LINKS = [
   { name: "Instagram", href: "https://www.instagram.com/hcg_foundation/" },
-  { name: "LinkedIn", href: "" },
-  { name: "Facebook", href: "" },
+  { name: "LinkedIn", href: "https://www.linkedin.com/company/hcg-foundation1/?original_referer=https%3A%2F%2Fwww%2Ehcgfoundation%2Eorg%2F&originalSubdomain=in" },
+  { name: "Facebook", href: "https://www.facebook.com/HCGFoundation/" },
 ] as const;
 
 export const FOOTER_DEVELOPER = {
