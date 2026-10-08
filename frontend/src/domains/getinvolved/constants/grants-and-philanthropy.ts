@@ -29,7 +29,7 @@ export const PHILANTHROPY_CARDS: PhilanthropyCard[] = [
     title: "Create a Philanthropic Partnership",
     description:
       "Work with HCG Foundation to design a giving initiative aligned with your philanthropic interests, priorities, and desired impact.",
-    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790846294418-wytjb-rectangle-1668.webp",
+    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791435957099-sjcgm-rectangle-1668.webp",
   },
   {
     id: "support-healthcare-innovation",

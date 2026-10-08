@@ -21,7 +21,7 @@ export const PARTICIPATE_CARDS: ParticipateCard[] = [
     title: "Volunteer",
     description:
       "Share your skills, time and energy to support our programs and communities. Be a part of meaningful change.",
-    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790848482532-j8iol-rectangle-1660-1-.webp",
+    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791436203233-vkh38-rectangle-1660.webp",
   },
   {
     id: "intern",
