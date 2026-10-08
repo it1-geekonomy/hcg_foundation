@@ -143,7 +143,12 @@ export default function EventCard({
       roundedClassName="rounded-[0.375rem]"
       isFlipped={isFlipped}
       onFlipChange={setIsFlipped}
-      onClick={handleCardClick}
+      onClick={() => {
+        // Only navigate if clicking on front face (when not flipped)
+        if (!isFlipped) {
+          handleCardClick();
+        }
+      }}
       flipOnHover={true}
       duration={0.42}
       front={frontContent}
