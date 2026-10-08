@@ -10,7 +10,11 @@ export type CardData = {
   href?: string;
 };
 
-export const COLLAPSED_WIDTH = 130;
+/** Width of a closed accordion strip on lg and up. Narrower strips leave the open card wider. */
+export const COLLAPSED_WIDTH = 88;
+
+/** Height of a closed stack card below lg. */
+export const MOBILE_COLLAPSED_HEIGHT = 80;
 
 /** sessionStorage flag: the project page was opened from the home carousel, so its "Home" breadcrumb returns there. */
 export const PROJECT_FROM_HOME_KEY = "project_from_home";

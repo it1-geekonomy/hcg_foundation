@@ -8,7 +8,7 @@ export interface CsrPartnerCard {
 
 export const CSR_PARTNER_CARDS: CsrPartnerCard[] = [
   {
-    number: "01",
+    number: "1",
     id: "fund-a-program",
     title: "Fund a Program",
     description:
@@ -16,7 +16,7 @@ export const CSR_PARTNER_CARDS: CsrPartnerCard[] = [
     imageUrl: "/Get Involved/CSR Partner/Fund a Program.png",
   },
   {
-    number: "02",
+    number: "2",
     id: "corporate-donations",
     title: "Corporate Donations",
     description:
@@ -24,7 +24,7 @@ export const CSR_PARTNER_CARDS: CsrPartnerCard[] = [
     imageUrl: "/Get Involved/CSR Partner/Corporate Donations.png",
   },
   {
-    number: "03",
+    number: "3",
     id: "event-sponsorships",
     title: "Event Sponsorships & Participation",
     description:
@@ -32,7 +32,7 @@ export const CSR_PARTNER_CARDS: CsrPartnerCard[] = [
     imageUrl: "/Get Involved/CSR Partner/Event Sponsorships & Participation.png",
   },
   {
-    number: "04",
+    number: "4",
     id: "donation-boxes",
     title: "Donation Boxes",
     description:
@@ -40,7 +40,7 @@ export const CSR_PARTNER_CARDS: CsrPartnerCard[] = [
     imageUrl: "/Get Involved/CSR Partner/Donation Boxes.png",
   },
   {
-    number: "05",
+    number: "5",
     id: "payroll-giving",
     title: "Payroll Giving",
     description:
@@ -48,7 +48,7 @@ export const CSR_PARTNER_CARDS: CsrPartnerCard[] = [
     imageUrl: "/Get Involved/CSR Partner/Payroll Giving.png",
   },
   {
-    number: "06",
+    number: "6",
     id: "corporate-employee-volunteering",
     title: "Corporate Employee Volunteering",
     description:
@@ -103,5 +103,17 @@ export const PARTNER_LOGOS: PartnerLogo[] = [
     id: "partner-8",
     src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791291555815-6sz0x-sd-foundation-logo-1.webp",
     alt: "SD Foundation",
+  },
+  {
+    id: "partner-9",
+    src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791434542053-okh93-corporatelogomark_rgb_hr-2-1.webp",
+    alt: "corporatelogomark",
+
+  },
+  {
+    id: "partner-10",
+    src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791434575068-jpbo7-image-93.webp",
+    alt: "jpbo7",
+
   },
 ];

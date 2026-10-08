@@ -29,6 +29,8 @@ export type PersonCardProps = Person & {
   labelRef?: (el: HTMLDivElement | null) => void;
   labelHeight?: number | null;
   style?: CSSProperties;
+  /** When false the card ignores hover/tap and stays on its front face. */
+  flipEnabled?: boolean;
 };
 
 export function PersonCard({
@@ -41,6 +43,7 @@ export function PersonCard({
   labelRef,
   labelHeight,
   style,
+  flipEnabled = true,
 }: PersonCardProps) {
   const [flipped, setFlipped] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
@@ -54,7 +57,12 @@ export function PersonCard({
 
   const leaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  useEffect(() => {
+    if (!flipEnabled) setFlipped(false);
+  }, [flipEnabled]);
+
   const handlePointerEnter = (e: React.PointerEvent) => {
+    if (!flipEnabled) return;
     if (e.pointerType === "touch") {
       isTouchRef.current = true;
       return;
@@ -86,6 +94,7 @@ export function PersonCard({
   }, []);
 
   const handleClick = (e: React.MouseEvent) => {
+    if (!flipEnabled) return;
     const isTouch =
       isTouchRef.current ||
       (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches) ||
@@ -240,9 +249,16 @@ export function PersonCard({
           initial={false}
           animate={{
             rotateY: flipped ? 0 : -180,
+            opacity: flipped ? 1 : 0,
           }}
+          // iOS Safari ignores backface-visibility under a filtered ancestor (the mobile coverflow),
+          // so the back face also swaps opacity at the half-turn, mirroring the front face.
           transition={{
             rotateY: { duration: currentDuration, ease: currentEase },
+            opacity: {
+              duration: 0.01,
+              delay: flipped ? currentDuration * 0.45 : currentDuration * 0.5,
+            },
           }}
           style={{
             backfaceVisibility: "hidden",

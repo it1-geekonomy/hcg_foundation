@@ -19,7 +19,7 @@ export default function AboutSection() {
   const [headVisible, setHeadVisible] = useState(false);
   const [descVisible, setDescVisible] = useState(false);
 
-  // Heading: each array entry is its own group (forced line break).
+  // Heading: each array entry is its own group (forced line break on lg+).
   const headWords: Word[] = ABOUT_CONTENT.heading.flatMap((line, gi) => {
     const parts = line.split(" ");
     return parts.map((w, wi) => ({ w, group: gi, last: wi === parts.length - 1 }));
@@ -41,25 +41,30 @@ export default function AboutSection() {
     const compute = (
       refs: (HTMLSpanElement | null)[],
       words: Word[],
+      forceGroupBreak: boolean,
     ): { lines: number[]; count: number } => {
       let line = -1;
       let prevGroup = -1;
       let prevTop = -Infinity;
       const lines = words.map((f, i) => {
         const top = refs[i]?.offsetTop ?? 0;
-        if (f.group !== prevGroup || top > prevTop + 2) {
+        const groupBreak = forceGroupBreak && f.group !== prevGroup;
+        if (groupBreak || top > prevTop + 2 || prevGroup === -1) {
           line += 1;
-          prevGroup = f.group;
           prevTop = top;
         }
+        prevGroup = f.group;
         return line;
       });
       return { lines, count: line + 1 };
     };
 
     const measure = () => {
-      setHeadLines(compute(headRefs.current, headWords).lines);
-      const d = compute(descRefs.current, descWords);
+      const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+      // Heading: forced breaks only when side-by-side (lg+). Stacked = natural wrap.
+      setHeadLines(compute(headRefs.current, headWords, isDesktop).lines);
+      // Paragraphs are separate blocks, so a group change is always a new line.
+      const d = compute(descRefs.current, descWords, true);
       setDescLines(d.lines);
       setDescLineCount(d.count);
     };
@@ -112,7 +117,7 @@ export default function AboutSection() {
 
   return (
     <section className="pt-8 pb-8 px-8 sm:px-12 md:px-16 lg:py-14 xl:py-30 lg:px-6 xl:px-6 2xl:px-40">
-      <div className="w-full grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-16">
+      <div className="w-full grid grid-cols-1 gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-16">
         {/* LEFT: heading, from the left, line by line */}
         <div
           ref={headWrapRef}
@@ -124,24 +129,29 @@ export default function AboutSection() {
             className="text-[#382E07] lg:text-nowrap font-tiempos-headline"
           >
             {ABOUT_CONTENT.heading.map((_, gi) => (
-              <span key={gi} className="block">
-                {headWords.map((f, i) =>
-                  f.group !== gi ? null : (
-                    <Fragment key={i}>
-                      <span
-                        ref={(el) => {
-                          headRefs.current[i] = el;
-                        }}
-                        className="inline-block motion-reduce:!transition-none"
-                        style={slideStyle(headVisible, (headLines[i] ?? 0) * LINE_STEP_MS)}
-                      >
-                        {f.w}
-                      </span>
-                      {f.last ? "" : " "}
-                    </Fragment>
-                  ),
-                )}
-              </span>
+              <Fragment key={gi}>
+                {/* < lg: inline (one paragraph, wraps naturally). lg+: block per line. */}
+                <span className="inline lg:block">
+                  {headWords.map((f, i) =>
+                    f.group !== gi ? null : (
+                      <Fragment key={i}>
+                        <span
+                          ref={(el) => {
+                            headRefs.current[i] = el;
+                          }}
+                          className="inline-block motion-reduce:!transition-none"
+                          style={slideStyle(headVisible, (headLines[i] ?? 0) * LINE_STEP_MS)}
+                        >
+                          {f.w}
+                        </span>
+                        {f.last ? "" : " "}
+                      </Fragment>
+                    ),
+                  )}
+                </span>
+                {/* Keeps a space between groups when they run together below lg. */}
+                {" "}
+              </Fragment>
             ))}
           </Typography>
         </div>
@@ -180,19 +190,33 @@ export default function AboutSection() {
             </Typography>
           ))}
 
+          {/* < 640px: centered. sm+ : left-aligned. Compact size below lg. lg+: original. */}
           <Link
             href={ABOUT_CONTENT.cta.href}
-            className="mt-2 inline-flex h-12 w-fit items-stretch overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D] motion-reduce:!transition-none"
+            className="mt-2 inline-flex w-fit items-stretch max-sm:self-center overflow-hidden rounded border border-[#FFD43B] bg-[#FFD43B] motion-reduce:!transition-none lg:h-12 lg:border-[#FCCC2D] lg:bg-[#FCCC2D]"
             style={slideStyle(descVisible, DESC_DELAY_MS + descLineCount * LINE_STEP_MS)}
           >
-            <span className="flex h-full items-center px-4">
-              <Typography variant="button-1" as="span" className="text-[#212121] font-semibold font-manrope">
+            <span className="flex items-center px-2.5 py-1.5 sm:px-3 sm:py-2 lg:h-full lg:px-4 lg:py-0">
+              {/* < lg: same type as the "More details" button */}
+              <Typography
+                variant="button-3"
+                as="span"
+                className="font-manrope font-semibold text-[#212121] lg:hidden"
+              >
+                {ABOUT_CONTENT.cta.label}
+              </Typography>
+              {/* lg+: original */}
+              <Typography
+                variant="button-1"
+                as="span"
+                className="hidden font-manrope font-semibold text-[#212121] lg:block"
+              >
                 {ABOUT_CONTENT.cta.label}
               </Typography>
             </span>
 
-            <span className="flex h-full w-12 shrink-0 items-center justify-center border-[3px] border-[#FCCC2D] bg-black">
-              <ArrowUpRight className="h-4 w-4 text-[#FCCC2D]" />
+            <span className="flex w-7 shrink-0 items-center justify-center border-2 border-[#FFD43B] bg-black sm:w-8 lg:h-full lg:w-12 lg:border-[3px] lg:border-[#FCCC2D]">
+              <ArrowUpRight className="h-3 w-3 text-[#FFD43B] sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4 lg:text-[#FCCC2D]" />
             </span>
           </Link>
         </div>

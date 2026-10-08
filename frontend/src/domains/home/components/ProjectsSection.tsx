@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   COLLAPSED_WIDTH,
+  MOBILE_COLLAPSED_HEIGHT,
   PROJECT_FROM_HOME_KEY,
   type CardData,
 } from "@/domains/home/constants/project";
@@ -72,6 +73,16 @@ function ChevronRightIcon({ className = "" }: { className?: string }) {
   );
 }
 
+/**
+ * Vertical title marquee (lg+), bottom → top, seamless loop.
+ * Works with the `.project-vertical-marquee-*` CSS in globals.css
+ * (track: flex column, gap 2.5rem, translateY 0 → -50%).
+ *
+ * Both copies live inside ONE inner wrapper (a single child of the track),
+ * so the track's CSS `gap` is never inserted between them. Each copy has its
+ * own `pb-10` (= 2.5rem), so the wrapper height is exactly 2 × (H + gap) and
+ * -50% lands exactly on one copy → no jump, no extra gap.
+ */
 function VerticalMarqueeTitle({ title }: { title: string }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLSpanElement>(null);
@@ -85,11 +96,12 @@ function VerticalMarqueeTitle({ title }: { title: string }) {
 
     const check = () => {
       const available = viewport.clientHeight;
-      const needed = measure.scrollHeight;
-      const overflows = needed > available + 8;
+      const needed = measure.getBoundingClientRect().height;
+      // Any overflow (0.5px for sub-pixel rounding) starts the marquee.
+      const overflows = needed - available > 0.5;
       setAnimate(overflows);
       if (overflows) {
-        // ~40px per second, clamp 10–28s for readable loop
+        // ~40px per second, clamp 10–28s
         setDurationSec(Math.min(28, Math.max(10, needed / 40)));
       }
     };
@@ -97,7 +109,20 @@ function VerticalMarqueeTitle({ title }: { title: string }) {
     check();
     const ro = new ResizeObserver(check);
     ro.observe(viewport);
-    return () => ro.disconnect();
+    ro.observe(measure);
+
+    // Re-measure once web fonts finish loading — sizes change.
+    let cancelled = false;
+    if (typeof document !== "undefined" && "fonts" in document) {
+      (document as Document & { fonts: FontFaceSet }).fonts.ready.then(() => {
+        if (!cancelled) check();
+      });
+    }
+
+    return () => {
+      cancelled = true;
+      ro.disconnect();
+    };
   }, [title]);
 
   const label = (
@@ -114,21 +139,28 @@ function VerticalMarqueeTitle({ title }: { title: string }) {
   return (
     <div
       ref={viewportRef}
-      className="card-vertical-label absolute inset-x-0 bottom-6 z-20 flex max-h-[calc(100%-3.5rem)] justify-center overflow-hidden"
+      className={`card-vertical-label absolute inset-x-0 top-14 bottom-6 z-20 flex flex-col items-center overflow-hidden ${
+        animate ? "justify-start" : "justify-end"
+      }`}
     >
       <div
-        className="project-vertical-marquee-track"
+        className="project-vertical-marquee-track shrink-0"
         data-animate={animate ? "true" : "false"}
         style={animate ? { animationDuration: `${durationSec}s` } : undefined}
       >
-        <span ref={measureRef} className="inline-flex">
-          {label}
-        </span>
-        {animate ? (
-          <span className="inline-flex" aria-hidden="true">
-            {label}
+        {/* Single child → track `gap` is not applied between the copies */}
+        <div className="flex shrink-0 flex-col items-center">
+          <span className={`inline-flex shrink-0 ${animate ? "pb-10" : ""}`}>
+            <span ref={measureRef} className="inline-flex">
+              {label}
+            </span>
           </span>
-        ) : null}
+          {animate ? (
+            <span className="inline-flex shrink-0 pb-10" aria-hidden="true">
+              {label}
+            </span>
+          ) : null}
+        </div>
       </div>
     </div>
   );
@@ -234,6 +266,12 @@ function HorizontalMarqueeTitle({
   );
 }
 
+/**
+ * "More details" button.
+ *  - `compact` is the desktop (lg+) card panel variant — unchanged.
+ *  - Non-compact is the mobile / tablet variant (below lg). Padding and icon
+ *    are smaller on small screens; the label typography is unchanged.
+ */
 function MoreDetailsButton({
   className = "",
   href,
@@ -246,7 +284,9 @@ function MoreDetailsButton({
   compact?: boolean;
 }) {
   const classes = `inline-flex w-fit shrink-0 items-center justify-center overflow-visible bg-[#FFD43B] uppercase tracking-wider text-neutral-900 transition-colors hover:bg-[#f0c527] ${
-    compact ? "gap-1.5 px-3 py-2" : "gap-1.5 px-4 py-2.5"
+    compact
+      ? "gap-1.5 px-3 py-2"
+      : "gap-1 px-2.5 py-1.5 sm:gap-1.5 sm:px-3 sm:py-2"
   } ${className}`;
   const label = (
     <Typography
@@ -257,7 +297,9 @@ function MoreDetailsButton({
       More details
     </Typography>
   );
-  const icon = <ArrowIcon className={compact ? "size-3.5" : "size-4"} />;
+  const icon = (
+    <ArrowIcon className={compact ? "size-3.5" : "size-3 sm:size-3.5"} />
+  );
 
   if (previewMode || !href) {
     return (
@@ -280,7 +322,6 @@ function MoreDetailsButton({
   );
 }
 
-const MOBILE_COLLAPSED_HEIGHT = 112;
 const MOBILE_EXPANDED_EXTRA = 200;
 const MOBILE_EXPANDED_MAX = 480;
 // How many project cards are visible at once. Once there are more
@@ -943,7 +984,7 @@ export default function ProjectsSection({
               className={`group relative w-full cursor-pointer overflow-hidden rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${
                 index === mobileActiveIndex
                   ? "h-[min(72vh,480px)] min-h-[420px]"
-                  : "h-[112px]"
+                  : "h-20"
               }`}
               style={{ willChange: "height" }}
             >
@@ -1022,7 +1063,7 @@ export default function ProjectsSection({
                   </Typography>
 
                   <MoreDetailsButton
-                    className="m-panel-cta px-4 py-3 font-manrope font-semibold"
+                    className="m-panel-cta font-manrope font-semibold"
                     href={card.href}
                     previewMode={previewMode}
                   />

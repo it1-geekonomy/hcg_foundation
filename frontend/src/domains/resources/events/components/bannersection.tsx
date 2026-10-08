@@ -3,16 +3,16 @@ import Banner from "@/shared/components/Herobannersection";
 // Content is data, kept separate from markup so the same Banner
 // can be reused across pages by swapping this object out.
 const FINANCIALSUPPORT_BANNER = {
-  bgImage: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791376405836-2h06b-rectangle-184-7-.webp",
-  bgImageMobile: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791376489425-a4fjn-rectangle-1661-2-.webp",
+  bgImage: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791296290041-5pkq1-rectangle-186.webp",
+  bgImageMobile: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791368727266-myemf-rectangle-186-2-.webp",
   bgImageAlt: "finance",
   breadcrumbs: [
     { label: "Home", href: "/" },
-    { label: "Our Programs" },
+    { label: "Resources" },
   ],
   title: (
     <>
-     Patient Aid
+    Events
     </>
   ),
 };
@@ -32,16 +32,3 @@ export default function AboutUsPage() {
     </main>
   );
 }
-
-/*
-Reusing Banner on another page just means passing different props, e.g.:
-
-<Banner
-  bgImage="/images/programs-hero.jpg"
-  bgImageMobile="/images/programs-hero-mobile.jpg"
-  breadcrumbs={[{ label: "Home", href: "/" }, { label: "Our Programs" }]}
-  subtitle="What We Do"
-  title="Programs That Change Lives"
-  description="From early screening to survivor support, every program is built around the patient."
-/>
-*/

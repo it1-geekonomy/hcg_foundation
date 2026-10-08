@@ -8,7 +8,7 @@ const AWARENESS_BANNER = {
   bgImageAlt: "awareness",
   breadcrumbs: [
     { label: "Home", href: "/" },
-    { label: "Our Program" },
+    { label: "Our Programs" },
   ],
   title: (
     <>

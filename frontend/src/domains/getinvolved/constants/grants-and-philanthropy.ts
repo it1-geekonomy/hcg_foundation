@@ -21,7 +21,7 @@ export const PHILANTHROPY_CARDS: PhilanthropyCard[] = [
     title: "Support Cancer Awareness & Early Detection",
     description:
       "Support or partner for awareness programmes, oral cancer camps, early detection, and timely treatment.",
-    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790846127207-0jx6p-rectangle-1667-1-.webp",
+    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791437479993-mgrye-rectangle-1667-1-.webp",
   },
   {
     id: "create-philanthropic-partnership",
@@ -29,7 +29,7 @@ export const PHILANTHROPY_CARDS: PhilanthropyCard[] = [
     title: "Create a Philanthropic Partnership",
     description:
       "Work with HCG Foundation to design a giving initiative aligned with your philanthropic interests, priorities, and desired impact.",
-    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790846294418-wytjb-rectangle-1668.webp",
+    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791435957099-sjcgm-rectangle-1668.webp",
   },
   {
     id: "support-healthcare-innovation",

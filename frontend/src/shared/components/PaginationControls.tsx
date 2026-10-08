@@ -47,25 +47,23 @@ export default function PaginationControls({
     }
   };
 
-  const getPageNumbers = (): (number | string)[] => {
-    if (totalPages <= 1) return [1];
-    if (totalPages <= 4) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
+  // Always 7 slots once paging kicks in (first, last, current ± 1, and up to two ellipses),
+  // so the control keeps the same width while paging. An ellipsis never stands in for a
+  // single page — that page is shown instead.
+  const getPageNumbers = (): (number | "ellipsis")[] => {
+    const SLOTS = 7;
+    const range = (from: number, to: number) =>
+      Array.from({ length: to - from + 1 }, (_, i) => from + i);
 
-    // When totalPages > 4:
-    // If currentPage is near start (page 1 or 2): 1, 2, '...', totalPages
-    if (currentPage <= 2) {
-      return [1, 2, "...", totalPages];
-    }
+    if (totalPages <= SLOTS) return range(1, totalPages);
 
-    // If currentPage is near end (totalPages - 1 or totalPages): 1, '...', totalPages - 1, totalPages
-    if (currentPage >= totalPages - 1) {
-      return [1, "...", totalPages - 1, totalPages];
+    if (currentPage <= 4) {
+      return [...range(1, 5), "ellipsis", totalPages];
     }
-
-    // If currentPage is in the middle: 1, '...', currentPage, '...', totalPages
-    return [1, "...", currentPage, "...", totalPages];
+    if (currentPage >= totalPages - 3) {
+      return [1, "ellipsis", ...range(totalPages - 4, totalPages)];
+    }
+    return [1, "ellipsis", currentPage - 1, currentPage, currentPage + 1, "ellipsis", totalPages];
   };
 
   return (
@@ -110,24 +108,26 @@ export default function PaginationControls({
       {showNumbers && totalPages > 1 && (
         <div className="flex items-center justify-center gap-1 sm:gap-1.5 px-0.5">
           {getPageNumbers().map((item, index) => {
-            if (typeof item === "string") {
+            if (item === "ellipsis") {
               return (
                 <span
-                  key={`dots-${index}`}
-                  className="px-0.5 text-[#8C826B] font-bold text-xs select-none tracking-wider"
+                  key={`ellipsis-${index}`}
+                  aria-hidden="true"
+                  className="flex size-6 sm:size-7 items-center justify-center font-manrope font-semibold text-xs leading-none text-[#8C826B] select-none"
                 >
-                  ...
+                  …
                 </span>
               );
             }
-            const pageNum = item as number;
+            const pageNum = item;
             const isActive = pageNum === currentPage;
             return (
               <button
-                key={`${pageNum}-${index}`}
+                key={pageNum}
                 type="button"
                 onClick={() => handlePageClick(pageNum)}
                 aria-label={`Go to page ${pageNum}`}
+                aria-current={isActive ? "page" : undefined}
                 className={`flex size-6 sm:size-7 items-center justify-center rounded-full font-manrope font-semibold text-xs transition cursor-pointer ${
                   isActive
                     ? "bg-[#FDC61D] text-[#382E07] shadow-xs"

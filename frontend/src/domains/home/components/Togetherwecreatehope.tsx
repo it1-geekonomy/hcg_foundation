@@ -14,6 +14,14 @@ import {
   type CarouselSlide,
 } from "@/domains/home/constants/togetherwehope";
 
+/**
+ * Shared sizing for the carousel and its placeholders.
+ * Below 640px: 4/3 (shorter than the old 3/4 portrait).
+ * 640px–1023px: 16/11. lg+: fixed 700px height.
+ */
+const CAROUSEL_SIZE =
+  "aspect-[4/3] sm:aspect-[16/11] md:aspect-[16/11] lg:h-[700px] lg:aspect-auto";
+
 function TogetherCarousel({ slides }: { slides: CarouselSlide[] }) {
   const [active, setActive] = useState(0);
   const count = slides.length;
@@ -36,14 +44,18 @@ function TogetherCarousel({ slides }: { slides: CarouselSlide[] }) {
 
   if (count === 0) {
     return (
-      <div className="relative w-full overflow-hidden rounded bg-[#141414] aspect-[3/4] sm:aspect-[16/11] md:aspect-[16/11] lg:h-[700px] lg:aspect-auto" />
+      <div
+        className={`relative w-full overflow-hidden rounded bg-[#141414] ${CAROUSEL_SIZE}`}
+      />
     );
   }
 
   const current = slides[active] ?? slides[0];
 
   return (
-    <div className="relative w-full overflow-hidden rounded bg-[#141414] aspect-[3/4] sm:aspect-[16/11] md:aspect-[16/11] lg:h-[700px] lg:aspect-auto">
+    <div
+      className={`relative w-full overflow-hidden rounded bg-[#141414] ${CAROUSEL_SIZE}`}
+    >
       {slides.map((s, i) =>
         s.image ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -51,7 +63,7 @@ function TogetherCarousel({ slides }: { slides: CarouselSlide[] }) {
             key={s.id ?? s.image}
             src={s.image}
             alt={s.title}
-            className={`absolute inset-0 h-full w-full object-cover object-center lg:object-top transition-opacity duration-700 ease-in-out ${
+            className={`absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-700 ease-in-out ${
               i === active ? "opacity-100" : "opacity-0"
             }`}
           />
@@ -196,7 +208,9 @@ export default function TogetherWeCreateHope() {
 
       <div className="mx-auto grid grid-cols-1 items-start gap-[clamp(1.5rem,3vw,2rem)] lg:grid-cols-2 lg:items-stretch">
         {!loaded ? (
-          <div className="relative w-full animate-pulse overflow-hidden rounded bg-[#141414]/20 aspect-[3/4] sm:aspect-[16/11] lg:h-[700px] lg:aspect-auto" />
+          <div
+            className={`relative w-full animate-pulse overflow-hidden rounded bg-[#141414]/20 ${CAROUSEL_SIZE}`}
+          />
         ) : (
           <TogetherCarousel slides={slides} />
         )}
@@ -258,20 +272,29 @@ export default function TogetherWeCreateHope() {
 
             <Link
               href={TOGETHER_CONTENT.content.cta.href}
-              className="mt-2 mb-4 inline-flex h-12 w-fit shrink-0 items-stretch overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D] lg:mb-0"
+              className="mt-2 mb-4 inline-flex w-fit shrink-0 items-stretch max-sm:self-center overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D] lg:mb-0 lg:h-12"
             >
-              <span className="flex h-full items-center px-4">
+              <span className="flex items-center px-2.5 py-1.5 sm:px-3 sm:py-2 lg:h-full lg:px-4 lg:py-0">
+                {/* < lg: same type as the About CTA */}
+                <Typography
+                  variant="button-3"
+                  as="span"
+                  className="font-manrope font-semibold tracking-wide text-[#090909] lg:hidden"
+                >
+                  {TOGETHER_CONTENT.content.cta.label}
+                </Typography>
+                {/* lg+: original */}
                 <Typography
                   variant="button-1"
                   as="span"
-                  className="font-manrope font-bold tracking-wide text-[#090909]"
+                  className="hidden font-manrope font-bold tracking-wide text-[#090909] lg:block"
                 >
                   {TOGETHER_CONTENT.content.cta.label}
                 </Typography>
               </span>
 
-              <span className="flex h-full w-12 shrink-0 items-center justify-center border-[3px] border-[#FCCC2D] bg-black">
-                <ArrowUpRight className="h-4 w-4 text-[#FFFFFF]" />
+              <span className="flex w-7 shrink-0 items-center justify-center border-2 border-[#FCCC2D] bg-black sm:w-8 lg:h-full lg:w-12 lg:border-[3px]">
+                <ArrowUpRight className="h-3 w-3 text-[#FFFFFF] sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4" />
               </span>
             </Link>
           </div>

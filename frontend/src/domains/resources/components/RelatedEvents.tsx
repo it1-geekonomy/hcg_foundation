@@ -157,7 +157,7 @@ export default function RelatedEvents({ currentEventId, events }: RelatedEventsP
         {allRelatedEvents.map((item) => (
           <div
             key={item.id}
-            className={`shrink-0 w-[calc(100%-1rem)] md:w-[calc(50%-1rem)] xl:w-[calc(50%-1.5rem)] snap-center flex select-none [&_img]:pointer-events-none ${loading ? "opacity-50" : "opacity-100"}`}
+            className={`shrink-0 w-[calc(100%-1rem)] md:w-[calc(50%-1rem)] xl:w-[calc(50%-1.5rem)] max-w-[34rem] snap-center flex select-none [&_img]:pointer-events-none ${loading ? "opacity-50" : "opacity-100"}`}
             onClickCapture={handleLinkClick}
           >
             <EventCard

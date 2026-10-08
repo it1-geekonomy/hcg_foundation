@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import Typography from "@/lib/Typography";
 import { navLinks, navbarContent } from "@/domains/home/constants/navbar";
 import { scrollHomeToHero } from "@/domains/home/utils/heroScrollReset";
-import DesktopDropdown from "./dropdown";
+import DesktopDropdown, { NavLabel } from "./dropdown";
 import { HamburgerButton, MobileMenuPanel } from "./hamburger";
 
 export default function Navbar() {
@@ -44,6 +44,14 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    document.body.dataset.navMenuOpen = "true";
+    return () => {
+      delete document.body.dataset.navMenuOpen;
+    };
+  }, [isMenuOpen]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -95,11 +103,11 @@ export default function Navbar() {
       <div aria-hidden="true" className="h-[calc(3.5rem+1px)] w-full sm:hidden" />
       <div
         id="site-navbar"
-        className={`fixed z-50 transition-transform duration-300 ease-in-out top-0 inset-x-0 sm:top-[clamp(0.75rem,2vw,1.5rem)] sm:inset-x-[clamp(1rem,8vw,8rem)] xl:inset-x-[clamp(0.5rem,3vw,4rem)] 2xl:inset-x-[clamp(1rem,10vw,10rem)] ${isVisible ? "translate-y-0" : "-translate-y-[150%]"
+        className={`fixed z-50 transition-transform duration-300 ease-in-out top-0 inset-x-0 sm:top-[clamp(0.75rem,2vw,1.5rem)] sm:inset-x-[clamp(1rem,8vw,8rem)] lg:inset-x-4 xl:inset-x-[clamp(0.5rem,3vw,4rem)] 2xl:inset-x-[clamp(1rem,10vw,10rem)] ${isVisible ? "translate-y-0" : "-translate-y-[150%]"
           }`}
       >
-      <nav className="w-full border border-white/10 bg-black/[0.18] backdrop-blur-[60px] px-[clamp(1rem,2vw,1.5rem)] max-sm:border-x-0 max-sm:border-t-0 max-sm:bg-[#2a2622] max-sm:px-0 max-sm:backdrop-blur-none xl:px-0">
-        <div className="flex items-center justify-between h-[clamp(3.5rem,6vw,4.5rem)] max-sm:h-14 max-sm:px-[clamp(1rem,2vw,1.5rem)] xl:ml-8">
+      <nav className="w-full border border-white/10 bg-black/[0.18] backdrop-blur-[60px] px-[clamp(1rem,2vw,1.5rem)] max-sm:border-x-0 max-sm:border-t-0 max-sm:bg-[#2a2622] max-sm:px-0 max-sm:backdrop-blur-none lg:px-0">
+        <div className="flex items-center justify-between gap-4 h-[clamp(3.5rem,6vw,4.5rem)] max-sm:h-14 max-sm:px-[clamp(1rem,2vw,1.5rem)] lg:ml-5 xl:ml-8">
           {/* Logo */}
           <Link
             href="/"
@@ -122,8 +130,8 @@ export default function Navbar() {
             />
           </Link>
 
-          {/* Nav Links — desktop (xl and up) */}
-          <div ref={desktopNavRef} className="hidden xl:flex items-center gap-[clamp(1.75rem,2vw,2rem)]">
+          {/* Nav Links — desktop (lg and up) */}
+          <div ref={desktopNavRef} className="hidden lg:flex items-center gap-5 xl:gap-[clamp(1.75rem,2vw,2rem)]">
             {navLinks.map((link, i) => {
               const isChildActive = Boolean(
                 link.hasDropdown &&
@@ -146,17 +154,10 @@ export default function Navbar() {
                       sessionStorage.setItem("nav_action", "navbar_home");
                       window.dispatchEvent(new Event("nav_action_event"));
                     }}
-                    className="relative flex items-center gap-1 py-1"
+                    aria-current={link.href === pathname ? "page" : undefined}
+                    className="group/nav relative flex items-center py-1"
                   >
-                    <Typography
-                      variant="text-2"
-                      as="span"
-                      className={`font-manrope text-white transition-colors duration-300 ${
-                        isActive ? "font-bold" : "font-medium"
-                      }`}
-                    >
-                      {link.label}
-                    </Typography>
+                    <NavLabel label={link.label} isActive={isActive} />
                   </Link>
                 );
               }
@@ -168,6 +169,10 @@ export default function Navbar() {
                   isActive={isActive}
                   isOpen={openDesktopDropdown === i}
                   onToggle={() => toggleDesktopDropdown(i)}
+                  onOpen={() => setOpenDesktopDropdown(i)}
+                  onClose={() =>
+                    setOpenDesktopDropdown((prev) => (prev === i ? null : prev))
+                  }
                   onItemClick={() => setOpenDesktopDropdown(null)}
                 />
               );
@@ -176,35 +181,35 @@ export default function Navbar() {
 
           {/* Right-side controls */}
           <div className="flex items-center gap-3">
-            {/* Donate Button — visible xl and up, next to nav links */}
+            {/* Donate Button — visible lg and up, next to nav links */}
             <Link
               href={navbarContent.donateButton.href}
               onClick={(event) => {
                 event.preventDefault();
                 scrollToDonateForm();
               }}
-              className="hidden xl:inline-block shrink-0 px-5 py-2.5 bg-[#FED034] mr-6"
+              className="hidden lg:inline-block shrink-0 px-4 py-2 bg-[#FED034] mr-4 transition-[background-color,transform] duration-200 hover:bg-[#FFDA55] active:scale-[0.98] xl:px-5 xl:py-2.5 xl:mr-6"
+            >
+              <Typography variant="button-4" as="span" className="text-[#262626] font-manrope font-bold lg:max-xl:!text-[15px]">
+                {navbarContent.donateButton.label}
+              </Typography>
+            </Link>
+
+            {/* Donate Button — visible sm to lg, sits before hamburger */}
+            <Link
+              href={navbarContent.donateButton.href}
+              onClick={(event) => {
+                event.preventDefault();
+                scrollToDonateForm();
+              }}
+              className="hidden sm:inline-block lg:hidden shrink-0 px-5 py-2.5 bg-[#FED034] transition-[background-color,transform] duration-200 hover:bg-[#FFDA55] active:scale-[0.98]"
             >
               <Typography variant="button-4" as="span" className="text-[#262626] font-manrope font-bold">
                 {navbarContent.donateButton.label}
               </Typography>
             </Link>
 
-            {/* Donate Button — visible sm to xl, sits before hamburger */}
-            <Link
-              href={navbarContent.donateButton.href}
-              onClick={(event) => {
-                event.preventDefault();
-                scrollToDonateForm();
-              }}
-              className="hidden sm:inline-block xl:hidden shrink-0 px-5 py-2.5 bg-[#FED034]"
-            >
-              <Typography variant="button-4" as="span" className="text-[#262626] font-bold">
-                {navbarContent.donateButton.label}
-              </Typography>
-            </Link>
-
-            {/* Hamburger — below xl, animated icon swap */}
+            {/* Hamburger — below lg, animated icon swap */}
             <HamburgerButton
               isMenuOpen={isMenuOpen}
               onToggle={() => setIsMenuOpen((prev) => !prev)}
@@ -212,7 +217,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile/tablet dropdown panel (below xl) */}
+        {/* Mobile/tablet dropdown panel (below lg) */}
         <MobileMenuPanel
           navLinks={navLinks}
           isMenuOpen={isMenuOpen}

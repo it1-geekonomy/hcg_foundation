@@ -1,3 +1,5 @@
+import { decodeHtmlEntities } from "@/shared/lib/decodeHtmlEntities";
+
 export type Person = {
   id?: string;
   name: string;
@@ -15,14 +17,12 @@ export const DUMMY_DESCRIPTION: string[] = [
 export function contentToDescription(html?: string | null): string[] {
   if (!html?.trim()) return [];
 
+  // Tags are stripped before decoding so an escaped `&lt;` in the copy survives as text.
   const fromParagraphs = Array.from(
     html.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)
   )
     .map((m) =>
-      m[1]
-        .replace(/<[^>]+>/g, " ")
-        .replace(/&nbsp;/g, " ")
-        .replace(/&amp;/g, "&")
+      decodeHtmlEntities(m[1].replace(/<[^>]+>/g, " "))
         .replace(/\s+/g, " ")
         .trim()
     )
@@ -30,12 +30,12 @@ export function contentToDescription(html?: string | null): string[] {
 
   if (fromParagraphs.length > 0) return fromParagraphs;
 
-  const plain = html
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/(p|div|li|h[1-6])>/gi, "\n")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
+  const plain = decodeHtmlEntities(
+    html
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/(p|div|li|h[1-6])>/gi, "\n")
+      .replace(/<[^>]+>/g, " ")
+  )
     .replace(/[ \t]+/g, " ")
     .trim();
 

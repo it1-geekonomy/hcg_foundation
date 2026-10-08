@@ -102,7 +102,7 @@ export default function EventCard({
               .map((paragraph, idx) => (
                 <Typography
                   key={idx}
-                  variant="body-1"
+                  variant="body-2"
                   as="p"
                   className="font-manrope leading-relaxed font-normal text-[#0D2838] text-left"
                 >
@@ -137,7 +137,7 @@ export default function EventCard({
 
   return (
     <FlipCard
-      className={`aspect-[4/3.5] sm:aspect-[4/3] xl:aspect-[4/3] w-full ${className}`}
+      className={`aspect-[4/3.5] sm:aspect-[16/11] xl:aspect-[16/11] w-full max-w-[38rem] mx-auto ${className}`}
       roundedClassName="rounded-[0.375rem]"
       isFlipped={isFlipped}
       onFlipChange={setIsFlipped}

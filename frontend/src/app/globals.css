@@ -482,6 +482,12 @@ body {
 body::-webkit-scrollbar {
   display: none;
 }
+
+/* The landing donation popup / open mobile menu own the screen; the chatbot returns once they close. */
+body[data-donation-overlay-open] [data-chatbot],
+body[data-nav-menu-open] [data-chatbot] {
+  display: none;
+}
 /* ===== Swasti cards: entrance animation only (no gradients, no hover, no rings) ===== */
 @keyframes swasti-reveal {
   from {

@@ -6,6 +6,7 @@ import Script from "next/script";
 import { Check, Lock } from "lucide-react";
 import Typography from "@/lib/Typography";
 import DonateDetailsModal from "@/shared/components/DonateDetailsModal";
+import { Terms80GLink } from "@/shared/components/Terms80GDialog";
 import CountrySelect from "@/shared/components/CountrySelect";
 import {
   donateTheme,
@@ -135,15 +136,14 @@ export default function DonateSection() {
         <Typography
           variant="body-7"
           as="p"
-          className="w-full leading-relaxed text-white/70 px-8 sm:px-10 mb-8 lg:px-12 lg:mb-6 font-argestadisplay font-bold"
+          className="w-full max-w-sm leading-relaxed text-white/70 font-argestadisplay font-bold"
         >
-          Your contribution helps us provide care, support and hope to those
-          who need it most.
+          Your support provides cancer care, emotional support, and financial aid to those in need.
         </Typography>
       </DonateItem>
 
       {/* Country */}
-      <DonateItem index={1} className="flex flex-col gap-2 mb-4">
+      <DonateItem index={1} className="flex flex-col gap-2">
         <Typography
           variant="body-8"
           as="span"
@@ -166,16 +166,17 @@ export default function DonateSection() {
       </DonateItem>
 
       {/* Amounts: values roll in (again on currency change); the gold pill glides to the chosen one */}
-      <DonateItem index={2} className="flex flex-col gap-3 mb-6 md:mb-0">
+      <DonateItem index={2} className="flex flex-col gap-2">
         <Typography
-          variant="body-7"
+          variant="body-8"
           as="span"
-          className="font-medium text-white mb-6 md:mb-0 font-manrope"
+          className="font-medium text-white font-manrope"
         >
           Choose an Amount
         </Typography>
 
-        <div className="flex flex-wrap gap-2 sm:grid sm:grid-flow-col sm:auto-cols-fr sm:gap-2 md:grid-flow-row md:auto-cols-auto md:grid-cols-4">
+        {/* 3 columns on phones ("Other" spans the last two cells), one row of 5 from sm up */}
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
           {currencyMeta.presets.map((amount, order) => {
             const active = selectedPreset === amount && !isCustom;
             return (
@@ -184,7 +185,7 @@ export default function DonateSection() {
                 type="button"
                 onClick={() => pickPreset(amount)}
                 aria-pressed={active}
-                className={`relative rounded border bg-transparent px-4 py-1.5 font-semibold transition-colors duration-300 sm:w-[80%] sm:mx-auto sm:px-0 sm:py-2.5 md:w-[88%] ${
+                className={`relative w-full whitespace-nowrap rounded border bg-transparent px-1 py-2.5 font-semibold transition-colors duration-300 ${
                   active
                     ? "border-[#FCCC2D] text-[#3A2E00]"
                     : "border-white/35 text-white hover:border-white/70"
@@ -208,84 +209,49 @@ export default function DonateSection() {
           })}
 
           {isCustom ? (
-            <div className="flex items-center justify-center gap-1 rounded border border-[#FCCC2D] bg-[#FCCC2D]/15 px-3 py-1.5 backdrop-blur-sm sm:w-[80%] sm:mx-auto sm:px-1 sm:py-2.5 md:w-[88%] md:px-2">
-              <Typography
-                variant="body-8"
-                as="span"
-                className="text-[#FFFFFF] font-manrope"
-              >
-                {currencyMeta.symbol}
-              </Typography>
+            <div className="col-span-2 flex min-w-0 items-center justify-center gap-0.5 overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D]/15 px-1 py-2.5 backdrop-blur-sm sm:col-span-1">
+              {customAmount ? (
+                <span className="shrink-0 font-manrope text-sm font-semibold leading-[1.31] text-white lg:text-base">
+                  {currencyMeta.symbol}
+                </span>
+              ) : null}
+              {/* Empty: full width so the placeholder centres; typing: sized to the digits so symbol + amount stay centred together */}
               <input
                 type="text"
                 inputMode="decimal"
                 autoFocus
+                maxLength={10}
                 value={customAmount}
                 onChange={(e) => handleCustomInputChange(e.target.value)}
-                placeholder="0"
-                className="w-16 min-w-0 bg-transparent font-semibold text-white placeholder-white/40 outline-none sm:w-full"
+                placeholder="Amount"
+                aria-label="Other amount"
+                style={
+                  customAmount
+                    ? { width: `${customAmount.length + 0.5}ch` }
+                    : undefined
+                }
+                className={`min-w-0 max-w-full bg-transparent font-manrope text-sm font-semibold leading-[1.31] text-white outline-none placeholder:font-normal placeholder:text-white/70 lg:text-base ${
+                  customAmount ? "text-left" : "w-full text-center"
+                }`}
               />
             </div>
           ) : (
             <button
               type="button"
               onClick={pickCustom}
-              className="rounded border-1 border-[#FCCC2D] bg-[#FCCC2D]/15 px-4 py-1.5 text-white font-semibold backdrop-blur-sm transition-colors sm:w-[80%] sm:mx-auto sm:px-0 sm:py-2.5 md:w-[88%]"
+              aria-label="Enter another amount"
+              className="col-span-2 w-full rounded border border-[#FCCC2D] bg-[#FCCC2D]/15 px-1 py-2.5 text-white font-semibold backdrop-blur-sm transition-colors hover:bg-[#FCCC2D]/25 sm:col-span-1"
             >
               <Typography variant="body-8" as="span" className="font-manrope">
-                More
+                Other
               </Typography>
             </button>
           )}
         </div>
       </DonateItem>
 
-      {/* "or" divider */}
-      <DonateItem
-        index={3}
-        className="hidden md:flex items-center gap-3 lg:mb-4"
-      >
-        <span className="h-px flex-1 bg-white/25" />
-        <Typography
-          variant="body-6"
-          as="span"
-          className="text-[#909299] font-manrope"
-        >
-          or
-        </Typography>
-        <span className="h-px flex-1 bg-white/25" />
-      </DonateItem>
-
-      {/* Custom amount */}
-      <DonateItem index={4} className="flex flex-col gap-2">
-        <Typography
-          variant="body-8"
-          as="span"
-          className="font-light text-white mb-4 lg:mb-6 font-manrope"
-        >
-          Custom Amount
-        </Typography>
-
-        <div className="flex items-center gap-2 border-b border-white/30 pb-2 mb-4 lg:mb-8">
-          <Typography
-            variant="body-2"
-            as="span"
-            className="text-[#FFFFFF] font-manrope"
-          >
-            {currencyMeta.symbol}
-          </Typography>
-          <input
-            type="text"
-            inputMode="decimal"
-            value={customAmount}
-            onChange={(e) => handleCustomInputChange(e.target.value)}
-            className="w-full bg-transparent text-white placeholder-white/40 outline-none"
-          />
-        </div>
-      </DonateItem>
-
       {/* 80G terms */}
-      <DonateItem index={5} className="flex flex-col gap-1.5">
+      <DonateItem index={3} className="flex flex-col gap-1.5">
         <label className="flex min-w-0 cursor-pointer items-center gap-3">
           <span className="relative flex h-4 w-4 shrink-0">
             <input
@@ -309,9 +275,13 @@ export default function DonateSection() {
             className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/80"
           >
             I have read and agree to the applicable{" "}
-            <span className="font-semibold text-[#FCCC2D]">
-              80G Terms &amp; Conditions
-            </span>{" "}
+            <Terms80GLink
+              className="font-semibold text-[#FCCC2D]"
+              onAgree={() => {
+                setAgreedTo80G(true);
+                setTermsError(false);
+              }}
+            />{" "}
             for this donation.
           </Typography>
         </label>
@@ -331,11 +301,8 @@ export default function DonateSection() {
       </DonateItem>
 
       {/* Social proof */}
-      <DonateItem
-        index={6}
-        className="mb-2 flex min-w-0 items-start gap-3 md:mb-0"
-      >
-        <div className="flex shrink-0 -space-x-2 pt-0.5">
+      <DonateItem index={4} className="flex min-w-0 items-center gap-3">
+        <div className="flex shrink-0 -space-x-2">
           {donorAvatars.map((src, i) => (
             <Image
               key={src}
@@ -359,17 +326,24 @@ export default function DonateSection() {
       </DonateItem>
 
       {/* Donate button: glows once an amount is chosen and 80G is agreed */}
-      <DonateItem index={7} className="flex flex-col items-center mb-0">
+      <DonateItem index={5} className="flex flex-col items-stretch gap-2">
         {amountError ? (
           <Shake key={`amount-${shakeKey}`}>
-            <p className="mb-2 font-manrope text-[#FFE08A]">{amountError}</p>
+            <Typography
+              variant="caption-1"
+              as="p"
+              role="alert"
+              className="text-center font-manrope text-[#FFE08A]"
+            >
+              {amountError}
+            </Typography>
           </Shake>
         ) : null}
         <DonateCta
           type="button"
           ready={readyToDonate}
           onClick={openDetailsForm}
-          className="rounded py-3 font-bold bg-[#FCCC2D] w-[240px] sm:w-[300px] md:w-full font-manrope cursor-pointer"
+          className="w-full cursor-pointer rounded bg-[#FCCC2D] py-3 font-bold font-manrope"
         >
           <Typography variant="button-1" as="span">
             Donate Now
@@ -378,7 +352,7 @@ export default function DonateSection() {
       </DonateItem>
 
       <DonateItem
-        index={8}
+        index={6}
         className="flex items-center justify-center gap-1.5"
       >
         <Lock className="h-4 w-4 text-white/70" />
@@ -429,13 +403,14 @@ export default function DonateSection() {
               alt="Two people holding hands"
               fill
               priority
+              sizes="100vw"
               className="object-cover object-top"
             />
-            <div className="relative z-10 px-6 py-6 sm:px-10 sm:py-10">
+            <div className="relative z-10 px-4 py-8 sm:px-8 sm:py-12">
               <DonateCard
                 origin="top"
                 glassColor={donateTheme.glassBg}
-                className="flex w-full flex-col gap-4 overflow-hidden rounded p-5"
+                className="mx-auto flex w-full max-w-lg flex-col gap-5 overflow-hidden rounded p-5 sm:p-8"
               >
                 {cardContent}
               </DonateCard>
@@ -449,13 +424,14 @@ export default function DonateSection() {
               alt="Two people holding hands"
               fill
               priority
+              sizes="100vw"
               className="object-cover"
             />
-            <div className="relative z-10 flex justify-end py-6 pl-6 pr-10 md:pr-[60px] lg:py-8 lg:pl-8 lg:pr-20 xl:py-10 xl:pl-10 xl:pr-28">
+            <div className="relative z-10 flex justify-end px-8 py-10 lg:px-16 lg:py-12 xl:px-28 xl:py-14">
               <DonateCard
                 origin="left"
                 glassColor={donateTheme.glassBg}
-                className="flex w-[440px] flex-col gap-5 overflow-hidden rounded p-8 lg:w-[540px] lg:gap-6 lg:p-12 xl:w-[600px] xl:p-10"
+                className="flex w-[460px] flex-col gap-5 overflow-hidden rounded p-8 lg:w-[520px] lg:p-10 xl:w-[560px] xl:gap-6"
               >
                 {cardContent}
               </DonateCard>
