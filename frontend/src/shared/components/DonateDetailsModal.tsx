@@ -98,6 +98,15 @@ export default function DonateDetailsModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && !window.Razorpay) {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
   const [amountValue, setAmountValue] = useState(amount);
   const [amountDraft, setAmountDraft] = useState(String(amount));
   const [editingAmount, setEditingAmount] = useState(false);
