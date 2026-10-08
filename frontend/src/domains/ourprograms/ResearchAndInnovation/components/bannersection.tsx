@@ -12,7 +12,7 @@ const ABOUT_US_BANNER = {
   ],
   title: (
     <>
-      Research and Innovation
+      Innovation and Technology
     </>
   ),
 };
