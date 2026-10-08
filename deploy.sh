@@ -87,7 +87,7 @@ main() {
 
   log "Starting containers"
   compose up -d --remove-orphans
-  # nginx bind-mounts a single file; a git checkout replaces it, so the container must be recreated to see it.
+  # nginx reads its config only at start, so a changed config needs a recreated container.
   if has_change '^nginx/'; then
     compose up -d --force-recreate nginx
   fi
