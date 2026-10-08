@@ -286,9 +286,22 @@ export type Donor = {
   razorpayPaymentId?: string | null;
   razorpayOrderId?: string | null;
   status: DonationStatus;
+  /** Receipt email queue (Resend allows 100/day; extra receipts wait for the next day). */
+  receiptEmailStatus?: ReceiptEmailStatus | null;
+  receiptEmailAttempts?: number;
+  receiptEmailNextAttemptAt?: string | null;
+  receiptEmailSentAt?: string | null;
+  receiptEmailError?: string | null;
   createdAt: string;
   updatedAt: string;
 };
+
+export type ReceiptEmailStatus =
+  | "queued"
+  | "sending"
+  | "sent"
+  | "failed"
+  | "skipped";
 
 export type CampaignStatus =
   | "pending"

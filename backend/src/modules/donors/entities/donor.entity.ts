@@ -3,6 +3,7 @@ import { Column, Entity, Index } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { DonationStatus } from '../../../common/enums/donation-status.enum';
 import { DonationCategory } from '../../../common/enums/donation-category.enum';
+import { ReceiptEmailStatus } from '../../../common/enums/receipt-email-status.enum';
 
 /**
  * Donors — independent table, no FKs, no SEO.
@@ -90,6 +91,28 @@ export class Donor extends BaseEntity {
     nullable: true,
   })
   razorpayOrderId?: string | null;
+
+  /** Receipt email queue: Resend's free plan allows 100 emails per UTC day, so receipts may wait for the next day. */
+  @ApiPropertyOptional({ enum: ReceiptEmailStatus })
+  @Index('idx_donors_receipt_email_queue')
+  @Column({ name: 'receipt_email_status', type: 'varchar', length: 20, nullable: true })
+  receiptEmailStatus?: ReceiptEmailStatus | null;
+
+  @ApiProperty({ example: 0 })
+  @Column({ name: 'receipt_email_attempts', type: 'int', default: 0 })
+  receiptEmailAttempts!: number;
+
+  @ApiPropertyOptional()
+  @Column({ name: 'receipt_email_next_attempt_at', type: 'timestamptz', nullable: true })
+  receiptEmailNextAttemptAt?: Date | null;
+
+  @ApiPropertyOptional()
+  @Column({ name: 'receipt_email_sent_at', type: 'timestamptz', nullable: true })
+  receiptEmailSentAt?: Date | null;
+
+  @ApiPropertyOptional()
+  @Column({ name: 'receipt_email_error', type: 'text', nullable: true })
+  receiptEmailError?: string | null;
 
   @ApiProperty({ enum: DonationStatus, default: DonationStatus.PENDING })
   @Index('idx_donors_status')

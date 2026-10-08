@@ -20,7 +20,7 @@ import { CreateDonationDto } from './dto/create-donation.dto';
 import { ListDonorsQueryDto } from './dto/list-donors-query.dto';
 import { VerifyDonationDto } from './dto/verify-donation.dto';
 import { Donor } from './entities/donor.entity';
-import { EmailService } from '../email/email.service';
+import { DonationEmailQueueService } from './donation-email-queue.service';
 import { DonationCategory } from '../../common/enums/donation-category.enum';
 
 export type DonationCheckout = {
@@ -44,7 +44,7 @@ export class DonorsService {
     @InjectRepository(Donor)
     private readonly repo: Repository<Donor>,
     private readonly razorpay: RazorpayService,
-    private readonly emailService: EmailService,
+    private readonly emailQueue: DonationEmailQueueService,
   ) { }
 
   async createOrder(dto: CreateDonationDto): Promise<DonationCheckout> {
@@ -161,13 +161,12 @@ export class DonorsService {
       existing.razorpayPaymentId = dto.razorpayPaymentId;
       existing.receiptNumber =
         existing.receiptNumber || this.buildReceiptNumber(existing.id);
+      Object.assign(existing, DonationEmailQueueService.queuedFields());
       const saved = await this.repo.save(existing);
       this.logger.log(
         `Donation paid. donor=${saved.id} receipt=${saved.receiptNumber}`,
       );
-      this.emailService.sendDonationReceipt(saved).catch(err => {
-        this.logger.error(`Failed to send receipt for donor ${saved.id}: ${err.message}`);
-      });
+      this.emailQueue.kick();
       return saved;
     }
 
@@ -198,13 +197,12 @@ export class DonorsService {
       }),
     );
     donor.receiptNumber = this.buildReceiptNumber(donor.id);
+    Object.assign(donor, DonationEmailQueueService.queuedFields());
     const saved = await this.repo.save(donor);
     this.logger.log(
       `Donation paid. donor=${saved.id} receipt=${saved.receiptNumber}`,
     );
-    this.emailService.sendDonationReceipt(saved).catch(err => {
-      this.logger.error(`Failed to send receipt for donor ${saved.id}: ${err.message}`);
-    });
+    this.emailQueue.kick();
     return saved;
   }
 
@@ -223,6 +221,12 @@ export class DonorsService {
     if (query.donationCategory) {
       qb.andWhere('donor.donationCategory = :donationCategory', {
         donationCategory: query.donationCategory,
+      });
+    }
+
+    if (query.receiptEmailStatus) {
+      qb.andWhere('donor.receiptEmailStatus = :receiptEmailStatus', {
+        receiptEmailStatus: query.receiptEmailStatus,
       });
     }
 
