@@ -60,7 +60,7 @@ export class ChatbotController {
   @ApiOperation({
     summary: 'Ask the HCG Foundation chatbot a question',
     description:
-      'Public website endpoint. Does not re-sync the index. Pass sessionId for follow-ups. Rate limited per IP: 10 messages/minute and 100/hour.',
+      'Public website endpoint. Does not re-sync the index. Pass sessionId for follow-ups. Rate limited to 10 messages/minute per conversation, and 60/minute and 600/hour per IP.',
   })
   @ApiTooManyRequestsResponse({ description: 'Rate limit exceeded' })
   async chat(@Body() dto: AskQuestionDto) {
