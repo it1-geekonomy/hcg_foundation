@@ -36,11 +36,13 @@ function FitViewport({
   className,
   minScale = 0,
   fillWidth = false,
+  dependency,
   children,
 }: {
   className?: string;
   minScale?: number;
   fillWidth?: boolean;
+  dependency?: unknown;
   children: React.ReactNode;
 }) {
   const frameRef = useRef<HTMLDivElement>(null);
@@ -131,7 +133,7 @@ function FitViewport({
       observer.disconnect();
       window.removeEventListener("resize", schedule);
     };
-  }, [minScale, fillWidth]);
+  }, [minScale, fillWidth, dependency]);
 
   return (
     <div ref={frameRef} className={className}>
@@ -147,9 +149,7 @@ const RESUME_TYPES = new Set([
 ]);
 const MAX_RESUME_BYTES = 5 * 1024 * 1024;
 
-/** Out of flow so an error never stretches its field or the paired field in the same row. */
-const FIELD_ERROR_CLASS =
-  "pointer-events-none absolute left-0 right-0 top-full mt-0.5 block text-xs leading-3.5 text-red-600 font-manrope";
+
 
 /** DD/MM/YYYY → YYYY-MM-DD (API format); undefined when incomplete/invalid. */
 function toIsoDate(value: string): string | undefined {
@@ -567,12 +567,12 @@ export default function ParticipateModal({
         className="relative z-10 w-full h-full flex items-center justify-center overflow-hidden overscroll-none pointer-events-none"
       >
         <div className="flex min-h-full w-full items-center justify-center">
-          <FitViewport className="flex w-full justify-center pointer-events-auto" fillWidth>
-            {/* Main Modal Container with exact Figma styling: width 640px (40rem), height 860px (53.75rem) for Intern (Frame 556), 736px (46rem) for Fundraise/Volunteer */}
+          <FitViewport className="flex w-full justify-center pointer-events-auto" fillWidth dependency={errors}>
+            {/* Main Modal Container with responsive sizing: width adapts as per screen */}
             <div
-              className={`relative z-10 mx-auto w-[calc(100%-0.5rem)] max-w-[40rem] sm:w-full bg-white shadow-2xl overflow-hidden flex flex-col rounded-[0.625rem] ${isIntern
-                ? "h-auto sm:h-[53.75rem]"
-                : "h-auto sm:h-[46rem]"
+              className={`relative z-10 mx-auto w-[calc(100%-0.5rem)] max-w-[42rem] sm:max-w-[44rem] sm:w-full bg-white shadow-2xl overflow-hidden flex flex-col rounded-[0.625rem] ${isIntern
+                ? "h-auto sm:min-h-[53.75rem]"
+                : "h-auto sm:min-h-[46rem]"
                 }`}
             >
         {/* Full Modal Watermark Background Image matching Figma */}
@@ -593,7 +593,7 @@ export default function ParticipateModal({
         </button>
 
         {/* Modal Body */}
-        <div data-modal-body className="relative z-10 py-2 px-3.5 sm:px-10 sm:py-7 md:px-12 md:py-8 overflow-visible sm:overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden h-auto sm:h-full flex flex-col justify-between">
+        <div data-modal-body className="relative z-10 py-2 px-3.5 sm:px-10 sm:py-7 md:px-12 md:py-8 overflow-hidden h-full flex flex-col justify-between">
           {/* Header Title & Subtitle matching Figma 100% */}
           <div className="text-center mx-auto px-7 sm:px-10 mb-1.5 sm:mb-6 md:mb-8">
             <div className="mb-0.5 sm:mb-1">
@@ -643,30 +643,32 @@ export default function ParticipateModal({
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} noValidate className="w-full max-w-[34rem] mx-auto flex-1 flex flex-col justify-between font-manrope space-y-1.5 sm:space-y-4 md:space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="w-full max-w-[34rem] sm:max-w-[38rem] mx-auto flex-1 flex flex-col justify-between font-manrope space-y-5 md:space-y-6">
             {/* Row 1: Full Name & Phone Number (Figma Frame 560: 544.45px x 41.14px, Gap: 51px) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-x-[3.19rem] sm:gap-y-4">
-              <div className="relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-x-[3.19rem] sm:gap-y-5">
+              <div className="relative flex flex-col">
                 <div
                   className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${errors.fullName
                     ? "border-red-500"
                     : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                     }`}
                 >
-                  <label htmlFor="participate-fullName" className="flex items-center cursor-pointer">
-                    <img
-                      src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791267846107-gluso-user-2x.webp"
-                      alt=""
-                      className="size-4 shrink-0 mr-3 object-contain"
-                    />
-                    <Typography
-                      variant="caption-1"
-                      as="span"
-                      className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                    >
-                      Full Name*
-                    </Typography>
-                  </label>
+                  <div className="flex items-center w-full">
+                    <label htmlFor="participate-fullName" className="flex items-center cursor-pointer min-w-0">
+                      <img
+                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791267846107-gluso-user-2x.webp"
+                        alt=""
+                        className="size-4 shrink-0 mr-3 object-contain"
+                      />
+                      <Typography
+                        variant="caption-1"
+                        as="span"
+                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                      >
+                        Full Name*
+                      </Typography>
+                    </label>
+                  </div>
                   <div className="pl-7 w-full">
                     <input
                       type="text"
@@ -678,15 +680,16 @@ export default function ParticipateModal({
                   </div>
                 </div>
                 {errors.fullName && (
-                  <span className={FIELD_ERROR_CLASS}>{errors.fullName}</span>
+                  <span className="block text-[0.72rem] text-red-600 font-manrope font-medium mt-1.5 leading-tight">
+                    {errors.fullName}
+                  </span>
                 )}
               </div>
 
-              <div className="relative min-h-[2.35rem] sm:min-h-[2.85rem] h-auto">
+              <div className="relative flex flex-col min-h-[2.35rem] sm:min-h-[2.85rem] h-auto">
                 <PhoneInputField
                   label="Phone Number"
                   hideLabel
-                  floatingError
                   required
                   error={errors.phone}
                   value={formData.phone}
@@ -701,28 +704,30 @@ export default function ParticipateModal({
             </div>
 
             {/* Row 2: Email & Gender (Intern) / Location (Fundraise/Volunteer) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-x-[3.19rem] sm:gap-y-4">
-              <div className="relative h-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-x-[3.19rem] sm:gap-y-5">
+              <div className="relative flex flex-col">
                 <div
-                  className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.email
+                  className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${errors.email
                     ? "border-red-500"
                     : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                     }`}
                 >
-                  <label htmlFor="participate-email" className="flex items-center cursor-pointer">
-                    <img
-                      src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791268404784-fpux5-sms.webp"
-                      alt=""
-                      className="size-4 shrink-0 mr-3 object-contain"
-                    />
-                    <Typography
-                      variant="caption-1"
-                      as="span"
-                      className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                    >
-                      Email Address*
-                    </Typography>
-                  </label>
+                  <div className="flex items-center w-full">
+                    <label htmlFor="participate-email" className="flex items-center cursor-pointer min-w-0">
+                      <img
+                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791268404784-fpux5-sms.webp"
+                        alt=""
+                        className="size-4 shrink-0 mr-3 object-contain"
+                      />
+                      <Typography
+                        variant="caption-1"
+                        as="span"
+                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                      >
+                        Email Address*
+                      </Typography>
+                    </label>
+                  </div>
                   <div className="pl-7 w-full">
                     <input
                       type="email"
@@ -735,7 +740,9 @@ export default function ParticipateModal({
                   </div>
                 </div>
                 {errors.email && (
-                  <span className={FIELD_ERROR_CLASS}>{errors.email}</span>
+                  <span className="block text-[0.72rem] text-red-600 font-manrope font-medium mt-1.5 leading-tight">
+                    {errors.email}
+                  </span>
                 )}
               </div>
 
@@ -749,7 +756,6 @@ export default function ParticipateModal({
                     }
                     setFormData((prev) => ({ ...prev, gender: val }));
                   }}
-                  className="h-full"
                 />
               ) : (
                 <LocationSelect
@@ -761,7 +767,6 @@ export default function ParticipateModal({
                     }
                     setFormData((prev) => ({ ...prev, location: val }));
                   }}
-                  className="h-full"
                 />
               )}
             </div>
@@ -769,36 +774,37 @@ export default function ParticipateModal({
             {/* Row 3 (Specific to Intern vs Fundraise/Volunteer) */}
             {isIntern ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-x-[3.19rem] sm:gap-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-x-[3.19rem] sm:gap-y-5">
                   <DobDatePicker
                     value={formData.dob}
                     onChange={(val) =>
                       setFormData((prev) => ({ ...prev, dob: val }))
                     }
-                    className="h-full"
                   />
 
-                  <div className="relative h-full">
+                  <div className="relative flex flex-col">
                     <div
-                      className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.course
+                      className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${errors.course
                         ? "border-red-500"
                         : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                         }`}
                     >
-                      <label htmlFor="participate-course" className="flex items-center cursor-pointer">
-                        <img
-                          src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269059713-dt428-book.webp"
-                          alt=""
-                          className="size-4 shrink-0 mr-3 object-contain"
-                        />
-                        <Typography
-                          variant="caption-1"
-                          as="span"
-                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                        >
-                          Current Course*
-                        </Typography>
-                      </label>
+                      <div className="flex items-center w-full">
+                        <label htmlFor="participate-course" className="flex items-center cursor-pointer min-w-0">
+                          <img
+                            src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269059713-dt428-book.webp"
+                            alt=""
+                            className="size-4 shrink-0 mr-3 object-contain"
+                          />
+                          <Typography
+                            variant="caption-1"
+                            as="span"
+                            className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                          >
+                            Current Course*
+                          </Typography>
+                        </label>
+                      </div>
                       <div className="pl-7 w-full">
                         <textarea
                           id="participate-course"
@@ -820,33 +826,37 @@ export default function ParticipateModal({
                       </div>
                     </div>
                     {errors.course && (
-                      <span className={FIELD_ERROR_CLASS}>{errors.course}</span>
+                      <span className="block text-[0.72rem] text-red-600 font-manrope font-medium mt-1.5 leading-tight">
+                        {errors.course}
+                      </span>
                     )}
                   </div>
                 </div>
 
                 {/* Address */}
-                <div className="relative">
+                <div className="relative flex flex-col">
                   <div
                     className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${errors.address
                       ? "border-red-500"
                       : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                       }`}
                   >
-                    <label htmlFor="participate-address" className="flex items-center cursor-pointer">
-                      <img
-                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269187397-m4u96-location.webp"
-                        alt=""
-                        className="size-4 shrink-0 mr-3 object-contain"
-                      />
-                      <Typography
-                        variant="caption-1"
-                        as="span"
-                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                      >
-                        Your Address*
-                      </Typography>
-                    </label>
+                    <div className="flex items-center w-full">
+                      <label htmlFor="participate-address" className="flex items-center cursor-pointer min-w-0">
+                        <img
+                          src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269187397-m4u96-location.webp"
+                          alt=""
+                          className="size-4 shrink-0 mr-3 object-contain"
+                        />
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                        >
+                          Your Address*
+                        </Typography>
+                      </label>
+                    </div>
                     <div className="pl-7 w-full">
                       <textarea
                         id="participate-address"
@@ -868,12 +878,14 @@ export default function ParticipateModal({
                     </div>
                   </div>
                   {errors.address && (
-                    <span className={FIELD_ERROR_CLASS}>{errors.address}</span>
+                    <span className="block text-[0.72rem] text-red-600 font-manrope font-medium mt-1.5 leading-tight">
+                      {errors.address}
+                    </span>
                   )}
                 </div>
 
                 {/* Languages & Skills */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-x-[3.19rem] sm:gap-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-x-[3.19rem] sm:gap-y-5">
                   <SearchableLanguageSelect
                     value={formData.languages}
                     error={errors.languages}
@@ -883,30 +895,31 @@ export default function ParticipateModal({
                       }
                       setFormData((prev) => ({ ...prev, languages: val }));
                     }}
-                    className="h-full"
                   />
 
-                  <div className="relative h-full">
+                  <div className="relative flex flex-col">
                     <div
-                      className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.computerSkills
+                      className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${errors.computerSkills
                         ? "border-red-500"
                         : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                         }`}
                     >
-                      <label htmlFor="participate-skills" className="flex items-center cursor-pointer">
-                        <img
-                          src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269549117-9bb93-magicpen.webp"
-                          alt=""
-                          className="size-4 shrink-0 mr-3 object-contain"
-                        />
-                        <Typography
-                          variant="caption-1"
-                          as="span"
-                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                        >
-                          Skills*
-                        </Typography>
-                      </label>
+                      <div className="flex items-center w-full">
+                        <label htmlFor="participate-skills" className="flex items-center cursor-pointer min-w-0">
+                          <img
+                            src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269549117-9bb93-magicpen.webp"
+                            alt=""
+                            className="size-4 shrink-0 mr-3 object-contain"
+                          />
+                          <Typography
+                            variant="caption-1"
+                            as="span"
+                            className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                          >
+                            Skills*
+                          </Typography>
+                        </label>
+                      </div>
                       <div className="pl-7 w-full">
                         <textarea
                           id="participate-skills"
@@ -931,35 +944,39 @@ export default function ParticipateModal({
                       </div>
                     </div>
                     {errors.computerSkills && (
-                      <span className={FIELD_ERROR_CLASS}>{errors.computerSkills}</span>
+                      <span className="block text-[0.72rem] text-red-600 font-manrope font-medium mt-1.5 leading-tight">
+                        {errors.computerSkills}
+                      </span>
                     )}
                   </div>
                 </div>
               </>
             ) : isVolunteer ? (
               /* Volunteer Row 3: Educational Qualification & Areas of Interest */
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-x-[3.19rem] sm:gap-y-4">
-                <div className="relative h-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-x-[3.19rem] sm:gap-y-5">
+                <div className="relative flex flex-col">
                   <div
-                    className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.educationalQualification
+                    className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${errors.educationalQualification
                       ? "border-red-500"
                       : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                       }`}
                   >
-                    <label htmlFor="participate-qualification" className="flex items-center cursor-pointer">
-                      <img
-                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791268884591-xwrs7-calendar-2.webp"
-                        alt=""
-                        className="size-4 shrink-0 mr-3 object-contain"
-                      />
-                      <Typography
-                        variant="caption-1"
-                        as="span"
-                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                      >
-                        Educational Qualification*
-                      </Typography>
-                    </label>
+                    <div className="flex items-center w-full">
+                      <label htmlFor="participate-qualification" className="flex items-center cursor-pointer min-w-0">
+                        <img
+                          src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791268884591-xwrs7-calendar-2.webp"
+                          alt=""
+                          className="size-4 shrink-0 mr-3 object-contain"
+                        />
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                        >
+                          Educational Qualification*
+                        </Typography>
+                      </label>
+                    </div>
                     <div className="pl-7 w-full">
                       <textarea
                         id="participate-qualification"
@@ -984,7 +1001,9 @@ export default function ParticipateModal({
                     </div>
                   </div>
                   {errors.educationalQualification && (
-                    <span className={FIELD_ERROR_CLASS}>{errors.educationalQualification}</span>
+                    <span className="block text-[0.72rem] text-red-600 font-manrope font-medium mt-1.5 leading-tight">
+                      {errors.educationalQualification}
+                    </span>
                   )}
                 </div>
 
@@ -1000,33 +1019,34 @@ export default function ParticipateModal({
                       volunteerInterest: val,
                     }));
                   }}
-                  className="h-full"
                 />
               </div>
             ) : (
               /* Specific to Fundraise (Frame 582: Gap 51px) */
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-x-[3.19rem] sm:gap-y-4">
-                <div className="relative h-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-x-[3.19rem] sm:gap-y-5">
+                <div className="relative flex flex-col">
                   <div
-                    className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.fundraisingGoal
+                    className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${errors.fundraisingGoal
                       ? "border-red-500"
                       : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                       }`}
                   >
-                    <label htmlFor="participate-goal" className="flex items-center cursor-pointer">
-                      <img
-                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791268884591-xwrs7-calendar-2.webp"
-                        alt=""
-                        className="size-4 shrink-0 mr-3 object-contain"
-                      />
-                      <Typography
-                        variant="caption-1"
-                        as="span"
-                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                      >
-                        Fundraising Goal*
-                      </Typography>
-                    </label>
+                    <div className="flex items-center w-full">
+                      <label htmlFor="participate-goal" className="flex items-center cursor-pointer min-w-0">
+                        <img
+                          src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791268884591-xwrs7-calendar-2.webp"
+                          alt=""
+                          className="size-4 shrink-0 mr-3 object-contain"
+                        />
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                        >
+                          Fundraising Goal*
+                        </Typography>
+                      </label>
+                    </div>
                     <div className="pl-7 w-full">
                       <textarea
                         id="participate-goal"
@@ -1051,31 +1071,35 @@ export default function ParticipateModal({
                     </div>
                   </div>
                   {errors.fundraisingGoal && (
-                    <span className={FIELD_ERROR_CLASS}>{errors.fundraisingGoal}</span>
+                    <span className="block text-[0.72rem] text-red-600 font-manrope font-medium mt-1.5 leading-tight">
+                      {errors.fundraisingGoal}
+                    </span>
                   )}
                 </div>
 
-                <div className="relative h-full">
+                <div className="relative flex flex-col">
                   <div
-                    className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-full pb-1 flex flex-col justify-between border-b transition-all ${errors.reason
+                    className={`min-h-[2.35rem] sm:min-h-[2.85rem] h-auto pb-1 flex flex-col justify-between border-b transition-all ${errors.reason
                       ? "border-red-500"
                       : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                       }`}
                   >
-                    <label htmlFor="participate-reason" className="flex items-center cursor-pointer">
-                      <img
-                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269059713-dt428-book.webp"
-                        alt=""
-                        className="size-4 shrink-0 mr-3 object-contain"
-                      />
-                      <Typography
-                        variant="caption-1"
-                        as="span"
-                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                      >
-                        Why are you fundraising?*
-                      </Typography>
-                    </label>
+                    <div className="flex items-center w-full">
+                      <label htmlFor="participate-reason" className="flex items-center cursor-pointer min-w-0">
+                        <img
+                          src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791269059713-dt428-book.webp"
+                          alt=""
+                          className="size-4 shrink-0 mr-3 object-contain"
+                        />
+                        <Typography
+                          variant="caption-1"
+                          as="span"
+                          className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                        >
+                          Why are you fundraising?*
+                        </Typography>
+                      </label>
+                    </div>
                     <div className="pl-7 w-full">
                       <textarea
                         id="participate-reason"
@@ -1097,7 +1121,9 @@ export default function ParticipateModal({
                     </div>
                   </div>
                   {errors.reason && (
-                    <span className={FIELD_ERROR_CLASS}>{errors.reason}</span>
+                    <span className="block text-[0.72rem] text-red-600 font-manrope font-medium mt-1.5 leading-tight">
+                      {errors.reason}
+                    </span>
                   )}
                 </div>
               </div>
@@ -1181,38 +1207,37 @@ export default function ParticipateModal({
                         Attach Resume*
                       </span>
                     </div>
-                    <span className="font-manrope font-medium text-[0.5rem] leading-[150%] tracking-[0.01em] text-[#7C8B93]">
-                      Upload your resume(PDF,DOC) - Max 5 MB
+                    <span className={`font-manrope font-medium text-[0.52rem] leading-[150%] tracking-[0.01em] ${errors.resumeFile ? "text-red-600 font-semibold" : "text-[#7C8B93]"}`}>
+                      {errors.resumeFile || "Upload your resume(PDF,DOC) - Max 5 MB"}
                     </span>
                   </label>
-                )}
-                {errors.resumeFile && (
-                  <span className={FIELD_ERROR_CLASS}>{errors.resumeFile}</span>
                 )}
               </div>
             ) : isVolunteer ? (
               /* Why would you like to volunteer?* for Volunteer */
-              <div className="relative">
+              <div className="relative flex flex-col">
                 <div
                   className={`min-h-[3.6rem] sm:min-h-[4.8rem] md:min-h-[5.54rem] h-auto pb-1 sm:pb-1.5 flex flex-col justify-between border-b transition-all ${errors.whyVolunteer
                     ? "border-red-500"
                     : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                     }`}
                 >
-                  <label htmlFor="participate-whyVolunteer" className="flex items-center cursor-pointer pt-0.5">
-                    <img
-                      src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791346766683-uabg5-messages.webp"
-                      alt=""
-                      className="size-4 shrink-0 mr-3 object-contain"
-                    />
-                    <Typography
-                      variant="caption-1"
-                      as="span"
-                      className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                    >
-                      Why would you like to volunteer?*
-                    </Typography>
-                  </label>
+                  <div className="flex items-center w-full">
+                    <label htmlFor="participate-whyVolunteer" className="flex items-center cursor-pointer pt-0.5 min-w-0">
+                      <img
+                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791346766683-uabg5-messages.webp"
+                        alt=""
+                        className="size-4 shrink-0 mr-3 object-contain"
+                      />
+                      <Typography
+                        variant="caption-1"
+                        as="span"
+                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                      >
+                        Why would you like to volunteer?*
+                      </Typography>
+                    </label>
+                  </div>
                   <div className="pl-7 w-full">
                     <textarea
                       id="participate-whyVolunteer"
@@ -1235,14 +1260,12 @@ export default function ParticipateModal({
                     />
                   </div>
                 </div>
-                <div className="flex justify-between items-center mt-0.5 sm:mt-1">
-                  {errors.whyVolunteer ? (
-                    <span className="text-xs text-red-600 font-manrope block">
-                      {errors.whyVolunteer}
-                    </span>
-                  ) : (
-                    <span />
-                  )}
+                {errors.whyVolunteer && (
+                  <span className="block text-[0.72rem] text-red-600 font-manrope font-medium mt-1.5 leading-tight">
+                    {errors.whyVolunteer}
+                  </span>
+                )}
+                <div className="flex justify-end items-center mt-1 sm:mt-1.5">
                   <span className="text-[0.7rem] text-[#7C8B93] font-manrope select-none">
                     {(formData.whyVolunteer || formData.message).length} / 500
                   </span>
@@ -1250,27 +1273,29 @@ export default function ParticipateModal({
               </div>
             ) : (
               /* Your Message for Fundraise */
-              <div className="relative">
+              <div className="relative flex flex-col">
                 <div
                   className={`min-h-[3.6rem] sm:min-h-[4.8rem] md:min-h-[5.54rem] h-auto pb-1 sm:pb-1.5 flex flex-col justify-between border-b transition-all ${errors.message
                     ? "border-red-500"
                     : "border-[#A3A3A399] focus-within:border-[#FCCC2D]"
                     }`}
                 >
-                  <label htmlFor="participate-message" className="flex items-center cursor-pointer pt-0.5">
-                    <img
-                      src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791346766683-uabg5-messages.webp"
-                      alt=""
-                      className="size-4 shrink-0 mr-3 object-contain"
-                    />
-                    <Typography
-                      variant="caption-1"
-                      as="span"
-                      className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
-                    >
-                      Your Message*
-                    </Typography>
-                  </label>
+                  <div className="flex items-center w-full">
+                    <label htmlFor="participate-message" className="flex items-center cursor-pointer pt-0.5 min-w-0">
+                      <img
+                        src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791346766683-uabg5-messages.webp"
+                        alt=""
+                        className="size-4 shrink-0 mr-3 object-contain"
+                      />
+                      <Typography
+                        variant="caption-1"
+                        as="span"
+                        className="font-medium text-[#0D2838] select-none font-manrope leading-normal"
+                      >
+                        Your Message*
+                      </Typography>
+                    </label>
+                  </div>
                   <div className="pl-7 w-full">
                     <textarea
                       id="participate-message"
@@ -1289,14 +1314,12 @@ export default function ParticipateModal({
                     />
                   </div>
                 </div>
-                <div className="flex justify-between items-center mt-0.5 sm:mt-1">
-                  {errors.message ? (
-                    <span className="text-xs text-red-600 font-manrope block">
-                      {errors.message}
-                    </span>
-                  ) : (
-                    <span />
-                  )}
+                {errors.message && (
+                  <span className="block text-[0.72rem] text-red-600 font-manrope font-medium mt-1.5 leading-tight">
+                    {errors.message}
+                  </span>
+                )}
+                <div className="flex justify-end items-center mt-1 sm:mt-1.5">
                   <span className="text-[0.7rem] text-[#7C8B93] font-manrope select-none">
                     {formData.message.length} / 500
                   </span>
@@ -1305,8 +1328,8 @@ export default function ParticipateModal({
             )}
 
             {/* Terms and Conditions Checkbox */}
-            <div className="relative flex flex-col gap-1 pt-0.5 sm:pt-1">
-              <div className="flex items-center gap-2">
+            <div className="relative flex flex-col pt-1 sm:pt-1.5">
+              <div className="flex items-center gap-2 min-w-0">
                 <span className="relative inline-flex items-center justify-center shrink-0">
                   <input
                     type="checkbox"
@@ -1345,7 +1368,9 @@ export default function ParticipateModal({
                 </label>
               </div>
               {errors.agreeTerms && (
-                <span className={FIELD_ERROR_CLASS}>{errors.agreeTerms}</span>
+                <span className="block text-[0.72rem] text-red-600 font-manrope font-medium mt-1.5 leading-tight">
+                  {errors.agreeTerms}
+                </span>
               )}
             </div>
 

@@ -23,13 +23,16 @@ import type {
   DonationCategory,
   DonationStatus,
   Donor,
+  ReceiptEmailStatus as ReceiptEmailStatusValue,
 } from "@/domains/cms/lib/types";
+import ReceiptEmailStatus from "./ReceiptEmailStatus";
 import { cmsErrorMessage } from "@/domains/cms/ui/CmsViewChrome";
 import { CmsPagination, type PaginationMeta } from "@/domains/cms/ui/CmsPagination";
 import CmsSearchInput from "@/domains/cms/ui/CmsSearchInput";
 import CmsSelect, {
   DONATION_CATEGORY_FILTER_OPTIONS,
   DONATION_STATUS_OPTIONS,
+  RECEIPT_EMAIL_STATUS_FILTER_OPTIONS,
 } from "@/domains/cms/ui/CmsSelect";
 
 const PAGE_SIZE = 10;
@@ -54,6 +57,7 @@ export default function DonorsListPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<DonationStatus | "">("paid");
   const [category, setCategory] = useState<DonationCategory | "">("");
+  const [emailStatus, setEmailStatus] = useState<ReceiptEmailStatusValue | "">("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,6 +71,7 @@ export default function DonorsListPage() {
         search: search || undefined,
         status: status || undefined,
         donationCategory: category || undefined,
+        receiptEmailStatus: emailStatus || undefined,
       });
       setDonors(res.data ?? []);
       setMeta(res.meta ?? emptyMeta);
@@ -75,7 +80,7 @@ export default function DonorsListPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, status, category]);
+  }, [page, search, status, category, emailStatus]);
 
   useEffect(() => {
     void load();
@@ -140,6 +145,16 @@ export default function DonorsListPage() {
                 setCategory(next as DonationCategory | "");
               }}
             />
+            <CmsSelect
+              size="sm"
+              className="sm:w-40"
+              value={emailStatus}
+              options={RECEIPT_EMAIL_STATUS_FILTER_OPTIONS}
+              onChange={(next) => {
+                setPage(1);
+                setEmailStatus(next as ReceiptEmailStatusValue | "");
+              }}
+            />
           </div>
 
           <div className="overflow-x-auto">
@@ -151,13 +166,14 @@ export default function DonorsListPage() {
                   <TableHead>Category</TableHead>
                   <TableHead>Country</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Email</TableHead>
                   <TableHead>Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {donors.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-cms-muted">
+                    <TableCell colSpan={7} className="text-cms-muted">
                       No donations yet.
                     </TableCell>
                   </TableRow>
@@ -193,6 +209,9 @@ export default function DonorsListPage() {
                         ) : null}
                       </TableCell>
                       <TableCell className="capitalize">{donor.status}</TableCell>
+                      <TableCell>
+                        <ReceiptEmailStatus {...donor} />
+                      </TableCell>
                       <TableCell className="whitespace-nowrap text-cms-muted">
                         {new Date(donor.createdAt).toLocaleDateString("en-IN")}
                       </TableCell>

@@ -67,15 +67,24 @@ export const HERO_FALLBACK_STEPS: HeroTileStep[] = [
   },
 ];
 
+const NON_IMAGE_FILE = /\.(pdf|docx?|pptx?|xlsx?|mp4|webm|mov|zip)(\?|#|$)/i;
+
+/** next/image throws on anything but a root-relative or http(s) image URL, which would break the whole hero. */
+function usableImageSrc(url?: string | null): string {
+  const src = url?.trim() ?? "";
+  if (!src || NON_IMAGE_FILE.test(src)) return "";
+  return src.startsWith("/") || /^https?:\/\//i.test(src) ? src : "";
+}
+
 export function mapHomeBannerToHeroStep(banner: HomeBanner): HeroTileStep {
-  const background = banner.bannerImageUrl?.trim() ?? "";
+  const background = usableImageSrc(banner.bannerImageUrl);
   return {
     name: banner.name?.trim() ?? "",
     tagline: banner.title?.trim() ?? "",
     body: banner.shortDescription?.trim() ?? "",
     backgroundSrc: background,
-    mobileBackgroundSrc: banner.mobileBannerImageUrl?.trim() || undefined,
-    tileImageSrc: banner.profileImageUrl?.trim() || background,
+    mobileBackgroundSrc: usableImageSrc(banner.mobileBannerImageUrl) || undefined,
+    tileImageSrc: usableImageSrc(banner.profileImageUrl) || background,
   };
 }
 
