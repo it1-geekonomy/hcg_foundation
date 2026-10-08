@@ -17,7 +17,13 @@ const getSiteUrl = () => {
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
-  return "http://localhost:3000";
+  
+  if (process.env.NODE_ENV === "development") {
+    return "http://localhost:3000";
+  }
+  
+  // Magic dynamic fallback: assume production if not in dev
+  return "https://www.hcgfoundation.org";
 };
 
 export const SITE_URL = getSiteUrl().trim().replace(/\/+$/, "");
