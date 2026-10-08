@@ -73,9 +73,44 @@ export default function HomeClient() {
       } else if (cameFromDetails) {
         setReady(true);
         setShowDonationOverlay(false);
-        setTimeout(() => {
-           document.getElementById(cameFromDetails)?.scrollIntoView({ behavior: "auto", block: "start" });
-        }, 0);
+        const targetId = cameFromDetails;
+        let attempts = 0;
+        const maxAttempts = 50; // Poll up to 2.5s for CMS-driven content to mount
+
+        const scrollToTarget = () => {
+          const el = document.getElementById(targetId);
+          if (el) {
+            const isSmallScreen = window.innerHeight < 900;
+            el.scrollIntoView({
+              behavior: attempts <= 2 ? "smooth" : "auto",
+              block: isSmallScreen ? "center" : "start",
+            });
+
+            // Handle potential late layout shifts (e.g. from async CMS sections above)
+            if (attempts < 6) {
+              setTimeout(() => {
+                const refreshedEl = document.getElementById(targetId);
+                if (refreshedEl) {
+                  const rect = refreshedEl.getBoundingClientRect();
+                  // If layout shift pushed it off screen or misplaced it, gently re-align
+                  if (rect.top < -80 || rect.top > window.innerHeight - 100) {
+                    refreshedEl.scrollIntoView({
+                      behavior: "smooth",
+                      block: isSmallScreen ? "center" : "start",
+                    });
+                  }
+                }
+              }, 400);
+            }
+          } else if (attempts < maxAttempts) {
+            attempts++;
+            setTimeout(scrollToTarget, 50);
+          }
+        };
+
+        requestAnimationFrame(() => {
+          setTimeout(scrollToTarget, 50);
+        });
       }
     };
 

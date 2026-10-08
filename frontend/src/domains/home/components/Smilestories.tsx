@@ -80,77 +80,21 @@ function formatStoryDate(dateStr?: string | null): string {
 }
 
 /**
- * Every card reserves exactly this many name lines (heading-8 line-height is 1.5),
- * so all cards are the same height no matter how long any one name is.
+ * Every card reserves exactly this many name lines,
+ * so all cards are the same height and aligned with the date row.
  */
-const NAME_BOX_CLASS = "flex h-[3em] flex-col justify-end";
-/** Long names shrink in steps down to this fraction of the base size to fit the box. */
-const NAME_MIN_SCALE = 0.5;
-const NAME_SCALE_STEP = 0.05;
+const NAME_BOX_CLASS = "flex h-[2.85em] flex-col justify-end";
 
-const nameFitCallbacks = new WeakMap<Element, () => void>();
-let nameFitObserver: ResizeObserver | null = null;
-
-/** One shared observer for every card: card width changes on resize/breakpoints. */
-function observeNameBox(el: Element, onResize: () => void) {
-  if (typeof ResizeObserver === "undefined") return () => {};
-  nameFitObserver ??= new ResizeObserver((entries) => {
-    for (const entry of entries) nameFitCallbacks.get(entry.target)?.();
-  });
-  nameFitCallbacks.set(el, onResize);
-  nameFitObserver.observe(el);
-  return () => {
-    nameFitObserver?.unobserve(el);
-    nameFitCallbacks.delete(el);
-  };
-}
-
-/** Name in a fixed 2-line box; never truncated, long names get a smaller font instead. */
+/** Consistent name matching Patient Stories page (body-7, bold, line-clamp-2). */
 function StoryCardName({ name }: { name: string }) {
-  const textRef = useRef<HTMLSpanElement>(null);
-
-  useLayoutEffect(() => {
-    const text = textRef.current;
-    const box = text?.parentElement;
-    if (!text || !box) return;
-
-    let lastWidth = -1;
-    const fit = (force = false) => {
-      const width = box.clientWidth;
-      if (!force && width === lastWidth) return;
-      lastWidth = width;
-
-      let scale = 1;
-      text.style.fontSize = "";
-      const maxHeight = box.clientHeight + 1;
-      while (text.offsetHeight > maxHeight && scale > NAME_MIN_SCALE) {
-        scale = Math.max(NAME_MIN_SCALE, scale - NAME_SCALE_STEP);
-        text.style.fontSize = `${scale}em`;
-      }
-    };
-
-    fit(true);
-    let cancelled = false;
-    // Manrope may swap in after first paint and change how many lines a name takes.
-    document.fonts?.ready.then(() => {
-      if (!cancelled) fit(true);
-    });
-    const stop = observeNameBox(box, () => fit());
-    return () => {
-      cancelled = true;
-      stop();
-    };
-  }, [name]);
-
   return (
     <Typography
-      variant="heading-8"
+      variant="body-7"
       as="p"
-      className={`${NAME_BOX_CLASS} text-left text-white font-semibold font-manrope`}
+      className={`${NAME_BOX_CLASS} text-left text-white font-bold font-manrope break-words !leading-snug line-clamp-2`}
+      title={name}
     >
-      <span ref={textRef} className="block wrap-anywhere text-pretty">
-        {name}
-      </span>
+      {name}
     </Typography>
   );
 }
@@ -166,25 +110,27 @@ function StoryCardSizer() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none invisible flex select-none flex-col justify-between overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-transparent pt-[1.4223rem] pl-[1.475rem] pr-[1.4223rem] pb-0"
+      className="pointer-events-none invisible flex select-none flex-col justify-between overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-transparent pt-[1.15rem] pl-[1.2rem] pr-[1.15rem] pb-0"
     >
       <div className="aspect-[21.177/23.021] w-full shrink-0" />
-      <div className="flex flex-col justify-start pt-4 pb-4">
+      <div className="flex flex-col justify-start pt-3 pb-3">
         <Typography
-          variant="heading-8"
+          variant="body-7"
           as="p"
-          className={`${NAME_BOX_CLASS} font-semibold font-manrope`}
+          className={`${NAME_BOX_CLASS} font-bold font-manrope !leading-snug`}
         >
-          {null}
-        </Typography>
-        <Typography
-          variant="text-2"
-          as="p"
-          className="mt-1 flex items-center gap-2 text-nowrap font-normal font-manrope"
-        >
-          <Calendar className="h-4 w-4" strokeWidth={1.75} />
           &nbsp;
         </Typography>
+        <div className="mt-1 flex items-center gap-1.5 text-white">
+          <Calendar className="size-3.5 sm:size-4 text-white shrink-0" />
+          <Typography
+            variant="body-8"
+            as="span"
+            className="font-manrope font-medium text-white text-nowrap"
+          >
+            &nbsp;
+          </Typography>
+        </div>
       </div>
     </div>
   );
@@ -233,7 +179,7 @@ const StoryCard = memo(function StoryCard({
   };
 
   const frontContent = (
-    <div className="group flex h-full w-full flex-col justify-between overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-[rgba(255,255,255,0.55)] bg-[rgba(0,0,0,0.23)] backdrop-blur-[1.30625rem] pt-[1.4223rem] pl-[1.475rem] pr-[1.4223rem] pb-0">
+    <div className="group flex h-full w-full flex-col justify-between overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-[rgba(255,255,255,0.55)] bg-[rgba(0,0,0,0.23)] backdrop-blur-[1.30625rem] pt-[1.15rem] pl-[1.2rem] pr-[1.15rem] pb-0">
       {/* photo: aspect 21.177rem / 23.021rem and 1.2643rem radius from Figma */}
       <div className="relative w-full aspect-[21.177/23.021] shrink-0 overflow-hidden rounded-[1.2643rem] bg-[#00000014]">
         {image ? (
@@ -241,7 +187,7 @@ const StoryCard = memo(function StoryCard({
             src={image}
             alt={name}
             fill
-            sizes="(max-width: 639px) clamp(240px, 65vw, 320px), (max-width: 767px) clamp(280px, 52vw - 34px, 360px), (max-width: 1023px) clamp(320px, 52vw - 42px, 400px), (max-width: 1279px) clamp(320px, 30vw - 20px, 400px), clamp(280px, 22vw - 6px, 410px)"
+            sizes="(max-width: 639px) clamp(210px, 60vw, 260px), (max-width: 767px) clamp(230px, 46vw - 20px, 290px), (max-width: 1023px) clamp(250px, 38vw - 24px, 320px), (max-width: 1279px) clamp(260px, 25vw - 16px, 330px), clamp(250px, 18vw - 6px, 340px)"
             style={{ objectPosition: objectPosition ?? "center" }}
             className="rounded-[1.2643rem] object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
@@ -249,17 +195,19 @@ const StoryCard = memo(function StoryCard({
       </div>
 
       {/* The name sits at the bottom of its 2-line box, right on top of the date. */}
-      <div className="flex flex-1 flex-col justify-start pt-4 pb-4">
+      <div className="flex flex-1 flex-col justify-start pt-3 pb-3">
         <StoryCardName name={name} />
         {date && date.trim() ? (
-          <Typography
-            variant="text-2"
-            as="p"
-            className="mt-1 flex items-center gap-2 text-white text-nowrap font-normal font-manrope"
-          >
-            <Calendar className="h-4 w-4" strokeWidth={1.75} />
-            {date}
-          </Typography>
+          <div className="mt-1 flex items-center gap-1.5 text-white">
+            <Calendar className="size-3.5 sm:size-4 text-white shrink-0" />
+            <Typography
+              variant="body-8"
+              as="span"
+              className="font-manrope font-medium text-white text-nowrap"
+            >
+              {date}
+            </Typography>
+          </div>
         ) : null}
       </div>
     </div>
@@ -268,19 +216,17 @@ const StoryCard = memo(function StoryCard({
   const renderBackContent = (flipped: boolean) => (
     <MirrorReveal isOpen={flipped} delay={0} duration={0.82}>
       <div
-        className={`relative h-full w-full flex flex-col justify-between items-center rounded-[1.2643rem] border-[0.0527rem] border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2] ${
-          storyHtml ? "p-4 sm:p-[1.425rem]" : "p-[1.425rem]"
-        }`}
+        className={`relative h-full w-full flex flex-col justify-between items-center rounded-[1.2643rem] border-[0.0527rem] border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2] ${storyHtml ? "p-3.5 sm:p-[1.2rem]" : "p-[1.2rem]"
+          }`}
       >
         {/* Scrollable Story Description matching Team & Trustees pattern */}
         <div
-          className={`min-h-0 w-full flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
-            storyHtml
+          className={`min-h-0 w-full flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${storyHtml
               ? // Bottom fade hints that the story scrolls; the matching bottom padding
-                // lets the last line scroll clear of the fade.
-                "pb-8 [mask-image:linear-gradient(to_bottom,black_calc(100%-2.5rem),transparent)]"
+              // lets the last line scroll clear of the fade.
+              "pb-8 [mask-image:linear-gradient(to_bottom,black_calc(100%-2.5rem),transparent)]"
               : "pr-1.5 space-y-2.5"
-          }`}
+            }`}
         >
           {storyHtml ? (
             <div
@@ -458,7 +404,12 @@ export default function SmileStories({
   }, [fullStory]);
 
   if (apiStories === null) {
-    return <div className="min-h-[400px]"></div>;
+    return (
+      <div
+        id="smilestories"
+        className="min-h-[400px] scroll-mt-16 sm:scroll-mt-20 lg:scroll-mt-24"
+      ></div>
+    );
   }
 
   if (apiStories.length === 0) {
@@ -600,6 +551,8 @@ function SmileStoriesCarousel({
         const parsed = parseFloat(saved);
         if (!Number.isNaN(parsed)) {
           offsetRef.current = parsed;
+          isPausedRef.current = true;
+          scheduleResume();
         }
       }
     } catch {
@@ -837,16 +790,16 @@ function SmileStoriesCarousel({
 
   return (
     <section
+      id="smilestories"
       ref={sectionRef}
-      className={`relative w-full ${navigable ? "lg:py-20" : "pb-10 lg:pb-16 xl:pb-20"}`}
+      className={`relative w-full scroll-mt-16 sm:scroll-mt-20 lg:scroll-mt-24 ${navigable ? "py-8 sm:py-12 lg:py-20" : "pb-10 lg:pb-16 xl:pb-20"}`}
     >
       {navigable ? (
-        <div ref={headingRef} className="mb-14">
+        <div ref={headingRef} className="mb-10 lg:mb-14">
           <Typography
-            id="smilestories"
             variant="heading-3"
             as="h2"
-            className="mx-auto text-center px-4 text-neutral-800 font-medium font-manrope pt-6 scroll-mt-24 motion-reduce:!transition-none"
+            className="mx-auto text-center px-4 text-neutral-800 font-medium font-manrope pt-2 sm:pt-4 lg:pt-6 motion-reduce:!transition-none"
             style={{
               opacity: headingVisible ? 1 : 0,
               filter: headingVisible ? "blur(0px)" : "blur(14px)",
@@ -879,15 +832,15 @@ function SmileStoriesCarousel({
             scheduleResume();
           }}
           // flex row (default align-items: stretch) => every card is as tall as the tallest one
-          className={`flex w-max flex-nowrap gap-3 sm:gap-5 lg:gap-8 ${isInfinite
-              ? 'touch-pan-y cursor-grab select-none will-change-transform active:cursor-grabbing'
-              : 'touch-pan-x snap-mandatory'
+          className={`flex w-max flex-nowrap gap-3 sm:gap-4 lg:gap-6 ${isInfinite
+            ? 'touch-pan-y cursor-grab select-none will-change-transform active:cursor-grabbing'
+            : 'touch-pan-x snap-mandatory'
             }`}
         >
           {displayStories.map((story, i) => (
             <div
               key={`${story.name}-${i}`}
-              className="flex flex-col shrink-0 basis-[clamp(240px,65vw,320px)] sm:basis-[clamp(280px,52vw-34px,360px)] md:basis-[clamp(320px,52vw-42px,400px)] lg:basis-[clamp(320px,30vw-20px,400px)] xl:basis-[clamp(280px,22vw-6px,410px)]"
+              className="flex flex-col shrink-0 basis-[clamp(210px,60vw,260px)] sm:basis-[clamp(230px,46vw-20px,290px)] md:basis-[clamp(250px,38vw-24px,320px)] lg:basis-[clamp(260px,25vw-16px,330px)] xl:basis-[clamp(250px,18vw-6px,340px)]"
               onPointerEnter={(e) => {
                 if (e.pointerType === "mouse") {
                   isHoverPausedRef.current = true;

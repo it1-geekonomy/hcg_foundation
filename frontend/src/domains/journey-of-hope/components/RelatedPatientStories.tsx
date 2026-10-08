@@ -96,7 +96,7 @@ export function RelatedPatientStories({ stories }: { stories: PatientStory[] }) 
             key={relStory.id}
             story={relStory}
             onClick={handleLinkClick}
-            className="shrink-0 w-[280px] sm:w-[320px] md:w-[350px] lg:w-[385px] snap-center select-none"
+            className="shrink-0 w-[250px] sm:w-[280px] md:w-[310px] lg:w-[320px] xl:w-[340px] snap-center select-none"
           />
         ))}
       </div>
