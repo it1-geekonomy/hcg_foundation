@@ -80,24 +80,33 @@ function TogetherCarousel({ slides }: { slides: CarouselSlide[] }) {
 
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-transparent" />
 
-      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-6 p-[clamp(1.25rem,3vw,2rem)] xl:px-16">
-        <Typography
-          variant="heading-2"
-          as="h3"
-          className="font-tiempos-headline font-normal text-white"
+      {/* Overlay: glass panel (title + scrollable desc) above the progress bars */}
+      <div className="absolute inset-0 flex flex-col justify-end gap-4 p-[clamp(1.25rem,3vw,2rem)] xl:px-16">
+        <div
+          key={current.id ?? active}
+          className="flex min-h-0 max-h-[65%] flex-col gap-3 rounded-md border border-white/15 bg-black/30 p-4 backdrop-blur-md sm:p-5 lg:p-6"
         >
-          {current.title}
-        </Typography>
-        <Typography
-          variant="body-3"
-          as="p"
-          className="hidden lg:block max-w-lg text-white/70 lg:mb-12 font-light font-argestadisplay"
-        >
-          {current.description}
-        </Typography>
+          <Typography
+            variant="heading-7"
+            as="h3"
+            className="shrink-0 font-tiempos-headline font-normal text-white"
+          >
+            {current.title}
+          </Typography>
+
+          {/* Description fills the space below the title; scrolls if long, scrollbar hidden */}
+         {/* Description: limited to ~6 lines, scrolls for the rest, scrollbar hidden */}
+<Typography
+  variant="body-3"
+  as="p"
+  className="hidden max-h-[10rem] max-w-2xl overflow-y-auto text-white font-light font-argestadisplay lg:block [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+>
+  {current.description}
+</Typography>
+        </div>
 
         {count > 1 ? (
-          <div className="mt-3 flex gap-2">
+          <div className="flex shrink-0 gap-2">
             {slides.map((s, i) => (
               <button
                 key={s.id ?? i}
@@ -256,14 +265,14 @@ export default function TogetherWeCreateHope() {
 
           <div className="flex min-h-0 flex-1 flex-col justify-start gap-4 rounded bg-gradient-to-br from-[#535353] to-[#000000] p-[clamp(1.5rem,4vw,3rem)] lg:pb-10">
             <Typography
-              variant="heading-2"
+              variant="heading-6"
               as="h3"
               className="font-tiempos-headline italic font-light text-white"
             >
               {TOGETHER_CONTENT.content.heading}
             </Typography>
             <Typography
-              variant="body-2"
+              variant="body-3"
               as="p"
               className="text-white/90 font-light font-argestadisplay"
             >
@@ -271,9 +280,9 @@ export default function TogetherWeCreateHope() {
             </Typography>
 
             <Link
-              href={TOGETHER_CONTENT.content.cta.href}
-              className="mt-2 mb-4 inline-flex w-fit shrink-0 items-stretch max-sm:self-center overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D] lg:mb-0 lg:h-12"
-            >
+  href={TOGETHER_CONTENT.content.cta.href}
+  className="mt-auto mb-4 inline-flex w-fit shrink-0 items-stretch max-sm:self-center overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D] lg:mb-0 lg:h-12"
+>
               <span className="flex items-center px-2.5 py-1.5 sm:px-3 sm:py-2 lg:h-full lg:px-4 lg:py-0">
                 {/* < lg: same type as the About CTA */}
                 <Typography
