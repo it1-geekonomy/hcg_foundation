@@ -37,6 +37,6 @@ export const PHILANTHROPY_CARDS: PhilanthropyCard[] = [
     title: "Support Healthcare Innovation",
     description:
       "Support research, innovation, and technology-led solutions that contribute to better, more accessible, and affordable healthcare.",
-    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790846508440-aypa9-rectangle-1667-2-.webp",
+    imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791444613160-nw2jb-rectangle-1667.webp",
   },
 ];
