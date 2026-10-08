@@ -211,7 +211,7 @@ export default function PatientStoriesPage() {
         ) : (
           <div
             key={`${safePage}-${itemsPerPage}`}
-            className={`flex flex-col gap-16 pb-4 lg:pb-0 lg:grid lg:grid-cols-3 xl:grid-cols-4 lg:gap-7 transition-all duration-500 ease-in-out ${
+            className={`flex flex-col gap-16 pb-4 lg:pb-0 lg:grid lg:grid-cols-4 xl:grid-cols-4 lg:gap-5 xl:gap-7 transition-all duration-500 ease-in-out ${
               isFetching ? "opacity-40 scale-[0.98] blur-[1px] pointer-events-none" : "opacity-100 scale-100 blur-0"
             }`}
           >
