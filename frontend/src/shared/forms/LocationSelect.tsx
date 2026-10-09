@@ -9,6 +9,29 @@ let cachedIndianStates: any[] = [];
 let cachedCountries: any[] = [];
 let cachedDefaultLocations: string[] = [];
 let isLoaded = false;
+let loadPromise: Promise<void> | null = null;
+
+function ensureLocationDataLoaded(): Promise<void> {
+  if (isLoaded) return Promise.resolve();
+  if (loadPromise) return loadPromise;
+
+  loadPromise = import("country-state-city").then(({ City, State, Country }) => {
+    const indianStatesMap = new Map((State.getStatesOfCountry("IN") || []).map((s) => [s.isoCode, s.name]));
+    cachedIndianCities = (City.getCitiesOfCountry("IN") || []).map((c) => {
+      const state = indianStatesMap.get(c.stateCode) || "";
+      return { label: state ? `${c.name}, ${state}` : c.name, name: c.name, state };
+    });
+    cachedIndianStates = (State.getStatesOfCountry("IN") || []).map((s) => ({ label: `${s.name}, India`, name: s.name }));
+    cachedCountries = (Country.getAllCountries() || []).map((c) => ({ label: c.name, name: c.name }));
+    cachedDefaultLocations = [
+      ...cachedIndianStates.slice(0, 10).map((s) => s.label),
+      ...cachedIndianCities.slice(0, 20).map((c) => c.label),
+    ];
+    isLoaded = true;
+  });
+
+  return loadPromise;
+}
 
 interface LocationSelectProps {
   value: string;
@@ -36,6 +59,15 @@ export default function LocationSelect({
   const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const customInputRef = useRef<HTMLInputElement>(null);
+
+  // Preload location data as soon as component mounts
+  useEffect(() => {
+    if (!isLoaded) {
+      ensureLocationDataLoaded().then(() => {
+        setDataReady(true);
+      });
+    }
+  }, []);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -69,19 +101,7 @@ export default function LocationSelect({
   useEffect(() => {
     if (isOpen) {
       if (!isLoaded) {
-        import("country-state-city").then(({ City, State, Country }) => {
-          const indianStatesMap = new Map((State.getStatesOfCountry("IN") || []).map((s) => [s.isoCode, s.name]));
-          cachedIndianCities = (City.getCitiesOfCountry("IN") || []).map((c) => {
-            const state = indianStatesMap.get(c.stateCode) || "";
-            return { label: state ? `${c.name}, ${state}` : c.name, name: c.name, state };
-          });
-          cachedIndianStates = (State.getStatesOfCountry("IN") || []).map((s) => ({ label: `${s.name}, India`, name: s.name }));
-          cachedCountries = (Country.getAllCountries() || []).map((c) => ({ label: c.name, name: c.name }));
-          cachedDefaultLocations = [
-            ...cachedIndianStates.slice(0, 10).map((s) => s.label),
-            ...cachedIndianCities.slice(0, 20).map((c) => c.label),
-          ];
-          isLoaded = true;
+        ensureLocationDataLoaded().then(() => {
           setDataReady(true);
         });
       }
@@ -137,7 +157,7 @@ export default function LocationSelect({
     ];
 
     return Array.from(new Set(merged));
-  }, [searchQuery]);
+  }, [searchQuery, dataReady]);
 
   const handleSelect = (loc: string) => {
     onChange(loc);
@@ -274,6 +294,10 @@ export default function LocationSelect({
                       </div>
                     );
                   })
+                ) : !dataReady ? (
+                  <div className="py-2.5 px-3 text-center text-[0.75rem] text-[#8C8275]">
+                    Loading locations...
+                  </div>
                 ) : (
                   <div className="py-2.5 px-3 text-center text-[0.75rem] text-[#8C8275]">
                     No locations match &ldquo;{searchQuery}&rdquo;
