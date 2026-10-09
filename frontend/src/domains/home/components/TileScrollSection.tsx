@@ -4,14 +4,12 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
   type CSSProperties,
 } from "react";
 import Image, { getImageProps } from "next/image";
 import { preload } from "react-dom";
-import { hyphenateSync } from "hyphen/en";
 import { cn } from "@/lib/utils";
 import {
   HERO_CONTENT_INSET_MULTIPLIER,
@@ -424,13 +422,6 @@ function StoryTextBlock({
   const hasHeading = Boolean(heading);
   const textColumnOffset = hasHeading ? 4 + layout.accentGap : 0;
 
-  // Phones justify the story in a ~190px column. Soft hyphens give every browser break points, since
-  // CSS `hyphens: auto` depends on per-platform dictionaries; without them the word gaps stretch badly.
-  const mobileBody = useMemo(
-    () => hyphenateSync(step.body, { minWordLength: 6 }),
-    [step.body]
-  );
-
   // Phones animate the story as one block: a per-word cascade over 60+ words stutters and hides text mid-read.
   const animateWords = !layout.isMobile;
   const words = (text: string) =>
@@ -504,12 +495,12 @@ function StoryTextBlock({
               marginTop: subheading ? layout.taglineGap : layout.nameGap,
               lineHeight: layout.bodyLineHeight ?? 1.65,
               ...(layout.isMobile
-                ? { textAlign: "justify", textAlignLast: "left", hyphens: "manual", WebkitHyphens: "manual" }
+                ? { overflowWrap: "break-word", hyphens: "auto", WebkitHyphens: "auto" }
                 : {}),
             }),
           }}
         >
-          {words(layout.isMobile ? mobileBody : step.body)}
+          {words(step.body)}
         </div>
       </div>
     </div>
@@ -806,16 +797,18 @@ export default function TileScrollSection({
             HERO_PANEL
           )}
         >
-          {steps.map((step, i) => (
-            <StoryTextBlock
-              key={`story-${i}`}
-              step={step}
-              active={activeStep === i}
-              exiting={exitStep === i}
-              direction={direction}
-              layout={layout}
-            />
-          ))}
+          {steps.map((step, i) =>
+            i === activeStep || i === exitStep ? (
+              <StoryTextBlock
+                key={`story-${i}`}
+                step={step}
+                active={activeStep === i}
+                exiting={exitStep === i}
+                direction={direction}
+                layout={layout}
+              />
+            ) : null
+          )}
         </div>
 
         <div
