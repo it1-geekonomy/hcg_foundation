@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { PARTNER_LOGOS } from "../constants/csr-partner";
 
 interface PartnerLogosMarqueeProps {
@@ -14,74 +14,62 @@ export default function PartnerLogosMarquee({
   speedPixelsPerSecond = 42,
   logoHeight = "h-12 sm:h-14 md:h-16",
 }: PartnerLogosMarqueeProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const firstSetRef = useRef<HTMLDivElement>(null);
 
-  const [isDragging, setIsDragging] = useState(false);
-  const isDraggingRef = useRef(false);
+  // Position & momentum state (runs on GPU transform: translate3d)
+  const offsetRef = useRef(0);
+  const isInteractingRef = useRef(false);
   const isHoveredRef = useRef(false);
-  const isWheelActiveRef = useRef(false);
-  const wheelTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const momentumVelocityRef = useRef(0);
+  const [isDragging, setIsDragging] = useState(false);
 
-  const startXRef = useRef(0);
-  const startScrollLeftRef = useRef(0);
-  const hasMovedRef = useRef(false);
+  // Touch tracking refs
+  const lastTouchXRef = useRef(0);
+  const lastTouchYRef = useRef(0);
+  const lastTouchTimeRef = useRef(0);
+  const gestureDirectionRef = useRef<"horizontal" | "vertical" | null>(null);
 
-  // Normalize scroll position for seamless infinite looping in either direction
-  const normalizeScroll = () => {
-    const container = containerRef.current;
-    const track = trackRef.current;
-    if (!container || !track) return;
+  // Mouse drag tracking refs
+  const isMouseDownRef = useRef(false);
+  const lastMouseXRef = useRef(0);
+  const lastMouseTimeRef = useRef(0);
 
-    // 4 identical sets rendered; one set width is total scrollWidth / 4
-    const oneSetWidth = track.scrollWidth / 4;
-    if (oneSetWidth <= 0) return;
-
-    if (container.scrollLeft >= oneSetWidth * 2) {
-      container.scrollLeft -= oneSetWidth;
-    } else if (container.scrollLeft < oneSetWidth) {
-      container.scrollLeft += oneSetWidth;
-    }
-  };
-
-  // Center initial scroll position so user can scroll both left and right immediately
+  // Continuous auto-move + momentum animation loop on GPU translate3d
   useEffect(() => {
-    const container = containerRef.current;
-    const track = trackRef.current;
-    if (!container || !track) return;
-
-    const initPos = () => {
-      const oneSetWidth = track.scrollWidth / 4;
-      if (oneSetWidth > 0) {
-        container.scrollLeft = oneSetWidth;
-      }
-    };
-
-    // Run after layout render
-    const raf = requestAnimationFrame(initPos);
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
-  // Continuous smooth auto-marquee loop via requestAnimationFrame
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
     let animId: number;
     let lastTime = performance.now();
 
     const step = (currentTime: number) => {
-      const deltaSeconds = (currentTime - lastTime) / 1000;
+      const deltaSeconds = Math.min((currentTime - lastTime) / 1000, 0.1);
       lastTime = currentTime;
 
-      // Auto-move when not dragging, not hovered, and not active wheel scrolling
-      if (
-        !isDraggingRef.current &&
-        !isHoveredRef.current &&
-        !isWheelActiveRef.current
-      ) {
-        container.scrollLeft += speedPixelsPerSecond * deltaSeconds;
-        normalizeScroll();
+      const oneSetWidth = firstSetRef.current?.offsetWidth || 0;
+
+      // When user is not actively dragging:
+      if (!isInteractingRef.current && !isHoveredRef.current) {
+        // If user flicked with finger/mouse, apply smooth momentum glide
+        if (Math.abs(momentumVelocityRef.current) > 0.4) {
+          offsetRef.current += momentumVelocityRef.current;
+          momentumVelocityRef.current *= 0.93; // Smooth inertial deceleration
+        } else {
+          momentumVelocityRef.current = 0;
+          offsetRef.current += speedPixelsPerSecond * deltaSeconds;
+        }
+      }
+
+      // Seamless infinite wrapping: when offset reaches the width of one set, loop back
+      if (oneSetWidth > 0) {
+        if (offsetRef.current >= oneSetWidth) {
+          offsetRef.current = offsetRef.current % oneSetWidth;
+        } else if (offsetRef.current < 0) {
+          offsetRef.current = oneSetWidth + (offsetRef.current % oneSetWidth);
+        }
+      }
+
+      // Apply hardware-accelerated transform directly
+      if (trackRef.current) {
+        trackRef.current.style.transform = `translate3d(-${offsetRef.current}px, 0, 0)`;
       }
 
       animId = requestAnimationFrame(step);
@@ -91,99 +79,135 @@ export default function PartnerLogosMarquee({
     return () => cancelAnimationFrame(animId);
   }, [speedPixelsPerSecond]);
 
-  // Pointer drag events for smooth mouse swipe & drag
-  const handlePointerDown = (e: React.PointerEvent) => {
-    if (e.pointerType === "mouse" && e.button !== 0) return;
-    const container = containerRef.current;
-    if (!container) return;
+  // Touch handlers for mobile (iPhone & Android)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 0) return;
+    isInteractingRef.current = true;
+    momentumVelocityRef.current = 0;
+    lastTouchXRef.current = e.touches[0].clientX;
+    lastTouchYRef.current = e.touches[0].clientY;
+    lastTouchTimeRef.current = performance.now();
+    gestureDirectionRef.current = null;
+  };
 
-    isDraggingRef.current = true;
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 0) return;
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const currentTime = performance.now();
+
+    const dx = currentX - lastTouchXRef.current;
+    const dy = currentY - lastTouchYRef.current;
+
+    // Detect gesture direction on initial movement
+    if (gestureDirectionRef.current === null) {
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+        gestureDirectionRef.current = Math.abs(dx) >= Math.abs(dy) ? "horizontal" : "vertical";
+      }
+    }
+
+    // If user is swiping horizontally, move logos smoothly with their finger
+    if (gestureDirectionRef.current === "horizontal") {
+      offsetRef.current -= dx;
+      const dt = Math.max((currentTime - lastTouchTimeRef.current) / 1000, 0.001);
+      // Track finger velocity for fast momentum glide on flick
+      const velocity = (-dx / dt) * 0.016;
+      momentumVelocityRef.current = Math.max(Math.min(velocity, 35), -35);
+    }
+
+    lastTouchXRef.current = currentX;
+    lastTouchYRef.current = currentY;
+    lastTouchTimeRef.current = currentTime;
+  };
+
+  const handleTouchEnd = () => {
+    isInteractingRef.current = false;
+    gestureDirectionRef.current = null;
+  };
+
+  // Desktop mouse drag handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    isMouseDownRef.current = true;
+    isInteractingRef.current = true;
     setIsDragging(true);
-    hasMovedRef.current = false;
-    startXRef.current = e.clientX;
-    startScrollLeftRef.current = container.scrollLeft;
-
-    try {
-      container.setPointerCapture(e.pointerId);
-    } catch {}
+    momentumVelocityRef.current = 0;
+    lastMouseXRef.current = e.clientX;
+    lastMouseTimeRef.current = performance.now();
   };
 
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDraggingRef.current || !containerRef.current) return;
-    const dx = e.clientX - startXRef.current;
-    if (Math.abs(dx) > 3) {
-      hasMovedRef.current = true;
-    }
-    containerRef.current.scrollLeft = startScrollLeftRef.current - dx;
-    normalizeScroll();
-  };
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isMouseDownRef.current) return;
+      const currentX = e.clientX;
+      const currentTime = performance.now();
+      const dx = currentX - lastMouseXRef.current;
 
-  const handlePointerUp = (e: React.PointerEvent) => {
-    isDraggingRef.current = false;
-    setIsDragging(false);
-    const container = containerRef.current;
-    if (container) {
-      try {
-        if (container.hasPointerCapture(e.pointerId)) {
-          container.releasePointerCapture(e.pointerId);
-        }
-      } catch {}
-    }
-  };
+      offsetRef.current -= dx;
+      const dt = Math.max((currentTime - lastMouseTimeRef.current) / 1000, 0.001);
+      const velocity = (-dx / dt) * 0.016;
+      momentumVelocityRef.current = Math.max(Math.min(velocity, 35), -35);
 
-  // Mouse wheel scroll support (horizontal or vertical mouse wheel)
-  const handleWheel = (e: React.WheelEvent) => {
-    const container = containerRef.current;
-    if (!container) return;
+      lastMouseXRef.current = currentX;
+      lastMouseTimeRef.current = currentTime;
+    };
 
-    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    if (Math.abs(delta) > 0) {
-      container.scrollLeft += delta;
-      normalizeScroll();
+    const handleMouseUp = () => {
+      if (isMouseDownRef.current) {
+        isMouseDownRef.current = false;
+        isInteractingRef.current = false;
+        setIsDragging(false);
+      }
+    };
 
-      isWheelActiveRef.current = true;
-      if (wheelTimeoutRef.current) clearTimeout(wheelTimeoutRef.current);
-      wheelTimeoutRef.current = setTimeout(() => {
-        isWheelActiveRef.current = false;
-      }, 900);
-    }
-  };
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, []);
 
-  // 4 identical sets to allow infinite forward & backward scroll without ever showing blank edge
+  // 4 identical sets to seamlessly cover all screens up to 4K displays
   const sets = [0, 1, 2, 3];
 
   return (
     <div className={className}>
-      <div className="relative w-full overflow-hidden py-2">
+      <div className="relative w-full overflow-hidden py-2 select-none">
         {/* Edge fade gradients for smooth entrance/exit */}
         <div className="pointer-events-none absolute left-0 inset-y-0 w-12 sm:w-24 bg-gradient-to-r from-[#FFF8E2] to-transparent z-10" />
         <div className="pointer-events-none absolute right-0 inset-y-0 w-12 sm:w-24 bg-gradient-to-l from-[#FFF8E2] to-transparent z-10" />
 
-        {/* Scroll container with mouse drag, wheel scroll, and auto-movement */}
+        {/* Viewport container */}
         <div
-          ref={containerRef}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          onWheel={handleWheel}
-          onMouseEnter={() => {
-            isHoveredRef.current = true;
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onPointerEnter={(e) => {
+            if (e.pointerType === "mouse") {
+              isHoveredRef.current = true;
+            }
           }}
-          onMouseLeave={() => {
-            isHoveredRef.current = false;
+          onPointerLeave={(e) => {
+            if (e.pointerType === "mouse") {
+              isHoveredRef.current = false;
+            }
           }}
-          className={`relative w-full overflow-x-auto select-none touch-pan-x [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
+          className={`w-full overflow-hidden touch-pan-y ${
             isDragging ? "cursor-grabbing" : "cursor-grab"
           }`}
         >
+          {/* GPU Hardware-Accelerated Sliding Track */}
           <div
             ref={trackRef}
-            className="flex w-max items-center py-1"
+            className="flex w-max items-center py-1 will-change-transform"
           >
             {sets.map((setIdx) => (
               <div
                 key={`set-${setIdx}`}
+                ref={setIdx === 0 ? firstSetRef : undefined}
                 aria-hidden={setIdx > 0}
                 className="flex shrink-0 items-center gap-10 sm:gap-14 pr-10 sm:pr-14"
               >

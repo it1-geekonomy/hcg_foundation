@@ -452,11 +452,10 @@ export default function TileScrollSection({ steps }: { steps: HeroTileStep[] }) 
   const [activeStep, setActiveStep] = useState(0);
   const [exitStep, setExitStep] = useState<number | null>(null);
   const [direction, setDirection] = useState<1 | -1>(1);
+  // Same value on the server and the first client render. Reading the window here
+  // made the hero HTML differ on phones and React threw away the server page.
   const [layout, setLayout] = useState<HeroResponsiveLayout>(() =>
-    getResponsiveValues(
-      typeof window !== "undefined" ? window.innerWidth : 1280,
-      typeof window !== "undefined" ? window.innerHeight : 900
-    )
+    getResponsiveValues(1280, 900)
   );
 
   const currentStepRef = useRef(0);
@@ -640,7 +639,7 @@ export default function TileScrollSection({ steps }: { steps: HeroTileStep[] }) 
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     syncLayout();
     moveTile(0);
     applyStep(0, true);
