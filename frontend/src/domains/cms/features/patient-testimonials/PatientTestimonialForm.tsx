@@ -86,9 +86,9 @@ export function getPatientTestimonialPatch(
 ): {
   fields: Partial<PatientTestimonialFields>;
   file: {
-    patientTestimonialBanner: File | null;
-    patientTestimonialMobileBanner: File | null;
-    patientTestimonialFile: File | null;
+    patientTestimonialBanner?: File | null;
+    patientTestimonialMobileBanner?: File | null;
+    patientTestimonialFile?: File | null;
   } | null;
   hasChanges: boolean;
 } {
@@ -111,21 +111,39 @@ export function getPatientTestimonialPatch(
     fields[key] = (after === undefined ? "" : after) as never;
   }
 
-  const fileChanges = {
-    patientTestimonialBanner: current.patientTestimonialBannerFile,
-    patientTestimonialMobileBanner: current.patientTestimonialMobileBannerFile,
-    patientTestimonialFile: current.patientTestimonialFileDoc,
-  };
+  const fileChanges: {
+    patientTestimonialBanner?: File | null;
+    patientTestimonialMobileBanner?: File | null;
+    patientTestimonialFile?: File | null;
+  } = {};
+
+  if (current.patientTestimonialBannerFile) {
+    fileChanges.patientTestimonialBanner = current.patientTestimonialBannerFile;
+  } else if (initial.patientTestimonialBannerUrl && !current.patientTestimonialBannerUrl) {
+    fileChanges.patientTestimonialBanner = null;
+  }
+
+  if (current.patientTestimonialMobileBannerFile) {
+    fileChanges.patientTestimonialMobileBanner = current.patientTestimonialMobileBannerFile;
+  } else if (initial.patientTestimonialMobileBannerUrl && !current.patientTestimonialMobileBannerUrl) {
+    fileChanges.patientTestimonialMobileBanner = null;
+  }
+
+  if (current.patientTestimonialFileDoc) {
+    fileChanges.patientTestimonialFile = current.patientTestimonialFileDoc;
+  } else if (initial.patientTestimonialFileUrl && !current.patientTestimonialFileUrl) {
+    fileChanges.patientTestimonialFile = null;
+  }
 
   const hasFileChanges =
-    fileChanges.patientTestimonialBanner ||
-    fileChanges.patientTestimonialMobileBanner ||
-    fileChanges.patientTestimonialFile;
+    fileChanges.patientTestimonialBanner !== undefined ||
+    fileChanges.patientTestimonialMobileBanner !== undefined ||
+    fileChanges.patientTestimonialFile !== undefined;
 
   return {
     fields,
     file: hasFileChanges ? fileChanges : null,
-    hasChanges: Object.keys(fields).length > 0 || !!hasFileChanges,
+    hasChanges: Object.keys(fields).length > 0 || hasFileChanges,
   };
 }
 

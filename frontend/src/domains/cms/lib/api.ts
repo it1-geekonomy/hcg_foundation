@@ -222,9 +222,13 @@ function annualReportFormData(
   }
   if (files?.banner instanceof File) {
     fd.append("annualReportBanner", files.banner, files.banner.name);
+  } else if (files?.banner === null) {
+    fd.append("annualReportBanner", "null");
   }
   if (files?.file instanceof File) {
     fd.append("annualReportFile", files.file, files.file.name);
+  } else if (files?.file === null) {
+    fd.append("annualReportFile", "null");
   }
   return fd;
 }
@@ -283,6 +287,8 @@ function teamPatchFormData(
   append("schemaCode", fields.schemaCode);
   if (teamImageFile instanceof File) {
     fd.append("teamImage", teamImageFile, teamImageFile.name);
+  } else if (teamImageFile === null) {
+    fd.append("teamImage", "null");
   }
   return fd;
 }
@@ -321,6 +327,8 @@ function awardPatchFormData(
   append("status", fields.status);
   if (awardImageFile instanceof File) {
     fd.append("awardImage", awardImageFile, awardImageFile.name);
+  } else if (awardImageFile === null) {
+    fd.append("awardImage", "null");
   }
   return fd;
 }
@@ -334,6 +342,8 @@ type HomeBannerFiles = {
 function appendHomeBannerFiles(fd: FormData, files?: HomeBannerFiles) {
   if (files?.bannerImage instanceof File) {
     fd.append("bannerImage", files.bannerImage, files.bannerImage.name);
+  } else if (files?.bannerImage === null) {
+    fd.append("bannerImage", "null");
   }
   if (files?.mobileBannerImage instanceof File) {
     fd.append(
@@ -341,9 +351,13 @@ function appendHomeBannerFiles(fd: FormData, files?: HomeBannerFiles) {
       files.mobileBannerImage,
       files.mobileBannerImage.name
     );
+  } else if (files?.mobileBannerImage === null) {
+    fd.append("mobileBannerImage", "null");
   }
   if (files?.profileImage instanceof File) {
     fd.append("profileImage", files.profileImage, files.profileImage.name);
+  } else if (files?.profileImage === null) {
+    fd.append("profileImage", "null");
   }
 }
 
@@ -454,6 +468,8 @@ function eventPatchFormData(
   append("schemaCode", fields.schemaCode);
   if (files?.eventBanner instanceof File) {
     fd.append("eventBanner", files.eventBanner, files.eventBanner.name);
+  } else if (files?.eventBanner === null) {
+    fd.append("eventBanner", "null");
   }
   if (files?.eventMobileBanner instanceof File) {
     fd.append(
@@ -461,6 +477,8 @@ function eventPatchFormData(
       files.eventMobileBanner,
       files.eventMobileBanner.name
     );
+  } else if (files?.eventMobileBanner === null) {
+    fd.append("eventMobileBanner", "null");
   }
   return fd;
 }
@@ -529,6 +547,8 @@ function projectPatchFormData(
   append("orderMode", fields.orderMode);
   if (files?.projectBanner instanceof File) {
     fd.append("projectBanner", files.projectBanner, files.projectBanner.name);
+  } else if (files?.projectBanner === null) {
+    fd.append("projectBanner", "null");
   }
   if (files?.projectMobileBanner instanceof File) {
     fd.append(
@@ -536,6 +556,8 @@ function projectPatchFormData(
       files.projectMobileBanner,
       files.projectMobileBanner.name
     );
+  } else if (files?.projectMobileBanner === null) {
+    fd.append("projectMobileBanner", "null");
   }
   return fd;
 }
@@ -590,6 +612,8 @@ function patientStoryPatchFormData(
   append("schemaCode", fields.schemaCode);
   if (patientImageFile instanceof File) {
     fd.append("patientImage", patientImageFile, patientImageFile.name);
+  } else if (patientImageFile === null) {
+    fd.append("patientImage", "null");
   }
   return fd;
 }
@@ -646,12 +670,18 @@ function patientTestimonialPatchFormData(
 
   if (files?.patientTestimonialBanner instanceof File) {
     fd.append("patientTestimonialBanner", files.patientTestimonialBanner, files.patientTestimonialBanner.name);
+  } else if (files?.patientTestimonialBanner === null) {
+    fd.append("patientTestimonialBanner", "null");
   }
   if (files?.patientTestimonialMobileBanner instanceof File) {
     fd.append("patientTestimonialMobileBanner", files.patientTestimonialMobileBanner, files.patientTestimonialMobileBanner.name);
+  } else if (files?.patientTestimonialMobileBanner === null) {
+    fd.append("patientTestimonialMobileBanner", "null");
   }
   if (files?.patientTestimonialFile instanceof File) {
     fd.append("patientTestimonialFile", files.patientTestimonialFile, files.patientTestimonialFile.name);
+  } else if (files?.patientTestimonialFile === null) {
+    fd.append("patientTestimonialFile", "null");
   }
   return fd;
 }

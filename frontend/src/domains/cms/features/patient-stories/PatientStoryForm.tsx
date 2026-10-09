@@ -128,7 +128,7 @@ export function getPatientStoryPatch(
   current: PatientStoryFormValues
 ): {
   fields: Partial<PatientStoryFields>;
-  file: File | null;
+  file?: File | null;
   hasChanges: boolean;
 } {
   const prev = formValuesToFields(initial);
@@ -156,11 +156,17 @@ export function getPatientStoryPatch(
     fields.content = next.content ?? "";
   }
 
-  const file = current.patientImageFile;
+  let file: File | null | undefined;
+  if (current.patientImageFile) {
+    file = current.patientImageFile;
+  } else if (initial.patientImageUrl && !current.patientImageUrl) {
+    file = null;
+  }
+
   return {
     fields,
     file,
-    hasChanges: Object.keys(fields).length > 0 || !!file,
+    hasChanges: Object.keys(fields).length > 0 || file !== undefined,
   };
 }
 

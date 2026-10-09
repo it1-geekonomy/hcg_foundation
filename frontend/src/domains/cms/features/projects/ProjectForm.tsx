@@ -146,8 +146,8 @@ export function getProjectPatch(
 ): {
   fields: Partial<ProjectFields>;
   files: {
-    projectBanner: File | null;
-    projectMobileBanner: File | null;
+    projectBanner?: File | null;
+    projectMobileBanner?: File | null;
   };
   hasChanges: boolean;
 } {
@@ -190,18 +190,30 @@ export function getProjectPatch(
   );
   if (orderMode) fields.orderMode = orderMode;
 
-  const files = {
-    projectBanner: current.projectBannerFile,
-    projectMobileBanner: current.projectMobileBannerFile,
-  };
+  const files: {
+    projectBanner?: File | null;
+    projectMobileBanner?: File | null;
+  } = {};
+
+  if (current.projectBannerFile) {
+    files.projectBanner = current.projectBannerFile;
+  } else if (initial.projectBannerUrl && !current.projectBannerUrl) {
+    files.projectBanner = null;
+  }
+
+  if (current.projectMobileBannerFile) {
+    files.projectMobileBanner = current.projectMobileBannerFile;
+  } else if (initial.projectMobileBannerUrl && !current.projectMobileBannerUrl) {
+    files.projectMobileBanner = null;
+  }
 
   return {
     fields,
     files,
     hasChanges:
       Object.keys(fields).length > 0 ||
-      !!files.projectBanner ||
-      !!files.projectMobileBanner,
+      files.projectBanner !== undefined ||
+      files.projectMobileBanner !== undefined,
   };
 }
 

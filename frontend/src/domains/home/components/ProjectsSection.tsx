@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -891,11 +892,13 @@ export default function ProjectsSection({
               style={{ willChange: "flex-grow, flex-basis" }}
             >
               {card.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={card.image}
                   alt=""
                   aria-hidden="true"
+                  fill
+                  sizes="(min-width: 1024px) 33vw, 0px"
+                  quality={60}
                   className="card-image absolute inset-0 h-full w-full object-cover will-change-transform"
                 />
               ) : (
@@ -993,11 +996,13 @@ export default function ProjectsSection({
               style={{ willChange: "height" }}
             >
               {card.mobileImage || card.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={card.mobileImage || card.image}
                   alt=""
                   aria-hidden="true"
+                  fill
+                  sizes="(max-width: 1023px) 100vw, 0px"
+                  quality={60}
                   className="m-card-image absolute inset-0 h-full w-full object-cover will-change-transform"
                 />
               ) : (

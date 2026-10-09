@@ -854,6 +854,7 @@ function ModalBelow1024({
             src={PORTRAIT_SRC_COMPACT}
             alt=""
             fill
+            priority
             sizes="(max-width: 1023px) 480px, 0px"
             className="object-cover object-top"
           />

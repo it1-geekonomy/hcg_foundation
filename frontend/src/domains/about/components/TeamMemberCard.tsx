@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Typography from "@/lib/Typography";
 import { cn } from "@/lib/utils";
-import { ImageUnavailableNotice } from "./shared/ImageUnavailableNotice";
+
 
 export type TeamMemberCardProps = {
   href?: string;
@@ -25,7 +25,7 @@ export default function TeamMemberCard({
   variant = "trustee",
 }: TeamMemberCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
-  const showImage = Boolean(imageUrl?.trim()) && !imageFailed;
+  const showImage = Boolean(imageUrl?.trim()) && imageUrl !== "null" && !imageFailed;
 
   useEffect(() => {
     setImageFailed(false);
@@ -47,9 +47,7 @@ export default function TeamMemberCard({
             unoptimized
             onError={() => setImageFailed(true)}
           />
-        ) : (
-          <ImageUnavailableNotice />
-        )}
+        ) : null}
         <div
           aria-hidden
           className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent"
@@ -62,13 +60,15 @@ export default function TeamMemberCard({
           idleBarClass
         )}
       >
-        <p className="truncate font-manrope text-sm font-semibold text-white sm:text-[15px]">
-          {name}
-        </p>
+        <p 
+          className="truncate font-manrope text-sm font-semibold text-white sm:text-[15px]"
+          dangerouslySetInnerHTML={{ __html: name }}
+        />
         {designation ? (
-          <p className="mt-0.5 line-clamp-2 font-manrope text-[11px] leading-snug text-white/80 sm:text-xs">
-            {designation}
-          </p>
+          <p 
+            className="mt-0.5 line-clamp-2 font-manrope text-[11px] leading-snug text-white/80 sm:text-xs"
+            dangerouslySetInnerHTML={{ __html: designation }}
+          />
         ) : null}
       </div>
 
@@ -79,18 +79,21 @@ export default function TeamMemberCard({
         )}
       >
         <div className="min-h-0 flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          <h3 className="font-manrope text-base font-bold tracking-tight text-[#0B2C4A] sm:text-lg">
-            {name}
-          </h3>
+          <h3 
+            className="font-manrope text-base font-bold tracking-tight text-[#0B2C4A] sm:text-lg"
+            dangerouslySetInnerHTML={{ __html: name }}
+          />
           {designation ? (
-            <p className="mt-1 font-manrope text-xs font-medium leading-snug text-[#1A4A6E] sm:text-sm">
-              {designation}
-            </p>
+            <p 
+              className="mt-1 font-manrope text-xs font-medium leading-snug text-[#1A4A6E] sm:text-sm"
+              dangerouslySetInnerHTML={{ __html: designation }}
+            />
           ) : null}
           {description ? (
-            <p className="mt-3 font-manrope text-xs leading-relaxed text-[#163A58] sm:mt-4 sm:text-[13px] sm:leading-relaxed">
-              {description}
-            </p>
+            <p 
+              className="mt-3 font-manrope text-xs leading-relaxed text-[#163A58] sm:mt-4 sm:text-[13px] sm:leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: description }}
+            />
           ) : null}
         </div>
       </div>
