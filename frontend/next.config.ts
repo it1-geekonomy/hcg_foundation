@@ -6,7 +6,8 @@ const nextConfig: NextConfig = {
   devIndicators: false,
 
   images: {
-
+    // Optimized images keep a long cache. The default 60s is what PageSpeed flags.
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       {
         protocol: "https",
