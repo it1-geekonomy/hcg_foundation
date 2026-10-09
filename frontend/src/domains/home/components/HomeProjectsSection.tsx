@@ -15,18 +15,21 @@ const PROGRAM_HREFS = [
   "/innovation-and-technology", 
 ];
 
-export default async function HomeProjectsSection() {
-  let cards: CardData[] = [];
-  
+export async function loadHomeProjectCards(): Promise<CardData[]> {
   try {
     const res = await publicProjectsApi.listPublished({ limit: 12 });
-    cards = (res.data ?? []).map((project, index) => ({
+    return (res.data ?? []).map((project, index) => ({
       ...mapProjectToCard(project, index),
       href: PROGRAM_HREFS[index] ?? `/projects/${project.slug}`,
     }));
   } catch (error) {
     console.error("Failed to fetch projects", error);
+    return [];
   }
+}
+
+export default async function HomeProjectsSection() {
+  const cards = await loadHomeProjectCards();
 
   return (
     <div id="projects" className="scroll-mt-24">
