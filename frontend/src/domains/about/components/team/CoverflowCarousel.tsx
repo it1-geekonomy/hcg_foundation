@@ -175,7 +175,11 @@ export function CoverflowCarousel({ people, label }: { people: Person[]; label: 
     const target = Math.min(max, Math.max(min, base - rawDx / step));
     d.dx = (base - target) * step;
 
-    tweenTo({ pos: target, duration: 0.35, ease: "power3.out" });
+    // While the finger is down the cards follow it directly. Starting a new eased tween on every
+    // pointermove restarts the ease's fast first frames each time, which reads as shaking on iPhone.
+    gsap.killTweensOf(motion.current, "pos");
+    motion.current.pos = target;
+    render();
   };
 
   const finishDrag = (e: PointerEvent) => {
