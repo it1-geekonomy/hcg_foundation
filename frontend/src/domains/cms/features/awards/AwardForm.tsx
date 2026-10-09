@@ -72,7 +72,7 @@ export function getAwardPatch(
   current: AwardFormValues
 ): {
   fields: Partial<AwardFields>;
-  file: File | null;
+  file?: File | null;
   hasChanges: boolean;
 } {
   const prev = formValuesToFields(initial);
@@ -102,11 +102,17 @@ export function getAwardPatch(
   );
   if (orderMode) fields.orderMode = orderMode;
 
-  const file = current.awardImageFile;
+  let file: File | null | undefined;
+  if (current.awardImageFile) {
+    file = current.awardImageFile;
+  } else if (initial.awardImageUrl && !current.awardImageUrl) {
+    file = null;
+  }
+
   return {
     fields,
     file,
-    hasChanges: Object.keys(fields).length > 0 || !!file,
+    hasChanges: Object.keys(fields).length > 0 || file !== undefined,
   };
 }
 

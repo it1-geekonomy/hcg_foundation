@@ -12,7 +12,7 @@ import {
   CARD_W_2XL,
   type Person,
 } from "@/domains/about/constants/teams";
-import { ImageUnavailableNotice } from "../shared/ImageUnavailableNotice";
+
 import {
   CARD_IMAGE_BOTTOM_INSET_CLASS,
   DEFAULT_CARD_TOP_OFFSET_CLASS,
@@ -49,7 +49,7 @@ export function PersonCard({
   const [imageFailed, setImageFailed] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const isTouchRef = useRef(false);
-  const showImage = Boolean(img?.trim()) && !imageFailed;
+  const showImage = Boolean(img?.trim()) && img !== "null" && !imageFailed;
 
   useEffect(() => {
     setImageFailed(false);
@@ -204,9 +204,7 @@ export function PersonCard({
                 onDragStart={(e) => e.preventDefault()}
                 onError={() => setImageFailed(true)}
               />
-            ) : (
-              <ImageUnavailableNotice />
-            )}
+            ) : null}
           </div>
 
           {/* Glassmorphic Front Label (Without arrow button) */}
@@ -225,17 +223,15 @@ export function PersonCard({
                 variant="body-9"
                 as="p"
                 className="font-manrope font-semibold text-white"
-              >
-                {name}
-              </Typography>
+                dangerouslySetInnerHTML={{ __html: name }}
+              />
               {role ? (
                 <Typography
                   variant="body-7"
                   as="p"
                   className="font-manrope font-normal text-white/85 line-clamp-2"
-                >
-                  {role}
-                </Typography>
+                  dangerouslySetInnerHTML={{ __html: role }}
+                />
               ) : null}
             </div>
           </div>
@@ -295,17 +291,15 @@ export function PersonCard({
                   variant="body-2"
                   as="p"
                   className="font-manrope font-semibold text-white tracking-tight"
-                >
-                  {name}
-                </Typography>
+                  dangerouslySetInnerHTML={{ __html: name }}
+                />
                 {role ? (
                   <Typography
                     variant="body-7"
                     as="p"
                     className="font-manrope font-normal text-white/80 mt-0.5 line-clamp-2"
-                  >
-                    {role}
-                  </Typography>
+                    dangerouslySetInnerHTML={{ __html: role }}
+                  />
                 ) : null}
               </div>
 
@@ -327,9 +321,8 @@ export function PersonCard({
                         variant="body-7"
                         as="p"
                         className="font-manrope leading-relaxed font-normal text-white/90"
-                      >
-                        {paragraph}
-                      </Typography>
+                        dangerouslySetInnerHTML={{ __html: paragraph }}
+                      />
                     ))
                   : null}
               </div>

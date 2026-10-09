@@ -58,13 +58,27 @@ export default function AnnualReportEditPage() {
     if (!id || saving) return;
     setSaving(true);
     try {
+      const files: {
+        banner?: File | null;
+        file?: File | null;
+      } = {};
+
+      if (form.bannerFile) {
+        files.banner = form.bannerFile;
+      } else if (report?.annualReportBanner && !form.bannerUrl) {
+        files.banner = null;
+      }
+
+      if (form.reportFile) {
+        files.file = form.reportFile;
+      } else if (report?.annualReportFile && !form.reportFileUrl) {
+        files.file = null;
+      }
+
       const res = await cmsApi.updateAnnualReport(
         id,
         formValuesToFields(form),
-        {
-          banner: form.bannerFile,
-          file: form.reportFile,
-        }
+        files
       );
       cmsToast.success(res.message || "Annual report updated successfully");
       router.push(`/admin/annual-reports/${id}`);

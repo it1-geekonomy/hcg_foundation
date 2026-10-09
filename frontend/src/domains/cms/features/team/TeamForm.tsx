@@ -121,7 +121,7 @@ export function getTeamPatch(
   current: TeamFormValues
 ): {
   fields: Partial<TeamFields>;
-  file: File | null;
+  file?: File | null;
   hasChanges: boolean;
 } {
   const prev = formValuesToFields(initial);
@@ -154,11 +154,17 @@ export function getTeamPatch(
   );
   if (orderMode && initial.type === current.type) fields.orderMode = orderMode;
 
-  const file = current.teamImageFile;
+  let file: File | null | undefined;
+  if (current.teamImageFile) {
+    file = current.teamImageFile;
+  } else if (initial.teamImageUrl && !current.teamImageUrl) {
+    file = null;
+  }
+
   return {
     fields,
     file,
-    hasChanges: Object.keys(fields).length > 0 || !!file,
+    hasChanges: Object.keys(fields).length > 0 || file !== undefined,
   };
 }
 
