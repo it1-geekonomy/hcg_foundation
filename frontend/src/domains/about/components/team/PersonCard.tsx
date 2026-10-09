@@ -135,8 +135,9 @@ export function PersonCard({
       onClick={handleClick}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
+      // touch-pan-y: only vertical panning is native, so horizontal swipes reach the carousel.
       className={cx(
-        "group relative aspect-[320/380] flex-none cursor-pointer [perspective:1200px] select-none",
+        "group relative aspect-[320/380] flex-none cursor-pointer touch-pan-y [perspective:1200px] select-none",
         widthClass ?? DEFAULT_CARD_WIDTH_CLASS,
       )}
     >
@@ -276,7 +277,7 @@ export function PersonCard({
           {/* Back panel covering exact same bounds as data-card-image */}
           <div
             className={cx(
-              "absolute inset-x-0 overflow-hidden rounded-md border border-[#E0D4AE]/50 shadow-sm",
+              "absolute inset-x-0 overflow-hidden rounded-md border border-[#E0D4AE]/50 shadow-sm touch-pan-y",
               CARD_IMAGE_BOTTOM_INSET_CLASS,
               resolvedTopOffsetClass,
             )}
@@ -284,7 +285,7 @@ export function PersonCard({
             {/* Bio Content */}
             <div
               className={cx(
-                "relative flex h-full w-full flex-col p-5 sm:p-6 overflow-hidden",
+                "relative flex h-full w-full flex-col p-5 sm:p-6 overflow-hidden touch-pan-y",
                 BACK_PANEL_BG,
               )}
             >
@@ -308,10 +309,12 @@ export function PersonCard({
                 ) : null}
               </div>
 
-              {/* Bio / Description Paragraphs */}
+              {/* Bio / Description Paragraphs.
+                  This is a scroll container, so it needs its own touch-pan-y: the browser stops
+                  resolving touch-action at the nearest scroller and never reaches the carousel's. */}
               <div
                 className={cx(
-                  "mt-3 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1.5",
+                  "mt-3 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1.5 touch-pan-y overscroll-contain",
                   "[scrollbar-width:none]",
                   "[-ms-overflow-style:none]",
                   "[&::-webkit-scrollbar]:hidden",

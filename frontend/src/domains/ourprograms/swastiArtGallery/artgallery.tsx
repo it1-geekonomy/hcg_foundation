@@ -275,7 +275,7 @@ export default function SwasthiArtTherapySection() {
 
               <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
                 {split(
-                  "Swasthi Art Gallery is HCG Foundation's creative care initiative where art supports patients through their cancer journey. Located within HCG's headquarters at Tower 1, Bengaluru, Swasthi Gallery brings together two connected efforts: a contemporary art gallery that channels the power of art into funding cancer care, and a dedicated Art Therapy program that brings the healing process of art-making directly to patients.",
+                  "Swasthi Art Gallery is HCG Foundation's creative care initiative where art supports patients through their cancer journey. Located within HCG's headquarters at Tower 1, Bengaluru, Swasthi Gallery brings together two connected efforts: a contemporary art gallery that channels the power of art into funding cancer care, and a dedicated Art Therapy program that brings the healing process of art making directly to patients.",
                   1,
                 )}
               </Typography>
