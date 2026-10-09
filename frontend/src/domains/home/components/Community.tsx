@@ -16,6 +16,21 @@ const DESC_DELAY_MS = 250; // description starts after the heading
 const SLIDE_TRANSITION =
   "opacity 700ms ease-out, transform 1000ms cubic-bezier(0.22, 1, 0.36, 1)";
 
+/*
+ * Glass overlay card on the image: light blackish, transparent, frosted (all devices).
+ * Colour and blur are plain inline styles (prefixed + unprefixed) because Safari only
+ * honours `-webkit-backdrop-filter` and can mis-render Tailwind's color-mix() opacity
+ * colours. translateZ(0) gives the card its own layer so the blur still paints while
+ * it fades/scales in.
+ */
+const glassStyle: React.CSSProperties = {
+  backgroundColor: "rgba(0, 0, 0, 0.28)",
+  WebkitBackdropFilter: "blur(12px)",
+  backdropFilter: "blur(12px)",
+  borderColor: "rgba(255, 255, 255, 0.18)",
+  transform: "translateZ(0)",
+};
+
 export default function CommunitySection() {
   const mediaRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
@@ -225,7 +240,8 @@ export default function CommunitySection() {
           />
 
           <div
-            className={`absolute bottom-4 left-4 right-4 w-auto max-w-none rounded-xl border border-white/10 bg-white/[0.12] p-4 backdrop-blur-sm transition-all duration-700 ease-out md:bottom-8 md:left-8 md:right-auto md:max-w-xs lg:bottom-12 lg:max-w-lg lg:p-6 xl:bottom-20 xl:max-w-lg xl:p-6 ${inView
+            style={glassStyle}
+            className={`absolute bottom-4 left-4 right-4 w-auto max-w-none rounded-xl border border-white/10 p-4 transition-all duration-700 ease-out md:bottom-8 md:left-8 md:right-auto md:max-w-xs lg:bottom-12 lg:max-w-lg lg:p-6 xl:bottom-20 xl:max-w-lg xl:p-6 ${inView
               ? "translate-y-0 scale-100 opacity-100"
               : "translate-y-10 scale-95 opacity-0"
               }`}
@@ -258,31 +274,31 @@ export default function CommunitySection() {
             </Typography>
 
             <button
-  type="button"
-  onClick={scrollToDonateForm}
-  className="inline-flex items-center gap-1.5 bg-[#FCCC2D] px-2.5 py-1.5 transition-colors hover:bg-[#e0b410] sm:gap-2 sm:px-3 sm:py-2 lg:gap-2 lg:px-6 lg:py-3"
->
-  {/* < lg: same type as the About CTA */}
-  <Typography
-    variant="button-3"
-    as="span"
-    className="font-manrope font-semibold text-[#373737] lg:hidden"
-  >
-    {communityContent.overlay.buttonText}
-  </Typography>
-  {/* lg+: original */}
-  <Typography
-    variant="button-1"
-    as="span"
-    className="hidden font-manrope font-medium text-[#373737] lg:block"
-  >
-    {communityContent.overlay.buttonText}
-  </Typography>
-  <ArrowUpRight
-    className="h-3 w-3 text-[#373737] sm:h-3.5 sm:w-3.5 lg:h-5 lg:w-5"
-    strokeWidth={2.5}
-  />
-</button>
+              type="button"
+              onClick={scrollToDonateForm}
+              className="inline-flex items-center gap-1.5 bg-[#FCCC2D] px-2.5 py-1.5 transition-colors hover:bg-[#e0b410] sm:gap-2 sm:px-3 sm:py-2 lg:gap-2 lg:px-6 lg:py-3"
+            >
+              {/* < lg: same type as the About CTA */}
+              <Typography
+                variant="button-3"
+                as="span"
+                className="font-manrope font-semibold text-[#373737] lg:hidden"
+              >
+                {communityContent.overlay.buttonText}
+              </Typography>
+              {/* lg+: original */}
+              <Typography
+                variant="button-1"
+                as="span"
+                className="hidden font-manrope font-medium text-[#373737] lg:block"
+              >
+                {communityContent.overlay.buttonText}
+              </Typography>
+              <ArrowUpRight
+                className="h-3 w-3 text-[#373737] sm:h-3.5 sm:w-3.5 lg:h-5 lg:w-5"
+                strokeWidth={2.5}
+              />
+            </button>
           </div>
         </div>
       </div>

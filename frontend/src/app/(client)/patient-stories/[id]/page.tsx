@@ -258,7 +258,7 @@ export default async function StoryDetailPage({
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-12 sm:gap-8 lg:gap-12 items-start">
               {/* Left Column: Patient Image + Social Share Buttons */}
               <div className="sm:col-span-5 flex flex-col items-start w-full">
-                <div className="relative aspect-[615/646] w-full max-w-[37.5rem] sm:max-w-[26.25rem] md:max-w-[30rem] lg:max-w-[32.5rem] xl:max-w-[35rem] overflow-hidden rounded-md bg-[#EFEAD8] shadow-xs">
+                <div className="relative aspect-[615/646] w-full max-w-[37.5rem] sm:max-w-[26.25rem] md:max-w-[30rem] lg:max-w-[32.5rem] xl:max-w-[35rem] overflow-hidden rounded-md">
                   {/* Puzzle-piece reveal on the detail image only — pieces
                       fade/scale in at their own cell, in a randomized order,
                       the moment this box scrolls into view. Same behavior
@@ -270,7 +270,7 @@ export default async function StoryDetailPage({
                       alt={story.patientName}
                       rows={4}
                       cols={5}
-                      fit="cover"
+                      fit="contain"
                       staggerDuration={1000}
                     />
                   ) : null}
