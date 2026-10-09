@@ -691,7 +691,8 @@ export default function TileScrollSection({ steps }: { steps: HeroTileStep[] }) 
           aria-hidden
           className="pointer-events-none invisible absolute top-0 left-0 h-svh w-px"
         />
-        {steps.map((step, i) => (
+        {steps.map((step, i) =>
+          i === activeStep || i === exitStep ? (
           <Image
             key={`bg-${i}`}
             src={
@@ -702,13 +703,15 @@ export default function TileScrollSection({ steps }: { steps: HeroTileStep[] }) 
             alt=""
             fill
             priority={i === 0}
+            quality={65}
             sizes="100vw"
             className={cn(
               "absolute inset-0 z-0 object-cover transition-opacity duration-700",
               activeStep === i ? "opacity-100" : "opacity-0"
             )}
           />
-        ))}
+          ) : null
+        )}
 
         <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-svh">
           <div className="absolute bottom-4 left-4 sm:bottom-5 sm:left-5 md:bottom-6 md:left-6">
@@ -770,12 +773,14 @@ export default function TileScrollSection({ steps }: { steps: HeroTileStep[] }) 
                 }
           }
         >
-          {steps.map((step, i) => (
+          {steps.map((step, i) =>
+            i === activeStep || i === exitStep ? (
             <Image
               key={`tile-${i}`}
               src={step.tileImageSrc}
               alt={step.name || step.tagline}
               fill
+              quality={65}
               className={cn(
                 "object-cover transition-[opacity,transform] duration-500",
                 activeStep === i ? "opacity-100" : "opacity-0",
@@ -783,7 +788,8 @@ export default function TileScrollSection({ steps }: { steps: HeroTileStep[] }) 
               )}
               sizes={`${layout.tileWidth * 2}px`}
             />
-          ))}
+            ) : null
+          )}
         </div>
       </div>
     </div>

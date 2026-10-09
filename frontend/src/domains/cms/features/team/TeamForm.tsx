@@ -121,7 +121,9 @@ export function getTeamPatch(
   current: TeamFormValues
 ): {
   fields: Partial<TeamFields>;
-  file?: File | null;
+  file: File | null;
+  /** Existing image was removed and no replacement was chosen. */
+  removeImage: boolean;
   hasChanges: boolean;
 } {
   const prev = formValuesToFields(initial);
@@ -154,17 +156,14 @@ export function getTeamPatch(
   );
   if (orderMode && initial.type === current.type) fields.orderMode = orderMode;
 
-  let file: File | null | undefined;
-  if (current.teamImageFile) {
-    file = current.teamImageFile;
-  } else if (initial.teamImageUrl && !current.teamImageUrl) {
-    file = null;
-  }
-
+  const file = current.teamImageFile;
+  const removeImage =
+    !file && Boolean(initial.teamImageUrl) && !current.teamImageUrl;
   return {
     fields,
     file,
-    hasChanges: Object.keys(fields).length > 0 || file !== undefined,
+    removeImage,
+    hasChanges: Object.keys(fields).length > 0 || !!file || removeImage,
   };
 }
 

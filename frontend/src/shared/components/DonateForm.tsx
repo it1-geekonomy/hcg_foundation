@@ -398,7 +398,6 @@ export default function DonateSection() {
               src={donatemobileimg}
               alt="Two people holding hands"
               fill
-              priority
               sizes="100vw"
               className="object-cover object-top"
             />
@@ -419,7 +418,6 @@ export default function DonateSection() {
               src={donateBgImage}
               alt="Two people holding hands"
               fill
-              priority
               sizes="100vw"
               className="object-cover"
             />

@@ -25,6 +25,13 @@ location /api/ {
     proxy_pass http://hcg_backend;
 }
 
+# Hashed build files. A year is safe: the filename changes when the file does.
+location /_next/static/ {
+    proxy_pass http://hcg_frontend;
+    proxy_hide_header Cache-Control;
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+}
+
 location / {
     proxy_pass http://hcg_frontend;
 }

@@ -557,7 +557,6 @@ export default function ChatbotWidget() {
                 width={97}
                 height={33}
                 unoptimized
-                priority
                 className="h-7 w-auto shrink-0 2xl:h-8"
               />
               {!isEmpty ? (

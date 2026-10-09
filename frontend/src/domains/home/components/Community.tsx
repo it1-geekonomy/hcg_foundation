@@ -212,16 +212,16 @@ export default function CommunitySection() {
             src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790769497613-k9y7g-frame-653-1-.webp"
             alt={communityContent.image.alt}
             fill
+            sizes="100vw"
             className="object-cover object-top block md:hidden"
-            priority
           />
 
           <Image
             src={communityContent.image.src}
             alt={communityContent.image.alt}
             fill
+            sizes="100vw"
             className="hidden object-cover object-center md:block"
-            priority
           />
 
           <div
