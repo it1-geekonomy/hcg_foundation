@@ -356,7 +356,7 @@ export default function AwardsRecognition({
                 : "-translate-x-16 opacity-0"
             }`}
           >
-            These recognitions reflect the support of our partners, well-wishers
+            These recognitions reflect the support of our partners, well wishers
             and communities, and inspire us to continue working towards equitable
             cancer care for all.
           </Typography>

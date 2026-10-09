@@ -28,7 +28,7 @@ export const PARTICIPATE_CARDS: ParticipateCard[] = [
     iconUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790848731820-fwtme-vector-14-.webp",
     title: "Intern",
     description:
-      "Gain hands-on experience, build your skills, and work on real-world healthcare initiatives.",
+      "Gain hands-on experience, build your skills, and work on real world healthcare initiatives.",
     imageUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791449788914-5r68b-rectangle-1660-1-.webp",
   },
 ];
@@ -50,7 +50,7 @@ export const PARTICIPATE_BENEFITS: ParticipateBenefit[] = [
   {
     id: "community",
     title: "Be Part of a Community",
-    description: "Join a network of like-minded changemakers.",
+    description: "Join a network of like minded changemakers.",
     iconUrl: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790849294533-30kyj-group.webp",
   },
   {

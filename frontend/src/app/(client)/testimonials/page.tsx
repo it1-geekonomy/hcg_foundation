@@ -224,7 +224,7 @@ export default function TestimonialsPage() {
             >
               Every journey is filled with courage, compassion, and
               resilience. Explore inspiring patient stories, community
-              initiatives, and life-changing moments that reflect HCG
+              initiatives, and life changing moments that reflect HCG
               Foundation&apos;s commitment to bringing hope, healing, and
               support to those who need it most.
             </Typography>
