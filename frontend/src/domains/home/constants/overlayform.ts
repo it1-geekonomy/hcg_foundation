@@ -12,7 +12,7 @@ export const IMPACT_ITEMS: { title: DonationCategory; desc: string }[] = [
   },
   {
     title: "Awareness & Prevention",
-    desc: "Support screening camps and early-detection initiatives.",
+    desc: "Support screening camps and early detection initiatives.",
   },
   {
     title: "Psychological Support",
