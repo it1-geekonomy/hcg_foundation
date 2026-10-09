@@ -65,11 +65,11 @@
 }
 
 @utility font-poppins {
-  font-family: var(--font-poppins), 'Poppins', sans-serif;
+  font-family: var(--font-poppins, 'Poppins'), sans-serif;
 }
 
 @utility font-roboto {
-  font-family: var(--font-roboto), 'Roboto', sans-serif;
+  font-family: var(--font-roboto, 'Roboto'), sans-serif;
 }
 
 @utility font-tiempos-text {
@@ -78,11 +78,11 @@
 
 /* Tiempos (trial) has no punctuation/symbols; those glyphs come from the matching italic (lib/fonts.ts). */
 @utility font-tiempos-fine {
-  font-family: var(--font-tiempos-fine), var(--font-tiempos-fine-glyphs), Georgia, serif;
+  font-family: var(--font-tiempos-fine), var(--font-tiempos-fine-glyphs, Georgia), serif;
 }
 
 @utility font-tiempos-headline {
-  font-family: var(--font-tiempos-headline), var(--font-tiempos-headline-glyphs), Georgia, serif;
+  font-family: var(--font-tiempos-headline), var(--font-tiempos-headline-glyphs, Georgia), serif;
 }
 
 @utility font-argestadisplay {
