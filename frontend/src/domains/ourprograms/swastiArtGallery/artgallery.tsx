@@ -335,7 +335,7 @@ export default function SwasthiArtTherapySection() {
                 <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
                   {split(
                     <>
-                      • <span className="font-normal text-[#262626]">Pre-art conversation</span> — the pre-art component is crucial, especially for the first meeting between the art therapist and the patient. This allows the therapist to get to know and assess the patient
+                      • <span className="font-normal text-[#262626]">Pre-art conversation</span> : the pre-art component is crucial, especially for the first meeting between the art therapist and the patient. This allows the therapist to get to know and assess the patient
                     </>,
                     3,
                   )}
@@ -344,7 +344,7 @@ export default function SwasthiArtTherapySection() {
                 <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
                   {split(
                     <>
-                      • <span className="font-normal text-[#262626]">The creative process</span> — the second part is the actual creative process, or the making of a piece or pieces of art. The therapist may teach the patient some art techniques, but the most important thing is to simply create something...
+                      • <span className="font-normal text-[#262626]">The creative process</span> : the second part is the actual creative process, or the making of a piece or pieces of art. The therapist may teach the patient some art techniques, but the most important thing is to simply create something...
                     </>,
                     4,
                   )}
@@ -353,7 +353,7 @@ export default function SwasthiArtTherapySection() {
                 <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
                   {split(
                     <>
-                      • <span className="font-normal text-[#262626]">Post-art reflection</span> — Patient and therapist discuss the finished piece together, the patient is expected to talk about their feelings, what led them to create that art, how they felt while making the art and their thoughts post completing it.
+                      • <span className="font-normal text-[#262626]">Post-art reflection</span> : Patient and therapist discuss the finished piece together, the patient is expected to talk about their feelings, what led them to create that art, how they felt while making the art and their thoughts post completing it.
                     </>,
                     5,
                   )}
@@ -460,14 +460,14 @@ export default function SwasthiArtTherapySection() {
             <>
               <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
                 {split(
-                  "Sessions can be individual, group, or family-based allowing patients to process their experience alongside fellow patients navigating the same journey, always with the choice to share only what feels comfortable.",
+                  "Sessions can be individual, group, or family based allowing patients to process their experience alongside fellow patients navigating the same journey, always with the choice to share only what feels comfortable.",
                   0,
                 )}
               </Typography>
 
               <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
                 {split(
-                  "Together, Swasthi Gallery and Art Therapy reflect HCG Foundation's belief that cancer care extends beyond medicine. One raises the funds that make patient support possible; the other puts the healing power of art directly into patients' hands.",
+                  "Together, Swasthi Gallery and Art Therapy reflect HCG Foundation's belief that cancer care extends beyond medicine. One raises the funds that make patient support possible; the other puts the healing power of art directly into patient's hands.",
                   1,
                 )}
               </Typography>

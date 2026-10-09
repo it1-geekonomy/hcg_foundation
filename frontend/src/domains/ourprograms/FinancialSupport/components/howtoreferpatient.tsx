@@ -21,7 +21,7 @@ const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 const SPRING = { type: "spring", stiffness: 320, damping: 14 } as const;
 
 const DESC_TEXT =
-  "A clear, compassionate 9-step process ensures every eligible patient receives the support they need — quickly and with dignity.";
+  "A clear, compassionate 9-step process ensures every eligible patient receives the support they need quickly and with dignity.";
 
 /* ---------- Step card ---------- */
 function StepCard({

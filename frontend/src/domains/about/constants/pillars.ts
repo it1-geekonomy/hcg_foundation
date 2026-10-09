@@ -28,7 +28,7 @@ export const pillars: Pillar[] = [
   {
     icon: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790835737630-bdaco-fi_2163406.webp",
     title: "Counselling for Patient & Family",
-    description: " Supporting the emotional well-being of patients and families throughout the cancer journey",
+    description: " Supporting the emotional well being of patients and families throughout the cancer journey",
   },
   {
     icon: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790835767595-awnma-fi_17101398.webp",

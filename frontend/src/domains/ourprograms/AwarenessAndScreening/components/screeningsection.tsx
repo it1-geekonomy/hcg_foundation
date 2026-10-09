@@ -39,7 +39,7 @@ const MOBILE_PARA =
 const STUDENT_HEADING = "Student Outreach";
 const STUDENT_PARAS = [
   "Since 2018, HCG Foundation has conducted healthy habits campaigns for 4th, 5th, and 6th-grade students in government schools. The program includes interactive sessions on nutrition, yoga, art, HPV vaccination, and conversations with healthcare professionals, helping students understand healthy lifestyle choices, peer pressure, substance abuse, and the importance of maintaining a balanced diet.",
-  "The initiative aims to build healthy habits and awareness from an early age, empowering children with practical knowledge that can support their physical, emotional, and overall well-being.",
+  "The initiative aims to build healthy habits and awareness from an early age, empowering children with practical knowledge that can support their physical, emotional, and overall well being.",
 ];
 
 type Word = { w: string; group: number; last: boolean };

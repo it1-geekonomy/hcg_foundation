@@ -9,11 +9,11 @@ export const DEFAULT_BLOCKS: SupportGroupBlock[] = [
     paragraphs: [
       {
         label: "A sense of belonging:",
-        text: "Group members feel they are not alone. The Support Group operates like a surrogate family where members feel supported, cared for and accepted for themselves. Reduces Isolation – Groups develop a sense of community through shared feelings and experiences, and they feel connected with other members and these connections can help them to cope better with their treatments.",
+        text: "Group members feel they are not alone. The Support Group operates like a surrogate family where members feel supported, cared for and accepted for themselves. Reduces Isolation Groups develop a sense of community through shared feelings and experiences, and they feel connected with other members and these connections can help them to cope better with their treatments.",
       },
       {
         label: "Empathy:",
-        text: "People outside the support group may not understand the experiences of people who have cancer, or they may dismiss their feelings. In the group, people have experienced and understood. Feeling Safe – Inside the group many patients feel protected and safe to express their feelings. Outside the group patients will try to hide their feelings/emotions which would later put them into depression.",
+        text: "People outside the support group may not understand the experiences of people who have cancer, or they may dismiss their feelings. In the group, people have experienced and understood. Feeling Safe Inside the group many patients feel protected and safe to express their feelings. Outside the group patients will try to hide their feelings/emotions which would later put them into depression.",
       },
     ],
   },
