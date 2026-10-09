@@ -9,14 +9,14 @@ import {
   useState,
   type CSSProperties,
 } from "react";
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
+import { preload } from "react-dom";
 import { hyphenateSync } from "hyphen/en";
 import { cn } from "@/lib/utils";
 import {
   HERO_CONTENT_INSET_MULTIPLIER,
   HERO_CONTENT_TOP_FRACTION,
   HERO_NAME_ACCENT_COLOR,
-  HERO_OVERLAY_BG,
   HERO_SHORT_VIEWPORT_PX,
   getHeroTileYFraction,
   type HeroTileStep,
@@ -185,9 +185,89 @@ const MOBILE_TILE_BOTTOM_GAP_PX = 64;
 const MOBILE_TILE_PANEL_OVERLAP = 0.15;
 const MOBILE_TILE_TRANSLATE_X = `${Math.round(MOBILE_TILE_PANEL_OVERLAP * 100)}%`;
 
-/** Phones: deeper at the bottom so long copy stays readable over any photo. */
-const HERO_OVERLAY_BG_MOBILE =
-  "linear-gradient(180deg, rgba(153,115,0,0.74) 0%, rgba(122,92,0,0.86) 100%)";
+/** Phone / tablet / desktop panel width. CSS, so the first paint matches the screen and does not shift. */
+const HERO_PANEL =
+  "w-[58%] sm:w-[42%] lg:w-[38%] xl:w-[35%]";
+const HERO_PANEL_RIGHT =
+  "right-[58%] sm:right-[42%] lg:right-[38%] xl:right-[35%]";
+
+function HeroBackground({
+  desktopSrc,
+  mobileSrc,
+  active,
+  priority,
+}: {
+  desktopSrc: string;
+  mobileSrc?: string;
+  active: boolean;
+  priority: boolean;
+}) {
+  const className = cn(
+    "absolute inset-0 z-0 h-full w-full object-cover transition-opacity duration-700",
+    active ? "opacity-100" : "opacity-0"
+  );
+
+  if (!mobileSrc || mobileSrc === desktopSrc) {
+    return (
+      <Image
+        src={desktopSrc}
+        alt=""
+        fill
+        priority={priority}
+        quality={65}
+        sizes="100vw"
+        className={className}
+      />
+    );
+  }
+
+  const shared = { alt: "", fill: true as const, quality: 65, sizes: "100vw" };
+  const {
+    props: { srcSet: desktopSet },
+  } = getImageProps({ ...shared, src: desktopSrc });
+  const {
+    props: { srcSet: mobileSet, ...mobileProps },
+  } = getImageProps({ ...shared, src: mobileSrc });
+
+  if (priority) {
+    const first = (srcSet?: string) => srcSet?.split(",")[0]?.trim().split(" ")[0];
+    const mobileHref = first(mobileSet);
+    const desktopHref = first(desktopSet);
+    if (mobileHref && mobileSet) {
+      preload(mobileHref, {
+        as: "image",
+        fetchPriority: "high",
+        imageSrcSet: mobileSet,
+        imageSizes: "100vw",
+        media: "(max-width: 639px)",
+      });
+    }
+    if (desktopHref && desktopSet) {
+      preload(desktopHref, {
+        as: "image",
+        fetchPriority: "high",
+        imageSrcSet: desktopSet,
+        imageSizes: "100vw",
+        media: "(min-width: 640px)",
+      });
+    }
+  }
+
+  return (
+    <picture className="absolute inset-0 z-0 block">
+      <source media="(max-width: 639px)" srcSet={mobileSet} sizes="100vw" />
+      <source media="(min-width: 640px)" srcSet={desktopSet} sizes="100vw" />
+      <img
+        {...mobileProps}
+        alt=""
+        fetchPriority={priority ? "high" : "low"}
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        className={className}
+      />
+    </picture>
+  );
+}
 
 function isDonationOverlayOpen(): boolean {
   return typeof document !== "undefined" &&
@@ -440,7 +520,13 @@ function StoryTextBlock({
 // MAIN
 // ============================================================================
 
-export default function TileScrollSection({ steps }: { steps: HeroTileStep[] }) {
+export default function TileScrollSection({
+  steps,
+  initialIsMobile = false,
+}: {
+  steps: HeroTileStep[];
+  initialIsMobile?: boolean;
+}) {
   const stepCount = steps.length;
   const wrapperRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -455,7 +541,7 @@ export default function TileScrollSection({ steps }: { steps: HeroTileStep[] }) 
   // Same value on the server and the first client render. Reading the window here
   // made the hero HTML differ on phones and React threw away the server page.
   const [layout, setLayout] = useState<HeroResponsiveLayout>(() =>
-    getResponsiveValues(1280, 900)
+    initialIsMobile ? getResponsiveValues(390, 800) : getResponsiveValues(1280, 900)
   );
 
   const currentStepRef = useRef(0);
@@ -692,23 +778,13 @@ export default function TileScrollSection({ steps }: { steps: HeroTileStep[] }) 
         />
         {steps.map((step, i) =>
           i === activeStep || i === exitStep ? (
-          <Image
-            key={`bg-${i}`}
-            src={
-              layout.isMobile && step.mobileBackgroundSrc
-                ? step.mobileBackgroundSrc
-                : step.backgroundSrc
-            }
-            alt=""
-            fill
-            priority={i === 0}
-            quality={65}
-            sizes="100vw"
-            className={cn(
-              "absolute inset-0 z-0 object-cover transition-opacity duration-700",
-              activeStep === i ? "opacity-100" : "opacity-0"
-            )}
-          />
+            <HeroBackground
+              key={`bg-${i}`}
+              desktopSrc={step.backgroundSrc}
+              mobileSrc={step.mobileBackgroundSrc}
+              active={activeStep === i}
+              priority={i === 0}
+            />
           ) : null
         )}
 
@@ -725,11 +801,10 @@ export default function TileScrollSection({ steps }: { steps: HeroTileStep[] }) 
         </div>
 
         <div
-          className="absolute top-0 right-0 z-10 h-full"
-          style={{
-            width: layout.overlayWidth,
-            background: layout.isMobile ? HERO_OVERLAY_BG_MOBILE : HERO_OVERLAY_BG,
-          }}
+          className={cn(
+            "absolute top-0 right-0 z-10 h-full bg-[linear-gradient(180deg,rgba(153,115,0,0.74)_0%,rgba(122,92,0,0.86)_100%)] sm:bg-none sm:bg-[rgba(153,115,0,0.7)]",
+            HERO_PANEL
+          )}
         >
           {steps.map((step, i) => (
             <StoryTextBlock
@@ -747,7 +822,9 @@ export default function TileScrollSection({ steps }: { steps: HeroTileStep[] }) 
           ref={tileRef}
           className={cn(
             "absolute top-0 z-20 aspect-square will-change-transform",
-            layout.isMobile && "overflow-hidden"
+            HERO_PANEL_RIGHT,
+            "translate-x-[15%] sm:translate-x-1/2",
+            layout.isMobile ? "overflow-hidden" : "border border-white bg-white"
           )}
           style={
             layout.isMobile
@@ -756,19 +833,12 @@ export default function TileScrollSection({ steps }: { steps: HeroTileStep[] }) 
                   boxShadow: "0 12px 30px rgba(0,0,0,0.45)",
                   backgroundColor: "#2B2410",
                   transition: "transform 650ms cubic-bezier(0.22,1,0.36,1)",
-                  right: layout.overlayWidth,
-                  transform: `translateX(${MOBILE_TILE_TRANSLATE_X}) translateY(0)`,
                 }
               : {
                   width: layout.tileWidth,
                   borderWidth: layout.tileBorder,
-                  borderStyle: "solid",
-                  borderColor: "white",
-                  backgroundColor: "white",
                   boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
                   transition: "transform 600ms cubic-bezier(0.4,0,0.2,1)",
-                  right: layout.overlayWidth,
-                  transform: "translateX(50%) translateY(0)",
                 }
           }
         >

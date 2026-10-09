@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { publicHomeBannersApi } from "@/domains/cms/lib/api";
 import {
   HERO_FALLBACK_STEPS,
@@ -6,6 +7,9 @@ import {
 import TileScrollSection from "./TileScrollSection";
 
 export default async function BannerSection() {
+  const headersList = await headers();
+  const userAgent = headersList.get("user-agent") || "";
+  const initialIsMobile = /Mobile|Android|iPhone|iPod|Windows Phone/i.test(userAgent);
   let steps = HERO_FALLBACK_STEPS;
   try {
     const res = await publicHomeBannersApi.listActive();
@@ -19,5 +23,5 @@ export default async function BannerSection() {
     console.error("Failed to fetch banners", error);
   }
 
-  return <TileScrollSection steps={steps} />;
+  return <TileScrollSection steps={steps} initialIsMobile={initialIsMobile} />;
 }
