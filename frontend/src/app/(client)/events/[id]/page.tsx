@@ -9,7 +9,7 @@ import DonateForm from "@/shared/components/DonateForm";
 import ShareStory from "@/shared/components/ShareStory";
 import RelatedEvents from "@/domains/resources/components/RelatedEvents";
 import PuzzleImage from "@/shared/components/Puzzleimage";
-import { EventItem } from "@/domains/resources/constants/events";
+import type { EventItem } from "@/domains/resources/components/EventCard";
 import { isMissingContentError, publicEventsApi } from "@/domains/cms/lib/api";
 import ContentNotice, { LOAD_ERROR_MESSAGE } from "@/shared/components/ContentNotice";
 import { useDetailPageAnimations } from "@/shared/lib/detailPageAnimations";

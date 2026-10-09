@@ -5,8 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import Typography from "@/lib/Typography";
 import PaginationControls from "@/shared/components/PaginationControls";
-import EventCard from "@/domains/resources/components/EventCard";
-import { EventItem } from "@/domains/resources/constants/events";
+import EventCard, { type EventItem } from "@/domains/resources/components/EventCard";
 import { publicEventsApi } from "@/domains/cms/lib/api";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
