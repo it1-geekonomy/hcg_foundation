@@ -4,14 +4,20 @@ import { useState, useEffect } from "react";
 
 import dynamic from "next/dynamic";
 
-const IntroSequence = dynamic(
-  () => import("@/domains/home/components/IntroSequence").then((m) => m.IntroSequence),
-  { ssr: false }
-);
-const OverlayForm = dynamic(
-  () => import("@/domains/home/components/OverlayForm"),
-  { ssr: false }
-);
+const loadIntro = () =>
+  import("@/domains/home/components/IntroSequence").then((m) => m.IntroSequence);
+const loadOverlay = () => import("@/domains/home/components/OverlayForm");
+
+const IntroSequence = dynamic(loadIntro, { ssr: false });
+const OverlayForm = dynamic(loadOverlay, { ssr: false });
+
+/**
+ * Runs inline, before first paint. Returning visitors (nav action, came from details, hash links)
+ * and PageSpeed/webdriver never see the cover. Same rules as the `ready` initial state below.
+ */
+const COVER_GUARD = `try{var s=sessionStorage,h=location.hash,n=s.getItem('nav_action');
+if((n&&n!=='logo')||s.getItem('came_from_details')||/projects|events|smilestories/.test(h)||navigator.webdriver){
+var c=document.getElementById('intro-cover');if(c)c.style.display='none'}}catch(e){}`;
 
 export default function HomeClient({ children, isBot }: { children: React.ReactNode; isBot?: boolean }) {
   const [ready, setReady] = useState(() => {
@@ -24,7 +30,7 @@ export default function HomeClient({ children, isBot }: { children: React.ReactN
       if (navAction === "logo") return false;
       if (navAction) return true;
       if (cameFromDetails) return true;
-      
+
       return h.includes("projects") || h.includes("events") || h.includes("smilestories");
     }
     return false;
@@ -37,26 +43,53 @@ export default function HomeClient({ children, isBot }: { children: React.ReactN
       const h = window.location.hash;
       const navAction = sessionStorage.getItem("nav_action");
       const cameFromDetails = sessionStorage.getItem("came_from_details");
-      
+
       if (navAction === "logo") return true;
       if (navAction) return false;
       if (cameFromDetails) return false;
 
       const isReady = h.includes("projects") || h.includes("events") || h.includes("smilestories");
-      return !isReady && !h; 
+      return !isReady && !h;
     }
     return false;
   });
+
+  // The server HTML always contains the homepage (the intro/overlay are ssr:false and load later),
+  // so on a first visit the homepage used to flash until those chunks arrived. This cover sits on
+  // top from the very first paint and is removed only once the intro/overlay chunks have loaded.
+  const [coverGone, setCoverGone] = useState(false);
+
+  useEffect(() => {
+    if (ready && !showDonationOverlay) {
+      setCoverGone(true);
+      return;
+    }
+    let cancelled = false;
+    const jobs: Promise<unknown>[] = [];
+    if (!ready) jobs.push(loadIntro());
+    if (showDonationOverlay) jobs.push(loadOverlay());
+    Promise.all(jobs)
+      .catch(() => {})
+      .then(() => {
+        if (cancelled) return;
+        // two frames so the intro has painted before the cover goes away
+        requestAnimationFrame(() => requestAnimationFrame(() => setCoverGone(true)));
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const handleNavAction = () => {
       const action = sessionStorage.getItem("nav_action");
       const cameFromDetails = sessionStorage.getItem("came_from_details");
-      
+
       // Clear flags
       sessionStorage.removeItem("nav_action");
       sessionStorage.removeItem("came_from_details");
-      
+
       if (action) {
         if (action === "logo") {
           setReady(false);
@@ -70,7 +103,7 @@ export default function HomeClient({ children, isBot }: { children: React.ReactN
           setReady(true);
           setShowDonationOverlay(false);
           setTimeout(() => {
-             document.getElementById("projects")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            document.getElementById("projects")?.scrollIntoView({ behavior: "smooth", block: "start" });
           }, 100);
         }
       } else if (cameFromDetails) {
@@ -126,6 +159,20 @@ export default function HomeClient({ children, isBot }: { children: React.ReactN
   return (
     <>
       {children}
+
+      {/* Same on server and first client render, so hydration matches. Bots never get it. */}
+      {!isBot && !coverGone && (
+        <>
+          <div
+            id="intro-cover"
+            aria-hidden
+            suppressHydrationWarning
+            // Match IntroSequence's background colour so the handover is invisible.
+            className="fixed inset-0 z-[9999] bg-black"
+          />
+          <script dangerouslySetInnerHTML={{ __html: COVER_GUARD }} />
+        </>
+      )}
 
       <div suppressHydrationWarning>
         {showDonationOverlay && (

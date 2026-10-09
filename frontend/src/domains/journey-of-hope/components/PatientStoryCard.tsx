@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Calendar } from "lucide-react";
+import Link from "next/link";
 import Typography from "@/lib/Typography";
 import { DiagonalArrowIcon } from "@/shared/components/icons/ArrowIcons";
 import FlipCard from "@/shared/components/FlipCard";
@@ -32,9 +33,7 @@ export default function PatientStoryCard({
   const handleCardClick = (e: React.MouseEvent) => {
     if (onClick) {
       onClick(e);
-      if (e.defaultPrevented) return;
     }
-    router.push(detailUrl);
   };
 
   const frontContent = (
@@ -54,11 +53,7 @@ export default function PatientStoryCard({
 
       {/* 4. Bottom Info Bar: Name & Date (Left) */}
       <div
-        onClick={(e) => {
-          e.stopPropagation();
-          handleCardClick(e);
-        }}
-        className="relative z-10 h-[5.25rem] flex items-center justify-between pointer-events-auto cursor-pointer"
+        className="relative z-10 h-[5.25rem] flex items-center justify-between pointer-events-none"
       >
         {/* Left: Patient Name & Date */}
         <div className="flex flex-col text-white min-w-0 w-full">
@@ -110,10 +105,6 @@ export default function PatientStoryCard({
         {/* Read More Button Constant at Bottom Center */}
         <div className="relative z-10 w-full flex justify-center shrink-0 pt-3 border-t border-[#E0D4AE]/50 mt-2">
           <div
-            onClick={(e) => {
-              e.stopPropagation();
-              handleCardClick(e);
-            }}
             className="inline-flex items-center justify-center whitespace-nowrap h-[2rem] lg:h-[2.35rem] w-auto px-4 lg:px-5 gap-[0.45rem] rounded-[0.375rem] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
           >
             <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
@@ -127,12 +118,15 @@ export default function PatientStoryCard({
   );
 
   return (
-    <div
+    <Link
+      href={detailUrl}
       style={style}
+      onClick={handleCardClick}
       className={cn(
-        "sticky top-[var(--mobile-top)] lg:top-auto lg:relative aspect-[24.0744/30.8173] w-full max-w-[28rem] mx-auto lg:max-w-none rounded-[1.2643rem]",
+        "block sticky top-[var(--mobile-top)] lg:top-auto lg:relative aspect-[24.0744/30.8173] w-full max-w-[28rem] mx-auto lg:max-w-none rounded-[1.2643rem]",
         className
       )}
+      aria-label={`Read story of ${story.patientName}`}
     >
       <FlipCard
         className="h-full w-full rounded-[1.2643rem]"
@@ -145,6 +139,6 @@ export default function PatientStoryCard({
         front={frontContent}
         back={renderBackContent}
       />
-    </div>
+    </Link>
   );
 }

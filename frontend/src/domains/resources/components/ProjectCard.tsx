@@ -29,7 +29,6 @@ export default function ProjectCard({
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
-    router.push(detailUrl);
   };
 
   const frontContent = (
@@ -116,16 +115,22 @@ export default function ProjectCard({
   );
 
   return (
-    <FlipCard
-      className={`aspect-[4/3.5] sm:aspect-[4/3] xl:aspect-[4/3] w-full ${className}`}
-      roundedClassName="rounded-[0.375rem]"
-      isFlipped={isFlipped}
-      onFlipChange={setIsFlipped}
+    <Link 
+      href={detailUrl} 
       onClick={handleCardClick}
-      flipOnHover={true}
-      duration={0.42}
-      front={frontContent}
-      back={renderBackContent}
-    />
+      className={`block w-full aspect-[4/3.5] sm:aspect-[4/3] xl:aspect-[4/3] ${className}`}
+      aria-label={`View details for ${project.title}`}
+    >
+      <FlipCard
+        className="h-full w-full"
+        roundedClassName="rounded-[0.375rem]"
+        isFlipped={isFlipped}
+        onFlipChange={setIsFlipped}
+        flipOnHover={true}
+        duration={0.42}
+        front={frontContent}
+        back={renderBackContent}
+      />
+    </Link>
   );
 }
