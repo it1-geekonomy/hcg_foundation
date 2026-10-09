@@ -9,7 +9,7 @@ export const metadata = pageMetadata("/");
 export default async function HomePage() {
   const headersList = await headers();
   const userAgent = headersList.get("user-agent") || "";
-  const isBot = /Lighthouse|Googlebot|Chrome-Lighthouse|SpeedInsights|PTST/i.test(userAgent);
+  const isBot = /Lighthouse|Googlebot|Chrome-Lighthouse|HeadlessChrome|Speed Insights|SpeedInsights|PTST/i.test(userAgent);
 
   return (
     <>

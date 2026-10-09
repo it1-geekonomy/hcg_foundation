@@ -3,8 +3,7 @@ import type { ReactNode } from "react";
 import Navbar from "@/shared/components/navbar/navbar";
 import Footer from "@/shared/components/footer/footer";
 import DonateButton from "@/shared/components/DonateButton";
-import dynamic from "next/dynamic";
-const ChatbotWidget = dynamic(() => import("@/shared/components/ChatbotWidget"));
+import DeferredChatbot from "@/shared/components/DeferredChatbot";
 
 interface ClientLayoutProps {
   children: ReactNode;
@@ -20,7 +19,7 @@ export default function ClientLayout({
       <main className="flex-1">{children}</main>
 
       <DonateButton />
-      <ChatbotWidget />
+      <DeferredChatbot />
 
       <Footer />
     </div>

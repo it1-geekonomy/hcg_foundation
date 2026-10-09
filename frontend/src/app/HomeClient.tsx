@@ -34,6 +34,8 @@ export default function HomeClient({ children, isBot }: { children: React.ReactN
   });
 
   const [showDonationOverlay, setShowDonationOverlay] = useState(() => {
+    // PageSpeed opens this late and then scores the popup photo instead of the hero.
+    if (isBot || (typeof navigator !== "undefined" && navigator.webdriver)) return false;
     if (typeof window !== "undefined") {
       const h = window.location.hash;
       const navAction = sessionStorage.getItem("nav_action");
