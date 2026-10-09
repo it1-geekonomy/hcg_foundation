@@ -11,6 +11,7 @@ import {
 } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Calendar } from "lucide-react";
 import Typography from "@/lib/Typography";
 import {
@@ -166,12 +167,12 @@ const StoryCard = memo(function StoryCard({
   isFlipped?: boolean;
   onFlip?: (index: number, flipped: boolean) => void;
   /** Omit to make the card non-navigating (no Read More, no click-through). */
-  onOpen?: (link: string) => void;
+  onOpen?: (link: string, e?: React.MouseEvent) => void;
 }) {
   const [internalFlipped, setInternalFlipped] = useState(false);
   const currentFlipped = isFlipped !== undefined ? isFlipped : internalFlipped;
   const onFlipChange = (f: boolean) => onFlip?.(index, f);
-  const onCardClick = (_e?: React.MouseEvent) => onOpen?.(link);
+  const onCardClick = (e?: React.MouseEvent) => onOpen?.(link, e);
 
   const handleFlipChange = (f: boolean) => {
     if (isFlipped === undefined) setInternalFlipped(f);
@@ -251,11 +252,7 @@ const StoryCard = memo(function StoryCard({
         {onOpen ? (
           <div className="relative z-10 w-full flex justify-center shrink-0 pt-3 border-t border-[#E0D4AE]/50 mt-2">
             <div
-              onClick={(e) => {
-                e.stopPropagation();
-                onCardClick?.(e);
-              }}
-              className="inline-flex items-center justify-center whitespace-nowrap h-[2rem] lg:h-[2.35rem] w-auto px-4 lg:px-5 gap-[0.45rem] rounded-[0.375rem] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
+              className="inline-flex items-center justify-center whitespace-nowrap h-[2rem] lg:h-[2.35rem] w-auto px-4 lg:px-5 gap-[0.45rem] rounded-[0.375rem] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer pointer-events-none"
             >
               <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
                 Read More
@@ -268,9 +265,34 @@ const StoryCard = memo(function StoryCard({
     </MirrorReveal>
   );
 
+  if (!onOpen) {
+    return (
+      <div className="relative w-full flex-1">
+        <StoryCardSizer />
+        <div className="absolute inset-0">
+          <FlipCard
+            className="h-full w-full rounded-[1.2643rem]"
+            roundedClassName="rounded-[1.2643rem]"
+            isFlipped={currentFlipped}
+            onFlipChange={handleFlipChange}
+            flipOnHover={true}
+            duration={0.42}
+            front={frontContent}
+            back={renderBackContent}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     // flex-1 = fill the (stretched) carousel item; the sizer gives the minimum height
-    <div className="relative w-full flex-1">
+    <Link 
+      href={link}
+      onClick={onCardClick}
+      className="relative w-full flex-1 block"
+      aria-label={`Read story of ${name}`}
+    >
       <StoryCardSizer />
 
       {/* the real flip card fills whatever height the row ends up with */}
@@ -283,12 +305,6 @@ const StoryCard = memo(function StoryCard({
           onClick={(e) => {
             // On desktop mouse, clicking the card navigates.
             // On mobile touch, clicking the card flips or taps Read More.
-            if (
-              typeof window !== "undefined" &&
-              window.matchMedia("(hover: hover)").matches
-            ) {
-              onCardClick?.(e);
-            }
           }}
           flipOnHover={true}
           duration={0.42}
@@ -296,7 +312,7 @@ const StoryCard = memo(function StoryCard({
           back={renderBackContent}
         />
       </div>
-    </div>
+    </Link>
   );
 });
 
@@ -740,12 +756,14 @@ function SmileStoriesCarousel({
   };
 
   const handleCardClick = useCallback(
-    (link: string) => {
-      if (didDragRef.current) return; // it was a drag, not a click - don't navigate
+    (link: string, e?: React.MouseEvent) => {
+      if (didDragRef.current) {
+        e?.preventDefault();
+        return; // it was a drag, not a click - don't navigate
+      }
       saveOffset();
-      router.push(link);
     },
-    [router, saveOffset],
+    [saveOffset],
   );
 
   const handleFlip = useCallback(

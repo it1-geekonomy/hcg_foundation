@@ -15,6 +15,7 @@ import {
   HERO_CONTENT_INSET_MULTIPLIER,
   HERO_CONTENT_TOP_FRACTION,
   HERO_NAME_ACCENT_COLOR,
+  HERO_OVERLAY_BG,
   HERO_SHORT_VIEWPORT_PX,
   getHeroTileYFraction,
   type HeroTileStep,
@@ -183,11 +184,17 @@ const MOBILE_TILE_BOTTOM_GAP_PX = 64;
 const MOBILE_TILE_PANEL_OVERLAP = 0.15;
 const MOBILE_TILE_TRANSLATE_X = `${Math.round(MOBILE_TILE_PANEL_OVERLAP * 100)}%`;
 
-/** Phone / tablet / desktop panel width. CSS, so the first paint matches the screen and does not shift. */
-const HERO_PANEL =
-  "w-[58%] sm:w-[42%] lg:w-[38%] xl:w-[35%]";
-const HERO_PANEL_RIGHT =
-  "right-[58%] sm:right-[42%] lg:right-[38%] xl:right-[35%]";
+/** Phones: deeper at the bottom so long copy stays readable over any photo. */
+const HERO_OVERLAY_BG_MOBILE =
+  "linear-gradient(180deg, rgba(153,115,0,0.74) 0%, rgba(122,92,0,0.86) 100%)";
+
+/**
+ * First-paint panel width / tile edge, in CSS only, so the server HTML already matches the screen.
+ * Once the layout has been measured (`synced`), the exact inline values from getResponsiveValues
+ * take over, so the final position is identical to the original (including the 1024–1279 interpolation).
+ */
+const HERO_PANEL = "w-[58%] sm:w-[42%] lg:w-[38%] xl:w-[35%]";
+const HERO_PANEL_RIGHT = "right-[58%] sm:right-[42%] lg:right-[38%] xl:right-[35%]";
 
 function HeroBackground({
   desktopSrc,
@@ -529,11 +536,13 @@ export default function TileScrollSection({
   const [activeStep, setActiveStep] = useState(0);
   const [exitStep, setExitStep] = useState<number | null>(null);
   const [direction, setDirection] = useState<1 | -1>(1);
-  // Same value on the server and the first client render. Reading the window here
-  // made the hero HTML differ on phones and React threw away the server page.
+  // Same value on the server and the first client render (hydration-safe).
   const [layout, setLayout] = useState<HeroResponsiveLayout>(() =>
     initialIsMobile ? getResponsiveValues(390, 800) : getResponsiveValues(1280, 900)
   );
+  // False on the server + hydration render: CSS classes position the panel/tile.
+  // True after the first real measurement: exact inline values take over (same as the original).
+  const [synced, setSynced] = useState(false);
 
   const currentStepRef = useRef(0);
   const isAnimatingRef = useRef(false);
@@ -718,6 +727,7 @@ export default function TileScrollSection({
 
   useLayoutEffect(() => {
     syncLayout();
+    setSynced(true);
     moveTile(0);
     applyStep(0, true);
   }, [moveTile, applyStep, syncLayout]);
@@ -796,6 +806,14 @@ export default function TileScrollSection({
             "absolute top-0 right-0 z-10 h-full bg-[linear-gradient(180deg,rgba(153,115,0,0.74)_0%,rgba(122,92,0,0.86)_100%)] sm:bg-none sm:bg-[rgba(153,115,0,0.7)]",
             HERO_PANEL
           )}
+          style={
+            synced
+              ? {
+                  width: layout.overlayWidth,
+                  background: layout.isMobile ? HERO_OVERLAY_BG_MOBILE : HERO_OVERLAY_BG,
+                }
+              : undefined
+          }
         >
           {steps.map((step, i) =>
             i === activeStep || i === exitStep ? (
@@ -811,13 +829,15 @@ export default function TileScrollSection({
           )}
         </div>
 
+        {/* Tile: transform is owned by moveTile() (inline), exactly like the original.
+            No Tailwind translate-* classes here: on Tailwind v4 they use the separate `translate`
+            property and would stack with the inline transform, shifting the tile twice. */}
         <div
           ref={tileRef}
           className={cn(
             "absolute top-0 z-20 aspect-square will-change-transform",
             HERO_PANEL_RIGHT,
-            "translate-x-[15%] sm:translate-x-1/2",
-            layout.isMobile ? "overflow-hidden" : "border border-white bg-white"
+            layout.isMobile && "overflow-hidden"
           )}
           style={
             layout.isMobile
@@ -826,30 +846,37 @@ export default function TileScrollSection({
                   boxShadow: "0 12px 30px rgba(0,0,0,0.45)",
                   backgroundColor: "#2B2410",
                   transition: "transform 650ms cubic-bezier(0.22,1,0.36,1)",
+                  ...(synced ? { right: layout.overlayWidth } : {}),
+                  transform: `translateX(${MOBILE_TILE_TRANSLATE_X}) translateY(0)`,
                 }
               : {
                   width: layout.tileWidth,
                   borderWidth: layout.tileBorder,
+                  borderStyle: "solid",
+                  borderColor: "white",
+                  backgroundColor: "white",
                   boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
                   transition: "transform 600ms cubic-bezier(0.4,0,0.2,1)",
+                  ...(synced ? { right: layout.overlayWidth } : {}),
+                  transform: "translateX(50%) translateY(0)",
                 }
           }
         >
           {steps.map((step, i) =>
             i === activeStep || i === exitStep ? (
-            <Image
-              key={`tile-${i}`}
-              src={step.tileImageSrc}
-              alt={step.name || step.tagline}
-              fill
-              quality={65}
-              className={cn(
-                "object-cover transition-[opacity,transform] duration-500",
-                activeStep === i ? "opacity-100" : "opacity-0",
-                layout.isMobile && (activeStep === i ? "scale-100" : "scale-110")
-              )}
-              sizes={`${layout.tileWidth * 2}px`}
-            />
+              <Image
+                key={`tile-${i}`}
+                src={step.tileImageSrc}
+                alt={step.name || step.tagline}
+                fill
+                quality={65}
+                className={cn(
+                  "object-cover transition-[opacity,transform] duration-500",
+                  activeStep === i ? "opacity-100" : "opacity-0",
+                  layout.isMobile && (activeStep === i ? "scale-100" : "scale-110")
+                )}
+                sizes={`${layout.tileWidth * 2}px`}
+              />
             ) : null
           )}
         </div>
