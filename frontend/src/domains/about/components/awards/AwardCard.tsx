@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import Typography from "@/lib/Typography";
 import type { AwardItem } from "@/domains/about/constants/awards";
-import { ImageUnavailableNotice } from "../shared/ImageUnavailableNotice";
+
 import { AwardLens, useAwardLens } from "./awardLens";
 
 export function AwardCard({
@@ -83,9 +83,7 @@ export function AwardCard({
               innerRef={innerRef}
             />
           </>
-        ) : (
-          <ImageUnavailableNotice />
-        )}
+        ) : null}
       </div>
 
       <div ref={textRef} className="min-w-0 w-full">

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { getImageProps } from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import Typography from "@/lib/Typography";
@@ -44,20 +45,38 @@ export default function EventCard({
     router.push(detailUrl);
   };
 
+  const validImageUrl = event.imageUrl && event.imageUrl !== "null" ? event.imageUrl : null;
+  const validMobileUrl = event.mobileImageUrl && event.mobileImageUrl !== "null" ? event.mobileImageUrl : null;
+
+  const desktopProps = validImageUrl
+    ? getImageProps({
+        src: validImageUrl,
+        alt: event.title,
+        fill: true,
+        sizes: "(min-width: 768px) 500px, 100vw",
+        className: "object-cover transition duration-700 group-hover:scale-105",
+      }).props
+    : null;
+
+  const mobileProps = validMobileUrl
+    ? getImageProps({
+        src: validMobileUrl,
+        alt: event.title,
+        fill: true,
+        sizes: "100vw",
+        className: "object-cover transition duration-700 group-hover:scale-105",
+      }).props
+    : null;
+
   const frontContent = (
     <div className="relative h-full w-full overflow-hidden rounded-[6px] bg-[#EFEAD8] shadow-xs transition duration-300">
-      {event.imageUrl ? (
+      {validImageUrl && desktopProps ? (
         <>
           <picture className="h-full w-full block">
-            {event.mobileImageUrl && (
-              <source media="(max-width: 767px)" srcSet={event.mobileImageUrl} />
+            {event.mobileImageUrl && mobileProps && (
+              <source media="(max-width: 767px)" srcSet={mobileProps.srcSet} />
             )}
-            <img
-              src={event.imageUrl}
-              alt={event.title}
-              className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-              loading="lazy"
-            />
+            <img {...desktopProps} />
           </picture>
 
           {/* Linear Gradient Overlay */}
@@ -81,9 +100,8 @@ export default function EventCard({
             as={headingTag}
             title={event.title}
             className="font-argestadisplay font-normal text-white block w-full !leading-[1.15]"
-          >
-            {event.title}
-          </Typography>
+            dangerouslySetInnerHTML={{ __html: event.title }}
+          />
         </div>
         {event.date && event.date.trim() ? (
           <div className="flex items-center gap-[0.35rem] sm:gap-[0.5rem] xl:gap-[0.7rem] min-w-0 text-left pt-1">
@@ -117,9 +135,8 @@ export default function EventCard({
                   variant="body-2"
                   as="p"
                   className="font-manrope leading-relaxed font-normal text-[#0D2838] text-left"
-                >
-                  {paragraph}
-                </Typography>
+                  dangerouslySetInnerHTML={{ __html: paragraph }}
+                />
               ))
           ) : null}
         </div>

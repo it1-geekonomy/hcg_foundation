@@ -21,7 +21,9 @@ export type AnnualReportFormValues = {
   reportYear: string;
   status: ContentStatus;
   bannerFile: File | null;
+  bannerUrl: string | null;
   reportFile: File | null;
+  reportFileUrl: string | null;
 };
 
 export const emptyAnnualReportForm = (): AnnualReportFormValues => ({
@@ -31,7 +33,9 @@ export const emptyAnnualReportForm = (): AnnualReportFormValues => ({
   reportYear: "",
   status: "draft",
   bannerFile: null,
+  bannerUrl: null,
   reportFile: null,
+  reportFileUrl: null,
 });
 
 export function slugifyTitle(title: string) {
@@ -53,7 +57,9 @@ export function annualReportToFormValues(
     reportYear: report.reportYear ?? "",
     status: report.status ?? "draft",
     bannerFile: null,
+    bannerUrl: report.annualReportBanner ?? null,
     reportFile: null,
+    reportFileUrl: report.annualReportFile ?? null,
   };
 }
 
@@ -98,8 +104,8 @@ export default function AnnualReportForm({
   slugLocked,
   onSlugManualEdit,
 }: AnnualReportFormProps) {
-  const bannerUrl = previewUrl(existingBannerUrl);
-  const fileUrl = previewUrl(existingFileUrl);
+  const bannerUrl = previewUrl(value.bannerUrl);
+  const fileUrl = previewUrl(value.reportFileUrl);
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-3xl space-y-5">
@@ -173,10 +179,11 @@ export default function AnnualReportForm({
               file: value.bannerFile,
               url: bannerUrl,
             }}
-            onChange={({ file }) =>
+            onChange={({ file, url }) =>
               onChange({
                 ...value,
                 bannerFile: file,
+                bannerUrl: url,
               })
             }
             requiredSize={ANNUAL_REPORT_BANNER_SIZE}
@@ -200,6 +207,14 @@ export default function AnnualReportForm({
               >
                 Open on CDN
               </a>
+              {" · "}
+              <button
+                type="button"
+                className="font-medium text-red-600 hover:underline"
+                onClick={() => onChange({ ...value, reportFile: null, reportFileUrl: null })}
+              >
+                Remove
+              </button>
             </Typography>
           ) : null}
           <Input
@@ -210,6 +225,7 @@ export default function AnnualReportForm({
               onChange({
                 ...value,
                 reportFile: e.target.files?.[0] ?? null,
+                reportFileUrl: null,
               })
             }
           />

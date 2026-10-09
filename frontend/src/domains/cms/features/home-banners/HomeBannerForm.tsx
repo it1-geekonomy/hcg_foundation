@@ -94,9 +94,9 @@ export function getHomeBannerPatch(
 ): {
   fields: UpdateHomeBannerPayload;
   files: {
-    bannerImage: File | null;
-    mobileBannerImage: File | null;
-    profileImage: File | null;
+    bannerImage?: File | null;
+    mobileBannerImage?: File | null;
+    profileImage?: File | null;
   };
   hasChanges: boolean;
 } {
@@ -121,20 +121,38 @@ export function getHomeBannerPatch(
   if (orderMode) fields.orderMode = orderMode;
   if (prev.isActive !== next.isActive) fields.isActive = next.isActive;
 
-  const files = {
-    bannerImage: current.bannerImageFile,
-    mobileBannerImage: current.mobileBannerImageFile,
-    profileImage: current.profileImageFile,
-  };
+  const files: {
+    bannerImage?: File | null;
+    mobileBannerImage?: File | null;
+    profileImage?: File | null;
+  } = {};
+
+  if (current.bannerImageFile) {
+    files.bannerImage = current.bannerImageFile;
+  } else if (initial.bannerImageUrl && !current.bannerImageUrl) {
+    files.bannerImage = null;
+  }
+
+  if (current.mobileBannerImageFile) {
+    files.mobileBannerImage = current.mobileBannerImageFile;
+  } else if (initial.mobileBannerImageUrl && !current.mobileBannerImageUrl) {
+    files.mobileBannerImage = null;
+  }
+
+  if (current.profileImageFile) {
+    files.profileImage = current.profileImageFile;
+  } else if (initial.profileImageUrl && !current.profileImageUrl) {
+    files.profileImage = null;
+  }
 
   return {
     fields,
     files,
     hasChanges:
       Object.keys(fields).length > 0 ||
-      !!files.bannerImage ||
-      !!files.mobileBannerImage ||
-      !!files.profileImage,
+      files.bannerImage !== undefined ||
+      files.mobileBannerImage !== undefined ||
+      files.profileImage !== undefined,
   };
 }
 

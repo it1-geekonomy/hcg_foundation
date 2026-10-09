@@ -153,8 +153,8 @@ export function getEventPatch(
 ): {
   fields: Partial<EventFields>;
   files: {
-    eventBanner: File | null;
-    eventMobileBanner: File | null;
+    eventBanner?: File | null;
+    eventMobileBanner?: File | null;
   };
   hasChanges: boolean;
 } {
@@ -186,18 +186,30 @@ export function getEventPatch(
     fields[key] = (after === undefined ? "" : after) as never;
   }
 
-  const files = {
-    eventBanner: current.eventBannerFile,
-    eventMobileBanner: current.eventMobileBannerFile,
-  };
+  const files: {
+    eventBanner?: File | null;
+    eventMobileBanner?: File | null;
+  } = {};
+
+  if (current.eventBannerFile) {
+    files.eventBanner = current.eventBannerFile;
+  } else if (initial.eventBannerUrl && !current.eventBannerUrl) {
+    files.eventBanner = null; // Explicitly removed
+  }
+
+  if (current.eventMobileBannerFile) {
+    files.eventMobileBanner = current.eventMobileBannerFile;
+  } else if (initial.eventMobileBannerUrl && !current.eventMobileBannerUrl) {
+    files.eventMobileBanner = null; // Explicitly removed
+  }
 
   return {
     fields,
     files,
     hasChanges:
       Object.keys(fields).length > 0 ||
-      !!files.eventBanner ||
-      !!files.eventMobileBanner,
+      files.eventBanner !== undefined ||
+      files.eventMobileBanner !== undefined,
   };
 }
 
