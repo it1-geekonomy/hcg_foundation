@@ -1,31 +1,21 @@
 import localFont from "next/font/local";
-import { Manrope, Newsreader, Poppins, Roboto } from "next/font/google";
-
-/** Poppins — brand logotype (FOUNDATION). */
-export const poppins = Poppins({
-	subsets: ["latin"],
-	weight: ["600"],
-	variable: "--font-poppins",
-	display: "swap",
-});
-
-/** Roboto — brand tagline (Lasting Inspiration). */
-export const roboto = Roboto({
-	subsets: ["latin"],
-	weight: ["400"],
-	variable: "--font-roboto",
-	display: "swap",
-});
 
 /**
- * Manrope — interface and body text. Served as woff2 (~20KB a weight) instead of the
- * local TTF files (~95KB each), which were all preloaded and delayed the hero image.
+ * Manrope — interface and body text. Kept local so Docker/Turbopack builds do not depend on
+ * next/font/google's generated fetch modules.
  */
-export const manrope = Manrope({
-	subsets: ["latin"],
-	weight: ["200", "300", "400", "500", "600", "700"],
+export const manrope = localFont({
+	src: [
+		{ path: "../app/Fonts/Manrope-ExtraLight.ttf", weight: "200", style: "normal" },
+		{ path: "../app/Fonts/Manrope-Light.ttf", weight: "300", style: "normal" },
+		{ path: "../app/Fonts/Manrope-Regular.ttf", weight: "400", style: "normal" },
+		{ path: "../app/Fonts/Manrope-Medium.ttf", weight: "500", style: "normal" },
+		{ path: "../app/Fonts/Manrope-SemiBold.ttf", weight: "600", style: "normal" },
+		{ path: "../app/Fonts/Manrope-Bold.ttf", weight: "700", style: "normal" },
+	],
 	variable: "--font-manrope",
 	display: "swap",
+	preload: false,
 });
 
 /*
@@ -52,28 +42,6 @@ export const tiemposHeadline = localFont({
 	adjustFontFallback: false,
 });
 
-/** Glyphs missing from Tiempos Fine (medium italic); only downloaded when such a glyph is shown. */
-export const tiemposFineGlyphs = Newsreader({
-	subsets: ["latin"],
-	weight: ["500"],
-	style: ["italic"],
-	variable: "--font-tiempos-fine-glyphs",
-	display: "swap",
-	preload: false,
-	adjustFontFallback: false,
-});
-
-/** Glyphs missing from Tiempos Headline (light italic); only downloaded when such a glyph is shown. */
-export const tiemposHeadlineGlyphs = Newsreader({
-	subsets: ["latin"],
-	weight: ["300"],
-	style: ["italic"],
-	variable: "--font-tiempos-headline-glyphs",
-	display: "swap",
-	preload: false,
-	adjustFontFallback: false,
-});
-
 /** Argesta Display — regular display text. */
 export const argestaDisplay = localFont({
 	src: [{ path: "../app/Fonts/argestadisplay-regular.otf", weight: "400", style: "normal" }],
@@ -84,12 +52,8 @@ export const argestaDisplay = localFont({
 /** Apply on <html> to register all local font variables. */
 export const fontVariableClassNames = [
 	manrope.variable,
-	poppins.variable,
-	roboto.variable,
 	tiemposFine.variable,
 	tiemposHeadline.variable,
-	tiemposFineGlyphs.variable,
-	tiemposHeadlineGlyphs.variable,
 	argestaDisplay.variable,
 ].join(" ");
 
