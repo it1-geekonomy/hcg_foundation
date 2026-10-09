@@ -99,7 +99,10 @@ export default function SwasthiGallerySection() {
     scrollToIndex(el, currentIndex(el) + direction);
   };
 
+  // Mouse-only drag. Touch and pen use the browser's native horizontal scroll
+  // (with scroll-snap), which is what makes swiping work on iPhone.
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== "mouse") return;
     if (window.innerWidth >= 1024) return;
     const el = scrollerRef.current;
     if (!el) return;
@@ -165,6 +168,7 @@ export default function SwasthiGallerySection() {
           </button>
 
           {/* Below lg: one row, same column widths, leftover images scroll.
+              Touch swipe is native (scroll-snap); mouse drag is custom.
               lg and up: the original wrapping grid. */}
           <div
             ref={scrollerRef}
@@ -173,8 +177,10 @@ export default function SwasthiGallerySection() {
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             onPointerCancel={onPointerUp}
-            className={`min-w-0 flex-1 touch-pan-y overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:overflow-visible ${
-              grabbing ? "cursor-grabbing" : "cursor-grab lg:cursor-auto"
+            className={`min-w-0 flex-1 overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:overflow-visible ${
+              grabbing
+                ? "cursor-grabbing snap-none"
+                : "cursor-grab snap-x snap-mandatory lg:cursor-auto lg:snap-none"
             }`}
           >
             <div className="flex w-max gap-3 sm:gap-4 lg:grid lg:w-full lg:grid-cols-5 lg:gap-5">
@@ -184,7 +190,7 @@ export default function SwasthiGallerySection() {
                   data-tile
                   data-detail-anim="slide"
                   data-detail-anim-delay={(index % 5) * 80}
-                  className="w-[var(--gallery-tile)] shrink-0 lg:w-auto"
+                  className="w-[var(--gallery-tile)] shrink-0 snap-start snap-always lg:w-auto"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={img.src} alt={img.alt} loading="lazy" draggable={false} className={TILE} />
