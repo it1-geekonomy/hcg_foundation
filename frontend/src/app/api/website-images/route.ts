@@ -28,6 +28,10 @@ const ALLOWED_TYPES: Record<string, string> = {
 // Must stay within nginx client_max_body_size (100m) in production
 const MAX_FILE_BYTES = 100 * 1024 * 1024;
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Unexpected error";
+}
+
 export async function GET() {
   try {
     const objects: { key: string | undefined; url: string; size: number }[] = [];
@@ -56,8 +60,8 @@ export async function GET() {
     }
 
     return NextResponse.json(objects);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -94,6 +98,7 @@ export async function POST(req: NextRequest) {
             Key: key,
             Body: buffer,
             ContentType: contentType,
+            CacheControl: "public, max-age=31536000, immutable",
           })
         );
 
@@ -107,8 +112,8 @@ export async function POST(req: NextRequest) {
     );
 
     return NextResponse.json({ uploaded });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -142,7 +147,7 @@ export async function DELETE(req: NextRequest) {
     );
     
     return NextResponse.json({ success: true, deletedCount: objectsToDelete.length });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
