@@ -42,7 +42,6 @@ export default function EventCard({
       sessionStorage.setItem("events_page_scroll", String(window.scrollY));
       sessionStorage.setItem("came_from_details_type", "events_listing");
     }
-    router.push(detailUrl);
   };
 
   const validImageUrl = event.imageUrl && event.imageUrl !== "null" ? event.imageUrl : null;
@@ -166,21 +165,22 @@ export default function EventCard({
   );
 
   return (
-    <FlipCard
-      className={`aspect-[4/3.5] sm:aspect-[16/11] xl:aspect-[16/11] w-full max-w-[38rem] mx-auto ${className}`}
-      roundedClassName="rounded-[0.375rem]"
-      isFlipped={isFlipped}
-      onFlipChange={setIsFlipped}
-      onClick={() => {
-        // Only navigate if clicking on front face (when not flipped)
-        if (!isFlipped) {
-          handleCardClick();
-        }
-      }}
-      flipOnHover={true}
-      duration={0.42}
-      front={frontContent}
-      back={renderBackContent}
-    />
+    <Link 
+      href={detailUrl} 
+      onClick={handleCardClick}
+      className={`block w-full max-w-[38rem] mx-auto aspect-[4/3.5] sm:aspect-[16/11] xl:aspect-[16/11] ${className}`}
+      aria-label={`View details for ${event.title}`}
+    >
+      <FlipCard
+        className="h-full w-full"
+        roundedClassName="rounded-[0.375rem]"
+        isFlipped={isFlipped}
+        onFlipChange={setIsFlipped}
+        flipOnHover={true}
+        duration={0.42}
+        front={frontContent}
+        back={renderBackContent}
+      />
+    </Link>
   );
 }
