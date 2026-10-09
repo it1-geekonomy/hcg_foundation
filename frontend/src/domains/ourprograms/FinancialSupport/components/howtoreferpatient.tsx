@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  Fragment,
   useRef,
   useState,
   type ReactNode,
@@ -40,7 +41,7 @@ function StepCard({
 
   return (
     <motion.div
-      className="group relative h-full rounded-xl border border-[#FFECB3] bg-[#FFFAEC] p-4 transition-colors duration-300 ease-out hover:border-[#FCCC2D] hover:bg-[#FFE39D] sm:p-5"
+      className="group relative min-w-0 self-stretch rounded-xl border border-[#FFECB3] bg-[#FFFAEC] p-4 transition-colors duration-300 ease-out hover:border-[#FCCC2D] hover:bg-[#FFE39D] sm:p-5"
       initial={
         skip
           ? false
@@ -349,6 +350,10 @@ export default function HowToRefer({ className = "" }: HowToReferProps) {
   useLayoutEffect(() => {
     measureLines();
     const t = setTimeout(measureLines, 100); // catch late font loads
+    // Re-measure once web fonts are ready (Safari/macOS can load them later).
+    if (typeof document !== "undefined" && document.fonts?.ready) {
+      document.fonts.ready.then(measureLines).catch(() => {});
+    }
     window.addEventListener("resize", measureLines);
     return () => {
       clearTimeout(t);
@@ -404,7 +409,14 @@ export default function HowToRefer({ className = "" }: HowToReferProps) {
   return (
     <section
       ref={sectionRef}
-      className={`w-full overflow-x-hidden bg-[#FFFCF2] px-8 py-10 sm:px-20 md:px-6 lg:px-6 lg:py-20 xl:px-6 2xl:px-40 ${className}`}
+      /*
+        antialiased + text-size-adjust: macOS renders text with sub-pixel
+        smoothing by default, which makes light-weight fonts slightly wider and
+        bolder than on Windows. That makes the card descriptions wrap onto an
+        extra line, so the cards (and their whole grid row) grow taller.
+        `antialiased` only affects macOS, so other platforms are unchanged.
+      */
+      className={`w-full overflow-x-hidden bg-[#FFFCF2] px-8 py-10 antialiased [-webkit-text-size-adjust:100%] [text-size-adjust:100%] sm:px-20 md:px-6 lg:px-6 lg:py-20 xl:px-6 2xl:px-40 ${className}`}
     >
       {/* Heading: blur reveal */}
       <div ref={headingRef}>
@@ -553,7 +565,7 @@ export default function HowToRefer({ className = "" }: HowToReferProps) {
                 const isLastInRow = i === 2;
 
                 return (
-                  <div key={step.id} className="contents">
+                  <Fragment key={step.id}>
                     <StepCard
                       step={step}
                       animationIndex={(rowStart + i) * 2}
@@ -567,7 +579,7 @@ export default function HowToRefer({ className = "" }: HowToReferProps) {
                         sectionVisible={sectionVisible}
                       />
                     )}
-                  </div>
+                  </Fragment>
                 );
               })}
           </div>
