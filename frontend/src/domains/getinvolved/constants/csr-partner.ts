@@ -12,7 +12,7 @@ export const CSR_PARTNER_CARDS: CsrPartnerCard[] = [
     id: "fund-a-program",
     title: "Fund a Program",
     description:
-      "HCG Foundation runs cancer patient aid, early-detection screening camps, Equipment & Mobile clinic Support and HPV vaccination drives through HCG's pan-India hospital network. You can adopt one or more of our programs that fit your CSR needs in terms of geographical location and area of intervention. HCG Foundation will be responsible for monitoring the program, providing clinical direction and medical expertise through our hospital partners, and sending quarterly impact reports.",
+      "HCG Foundation runs cancer patient aid, early-detection screening camps, Equipment & Mobile clinic Support and HPV vaccination drives through HCG's pan India hospital network. You can adopt one or more of our programs that fit your CSR needs in terms of geographical location and area of intervention. HCG Foundation will be responsible for monitoring the program, providing clinical direction and medical expertise through our hospital partners, and sending quarterly impact reports.",
     imageUrl: "/Get Involved/CSR Partner/Fund a Program.png",
   },
   {

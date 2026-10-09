@@ -333,7 +333,7 @@ export default function GrantsAndPhilanthropyPage() {
           <div className="w-full md:col-span-6 lg:col-span-5 flex justify-start md:justify-end">
             <div data-anim="top-desc" className="w-full md:max-w-[35.5rem] text-left">
               <Typography variant="body-10" as="p" className="font-argestadisplay font-normal text-[#596D79]">
-                HCG Foundation welcomes partnerships with grant-making foundations, trusts, and philanthropic organizations aligned with our mission of equitable cancer care.
+                HCG Foundation welcomes partnerships with grant making foundations, trusts, and philanthropic organizations aligned with our mission of equitable cancer care.
               </Typography>
             </div>
           </div>
