@@ -123,7 +123,8 @@ export function PersonCard({
 
   const resolvedTopOffsetClass = topOffsetClass ?? DEFAULT_CARD_TOP_OFFSET_CLASS;
 
-  const currentDuration = flipped ? 0.42 : 1.0;
+  // A card that just left the centre un-flips instantly; a 1s 3D rotation while it slides away wobbles on iOS.
+  const currentDuration = !flipEnabled ? 0 : flipped ? 0.42 : 1.0;
   const currentEase: [number, number, number, number] = flipped
     ? [0.25, 1, 0.5, 1]
     : [0.4, 0.0, 0.2, 1];
