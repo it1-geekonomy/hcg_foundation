@@ -8,7 +8,18 @@ import Typography from "@/lib/Typography";
 import { DiagonalArrowIcon } from "@/shared/components/icons/ArrowIcons";
 import FlipCard from "@/shared/components/FlipCard";
 import MirrorReveal from "@/shared/components/MirrorReveal";
-import type { EventItem } from "@/domains/resources/constants/events";
+export interface EventItem {
+  id: string;
+  slug: string;
+  title: string;
+  date: string;
+  category: "Celebration" | "Community Event" | "Wellness" | "Awareness";
+  summary: string;
+  fullStory: string;
+  imageUrl: string;
+  mobileImageUrl?: string;
+  location?: string;
+}
 
 interface EventCardProps {
   event: EventItem;

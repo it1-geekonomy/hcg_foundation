@@ -7,8 +7,7 @@ import { cmsApi } from "@/domains/cms/lib/api";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import type { CmsEvent } from "@/domains/cms/lib/types";
-import EventCard from "@/domains/resources/components/EventCard";
-import type { EventItem } from "@/domains/resources/constants/events";
+import EventCard, { type EventItem } from "@/domains/resources/components/EventCard";
 import EventsListSection from "@/domains/resources/components/EventsListSection";
 import CmsWebsitePreview from "@/domains/cms/ui/CmsWebsitePreview";
 import {
