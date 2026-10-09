@@ -39,14 +39,14 @@ export default function PatientStoryCard({
   const frontContent = (
     <div className="group relative flex flex-col justify-between h-full w-full overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-[rgba(255,255,255,0.55)] bg-[rgba(0,0,0,0.23)] backdrop-blur-[1.30625rem] pt-[1.15rem] pl-[1.2rem] pr-[1.15rem] pb-0 transition-all duration-500 hover:border-[rgba(255,255,255,0.75)]">
       {/* Inner Image: Rectangle 31 in Figma (21.177rem x 23.021rem, radius 1.2643rem) */}
-      <div className="relative z-10 w-full aspect-[21.177/23.021] overflow-hidden rounded-[1.2643rem] shadow-xs pointer-events-none bg-black/10">
+      <div className="relative z-10 w-full aspect-[21.177/23.021] overflow-hidden rounded-xl shadow-xs pointer-events-none">
         {story.imageUrl && story.imageUrl !== "null" ? (
           <Image
             src={story.imageUrl}
             alt={story.patientName}
             fill
             sizes="(max-width: 1023px) 100vw, 400px"
-            className="object-cover rounded-[1.2643rem] transition duration-500 group-hover:scale-105"
+            className="object-contain"
           />
         ) : null}
       </div>

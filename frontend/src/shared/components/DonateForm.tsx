@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Script from "next/script";
 import { Check, Lock } from "lucide-react";
 import Typography from "@/lib/Typography";
 import DonateDetailsModal from "@/shared/components/DonateDetailsModal";
@@ -25,7 +24,6 @@ import {
   getDonationCurrency,
 } from "@/domains/home/constants/donation-currency";
 import {
-  AmountPill,
   CountUp,
   DonateCard,
   DonateCta,
@@ -165,7 +163,7 @@ export default function DonateSection() {
         </Typography>
       </DonateItem>
 
-      {/* Amounts: values roll in (again on currency change); the gold pill glides to the chosen one */}
+      {/* Amounts: values roll in (again on currency change); selected one gets a static gold background */}
       <DonateItem index={2} className="flex flex-col gap-2">
         <Typography
           variant="body-8"
@@ -185,13 +183,12 @@ export default function DonateSection() {
                 type="button"
                 onClick={() => pickPreset(amount)}
                 aria-pressed={active}
-                className={`relative w-full whitespace-nowrap rounded border bg-transparent px-1 py-2.5 font-semibold transition-colors duration-300 ${
+                className={`relative w-full whitespace-nowrap rounded border px-1 py-2.5 font-semibold transition-colors duration-300 ${
                   active
-                    ? "border-[#FCCC2D] text-[#3A2E00]"
-                    : "border-white/35 text-white hover:border-white/70"
+                    ? "border-[#FCCC2D] bg-[#FCCC2D] text-[#3A2E00]"
+                    : "border-white/35 bg-transparent text-white hover:border-white/70"
                 }`}
               >
-                {active ? <AmountPill /> : null}
                 <Typography
                   variant="body-8"
                   as="span"
@@ -398,6 +395,7 @@ export default function DonateSection() {
               src={donatemobileimg}
               alt="Two people holding hands"
               fill
+              priority
               sizes="100vw"
               className="object-cover object-top"
             />
@@ -418,6 +416,7 @@ export default function DonateSection() {
               src={donateBgImage}
               alt="Two people holding hands"
               fill
+              priority
               sizes="100vw"
               className="object-cover"
             />

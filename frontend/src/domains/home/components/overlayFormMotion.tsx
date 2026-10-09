@@ -26,6 +26,14 @@ const instant = { duration: 0 };
 const useSkip = () => useReducedMotion() === true;
 
 /* ---------- Backdrop ---------- */
+/*
+ * Safari fix: Framer Motion can't animate `backdrop-filter` in Safari (it only honours
+ * `-webkit-backdrop-filter`, and Framer doesn't add that prefix), so the blur never showed
+ * on Mac. The blur now lives on a separate STATIC layer (both prefixed and unprefixed) and
+ * only that layer's opacity is animated, which every browser handles.
+ */
+const BLUR = "blur(4px)";
+
 export function OverlayBackdrop({
   className = "",
   children,
@@ -38,17 +46,30 @@ export function OverlayBackdrop({
   "aria-labelledby"?: string;
 }) {
   const skip = useSkip();
-  const hidden = { backgroundColor: "rgba(255,255,255,0)", backdropFilter: "blur(0px)" };
-  const shown = { backgroundColor: "rgba(255,255,255,0.1)", backdropFilter: "blur(4px)" };
+  const hidden = { backgroundColor: "rgba(255,255,255,0)" };
+  const shown = { backgroundColor: "rgba(255,255,255,0.1)" };
+  const closeExit = { duration: 0.35, ease: EASE, delay: ROLL.closeDuration };
+
   return (
     <motion.div
       {...aria}
       className={className}
       initial={skip ? shown : hidden}
       animate={shown}
-      exit={{ ...hidden, transition: { duration: 0.35, ease: EASE, delay: ROLL.closeDuration } }}
+      exit={{ ...hidden, transition: closeExit }}
       transition={skip ? instant : { duration: 0.5, ease: EASE }}
     >
+      {/* Blur layer: sits behind the content (negative z-index stays inside this fixed,
+          stacking-context parent), never intercepts clicks. */}
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{ WebkitBackdropFilter: BLUR, backdropFilter: BLUR }}
+        initial={skip ? { opacity: 1 } : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0, transition: closeExit }}
+        transition={skip ? instant : { duration: 0.5, ease: EASE }}
+      />
       {children}
     </motion.div>
   );
