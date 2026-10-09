@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  allowedDevOrigins: ["10.0.0.55"],
+  allowedDevOrigins: ["10.0.0.216"],
   devIndicators: false,
 
   images: {
