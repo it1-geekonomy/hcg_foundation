@@ -268,7 +268,8 @@ function teamFormData(
 /** PATCH — only append keys that were provided (partial update). */
 function teamPatchFormData(
   fields: Partial<TeamFields>,
-  teamImageFile?: File | null
+  teamImageFile?: File | null,
+  removeImage?: boolean
 ) {
   const fd = new FormData();
   const append = (key: keyof TeamFields, value?: string | null) => {
@@ -287,8 +288,9 @@ function teamPatchFormData(
   append("schemaCode", fields.schemaCode);
   if (teamImageFile instanceof File) {
     fd.append("teamImage", teamImageFile, teamImageFile.name);
-  } else if (teamImageFile === null) {
-    fd.append("teamImage", "null");
+  } else if (removeImage) {
+    // Empty value tells the API to delete the stored image.
+    fd.append("teamImage", "");
   }
   return fd;
 }
@@ -780,12 +782,13 @@ export const cmsApi = {
   updateTeam: (
     id: string,
     fields: Partial<TeamFields>,
-    teamImageFile?: File | null
+    teamImageFile?: File | null,
+    removeImage?: boolean
   ) =>
     requestFormData<ApiEnvelope<Team>>(
       `/teams/${id}`,
       "PATCH",
-      teamPatchFormData(fields, teamImageFile)
+      teamPatchFormData(fields, teamImageFile, removeImage)
     ),
 
   deleteTeam: (id: string) =>

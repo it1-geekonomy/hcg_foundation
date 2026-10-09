@@ -129,15 +129,17 @@ export class TeamsService {
     const entity = await this.findOne(id);
     const previousOrder = entity.displayOrder;
     const previousType = entity.type;
-    const { displayOrder: requested, orderMode, ...rest } = dto;
+    const { displayOrder: requested, orderMode, teamImage: teamImageField, ...rest } = dto;
     Object.assign(entity, rest);
 
-    const newTeamImage = await this.cdn.replace(
-      entity.teamImage,
-      files?.teamImage,
-      'teams',
-    );
-    entity.teamImage = newTeamImage ?? undefined;
+    if (files?.teamImage) {
+      entity.teamImage =
+        (await this.cdn.replace(entity.teamImage, files.teamImage, 'teams')) ??
+        undefined;
+    } else if (teamImageField === '') {
+      await this.cdn.delete(entity.teamImage);
+      entity.teamImage = null;
+    }
     return saveWithDisplayOrder(this.repo, entity, {
       previousOrder,
       previousScope: { type: previousType },

@@ -776,7 +776,6 @@ function Modal1024Up({
           <div className="relative -ml-7 -mb-4 w-[42%] max-w-[340px] shrink-0 2xl:-ml-8 2xl:max-w-[360px]">
             <PortraitWithBackdrop
               className="h-full w-full"
-              priority
               sizes="(min-width: 1536px) 360px, (min-width: 1024px) 340px, 0px"
             />
           </div>
