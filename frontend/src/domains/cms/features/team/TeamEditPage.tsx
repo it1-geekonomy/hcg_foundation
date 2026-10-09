@@ -63,7 +63,12 @@ export default function TeamEditPage() {
 
     setSaving(true);
     try {
-      const res = await cmsApi.updateTeam(id, patch.fields, patch.file);
+      const res = await cmsApi.updateTeam(
+        id,
+        patch.fields,
+        patch.file,
+        patch.removeImage
+      );
       cmsToast.success(
         res.message || "Team member updated successfully"
       );

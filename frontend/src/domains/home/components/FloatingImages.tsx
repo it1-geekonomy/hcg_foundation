@@ -45,8 +45,7 @@ export default function HopeSection() {
                 width={200}
                 height={260}
                 className="w-full h-full object-cover"
-                priority={i === 0}
-                sizes="(max-width: 640px) 150px, 200px"
+                sizes="200px"
               />
             </div>
           </div>

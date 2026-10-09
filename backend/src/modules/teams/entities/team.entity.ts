@@ -14,7 +14,7 @@ export class Team extends SeoContentEntity {
   designation?: string;
 
   @Column({ name: 'team_image', type: 'text', nullable: true })
-  teamImage?: string;
+  teamImage?: string | null;
 
   @Column({ type: 'text', nullable: true })
   content?: string;

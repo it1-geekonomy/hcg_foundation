@@ -161,7 +161,7 @@ export class TeamsController {
   @ApiOperation({
     summary: 'Update team member/trustee (CMS / super-admin)',
     description:
-      'Optional new `teamImage` file replaces the previous CDN object.',
+      'Optional new `teamImage` file replaces the previous CDN object. Send an empty `teamImage` field to remove it.',
   })
   @ApiOkResponse({ type: Team })
   @ApiUnauthorizedResponse({

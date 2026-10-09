@@ -59,21 +59,21 @@ export class EmailService {
       return { status: 'skipped', reason: 'Donor provided no email' };
     }
 
-    let certPdf: Buffer;
-    let receiptPdf: Buffer;
+    let certPdf: Buffer = Buffer.alloc(0);
+    let receiptPdf: Buffer | null = null;
     try {
-      [certPdf, receiptPdf] = await Promise.all([
+      const [cert, receipt] = await Promise.all([
         this.certificates.buildPdf(donor),
-        this.receipts.buildPdf(donor),
+        donor.pan ? this.receipts.buildPdf(donor) : Promise.resolve(null),
       ]);
+      certPdf = cert;
+      receiptPdf = receipt;
     } catch (err) {
       this.logger.error(
         `Could not build donation PDFs: ${
           err instanceof Error ? err.message : 'unknown error'
         }`,
       );
-      certPdf = Buffer.alloc(0);
-      receiptPdf = Buffer.alloc(0);
     }
 
     const amountLabel = this.formatAmount(donor.amount, donor.currency);
@@ -84,15 +84,18 @@ export class EmailService {
     );
     const certFilename = `HCG-Donation-Certificate-${receipt}.pdf`;
     const receiptFilename = `HCG-Donation-Receipt-${receipt}.pdf`;
-    const hasPdf = certPdf.length > 0 && receiptPdf.length > 0;
+    
+    const attachments: { filename: string; content: string }[] = [];
+    if (certPdf.length > 0) {
+      attachments.push({ filename: certFilename, content: certPdf.toString('base64') });
+    }
+    const hasReceiptPdf = receiptPdf && receiptPdf.length > 0;
+    if (hasReceiptPdf) {
+      attachments.push({ filename: receiptFilename, content: receiptPdf!.toString('base64') });
+    }
+    const hasPdf = attachments.length > 0;
 
     try {
-      const attachments = hasPdf
-        ? [
-            { filename: certFilename, content: certPdf.toString('base64') },
-            { filename: receiptFilename, content: receiptPdf.toString('base64') }
-          ]
-        : undefined;
 
       const { data, error } = await this.resend.emails.send({
         from: `HCG Foundation <${this.fromEmail}>`,
@@ -105,8 +108,9 @@ export class EmailService {
           dateLabel,
           category: donor.donationCategory || DonationCategory.GENERAL_FUNDS,
           hasPdf,
+          hasReceiptPdf: !!hasReceiptPdf,
         }),
-        attachments,
+        attachments: attachments.length > 0 ? attachments : undefined,
       });
 
       if (error) {
@@ -141,15 +145,22 @@ export class EmailService {
     dateLabel: string;
     category: string;
     hasPdf: boolean;
+    hasReceiptPdf: boolean;
   }) {
     const name = this.escape(params.fullName);
     const category = this.escape(params.category);
     const amount = this.escape(params.amountLabel);
     const receipt = this.escape(params.receipt);
     const date = this.escape(params.dateLabel);
-    const certNote = params.hasPdf
-      ? 'Your official <strong>Donation Certificate of Appreciation</strong> and <strong>Donation Receipt</strong> are attached as PDFs. Please keep them for your records.'
-      : 'Your donation has been recorded. If you need a certificate or receipt copy, reply to this email and we will gladly help.';
+    
+    let certNote = 'Your donation has been recorded. If you need a certificate or receipt copy, reply to this email and we will gladly help.';
+    if (params.hasPdf) {
+      if (params.hasReceiptPdf) {
+        certNote = 'Your official <strong>Donation Certificate of Appreciation</strong> and <strong>80G Donation Receipt</strong> are attached as PDFs. Please keep them for your records.';
+      } else {
+        certNote = 'Your official <strong>Donation Certificate of Appreciation</strong> is attached as a PDF. Please keep it for your records.';
+      }
+    }
 
     return `<!DOCTYPE html>
 <html lang="en">

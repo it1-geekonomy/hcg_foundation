@@ -1,5 +1,5 @@
 import localFont from "next/font/local";
-import { Newsreader, Poppins, Roboto } from "next/font/google";
+import { Manrope, Newsreader, Poppins, Roboto } from "next/font/google";
 
 /** Poppins — brand logotype (FOUNDATION). */
 export const poppins = Poppins({
@@ -17,16 +17,13 @@ export const roboto = Roboto({
 	display: "swap",
 });
 
-/** Manrope — regular through bold interface and body text. */
-export const manrope = localFont({
-	src: [
-		{ path: "../app/Fonts/Manrope-ExtraLight.ttf", weight: "200", style: "normal" },
-		{ path: "../app/Fonts/Manrope-Light.ttf", weight: "300", style: "normal" },
-		{ path: "../app/Fonts/Manrope-Regular.ttf", weight: "400", style: "normal" },
-		{ path: "../app/Fonts/Manrope-Medium.ttf", weight: "500", style: "normal" },
-		{ path: "../app/Fonts/Manrope-SemiBold.ttf", weight: "600", style: "normal" },
-		{ path: "../app/Fonts/Manrope-Bold.ttf", weight: "700", style: "normal" },
-	],
+/**
+ * Manrope — interface and body text. Served as woff2 (~20KB a weight) instead of the
+ * local TTF files (~95KB each), which were all preloaded and delayed the hero image.
+ */
+export const manrope = Manrope({
+	subsets: ["latin"],
+	weight: ["200", "300", "400", "500", "600", "700"],
 	variable: "--font-manrope",
 	display: "swap",
 });
