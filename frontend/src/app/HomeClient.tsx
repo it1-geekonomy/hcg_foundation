@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AnimatePresence } from "framer-motion";
 
 import dynamic from "next/dynamic";
 
@@ -15,8 +14,6 @@ const OverlayForm = dynamic(
 );
 
 export default function HomeClient({ children, isBot }: { children: React.ReactNode; isBot?: boolean }) {
-  const [scrollTarget, setScrollTarget] = useState<string | null>(null);
-
   const [ready, setReady] = useState(() => {
     if (isBot) return true;
     if (typeof window !== "undefined") {
@@ -51,11 +48,7 @@ export default function HomeClient({ children, isBot }: { children: React.ReactN
     return false;
   });
 
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
-    setMounted(true);
-    
     const handleNavAction = () => {
       const action = sessionStorage.getItem("nav_action");
       const cameFromDetails = sessionStorage.getItem("came_from_details");
@@ -135,24 +128,20 @@ export default function HomeClient({ children, isBot }: { children: React.ReactN
       {children}
 
       <div suppressHydrationWarning>
-        <AnimatePresence>
-          {showDonationOverlay && (
-            <OverlayForm
-              key="donation-overlay"
-              onClose={() => setShowDonationOverlay(false)}
-            />
-          )}
-        </AnimatePresence>
+        {showDonationOverlay && (
+          <OverlayForm
+            key="donation-overlay"
+            onClose={() => setShowDonationOverlay(false)}
+          />
+        )}
 
-        <AnimatePresence>
-          {!ready && (
-            <IntroSequence
-              onDone={() => {
-                setReady(true);
-              }}
-            />
-          )}
-        </AnimatePresence>
+        {!ready && (
+          <IntroSequence
+            onDone={() => {
+              setReady(true);
+            }}
+          />
+        )}
       </div>
     </>
   );
