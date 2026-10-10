@@ -241,6 +241,5 @@ def answer_team_question(question: str) -> dict | None:
     wanted = _is_list_request(q)
     if wanted:
         trustees, team = wanted
-        # "Teams" alone gets trustees too: the About Us page shows both
-        return list_answer(trustees=trustees or team, team=team)
+        return list_answer(trustees=trustees, team=team)
     return None
