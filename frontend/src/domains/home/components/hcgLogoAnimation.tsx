@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import * as THREE from "three";
 import Typography from "@/lib/Typography";
 
 const YELLOW_HAND = "/hcg-logo/yellow-hand.png";
@@ -10,6 +9,9 @@ const PINK_HAND = "/hcg-logo/pink-hand.png";
 const H_LETTER = "/hcg-logo/H.png";
 const C_LETTER = "/hcg-logo/C.png";
 const G_LETTER = "/hcg-logo/G.png";
+
+/** Order matters: indexes 0-2 are the hands, 3-5 the letters (see HANDS / LETTERS below). */
+const LOGO_URLS = [YELLOW_HAND, BLUE_HAND, PINK_HAND, H_LETTER, C_LETTER, G_LETTER];
 
 type Vec2 = [number, number];
 type Vec3 = [number, number, number];
@@ -33,26 +35,30 @@ const H_POS: Vec3 = [32, 35, 3];
 const C_POS: Vec3 = [H_POS[0] + H_SIZE[0] / 2 + LETTER_GAP + C_SIZE[0] / 2, 35, 3];
 const G_POS: Vec3 = [C_POS[0] + C_SIZE[0] / 2 + LETTER_GAP + G_SIZE[0] / 2, 35, 3];
 
-interface FlyInOffset {
-  dx: number;
-  dy: number;
-  rot: number;
-  scale: number;
-}
-
-interface TweenTransform {
+interface Tween {
   x: number;
   y: number;
   rot: number;
   scale: number;
 }
 
-interface TimelineEntry {
-  obj: THREE.Mesh;
+interface Layer {
+  src: number;
+  size: Vec2;
   start: number;
   dur: number;
-  from: TweenTransform;
-  to: TweenTransform;
+  from: Tween;
+  to: Tween;
+}
+
+function makeFly(
+  target: Vec3,
+  off: { dx: number; dy: number; rot: number; scale: number },
+): { from: Tween; to: Tween } {
+  return {
+    to: { x: target[0], y: target[1], rot: 0, scale: 1 },
+    from: { x: target[0] + off.dx, y: target[1] + off.dy, rot: off.rot, scale: off.scale },
+  };
 }
 
 function easeInOutCubic(t: number): number {
@@ -82,6 +88,20 @@ const G_DUR = 0.32;
 
 const FINAL_POP_START = G_START + G_DUR;
 const FINAL_POP_DUR = 0.25;
+/** After this the canvas no longer changes, so it stops redrawing. */
+const ANIM_END = FINAL_POP_START + FINAL_POP_DUR + 0.05;
+
+const HANDS: Layer[] = [
+  { src: 0, size: YELLOW_SIZE, start: 0.05, dur: 0.58, ...makeFly(YELLOW_POS, { dx: -400, dy: 0, rot: -2.44, scale: 0.4 }) },
+  { src: 1, size: BLUE_SIZE, start: 0.12, dur: 0.58, ...makeFly(BLUE_POS, { dx: 0, dy: 320, rot: 3.49, scale: 0.4 }) },
+  { src: 2, size: PINK_SIZE, start: 0.2, dur: 0.58, ...makeFly(PINK_POS, { dx: 300, dy: -300, rot: 2.79, scale: 0.4 }) },
+];
+
+const LETTERS: Layer[] = [
+  { src: 3, size: H_SIZE, start: H_START, dur: H_DUR, ...makeFly(H_POS, { dx: 260, dy: 0, rot: 0, scale: 0.5 }) },
+  { src: 4, size: C_SIZE, start: C_START, dur: C_DUR, ...makeFly(C_POS, { dx: 260, dy: 0, rot: 0, scale: 0.5 }) },
+  { src: 5, size: G_SIZE, start: G_START, dur: G_DUR, ...makeFly(G_POS, { dx: 260, dy: 0, rot: 0, scale: 0.5 }) },
+];
 
 /* text lands sooner after the mark settles — less idle gap */
 const FOUNDATION_DELAY_MS = 2350;
@@ -90,6 +110,52 @@ const STAR_DELAY_MS = 2650;
 const STAR_BLINK_DUR_MS = 400;
 const STAR_HIDE_DELAY_MS = STAR_DELAY_MS + STAR_BLINK_DUR_MS;
 const COMPLETE_MS = STAR_HIDE_DELAY_MS + 280;
+/** Safety net if the tab is hidden / rAF is paused: never leave the visitor stuck on the intro. */
+const MAX_WAIT_MS = COMPLETE_MS + 6000;
+
+// ============================================================================
+// IMAGE PRELOAD — call preloadHcgLogo() early (IntroSequence does it on mount) so the
+// images are already decoded when the logo scene starts. Previously they began loading
+// when the scene mounted, so letters could pop in late / out of sync with the text.
+// ============================================================================
+
+let logoImagesPromise: Promise<HTMLImageElement[]> | null = null;
+
+export function preloadHcgLogo(): Promise<HTMLImageElement[]> {
+  if (typeof window === "undefined") return Promise.resolve([]);
+  if (!logoImagesPromise) {
+    logoImagesPromise = Promise.all(
+      LOGO_URLS.map(
+        (url) =>
+          new Promise<HTMLImageElement>((resolve) => {
+            const img = new Image();
+            img.decoding = "async";
+            img.onload = () => {
+              const decoded = typeof img.decode === "function" ? img.decode().catch(() => {}) : Promise.resolve();
+              decoded.then(() => resolve(img));
+            };
+            img.onerror = () => resolve(img); // broken image: simply not drawn
+            img.src = url;
+          }),
+      ),
+    );
+  }
+  return logoImagesPromise;
+}
+
+/** Pre-scales a sprite once to its on-screen size so each frame only blits a small bitmap. */
+function bakeSprite(img: HTMLImageElement, size: Vec2, dpr: number): CanvasImageSource | null {
+  if (!img.naturalWidth) return null;
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(size[0] * dpr));
+  c.height = Math.max(1, Math.round(size[1] * dpr));
+  const g = c.getContext("2d");
+  if (!g) return img;
+  g.imageSmoothingEnabled = true;
+  g.imageSmoothingQuality = "high";
+  g.drawImage(img, 0, 0, c.width, c.height);
+  return c;
+}
 
 export default function HcgLogoAnimation({
   onDone,
@@ -103,231 +169,213 @@ export default function HcgLogoAnimation({
   const [showSubtitle, setShowSubtitle] = useState(false);
   const [showStar, setShowStar] = useState(false);
   const doneRef = useRef(false);
+  const onDoneRef = useRef(onDone);
+  useEffect(() => {
+    onDoneRef.current = onDone;
+  });
 
-  // Refs used to measure each line's natural (unscaled) text width so it
-  // can be horizontally scaled to exactly fill the HCG span, without
-  // touching letter-spacing/kerning — the font itself stays untouched,
-  // it's just stretched/condensed like a logotype.
+  // Each line's natural text width is measured so it can be scaled to exactly fill the HCG span.
   const foundationTextRef = useRef<HTMLSpanElement>(null);
   const subtitleTextRef = useRef<HTMLSpanElement>(null);
   const [foundationFontPx, setFoundationFontPx] = useState<number | null>(null);
   const [subtitleFontPx, setSubtitleFontPx] = useState<number | null>(null);
+  // Text is only revealed once it has been fitted, so it never appears at one size and then jumps.
+  const [fitted, setFitted] = useState(false);
 
   const finish = () => {
     if (doneRef.current) return;
     doneRef.current = true;
-    onDone();
+    onDoneRef.current();
   };
 
-  useEffect(() => {
-    const foundationTimer = setTimeout(() => setShowFoundation(true), FOUNDATION_DELAY_MS);
-    const subtitleTimer = setTimeout(() => setShowSubtitle(true), SUBTITLE_DELAY_MS);
-    const starShowTimer = setTimeout(() => setShowStar(true), STAR_DELAY_MS);
-    const starHideTimer = setTimeout(() => setShowStar(false), STAR_HIDE_DELAY_MS);
-    const completeTimer = setTimeout(finish, COMPLETE_MS);
-    return () => {
-      clearTimeout(foundationTimer);
-      clearTimeout(subtitleTimer);
-      clearTimeout(starShowTimer);
-      clearTimeout(starHideTimer);
-      clearTimeout(completeTimer);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+  // --------------------------------------------------------------------------
+  // One clock drives the canvas AND the text/star reveals, so they never drift apart.
+  // --------------------------------------------------------------------------
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x2D2D2D);
-
-    const camera = new THREE.OrthographicCamera(0, 0, 0, 0, 0.1, 1000);
-    camera.position.z = 10;
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    container.appendChild(renderer.domElement);
-
-    function resize() {
-      const w = container!.clientWidth;
-      const h = container!.clientHeight;
-      camera.left = -w / 2;
-      camera.right = w / 2;
-      camera.top = h / 2;
-      camera.bottom = -h / 2;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    }
-    resize();
-
-    const resizeObserver = new ResizeObserver(resize);
-    resizeObserver.observe(container);
-
-    const loader = new THREE.TextureLoader();
-    function makePlane(url: string, size: Vec2): THREE.Mesh {
-      const [w, h] = size;
-      const texture = loader.load(url);
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.minFilter = THREE.LinearFilter;
-      texture.generateMipmaps = false;
-      const material = new THREE.MeshBasicMaterial({
-        map: texture,
-        transparent: true,
-        opacity: 0,
-        depthWrite: false,
-      });
-      const geometry = new THREE.PlaneGeometry(w, h);
-      return new THREE.Mesh(geometry, material);
-    }
-
-    const root = new THREE.Group();
-    scene.add(root);
-
-    const handsGroup = new THREE.Group();
-    handsGroup.position.set(...HANDS_GROUP_POS);
-    root.add(handsGroup);
-
-    const yellow = makePlane(YELLOW_HAND, YELLOW_SIZE);
-    yellow.position.set(...YELLOW_POS);
-    handsGroup.add(yellow);
-
-    const blue = makePlane(BLUE_HAND, BLUE_SIZE);
-    blue.position.set(...BLUE_POS);
-    handsGroup.add(blue);
-
-    const pink = makePlane(PINK_HAND, PINK_SIZE);
-    pink.position.set(...PINK_POS);
-    handsGroup.add(pink);
-
-    function buildFlyIn(
-      obj: THREE.Mesh,
-      localTarget: Vec3,
-      offset: FlyInOffset,
-    ): { from: TweenTransform; to: TweenTransform } {
-      const to: TweenTransform = { x: localTarget[0], y: localTarget[1], rot: 0, scale: 1 };
-      const from: TweenTransform = {
-        x: localTarget[0] + offset.dx,
-        y: localTarget[1] + offset.dy,
-        rot: offset.rot,
-        scale: offset.scale,
-      };
-      obj.position.x = from.x;
-      obj.position.y = from.y;
-      obj.rotation.z = from.rot;
-      obj.scale.setScalar(from.scale);
-      (obj.material as THREE.MeshBasicMaterial).opacity = 0;
-      return { from, to };
-    }
-
-    const yellowTween = buildFlyIn(yellow, YELLOW_POS, {
-      dx: -400,
-      dy: 0,
-      rot: -2.44,
-      scale: 0.4,
-    });
-    const blueTween = buildFlyIn(blue, BLUE_POS, { dx: 0, dy: 320, rot: 3.49, scale: 0.4 });
-    const pinkTween = buildFlyIn(pink, PINK_POS, { dx: 300, dy: -300, rot: 2.79, scale: 0.4 });
-
-    const handTimeline: TimelineEntry[] = [
-      { obj: yellow, start: 0.05, dur: 0.58, ...yellowTween },
-      { obj: blue, start: 0.12, dur: 0.58, ...blueTween },
-      { obj: pink, start: 0.2, dur: 0.58, ...pinkTween },
-    ];
-
-    const hLetter = makePlane(H_LETTER, H_SIZE);
-    const cLetter = makePlane(C_LETTER, C_SIZE);
-    const gLetter = makePlane(G_LETTER, G_SIZE);
-    root.add(hLetter, cLetter, gLetter);
-
-    const hTween = buildFlyIn(hLetter, H_POS, { dx: 260, dy: 0, rot: 0, scale: 0.5 });
-    const cTween = buildFlyIn(cLetter, C_POS, { dx: 260, dy: 0, rot: 0, scale: 0.5 });
-    const gTween = buildFlyIn(gLetter, G_POS, { dx: 260, dy: 0, rot: 0, scale: 0.5 });
-
-    const letterTimeline: TimelineEntry[] = [
-      { obj: hLetter, start: H_START, dur: H_DUR, ...hTween },
-      { obj: cLetter, start: C_START, dur: C_DUR, ...cTween },
-      { obj: gLetter, start: G_START, dur: G_DUR, ...gTween },
-    ];
-
-    const clock = new THREE.Clock();
+    let cancelled = false;
     let raf = 0;
+    let startTime = 0;
+    let lastT = -1;
+    let sprites: (CanvasImageSource | null)[] = [];
 
-    function animate() {
-      raf = requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
+    const canvas = document.createElement("canvas");
+    canvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%;display:block";
+    container.appendChild(canvas);
+    const ctx = canvas.getContext("2d");
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let w = 0;
+    let h = 0;
 
-      handTimeline.forEach(({ obj, start, dur, from, to }) => {
-        if (t < start) return;
-        const p = Math.min((t - start) / dur, 1);
-        const e = easeOutBack(p, 0.9);
-        obj.position.x = lerp(from.x, to.x, e);
-        obj.position.y = lerp(from.y, to.y, e);
-        obj.rotation.z = lerp(from.rot, to.rot, e);
-        const s = lerp(from.scale, to.scale, e);
-        obj.scale.setScalar(s);
-        (obj.material as THREE.MeshBasicMaterial).opacity = Math.min(p / 0.45, 1);
-      });
+    const sizeCanvas = () => {
+      w = container.clientWidth;
+      h = container.clientHeight;
+      canvas.width = Math.max(1, Math.round(w * dpr));
+      canvas.height = Math.max(1, Math.round(h * dpr));
+    };
 
-      if (t >= GROUP_SPIN_START) {
-        const p = Math.min((t - GROUP_SPIN_START) / GROUP_SPIN_DUR, 1);
-        const e = easeInOutCubic(p);
-        handsGroup.rotation.z = e * Math.PI * 2;
+    function drawSprite(
+      layer: Layer,
+      x: number,
+      y: number,
+      rot: number,
+      sx: number,
+      sy: number,
+      alpha: number,
+    ) {
+      const src = sprites[layer.src];
+      if (!ctx || !src || alpha <= 0) return;
+      ctx.globalAlpha = alpha;
+      ctx.save();
+      ctx.translate(x, -y); // scene units are y-up, canvas is y-down
+      ctx.rotate(-rot);
+      ctx.scale(sx, sy);
+      ctx.drawImage(src, -layer.size[0] / 2, -layer.size[1] / 2, layer.size[0], layer.size[1]);
+      ctx.restore();
+    }
 
-        const spinEnd = GROUP_SPIN_START + GROUP_SPIN_DUR;
-        if (t >= spinEnd) {
-          const pp = Math.min((t - spinEnd) / SPIN_POP_DUR, 1);
-          const pop = 1 + Math.sin(pp * Math.PI) * (1 - pp) * 0.09;
-          handsGroup.scale.setScalar(pop);
-        }
-      }
+    function draw(t: number) {
+      if (!ctx) return;
+      lastT = t;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "#2D2D2D";
+      ctx.fillRect(0, 0, w, h);
 
-      letterTimeline.forEach(({ obj, start, dur, from, to }) => {
-        if (t < start) return;
-        const p = Math.min((t - start) / dur, 1);
-        const e = easeOutBack(p, 1.25);
-        obj.position.x = lerp(from.x, to.x, e);
-        obj.position.y = lerp(from.y, to.y, e);
-        obj.rotation.z = lerp(from.rot, to.rot, e);
-        const baseScale = lerp(from.scale, to.scale, e);
-
-        const squash = Math.sin(Math.min(p, 1) * Math.PI) * 0.1;
-        obj.scale.set(baseScale * (1 + squash), baseScale * (1 - squash * 0.6), 1);
-
-        (obj.material as THREE.MeshBasicMaterial).opacity = Math.min(p / 0.35, 1);
-      });
+      ctx.save();
+      ctx.translate(w / 2, h / 2);
 
       if (t >= FINAL_POP_START) {
         const p = Math.min((t - FINAL_POP_START) / FINAL_POP_DUR, 1);
         const pop = 1 + Math.sin(p * Math.PI) * (1 - p) * 0.035;
-        root.scale.setScalar(pop);
+        ctx.scale(pop, pop);
       }
 
-      renderer.render(scene, camera);
+      // Hands group: spins once, then pops
+      ctx.save();
+      ctx.translate(HANDS_GROUP_POS[0], -HANDS_GROUP_POS[1]);
+      if (t >= GROUP_SPIN_START) {
+        const p = Math.min((t - GROUP_SPIN_START) / GROUP_SPIN_DUR, 1);
+        ctx.rotate(-(easeInOutCubic(p) * Math.PI * 2));
+        const spinEnd = GROUP_SPIN_START + GROUP_SPIN_DUR;
+        if (t >= spinEnd) {
+          const pp = Math.min((t - spinEnd) / SPIN_POP_DUR, 1);
+          const pop = 1 + Math.sin(pp * Math.PI) * (1 - pp) * 0.09;
+          ctx.scale(pop, pop);
+        }
+      }
+      for (const L of HANDS) {
+        if (t < L.start) continue;
+        const p = Math.min((t - L.start) / L.dur, 1);
+        const e = easeOutBack(p, 0.9);
+        const s = lerp(L.from.scale, L.to.scale, e);
+        drawSprite(
+          L,
+          lerp(L.from.x, L.to.x, e),
+          lerp(L.from.y, L.to.y, e),
+          lerp(L.from.rot, L.to.rot, e),
+          s,
+          s,
+          Math.min(p / 0.45, 1),
+        );
+      }
+      ctx.restore();
+
+      // Letters: fly in with a little squash
+      for (const L of LETTERS) {
+        if (t < L.start) continue;
+        const p = Math.min((t - L.start) / L.dur, 1);
+        const e = easeOutBack(p, 1.25);
+        const base = lerp(L.from.scale, L.to.scale, e);
+        const squash = Math.sin(p * Math.PI) * 0.1;
+        drawSprite(
+          L,
+          lerp(L.from.x, L.to.x, e),
+          lerp(L.from.y, L.to.y, e),
+          lerp(L.from.rot, L.to.rot, e),
+          base * (1 + squash),
+          base * (1 - squash * 0.6),
+          Math.min(p / 0.35, 1),
+        );
+      }
+
+      ctx.restore();
+      ctx.globalAlpha = 1;
     }
-    animate();
+
+    sizeCanvas();
+    draw(0);
+
+    const resizeObserver = new ResizeObserver(() => {
+      sizeCanvas();
+      draw(Math.max(lastT, 0));
+    });
+    resizeObserver.observe(container);
+
+    const flags = { foundation: false, subtitle: false, starOn: false, starOff: false, done: false };
+
+    function tick(now: number) {
+      if (cancelled) return;
+      const ms = now - startTime;
+
+      if (!flags.foundation && ms >= FOUNDATION_DELAY_MS) {
+        flags.foundation = true;
+        setShowFoundation(true);
+      }
+      if (!flags.subtitle && ms >= SUBTITLE_DELAY_MS) {
+        flags.subtitle = true;
+        setShowSubtitle(true);
+      }
+      if (!flags.starOn && ms >= STAR_DELAY_MS) {
+        flags.starOn = true;
+        setShowStar(true);
+      }
+      if (!flags.starOff && ms >= STAR_HIDE_DELAY_MS) {
+        flags.starOff = true;
+        setShowStar(false);
+      }
+      if (!flags.done && ms >= COMPLETE_MS) {
+        flags.done = true;
+        finish();
+        return; // nothing left to animate
+      }
+
+      // Redraw only while something is moving (plus once at the final pose).
+      const drawT = Math.min(ms / 1000, ANIM_END);
+      if (drawT !== lastT) draw(drawT);
+
+      raf = requestAnimationFrame(tick);
+    }
+
+    preloadHcgLogo().then((imgs) => {
+      if (cancelled) return;
+      sprites = LOGO_URLS.map((_, i) =>
+        imgs[i] ? bakeSprite(imgs[i], i < 3 ? HANDS[i]!.size : LETTERS[i - 3]!.size, dpr) : null,
+      );
+      startTime = performance.now();
+      raf = requestAnimationFrame(tick);
+    });
+
+    const safety = window.setTimeout(() => {
+      if (!flags.done) {
+        flags.done = true;
+        finish();
+      }
+    }, MAX_WAIT_MS);
 
     return () => {
+      cancelled = true;
       cancelAnimationFrame(raf);
+      window.clearTimeout(safety);
       resizeObserver.disconnect();
-      [yellow, blue, pink, hLetter, cLetter, gLetter].forEach((mesh) => {
-        mesh.geometry.dispose();
-        const mat = mesh.material as THREE.MeshBasicMaterial;
-        mat.map?.dispose();
-        mat.dispose();
-      });
-      renderer.dispose();
-      if (renderer.domElement.parentNode === container) {
-        container.removeChild(renderer.domElement);
-      }
+      if (canvas.parentNode === container) container.removeChild(canvas);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Text block is anchored to the LEFT edge of H and stretched to the
-  // RIGHT edge of G, so both lines can be justified across that exact span
-  // (matching the red guide lines: text starts at H's left edge and ends
-  // at G's right edge).
+  // Text block is anchored to the LEFT edge of H and stretched to the RIGHT edge of G.
   const lettersLeftX = H_POS[0] - H_SIZE[0] / 2;
   const lettersRightX = G_POS[0] + G_SIZE[0] / 2;
   const lettersWidth = lettersRightX - lettersLeftX;
@@ -339,13 +387,13 @@ export default function HcgLogoAnimation({
   const gTopRightX = G_POS[0] + G_SIZE[0] / 2;
   const gTopRightY = G_POS[1] + G_SIZE[1] / 2;
 
+  // Fit once while the text is still invisible (and again when fonts finish loading); the reveal
+  // waits for this, so the size never visibly jumps.
   useLayoutEffect(() => {
-    function fitLine(
-      el: HTMLSpanElement,
-      setPx: (px: number) => void,
-    ) {
-      const computed = window.getComputedStyle(el);
-      const currentPx = parseFloat(computed.fontSize);
+    let cancelled = false;
+
+    function fitLine(el: HTMLSpanElement, setPx: (px: number) => void) {
+      const currentPx = parseFloat(window.getComputedStyle(el).fontSize);
       const natural = el.offsetWidth;
       if (currentPx > 0 && natural > 0) {
         setPx(currentPx * (lettersWidth / natural));
@@ -353,22 +401,24 @@ export default function HcgLogoAnimation({
     }
 
     function measure() {
-      if (foundationTextRef.current) {
-        fitLine(foundationTextRef.current, setFoundationFontPx);
-      }
-      if (subtitleTextRef.current) {
-        fitLine(subtitleTextRef.current, setSubtitleFontPx);
-      }
+      if (foundationTextRef.current) fitLine(foundationTextRef.current, setFoundationFontPx);
+      if (subtitleTextRef.current) fitLine(subtitleTextRef.current, setSubtitleFontPx);
     }
 
     measure();
     if (typeof document !== "undefined" && "fonts" in document) {
-      document.fonts.ready.then(measure);
+      document.fonts.ready.then(() => {
+        if (cancelled) return;
+        measure();
+        setFitted(true);
+      });
+    } else {
+      setFitted(true);
     }
-    const t = setTimeout(measure, 100);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lettersWidth, showFoundation, showSubtitle]);
+    return () => {
+      cancelled = true;
+    };
+  }, [lettersWidth]);
 
   return (
     <section
@@ -394,8 +444,8 @@ export default function HcgLogoAnimation({
           style={{
             fontSize: foundationFontPx ? `${foundationFontPx}px` : undefined,
             lineHeight: 1.49,
-            opacity: showFoundation ? 1 : 0,
-            transform: showFoundation ? "translateY(0)" : "translateY(8px)",
+            opacity: showFoundation && fitted ? 1 : 0,
+            transform: showFoundation && fitted ? "translateY(0)" : "translateY(8px)",
             transition: "opacity 380ms ease-out, transform 480ms cubic-bezier(0.33, 1, 0.32, 1)",
           }}
         >
@@ -409,8 +459,8 @@ export default function HcgLogoAnimation({
           style={{
             fontSize: subtitleFontPx ? `${subtitleFontPx}px` : undefined,
             lineHeight: 1.25,
-            opacity: showSubtitle ? 1 : 0,
-            transform: showSubtitle ? "translateY(0)" : "translateY(8px)",
+            opacity: showSubtitle && fitted ? 1 : 0,
+            transform: showSubtitle && fitted ? "translateY(0)" : "translateY(8px)",
             transition: "opacity 380ms ease-out, transform 480ms cubic-bezier(0.33, 1, 0.32, 1)",
           }}
         >

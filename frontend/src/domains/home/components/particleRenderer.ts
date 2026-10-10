@@ -1,6 +1,25 @@
 import { type Particle } from "../constants/footer";
 import { easeSmooth, clamp01 } from "./utils";
 
+/**
+ * PERF: the old version called beginPath/arc/fill and built a new hsla() string for EVERY particle EVERY
+ * frame (thousands of allocations + fills per frame). Particles are now grouped into a few alpha levels and
+ * each level is drawn as ONE path with ONE fill. Same look, a fraction of the work.
+ *
+ * Differences (barely visible): hue is one value (the particles only varied 40–48), and dots of the
+ * same level that overlap no longer stack their alpha.
+ */
+const ALPHA_LEVELS = 12;
+const HUE = 44;
+const TAU = Math.PI * 2;
+
+// Reused every frame — no per-frame allocation.
+let xs = new Float32Array(0);
+let ys = new Float32Array(0);
+let rs = new Float32Array(0);
+let levels = new Uint8Array(0);
+const counts = new Int32Array(ALPHA_LEVELS);
+
 export function renderParticles(
   ctx: CanvasRenderingContext2D,
   particles: Particle[],
@@ -11,25 +30,52 @@ export function renderParticles(
 ) {
   if (particleAlpha <= 0.01) return;
 
-  for (const q of particles) {
+  const n = particles.length;
+  if (xs.length < n) {
+    xs = new Float32Array(n);
+    ys = new Float32Array(n);
+    rs = new Float32Array(n);
+    levels = new Uint8Array(n);
+  }
+  counts.fill(0);
+
+  const melt = stage === "solid" ? merge : 0;
+  const sizeMul = 1 + melt * 1.15;
+  const light = 64 + melt * 6;
+  const sat = 80 - melt * 6;
+
+  for (let i = 0; i < n; i++) {
+    const q = particles[i]!;
+    const a = particleAlpha * q.fade;
+    if (a <= 0.01) {
+      levels[i] = 0;
+      continue;
+    }
+
     const u = easeSmooth(clamp01((progress - q.d) / (1 - q.d)));
     const omu = 1 - u;
+    xs[i] = omu * omu * q.sx + 2 * omu * u * q.mx + u * u * q.hx;
+    ys[i] = omu * omu * q.sy + 2 * omu * u * q.my + u * u * q.hy;
+    rs[i] = q.r * (0.9 + u * 0.15) * sizeMul;
 
-    const x = omu * omu * q.sx + 2 * omu * u * q.mx + u * u * q.hx;
-    const y = omu * omu * q.sy + 2 * omu * u * q.my + u * u * q.hy;
+    const level = Math.min(ALPHA_LEVELS, Math.max(1, Math.ceil(a * ALPHA_LEVELS)));
+    levels[i] = level;
+    counts[level - 1]!++;
+  }
 
-    const melt = stage === "solid" ? merge : 0;
-    const size = q.r * (0.9 + u * 0.15) * (1 + melt * 1.15);
-    const a = particleAlpha * q.fade;
-
-    if (a <= 0.01) continue;
-
-    const light = 64 + melt * 6;
-    const sat = 80 - melt * 6;
+  for (let level = 1; level <= ALPHA_LEVELS; level++) {
+    if (counts[level - 1] === 0) continue;
 
     ctx.beginPath();
-    ctx.arc(x, y, size, 0, Math.PI * 2);
-    ctx.fillStyle = `hsla(${q.hue}, ${sat}%, ${light}%, ${a})`;
+    for (let i = 0; i < n; i++) {
+      if (levels[i] !== level) continue;
+      const x = xs[i]!;
+      const y = ys[i]!;
+      const r = rs[i]!;
+      ctx.moveTo(x + r, y); // start each dot separately so no connecting lines are drawn
+      ctx.arc(x, y, r, 0, TAU);
+    }
+    ctx.fillStyle = `hsla(${HUE}, ${sat}%, ${light}%, ${(level - 0.5) / ALPHA_LEVELS})`;
     ctx.fill();
   }
 }

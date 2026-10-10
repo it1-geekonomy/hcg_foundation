@@ -20,44 +20,43 @@ if((n&&n!=='logo')||s.getItem('came_from_details')||/projects|events|smilestorie
 var c=document.getElementById('intro-cover');if(c)c.style.display='none'}}catch(e){}`;
 
 export default function HomeClient({ children, isBot }: { children: React.ReactNode; isBot?: boolean }) {
-  const [ready, setReady] = useState(() => {
-    if (isBot) return true;
-    if (typeof window !== "undefined") {
-      const h = window.location.hash;
-      const navAction = sessionStorage.getItem("nav_action");
-      const cameFromDetails = sessionStorage.getItem("came_from_details");
-
-      if (navAction === "logo") return false;
-      if (navAction) return true;
-      if (cameFromDetails) return true;
-
-      return h.includes("projects") || h.includes("events") || h.includes("smilestories");
-    }
-    return false;
-  });
-
-  const [showDonationOverlay, setShowDonationOverlay] = useState(() => {
-    // PageSpeed opens this late and then scores the popup photo instead of the hero.
-    if (isBot || (typeof navigator !== "undefined" && navigator.webdriver)) return false;
-    if (typeof window !== "undefined") {
-      const h = window.location.hash;
-      const navAction = sessionStorage.getItem("nav_action");
-      const cameFromDetails = sessionStorage.getItem("came_from_details");
-
-      if (navAction === "logo") return true;
-      if (navAction) return false;
-      if (cameFromDetails) return false;
-
-      const isReady = h.includes("projects") || h.includes("events") || h.includes("smilestories");
-      return !isReady && !h;
-    }
-    return false;
-  });
+  const [ready, setReady] = useState(isBot || false);
+  const [showDonationOverlay, setShowDonationOverlay] = useState(false);
 
   // The server HTML always contains the homepage (the intro/overlay are ssr:false and load later),
   // so on a first visit the homepage used to flash until those chunks arrived. This cover sits on
   // top from the very first paint and is removed only once the intro/overlay chunks have loaded.
   const [coverGone, setCoverGone] = useState(false);
+
+  useEffect(() => {
+    if (!isBot) {
+      const h = window.location.hash;
+      const navAction = sessionStorage.getItem("nav_action");
+      const cameFromDetails = sessionStorage.getItem("came_from_details");
+      const isAuto = navigator.webdriver;
+
+      let nextReady = false;
+      let nextOverlay = false;
+
+      if (navAction === "logo") {
+        nextReady = false;
+        nextOverlay = true;
+      } else if (navAction || cameFromDetails) {
+        nextReady = true;
+        nextOverlay = false;
+      } else {
+        const hasHash = h.includes("projects") || h.includes("events") || h.includes("smilestories");
+        nextReady = isAuto || hasHash;
+        nextOverlay = !isAuto && !hasHash && !h;
+      }
+
+      setReady(nextReady);
+      setShowDonationOverlay(nextOverlay);
+    }
+    // Run exactly ONCE on mount to sync client state without structural hydration mismatch.
+    // Do NOT depend on ready/showDonationOverlay, otherwise it reverts them after the intro finishes!
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (ready && !showDonationOverlay) {
@@ -167,10 +166,10 @@ export default function HomeClient({ children, isBot }: { children: React.ReactN
             id="intro-cover"
             aria-hidden
             suppressHydrationWarning
-            // Match IntroSequence's background colour so the handover is invisible.
-            className="fixed inset-0 z-[9999] bg-black"
+            // Same colour as IntroSequence's background so the handover is invisible.
+            className="fixed inset-0 z-[9999] bg-[#2D2D2D]"
           />
-          <script dangerouslySetInnerHTML={{ __html: COVER_GUARD }} />
+          <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: COVER_GUARD }} />
         </>
       )}
 

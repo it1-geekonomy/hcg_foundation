@@ -4,12 +4,14 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
 } from "react";
 import Image, { getImageProps } from "next/image";
 import { preload } from "react-dom";
+import { hyphenateSync } from "hyphen/en";
 import { cn } from "@/lib/utils";
 import {
   HERO_CONTENT_INSET_MULTIPLIER,
@@ -26,7 +28,7 @@ import {
 } from "@/domains/home/utils/heroScrollReset";
 
 // ============================================================================
-// RESPONSIVE LAYOUT
+// RESPONSIVE LAYOUT  (unchanged from the original)
 // ============================================================================
 
 function clamp01(value: number) {
@@ -189,13 +191,18 @@ const HERO_OVERLAY_BG_MOBILE =
   "linear-gradient(180deg, rgba(153,115,0,0.74) 0%, rgba(122,92,0,0.86) 100%)";
 
 /**
- * First-paint panel width / tile edge, in CSS only, so the server HTML already matches the screen.
- * Once the layout has been measured (`synced`), the exact inline values from getResponsiveValues
- * take over, so the final position is identical to the original (including the 1024–1279 interpolation).
+ * PERF: first-paint panel width / tile edge in CSS only, so the server HTML already matches the screen
+ * (no layout shift). Once the layout is measured (`synced`), the exact inline values from
+ * getResponsiveValues take over, so final positions are identical to the original.
  */
 const HERO_PANEL = "w-[58%] sm:w-[42%] lg:w-[38%] xl:w-[35%]";
 const HERO_PANEL_RIGHT = "right-[58%] sm:right-[42%] lg:right-[38%] xl:right-[35%]";
 
+/**
+ * PERF: picks the phone or desktop photo with <picture> media queries, and preloads only the one that
+ * will be used. Previously the server preloaded the desktop photo and phones then downloaded a second
+ * (mobile) photo after hydration.
+ */
 function HeroBackground({
   desktopSrc,
   mobileSrc,
@@ -298,7 +305,8 @@ function getTileTranslateY(
 }
 
 // ============================================================================
-// ANIMATED TEXT
+// ANIMATED TEXT  (all stories stay mounted, exactly like the original, so every
+// enter/exit transition plays smoothly)
 // ============================================================================
 
 function renderWordLines(
@@ -388,6 +396,12 @@ function StoryTextBlock({
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Long CMS stories shrink (down to MIN_TEXT_FIT) instead of running past the panel.
+  //
+  // PERF: this measures layout (forced reflow). Doing it for every hidden story at load blocks the main
+  // thread, so only the visible story (active / exiting) is fitted immediately. Hidden stories are fitted
+  // when the browser is idle, and again right away the moment they become active, so a story is always
+  // correctly sized before it is shown.
+  const needsNow = active || exiting;
   useLayoutEffect(() => {
     const frame = frameRef.current;
     const content = contentRef.current;
@@ -405,11 +419,25 @@ function StoryTextBlock({
         frame.style.setProperty("--fit", scale.toFixed(3));
       }
     };
-    fit();
-    const observer = new ResizeObserver(fit);
-    observer.observe(frame);
-    return () => observer.disconnect();
-  }, [layout, step]);
+
+    if (needsNow) {
+      fit();
+      const observer = new ResizeObserver(fit);
+      observer.observe(frame);
+      return () => observer.disconnect();
+    }
+
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (w.requestIdleCallback) {
+      const id = w.requestIdleCallback(fit, { timeout: 1500 });
+      return () => w.cancelIdleCallback?.(id);
+    }
+    const id = window.setTimeout(fit, 200);
+    return () => window.clearTimeout(id);
+  }, [layout, step, needsNow]);
 
   // The phone panel sits over busy photos, so text gets a soft shadow there for legibility.
   const mobileShadow: CSSProperties = layout.isMobile
@@ -428,6 +456,13 @@ function StoryTextBlock({
   const subheading = step.name ? step.tagline : "";
   const hasHeading = Boolean(heading);
   const textColumnOffset = hasHeading ? 4 + layout.accentGap : 0;
+
+  // Phones justify the story in a ~190px column. Soft hyphens give every browser break points, since
+  // CSS `hyphens: auto` depends on per-platform dictionaries; without them the word gaps stretch badly.
+  const mobileBody = useMemo(
+    () => hyphenateSync(step.body, { minWordLength: 6 }),
+    [step.body]
+  );
 
   // Phones animate the story as one block: a per-word cascade over 60+ words stutters and hides text mid-read.
   const animateWords = !layout.isMobile;
@@ -502,12 +537,12 @@ function StoryTextBlock({
               marginTop: subheading ? layout.taglineGap : layout.nameGap,
               lineHeight: layout.bodyLineHeight ?? 1.65,
               ...(layout.isMobile
-                ? { overflowWrap: "break-word", hyphens: "auto", WebkitHyphens: "auto" }
+                ? { textAlign: "justify", textAlignLast: "left", hyphens: "manual", WebkitHyphens: "manual" }
                 : {}),
             }),
           }}
         >
-          {words(step.body)}
+          {words(layout.isMobile ? mobileBody : step.body)}
         </div>
       </div>
     </div>
@@ -548,6 +583,10 @@ export default function TileScrollSection({
   const isAnimatingRef = useRef(false);
   const isResettingRef = useRef(false);
   const isPinnedRef = useRef(false);
+  const exitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollRafRef = useRef(0);
+  // PERF: the pinned range only changes on resize, so it is measured then instead of on every scroll event.
+  const pinnedRangeRef = useRef(0);
   const navClearanceRef = useRef(getNavbarClearancePx());
   const layoutRef = useRef(layout);
   const layoutSizeRef = useRef("");
@@ -555,6 +594,21 @@ export default function TileScrollSection({
   const getViewportHeight = useCallback(
     () => viewportProbeRef.current?.offsetHeight || window.innerHeight,
     []
+  );
+
+  /** Scroll distance over which the hero stays pinned; each story owns an equal share of it. */
+  const measurePinnedRange = useCallback(() => {
+    const wrapper = wrapperRef.current;
+    const hero = heroRef.current;
+    if (!wrapper || !hero) return 0;
+    const range = Math.max(0, wrapper.offsetHeight - hero.offsetHeight);
+    pinnedRangeRef.current = range;
+    return range;
+  }, []);
+
+  const getPinnedRange = useCallback(
+    () => pinnedRangeRef.current || measurePinnedRange(),
+    [measurePinnedRange]
   );
 
   const syncLayout = useCallback(() => {
@@ -599,20 +653,22 @@ export default function TileScrollSection({
       setDirection(dir);
       setExitStep(prev);
       setActiveStep(step);
-      setTimeout(() => setExitStep(null), 500);
+
+      // Clearing the previous timer stops an older timeout from ending a newer exit early.
+      if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
+      exitTimerRef.current = setTimeout(() => setExitStep(null), 500);
 
       moveTile(step);
     },
     [moveTile]
   );
 
-  /** Scroll distance over which the hero stays pinned; each story owns an equal share of it. */
-  const getPinnedRange = useCallback(() => {
-    const wrapper = wrapperRef.current;
-    const hero = heroRef.current;
-    if (!wrapper || !hero) return 0;
-    return Math.max(0, wrapper.offsetHeight - hero.offsetHeight);
-  }, []);
+  useEffect(
+    () => () => {
+      if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
+    },
+    []
+  );
 
   const scrollToStep = useCallback(
     (step: number) => {
@@ -719,18 +775,33 @@ export default function TileScrollSection({
     return () => window.removeEventListener(HERO_RESET_EVENT, onHeroReset);
   }, [resetToTop]);
 
+  // PERF: scroll events can fire several times per frame; handle at most once per frame.
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    const onScroll = () => {
+      if (scrollRafRef.current) return;
+      scrollRafRef.current = requestAnimationFrame(() => {
+        scrollRafRef.current = 0;
+        handleScroll();
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
     queueMicrotask(() => handleScroll());
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (scrollRafRef.current) {
+        cancelAnimationFrame(scrollRafRef.current);
+        scrollRafRef.current = 0;
+      }
+    };
   }, [handleScroll]);
 
   useLayoutEffect(() => {
     syncLayout();
+    measurePinnedRange();
     setSynced(true);
     moveTile(0);
     applyStep(0, true);
-  }, [moveTile, applyStep, syncLayout]);
+  }, [moveTile, applyStep, syncLayout, measurePinnedRange]);
 
   // Re-place the tile once React has applied the new layout (tile size changes per breakpoint).
   useEffect(() => {
@@ -740,11 +811,12 @@ export default function TileScrollSection({
   useEffect(() => {
     const onResize = () => {
       syncLayout();
+      measurePinnedRange();
       moveTile(currentStepRef.current);
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [moveTile, syncLayout]);
+  }, [moveTile, syncLayout, measurePinnedRange]);
 
   return (
     <div
@@ -815,18 +887,17 @@ export default function TileScrollSection({
               : undefined
           }
         >
-          {steps.map((step, i) =>
-            i === activeStep || i === exitStep ? (
-              <StoryTextBlock
-                key={`story-${i}`}
-                step={step}
-                active={activeStep === i}
-                exiting={exitStep === i}
-                direction={direction}
-                layout={layout}
-              />
-            ) : null
-          )}
+          {/* All stories stay mounted (as in the original) so each one animates in/out smoothly. */}
+          {steps.map((step, i) => (
+            <StoryTextBlock
+              key={`story-${i}`}
+              step={step}
+              active={activeStep === i}
+              exiting={exitStep === i}
+              direction={direction}
+              layout={layout}
+            />
+          ))}
         </div>
 
         {/* Tile: transform is owned by moveTile() (inline), exactly like the original.
