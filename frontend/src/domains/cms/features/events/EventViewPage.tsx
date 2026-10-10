@@ -167,7 +167,7 @@ export default function EventViewPage() {
       </div>
 
       <CmsWebsitePreview label="Website preview" className="bg-[#FFF6D8]">
-        <EventsListSection previewEvent={previewEvent} />
+        <EventsListSection previewEvent={previewEvent} previewMode={true} />
       </CmsWebsitePreview>
     </div>
   );

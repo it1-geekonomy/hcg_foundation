@@ -7,7 +7,7 @@ import { publicEventsApi } from "@/domains/cms/lib/api";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
-export default function EventsListSection({ previewEvent }: { previewEvent?: EventItem | null }) {
+export default function EventsListSection({ previewEvent, previewMode }: { previewEvent?: EventItem | null; previewMode?: boolean }) {
   const [allEvents, setAllEvents] = useState<EventItem[]>([]);
   const [currentPage, setCurrentPage] = useState(() => {
     if (typeof window !== "undefined") {
@@ -169,6 +169,7 @@ export default function EventsListSection({ previewEvent }: { previewEvent?: Eve
                 event={eventItem}
                 headingTag="h2"
                 className="w-full shadow-2xl shadow-black/10 lg:shadow-xs transition-all duration-500"
+                previewMode={previewMode}
               />
             </div>
           ))}

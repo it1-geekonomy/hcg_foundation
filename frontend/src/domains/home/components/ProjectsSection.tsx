@@ -304,7 +304,7 @@ function MoreDetailsButton({
     <ArrowIcon className={compact ? "size-3.5" : "size-3 sm:size-3.5"} />
   );
 
-  if (previewMode || !href) {
+  if (!href) {
     return (
       <span className={`${classes} cursor-default opacity-90`}>
         {label}
@@ -319,6 +319,7 @@ function MoreDetailsButton({
       className={classes}
       onClick={() => sessionStorage.setItem(PROJECT_FROM_HOME_KEY, "1")}
       aria-label={ariaLabel}
+      {...(previewMode ? { target: "_blank", rel: "noopener noreferrer" } : {})}
     >
       {label}
       {icon}
