@@ -118,27 +118,33 @@ export default function PatientStoryCard({
   );
 
   return (
-    <Link
-      href={detailUrl}
-      style={style}
-      onClick={handleCardClick}
-      className={cn(
-        "block sticky top-[var(--mobile-top)] lg:top-auto lg:relative aspect-[24.0744/30.8173] w-full max-w-[28rem] mx-auto lg:max-w-none rounded-[1.2643rem]",
-        className
-      )}
-      aria-label={`Read story of ${story.patientName}`}
-    >
-      <FlipCard
-        className="h-full w-full rounded-[1.2643rem]"
-        roundedClassName="rounded-[1.2643rem]"
-        isFlipped={isFlipped}
-        onFlipChange={setIsFlipped}
+    <>
+      {/* Explicit SEO Link for Crawlers (Screaming Frog) */}
+      <a href={detailUrl} className="sr-only">
+        Read story of {story.patientName}
+      </a>
+      <Link
+        href={detailUrl}
+        style={style}
         onClick={handleCardClick}
-        flipOnHover={true}
-        duration={0.42}
-        front={frontContent}
-        back={renderBackContent}
-      />
-    </Link>
+        className={cn(
+          "block sticky top-[var(--mobile-top)] lg:top-auto lg:relative aspect-[24.0744/30.8173] w-full max-w-[28rem] mx-auto lg:max-w-none rounded-[1.2643rem]",
+          className
+        )}
+        aria-label={`Read story of ${story.patientName}`}
+      >
+        <FlipCard
+          className="h-full w-full rounded-[1.2643rem]"
+          roundedClassName="rounded-[1.2643rem]"
+          isFlipped={isFlipped}
+          onFlipChange={setIsFlipped}
+          onClick={handleCardClick}
+          flipOnHover={true}
+          duration={0.42}
+          front={frontContent}
+          back={renderBackContent}
+        />
+      </Link>
+    </>
   );
 }

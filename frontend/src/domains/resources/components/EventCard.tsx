@@ -165,22 +165,27 @@ export default function EventCard({
   );
 
   return (
-    <Link 
-      href={detailUrl} 
-      onClick={handleCardClick}
-      className={`block w-full max-w-[38rem] mx-auto aspect-[4/3.5] sm:aspect-[16/11] xl:aspect-[16/11] ${className}`}
-      aria-label={`View details for ${event.title}`}
-    >
-      <FlipCard
-        className="h-full w-full"
-        roundedClassName="rounded-[0.375rem]"
-        isFlipped={isFlipped}
-        onFlipChange={setIsFlipped}
-        flipOnHover={true}
-        duration={0.42}
-        front={frontContent}
-        back={renderBackContent}
-      />
-    </Link>
+    <>
+      <a href={detailUrl} className="sr-only">
+        View details for {event.title}
+      </a>
+      <Link 
+        href={detailUrl} 
+        onClick={handleCardClick}
+        className={`block w-full max-w-[38rem] mx-auto aspect-[4/3.5] sm:aspect-[16/11] xl:aspect-[16/11] ${className}`}
+        aria-label={`View details for ${event.title}`}
+      >
+        <FlipCard
+          className="h-full w-full"
+          roundedClassName="rounded-[0.375rem]"
+          isFlipped={isFlipped}
+          onFlipChange={setIsFlipped}
+          flipOnHover={true}
+          duration={0.42}
+          front={frontContent}
+          back={renderBackContent}
+        />
+      </Link>
+    </>
   );
 }
