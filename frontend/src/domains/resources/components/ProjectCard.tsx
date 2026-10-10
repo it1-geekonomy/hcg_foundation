@@ -115,22 +115,27 @@ export default function ProjectCard({
   );
 
   return (
-    <Link 
-      href={detailUrl} 
-      onClick={handleCardClick}
-      className={`block w-full aspect-[4/3.5] sm:aspect-[4/3] xl:aspect-[4/3] ${className}`}
-      aria-label={`View details for ${project.title}`}
-    >
-      <FlipCard
-        className="h-full w-full"
-        roundedClassName="rounded-[0.375rem]"
-        isFlipped={isFlipped}
-        onFlipChange={setIsFlipped}
-        flipOnHover={true}
-        duration={0.42}
-        front={frontContent}
-        back={renderBackContent}
-      />
-    </Link>
+    <>
+      <a href={detailUrl} className="sr-only">
+        View details for {project.title}
+      </a>
+      <Link 
+        href={detailUrl} 
+        onClick={handleCardClick}
+        className={`block w-full aspect-[4/3.5] sm:aspect-[4/3] xl:aspect-[4/3] ${className}`}
+        aria-label={`View details for ${project.title}`}
+      >
+        <FlipCard
+          className="h-full w-full"
+          roundedClassName="rounded-[0.375rem]"
+          isFlipped={isFlipped}
+          onFlipChange={setIsFlipped}
+          flipOnHover={true}
+          duration={0.42}
+          front={frontContent}
+          back={renderBackContent}
+        />
+      </Link>
+    </>
   );
 }

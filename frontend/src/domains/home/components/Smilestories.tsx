@@ -287,32 +287,35 @@ const StoryCard = memo(function StoryCard({
 
   return (
     // flex-1 = fill the (stretched) carousel item; the sizer gives the minimum height
-    <Link 
-      href={link}
-      onClick={onCardClick}
-      className="relative w-full flex-1 block"
-      aria-label={`Read story of ${name}`}
-    >
-      <StoryCardSizer />
-
-      {/* the real flip card fills whatever height the row ends up with */}
-      <div className="absolute inset-0">
-        <FlipCard
-          className="h-full w-full rounded-[1.2643rem]"
-          roundedClassName="rounded-[1.2643rem]"
-          isFlipped={currentFlipped}
-          onFlipChange={handleFlipChange}
-          onClick={(e) => {
-            // On desktop mouse, clicking the card navigates.
-            // On mobile touch, clicking the card flips or taps Read More.
-          }}
-          flipOnHover={true}
-          duration={0.42}
-          front={frontContent}
-          back={renderBackContent}
-        />
-      </div>
-    </Link>
+    <>
+      <a href={link} className="sr-only">Read story of {name}</a>
+      <Link 
+        href={link}
+        onClick={onCardClick}
+        className="relative w-full flex-1 block"
+        aria-label={`Read story of ${name}`}
+      >
+        <StoryCardSizer />
+  
+        {/* the real flip card fills whatever height the row ends up with */}
+        <div className="absolute inset-0">
+          <FlipCard
+            className="h-full w-full rounded-[1.2643rem]"
+            roundedClassName="rounded-[1.2643rem]"
+            isFlipped={currentFlipped}
+            onFlipChange={handleFlipChange}
+            onClick={(e) => {
+              // On desktop mouse, clicking the card navigates.
+              // On mobile touch, clicking the card flips or taps Read More.
+            }}
+            flipOnHover={true}
+            duration={0.42}
+            front={frontContent}
+            back={renderBackContent}
+          />
+        </div>
+      </Link>
+    </>
   );
 });
 
