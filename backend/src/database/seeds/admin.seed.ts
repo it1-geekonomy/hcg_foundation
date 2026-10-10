@@ -20,7 +20,7 @@ async function seed() {
   const username = (process.env.SEED_ADMIN_USERNAME ?? 'admin')
     .trim()
     .toLowerCase();
-  const password = process.env.SEED_ADMIN_PASSWORD ?? 'Admin@12345';
+  const password = process.env.SEED_ADMIN_PASSWORD ?? '7E@9866ce!';
 
   await AppDataSource.initialize();
   const repo = AppDataSource.getRepository(User);
