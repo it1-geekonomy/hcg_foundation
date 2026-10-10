@@ -4,7 +4,6 @@ import HomeBelowFoldLoader from "@/domains/home/components/HomeBelowFoldLoader";
 import { loadHomeProjectCards } from "@/domains/home/components/HomeProjectsSection";
 import { SeoLinks } from "./SeoLinks";
 
-
 export default function ClientPage() {
   // Start loading project data alongside the hero. It is below the fold and
   // streamed independently so the API response cannot hold up the first page bytes.
