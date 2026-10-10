@@ -293,10 +293,33 @@ export default function ParticipateModal({
     window.open(fileUrl, "_blank", "noopener,noreferrer");
   };
 
-  // Lock body scroll when modal is open
+  // Lock body & touch scroll when modal is open (iOS Safari compatible)
   useEffect(() => {
     if (isOpen) {
+      // Prevent iOS Safari background scrolling when dragging/swiping on modal
+      const preventTouchScroll = (e: TouchEvent) => {
+        const target = e.target as HTMLElement | null;
+        if (target && target.closest(".overflow-y-auto")) {
+          return;
+        }
+        if (e.cancelable) {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener("touchmove", preventTouchScroll, { passive: false });
+
+      const scrollY = window.scrollY;
+      const originalPosition = document.body.style.position;
+      const originalTop = document.body.style.top;
+      const originalWidth = document.body.style.width;
+      const originalOverflow = document.body.style.overflow;
+
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
       document.body.style.overflow = "hidden";
+
       // Fresh clean state every time modal is opened
       setSubmitted(false);
       setSubmitting(false);
@@ -324,12 +347,16 @@ export default function ParticipateModal({
         message: "",
         agreeTerms: false,
       });
-    } else {
-      document.body.style.overflow = "unset";
+
+      return () => {
+        document.removeEventListener("touchmove", preventTouchScroll);
+        document.body.style.position = originalPosition;
+        document.body.style.top = originalTop;
+        document.body.style.width = originalWidth;
+        document.body.style.overflow = originalOverflow;
+        window.scrollTo(0, scrollY);
+      };
     }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
   }, [isOpen, type]);
 
   // Close on Escape key press
