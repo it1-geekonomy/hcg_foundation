@@ -14,6 +14,7 @@ export type TeamMemberCardProps = {
   imageUrl?: string | null;
   description?: string | null;
   variant?: "trustee" | "team";
+  previewMode?: boolean;
 };
 
 export default function TeamMemberCard({
@@ -23,6 +24,7 @@ export default function TeamMemberCard({
   imageUrl,
   description,
   variant = "trustee",
+  previewMode = false,
 }: TeamMemberCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
   const showImage = Boolean(imageUrl?.trim()) && imageUrl !== "null" && !imageFailed;
@@ -105,7 +107,11 @@ export default function TeamMemberCard({
 
   if (href) {
     return (
-      <Link href={href} className={shellClass}>
+      <Link 
+        href={href} 
+        className={shellClass}
+        {...(previewMode ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
         {inner}
       </Link>
     );
