@@ -7,8 +7,8 @@ import { cmsApi, publicProjectsApi } from "@/domains/cms/lib/api";
 import { cmsConfirm } from "@/domains/cms/lib/confirm";
 import { cmsToast } from "@/domains/cms/lib/toast";
 import type { CmsProject } from "@/domains/cms/lib/types";
-import ProjectCard from "@/domains/resources/components/ProjectCard";
-import type { ProjectItem } from "@/domains/resources/constants/projects";
+import ProjectsSection from "@/domains/home/components/ProjectsSection";
+import { mapProjectToCard } from "@/domains/home/constants/project";
 import CmsWebsitePreview from "@/domains/cms/ui/CmsWebsitePreview";
 import {
   CmsBadge,
@@ -109,17 +109,6 @@ export default function ProjectViewPage() {
 
   const isDeleted = Boolean(project.deletedAt);
 
-  const previewProject: ProjectItem | null = project ? {
-    id: project.id ?? "",
-    slug: project.slug ?? "",
-    title: project.title ?? "",
-    category: "Project",
-    summary: project.shortDescription ?? "",
-    fullStory: project.content ?? "",
-    imageUrl: project.projectBanner || project.projectMobileBanner || "",
-    mobileImageUrl: project.projectMobileBanner || project.projectBanner || "",
-  } : null;
-
   return (
     <div className="space-y-6">
       <CmsViewHeader
@@ -162,11 +151,15 @@ export default function ProjectViewPage() {
         }
       />
 
-      <CmsWebsitePreview label="Website preview" className="bg-[#FFF6D8]">
-        <div className="max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex justify-center">
-          <div className="w-full max-w-3xl">
-            {previewProject ? <ProjectCard project={previewProject} /> : null}
-          </div>
+      <CmsWebsitePreview label="Website preview (Homepage style)">
+        <div className="bg-[#FFF6D8] w-full">
+          {project ? (
+            <ProjectsSection
+              cards={[
+                mapProjectToCard(project, 0)
+              ]}
+            />
+          ) : null}
         </div>
       </CmsWebsitePreview>
 
