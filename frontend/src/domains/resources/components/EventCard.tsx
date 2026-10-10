@@ -26,12 +26,14 @@ interface EventCardProps {
   event: EventItem;
   headingTag?: "h2" | "h3";
   className?: string;
+  previewMode?: boolean;
 }
 
 export default function EventCard({
   event,
   headingTag = "h2",
   className = "",
+  previewMode = false,
 }: EventCardProps) {
   const router = useRouter();
   const [isFlipped, setIsFlipped] = useState(false);
@@ -140,12 +142,15 @@ export default function EventCard({
           ) : null}
         </div>
 
-        {/* Read More Button Constant at Bottom Center */}
         <div className="relative z-10 w-full flex justify-center shrink-0 pt-3 border-t border-[#E0D4AE]/50 mt-2">
           <Link
             href={detailUrl}
             data-no-drag="true"
             onClick={(e) => {
+              if (previewMode) {
+                e.stopPropagation();
+                return;
+              }
               e.stopPropagation();
               if (typeof window !== "undefined") {
                 sessionStorage.setItem("events_page_scroll", String(window.scrollY));
@@ -153,6 +158,7 @@ export default function EventCard({
               }
             }}
             className="inline-flex items-center justify-center whitespace-nowrap h-[1.75rem] lg:h-[2.5rem] xl:h-[3rem] w-auto xl:w-[9.5rem] px-[0.75rem] lg:px-[1.25rem] gap-[0.45rem] rounded-[6px] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
+            {...(previewMode ? { target: "_blank", rel: "noopener noreferrer" } : {})}
           >
             <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
               Read More
@@ -166,14 +172,18 @@ export default function EventCard({
 
   return (
     <>
-      <a href={detailUrl} className="sr-only">
+      <a href={detailUrl} className="sr-only" {...(previewMode ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
         View details for {event.title}
       </a>
       <Link 
         href={detailUrl} 
-        onClick={handleCardClick}
+        onClick={(e) => {
+          if (previewMode) return;
+          handleCardClick();
+        }}
         className={`block w-full max-w-[38rem] mx-auto aspect-[4/3.5] sm:aspect-[16/11] xl:aspect-[16/11] ${className}`}
         aria-label={`View details for ${event.title}`}
+        {...(previewMode ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       >
         <FlipCard
           className="h-full w-full"

@@ -109,6 +109,8 @@ export default function ProjectViewPage() {
 
   const isDeleted = Boolean(project.deletedAt);
 
+  const previewCard = project ? mapProjectToCard(project, 0) : null;
+
   return (
     <div className="space-y-6">
       <CmsViewHeader
@@ -153,12 +155,8 @@ export default function ProjectViewPage() {
 
       <CmsWebsitePreview label="Website preview (Homepage style)">
         <div className="bg-[#FFF6D8] w-full">
-          {project ? (
-            <ProjectsSection
-              cards={[
-                mapProjectToCard(project, 0)
-              ]}
-            />
+          {previewCard ? (
+            <ProjectsSection cards={[previewCard]} previewMode={true} />
           ) : null}
         </div>
       </CmsWebsitePreview>
