@@ -98,7 +98,23 @@ export default function Footer() {
             <ul className="mt-3 space-y-1.5 min-[375px]:whitespace-nowrap md:whitespace-normal lg:mt-8 lg:space-y-3">
               {FOOTER_QUICK_LINKS.map((item) => (
                 <li key={item.label}>
-                  <Link href={item.href} className="hover:text-[#FDB723] transition-colors text-white">
+                  <Link 
+                    href={item.href} 
+                    className="hover:text-[#FDB723] transition-colors text-white"
+                    onClick={(e) => {
+                      if (item.href.startsWith("#")) {
+                        e.preventDefault();
+                        const id = item.href.substring(1);
+                        const el = document.getElementById(id);
+                        if (el) {
+                          el.scrollIntoView({ behavior: "smooth" });
+                        } else {
+                          sessionStorage.setItem("pendingScroll", id);
+                          window.location.href = "/";
+                        }
+                      }
+                    }}
+                  >
                     <Typography variant="body-9" as="span" className="text-inherit">
                       {item.label}
                     </Typography>
