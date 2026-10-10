@@ -116,9 +116,10 @@ OUT_OF_SCOPE_ANSWER = (
 )
 
 SMALL_TALK_ANSWER = (
-    "I’m doing well, thank you for asking! How can I help you today? I can answer questions "
-    "about donating, Patient Aid, screening camps, volunteering, internships and events."
+    "Do you mean how HCG Foundation is doing, or how its programs work?"
 )
+
+CONTINUATION_ANSWER = "What else can I help you with? You can ask about our programs, Patient Aid, or how to volunteer."
 
 ABOUT_BOT_ANSWER = (
     "I’m Hope, the HCG Foundation AI Assistant. I can help you find information about "
@@ -126,7 +127,11 @@ ABOUT_BOT_ANSWER = (
     f"internships, and events. For further assistance, contact {OFFICIAL_EMAIL} or {OFFICIAL_PHONE}."
 )
 
-ACK_ANSWER = "Glad to help! Is there anything else you’d like to know about HCG Foundation?"
+ACK_ANSWER = "😊 You're welcome! Anything else I can help with?"
+
+NO_THANKS_ANSWER = "Alright! Have a great day. Feel free to reach out if you need anything else."
+
+CLARIFICATION_ANSWER = "Could you please clarify what you mean, or what you'd like to know more about?"
 
 SETUP_ANSWER = (
     "I’m still setting up my knowledge base. Please try again in a moment, "
