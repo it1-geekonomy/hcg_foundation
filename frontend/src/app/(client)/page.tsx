@@ -7,13 +7,26 @@ import { publicPatientStoriesApi } from "@/domains/cms/lib/api";
 // Renders visually hidden links for SEO crawlers since the visual stories load via client JS
 async function SeoPatientStoriesLinks() {
   try {
-    // Fetch the first 100 stories (or paginated list) server-side for the crawler
-    const res = await publicPatientStoriesApi.listPublished({ page: 1, limit: 100 });
-    if (!res?.data) return null;
+    let allStories: any[] = [];
+    let currentPage = 1;
+    let totalPages = 1;
+
+    // Fetch all pages of stories so the crawler sees every single link
+    while (currentPage <= totalPages) {
+      const res = await publicPatientStoriesApi.listPublished({ page: currentPage, limit: 100 });
+      if (!res?.data) break;
+
+      allStories = [...allStories, ...res.data];
+      totalPages = res.meta?.totalPages || 1;
+      currentPage++;
+    }
+
+    if (allStories.length === 0) return null;
+
     return (
       <div className="sr-only" aria-hidden="true">
         <h2>Patient Stories Index</h2>
-        {res.data.map((story) => (
+        {allStories.map((story) => (
           <a key={story.id} href={`/patient-stories/${story.slug || story.id}`}>
             {story.title}
           </a>
