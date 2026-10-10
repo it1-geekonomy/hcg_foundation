@@ -1,7 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { fontVariableClassNames } from "@/lib/fonts";
 import { PAGE_SEO, SITE_NAME, SITE_URL } from "@/lib/seo";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 // No canonical here: it would be inherited by every route that doesn't set its own.
 export const metadata: Metadata = {
