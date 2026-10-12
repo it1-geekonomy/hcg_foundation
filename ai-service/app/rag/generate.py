@@ -36,13 +36,20 @@ Rules:
 16. Context blocks with Category "Page" hold the actual text of the public website pages — prefer them when describing programs, initiatives and how to get involved.
 17. Answer the question that was asked, directly, in the first sentence. Start with Yes or No only when context states that answer explicitly; when context only says something is not published or not described, say exactly that instead of Yes/No.
 18. Never mention "context", "provided information" or "documents" to the visitor. When a detail is missing, say it is not published on our website, then share any closely related facts the context does give (for example, related programs or work with schools, hospitals or communities) before suggesting the official contact.
+19. 80G Tax Benefit: State that it is valid till AY 2026-27 (or as per current certificate context). Terms: Qualifies for 50% deduction, limited to 10% of gross total income. Claimable only under the old tax regime. Donations above ₹2,000 must be non-cash. PAN/Aadhaar is required. Do not claim it is valid indefinitely.
+20. Payment Gateway: If asked, we use Razorpay for online donations.
+21. Funds & Income: Explain how funds support our programs. Never invent audited financial figures, and only mention donations/CSR if context supports both.
+22. International Donations: Acceptable via our FCRA bank account (details above). Do not invent online flows for international donations unless in context.
+23. Donor Details: For privacy, you do not have access to personal donor records, transactions, or receipts.
+24. Annual Reports/Documents: When listing reports or newsletters, always sort them newest-year first. Use the document's Title as the link label, linking to its URL (e.g. `[Annual Report 2025-26](/transparency-and-knowledge-hub)`). Do not generate fake URLs.
+25. Simplification/Elaboration: When a visitor asks "tell me more" or "explain in simple words", stay strictly focused on the specific topic of their previous turn. Do not broaden the answer to the whole gallery, program, or organization unless asked.
+26. Strict Adherence: When listing application steps or payment details (e.g. direct-payment to hospitals for Patient Aid), state exactly what the CONTEXT explicitly says. Never present unsupported requirements as mandatory, and never infer details about the patient covering remaining amounts unless explicitly stated.
 """
 
-# Second chance when nothing answers the question directly ("in-kind donations?",
-# "how many locations?"): an honest "not published" plus related facts beats a refusal.
 RELATED_INSTRUCTION = f"""The CONTEXT may not answer this exact question. Decide:
 - If CONTEXT contains facts that are clearly related and genuinely useful to this visitor, reply in 2-4 sentences: first say plainly that the specific detail asked about is not published on our website, then share the related facts, then suggest contacting {C.OFFICIAL_EMAIL} or {C.OFFICIAL_PHONE} for that specific point.
 - Only use facts stated in CONTEXT. Never guess numbers, policies or yes/no answers that CONTEXT does not state.
+- For financial questions, DO NOT substitute or append unrelated cost estimates or figures if the requested figure is not published. Just state it is not published and give the contact details.
 - If nothing in CONTEXT is related, reply with exactly: {C.NO_ANSWER_TOKEN}"""
 
 
@@ -140,6 +147,17 @@ def _no_upcoming_events_answer(contexts: list[dict]) -> str:
 
 
 def recover_if_needed(answer: str, question: str, contexts: list[dict], intents: set[str]) -> str:
+    q = (question or "").lower()
+    
+    if "donor_details" in intents:
+        return "For your privacy and security, I do not have access to personal donor records, transactions, or receipts. Please contact the Foundation directly at " + f"{C.OFFICIAL_EMAIL} or {C.OFFICIAL_PHONE}."
+        
+    if "payment_gateway" in intents:
+        return "Online donations on the HCG Foundation website are processed securely through the Razorpay payment gateway, which supports major credit and debit cards, UPI, and net banking."
+        
+    if "financial_stats" in intents:
+        return "Specific figures for total donations collected or audited income amounts are not published here. Donations and CSR funds directly support our cancer-care programs. You can contact our team for official financial reports."
+
     text = (answer or "").strip()
     if text and text != C.NO_ANSWER_TOKEN:
         return text
@@ -148,7 +166,6 @@ def recover_if_needed(answer: str, question: str, contexts: list[dict], intents:
         f"{c.get('title','')} {c.get('content','')} {c.get('designation','')}"
         for c in contexts
     ).lower()
-    q = (question or "").lower()
 
     if "psychological" in intents or "psychological" in q or "counsel" in q:
         if "psycholog" in joined or "counsel" in joined:
@@ -193,10 +210,16 @@ def recover_if_needed(answer: str, question: str, contexts: list[dict], intents:
             f"{C.OFFICIAL_EMAIL} or call {C.OFFICIAL_PHONE}."
         )
 
-    if "trustees" in intents or "founder" in intents:
+    wants_trustees = "trustees" in intents or "founder" in intents
+    wants_team = "team" in intents
+    
+    if "team" in q and any(w in q for w in ("where", "find", "section", "link", "url")):
+        return f"You can view the team profiles in the [{C.PAGE_LABELS[C.TEAM_URL]}]({C.TEAM_URL}) section of the About Us page."
+        
+    if wants_trustees or wants_team:
         from app.rag.team import list_answer
 
-        board = list_answer(trustees=True, team=False)
+        board = list_answer(trustees=wants_trustees, team=wants_team)
         if board:
             return board["answer"]
 

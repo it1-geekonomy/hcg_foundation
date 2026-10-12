@@ -99,7 +99,9 @@ def clean_answer(text: str) -> str:
         label, url = m.group(1), _SITE_PREFIX.sub("", m.group(2)) or "/"
         valid = public_url(url) if not url.startswith(("mailto:", "tel:")) else url
         if valid:
-            # The model tends to name a page after the document it read ("Swasti Gallery page" -> /about-us)
+            # Preserve document-specific titles instead of generic page labels
+            if any(k in label.lower() for k in ("report", "newsletter", "policy", "guideline")):
+                return f"[{label}]({valid})"
             return f"[{page_label(valid, label)}]({valid})"
         return m.group(0) if _allowed_external(url) else label
 

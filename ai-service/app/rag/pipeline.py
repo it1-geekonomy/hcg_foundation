@@ -90,6 +90,14 @@ def _answer(message: str, session_id: str | None) -> dict:
 
     hits = hybrid_retrieve(queries, intents, question=search_text)
     ranked = vector_store.with_neighbor_chunks(rerank(hits, intents))
+    
+    if "summarize" in intents and history:
+        last_asst = next((m["content"] for m in reversed(history) if m["role"] == "assistant"), "")
+        last_user = next((m["content"] for m in reversed(history) if m["role"] == "user"), "")
+        if last_asst:
+            user_message = f"Regarding my previous question '{last_user}', {user_message}"
+            ranked = [{"title": "Previous Answer", "content": last_asst, "url": "", "category": "Memory"}]
+
     if "hospital" in intents:
         extra = hospital_context()
         if extra:
