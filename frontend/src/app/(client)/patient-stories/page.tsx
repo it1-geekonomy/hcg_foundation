@@ -1,7 +1,29 @@
 import React from "react";
+import type { Metadata } from "next";
 import PatientStoriesClient from "./PatientStoriesClient";
 import { publicPatientStoriesApi } from "@/domains/cms/lib/api";
 import { PatientStory } from "@/domains/journey-of-hope/constants/stories";
+import { pageMetadata } from "@/lib/seo";
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams?: Promise<{ page?: string; search?: string }>;
+}): Promise<Metadata> {
+  const resolved = searchParams ? await searchParams : {};
+  const pageParam = parseInt(resolved.page || "1", 10);
+  const base = pageMetadata("/patient-stories");
+  if (pageParam > 1 || resolved.search) {
+    return {
+      ...base,
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+  return base;
+}
 
 function formatStoryDate(dateStr?: string | null): string {
   if (!dateStr) return "";
