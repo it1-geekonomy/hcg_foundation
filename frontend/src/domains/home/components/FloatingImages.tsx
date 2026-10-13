@@ -87,7 +87,7 @@ export default function HopeSection() {
             willChange: "opacity, filter, transform",
           }}
         >
-          Your Kindness
+          Your Contribution
         </Typography>
       </div>
     </section>

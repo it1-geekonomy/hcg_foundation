@@ -25,15 +25,17 @@ const C_SIZE: Vec2 = [42, 56];
 const G_SIZE: Vec2 = [45, 59];
 
 const YELLOW_POS: Vec3 = [-30, 4, 0];
-const BLUE_POS: Vec3 = [26, 14, 1];
+const BLUE_POS: Vec3 = [26, 8, 1];
 const PINK_POS: Vec3 = [15, -34, 2];
 
-const HANDS_GROUP_POS: Vec3 = [-95, 5, 0];
+const HANDS_GROUP_POS: Vec3 = [-78, 5, 0];
 
-const LETTER_GAP = 2;
-const H_POS: Vec3 = [32, 35, 3];
-const C_POS: Vec3 = [H_POS[0] + H_SIZE[0] / 2 + LETTER_GAP + C_SIZE[0] / 2, 35, 3];
-const G_POS: Vec3 = [C_POS[0] + C_SIZE[0] / 2 + LETTER_GAP + G_SIZE[0] / 2, 35, 3];
+const H_C_GAP = -3;   // gap between H and C (already looks right)
+const C_G_GAP = -10;  // gap between C and G, make it more negative (-16, -18) to close it more
+const RIGHT_SET_Y = 14; // was 35. Lower number = HCG + FOUNDATION + subtitle move DOWN
+const H_POS: Vec3 = [32, RIGHT_SET_Y, 3];
+const C_POS: Vec3 = [H_POS[0] + H_SIZE[0] / 2 + H_C_GAP + C_SIZE[0] / 2, RIGHT_SET_Y, 3];
+const G_POS: Vec3 = [C_POS[0] + C_SIZE[0] / 2 + C_G_GAP + G_SIZE[0] / 2, RIGHT_SET_Y, 3];
 
 interface Tween {
   x: number;
@@ -380,7 +382,7 @@ export default function HcgLogoAnimation({
   const lettersRightX = G_POS[0] + G_SIZE[0] / 2;
   const lettersWidth = lettersRightX - lettersLeftX;
 
-  const CONTENT_GAP = 8;
+  const CONTENT_GAP = 0;
   const lettersBottomEdgeY = G_POS[1] - G_SIZE[1] / 2;
   const lettersBottomY = lettersBottomEdgeY - CONTENT_GAP;
 
@@ -440,10 +442,10 @@ export default function HcgLogoAnimation({
         <Typography
           variant="brand-1"
           as="span"
-          className="block w-full whitespace-nowrap text-white antialiased"
+          className="block w-full whitespace-nowrap text-white antialiased mt-1"
           style={{
             fontSize: foundationFontPx ? `${foundationFontPx}px` : undefined,
-            lineHeight: 1.49,
+            lineHeight: 1,
             opacity: showFoundation && fitted ? 1 : 0,
             transform: showFoundation && fitted ? "translateY(0)" : "translateY(8px)",
             transition: "opacity 380ms ease-out, transform 480ms cubic-bezier(0.33, 1, 0.32, 1)",
@@ -455,10 +457,10 @@ export default function HcgLogoAnimation({
         <Typography
           variant="brand-2"
           as="span"
-          className="mt-1 block w-full whitespace-nowrap text-white antialiased"
+          className="block w-full whitespace-nowrap text-white antialiased"
           style={{
             fontSize: subtitleFontPx ? `${subtitleFontPx}px` : undefined,
-            lineHeight: 1.25,
+            lineHeight: 1,
             opacity: showSubtitle && fitted ? 1 : 0,
             transform: showSubtitle && fitted ? "translateY(0)" : "translateY(8px)",
             transition: "opacity 380ms ease-out, transform 480ms cubic-bezier(0.33, 1, 0.32, 1)",
