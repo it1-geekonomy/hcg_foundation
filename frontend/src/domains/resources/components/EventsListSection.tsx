@@ -211,7 +211,6 @@ export default function EventsListSection({
           currentPage={safePage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
-          getPageHref={(p) => (p === 1 ? "/events" : `/events?page=${p}`)}
           className="mt-12 sm:mt-16"
           showArrows={true}
           showNumbers={true}

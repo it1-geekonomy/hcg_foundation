@@ -243,13 +243,12 @@ export default function PatientStoriesClient({
           </div>
         )}
 
-        {/* Bottom Centered Pagination Navigation with crawlable links */}
+        {/* Bottom Centered Pagination Navigation */}
         {totalPages > 1 ? (
           <PaginationControls
             currentPage={safePage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
-            getPageHref={(p) => (p === 1 ? "/patient-stories" : `/patient-stories?page=${p}`)}
             showArrows={true}
             showNumbers={true}
             className="mt-12 sm:mt-16"
