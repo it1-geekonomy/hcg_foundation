@@ -81,8 +81,35 @@ export function ArrowScrollCarousel({ people }: { people: Person[] }) {
     const cardWidth = card
       ? card.offsetWidth + MOBILE_CARD_GAP_PX
       : el.clientWidth;
-    el.scrollBy({ left: dir * cardWidth, behavior: "smooth" });
+    if (dir === 1 && el.scrollLeft >= el.scrollWidth - el.clientWidth - 4) {
+      el.scrollTo({ left: 0, behavior: "smooth" });
+    } else {
+      el.scrollBy({ left: dir * cardWidth, behavior: "smooth" });
+    }
   };
+
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Auto-scroll every 3 seconds (pauses completely when hovered or reading a flipped card)
+  useEffect(() => {
+    if (people.length <= 1 || isHovered) return;
+
+    const timer = window.setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      const el = scrollRef.current;
+      const root = rootRef.current;
+      const isReadingOrHovered =
+        isHovered ||
+        Boolean(el?.querySelector('[data-flipped="true"]')) ||
+        Boolean(root?.matches(":hover")) ||
+        Boolean(el?.matches(":hover"));
+
+      if (isReadingOrHovered) return;
+      scrollByCard(1);
+    }, 3000);
+
+    return () => window.clearInterval(timer);
+  }, [people.length, isHovered]);
 
   // One-card-per-gesture: take over the horizontal swipe/scroll so a fast
   // flick or a long trackpad swipe still only ever advances a single card.
@@ -173,6 +200,8 @@ export function ArrowScrollCarousel({ people }: { people: Person[] }) {
   return (
     <div
       ref={rootRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={cx(
         "relative mx-auto flex w-full max-w-[1260px] items-start gap-1",
         "max-sm:-mx-8",
