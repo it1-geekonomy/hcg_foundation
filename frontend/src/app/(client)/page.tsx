@@ -18,7 +18,9 @@ export default function ClientPage() {
         <HomeBelowFoldLoader cards={cards} />
       </Suspense>
       {/* Hidden links so basic crawlers (like Screaming Frog) can find deep story links */}
-      <SeoLinks />
+      <Suspense fallback={null}>
+        <SeoLinks />
+      </Suspense>
     </>
   );
 }
