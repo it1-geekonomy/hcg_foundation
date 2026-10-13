@@ -12,7 +12,16 @@ type SeoLinkItem = {
   description: string;
 };
 
-export async function SeoLinks() {
+let cachedLinks: SeoLinkItem[] | null = null;
+let lastFetchedAt = 0;
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes cache
+
+async function getSiteLinks(): Promise<SeoLinkItem[]> {
+  const now = Date.now();
+  if (cachedLinks && now - lastFetchedAt < CACHE_TTL_MS) {
+    return cachedLinks;
+  }
+
   const links: SeoLinkItem[] = [];
 
   // 1. Static Main Pages from PAGE_SEO
@@ -24,8 +33,7 @@ export async function SeoLinks() {
     });
   }
 
-
-  // 2. Published Patient Stories (dynamically fetched from API so newly published stories automatically appear)
+  // 2. Published Patient Stories (dynamically fetched from API)
   try {
     let page = 1;
     let totalPages = 1;
@@ -103,9 +111,20 @@ export async function SeoLinks() {
     console.error("SeoLinks: Failed to fetch events:", error);
   }
 
+  if (links.length > 0) {
+    cachedLinks = links;
+    lastFetchedAt = now;
+  }
+
+  return cachedLinks || links;
+}
+
+export async function SeoLinks() {
+  const links = await getSiteLinks();
+
   return (
-    <div className="sr-only" aria-hidden="true">
-      <h2>Site Index</h2>
+    <nav aria-label="Site Directory" className="sr-only">
+      <h2>HCG Foundation Site Directory</h2>
       <ul>
         {links.map((link, idx) => (
           <li key={`${link.href}-${idx}`}>
@@ -113,6 +132,6 @@ export async function SeoLinks() {
           </li>
         ))}
       </ul>
-    </div>
+    </nav>
   );
 }
