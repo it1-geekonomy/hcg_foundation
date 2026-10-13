@@ -36,7 +36,7 @@ PAGE_LABELS = {
     DONATE_URL: "Donate Now",
     PATIENT_AID_URL: "Patient Aid",
     AWARENESS_URL: "Awareness & Screening Camps",
-    SWASTI_URL: "Swasthi Art Gallery",
+    SWASTI_URL: "Swasti Art Gallery",
     PINK_HOPE_URL: "Pink Hope Support Group",
     RESEARCH_URL: "Research & Innovation",
     PARTICIPATE_URL: "Volunteer & Internships",

@@ -2,8 +2,6 @@ import { Suspense } from "react";
 import { BannerSection } from "@/domains/home/index";
 import HomeBelowFoldLoader from "@/domains/home/components/HomeBelowFoldLoader";
 import { loadHomeProjectCards } from "@/domains/home/components/HomeProjectsSection";
-import { SeoLinks } from "./SeoLinks";
-
 export default function ClientPage() {
   // Start loading project data alongside the hero. It is below the fold and
   // streamed independently so the API response cannot hold up the first page bytes.
@@ -16,10 +14,6 @@ export default function ClientPage() {
       <BannerSection />
       <Suspense fallback={null}>
         <HomeBelowFoldLoader cards={cards} />
-      </Suspense>
-      {/* Hidden links so basic crawlers (like Screaming Frog) can find deep story links */}
-      <Suspense fallback={null}>
-        <SeoLinks />
       </Suspense>
     </>
   );

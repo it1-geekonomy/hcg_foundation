@@ -10,7 +10,7 @@ const GALLERY_IMAGES: { src: string; alt: string }[] = [
   { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356345002-y58ti-rectangle-211-4-.webp", alt: "Patients and volunteers with art work" },
   { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356381758-vfduz-rectangle-212-4-.webp", alt: "Patient with caregiver smiling" },
   { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356414992-dec74-rectangle-213-3-.webp", alt: "Gallery visitors at an exhibition" },
-  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356459093-35t5o-rectangle-210-5-.webp", alt: "Guests at a Swasthi event" },
+  { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356459093-35t5o-rectangle-210-5-.webp", alt: "Guests at a Swasti event" },
   { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356497605-7539h-rectangle-211-5-.webp", alt: "Family at the gallery" },
   { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356530502-ikhta-rectangle-212-5-.webp", alt: "Mother and child showing their artwork" },
   { src: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791356569601-tvwf5-rectangle-213-4-.webp", alt: "Child painting with a therapist" },

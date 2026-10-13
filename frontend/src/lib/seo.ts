@@ -52,9 +52,9 @@ export const PAGE_SEO = {
       "HCG Foundation organises cancer awareness and screening camps to help communities spot early signs and get checked in time. Learn more.",
   },
   "/swasti-art-gallery": {
-    title: "Swasthi Art Gallery & Art Therapy | HCG Foundation",
+    title: "Swasti Art Gallery & Art Therapy | HCG Foundation",
     description:
-      "Swasthi Art Gallery raises funds for cancer patients, and its art therapy sessions let patients create, reflect and express feelings. Visit the gallery.",
+      "Swasti Art Gallery raises funds for cancer patients, and its art therapy sessions let patients create, reflect and express feelings. Visit the gallery.",
   },
   "/pink-hope-support-group": {
     title: "Pink Hope Patient Support Group | HCG Foundation",

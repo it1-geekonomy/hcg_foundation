@@ -204,7 +204,7 @@ def _static_documents() -> list[dict]:
                 "camps focused on breast, oral and cervical cancers; Mobile Screening that takes "
                 "screening to underserved and remote areas; Student Outreach healthy-habits campaigns "
                 "for 4th–6th grade students in government schools since 2018; HPV vaccination.\n"
-                f"- Swasthi Art Gallery ({C.SWASTI_URL}) — art gallery and art therapy "
+                f"- Swasti Art Gallery ({C.SWASTI_URL}) — art gallery and art therapy "
                 "initiative since 2007 at HCG hospitals; proceeds support cancer patients.\n"
                 f"- Pink Hope Support Group ({C.PINK_HOPE_URL}).\n"
                 f"- Research & Innovation ({C.RESEARCH_URL}).\n"
