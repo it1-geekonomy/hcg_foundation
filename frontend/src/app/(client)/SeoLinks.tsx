@@ -24,12 +24,6 @@ export async function SeoLinks() {
     });
   }
 
-  // Optional supplementary team route if desired
-  links.push({
-    href: "/team",
-    title: "HCG Foundation Team",
-    description: "Find hope and support with HCG Foundation's team.",
-  });
 
   // 2. Published Patient Stories (dynamically fetched from API so newly published stories automatically appear)
   try {
