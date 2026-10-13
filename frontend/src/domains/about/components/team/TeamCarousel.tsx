@@ -51,6 +51,7 @@ export function TeamCarousel({
   const totalGapsPx = (visibleCount - 1) * CAROUSEL_GAP_PX;
   const cardWidthExpr = `min(${cardWidthPx}px, calc((100cqw - ${totalGapsPx}px) / ${visibleCount}))`;
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(!needsCarousel);
@@ -124,15 +125,47 @@ export function TeamCarousel({
       if (!el) return;
       const step = getCardStep();
       if (step <= 0) return;
+      const maxIndex = getMaxIndex();
       const base =
         pendingIndexRef.current ?? Math.round(el.scrollLeft / step);
-      scrollToIndex(base + dir);
+      const nextIndex = base + dir;
+      if (nextIndex > maxIndex) {
+        scrollToIndex(0);
+      } else if (nextIndex < 0) {
+        scrollToIndex(maxIndex);
+      } else {
+        scrollToIndex(nextIndex);
+      }
     },
-    [getCardStep, scrollToIndex],
+    [getCardStep, getMaxIndex, scrollToIndex],
   );
 
   const goPrev = () => scrollByCard(-1);
   const goNext = () => scrollByCard(1);
+
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Auto-scroll every 3 seconds (pauses completely when hovered or reading a flipped card)
+  useEffect(() => {
+    if (!needsCarousel || isHovered || dragging) return;
+
+    const timer = window.setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      const el = scrollRef.current;
+      const container = containerRef.current;
+      // Do not advance if the user is hovering, reading a flipped card, or interacting
+      const isReadingOrHovered =
+        isHovered ||
+        Boolean(el?.querySelector('[data-flipped="true"]')) ||
+        Boolean(container?.matches(":hover")) ||
+        Boolean(el?.matches(":hover"));
+
+      if (isReadingOrHovered) return;
+      scrollByCard(1);
+    }, 3000);
+
+    return () => window.clearInterval(timer);
+  }, [needsCarousel, isHovered, dragging, scrollByCard]);
 
   useEffect(() => {
     return () => {
@@ -361,7 +394,12 @@ export function TeamCarousel({
   );
 
   return (
-    <div className="mx-auto -mt-20 flex w-full max-w-full min-w-0 items-start justify-center gap-2">
+    <div
+      ref={containerRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="mx-auto -mt-20 flex w-full max-w-full min-w-0 items-start justify-center gap-2"
+    >
       {needsCarousel ? arrowRail("left") : null}
 
       <div

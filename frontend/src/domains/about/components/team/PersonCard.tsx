@@ -220,6 +220,7 @@ export function PersonCard({
     <div
       ref={cardRef}
       style={style}
+      data-flipped={flipped ? "true" : undefined}
       onClick={handleClick}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}

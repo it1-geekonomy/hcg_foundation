@@ -83,12 +83,20 @@ export default function PatientStoryCard({
   );
 
   const renderBackContent = (flipped: boolean) => (
-    <MirrorReveal isOpen={flipped} delay={0} duration={0.82}>
+    <MirrorReveal isOpen={flipped} delay={0} duration={0.35}>
       <div className="relative h-full w-full flex flex-col justify-between items-center p-4 lg:p-[1.2rem] rounded-[1.2643rem] border-[0.0527rem] border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2]">
+        {/* Watermark Background Overlay matching Form */}
+        <div
+          className="absolute inset-0 z-0 bg-contain bg-center bg-no-repeat opacity-25 mix-blend-multiply pointer-events-none"
+          style={{
+            backgroundImage: `url('/hcg-logo/hands-watermark.webp')`,
+          }}
+        />
+
         {/* Scrollable Story Description matching Team & Trustees pattern */}
-        <div className="min-h-0 flex-1 overflow-y-auto pr-1.5 space-y-2.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {(story.excerpt || story.quote) ? (
-            (story.excerpt || story.quote || "")
+        <div className="relative z-10 min-h-0 flex-1 overflow-y-auto pr-1.5 space-y-2.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {(story.excerpt || story.quote || story.fullStory) ? (
+            (story.excerpt || story.quote || story.fullStory || "")
               .split("\n\n")
               .map((paragraph, idx) => (
                 <Typography
