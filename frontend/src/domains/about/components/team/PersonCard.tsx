@@ -121,6 +121,93 @@ export function PersonCard({
     };
   }, [flipped]);
 
+  // Smooth scroll accumulator and animation frame for seamless page scrolling
+  const scrollAccumulatorRef = useRef(0);
+  const rafIdRef = useRef<number | null>(null);
+
+  const startSmoothPageScroll = (delta: number) => {
+    // If direction reversed, reset accumulator to avoid fighting inertia
+    if (
+      (delta > 0 && scrollAccumulatorRef.current < 0) ||
+      (delta < 0 && scrollAccumulatorRef.current > 0)
+    ) {
+      scrollAccumulatorRef.current = 0;
+    }
+
+    scrollAccumulatorRef.current += delta;
+
+    if (rafIdRef.current === null) {
+      const step = () => {
+        if (Math.abs(scrollAccumulatorRef.current) < 1) {
+          if (scrollAccumulatorRef.current !== 0) {
+            window.scrollBy({ top: scrollAccumulatorRef.current, behavior: "auto" });
+          }
+          scrollAccumulatorRef.current = 0;
+          rafIdRef.current = null;
+          return;
+        }
+
+        // 0.25 ease-out lerp gives an organic, gliding feel that matches native smooth scrolling
+        const move = scrollAccumulatorRef.current * 0.25;
+        window.scrollBy({ top: move, behavior: "auto" });
+        scrollAccumulatorRef.current -= move;
+
+        rafIdRef.current = requestAnimationFrame(step);
+      };
+      rafIdRef.current = requestAnimationFrame(step);
+    }
+  };
+
+  // Clean up animation on unmount or when card un-flips
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+        scrollAccumulatorRef.current = 0;
+      }
+    };
+  }, [flipped]);
+
+  // When bio reaches the top/bottom boundary, seamlessly carry over leftover delta and momentum to page scroll
+  const handleBioWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    if (!el) return;
+
+    const maxScroll = el.scrollHeight - el.clientHeight;
+
+    // If text does not overflow at all
+    if (maxScroll <= 1) {
+      startSmoothPageScroll(e.deltaY);
+      return;
+    }
+
+    const isAtBottom = el.scrollTop >= maxScroll - 1.5;
+    const isAtTop = el.scrollTop <= 0.5;
+
+    if (e.deltaY > 0) {
+      if (isAtBottom) {
+        startSmoothPageScroll(e.deltaY);
+      } else {
+        const remaining = maxScroll - el.scrollTop;
+        if (e.deltaY > remaining) {
+          // Carry over leftover delta immediately to the page so it doesn't freeze at the bottom wall
+          startSmoothPageScroll(e.deltaY - remaining);
+        }
+      }
+    } else if (e.deltaY < 0) {
+      if (isAtTop) {
+        startSmoothPageScroll(e.deltaY);
+      } else {
+        const remaining = el.scrollTop;
+        if (Math.abs(e.deltaY) > remaining) {
+          // Carry over leftover delta upward immediately to the page
+          startSmoothPageScroll(e.deltaY + remaining);
+        }
+      }
+    }
+  };
+
   const resolvedTopOffsetClass = topOffsetClass ?? DEFAULT_CARD_TOP_OFFSET_CLASS;
 
   // A card that just left the centre un-flips instantly; a 1s 3D rotation while it slides away wobbles on iOS.
@@ -308,8 +395,9 @@ export function PersonCard({
                   This is a scroll container, so it needs its own touch-pan-y: the browser stops
                   resolving touch-action at the nearest scroller and never reaches the carousel's. */}
               <div
+                onWheel={handleBioWheel}
                 className={cx(
-                  "mt-3 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1.5 touch-pan-y overscroll-contain",
+                  "mt-3 min-h-0 flex-1 space-y-3 overflow-y-auto pr-1.5 touch-pan-y",
                   "[scrollbar-width:none]",
                   "[-ms-overflow-style:none]",
                   "[&::-webkit-scrollbar]:hidden",
