@@ -1,12 +1,14 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export interface PaginationControlsProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  getPageHref?: (page: number) => string;
   className?: string;
   showDots?: boolean;
   showArrows?: boolean;
@@ -18,6 +20,7 @@ export default function PaginationControls({
   currentPage,
   totalPages,
   onPageChange,
+  getPageHref,
   className = "",
   showDots = true,
   showArrows = true,
@@ -70,15 +73,28 @@ export default function PaginationControls({
     <div className={`flex items-center justify-center gap-1 sm:gap-1.5 ${className}`}>
       {/* Previous Arrow (<) */}
       {showArrows && totalPages > 1 && (
-        <button
-          type="button"
-          onClick={handlePrev}
-          disabled={currentPage <= 1}
-          aria-label="Previous page"
-          className="flex size-6 sm:size-7 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#FDC61D] mr-0.5 sm:mr-1"
-        >
-          <ChevronLeft className="size-3.5 sm:size-4" />
-        </button>
+        getPageHref && currentPage > 1 ? (
+          <Link
+            href={getPageHref(currentPage - 1)}
+            onClick={(e) => {
+              handlePrev();
+            }}
+            aria-label="Previous page"
+            className="flex size-6 sm:size-7 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer mr-0.5 sm:mr-1"
+          >
+            <ChevronLeft className="size-3.5 sm:size-4" />
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={handlePrev}
+            disabled={currentPage <= 1}
+            aria-label="Previous page"
+            className="flex size-6 sm:size-7 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#FDC61D] mr-0.5 sm:mr-1"
+          >
+            <ChevronLeft className="size-3.5 sm:size-4" />
+          </button>
+        )
       )}
 
       {/* Page Indicator Dots */}
@@ -87,17 +103,29 @@ export default function PaginationControls({
           {Array.from({ length: totalPages }).map((_, idx) => {
             const pageNum = idx + 1;
             const isActive = pageNum === currentPage;
+            const dotClass = `h-2 rounded-full transition-all duration-300 cursor-pointer ${
+              isActive
+                ? "w-7 bg-[#FDC61D]"
+                : "w-2 bg-[#EFE4C8] hover:bg-[#E9B510]/60"
+            }`;
+            if (getPageHref) {
+              return (
+                <Link
+                  key={pageNum}
+                  href={getPageHref(pageNum)}
+                  onClick={() => handlePageClick(pageNum)}
+                  aria-label={`Go to page ${pageNum}`}
+                  className={dotClass}
+                />
+              );
+            }
             return (
               <button
                 key={pageNum}
                 type="button"
                 onClick={() => handlePageClick(pageNum)}
                 aria-label={`Go to page ${pageNum}`}
-                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                  isActive
-                    ? "w-7 bg-[#FDC61D]"
-                    : "w-2 bg-[#EFE4C8] hover:bg-[#E9B510]/60"
-                }`}
+                className={dotClass}
               />
             );
           })}
@@ -121,6 +149,27 @@ export default function PaginationControls({
             }
             const pageNum = item;
             const isActive = pageNum === currentPage;
+            const btnClass = `flex size-6 sm:size-7 items-center justify-center rounded-full font-manrope font-semibold text-xs transition cursor-pointer ${
+              isActive
+                ? "bg-[#FDC61D] text-[#382E07] shadow-xs"
+                : "bg-transparent text-[#2D2D2D] hover:bg-[#EFE4C8]"
+            }`;
+
+            if (getPageHref) {
+              return (
+                <Link
+                  key={pageNum}
+                  href={getPageHref(pageNum)}
+                  onClick={() => handlePageClick(pageNum)}
+                  aria-label={`Go to page ${pageNum}`}
+                  aria-current={isActive ? "page" : undefined}
+                  className={btnClass}
+                >
+                  {pageNum}
+                </Link>
+              );
+            }
+
             return (
               <button
                 key={pageNum}
@@ -128,11 +177,7 @@ export default function PaginationControls({
                 onClick={() => handlePageClick(pageNum)}
                 aria-label={`Go to page ${pageNum}`}
                 aria-current={isActive ? "page" : undefined}
-                className={`flex size-6 sm:size-7 items-center justify-center rounded-full font-manrope font-semibold text-xs transition cursor-pointer ${
-                  isActive
-                    ? "bg-[#FDC61D] text-[#382E07] shadow-xs"
-                    : "bg-transparent text-[#2D2D2D] hover:bg-[#EFE4C8]"
-                }`}
+                className={btnClass}
               >
                 {pageNum}
               </button>
@@ -143,15 +188,28 @@ export default function PaginationControls({
 
       {/* Next Arrow (>) */}
       {showArrows && totalPages > 1 && (
-        <button
-          type="button"
-          onClick={handleNext}
-          disabled={currentPage >= totalPages}
-          aria-label="Next page"
-          className="flex size-6 sm:size-7 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#FDC61D] ml-0.5 sm:ml-1"
-        >
-          <ChevronRight className="size-3.5 sm:size-4" />
-        </button>
+        getPageHref && currentPage < totalPages ? (
+          <Link
+            href={getPageHref(currentPage + 1)}
+            onClick={(e) => {
+              handleNext();
+            }}
+            aria-label="Next page"
+            className="flex size-6 sm:size-7 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer ml-0.5 sm:ml-1"
+          >
+            <ChevronRight className="size-3.5 sm:size-4" />
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={currentPage >= totalPages}
+            aria-label="Next page"
+            className="flex size-6 sm:size-7 items-center justify-center rounded-full bg-[#FDC61D] text-[#382E07] shadow-xs transition hover:bg-[#E9B510] active:scale-95 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#FDC61D] ml-0.5 sm:ml-1"
+          >
+            <ChevronRight className="size-3.5 sm:size-4" />
+          </button>
+        )
       )}
     </div>
   );

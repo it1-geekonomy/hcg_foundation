@@ -1,0 +1,266 @@
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { HeartHandshake, Search, SearchX } from "lucide-react";
+import ContentNotice, { LOAD_ERROR_MESSAGE } from "@/shared/components/ContentNotice";
+import Typography from "@/lib/Typography";
+import Banner from "@/shared/components/Herobannersection";
+import DonateForm from "@/shared/components/DonateForm";
+import PaginationControls from "@/shared/components/PaginationControls";
+import { PatientStory } from "@/domains/journey-of-hope/constants/stories";
+import PatientStoryCard from "@/domains/journey-of-hope/components/PatientStoryCard";
+import { publicPatientStoriesApi } from "@/domains/cms/lib/api";
+
+const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
+
+function formatStoryDate(dateStr?: string | null): string {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
+interface PatientStoriesClientProps {
+  initialStories?: PatientStory[] | null;
+  initialTotalCount?: number | null;
+  initialPage?: number;
+  initialSearch?: string;
+}
+
+export default function PatientStoriesClient({
+  initialStories = null,
+  initialTotalCount = null,
+  initialPage = 1,
+  initialSearch = "",
+}: PatientStoriesClientProps) {
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [itemsPerPage, setItemsPerPage] = useState<number | null>(8);
+  const [apiStories, setApiStories] = useState<PatientStory[] | null>(initialStories);
+  const [totalCount, setTotalCount] = useState<number | null>(initialTotalCount);
+  const [loading, setLoading] = useState(initialStories === null);
+  const [isFetching, setIsFetching] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
+  const isInitialMount = useRef(true);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setCurrentPage(1);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const updateItemsPerPage = () => {
+      if (window.innerWidth < 640) {
+        setItemsPerPage(4);
+      } else if (window.innerWidth < 768) {
+        setItemsPerPage(6);
+      } else if (window.innerWidth < 1280) {
+        setItemsPerPage(6);
+      } else {
+        setItemsPerPage(8);
+      }
+    };
+    updateItemsPerPage();
+    window.addEventListener("resize", updateItemsPerPage);
+    return () => window.removeEventListener("resize", updateItemsPerPage);
+  }, []);
+
+  useEffect(() => {
+    if (itemsPerPage === null) return;
+    
+    // Skip initial fetch if SSR already hydrated the exact page and search
+    if (
+      isInitialMount.current &&
+      initialStories !== null &&
+      currentPage === initialPage &&
+      debouncedSearch === initialSearch
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+    
+    if (!apiStories) {
+      setLoading(true);
+    } else {
+      setIsFetching(true);
+    }
+    
+    setFailed(false);
+    (async () => {
+      try {
+        const res = await publicPatientStoriesApi.listPublished({
+          page: currentPage,
+          limit: itemsPerPage,
+          search: debouncedSearch || undefined,
+        });
+        if (cancelled) return;
+        if (res.data && res.data.length > 0) {
+          const mapped: PatientStory[] = res.data.map((item) => ({
+            id: item.id,
+            slug: item.slug,
+            patientName: item.title,
+            date: formatStoryDate(item.storyDate),
+            conditionTag: item.donationState || "Patient Journey",
+            excerpt: item.shortDescription || "",
+            fullStory: item.content || "",
+            imageUrl: item.patientImage || "",
+            heroImageUrl: item.patientImage || "",
+          }));
+          setApiStories(mapped);
+          setTotalCount(res.meta.total);
+        } else {
+          setApiStories([]);
+          setTotalCount(0);
+        }
+      } catch {
+        if (!cancelled) {
+          setApiStories([]);
+          setTotalCount(0);
+          setFailed(true);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+          setIsFetching(false);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentPage, itemsPerPage, debouncedSearch, attempt]);
+
+  const clearSearch = () => {
+    setSearchTerm("");
+    setDebouncedSearch("");
+    setCurrentPage(1);
+    if (typeof window !== "undefined") {
+      window.history.pushState(null, "", "/patient-stories");
+    }
+  };
+
+  const sourceStories = apiStories ?? [];
+  const totalItems = totalCount ?? 0;
+  const itemsPerPg = itemsPerPage || 8;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPg));
+  const safePage = Math.min(currentPage, totalPages);
+  const currentStories = sourceStories;
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    const url = page === 1 ? "/patient-stories" : `/patient-stories?page=${page}`;
+    if (typeof window !== "undefined") {
+      window.history.pushState(null, "", url);
+    }
+  };
+
+  return (
+    <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope">
+      {/* Main Patient Stories Grid Section */}
+      <section className={`${CONTAINER} pt-7 sm:pt-[6.5rem] lg:pt-[10.25rem] pb-8 sm:pb-10 lg:pb-12`}>
+        {/* Search Bar */}
+        <div className="mb-10 flex justify-center">
+          <div className="relative w-full max-w-lg">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+              <Search className="size-5 text-[#8C826B]" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search by patient name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-full border border-[#DCD5C3] bg-white py-3.5 pl-11 pr-4 text-base text-[#2D2D2D] shadow-sm outline-none transition focus:border-[#FDC61D] focus:ring-2 focus:ring-[#FDC61D]/20 placeholder:text-[#8C826B]"
+            />
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center items-center py-20 min-h-[40vh]">
+            <Typography variant="heading-6" as="p" className="text-[#343E43] animate-pulse">
+              Loading patient stories...
+            </Typography>
+          </div>
+        ) : failed ? (
+          <ContentNotice
+            tone="error"
+            title="We couldn't load patient stories right now"
+            message={LOAD_ERROR_MESSAGE}
+            action={{ label: "Try again", onClick: () => setAttempt((n) => n + 1) }}
+            className="py-16"
+          />
+        ) : currentStories.length === 0 && debouncedSearch ? (
+          <ContentNotice
+            icon={SearchX}
+            title="No stories match your search"
+            message={`We couldn't find a patient story for “${debouncedSearch}”. Try a different name, or browse all stories.`}
+            action={{ label: "Clear search", onClick: clearSearch }}
+            className="py-16"
+          />
+        ) : currentStories.length === 0 ? (
+          <ContentNotice
+            icon={HeartHandshake}
+            title="Patient stories are coming soon"
+            message="We're gathering stories of courage and recovery from the patients and families we support. Please check back soon."
+            className="py-16"
+          />
+        ) : (
+          <div
+            key={`${safePage}-${itemsPerPage}`}
+            className={`flex flex-col gap-16 pb-4 lg:pb-0 lg:grid lg:grid-cols-4 xl:grid-cols-4 lg:gap-5 xl:gap-7 transition-all duration-500 ease-in-out ${
+              isFetching ? "opacity-40 scale-[0.98] blur-[1px] pointer-events-none" : "opacity-100 scale-100 blur-0"
+            }`}
+          >
+            {currentStories.map((story, index) => (
+              <PatientStoryCard
+                key={story.id}
+                story={story}
+                style={{
+                  "--mobile-top": `calc(6rem + ${index * 1.5}rem)`,
+                  zIndex: index,
+                } as React.CSSProperties}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Bottom Centered Pagination Navigation with crawlable links */}
+        {totalPages > 1 ? (
+          <PaginationControls
+            currentPage={safePage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            getPageHref={(p) => (p === 1 ? "/patient-stories" : `/patient-stories?page=${p}`)}
+            showArrows={true}
+            showNumbers={true}
+            className="mt-12 sm:mt-16"
+          />
+        ) : null}
+      </section>
+
+      {/* Donate Section at the Bottom */}
+      <div id="donate-form">
+        <DonateForm />
+      </div>
+    </main>
+  );
+}

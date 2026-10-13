@@ -42,14 +42,14 @@ export default function SwasthiArtTherapySection() {
           data-detail-anim="lines"
           className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
         >
-          Swasthi Art Gallery & Art Therapy Program
+          Swasti Art Gallery & Art Therapy Program
         </Typography>
       </div>
 
       {/* Intro Paragraph */}
       <div>
         <Typography variant="body-10" as="p" data-detail-anim="lines" data-detail-anim-delay="150" className={PARAGRAPH_CLASS}>
-          Swasthi Art Gallery is HCG Foundation&apos;s creative care initiative where art supports patients through their cancer journey. Located within HCG&apos;s headquarters at Tower 1, Bengaluru, Swasthi Gallery brings together two connected efforts: a contemporary art gallery that channels the power of art into funding cancer care, and a dedicated Art Therapy program that brings the healing process of art-making directly to patients.
+          Swasti Art Gallery is HCG Foundation&apos;s creative care initiative where art supports patients through their cancer journey. Located within HCG&apos;s headquarters at Tower 1, Bengaluru, Swasti Gallery brings together two connected efforts: a contemporary art gallery that channels the power of art into funding cancer care, and a dedicated Art Therapy program that brings the healing process of art-making directly to patients.
         </Typography>
       </div>
 
@@ -57,16 +57,16 @@ export default function SwasthiArtTherapySection() {
       <div className="flex flex-col space-y-[1rem]">
         <div>
           <Typography variant="heading-8" as="h3" data-detail-anim="slide" className={SUBHEADING_CLASS}>
-            About Swasthi Gallery
+            About Swasti Gallery
           </Typography>
         </div>
 
         <Typography variant="body-10" as="p" data-detail-anim="lines" data-detail-anim-delay="150" className={PARAGRAPH_CLASS}>
-          Launched in 2007, the art space in a hospital gives a positive energy to the patients and their families. Swasthi Art Gallery has been actively involved in organizing art shows, camps and workshops which involve artists coming from across the country and outside.
+          Launched in 2007, the art space in a hospital gives a positive energy to the patients and their families. Swasti Art Gallery has been actively involved in organizing art shows, camps and workshops which involve artists coming from across the country and outside.
         </Typography>
 
         <Typography variant="body-10" as="p" data-detail-anim="lines" data-detail-anim-delay="150" className={PARAGRAPH_CLASS}>
-          The gallery offers a platform to bring forth young upcoming artists and also organizes shows for renowned artists. Swasthi aspires to create a space for art lovers and buyers by exhibiting quality art pieces. They aim at raising funds for the HCG foundation to help support the cancer patients.
+          The gallery offers a platform to bring forth young upcoming artists and also organizes shows for renowned artists. Swasti aspires to create a space for art lovers and buyers by exhibiting quality art pieces. They aim at raising funds for the HCG foundation to help support the cancer patients.
         </Typography>
       </div>
 
@@ -81,7 +81,7 @@ export default function SwasthiArtTherapySection() {
           </div>
 
           <Typography variant="body-10" as="p" data-detail-anim="lines" data-detail-anim-delay="150" className={PARAGRAPH_CLASS}>
-            In 2018, Swasthi Art Gallery extended its mission from the gallery walls to direct patient care with the launch of its Art Therapy program at HCG Bangalore hospital. Art therapy is a form of expressive therapy that uses the creative process of making art to support a patient&apos;s physical, mental, and emotional wellbeing.
+            In 2018, Swasti Art Gallery extended its mission from the gallery walls to direct patient care with the launch of its Art Therapy program at HCG Bangalore hospital. Art therapy is a form of expressive therapy that uses the creative process of making art to support a patient&apos;s physical, mental, and emotional wellbeing.
           </Typography>
 
           <div className="w-full flex flex-col space-y-[1rem]">
@@ -200,7 +200,7 @@ export default function SwasthiArtTherapySection() {
         </Typography>
 
         <Typography variant="body-10" as="p" data-detail-anim="lines" className={PARAGRAPH_CLASS}>
-          Together, Swasthi Gallery and Art Therapy reflect HCG Foundation&apos;s belief that cancer care extends beyond medicine. One raises the funds that make patient support possible; the other puts the healing power of art directly into patients&apos; hands.
+          Together, Swasti Gallery and Art Therapy reflect HCG Foundation&apos;s belief that cancer care extends beyond medicine. One raises the funds that make patient support possible; the other puts the healing power of art directly into patients&apos; hands.
         </Typography>
       </div>
     </div>

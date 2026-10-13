@@ -7,8 +7,22 @@ import { publicEventsApi } from "@/domains/cms/lib/api";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
-export default function EventsListSection({ previewEvent, previewMode }: { previewEvent?: EventItem | null; previewMode?: boolean }) {
-  const [allEvents, setAllEvents] = useState<EventItem[]>([]);
+interface EventsListSectionProps {
+  previewEvent?: EventItem | null;
+  previewMode?: boolean;
+  initialEvents?: EventItem[] | null;
+  initialTotalCount?: number | null;
+  initialPage?: number;
+}
+
+export default function EventsListSection({
+  previewEvent,
+  previewMode,
+  initialEvents = null,
+  initialTotalCount = null,
+  initialPage = 1,
+}: EventsListSectionProps) {
+  const [allEvents, setAllEvents] = useState<EventItem[]>(initialEvents || []);
   const [currentPage, setCurrentPage] = useState(() => {
     if (typeof window !== "undefined") {
       const savedPage = sessionStorage.getItem("events_current_page");
@@ -17,11 +31,11 @@ export default function EventsListSection({ previewEvent, previewMode }: { previ
         if (!isNaN(p) && p > 0) return p;
       }
     }
-    return 1;
+    return initialPage;
   });
-  const [itemsPerPage, setItemsPerPage] = useState<number | null>(null);
-  const [totalCount, setTotalCount] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [itemsPerPage, setItemsPerPage] = useState<number | null>(6);
+  const [totalCount, setTotalCount] = useState<number | null>(initialTotalCount);
+  const [loading, setLoading] = useState(initialEvents === null);
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,6 +58,9 @@ export default function EventsListSection({ previewEvent, previewMode }: { previ
   // Fetch events page
   useEffect(() => {
     if (itemsPerPage === null) return;
+    if (initialEvents && currentPage === initialPage && itemsPerPage === 6 && !previewEvent) {
+      return;
+    }
     let cancelled = false;
 
     if (allEvents.length === 0) {
@@ -143,6 +160,8 @@ export default function EventsListSection({ previewEvent, previewMode }: { previ
     setCurrentPage(page);
     if (typeof window !== "undefined") {
       sessionStorage.setItem("events_current_page", String(page));
+      const url = page === 1 ? "/events" : `/events?page=${page}`;
+      window.history.pushState(null, "", url);
     }
   };
 
@@ -192,6 +211,7 @@ export default function EventsListSection({ previewEvent, previewMode }: { previ
           currentPage={safePage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
+          getPageHref={(p) => (p === 1 ? "/events" : `/events?page=${p}`)}
           className="mt-12 sm:mt-16"
           showArrows={true}
           showNumbers={true}

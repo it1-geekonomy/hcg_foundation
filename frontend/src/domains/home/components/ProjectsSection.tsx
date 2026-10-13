@@ -297,7 +297,7 @@ function MoreDetailsButton({
       as="span"
       className="uppercase text-neutral-900"
     >
-      More details
+      Know More
     </Typography>
   );
   const icon = (

@@ -7,7 +7,7 @@ import Banner from "@/shared/components/Herobannersection";
 import DonateForm from "@/shared/components/DonateForm";
 import ShareStory from "@/shared/components/ShareStory";
 import RelatedProjects from "@/domains/resources/components/RelatedProjects";
-import SwasthiArtTherapySection from "@/domains/resources/components/SwasthiArtTherapySection";
+import SwasthiArtTherapySection from "@/domains/resources/components/SwastiArtTherapySection";
 import PuzzleImage from "@/shared/components/Puzzleimage";
 import { ProjectItem, PROJECTS_DATA } from "@/domains/resources/constants/projects";
 import { isMissingContentError, publicProjectsApi } from "@/domains/cms/lib/api";
