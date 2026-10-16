@@ -29,7 +29,7 @@ export default async function TermsAndConditionsPage() {
         <LegalDocumentPage
           document={document}
           fallbackTitle="Terms & Conditions"
-          emptyMessage="We are currently updating our Terms & Conditions. Please check back soon, or contact us at hcgfoundation@gmail.com if you have any questions."
+          emptyMessage="We are currently updating our Terms & Conditions. Please check back soon, or contact us at info@hcgfoundation.org if you have any questions."
         />
       </AnimatedLegalContent>
       <div id="donate-form">
