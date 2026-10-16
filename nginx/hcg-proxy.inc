@@ -1,3 +1,8 @@
+add_header X-Content-Type-Options "nosniff" always;
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+
 client_max_body_size 100m;
 
 proxy_http_version 1.1;
@@ -29,7 +34,12 @@ location /api/ {
 location /_next/static/ {
     proxy_pass http://hcg_frontend;
     proxy_hide_header Cache-Control;
+
     add_header Cache-Control "public, max-age=31536000, immutable" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
 }
 
 location / {
