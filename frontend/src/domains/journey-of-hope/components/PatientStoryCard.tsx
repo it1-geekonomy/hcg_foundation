@@ -113,7 +113,7 @@ export default function PatientStoryCard({
         {/* Read More Button Constant at Bottom Center */}
         <div className="relative z-10 w-full flex justify-center shrink-0 pt-3 border-t border-[#E0D4AE]/50 mt-2">
           <div
-            className="inline-flex items-center justify-center whitespace-nowrap h-[2rem] lg:h-[2.35rem] w-auto px-4 lg:px-5 gap-[0.45rem] rounded-[0.375rem] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
+            className="inline-flex items-center justify-center whitespace-nowrap min-h-[44px] sm:min-h-0 h-[2.75rem] sm:h-[2rem] lg:h-[2.35rem] w-auto px-4 lg:px-5 gap-[0.45rem] rounded-[0.375rem] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
           >
             <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
               Read More
