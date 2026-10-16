@@ -86,6 +86,16 @@ def _answer(message: str, session_id: str | None) -> dict:
     search_text = normalize_for_retrieval(user_message)
     rewritten = rewrite_query(search_text, history)
     intents = detect_intents(f"{search_text} {rewritten}")
+    if "quick_links" in intents:
+        append_turn(sid, "user", user_message)
+        append_turn(sid, "assistant", C.QUICK_LINKS_ANSWER)
+        return {
+            "answer": C.QUICK_LINKS_ANSWER,
+            "sources": C.QUICK_LINKS_SOURCES,
+            "session_id": sid,
+            "response_time_ms": int((time.perf_counter() - started) * 1000),
+        }
+
     queries = build_multi_queries(rewritten, intents)
 
     hits = hybrid_retrieve(queries, intents, question=search_text)
@@ -112,7 +122,7 @@ def _answer(message: str, session_id: str | None) -> dict:
 
     # If model returned token somehow, or if recovery triggered fallback, clear sources
     if answer.strip() == C.NO_ANSWER_TOKEN or answer.strip() == C.FALLBACK_ANSWER.strip():
-        answer = C.FALLBACK_ANSWER if is_on_topic(user_message, intents) else C.OUT_OF_SCOPE_ANSWER
+        answer = C.FALLBACK_ANSWER if (is_on_topic(user_message, intents) or bool(ranked)) else C.OUT_OF_SCOPE_ANSWER
         sources = []
     elif answer == C.OUT_OF_SCOPE_ANSWER:
         sources = []
