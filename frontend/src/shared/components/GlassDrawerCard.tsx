@@ -155,7 +155,7 @@ export default function GlassDrawerCard({
           <Link
             href={detailUrl}
             onClick={handleNavigate}
-            className="inline-flex items-center justify-center whitespace-nowrap h-[1.75rem] lg:h-[2.5rem] xl:h-[3rem] w-auto xl:w-[9.5rem] px-[0.75rem] lg:px-[1.25rem] gap-[0.45rem] rounded-[6px] border border-white/10 bg-[#FCCC2D] text-[#2D2D2D] backdrop-blur-[42px] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 relative z-20 cursor-pointer"
+            className="inline-flex items-center justify-center whitespace-nowrap min-h-[44px] sm:min-h-0 h-[2.75rem] sm:h-[1.75rem] lg:h-[2.5rem] xl:h-[3rem] w-auto xl:w-[9.5rem] px-[1rem] sm:px-[0.75rem] lg:px-[1.25rem] gap-[0.45rem] rounded-[6px] border border-white/10 bg-[#FCCC2D] text-[#2D2D2D] backdrop-blur-[42px] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 relative z-20 cursor-pointer"
           >
             <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
               Read More
@@ -244,7 +244,7 @@ export default function GlassDrawerCard({
               <Link
                 href={detailUrl}
                 onClick={handleNavigate}
-                className="inline-flex items-center justify-center whitespace-nowrap h-[2.25rem] lg:h-[2.5rem] px-4 sm:px-5 gap-2 rounded-[6px] border border-white/10 bg-[#FCCC2D] text-[#2D2D2D] hover:bg-[#E9B510] shadow-[0_4px_14px_rgba(252,204,45,0.3)] transition duration-200 hover:scale-105 ml-auto relative z-20 cursor-pointer font-medium"
+                className="inline-flex items-center justify-center whitespace-nowrap min-h-[44px] sm:min-h-0 h-[2.75rem] sm:h-[2.25rem] lg:h-[2.5rem] px-4 sm:px-5 gap-2 rounded-[6px] border border-white/10 bg-[#FCCC2D] text-[#2D2D2D] hover:bg-[#E9B510] shadow-[0_4px_14px_rgba(252,204,45,0.3)] transition duration-200 hover:scale-105 ml-auto relative z-20 cursor-pointer font-medium"
               >
                 <Typography variant="button-1" as="span" className="text-[#2D2D2D] text-xs sm:text-sm">
                   Read More
