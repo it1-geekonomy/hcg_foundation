@@ -1,15 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  Fragment,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { Fragment, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Typography from "@/lib/Typography";
 import {
@@ -267,145 +259,6 @@ export default function HowToRefer({ className = "" }: HowToReferProps) {
   const { ref: sectionRef, visible: sectionVisible } =
     useSectionVisible<HTMLElement>();
 
-  const reduce = useReducedMotion();
-  const skip = reduce === true;
-
-  /* ---------- Heading blur reveal (plays once) ---------- */
-  const headingRef = useRef<HTMLDivElement | null>(null);
-  const [headingVisible, setHeadingVisible] = useState(false);
-
-  useEffect(() => {
-    const node = headingRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setHeadingVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.3 },
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  /* ---------- Description blur reveal (plays once) ---------- */
-  const descRevealRef = useRef<HTMLDivElement | null>(null);
-  const [descVisible, setDescVisible] = useState(false);
-
-  useEffect(() => {
-    const node = descRevealRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setDescVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.3 },
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  /* ---------- Description: scroll-driven line-by-line fill ---------- */
-  const descWrapRef = useRef<HTMLSpanElement | null>(null);
-  const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const rafRef = useRef<number | null>(null);
-
-  const [progress, setProgress] = useState(0);
-  const [lineIndexForWord, setLineIndexForWord] = useState<number[]>([]);
-  const [lineCount, setLineCount] = useState(1);
-
-  const words = DESC_TEXT.split(" ");
-
-  // Group words into visual lines by their rendered offsetTop.
-  // Recomputed on resize because wrapping changes with viewport width.
-  const measureLines = useCallback(() => {
-    const tops = wordRefs.current.map((el) => el?.offsetTop ?? 0);
-    if (tops.length === 0) return;
-
-    let currentTop = tops[0];
-    let currentLine = 0;
-    const indices: number[] = [];
-
-    tops.forEach((top) => {
-      if (top > currentTop + 2) {
-        currentLine += 1;
-        currentTop = top;
-      }
-      indices.push(currentLine);
-    });
-
-    setLineIndexForWord(indices);
-    setLineCount(currentLine + 1);
-  }, []);
-
-  useLayoutEffect(() => {
-    measureLines();
-    const t = setTimeout(measureLines, 100); // catch late font loads
-    // Re-measure once web fonts are ready (Safari/macOS can load them later).
-    if (typeof document !== "undefined" && document.fonts?.ready) {
-      document.fonts.ready.then(measureLines).catch(() => {});
-    }
-    window.addEventListener("resize", measureLines);
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("resize", measureLines);
-    };
-  }, [measureLines]);
-
-  const updateProgress = useCallback(() => {
-    const node = descWrapRef.current;
-    rafRef.current = null;
-    if (!node) return;
-
-    const rect = node.getBoundingClientRect();
-    const vh = window.innerHeight;
-
-    // fill starts when the text is 90% down the viewport,
-    // completes when it reaches 40% from the top
-    const startPx = vh * 0.9;
-    const endPx = vh * 0.4;
-
-    const raw = (startPx - rect.top) / (startPx - endPx);
-    setProgress(Math.min(1, Math.max(0, raw)));
-  }, []);
-
-  const onScroll = useCallback(() => {
-    if (rafRef.current != null) return;
-    rafRef.current = requestAnimationFrame(updateProgress);
-  }, [updateProgress]);
-
-  useEffect(() => {
-    updateProgress();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
-    };
-  }, [onScroll, updateProgress]);
-
-  const scrollPerLine = 1 / lineCount;
-
-  function opacityForLine(lineIdx: number): number {
-    if (skip) return 1;
-    const lineStart = lineIdx * scrollPerLine;
-    const raw = (progress - lineStart) / scrollPerLine;
-    return Math.min(1, Math.max(0, raw));
-  }
-
-  const headingShown = headingVisible || skip;
-  const descShown = descVisible || skip;
-
   return (
     <section
       ref={sectionRef}
@@ -418,64 +271,25 @@ export default function HowToRefer({ className = "" }: HowToReferProps) {
       */
       className={`w-full overflow-x-hidden bg-[#FFFCF2] px-8 py-10 antialiased [-webkit-text-size-adjust:100%] [text-size-adjust:100%] sm:px-20 md:px-6 lg:px-6 lg:py-20 xl:px-6 2xl:px-40 ${className}`}
     >
-      {/* Heading: blur reveal */}
-      <div ref={headingRef}>
+      {/* Heading */}
+      <div>
         <Typography
           variant="heading-3"
           as="h2"
           className="text-center font-tiempos-headline text-[#382E07]"
-          style={{
-            opacity: headingShown ? 1 : 0,
-            filter: headingShown ? "blur(0px)" : "blur(14px)",
-            transform: headingShown
-              ? "translate3d(0,0,0)"
-              : "translate3d(0,32px,0)",
-            transition: skip
-              ? "none"
-              : "opacity 700ms ease-out, filter 500ms ease-out, transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
-            willChange: "opacity, filter, transform",
-          }}
         >
           How to Refer a Patient to HCG Foundation
         </Typography>
       </div>
 
-      {/* Description: blur reveal + scroll-driven line fill */}
-      <div
-        ref={descRevealRef}
-        className="mx-auto mt-3 max-w-xl"
-        style={{
-          opacity: descShown ? 1 : 0,
-          filter: descShown ? "blur(0px)" : "blur(14px)",
-          transform: descShown
-            ? "translate3d(0,0,0)"
-            : "translate3d(0,32px,0)",
-          transition: skip
-            ? "none"
-            : "opacity 700ms ease-out 150ms, filter 500ms ease-out 150ms, transform 1100ms cubic-bezier(0.22, 1, 0.36, 1) 150ms",
-          willChange: "opacity, filter, transform",
-        }}
-      >
+      {/* Description */}
+      <div className="mx-auto mt-3 max-w-xl">
         <Typography
           variant="body-6"
           as="p"
           className="text-center font-manrope font-normal text-[#6B6660]"
         >
-          <span ref={descWrapRef} className="inline">
-            {words.map((word, i) => (
-              <span
-                key={i}
-                ref={(el) => {
-                  wordRefs.current[i] = el;
-                }}
-                className="transition-opacity duration-150 ease-out"
-                style={{ opacity: opacityForLine(lineIndexForWord[i] ?? 0) }}
-              >
-                {word}
-                {i < words.length - 1 ? " " : ""}
-              </span>
-            ))}
-          </span>
+          {DESC_TEXT}
         </Typography>
       </div>
 

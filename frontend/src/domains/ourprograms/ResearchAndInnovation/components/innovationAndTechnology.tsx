@@ -1,196 +1,12 @@
 "use client";
 
-import {
-  Children,
-  cloneElement,
-  isValidElement,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Typography from "@/lib/Typography";
 import {
   INNOVATION_CONTENT,
   INNOVATION_COMPANIES,
   INNOVATION_CARD_STYLE,
 } from "@/domains/ourprograms/ResearchAndInnovation/constants/innovation";
-
-/* ------------- slide-in text animation (same as WhyPatientsJoinUs) ------------- */
-
-const LINE_STEP_MS = 120;
-const HEAD_DELAY_MS = 100;
-const DESC_DELAY_MS = 250;
-const SLIDE_TRANSITION =
-  "opacity 700ms ease-out, transform 1000ms cubic-bezier(0.22, 1, 0.36, 1)";
-
-// Direction comes from the --slide-x CSS variable set on the section (always from the left).
-function slideStyle(visible: boolean, delayMs: number): CSSProperties {
-  return {
-    opacity: visible ? 1 : 0,
-    transform: visible ? "translate3d(0,0,0)" : "translate3d(var(--slide-x),0,0)",
-    transition: SLIDE_TRANSITION,
-    transitionDelay: `${delayMs}ms`,
-    willChange: "opacity, transform",
-  };
-}
-
-type SplitCtx = {
-  refs: { current: (HTMLSpanElement | null)[] };
-  groups: number[];
-  lines: number[];
-  visible: boolean;
-  base: number;
-  count: number;
-};
-
-function splitNode(
-  node: ReactNode,
-  group: number,
-  ctx: SplitCtx,
-  wordClass = "",
-): ReactNode {
-  if (node === null || node === undefined || typeof node === "boolean") return null;
-
-  if (typeof node === "string" || typeof node === "number") {
-    return String(node)
-      .split(/(\s+)/)
-      .map((part, k) => {
-        if (part === "") return null;
-        if (/^\s+$/.test(part)) return part;
-        const i = ctx.count++;
-        ctx.groups[i] = group;
-        return (
-          <span
-            key={k}
-            ref={(el) => {
-              ctx.refs.current[i] = el;
-            }}
-            className={`inline-block motion-reduce:!transition-none ${wordClass}`}
-            style={slideStyle(ctx.visible, ctx.base + (ctx.lines[i] ?? 0) * LINE_STEP_MS)}
-          >
-            {part}
-          </span>
-        );
-      });
-  }
-
-  if (Array.isArray(node)) {
-    return Children.map(node, (c) => splitNode(c, group, ctx, wordClass));
-  }
-
-  if (isValidElement(node)) {
-    if (node.type === "br") return node;
-    const children = (node.props as { children?: ReactNode }).children;
-    if (children === undefined) return node;
-    return cloneElement(
-      node,
-      undefined,
-      Children.map(children, (c) => splitNode(c, group, ctx, wordClass)),
-    );
-  }
-
-  return node;
-}
-
-function sameLines(a: number[], b: number[]) {
-  return a.length === b.length && a.every((v, i) => v === b[i]);
-}
-
-type Splitter = {
-  (node: ReactNode, group: number, wordClass?: string): ReactNode;
-  slideWith: (group: number) => CSSProperties;
-};
-
-function SlideBlock({
-  baseDelay,
-  className,
-  children,
-}: {
-  baseDelay: number;
-  className?: string;
-  children: (split: Splitter) => ReactNode;
-}) {
-  const wrapRef = useRef<HTMLDivElement | null>(null);
-  const refs = useRef<(HTMLSpanElement | null)[]>([]);
-  const groupsRef = useRef<number[]>([]);
-  const [visible, setVisible] = useState(false);
-  const [lines, setLines] = useState<number[]>([]);
-
-  const measure = () => {
-    let line = -1;
-    let prevGroup = -1;
-    let prevTop = -Infinity;
-    const next = groupsRef.current.map((g, i) => {
-      const top = refs.current[i]?.offsetTop ?? 0;
-      if (g !== prevGroup || top > prevTop + 2) {
-        line += 1;
-        prevGroup = g;
-        prevTop = top;
-      }
-      return line;
-    });
-    setLines((prev) => (sameLines(prev, next) ? prev : next));
-  };
-
-  useLayoutEffect(() => {
-    measure();
-  });
-
-  useEffect(() => {
-    const t = setTimeout(measure, 150);
-    window.addEventListener("resize", measure);
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("resize", measure);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    const node = wrapRef.current;
-    if (!node) return;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setVisible(true);
-          obs.disconnect();
-        }
-      },
-      { threshold: 0.25 },
-    );
-    obs.observe(node);
-    return () => obs.disconnect();
-  }, []);
-
-  const ctx: SplitCtx = {
-    refs,
-    groups: [],
-    lines,
-    visible,
-    base: baseDelay,
-    count: 0,
-  };
-  const split = ((node: ReactNode, group: number, wordClass?: string) =>
-    splitNode(node, group, ctx, wordClass)) as Splitter;
-  split.slideWith = (group: number) => {
-    const firstWord = groupsRef.current.indexOf(group);
-    const line = firstWord >= 0 ? (lines[firstWord] ?? 0) : 0;
-    return slideStyle(visible, baseDelay + line * LINE_STEP_MS);
-  };
-
-  const content = children(split);
-  refs.current.length = ctx.count;
-  groupsRef.current = ctx.groups;
-
-  return (
-    <div ref={wrapRef} className={className}>
-      {content}
-    </div>
-  );
-}
 
 /* ------------- card reveal animation (staggered fade-up, plays once) ------------- */
 
@@ -239,53 +55,44 @@ export default function InnovationAndTechnology() {
   const { ref: gridRef, visible: cardsVisible } = useInViewOnce<HTMLDivElement>(0.1);
 
   return (
-    <section className="w-full overflow-x-hidden bg-[#FFF8E2] py-2 md:py-2 px-8 sm:px-12 md:px-16 lg:py-4 xl:py-4 lg:px-6 xl:px-6 2xl:px-40 [--slide-x:-80px]">
+    <section className="w-full overflow-x-hidden bg-[#FFF8E2] py-2 md:py-2 px-8 sm:px-12 md:px-16 lg:py-4 xl:py-4 lg:px-6 xl:px-6 2xl:px-40">
       {/* Heading + description */}
       <div className="flex flex-col gap-4">
-        <SlideBlock baseDelay={HEAD_DELAY_MS}>
-          {(split) => (
-            <Typography
-              variant="heading-2"
-              as="h2"
-              className="font-tiempos-headline italic text-[#0D2838]"
-            >
-              {split(INNOVATION_CONTENT.heading, 0)}
-            </Typography>
-          )}
-        </SlideBlock>
+        <div>
+          <Typography
+            variant="heading-2"
+            as="h2"
+            className="font-tiempos-headline italic text-[#0D2838]"
+          >
+            {INNOVATION_CONTENT.heading}
+          </Typography>
+        </div>
 
-        <SlideBlock
-          baseDelay={DESC_DELAY_MS}
-          className="flex min-w-0 flex-col gap-4 md:gap-6"
-        >
-          {(split) =>
-            INNOVATION_CONTENT.paragraphs.map((text, i) => (
-              <Typography
-                key={i}
-                variant="body-3"
-                as="p"
-                className="font-normal font-argestadisplay text-[#293239]"
-              >
-                {split(text, i)}
-              </Typography>
-            ))
-          }
-        </SlideBlock>
+        <div className="flex min-w-0 flex-col gap-4 md:gap-6">
+          {INNOVATION_CONTENT.paragraphs.map((text, i) => (
+            <Typography
+              key={i}
+              variant="body-3"
+              as="p"
+              className="font-normal font-argestadisplay text-[#293239]"
+            >
+              {text}
+            </Typography>
+          ))}
+        </div>
       </div>
 
       {/* Companies */}
       <div className="mt-2 sm:mt-4 lg:mt-6 xl:mt-8">
-        <SlideBlock baseDelay={HEAD_DELAY_MS}>
-          {(split) => (
-            <Typography
-              variant="heading-7"
-              as="h3"
-              className="font-tiempos-headline font-light text-[#000000]"
-            >
-              {split(INNOVATION_CONTENT.companiesHeading, 0)}
-            </Typography>
-          )}
-        </SlideBlock>
+        <div>
+          <Typography
+            variant="heading-7"
+            as="h3"
+            className="font-tiempos-headline font-light text-[#000000]"
+          >
+            {INNOVATION_CONTENT.companiesHeading}
+          </Typography>
+        </div>
 
         <div
           ref={gridRef}
