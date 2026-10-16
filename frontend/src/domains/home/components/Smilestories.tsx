@@ -317,6 +317,7 @@ const StoryCard = memo(function StoryCard({
 
         {/* Scrollable Story Description matching Team & Trustees pattern */}
         <div
+          onWheel={handleStoryWheel}
           className={`relative z-10 min-h-0 w-full flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${storyHtml
               ? // Bottom fade hints that the story scrolls; the matching bottom padding
               // lets the last line scroll clear of the fade.
