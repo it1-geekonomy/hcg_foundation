@@ -65,6 +65,25 @@ export class DonorsController {
     };
   }
 
+  @Public()
+  @Get('monthly-count')
+  @ApiOperation({
+    summary: 'Get current month donors count (website / Donate Now)',
+    description:
+      'Returns the number of paid donors who contributed in the current month.',
+  })
+  @ApiOkResponse({
+    description: 'Current month donor count',
+  })
+  async getMonthlyCount() {
+    const data = await this.service.getCurrentMonthCount();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Monthly donor count fetched successfully',
+      data,
+    };
+  }
+
   @Get()
   @ApiBearerAuth()
   @ApiOperation({
