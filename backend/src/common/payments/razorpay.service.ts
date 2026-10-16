@@ -44,8 +44,16 @@ export class RazorpayService {
       receipt: params.receipt,
       notes: params.notes,
       payment_capture: 1,
+      payment: {
+        capture: 'automatic',
+        capture_options: {
+          automatic_expiry_period: 12,
+          manual_expiry_period: 7200,
+          refund_speed: 'optimum',
+        },
+      },
     } as any);
-    this.logger.log(`Razorpay order created: ${order.id} (payment_capture: 1)`);
+    this.logger.log(`Razorpay order created: ${order.id} (auto-capture enabled)`);
     return {
       id: String(order.id),
       amount: Number(order.amount),
