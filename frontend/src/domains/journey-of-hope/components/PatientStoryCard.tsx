@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -33,6 +33,86 @@ export default function PatientStoryCard({
   const handleCardClick = (e: React.MouseEvent) => {
     if (onClick) {
       onClick(e);
+    }
+  };
+
+  // Smooth scroll accumulator and animation frame for seamless page scrolling
+  const scrollAccumulatorRef = useRef(0);
+  const rafIdRef = useRef<number | null>(null);
+
+  const startSmoothPageScroll = (delta: number) => {
+    if (
+      (delta > 0 && scrollAccumulatorRef.current < 0) ||
+      (delta < 0 && scrollAccumulatorRef.current > 0)
+    ) {
+      scrollAccumulatorRef.current = 0;
+    }
+
+    scrollAccumulatorRef.current += delta;
+
+    if (rafIdRef.current === null) {
+      const step = () => {
+        if (Math.abs(scrollAccumulatorRef.current) < 1) {
+          if (scrollAccumulatorRef.current !== 0) {
+            window.scrollBy({ top: scrollAccumulatorRef.current, behavior: "auto" });
+          }
+          scrollAccumulatorRef.current = 0;
+          rafIdRef.current = null;
+          return;
+        }
+
+        const move = scrollAccumulatorRef.current * 0.25;
+        window.scrollBy({ top: move, behavior: "auto" });
+        scrollAccumulatorRef.current -= move;
+
+        rafIdRef.current = requestAnimationFrame(step);
+      };
+      rafIdRef.current = requestAnimationFrame(step);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+        scrollAccumulatorRef.current = 0;
+      }
+    };
+  }, [isFlipped]);
+
+  const handleStoryWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    if (!el) return;
+
+    const maxScroll = el.scrollHeight - el.clientHeight;
+
+    if (maxScroll <= 1) {
+      startSmoothPageScroll(e.deltaY);
+      return;
+    }
+
+    const isAtBottom = el.scrollTop >= maxScroll - 1.5;
+    const isAtTop = el.scrollTop <= 0.5;
+
+    if (e.deltaY > 0) {
+      if (isAtBottom) {
+        startSmoothPageScroll(e.deltaY);
+      } else {
+        const remaining = maxScroll - el.scrollTop;
+        if (e.deltaY > remaining) {
+          startSmoothPageScroll(e.deltaY - remaining);
+        }
+      }
+    } else if (e.deltaY < 0) {
+      if (isAtTop) {
+        startSmoothPageScroll(e.deltaY);
+      } else {
+        const remaining = el.scrollTop;
+        if (Math.abs(e.deltaY) > remaining) {
+          startSmoothPageScroll(e.deltaY + remaining);
+        }
+      }
     }
   };
 
@@ -94,7 +174,10 @@ export default function PatientStoryCard({
         />
 
         {/* Scrollable Story Description matching Team & Trustees pattern */}
-        <div className="relative z-10 min-h-0 flex-1 overflow-y-auto pr-1.5 space-y-2.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div
+          onWheel={handleStoryWheel}
+          className="relative z-10 min-h-0 flex-1 overflow-y-auto pr-1.5 space-y-2.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        >
           {(story.excerpt || story.quote || story.fullStory) ? (
             (story.excerpt || story.quote || story.fullStory || "")
               .split("\n\n")
