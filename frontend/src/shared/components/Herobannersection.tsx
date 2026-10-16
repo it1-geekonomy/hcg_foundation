@@ -96,7 +96,10 @@ export default function Banner({
                   return (
                     <li key={`${crumb.label}-${index}`} className="flex items-center gap-2">
                       {crumb.href && !isLast ? (
-                        <Link href={crumb.href} onClick={crumb.onClick} className="transition-colors hover:text-[#FCCC2D]">
+                        <Link
+                          href={crumb.href}
+                          className="transition-colors hover:text-[#FCCC2D]"
+                        >
                           {label}
                         </Link>
                       ) : (

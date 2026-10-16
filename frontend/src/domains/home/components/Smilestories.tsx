@@ -29,19 +29,18 @@ import MirrorReveal from "@/shared/components/MirrorReveal";
 import { DiagonalArrowIcon } from "@/shared/components/icons/ArrowIcons";
 import { publicPatientStoriesApi } from "@/domains/cms/lib/api";
 
-/** Items requested per API call. The loop below keeps fetching pages until none are left. */
-const PAGE_SIZE = 50;
+/** Items requested per API call on home page. */
+const HOME_PAGE_SIZE = 12;
+const FULL_PAGE_SIZE = 50;
 /** Safety net so a misbehaving API can never cause an endless request loop. */
 const MAX_PAGES = 1000;
 /**
  * The track renders: [CLONES tail cards | every story | CLONES head cards].
- * The clones on each side are what you see when the loop restarts or when you
- * drag past either end, so they must cover at least one screen width. The
- * number is re-measured at runtime and only ever grows (up to MAX_CLONES).
- * Lists shorter than the clone count are repeated to fill it.
+ * Clones cover at least one screen width on each side.
+ * Capped to prevent excessive DOM node counts while keeping smooth infinite loop.
  */
-const MIN_CLONES = 16;
-const MAX_CLONES = 80;
+const MIN_CLONES = 6;
+const MAX_CLONES = 12;
 
 /** Pasted CMS HTML carries its own colours/backgrounds; keep it on-brand and compact. */
 const STORY_HTML_CLASS = [
@@ -457,10 +456,13 @@ export default function SmileStories({
         let page = 1;
         let totalPages: number | null = null;
 
-        while (page <= MAX_PAGES) {
+        const pageSize = fullStory ? FULL_PAGE_SIZE : HOME_PAGE_SIZE;
+        const maxPages = fullStory ? MAX_PAGES : 1;
+
+        while (page <= maxPages) {
           const res: any = await publicPatientStoriesApi.listPublished({
             page,
-            limit: PAGE_SIZE,
+            limit: pageSize,
           });
           if (cancelled) return;
 

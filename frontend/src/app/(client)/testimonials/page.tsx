@@ -1,11 +1,6 @@
 "use client";
 
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  type ReactNode,
-} from "react";
+import React, { useState, useEffect } from "react";
 import { PanInfo } from "framer-motion";
 import Typography from "@/lib/Typography";
 import Banner from "@/shared/components/Herobannersection";
@@ -19,58 +14,6 @@ import ContentNotice, { LOAD_ERROR_MESSAGE } from "@/shared/components/ContentNo
 
 const CONTAINER =
   "max-w-[90rem] 2xl:max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8";
-
-/* Slide-in from the left. Plays once when it scrolls into view. */
-function SlideInLeft({
-  children,
-  className = "",
-  delay = 0,
-}: {
-  children: ReactNode;
-  className?: string;
-  delay?: number;
-}) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-
-    const obs = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setVisible(true);
-          obs.disconnect();
-        }
-      },
-      { threshold: 0.25 },
-    );
-
-    obs.observe(node);
-
-    return () => obs.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      className={`overflow-x-clip motion-reduce:!transition-none ${className}`}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible
-          ? "translate3d(0,0,0)"
-          : "translate3d(-80px,0,0)",
-        transition:
-          "opacity 700ms ease-out, transform 1000ms cubic-bezier(0.22, 1, 0.36, 1)",
-        transitionDelay: `${delay}ms`,
-        willChange: "opacity, transform",
-      }}
-    >
-      {children}
-    </div>
-  );
-}
 
 type CardItem = {
   id: string;
@@ -201,8 +144,7 @@ export default function TestimonialsPage() {
       >
         {/* Header Title & Subtitle */}
         <div className="w-full text-left">
-          {/* Heading Animation */}
-          <SlideInLeft>
+          <div className="overflow-x-clip">
             <Typography
               variant="heading-2"
               as="h2"
@@ -210,13 +152,9 @@ export default function TestimonialsPage() {
             >
               Patient Testimonials
             </Typography>
-          </SlideInLeft>
+          </div>
 
-          {/* Description Animation */}
-          <SlideInLeft
-            delay={150}
-            className="mt-3 sm:mt-4 max-w-full md:max-w-[51.25rem] lg:max-w-[86.25rem]"
-          >
+          <div className="mt-3 sm:mt-4 max-w-full md:max-w-[51.25rem] lg:max-w-[86.25rem] overflow-x-clip">
             <Typography
               variant="body-10"
               as="p"
@@ -228,7 +166,7 @@ export default function TestimonialsPage() {
               Foundation&apos;s commitment to bringing hope, healing, and
               support to those who need it most.
             </Typography>
-          </SlideInLeft>
+          </div>
         </div>
 
         {!loading && failed ? (

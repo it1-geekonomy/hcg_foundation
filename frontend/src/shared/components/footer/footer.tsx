@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Mail, MapPin, Phone, ArrowUpRight } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import Image from "next/image";
 import {
   FOOTER_QUICK_LINKS,
@@ -178,7 +178,11 @@ export default function Footer() {
                 <div className="flex flex-wrap gap-x-6 gap-y-3 md:flex-col md:gap-y-3 lg:gap-y-4">
                   <div className="flex items-center gap-3 lg:gap-4">
                     <Phone className="w-5 h-5 text-[#787878] flex-shrink-0" />
-                    <a href={FOOTER_CONTACT_INFO.phoneLink} className="inline-flex items-center min-h-[44px] sm:min-h-0">
+                    <a
+                      href={FOOTER_CONTACT_INFO.phoneLink}
+                      aria-label={`Call HCG Foundation at ${FOOTER_CONTACT_INFO.phone}`}
+                      className="inline-flex items-center min-h-[44px] sm:min-h-0"
+                    >
                       <Typography variant="body-8" as="span" className="text-white hover:text-[#FDB723] transition-colors">
                         {FOOTER_CONTACT_INFO.phone}
                       </Typography>
@@ -187,7 +191,11 @@ export default function Footer() {
 
                   <div className="flex min-w-0 items-center gap-3 lg:gap-4">
                     <Mail className="w-5 h-5 text-[#787878] flex-shrink-0" />
-                    <a href={FOOTER_CONTACT_INFO.emailLink} className="inline-flex items-center min-h-[44px] sm:min-h-0 min-w-0 break-all">
+                    <a
+                      href={FOOTER_CONTACT_INFO.emailLink}
+                      aria-label={`Email HCG Foundation at ${FOOTER_CONTACT_INFO.email}`}
+                      className="inline-flex items-center min-h-[44px] sm:min-h-0 min-w-0 break-all"
+                    >
                       <Typography variant="body-8" as="span" className="text-white hover:text-[#FDB723] transition-colors">
                         {FOOTER_CONTACT_INFO.email}
                       </Typography>

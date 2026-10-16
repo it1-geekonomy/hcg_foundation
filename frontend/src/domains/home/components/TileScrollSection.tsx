@@ -4,7 +4,6 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -417,13 +416,12 @@ function StoryTextBlock({
       const cs = getComputedStyle(frame);
       const available =
         frame.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-      let scale = 1;
+      if (available <= 0) return;
       frame.style.setProperty("--fit", "1");
-      for (let i = 0; i < 6; i++) {
-        const needed = content.offsetHeight;
-        if (needed <= available || scale <= minFit) break;
-        scale = Math.max(minFit, scale * Math.max(0.9, Math.sqrt(available / needed)));
-        frame.style.setProperty("--fit", scale.toFixed(3));
+      const needed = content.offsetHeight;
+      if (needed > available) {
+        const ratio = Math.max(minFit, Math.min(1, Math.round((available / needed) * 100) / 100));
+        frame.style.setProperty("--fit", ratio.toFixed(2));
       }
     };
 
@@ -863,11 +861,11 @@ export default function TileScrollSection({
         <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-svh">
           <div className="absolute bottom-4 left-4 sm:bottom-5 sm:left-5 md:bottom-6 md:left-6">
             <Image
-              src="/HCG Logo/TITLE.png"
+              src="/HCG Logo/TITLE.webp"
               alt="HCG Foundation"
-              width={120}
-              height={40}
-              className="h-auto w-16 opacity-65 brightness-0 invert sm:w-20 md:w-24"
+              width={224}
+              height={165}
+              className="h-auto w-16 aspect-[224/165] opacity-65 brightness-0 invert sm:w-20 md:w-24"
             />
           </div>
         </div>

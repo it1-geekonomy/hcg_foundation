@@ -7,12 +7,12 @@ import localFont from "next/font/local";
  */
 export const manrope = localFont({
 	src: [
-		{ path: "../app/Fonts/Manrope-variable-ext.woff2", weight: "200 700", style: "normal" },
 		{ path: "../app/Fonts/Manrope-variable.woff2",     weight: "200 700", style: "normal" },
+		{ path: "../app/Fonts/Manrope-variable-ext.woff2", weight: "200 700", style: "normal" },
 	],
 	variable: "--font-manrope",
 	display: "swap",
-	preload: false,
+	preload: true,
 });
 
 /*
