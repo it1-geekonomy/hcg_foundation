@@ -30,8 +30,8 @@ export class ListDonorsQueryDto {
 
   @ApiPropertyOptional({
     enum: DonationStatus,
-    default: DonationStatus.PAID,
-    description: 'Defaults to paid. Abandoned checkouts are not stored.',
+    description:
+      'Filter by status (paid, refunded, pending, failed). If omitted, returns all.',
   })
   @IsOptional()
   @IsEnum(DonationStatus)

@@ -2,13 +2,17 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
   Query,
+  RawBodyRequest,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -116,6 +120,45 @@ export class DonorsController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Donor fetched successfully',
+      data,
+    };
+  }
+
+  @Post(':id/sync')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Sync donor status with Razorpay (CMS)',
+    description:
+      'Fetches current payment/order status from Razorpay and updates the donor if refunded, captured, or failed.',
+  })
+  @ApiOkResponse({ type: Donor })
+  async syncStatus(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.syncPaymentStatus(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: `Status synced with Razorpay: ${data.status}`,
+      data,
+    };
+  }
+
+  @Public()
+  @Post('webhook')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Razorpay webhook receiver',
+    description:
+      'Receives webhook events from Razorpay (refund.processed, payment.refunded, payment.failed). Verifies x-razorpay-signature.',
+  })
+  async handleWebhook(
+    @Req() req: RawBodyRequest<Request>,
+    @Headers('x-razorpay-signature') signature: string,
+  ) {
+    const rawBody = req.rawBody ?? JSON.stringify(req.body);
+    const data = await this.service.handleRazorpayWebhook(rawBody, signature);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Webhook processed successfully',
       data,
     };
   }
