@@ -6,17 +6,29 @@
 #   REBUILD_ALL=true bash /opt/hcg/deploy.sh
 #
 # Options (environment variables):
-#   DEPLOY_BRANCH=main      branch to deploy
-#   REBUILD_ALL=true        rebuild every service, not only the ones whose folder changed
-#   REINDEX_CHATBOT=true    force a full chatbot re-embed even if the website text is unchanged
-#   GIT_FETCH_URL=<url>     fetch from this URL instead of `origin` (CI passes a short-lived token)
+#   DEPLOY_BRANCH=main        branch to deploy
+#   BUILD_BACKEND=true/false  passed from CI if backend needs rebuilding
+#   BUILD_FRONTEND=true/false passed from CI if frontend needs rebuilding
+#   BUILD_AI_SERVICE=true/false passed from CI if ai-service needs rebuilding
+#   BUILD_NGINX=true/false    passed from CI if nginx config needs reloading
+#   REBUILD_ALL=true          rebuild every service, not only the ones whose folder changed
+#   REINDEX_CHATBOT=true      force a full chatbot re-embed even if the website text is unchanged
+#   GIT_FETCH_URL=<url>       fetch from this URL instead of `origin` (CI passes a short-lived token)
 set -Eeuo pipefail
 
 APP_DIR="${APP_DIR:-/opt/hcg}"
 DEPLOY_BRANCH="${DEPLOY_BRANCH:-main}"
 REBUILD_ALL="${REBUILD_ALL:-false}"
 REINDEX_CHATBOT="${REINDEX_CHATBOT:-false}"
+BUILD_BACKEND="${BUILD_BACKEND:-}"
+BUILD_FRONTEND="${BUILD_FRONTEND:-}"
+BUILD_AI_SERVICE="${BUILD_AI_SERVICE:-}"
+BUILD_NGINX="${BUILD_NGINX:-}"
 GIT_FETCH_URL="${GIT_FETCH_URL:-origin}"
+
+# Enable Docker BuildKit for cached layer re-use
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
 
 compose() { docker compose --env-file .env.prod -f docker-compose.prod.yml "$@"; }
 log() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
@@ -31,8 +43,8 @@ wait_for() {
       warn "$label was not ready after ${timeout}s"
       return 1
     fi
-    sleep 5
-    waited=$((waited + 5))
+    sleep 3
+    waited=$((waited + 3))
   done
   echo "$label is up (${waited}s)"
 }
@@ -66,49 +78,92 @@ main() {
   [[ "$prev" != "$head" ]] && changed="$(git diff --name-only "$prev" "$head")"
   has_change() { grep -qE "$1" <<<"$changed"; }
 
-  local services=()
+  local rebuild_ai=false
+  local rebuild_backend=false
+  local rebuild_frontend=false
+  local reload_nginx=false
+
   if [[ "$REBUILD_ALL" == "true" ]]; then
-    services=(ai-service backend frontend)
+    rebuild_ai=true
+    rebuild_backend=true
+    rebuild_frontend=true
+  elif [[ -n "$BUILD_BACKEND" || -n "$BUILD_FRONTEND" || -n "$BUILD_AI_SERVICE" || -n "$BUILD_NGINX" ]]; then
+    # CI explicitly provided the exact services that changed for this deployment
+    [[ "$BUILD_AI_SERVICE" == "true" ]] && rebuild_ai=true
+    [[ "$BUILD_BACKEND" == "true" ]] && rebuild_backend=true
+    [[ "$BUILD_FRONTEND" == "true" ]] && rebuild_frontend=true
+    [[ "$BUILD_NGINX" == "true" ]] && reload_nginx=true
   else
-    if has_change '^ai-service/'; then services+=(ai-service); fi
-    if has_change '^backend/'; then services+=(backend); fi
-    if has_change '^frontend/'; then services+=(frontend); fi
+    # Fallback when deploy.sh is executed manually in droplet terminal without CI env vars
+    if has_change '^ai-service/'; then rebuild_ai=true; fi
+    if has_change '^backend/'; then rebuild_backend=true; fi
+    if has_change '^frontend/'; then rebuild_frontend=true; fi
+    if has_change '^nginx/'; then reload_nginx=true; fi
   fi
+
+  if has_change '^nginx/'; then reload_nginx=true; fi
+
+  local services=()
+  if [[ "$rebuild_ai" == "true" ]]; then services+=(ai-service); fi
+  if [[ "$rebuild_backend" == "true" ]]; then services+=(backend); fi
+  if [[ "$rebuild_frontend" == "true" ]]; then services+=(frontend); fi
+
+  log "Services to build: ${services[*]:-none}"
 
   # Build before touching running containers: a failed build leaves the live site as it was.
   # One service at a time, because parallel builds run out of memory on this Droplet.
   if ((${#services[@]} == 0)); then
     log "No service code changed; skipping image builds"
+  else
+    for service in "${services[@]}"; do
+      log "Building $service"
+      compose build "$service"
+    done
   fi
-  for service in "${services[@]}"; do
-    log "Building $service"
-    compose build "$service"
-  done
 
   log "Starting containers"
   compose up -d --remove-orphans
-  # nginx reads its config only at start, so a changed config needs a recreated container.
-  if has_change '^nginx/'; then
+
+  # Nginx reload / recreation
+  if [[ "$reload_nginx" == "true" ]]; then
+    log "Recreating nginx with updated configuration"
     compose up -d --force-recreate nginx
+  else
+    # Reload nginx gracefully so it refreshes internal upstream DNS immediately
+    compose exec -T nginx nginx -s reload 2>/dev/null || true
   fi
 
   log "Waiting for services"
-  wait_for "Backend API" 240 curl -fsS http://localhost/api/health
-  wait_for "Website" 180 curl -fsS -o /dev/null http://localhost/
-  wait_for "AI service" 120 compose exec -T ai-service \
-    python -c "import urllib.request; urllib.request.urlopen('http://localhost:8001/health', timeout=5)"
+  if [[ "$rebuild_backend" == "true" ]]; then
+    wait_for "Backend API" 240 curl -fsS http://localhost/api/health
+  fi
+  if [[ "$rebuild_frontend" == "true" ]]; then
+    wait_for "Website" 180 curl -fsS -o /dev/null http://localhost/
+  fi
+  if [[ "$rebuild_ai" == "true" ]]; then
+    wait_for "AI service" 120 compose exec -T ai-service \
+      python -c "import urllib.request; urllib.request.urlopen('http://localhost:8001/health', timeout=5)"
+  fi
+  # Fast sanity ping for the live website
+  wait_for "Website root" 30 curl -fsS -o /dev/null http://localhost/
 
-  log "Database migrations"
-  compose exec -T backend pnpm run migration:run:prod
+  # Database migrations and seed: ONLY run if backend was rebuilt
+  if [[ "$rebuild_backend" == "true" ]]; then
+    log "Database migrations"
+    compose exec -T backend pnpm run migration:run:prod
 
-  log "Admin seed (skipped if the admin already exists)"
-  compose exec -T backend pnpm run seed:prod | sed '/password:/d'
+    log "Admin seed (skipped if the admin already exists)"
+    compose exec -T backend pnpm run seed:prod | sed '/password:/d'
+  else
+    log "Skipping database migrations & admin seed (backend code unchanged)"
+  fi
 
-  log "Chatbot knowledge sync (website pages + built-in knowledge)"
-  local force_sync=False
-  [[ "$REINDEX_CHATBOT" == "true" ]] && force_sync=True
-  # A renamed or removed page shows up here: the chatbot would link to a 404 and keep the page's old text.
-  if ! compose exec -T ai-service python -c "
+  # Chatbot knowledge sync: ONLY run if AI service changed or explicitly requested
+  if [[ "$REINDEX_CHATBOT" == "true" || "$rebuild_ai" == "true" ]]; then
+    log "Chatbot knowledge sync (website pages + built-in knowledge)"
+    local force_sync=False
+    [[ "$REINDEX_CHATBOT" == "true" ]] && force_sync=True
+    if ! compose exec -T ai-service python -c "
 from app.services.sync_service import full_sync
 r = full_sync(force=$force_sync)
 print(r)
@@ -117,8 +172,11 @@ for key, what in (('broken_links', 'Chatbot links to pages the website no longer
     if r.get(key):
         print('!!  %s: %s (update ai-service/app/rag/constants.py and site_pages.py)' % (what, ', '.join(r[key])))
 " 2>&1 \
-    | grep -v 'Multiple definitions in dictionary'; then
-    warn "Chatbot sync failed. The site is live; re-run with REINDEX_CHATBOT=true."
+      | grep -v 'Multiple definitions in dictionary'; then
+      warn "Chatbot sync failed. The site is live; re-run with REINDEX_CHATBOT=true."
+    fi
+  else
+    log "Skipping chatbot knowledge sync (AI service unchanged; set REINDEX_CHATBOT=true to re-sync)"
   fi
 
   # Never prune volumes: the database lives in the pgdata volume.
