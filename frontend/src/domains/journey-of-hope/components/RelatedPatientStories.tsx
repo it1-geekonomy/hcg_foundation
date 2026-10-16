@@ -73,7 +73,7 @@ export function RelatedPatientStories({ stories }: { stories: PatientStory[] }) 
         </Typography>
         <Link
           href="/patient-stories"
-          className="inline-flex items-center gap-1 transition hover:text-[#B88700]"
+          className="inline-flex items-center min-h-[44px] py-1.5 sm:py-0 sm:min-h-0 gap-1 transition hover:text-[#B88700]"
         >
           <Typography variant="body-9" as="span" className="font-manrope font-semibold text-[#2D2D2D]">
             View All

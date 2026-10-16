@@ -11,7 +11,7 @@ import {
 } from "react";
 import Image, { getImageProps } from "next/image";
 import { preload } from "react-dom";
-import { hyphenateSync } from "hyphen/en";
+import Typography from "@/lib/Typography";
 import { cn } from "@/lib/utils";
 import {
   HERO_CONTENT_INSET_MULTIPLIER,
@@ -28,7 +28,7 @@ import {
 } from "@/domains/home/utils/heroScrollReset";
 
 // ============================================================================
-// RESPONSIVE LAYOUT  (unchanged from the original)
+// RESPONSIVE LAYOUT
 // ============================================================================
 
 function clamp01(value: number) {
@@ -63,32 +63,32 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
   const isShort = height < HERO_SHORT_VIEWPORT_PX;
   const contentTopPx = height * HERO_CONTENT_TOP_FRACTION;
 
-  // Phones — same right-hand panel as desktop, kept to about half the width so the photo stays visible;
-  // the tile slides down the photo side of the panel edge.
+  // Phones — same right-hand panel as desktop. The panel is wide enough (66%) for the copy to stay
+  // readable at 13–14px; the tile slides down the photo side of the panel edge.
   if (width < 640) {
     const small = height < 700;
     const tileWidth = small ? 84 : 96;
     return {
       isMobile: true,
-      overlayWidth: "58%",
+      overlayWidth: MOBILE_PANEL_WIDTH,
       tileWidth,
       tileBorder: 0,
       // Copy starts just under the navbar so the longest stories fit above the chatbot.
       contentTopPx: MOBILE_CONTENT_TOP_PX,
-      contentLeft: Math.round(tileWidth * MOBILE_TILE_PANEL_OVERLAP) + 10,
-      // Clears the fixed "Donate Now" side tab (~34px wide on phones).
-      contentRight: 40,
+      contentLeft: Math.round(tileWidth * MOBILE_TILE_PANEL_OVERLAP) + 8,
+      // Clears the fixed "Donate Now" side tab (~34px wide on phones) with a ~12px margin.
+      contentRight: 46,
       // Clears the chatbot launcher (60px tall, 64px above the bottom edge).
-      contentBottom: 132,
-      gapAfterTile: 0,
+      contentBottom: 160,
+      gapAfterTile: 12,
       accentGap: 7,
-      nameSize: small ? 17 : 19,
-      taglineSize: small ? 12.5 : 13.5,
-      bodySize: small ? 12 : 13,
-      bodyLineHeight: 1.55,
+      nameSize: small ? 18 : 20,
+      taglineSize: small ? 13 : 14,
+      bodySize: small ? 13 : 14,
+      bodyLineHeight: 1.5,
       nameGap: small ? 7 : 9,
       taglineGap: small ? 8 : 10,
-      wordSpacing: "0.25em",
+      wordSpacing: "0.2em",
     };
   }
 
@@ -112,7 +112,7 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
       bodySize: isShort ? 11 : 12,
       nameGap: isShort ? 20 : 24,
       taglineGap: isShort ? 12 : 14,
-      wordSpacing: "0.25em",
+      wordSpacing: "0.2em",
     };
   }
 
@@ -140,7 +140,7 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
       bodySize: Math.round(lerp(14, 15, t)),
       nameGap: isShort ? 22 : Math.round(lerp(24, 28, t)),
       taglineGap: isShort ? 14 : Math.round(lerp(14, 16, t)),
-      wordSpacing: "0.28em",
+      wordSpacing: "0.2em",
     };
   }
 
@@ -164,7 +164,7 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
     bodySize: isShort ? 14 : 16,
     nameGap: isShort ? 22 : 28,
     taglineGap: isShort ? 14 : 16,
-    wordSpacing: "0.3em",
+    wordSpacing: "0.2em",
   };
 }
 
@@ -178,13 +178,17 @@ function getNavbarClearancePx(): number {
 
 const XL_BREAKPOINT_PX = 1280;
 const MIN_TEXT_FIT = 0.8;
+/** Phones: copy may shrink less than on desktop so it never drops to fine print. */
+const MIN_TEXT_FIT_MOBILE = 0.92;
 /** Phones: just below the ~57px navbar. */
 const MOBILE_CONTENT_TOP_PX = 72;
 /** Phones: lowest tile stop stays above the HCG title mark in the bottom-left corner. */
 const MOBILE_TILE_BOTTOM_GAP_PX = 64;
-/** Phones: share of the tile that sits over the panel — just a lip, so the narrow panel keeps its width for the copy. */
+/** Phones: share of the tile that sits over the panel — just a lip, so the panel keeps its width for the copy. */
 const MOBILE_TILE_PANEL_OVERLAP = 0.15;
 const MOBILE_TILE_TRANSLATE_X = `${Math.round(MOBILE_TILE_PANEL_OVERLAP * 100)}%`;
+/** Phones: panel width. Must match the `w-[66%]` / `right-[66%]` classes below. */
+const MOBILE_PANEL_WIDTH = "61%";
 
 /** Phones: deeper at the bottom so long copy stays readable over any photo. */
 const HERO_OVERLAY_BG_MOBILE =
@@ -193,10 +197,11 @@ const HERO_OVERLAY_BG_MOBILE =
 /**
  * PERF: first-paint panel width / tile edge in CSS only, so the server HTML already matches the screen
  * (no layout shift). Once the layout is measured (`synced`), the exact inline values from
- * getResponsiveValues take over, so final positions are identical to the original.
+ * getResponsiveValues take over.
+ * Keep the phone value (66%) in sync with MOBILE_PANEL_WIDTH.
  */
-const HERO_PANEL = "w-[58%] sm:w-[42%] lg:w-[38%] xl:w-[35%]";
-const HERO_PANEL_RIGHT = "right-[58%] sm:right-[42%] lg:right-[38%] xl:right-[35%]";
+const HERO_PANEL = "w-[61%] sm:w-[42%] lg:w-[38%] xl:w-[35%]";
+const HERO_PANEL_RIGHT = "right-[61%] sm:right-[42%] lg:right-[38%] xl:right-[35%]";
 
 /**
  * PERF: picks the phone or desktop photo with <picture> media queries, and preloads only the one that
@@ -226,14 +231,14 @@ function HeroBackground({
         alt=""
         fill
         priority={priority}
-        quality={65}
+        quality={75}
         sizes="100vw"
         className={className}
       />
     );
   }
 
-  const shared = { alt: "", fill: true as const, quality: 65, sizes: "100vw" };
+  const shared = { alt: "", fill: true as const, quality: 75, sizes: "100vw" };
   const {
     props: { srcSet: desktopSet },
   } = getImageProps({ ...shared, src: desktopSrc });
@@ -305,8 +310,7 @@ function getTileTranslateY(
 }
 
 // ============================================================================
-// ANIMATED TEXT  (all stories stay mounted, exactly like the original, so every
-// enter/exit transition plays smoothly)
+// ANIMATED TEXT  (all stories stay mounted so every enter/exit transition plays smoothly)
 // ============================================================================
 
 function renderWordLines(
@@ -395,17 +399,20 @@ function StoryTextBlock({
   const frameRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Long CMS stories shrink (down to MIN_TEXT_FIT) instead of running past the panel.
+  // Long CMS stories shrink (down to the min fit) instead of running past the panel.
   //
   // PERF: this measures layout (forced reflow). Doing it for every hidden story at load blocks the main
   // thread, so only the visible story (active / exiting) is fitted immediately. Hidden stories are fitted
   // when the browser is idle, and again right away the moment they become active, so a story is always
   // correctly sized before it is shown.
   const needsNow = active || exiting;
+  const isMobile = layout.isMobile;
   useLayoutEffect(() => {
     const frame = frameRef.current;
     const content = contentRef.current;
     if (!frame || !content) return;
+    // Phones shrink less, so the copy never turns into fine print.
+    const minFit = isMobile ? MIN_TEXT_FIT_MOBILE : MIN_TEXT_FIT;
     const fit = () => {
       const cs = getComputedStyle(frame);
       const available =
@@ -414,8 +421,8 @@ function StoryTextBlock({
       frame.style.setProperty("--fit", "1");
       for (let i = 0; i < 6; i++) {
         const needed = content.offsetHeight;
-        if (needed <= available || scale <= MIN_TEXT_FIT) break;
-        scale = Math.max(MIN_TEXT_FIT, scale * Math.max(0.9, Math.sqrt(available / needed)));
+        if (needed <= available || scale <= minFit) break;
+        scale = Math.max(minFit, scale * Math.max(0.9, Math.sqrt(available / needed)));
         frame.style.setProperty("--fit", scale.toFixed(3));
       }
     };
@@ -437,32 +444,22 @@ function StoryTextBlock({
     }
     const id = window.setTimeout(fit, 200);
     return () => window.clearTimeout(id);
-  }, [layout, step, needsNow]);
+  }, [layout, step, needsNow, isMobile]);
 
   // The phone panel sits over busy photos, so text gets a soft shadow there for legibility.
   const mobileShadow: CSSProperties = layout.isMobile
     ? { textShadow: "0 1px 3px rgba(0,0,0,0.28)" }
     : {};
-  const textStyle = (size: number, weight: number, color: string, extra?: CSSProperties) => ({
-    fontSize: `calc(var(--fit, 1) * ${size}px)`,
-    fontWeight: weight,
-    color,
-    ...mobileShadow,
-    ...extra,
-  });
+
+  // Phones: left-aligned, no hyphenation. Justified + hyphenated text in a narrow column gives
+  // big word gaps and broken words ("includ-ing").
+  const mobileTextFlow: CSSProperties = layout.isMobile
+    ? { textAlign: "left", hyphens: "none", WebkitHyphens: "none", overflowWrap: "normal" }
+    : {};
 
   // Without a name, the title takes the heading slot so it isn't left at tagline size.
   const heading = step.name || step.tagline;
-  const subheading = step.name ? step.tagline : "";
   const hasHeading = Boolean(heading);
-  const textColumnOffset = hasHeading ? 4 + layout.accentGap : 0;
-
-  // Phones justify the story in a ~190px column. Soft hyphens give every browser break points, since
-  // CSS `hyphens: auto` depends on per-platform dictionaries; without them the word gaps stretch badly.
-  const mobileBody = useMemo(
-    () => hyphenateSync(step.body, { minWordLength: 6 }),
-    [step.body]
-  );
 
   // Phones animate the story as one block: a per-word cascade over 60+ words stutters and hides text mid-read.
   const animateWords = !layout.isMobile;
@@ -472,22 +469,19 @@ function StoryTextBlock({
   const blockMotion: CSSProperties = animateWords
     ? {}
     : {
-        opacity: active ? 1 : 0,
-        transform: active
-          ? "translateY(0)"
-          : `translateY(${exiting ? -blockShift : blockShift}px)`,
-        transition: active
-          ? "opacity 420ms ease 140ms, transform 560ms cubic-bezier(0.22,1,0.36,1) 140ms"
-          : "opacity 220ms ease, transform 300ms ease",
-      };
+      opacity: active ? 1 : 0,
+      transform: active
+        ? "translateY(0)"
+        : `translateY(${exiting ? -blockShift : blockShift}px)`,
+      transition: active
+        ? "opacity 420ms ease 140ms, transform 560ms cubic-bezier(0.22,1,0.36,1) 140ms"
+        : "opacity 220ms ease, transform 300ms ease",
+    };
 
   return (
     <div
       ref={frameRef}
-      className={cn(
-        "pointer-events-none absolute inset-x-0 top-0 flex flex-col overflow-hidden font-manrope",
-        layout.isMobile ? "justify-center" : "justify-start"
-      )}
+      className="pointer-events-none absolute inset-x-0 top-0 flex flex-col justify-start overflow-hidden font-manrope"
       style={{
         // Sized to the small viewport so mobile toolbars never cover the copy or its chatbot clearance.
         height: `calc(100svh - ${layout.contentTopPx}px)`,
@@ -506,44 +500,43 @@ function StoryTextBlock({
               style={{ backgroundColor: HERO_NAME_ACCENT_COLOR }}
               aria-hidden
             />
-            <div
-              className="min-w-0 flex-1 text-balance"
-              style={textStyle(layout.nameSize, 700, "white", { lineHeight: 1.2 })}
+            <Typography
+              variant="heading-7"
+              as="h2"
+              className="min-w-0 flex-1 text-balance font-manrope text-white"
+              style={
+                layout.isMobile
+                  ? {
+                    fontSize: `calc(var(--fit, 1) * ${layout.nameSize}px)`,
+                    lineHeight: 1.25,
+                    ...mobileShadow,
+                    ...mobileTextFlow,
+                  }
+                  : undefined
+              }
             >
               {words(heading)}
-            </div>
+            </Typography>
           </div>
         ) : null}
 
-        {subheading ? (
-          <div
-            className="text-balance"
-            style={{
-              paddingLeft: textColumnOffset,
-              ...textStyle(layout.taglineSize, layout.isMobile ? 600 : 700, "white", {
-                marginTop: layout.nameGap,
-                lineHeight: 1.4,
-              }),
-            }}
-          >
-            {words(subheading)}
-          </div>
-        ) : null}
-
-        <div
-          style={{
-            paddingLeft: textColumnOffset,
-            ...textStyle(layout.bodySize, layout.isMobile ? 500 : 400, layout.isMobile ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.95)", {
-              marginTop: subheading ? layout.taglineGap : layout.nameGap,
-              lineHeight: layout.bodyLineHeight ?? 1.65,
-              ...(layout.isMobile
-                ? { textAlign: "justify", textAlignLast: "left", hyphens: "manual", WebkitHyphens: "manual" }
-                : {}),
-            }),
-          }}
+        <Typography
+          variant="body-7"
+          as="p"
+          className="font-manrope text-white pt-3 sm:pt-4"
+          style={
+            layout.isMobile
+              ? {
+                fontSize: `calc(var(--fit, 1) * ${layout.bodySize}px)`,
+                lineHeight: layout.bodyLineHeight,
+                ...mobileShadow,
+                ...mobileTextFlow,
+              }
+              : undefined
+          }
         >
-          {words(layout.isMobile ? mobileBody : step.body)}
-        </div>
+          {words(step.body)}
+        </Typography>
       </div>
     </div>
   );
@@ -576,7 +569,7 @@ export default function TileScrollSection({
     initialIsMobile ? getResponsiveValues(390, 800) : getResponsiveValues(1280, 900)
   );
   // False on the server + hydration render: CSS classes position the panel/tile.
-  // True after the first real measurement: exact inline values take over (same as the original).
+  // True after the first real measurement: exact inline values take over.
   const [synced, setSynced] = useState(false);
 
   const currentStepRef = useRef(0);
@@ -682,7 +675,7 @@ export default function TileScrollSection({
   );
 
   // Touch screens scroll natively (a touch scroll can't be cancelled once momentum starts, so hijacking it
-  // fights the browser). Snap points at each story make one swipe land on the next story; proximity
+  // fights the browser). Snap points at each story make one swipe land near the next story; proximity
   // snapping releases the page once the visitor scrolls on past the hero.
   useEffect(() => {
     if (!window.matchMedia("(pointer: coarse)").matches) return;
@@ -818,20 +811,26 @@ export default function TileScrollSection({
     return () => window.removeEventListener("resize", onResize);
   }, [moveTile, syncLayout, measurePinnedRange]);
 
+  // Phones: 70svh of scroll per story (was 55svh, which let a normal swipe skip a story).
+  // Desktop: 100svh per story.
+  const stepScrollUnit = layout.isMobile ? "70svh" : "100svh";
+
+  if (stepCount === 0) return null;
+
   return (
     <div
       ref={wrapperRef}
       className="relative z-0"
-      // Each story gets one small-viewport height of scroll; the hero itself is a large-viewport tall,
-      // so mobile toolbars never uncover a gap beneath it.
-      style={{ height: `calc(${Math.max(0, stepCount - 1)} * 100svh + 100lvh)` }}
+      style={{ height: `calc(${Math.max(0, stepCount - 1)} * ${stepScrollUnit} + 100lvh)` }}
     >
+      {/* Snap markers. No scroll-snap-stop: "always" — it forces the page to halt at every marker,
+          which made fast swipes feel stuck or jerky, especially on iOS Safari. */}
       {steps.map((_, i) => (
         <div
           key={`snap-${i}`}
           aria-hidden
           className="pointer-events-none absolute left-0 h-px w-px"
-          style={{ top: `calc(${i} * 100svh)`, scrollSnapAlign: "start", scrollSnapStop: "always" }}
+          style={{ top: `calc(${i} * ${stepScrollUnit})`, scrollSnapAlign: "start" }}
         />
       ))}
       <div
@@ -881,13 +880,13 @@ export default function TileScrollSection({
           style={
             synced
               ? {
-                  width: layout.overlayWidth,
-                  background: layout.isMobile ? HERO_OVERLAY_BG_MOBILE : HERO_OVERLAY_BG,
-                }
+                width: layout.overlayWidth,
+                background: layout.isMobile ? HERO_OVERLAY_BG_MOBILE : HERO_OVERLAY_BG,
+              }
               : undefined
           }
         >
-          {/* All stories stay mounted (as in the original) so each one animates in/out smoothly. */}
+          {/* All stories stay mounted so each one animates in/out smoothly. */}
           {steps.map((step, i) => (
             <StoryTextBlock
               key={`story-${i}`}
@@ -900,7 +899,7 @@ export default function TileScrollSection({
           ))}
         </div>
 
-        {/* Tile: transform is owned by moveTile() (inline), exactly like the original.
+        {/* Tile: transform is owned by moveTile() (inline).
             No Tailwind translate-* classes here: on Tailwind v4 they use the separate `translate`
             property and would stack with the inline transform, shifting the tile twice. */}
         <div
@@ -913,24 +912,24 @@ export default function TileScrollSection({
           style={
             layout.isMobile
               ? {
-                  width: layout.tileWidth,
-                  boxShadow: "0 12px 30px rgba(0,0,0,0.45)",
-                  backgroundColor: "#2B2410",
-                  transition: "transform 650ms cubic-bezier(0.22,1,0.36,1)",
-                  ...(synced ? { right: layout.overlayWidth } : {}),
-                  transform: `translateX(${MOBILE_TILE_TRANSLATE_X}) translateY(0)`,
-                }
+                width: layout.tileWidth,
+                boxShadow: "0 12px 30px rgba(0,0,0,0.45)",
+                backgroundColor: "#2B2410",
+                transition: "transform 650ms cubic-bezier(0.22,1,0.36,1)",
+                ...(synced ? { right: layout.overlayWidth } : {}),
+                transform: `translateX(${MOBILE_TILE_TRANSLATE_X}) translateY(0)`,
+              }
               : {
-                  width: layout.tileWidth,
-                  borderWidth: layout.tileBorder,
-                  borderStyle: "solid",
-                  borderColor: "white",
-                  backgroundColor: "white",
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
-                  transition: "transform 600ms cubic-bezier(0.4,0,0.2,1)",
-                  ...(synced ? { right: layout.overlayWidth } : {}),
-                  transform: "translateX(50%) translateY(0)",
-                }
+                width: layout.tileWidth,
+                borderWidth: layout.tileBorder,
+                borderStyle: "solid",
+                borderColor: "white",
+                backgroundColor: "white",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+                transition: "transform 600ms cubic-bezier(0.4,0,0.2,1)",
+                ...(synced ? { right: layout.overlayWidth } : {}),
+                transform: "translateX(50%) translateY(0)",
+              }
           }
         >
           {steps.map((step, i) =>

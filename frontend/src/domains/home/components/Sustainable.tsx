@@ -147,7 +147,7 @@ export default function SustainableGoalsSection() {
                 />
               </div>
 
-              <div className="w-full flex h-8 shrink-0 items-center justify-center pb-3 sm:h-9 md:pb-0 lg:mt-3 lg:h-10 xl:h-11">
+              <div className="w-full flex min-h-8 h-auto shrink-0 items-center justify-center pb-2 sm:h-9 md:pb-0 lg:mt-3 lg:h-10 xl:h-11">
                 <Typography
                   variant="caption-1"
                   as="span"

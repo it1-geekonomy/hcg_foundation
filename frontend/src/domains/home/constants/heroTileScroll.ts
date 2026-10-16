@@ -18,54 +18,7 @@ export type HeroTileStep = {
   tileImageSrc: string;
 };
 
-// ============================================================================
-// ASSETS
-// ============================================================================
 
-const HOME_BG_1 = "/home/bg1.png";
-const HOME_BG_2 = "/home/bg2.png";
-const HOME_TILE_1 = "/home/dr1.png";
-const HOME_TILE_2 = "/home/dr2.png";
-const HOME_BG_3 = "/home/bg3.png";
-const HOME_TILE_3 = "/home/dr3.png";
-const HOME_BG_4 = "/home/bg4.png";
-const HOME_TILE_4 = "/home/dr4.png";
-
-// ============================================================================
-// HERO TILE STEPS - Story data
-// ============================================================================
-
-/** Shown only when the CMS has no active home banners or the API is unreachable. */
-export const HERO_FALLBACK_STEPS: HeroTileStep[] = [
-  {
-    name: "Ananya Nair",
-    tagline: "With courage in her heart and hope ahead.",
-    body: "Ananya faced her cancer journey with quiet strength and unwavering hope. With access to timely treatment, financial assistance, and compassionate care, she continues to move forward surrounded by a community that believes in her recovery.",
-    backgroundSrc: HOME_BG_1,
-    tileImageSrc: HOME_TILE_1,
-  },
-  {
-    name: "Meera Sreekumar",
-    tagline: "A journey of courage, care, and hope.",
-    body: "Meera was diagnosed with breast cancer and faced the challenges of treatment with determination. With access to timely care, financial assistance, and emotional support, she continues her journey toward recovery with renewed confidence.",
-    backgroundSrc: HOME_BG_2,
-    tileImageSrc: HOME_TILE_2,
-  },
-  {
-    name: "Rahul Sharma",
-    tagline: "With courage in her heart and hope ahead.",
-    body: "Rahul is undergoing treatment for colorectal cancer and requires continued medical care and regular follow-ups. The increasing cost of treatment has placed financial pressure on his family. Timely support can help him continue his treatment and focus on his recovery.",
-    backgroundSrc: HOME_BG_3,
-    tileImageSrc: HOME_TILE_3,
-  },
-  {
-    name: "Rohit Kumar",
-    tagline: "Strength through treatment, hope for tomorrow.",
-    body: "Rohit is receiving treatment for oral cancer and needs ongoing medical care, medication, and follow-up support. Managing treatment expenses has become challenging for his family. Community support can help him continue his care and move forward with renewed hope.",
-    backgroundSrc: HOME_BG_4,
-    tileImageSrc: HOME_TILE_4,
-  },
-];
 
 const NON_IMAGE_FILE = /\.(pdf|docx?|pptx?|xlsx?|mp4|webm|mov|zip)(\?|#|$)/i;
 

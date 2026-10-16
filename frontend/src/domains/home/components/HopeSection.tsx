@@ -193,10 +193,10 @@ export default function AboutSection() {
           {/* < 640px: centered. sm+ : left-aligned. Compact size below lg. lg+: original. */}
           <Link
             href={ABOUT_CONTENT.cta.href}
-            className="mt-2 inline-flex w-fit items-stretch max-sm:self-center overflow-hidden rounded border border-[#FFD43B] bg-[#FFD43B] motion-reduce:!transition-none lg:h-12 lg:border-[#FCCC2D] lg:bg-[#FCCC2D]"
+            className="mt-2 inline-flex w-fit items-stretch max-sm:self-center overflow-hidden rounded border border-[#FFD43B] bg-[#FFD43B] motion-reduce:!transition-none min-h-[44px] lg:min-h-0 lg:h-12 lg:border-[#FCCC2D] lg:bg-[#FCCC2D]"
             style={slideStyle(descVisible, DESC_DELAY_MS + descLineCount * LINE_STEP_MS)}
           >
-            <span className="flex items-center px-2.5 py-1.5 sm:px-3 sm:py-2 lg:h-full lg:px-4 lg:py-0">
+            <span className="flex items-center px-3.5 py-2 sm:px-3 sm:py-2 lg:h-full lg:px-4 lg:py-0">
               {/* < lg: same type as the "More details" button */}
               <Typography
                 variant="button-3"
@@ -215,8 +215,8 @@ export default function AboutSection() {
               </Typography>
             </span>
 
-            <span className="flex w-7 shrink-0 items-center justify-center border-2 border-[#FFD43B] bg-black sm:w-8 lg:h-full lg:w-12 lg:border-[3px] lg:border-[#FCCC2D]">
-              <ArrowUpRight className="h-3 w-3 text-[#FFD43B] sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4 lg:text-[#FCCC2D]" />
+            <span className="flex w-11 sm:w-8 shrink-0 items-center justify-center border-2 border-[#FFD43B] bg-black lg:h-full lg:w-12 lg:border-[3px] lg:border-[#FCCC2D]">
+              <ArrowUpRight className="h-3.5 w-3.5 text-[#FFD43B] sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4 lg:text-[#FCCC2D]" />
             </span>
           </Link>
         </div>

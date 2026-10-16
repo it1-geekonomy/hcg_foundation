@@ -42,11 +42,11 @@ export function PatientStoryDetailPreview({ story }: { story: PatientStory }) {
         <div className="mt-4 sm:mt-5 max-h-[25rem] sm:max-h-[30rem] lg:max-h-[35rem] xl:max-h-[40rem] overflow-y-auto no-scrollbar pr-2 sm:pr-4">
           {story.fullStory.includes("<") ? (
             <div
-              className="prose prose-stone max-w-none text-justify text-[#343E43]"
+              className="prose prose-stone max-w-none text-left text-[#343E43]"
               dangerouslySetInnerHTML={{ __html: story.fullStory }}
             />
           ) : (
-            <div className="space-y-3.5 text-justify">
+            <div className="space-y-3.5 text-left">
               {story.fullStory.split("\n\n").map((paragraph, index) => (
                 <Typography
                   key={index}

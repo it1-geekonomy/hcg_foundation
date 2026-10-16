@@ -289,7 +289,7 @@ function MoreDetailsButton({
   const classes = `inline-flex w-fit shrink-0 items-center justify-center overflow-visible bg-[#FFD43B] uppercase tracking-wider text-neutral-900 transition-colors hover:bg-[#f0c527] ${
     compact
       ? "gap-1.5 px-3 py-2"
-      : "gap-1 px-2.5 py-1.5 sm:gap-1.5 sm:px-3 sm:py-2"
+      : "gap-1.5 min-h-[44px] px-3.5 py-2 sm:min-h-0 sm:gap-1.5 sm:px-3 sm:py-2"
   } ${className}`;
   const label = (
     <Typography
@@ -1091,18 +1091,18 @@ export default function ProjectsSection({
               onClick={handlePrev}
               disabled={clampedWindowStart === 0}
               aria-label="Previous projects"
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FFD43B] text-neutral-900 transition-colors hover:bg-[#f0c527] disabled:cursor-not-allowed disabled:bg-[#FFE9A0]"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FFD43B] text-neutral-900 transition-colors hover:bg-[#f0c527] disabled:cursor-not-allowed disabled:bg-[#FFE9A0]"
             >
-              <ChevronLeftIcon />
+              <ChevronLeftIcon className="size-4" />
             </button>
             <button
               type="button"
               onClick={handleNext}
               disabled={clampedWindowStart >= maxWindowStart}
               aria-label="Next projects"
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FFD43B] text-neutral-900 transition-colors hover:bg-[#f0c527] disabled:cursor-not-allowed disabled:bg-[#FFE9A0]"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FFD43B] text-neutral-900 transition-colors hover:bg-[#f0c527] disabled:cursor-not-allowed disabled:bg-[#FFE9A0]"
             >
-              <ChevronRightIcon />
+              <ChevronRightIcon className="size-4" />
             </button>
           </div>
         ) : null}
