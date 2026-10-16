@@ -2,6 +2,8 @@ add_header X-Content-Type-Options "nosniff" always;
 add_header X-Frame-Options "SAMEORIGIN" always;
 add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+add_header Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://cdn.razorpay.com https://maps.googleapis.com https://cdn.jsdelivr.net blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://checkout.razorpay.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://*.r2.dev https://*.razorpay.com https://maps.gstatic.com https://*.googleapis.com https://images.unsplash.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://checkout.razorpay.com https://*.razorpay.com https://maps.googleapis.com https://photon.komoot.io https://*.r2.dev https://cdn.jsdelivr.net; media-src 'self' blob: data: https://*.r2.dev; frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://*.razorpay.com https://www.google.com https://www.youtube.com https://www.youtube-nocookie.com; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://api.razorpay.com https://*.razorpay.com; worker-src 'self' blob:;" always;
+
 
 client_max_body_size 100m;
 
@@ -40,6 +42,7 @@ location /_next/static/ {
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    add_header Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://cdn.razorpay.com https://maps.googleapis.com https://cdn.jsdelivr.net blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://checkout.razorpay.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://*.r2.dev https://*.razorpay.com https://maps.gstatic.com https://*.googleapis.com https://images.unsplash.com https://cdn.jsdelivr.net; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://checkout.razorpay.com https://*.razorpay.com https://maps.googleapis.com https://photon.komoot.io https://*.r2.dev https://cdn.jsdelivr.net; media-src 'self' blob: data: https://*.r2.dev; frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://*.razorpay.com https://www.google.com https://www.youtube.com https://www.youtube-nocookie.com; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://api.razorpay.com https://*.razorpay.com; worker-src 'self' blob:;" always;
 }
 
 location / {
