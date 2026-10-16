@@ -420,6 +420,28 @@ export class DonorsService {
     return donor;
   }
 
+  async syncAll(): Promise<{ synced: number; updated: number }> {
+    const donors = await this.repo.find();
+    let updated = 0;
+    for (const donor of donors) {
+      if (donor.razorpayPaymentId || donor.razorpayOrderId) {
+        const prevStatus = donor.status;
+        try {
+          const res = await this.syncPaymentStatus(donor.id);
+          if (res.status !== prevStatus) {
+            updated++;
+          }
+        } catch (err) {
+          this.logger.warn(
+            `Could not sync donor ${donor.id}: ${this.razorpayErrorReason(err)}`,
+          );
+        }
+      }
+    }
+    this.logger.log(`SyncAll complete: ${donors.length} donors checked, ${updated} updated.`);
+    return { synced: donors.length, updated };
+  }
+
   async handleRazorpayWebhook(
     rawBody: string | Buffer,
     signature: string,
