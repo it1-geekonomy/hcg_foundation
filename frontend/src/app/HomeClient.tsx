@@ -1,89 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
-
+import { useState, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 
-const loadIntro = () =>
-  import("@/domains/home/components/IntroSequence").then((m) => m.IntroSequence);
-const loadOverlay = () => import("@/domains/home/components/OverlayForm");
+const IntroSequence = dynamic(
+  () =>
+    import("@/domains/home/components/IntroSequence").then((m) => m.IntroSequence),
+  { ssr: false }
+);
+const OverlayForm = dynamic(
+  () => import("@/domains/home/components/OverlayForm"),
+  { ssr: false }
+);
 
-const IntroSequence = dynamic(loadIntro, { ssr: false });
-const OverlayForm = dynamic(loadOverlay, { ssr: false });
-
-/**
- * Runs inline, before first paint. Returning visitors (nav action, came from details, hash links)
- * and PageSpeed/webdriver never see the cover. Same rules as the `ready` initial state below.
- */
-const COVER_GUARD = `try{var s=sessionStorage,h=location.hash,n=s.getItem('nav_action');
-if((n&&n!=='logo')||s.getItem('came_from_details')||/projects|events|smilestories/.test(h)||navigator.webdriver){
-var c=document.getElementById('intro-cover');if(c)c.style.display='none'}}catch(e){}`;
-
-export default function HomeClient({ children, isBot }: { children: React.ReactNode; isBot?: boolean }) {
-  const [ready, setReady] = useState(isBot || false);
-  const [showDonationOverlay, setShowDonationOverlay] = useState(false);
-
-  // The server HTML always contains the homepage (the intro/overlay are ssr:false and load later),
-  // so on a first visit the homepage used to flash until those chunks arrived. This cover sits on
-  // top from the very first paint and is removed only once the intro/overlay chunks have loaded.
-  const [coverGone, setCoverGone] = useState(false);
-
-  useEffect(() => {
-    if (!isBot) {
-      const h = window.location.hash;
-      const navAction = sessionStorage.getItem("nav_action");
-      const cameFromDetails = sessionStorage.getItem("came_from_details");
-      const isAuto = navigator.webdriver;
-
-      let nextReady = false;
-      let nextOverlay = false;
-
-      if (navAction === "logo") {
-        nextReady = false;
-        nextOverlay = true;
-      } else if (navAction || cameFromDetails) {
-        nextReady = true;
-        nextOverlay = false;
-      } else {
-        const hasHash = h.includes("projects") || h.includes("events") || h.includes("smilestories");
-        nextReady = isAuto || hasHash;
-        nextOverlay = !isAuto && !hasHash && !h;
-      }
-
-      setReady(nextReady);
-      setShowDonationOverlay(nextOverlay);
-    }
-    // Run exactly ONCE on mount to sync client state without structural hydration mismatch.
-    // Do NOT depend on ready/showDonationOverlay, otherwise it reverts them after the intro finishes!
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (ready && !showDonationOverlay) {
-      setCoverGone(true);
-      return;
-    }
-    let cancelled = false;
-    const jobs: Promise<unknown>[] = [];
-    if (!ready) jobs.push(loadIntro());
-    if (showDonationOverlay) jobs.push(loadOverlay());
-    Promise.all(jobs)
-      .catch(() => {})
-      .then(() => {
-        if (cancelled) return;
-        // two frames so the intro has painted before the cover goes away
-        requestAnimationFrame(() => requestAnimationFrame(() => setCoverGone(true)));
-      });
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+export default function HomeClient({ children }: { children: React.ReactNode }) {
+  // Start with ready=false and showDonationOverlay=true so the landing video/intro and donation form
+  // appear on initial load / hard reload.
+  const [ready, setReady] = useState(false);
+  const [showDonationOverlay, setShowDonationOverlay] = useState(true);
 
   useEffect(() => {
     const handleNavAction = () => {
       const action = sessionStorage.getItem("nav_action");
       const cameFromDetails = sessionStorage.getItem("came_from_details");
+      const h = window.location.hash;
 
       // Clear flags
       sessionStorage.removeItem("nav_action");
@@ -127,7 +67,6 @@ export default function HomeClient({ children, isBot }: { children: React.ReactN
                 const refreshedEl = document.getElementById(targetId);
                 if (refreshedEl) {
                   const rect = refreshedEl.getBoundingClientRect();
-                  // If layout shift pushed it off screen or misplaced it, gently re-align
                   if (rect.top < -80 || rect.top > window.innerHeight - 100) {
                     refreshedEl.scrollIntoView({
                       behavior: "smooth",
@@ -146,6 +85,9 @@ export default function HomeClient({ children, isBot }: { children: React.ReactN
         requestAnimationFrame(() => {
           setTimeout(scrollToTarget, 50);
         });
+      } else if (h && (h.includes("projects") || h.includes("events") || h.includes("smilestories"))) {
+        setReady(true);
+        setShowDonationOverlay(false);
       }
     };
 
@@ -159,21 +101,7 @@ export default function HomeClient({ children, isBot }: { children: React.ReactN
     <>
       {children}
 
-      {/* Same on server and first client render, so hydration matches. Bots never get it. */}
-      {!isBot && !coverGone && (
-        <>
-          <div
-            id="intro-cover"
-            aria-hidden
-            suppressHydrationWarning
-            // Same colour as IntroSequence's background so the handover is invisible.
-            className="fixed inset-0 z-[9999] bg-[#2D2D2D]"
-          />
-          <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: COVER_GUARD }} />
-        </>
-      )}
-
-      <div suppressHydrationWarning>
+      <Suspense fallback={null}>
         {showDonationOverlay && (
           <OverlayForm
             key="donation-overlay"
@@ -188,7 +116,7 @@ export default function HomeClient({ children, isBot }: { children: React.ReactN
             }}
           />
         )}
-      </div>
+      </Suspense>
     </>
   );
 }

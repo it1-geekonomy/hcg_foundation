@@ -59,7 +59,7 @@ function ShareIconButton({
         onFocus={() => setIsHovered(true)}
         onBlur={() => setIsHovered(false)}
         aria-label={label}
-        className="relative flex size-8 sm:size-9 items-center justify-center rounded-full
+        className="relative flex size-11 items-center justify-center rounded-full
                    bg-transparent text-[#382E07] shadow-none
                    transition-all duration-300 ease-out
                    hover:bg-[#FDC61D] hover:shadow-xs hover:scale-110 hover:-translate-y-0.5

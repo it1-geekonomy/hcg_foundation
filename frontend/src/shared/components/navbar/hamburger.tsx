@@ -17,7 +17,7 @@ export function HamburgerButton({ isMenuOpen, onToggle }: HamburgerButtonProps) 
       onClick={onToggle}
       aria-label="Toggle menu"
       aria-expanded={isMenuOpen}
-      className="lg:hidden shrink-0 relative h-6 w-6 p-2 text-white box-content"
+      className="lg:hidden shrink-0 relative flex h-12 w-12 items-center justify-center text-white"
     >
       <Menu
         className={`absolute inset-0 m-auto h-6 w-6 transition-all duration-300 ease-in-out ${

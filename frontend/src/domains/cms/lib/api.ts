@@ -133,13 +133,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     let res: Response;
     try {
       res = await fetch(`${API_BASE}${path}`, {
+        cache: init?.cache ?? (init?.next ? undefined : "no-store"),
         ...init,
         headers: {
           "Content-Type": "application/json",
           ...authHeaders(),
           ...(init?.headers ?? {}),
         },
-        cache: "no-store",
       });
     } catch {
       throw new Error(
@@ -1195,6 +1195,11 @@ export const cmsApi = {
 
   getDonor: (id: string) => request<ApiEnvelope<Donor>>(`/donors/${id}`),
 
+  syncDonor: (id: string) =>
+    request<ApiEnvelope<Donor>>(`/donors/${id}/sync`, {
+      method: "POST",
+    }),
+
   listFundraisingCampaigns: (params?: ListQuery) =>
     request<Paginated<FundraisingCampaign>>(
       `/fundraising-campaigns${toQuery({ page: 1, limit: 20, ...params })}`
@@ -1558,8 +1563,11 @@ export const publicEventsApi = {
 
 /** Public site: active home banners */
 export const publicHomeBannersApi = {
-  listActive: () =>
-    request<ApiEnvelope<HomeBanner[]>>("/home-banners/active"),
+  listActive: (init?: RequestInit) =>
+    request<ApiEnvelope<HomeBanner[]>>("/home-banners/active", {
+      next: { revalidate: 60 },
+      ...init,
+    } as RequestInit),
 };
 
 /**

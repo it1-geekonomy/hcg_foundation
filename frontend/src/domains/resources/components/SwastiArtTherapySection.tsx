@@ -25,7 +25,7 @@ const ART_GALLERY_CARDS = [
   },
 ];
 
-const PARAGRAPH_CLASS = "font-argestadisplay font-normal text-justify text-[#596D79]";
+const PARAGRAPH_CLASS = "font-argestadisplay font-normal text-left text-[#596D79]";
 const SUBHEADING_CLASS = "font-argestadisplay font-normal underline text-[#262626]";
 const CARD_STAGGER_MS = 120;
 

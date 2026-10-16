@@ -249,7 +249,7 @@ function ReelCard({
         onClick={handleToggle}
         aria-label={muted ? "Unmute video" : "Mute video"}
         aria-pressed={!muted}
-        className="absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70"
+        className="absolute bottom-3 right-3 flex h-11 w-11 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70"
       >
         <MuteIcon muted={muted} />
       </button>
@@ -307,7 +307,7 @@ function ReelNavButton({
       }`}
       style={
         {
-          "--btn-size": `clamp(28px, 7vw, ${size * 0.85}px)`,
+          "--btn-size": `clamp(44px, 7vw, ${size * 0.85}px)`,
           "--btn-bg": reelsTheme.arrowBg,
         } as React.CSSProperties
       }

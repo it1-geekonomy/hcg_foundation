@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { RefreshCw } from "lucide-react";
+import { Button } from "@/shared/ui/button";
 import { cmsApi } from "@/domains/cms/lib/api";
 import type { Donor } from "@/domains/cms/lib/types";
 import {
@@ -28,6 +30,8 @@ export default function DonorsViewPage() {
   const [donor, setDonor] = useState<Donor | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,6 +65,23 @@ export default function DonorsViewPage() {
     );
   }
 
+  const handleSync = async () => {
+    if (!donor) return;
+    setSyncing(true);
+    setSyncFeedback(null);
+    try {
+      const res = await cmsApi.syncDonor(donor.id);
+      setDonor(res.data);
+      setSyncFeedback(`Synced with Razorpay: Status is "${res.data.status}".`);
+    } catch (err) {
+      setSyncFeedback(
+        cmsErrorMessage(err, "Failed to sync payment status with Razorpay"),
+      );
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <CmsViewHeader
@@ -68,7 +89,33 @@ export default function DonorsViewPage() {
         title={donor.fullName}
         badges={<CmsBadge tone={statusTone(donor.status)}>{donor.status}</CmsBadge>}
         meta={`${donor.currency} ${donor.amount} · ${formatCmsDateTime(donor.createdAt)}`}
+        actions={
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleSync}
+            disabled={syncing || (!donor.razorpayPaymentId && !donor.razorpayOrderId)}
+            className="gap-1.5"
+          >
+            <RefreshCw className={`size-3.5 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "Syncing…" : "Sync with Razorpay"}
+          </Button>
+        }
       />
+
+      {syncFeedback ? (
+        <div
+          className={`rounded-lg border px-4 py-3 text-sm font-medium ${
+            syncFeedback.toLowerCase().includes("fail") ||
+            syncFeedback.toLowerCase().includes("error")
+              ? "border-red-200 bg-red-50 text-red-700"
+              : "border-emerald-200 bg-emerald-50 text-emerald-800"
+          }`}
+        >
+          {syncFeedback}
+        </div>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <CmsDetailCard title="Donor">
@@ -101,7 +148,14 @@ export default function DonorsViewPage() {
             />
             <CmsDetailRow
               label="Status"
-              value={<span className="capitalize">{donor.status}</span>}
+              value={
+                <div className="flex items-center gap-2">
+                  <CmsBadge tone={statusTone(donor.status)}>{donor.status}</CmsBadge>
+                  {donor.status === "refunded" ? (
+                    <span className="text-xs text-cms-muted">(Payment refunded on Razorpay)</span>
+                  ) : null}
+                </div>
+              }
             />
             <CmsDetailRow label="Receipt" value={donor.receiptNumber} />
             <CmsDetailRow label="Receipt email" value={<ReceiptEmailStatus {...donor} />} />

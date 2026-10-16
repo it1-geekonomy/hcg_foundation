@@ -26,7 +26,7 @@ import type {
   ReceiptEmailStatus as ReceiptEmailStatusValue,
 } from "@/domains/cms/lib/types";
 import ReceiptEmailStatus from "./ReceiptEmailStatus";
-import { cmsErrorMessage } from "@/domains/cms/ui/CmsViewChrome";
+import { CmsBadge, cmsErrorMessage } from "@/domains/cms/ui/CmsViewChrome";
 import { CmsPagination, type PaginationMeta } from "@/domains/cms/ui/CmsPagination";
 import CmsSearchInput from "@/domains/cms/ui/CmsSearchInput";
 import CmsSelect, {
@@ -50,12 +50,19 @@ function formatAmount(amount: string, currency: string) {
   return `${currency} ${n.toLocaleString("en-IN")}`;
 }
 
+function statusTone(status?: string) {
+  if (status === "paid") return "success" as const;
+  if (status === "failed") return "danger" as const;
+  if (status === "refunded") return "info" as const;
+  return "status" as const;
+}
+
 export default function DonorsListPage() {
   const [donors, setDonors] = useState<Donor[]>([]);
   const [meta, setMeta] = useState<PaginationMeta>(emptyMeta);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<DonationStatus | "">("paid");
+  const [status, setStatus] = useState<DonationStatus | "">("");
   const [category, setCategory] = useState<DonationCategory | "">("");
   const [emailStatus, setEmailStatus] = useState<ReceiptEmailStatusValue | "">("");
   const [loading, setLoading] = useState(true);
@@ -208,7 +215,11 @@ export default function DonorsListPage() {
                           </Typography>
                         ) : null}
                       </TableCell>
-                      <TableCell className="capitalize">{donor.status}</TableCell>
+                      <TableCell>
+                        <CmsBadge tone={statusTone(donor.status)}>
+                          {donor.status}
+                        </CmsBadge>
+                      </TableCell>
                       <TableCell>
                         <ReceiptEmailStatus {...donor} />
                       </TableCell>

@@ -162,10 +162,11 @@ export const DONATION_CATEGORY_FILTER_OPTIONS: CmsSelectOption[] = [
 ];
 
 export const DONATION_STATUS_OPTIONS: CmsSelectOption[] = [
+  { value: "", label: "All statuses" },
   { value: "paid", label: "Paid" },
+  { value: "refunded", label: "Refunded" },
   { value: "pending", label: "Pending" },
   { value: "failed", label: "Failed" },
-  { value: "refunded", label: "Refunded" },
 ];
 
 export const RECEIPT_EMAIL_STATUS_FILTER_OPTIONS: CmsSelectOption[] = [

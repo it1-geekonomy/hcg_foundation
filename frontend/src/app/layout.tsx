@@ -6,7 +6,6 @@ import { PAGE_SEO, SITE_NAME, SITE_URL } from "@/lib/seo";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 // No canonical here: it would be inherited by every route that doesn't set its own.
@@ -35,6 +34,12 @@ export default function RootLayout({
       lang="en"
       className={`${fontVariableClassNames} h-full antialiased`}
     >
+      <head>
+        <link rel="preconnect" href="https://pub-88ceae84120e4b1b949fe39c82f1cb5f.r2.dev" />
+        <link rel="dns-prefetch" href="https://pub-88ceae84120e4b1b949fe39c82f1cb5f.r2.dev" />
+        <link rel="preconnect" href="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev" />
+        <link rel="dns-prefetch" href="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev" />
+      </head>
       <body className="min-h-full flex flex-col">
         {children}
       </body>

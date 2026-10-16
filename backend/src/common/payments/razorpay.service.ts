@@ -12,11 +12,14 @@ export class RazorpayService {
   private readonly logger = new Logger(RazorpayService.name);
   private readonly keyId: string;
   private readonly keySecret: string;
+  private readonly webhookSecret: string;
   private readonly client: Razorpay;
 
   constructor(private readonly config: ConfigService) {
     this.keyId = this.config.get<string>('razorpay.keyId') ?? '';
     this.keySecret = this.config.get<string>('razorpay.keySecret') ?? '';
+    this.webhookSecret =
+      this.config.get<string>('razorpay.webhookSecret') ?? '';
     this.client = new Razorpay({
       key_id: this.keyId,
       key_secret: this.keySecret,
@@ -40,13 +43,38 @@ export class RazorpayService {
       currency: params.currency,
       receipt: params.receipt,
       notes: params.notes,
-    });
-    this.logger.log(`Razorpay order created: ${order.id}`);
+      payment_capture: 1,
+    } as any);
+    this.logger.log(`Razorpay order created: ${order.id} (payment_capture: 1)`);
     return {
       id: String(order.id),
       amount: Number(order.amount),
       currency: String(order.currency),
     };
+  }
+
+  async capturePayment(
+    paymentId: string,
+    amountPaise: number,
+    currency: string = 'INR',
+  ): Promise<any> {
+    this.assertConfigured();
+    try {
+      const captured = await this.client.payments.capture(
+        paymentId,
+        amountPaise,
+        currency,
+      );
+      this.logger.log(`Razorpay payment captured successfully: ${paymentId}`);
+      return captured;
+    } catch (err: any) {
+      const desc = err?.error?.description || err?.message || '';
+      if (/already\s+been\s+captured/i.test(desc)) {
+        this.logger.log(`Razorpay payment ${paymentId} was already captured.`);
+        return null;
+      }
+      throw err;
+    }
   }
 
   async fetchOrder(orderId: string): Promise<{
@@ -66,6 +94,21 @@ export class RazorpayService {
     };
   }
 
+  async fetchPayment(paymentId: string): Promise<{
+    id: string;
+    status: string;
+    amount: number;
+    currency: string;
+    amount_refunded: number;
+    refund_status?: string | null;
+    order_id?: string | null;
+    notes?: Record<string, string>;
+  }> {
+    this.assertConfigured();
+    const payment = await this.client.payments.fetch(paymentId);
+    return payment as any;
+  }
+
   verifyPaymentSignature(
     orderId: string,
     paymentId: string,
@@ -83,6 +126,36 @@ export class RazorpayService {
     } catch {
       return false;
     }
+  }
+
+  verifyWebhookSignature(rawBody: string | Buffer, signature: string): boolean {
+    if (!this.webhookSecret) {
+      this.logger.warn(
+        'Razorpay webhook secret (RAZORPAY_WEBHOOK_SECRET) is not configured.',
+      );
+      return false;
+    }
+    if (!signature) {
+      return false;
+    }
+    const bodyString = Buffer.isBuffer(rawBody)
+      ? rawBody.toString('utf8')
+      : String(rawBody);
+    const expected = createHmac('sha256', this.webhookSecret)
+      .update(bodyString)
+      .digest('hex');
+    try {
+      return timingSafeEqual(
+        Buffer.from(expected, 'utf8'),
+        Buffer.from(signature, 'utf8'),
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  getWebhookSecret(): string {
+    return this.webhookSecret;
   }
 
   private assertConfigured() {
