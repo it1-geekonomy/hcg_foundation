@@ -124,6 +124,23 @@ export class DonorsController {
     };
   }
 
+  @Post('sync-all')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Sync all donors status with Razorpay (CMS)',
+    description:
+      'Loops through all donors and fetches their live status from Razorpay.',
+  })
+  async syncAll() {
+    const data = await this.service.syncAll();
+    return {
+      statusCode: HttpStatus.OK,
+      message: `Synced ${data.synced} donors with Razorpay (${data.updated} updated)`,
+      data,
+    };
+  }
+
   @Post(':id/sync')
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)

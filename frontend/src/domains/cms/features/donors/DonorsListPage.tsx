@@ -66,6 +66,8 @@ export default function DonorsListPage() {
   const [category, setCategory] = useState<DonationCategory | "">("");
   const [emailStatus, setEmailStatus] = useState<ReceiptEmailStatusValue | "">("");
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -89,6 +91,20 @@ export default function DonorsListPage() {
     }
   }, [page, search, status, category, emailStatus]);
 
+  const handleSyncAll = async () => {
+    setSyncing(true);
+    setSyncMessage(null);
+    try {
+      const res = await cmsApi.syncAllDonors();
+      setSyncMessage(res.message || "Synced all donors with Razorpay.");
+      await load();
+    } catch (err) {
+      setError(cmsErrorMessage(err, "Failed to sync donors with Razorpay"));
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   useEffect(() => {
     void load();
   }, [load]);
@@ -103,6 +119,16 @@ export default function DonorsListPage() {
         Website donations that completed payment.
       </Typography>
 
+      {syncMessage ? (
+        <Typography
+          variant="label-1"
+          as="div"
+          className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800"
+        >
+          {syncMessage}
+        </Typography>
+      ) : null}
+
       {error ? (
         <Typography
           variant="label-1"
@@ -114,13 +140,23 @@ export default function DonorsListPage() {
       ) : null}
 
       <Card>
-        <CardHeader>
-          <CardTitle>Donations</CardTitle>
-          <CardDescription>
-            {loading
-              ? "Loading…"
-              : `${meta.total} total · page ${meta.page} of ${meta.totalPages}`}
-          </CardDescription>
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle>Donations</CardTitle>
+            <CardDescription>
+              {loading
+                ? "Loading…"
+                : `${meta.total} total · page ${meta.page} of ${meta.totalPages}`}
+            </CardDescription>
+          </div>
+          <button
+            type="button"
+            onClick={handleSyncAll}
+            disabled={syncing || loading}
+            className="inline-flex items-center gap-2 rounded-lg border border-cms-border bg-cms-surface px-3 py-1.5 text-xs font-medium text-cms-text shadow-sm hover:bg-cms-hover disabled:opacity-50"
+          >
+            {syncing ? "Syncing with Razorpay…" : "Sync All with Razorpay"}
+          </button>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex flex-col gap-3 sm:flex-row">
