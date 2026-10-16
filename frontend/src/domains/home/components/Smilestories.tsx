@@ -572,10 +572,6 @@ function SmileStoriesCarousel({
   const trackRef = useRef<HTMLDivElement>(null);
   const [hasEntered, setHasEntered] = useState(false);
 
-  // Heading blur reveal — plays once, the first time it scrolls into view.
-  const headingRef = useRef<HTMLDivElement | null>(null);
-  const [headingVisible, setHeadingVisible] = useState(false);
-
   const offsetRef = useRef(0); // kept wrapped inside [0, oneSetWidth)
   const oneSetWidthRef = useRef(0); // length of one full loop (all stories)
   const prefixWidthRef = useRef(0); // width of the tail clones before the first story
@@ -698,25 +694,6 @@ function SmileStoriesCarousel({
       { threshold: 0.3 }
     );
     observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  // Heading blur reveal observer
-  useEffect(() => {
-    const node = headingRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setHeadingVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.3 },
-    );
-
-    observer.observe(node);
     return () => observer.disconnect();
   }, []);
 
@@ -910,21 +887,11 @@ function SmileStoriesCarousel({
       className={`relative w-full scroll-mt-16 sm:scroll-mt-20 lg:scroll-mt-24 ${navigable ? "py-8 sm:py-12 lg:py-20" : "pb-10 lg:pb-16 xl:pb-20"}`}
     >
       {navigable ? (
-        <div ref={headingRef} className="mb-10 lg:mb-14">
+        <div className="mb-10 lg:mb-14">
           <Typography
             variant="heading-3"
             as="h2"
-            className="mx-auto text-center px-4 text-neutral-800 font-medium font-manrope pt-2 sm:pt-4 lg:pt-6 motion-reduce:!transition-none"
-            style={{
-              opacity: headingVisible ? 1 : 0,
-              filter: headingVisible ? "blur(0px)" : "blur(14px)",
-              transform: headingVisible
-                ? "translate3d(0,0,0)"
-                : "translate3d(0,32px,0)",
-              transition:
-                "opacity 700ms ease-out, filter 500ms ease-out, transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
-              willChange: "opacity, filter, transform",
-            }}
+            className="mx-auto text-center px-4 text-neutral-800 font-medium font-manrope pt-2 sm:pt-4 lg:pt-6"
           >
             Behind Every <em className="text-neutral-900 font-tiempos-headline">Smile Is a Story</em>
           </Typography>
