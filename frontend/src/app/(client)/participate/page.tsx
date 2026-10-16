@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useLayoutEffect } from "react";
+import React, { useState } from "react";
 import Typography from "@/lib/Typography";
 import DonateForm from "@/shared/components/DonateForm";
 import PartnerWithUsModal from "@/shared/components/PartnerWithUsModal";
@@ -15,183 +15,10 @@ import Banner from "@/shared/components/Herobannersection";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
-/* ------------------------------------------------------------------ */
-/* Animations                                                          */
-/*  - Top header:   eyebrow + title slide from left, description from  */
-/*                  right (all from left when the layout stacks).      */
-/*  - Benefits bar: icon, heading and description use the same         */
-/*                  blur + rise reveal as the StatSection heading.     */
-/* ------------------------------------------------------------------ */
-const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
-
-type StyledEl = HTMLElement | SVGElement;
-
-function startParticipateAnimations(): void {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-  const main = document.querySelector<HTMLElement>("main");
-  if (!main || main.dataset.participateAnim) return;
-  main.dataset.participateAnim = "1";
-  main.style.overflowX = "clip"; // slide offsets must not create a horizontal scrollbar
-
-  const T = "opacity 700ms ease-out, transform 1000ms cubic-bezier(0.22, 1, 0.36, 1)";
-  // Same timing as the StatSection heading reveal
-  const T_BLUR =
-    "opacity 700ms ease-out, filter 500ms ease-out, transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)";
-  const LEFT = -80;
-  const STEP = 120;
-  const MAXD = 1200;
-
-  // Row layout starts at md (768px). Below that everything stacks.
-  const stacked = !window.matchMedia("(min-width: 768px)").matches;
-  const RIGHT = stacked ? LEFT : 80;
-
-  const hide = (el: StyledEl, x: number) => {
-    el.style.opacity = "0";
-    el.style.transform = `translate3d(${x}px,0,0)`;
-    el.style.transition = "none";
-    el.style.willChange = "opacity, transform";
-  };
-
-  // Trigger is an element that stays on screen (the animated one is translated).
-  const watch = (el: Element, cb: () => void) => {
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          io.disconnect();
-          cb();
-        }
-      },
-      { threshold: 0.01, rootMargin: "0px 0px -5% 0px" },
-    );
-    io.observe(el);
-  };
-
-  const wrap = (root: HTMLElement): HTMLSpanElement[] => {
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    const nodes: Text[] = [];
-    while (walker.nextNode()) nodes.push(walker.currentNode as Text);
-    const spans: HTMLSpanElement[] = [];
-    nodes.forEach((n) => {
-      const t = n.nodeValue || "";
-      if (!t.trim()) return;
-      const frag = document.createDocumentFragment();
-      t.split(/(\s+)/).forEach((p) => {
-        if (!p) return;
-        if (/^\s+$/.test(p)) {
-          frag.appendChild(document.createTextNode(p));
-          return;
-        }
-        const s = document.createElement("span");
-        s.textContent = p;
-        s.style.display = "inline-block";
-        frag.appendChild(s);
-        spans.push(s);
-      });
-      n.parentNode?.replaceChild(frag, n);
-    });
-    return spans;
-  };
-
-  // Line-by-line slide-in.
-  const lineText = (root: HTMLElement | null, x: number, delay: number) => {
-    if (!root) return;
-    const spans = wrap(root);
-    spans.forEach((s) => hide(s, x));
-    void root.getBoundingClientRect();
-    watch(root, () => {
-      let line = -1;
-      let top0 = -Infinity;
-      const lines = spans.map((s) => {
-        const top = s.getBoundingClientRect().top;
-        if (Math.abs(top - top0) > 4) {
-          line += 1;
-          top0 = top;
-        }
-        return line;
-      });
-      spans.forEach((s, i) => {
-        s.style.transition = T;
-        s.style.transitionDelay = `${delay + Math.min(lines[i] * STEP, MAXD)}ms`;
-        s.style.opacity = "1";
-        s.style.transform = "translate3d(0,0,0)";
-      });
-    });
-  };
-
-  // Whole-element slide-in.
-  const slide = (el: StyledEl | null, x: number, delay: number, trigger?: Element | null) => {
-    if (!el) return;
-    if (getComputedStyle(el).display === "inline") el.style.display = "inline-block";
-    hide(el, x);
-    void el.getBoundingClientRect();
-    watch(trigger || el.parentElement || el, () => {
-      el.style.transition = T;
-      el.style.transitionDelay = `${delay}ms`;
-      el.style.opacity = "1";
-      el.style.transform = "translate3d(0,0,0)";
-      window.setTimeout(() => {
-        el.style.opacity = "";
-        el.style.transform = "";
-        el.style.transition = "";
-        el.style.transitionDelay = "";
-        el.style.willChange = "";
-      }, 1000 + delay + 100);
-    });
-  };
-
-  // Blur + rise reveal (same as the StatSection heading).
-  const blurIn = (el: StyledEl | null, delay: number, trigger: Element) => {
-    if (!el) return;
-    el.style.opacity = "0";
-    el.style.filter = "blur(14px)";
-    el.style.transform = "translate3d(0,32px,0)";
-    el.style.transition = "none";
-    el.style.willChange = "opacity, filter, transform";
-    void el.getBoundingClientRect();
-    watch(trigger, () => {
-      el.style.transition = T_BLUR;
-      el.style.transitionDelay = `${delay}ms`;
-      el.style.opacity = "1";
-      el.style.filter = "blur(0px)";
-      el.style.transform = "translate3d(0,0,0)";
-      window.setTimeout(() => {
-        el.style.opacity = "";
-        el.style.filter = "";
-        el.style.transform = "";
-        el.style.transition = "";
-        el.style.transitionDelay = "";
-        el.style.willChange = "";
-      }, 1100 + delay + 100);
-    });
-  };
-
-  const q = (name: string) => main.querySelector<HTMLElement>(`[data-anim="${name}"]`);
-
-  // 1) Top header: eyebrow + title from left, description from right (left when stacked)
-  const eyebrow = q("eyebrow");
-  slide(eyebrow, LEFT, 0, eyebrow?.parentElement);
-  lineText(q("top-title"), LEFT, 100);
-  lineText(q("top-desc"), RIGHT, 300);
-
-  // 2) Benefits bar: icon -> heading -> description, staggered per benefit
-  main.querySelectorAll<HTMLElement>("[data-benefit]").forEach((item, i) => {
-    const base = stacked ? 0 : i * 150;
-    blurIn(item.querySelector<HTMLElement>('[data-blur="icon"]'), base, item);
-    blurIn(item.querySelector<HTMLElement>('[data-blur="title"]'), base + 120, item);
-    blurIn(item.querySelector<HTMLElement>('[data-blur="desc"]'), base + 240, item);
-  });
-}
-
 export default function ParticipatePage() {
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
   const [activeModalType, setActiveModalType] =
     useState<ParticipateModalType>(null);
-
-  // Animations (runs once on mount)
-  useIsoLayoutEffect(() => {
-    startParticipateAnimations();
-  }, []);
 
   return (
     <main className="min-h-screen bg-[#FFF8E2]">
@@ -211,7 +38,7 @@ export default function ParticipatePage() {
       <section className={`${CONTAINER} pt-7 sm:pt-[6.5rem] lg:pt-[10.25rem] pb-8 sm:pb-12 lg:pb-16`}>
         {/* Eyebrow: Our Mission a little up */}
         <div className="flex items-center gap-2 mb-2 sm:mb-2.5">
-          <div data-anim="eyebrow" className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <span className="inline-block size-2.5 rounded-full bg-[#FCCC2D]" />
             <Typography variant="body-8" as="span" className="font-manrope font-normal text-[#8F5E09]">
               Our Mission
@@ -222,7 +49,7 @@ export default function ParticipatePage() {
         {/* Equal Level Row: Title on Left, Paragraph on Right */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 mb-10 sm:mb-14 items-start">
           <div className="md:col-span-6 lg:col-span-8">
-            <div data-anim="top-title" className="md:max-w-[21rem] lg:max-w-none">
+            <div className="md:max-w-[21rem] lg:max-w-none">
               <Typography
                 variant="heading-2"
                 as="h2"
@@ -233,7 +60,7 @@ export default function ParticipatePage() {
             </div>
           </div>
           <div className="md:col-span-6 lg:col-span-4">
-            <div data-anim="top-desc">
+            <div>
               <Typography
                 variant="body-10"
                 as="p"
@@ -315,13 +142,9 @@ export default function ParticipatePage() {
           {PARTICIPATE_BENEFITS.map((benefit) => (
             <div
               key={benefit.id}
-              data-benefit
               className="flex items-center gap-3.5 sm:gap-4 lg:gap-[1.3rem]"
             >
-              <div
-                data-blur="icon"
-                className="w-[3.25rem] h-[3.25rem] sm:w-[3.75rem] sm:h-[3.75rem] lg:w-[4.9225rem] lg:h-[4.9225rem] rounded-full border border-[#C2A947] flex items-center justify-center shrink-0 bg-[#FFF3CC]"
-              >
+              <div className="w-[3.25rem] h-[3.25rem] sm:w-[3.75rem] sm:h-[3.75rem] lg:w-[4.9225rem] lg:h-[4.9225rem] rounded-full border border-[#C2A947] flex items-center justify-center shrink-0 bg-[#FFF3CC]">
                 <img
                   src={benefit.iconUrl}
                   alt={benefit.title}
@@ -329,7 +152,7 @@ export default function ParticipatePage() {
                 />
               </div>
               <div className="text-left">
-                <div data-blur="title" className="mb-0.5 sm:mb-1">
+                <div className="mb-0.5 sm:mb-1">
                   <Typography
                     variant="body-2"
                     as="h3"
@@ -338,7 +161,7 @@ export default function ParticipatePage() {
                     {benefit.title}
                   </Typography>
                 </div>
-                <div data-blur="desc">
+                <div>
                   <Typography
                     variant="body-9"
                     as="p"

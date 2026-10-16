@@ -12,7 +12,6 @@ import PuzzleImage from "@/shared/components/Puzzleimage";
 import type { EventItem } from "@/domains/resources/components/EventCard";
 import { isMissingContentError, publicEventsApi } from "@/domains/cms/lib/api";
 import ContentNotice, { LOAD_ERROR_MESSAGE } from "@/shared/components/ContentNotice";
-import { useDetailPageAnimations } from "@/shared/lib/detailPageAnimations";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
@@ -84,8 +83,6 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
       cancelled = true;
     };
   }, [resolvedParams.id, attempt]);
-
-  useDetailPageAnimations(!loading && Boolean(eventItem), eventItem?.id);
 
   if (!loading && !eventItem && !failed) {
     notFound();
