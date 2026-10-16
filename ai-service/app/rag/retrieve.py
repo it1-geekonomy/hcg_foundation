@@ -13,7 +13,29 @@ _NAME_QUESTION = re.compile(
     r"|^\s*(?:and\s+|what\s+|how\s+)?about\s+",
     re.I,
 )
-_NOT_A_NAME = {"the", "a", "an", "your", "our", "you", "we", "this", "that", "it", "hcg"}
+_NOT_A_NAME = {
+    "the", "a", "an", "your", "our", "my", "you", "we", "they", "i", "me",
+    "this", "that", "these", "those", "it", "its",
+    "in", "on", "at", "to", "for", "from", "with", "by", "about", "of", "and", "or",
+    "hcg", "foundation",
+}
+
+_QUESTION_STARTERS = {
+    "who", "what", "where", "when", "why", "how", "which",
+    "can", "could", "will", "would", "do", "does", "did",
+    "is", "are", "was", "were", "am",
+    "tell", "give", "show", "explain", "help", "please",
+    "hi", "hello", "hey", "yes", "no", "ok", "okay", "thanks", "thank",
+}
+
+_COMMON_SITE_TERMS = {
+    "cancer", "patient", "patients", "hospital", "hospitals",
+    "donate", "donation", "donations", "donor", "donors",
+    "volunteer", "volunteering", "intern", "internship",
+    "event", "events", "project", "projects", "contact",
+    "address", "phone", "email", "faq", "faqs", "help",
+    "menu", "quick", "links", "link", "page", "pages",
+}
 
 # CMS items whose title names them (patients, team members, events...): if the
 # question contains one, that item is what the visitor is asking about.
@@ -32,12 +54,22 @@ def _named_phrases(queries: list[str]) -> set[str]:
     phrases: set[str] = set()
     for q in queries:
         m = _NAME_QUESTION.match(q)
-        if not m:
-            continue
-        words = re.sub(r"[^\w\s]", " ", q[m.end():]).split()
+        if m:
+            words = re.sub(r"[^\w\s]", " ", q[m.end():]).split()
+        else:
+            words = re.sub(r"[^\w\s]", " ", q).split()
+            if not words or words[0].lower() in _QUESTION_STARTERS:
+                continue
+
         phrase = " ".join(words)
-        if 1 <= len(words) <= 4 and len(phrase) >= 4 and words[0].lower() not in _NOT_A_NAME:
-            phrases.add(phrase)
+        if not (1 <= len(words) <= 4 and len(phrase) >= 3):
+            continue
+        first_word = words[0].lower()
+        if first_word in _NOT_A_NAME:
+            continue
+        if len(words) == 1 and first_word in _COMMON_SITE_TERMS:
+            continue
+        phrases.add(phrase)
     return phrases
 
 

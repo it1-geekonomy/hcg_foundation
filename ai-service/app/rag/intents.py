@@ -18,6 +18,7 @@ _EXACT = {
     r"^(what|pardon|huh|excuse\s*me|i\s*don'?t\s*understand|not\s*clear|confused|what\s*(does\s*that|do\s*you)\s*mean)[\s!?.,]*$": "clarification",
     r"^(who\s+(is|was)\s+(the\s+)?founder|who\s+founded(\s+it)?|founder)[\s!?.,]*$": "founder",
     r"^(contact(\s+details)?|how\s+to\s+contact(\s+you)?|phone\s+number|email(\s+address)?|where\s+are\s+you\s+located|address|location)[\s!?.,]*$": "contact",
+    r"^((can\s+you\s+)?(give|show|provide|send)\s+(me\s+)?(the\s+)?(quick\s*links?|inner\s*pages?|important\s*links?|site\s*links?)|(what\s+are\s+(the\s+)?)?quick\s*links?|quicklinks?|inner\s*pages?|important\s*links?|site\s*(links?|map|navigation)|all\s*links|menu|navigation)[\s!?.,]*$": "quick_links",
 }
 
 
@@ -65,6 +66,12 @@ def match_fast_intent(message: str) -> dict | None:
                 return {"intent": intent, "answer": C.FOUNDER_INTENT_ANSWER, "sources": []}
             if intent == "contact":
                 return {"intent": intent, "answer": C.CONTACT_ANSWER, "sources": []}
+            if intent == "quick_links":
+                return {
+                    "intent": intent,
+                    "answer": C.QUICK_LINKS_ANSWER,
+                    "sources": C.QUICK_LINKS_SOURCES,
+                }
             if intent == "donate":
                 return {
                     "intent": intent,
@@ -87,6 +94,8 @@ _TOPIC_WORDS = (
     "program", "project", "event", "stor(?:y|ies)", "testimonial", "report", "csr", "80g",
     "12a", "fcra", "hpv", "vaccin", "swast", "aa?sha", "charity", "ngo", "fund",
     "explain", "summariz", "elaborate", "clarify", "tell me", "previous",
+    "innovat", "technolog", "biomarker", "genom", "deep holistics", "rayiot", "erlysign",
+    "ayurythm", "triesta", "art therap", "pink hope", "quick link", "inner page", "sitemap", "navigation",
 )
 
 
@@ -185,4 +194,6 @@ def detect_intents(text: str) -> set[str]:
         intents.add("payment_gateway")
     if _has(t, "how much donation", "total donation", "audited", "source of income", "funds collected", "donations collected"):
         intents.add("financial_stats")
+    if _has(t, "quick link", "quicklink", "inner page", "sitemap", "site map", "navigation link", "all links"):
+        intents.add("quick_links")
     return intents
