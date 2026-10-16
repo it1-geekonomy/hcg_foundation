@@ -112,7 +112,7 @@ export default function SustainableGoalsSection() {
               willChange: "opacity, filter, transform",
             }}
           >
-            Sustainable Development Goals
+            UN Sustainable Development Goals
           </Typography>
         </div>
 

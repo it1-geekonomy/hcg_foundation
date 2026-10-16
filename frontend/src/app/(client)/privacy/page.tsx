@@ -29,7 +29,7 @@ export default async function PrivacyPolicyPage() {
         <LegalDocumentPage
           document={document}
           fallbackTitle="Privacy Policy"
-          emptyMessage="We are currently updating our Privacy Policy. Please check back soon, or contact us at hcgfoundation@gmail.com if you have any questions about how we handle your information."
+          emptyMessage="We are currently updating our Privacy Policy. Please check back soon, or contact us at info@hcgfoundation.org if you have any questions about how we handle your information."
         />
       </AnimatedLegalContent>
       <div id="donate-form">

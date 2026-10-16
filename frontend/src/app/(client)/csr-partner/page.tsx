@@ -356,7 +356,7 @@ export default function CsrPartnerPage() {
                 as="span"
                 className="font-argestadisplay font-normal text-[#596D79]"
               >
-                hcgfoundation@gmail.com
+                info@hcgfoundation.org
               </Typography>
               <Typography
                 variant="body-10"

@@ -13,7 +13,7 @@ export const CONTACT_INFO: ContactInfoItem[] = [
   {
     icon: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791171947668-9y7tq-sms-notification.webp",
     title: "Email",
-    lines: ["hcgfoundation@gmail.com"],
+    lines: ["info@hcgfoundation.org"],
   },
   {
     icon: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791171990748-iwcsv-boxicons_location-filled.webp",
