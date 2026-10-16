@@ -56,7 +56,7 @@ export default function PatientStoryCard({
         className="relative z-10 h-[5.25rem] flex items-center justify-between pointer-events-none"
       >
         {/* Left: Patient Name & Date */}
-        <div className="flex flex-col text-white min-w-0 w-full">
+        <div className="flex flex-col text-white min-w-0 w-full [transform:translateZ(0)]">
           <Typography
             variant="body-7"
             as="h3"

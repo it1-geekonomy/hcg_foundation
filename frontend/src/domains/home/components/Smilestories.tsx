@@ -283,7 +283,7 @@ const StoryCard = memo(function StoryCard({
       </div>
 
       {/* The name sits at the bottom of its 2-line box, right on top of the date. */}
-      <div className="flex flex-1 flex-col justify-start pt-3 pb-3">
+      <div className="flex flex-1 flex-col justify-start pt-3 pb-3 relative z-10 [transform:translateZ(0)]">
         <StoryCardName name={name} />
         {date && date.trim() ? (
           <div className="mt-1 flex items-center gap-1.5 text-white">
