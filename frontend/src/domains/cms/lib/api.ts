@@ -1195,6 +1195,11 @@ export const cmsApi = {
 
   getDonor: (id: string) => request<ApiEnvelope<Donor>>(`/donors/${id}`),
 
+  syncDonor: (id: string) =>
+    request<ApiEnvelope<Donor>>(`/donors/${id}/sync`, {
+      method: "POST",
+    }),
+
   listFundraisingCampaigns: (params?: ListQuery) =>
     request<Paginated<FundraisingCampaign>>(
       `/fundraising-campaigns${toQuery({ page: 1, limit: 20, ...params })}`

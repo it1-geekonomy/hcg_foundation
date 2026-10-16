@@ -7,7 +7,9 @@ import { GlobalHttpExceptionFilter } from './common/filters/http-exception.filte
 import { ResponseTransformInterceptor } from './common/interceptors/response-transform.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
+  });
   // Behind nginx: take the visitor IP from X-Forwarded-For (used by the chatbot rate limit)
   app.set('trust proxy', 1);
 

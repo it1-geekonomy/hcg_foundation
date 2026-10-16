@@ -149,6 +149,25 @@ export class DonorsService {
       );
     }
 
+    // Ensure payment is captured on Razorpay so it is not auto-refunded after 2 days
+    try {
+      const payment = await this.razorpay.fetchPayment(dto.razorpayPaymentId);
+      if (payment && payment.status === 'authorized') {
+        this.logger.log(
+          `Payment ${dto.razorpayPaymentId} is authorized. Auto-capturing on Razorpay...`,
+        );
+        await this.razorpay.capturePayment(
+          dto.razorpayPaymentId,
+          Number(payment.amount),
+          payment.currency || 'INR',
+        );
+      }
+    } catch (err) {
+      this.logger.warn(
+        `Failed to check/capture payment ${dto.razorpayPaymentId}: ${this.razorpayErrorReason(err)}`,
+      );
+    }
+
     const existing = await this.repo.findOne({
       where: { razorpayOrderId: dto.razorpayOrderId },
     });
@@ -214,9 +233,11 @@ export class DonorsService {
       .createQueryBuilder('donor')
       .orderBy('donor.createdAt', 'DESC');
 
-    qb.andWhere('donor.status = :status', {
-      status: query.status ?? DonationStatus.PAID,
-    });
+    if (query.status) {
+      qb.andWhere('donor.status = :status', {
+        status: query.status,
+      });
+    }
 
     if (query.donationCategory) {
       qb.andWhere('donor.donationCategory = :donationCategory', {
@@ -253,6 +274,244 @@ export class DonorsService {
       );
     }
     return entity;
+  }
+
+  async syncPaymentStatus(id: string): Promise<Donor> {
+    const donor = await this.findOne(id);
+    if (!donor.razorpayPaymentId && !donor.razorpayOrderId) {
+      throw new BadRequestException(
+        'This donation has no Razorpay payment ID or order ID to sync.',
+      );
+    }
+
+    let paymentData: any = null;
+    if (donor.razorpayPaymentId) {
+      try {
+        paymentData = await this.razorpay.fetchPayment(donor.razorpayPaymentId);
+      } catch (err) {
+        const reason = this.razorpayErrorReason(err);
+        this.logger.error(
+          `Failed to fetch payment ${donor.razorpayPaymentId} from Razorpay: ${reason}`,
+        );
+        throw new BadRequestException(
+          `Could not fetch payment from Razorpay: ${reason}`,
+        );
+      }
+    }
+
+    if (paymentData) {
+      const razorpayStatus = String(paymentData.status || '').toLowerCase();
+      const amountRefunded = Number(paymentData.amount_refunded || 0);
+
+      if (razorpayStatus === 'refunded' || amountRefunded > 0) {
+        donor.status = DonationStatus.REFUNDED;
+      } else if (razorpayStatus === 'captured') {
+        donor.status = DonationStatus.PAID;
+      } else if (razorpayStatus === 'failed') {
+        donor.status = DonationStatus.FAILED;
+      } else if (razorpayStatus === 'authorized') {
+        const payId = String(paymentData.id || donor.razorpayPaymentId);
+        try {
+          await this.razorpay.capturePayment(
+            payId,
+            Number(paymentData.amount),
+            paymentData.currency || 'INR',
+          );
+          donor.status = DonationStatus.PAID;
+        } catch (err) {
+          this.logger.warn(
+            `Could not capture authorized payment during sync: ${this.razorpayErrorReason(err)}`,
+          );
+        }
+      }
+
+      if (paymentData.order_id && !donor.razorpayOrderId) {
+        donor.razorpayOrderId = String(paymentData.order_id);
+      }
+
+      const updated = await this.repo.save(donor);
+      this.logger.log(
+        `Donor ${donor.id} synced with Razorpay: new status=${updated.status}`,
+      );
+      return updated;
+    }
+
+    if (donor.razorpayOrderId) {
+      try {
+        const orderData = await this.razorpay.fetchOrder(donor.razorpayOrderId);
+        if (
+          orderData &&
+          (orderData as any).status === 'paid' &&
+          donor.status !== DonationStatus.PAID
+        ) {
+          donor.status = DonationStatus.PAID;
+          donor.receiptNumber =
+            donor.receiptNumber || this.buildReceiptNumber(donor.id);
+          Object.assign(donor, DonationEmailQueueService.queuedFields());
+          const updated = await this.repo.save(donor);
+          this.emailQueue.kick();
+          return updated;
+        }
+      } catch (err) {
+        const reason = this.razorpayErrorReason(err);
+        throw new BadRequestException(
+          `Could not fetch order from Razorpay: ${reason}`,
+        );
+      }
+    }
+
+    return donor;
+  }
+
+  async handleRazorpayWebhook(
+    rawBody: string | Buffer,
+    signature: string,
+  ): Promise<{ received: boolean; event?: string; message?: string }> {
+    if (!signature) {
+      throw new BadRequestException('Missing x-razorpay-signature header');
+    }
+
+    const isValid = this.razorpay.verifyWebhookSignature(rawBody, signature);
+    if (!isValid) {
+      this.logger.warn('Razorpay webhook signature verification failed.');
+      throw new BadRequestException('Invalid webhook signature');
+    }
+
+    const rawString = Buffer.isBuffer(rawBody)
+      ? rawBody.toString('utf8')
+      : String(rawBody);
+
+    let body: any;
+    try {
+      body = JSON.parse(rawString);
+    } catch {
+      throw new BadRequestException('Invalid JSON payload in webhook');
+    }
+
+    const eventName: string = body.event;
+    this.logger.log(`Received Razorpay webhook event: ${eventName}`);
+
+    const payload = body.payload ?? {};
+    const paymentEntity = payload.payment?.entity;
+    const refundEntity = payload.refund?.entity;
+
+    const paymentId: string | undefined =
+      refundEntity?.payment_id || paymentEntity?.id;
+    const orderId: string | undefined = paymentEntity?.order_id;
+
+    if (!paymentId && !orderId) {
+      this.logger.warn(
+        `Webhook ${eventName} received without payment_id or order_id`,
+      );
+      return { received: true, event: eventName };
+    }
+
+    // Find donor by payment ID or order ID
+    let donor: Donor | null = null;
+    if (paymentId) {
+      donor = await this.repo.findOne({
+        where: { razorpayPaymentId: paymentId },
+      });
+    }
+    if (!donor && orderId) {
+      donor = await this.repo.findOne({
+        where: { razorpayOrderId: orderId },
+      });
+    }
+
+    if (!donor) {
+      this.logger.warn(
+        `No donor found for webhook ${eventName} (payment=${paymentId}, order=${orderId})`,
+      );
+      return {
+        received: true,
+        event: eventName,
+        message: 'No matching donor record found',
+      };
+    }
+
+    // Handle refunds
+    if (
+      eventName === 'refund.processed' ||
+      eventName === 'refund.created' ||
+      eventName === 'payment.refunded'
+    ) {
+      donor.status = DonationStatus.REFUNDED;
+      if (paymentId && !donor.razorpayPaymentId) {
+        donor.razorpayPaymentId = paymentId;
+      }
+      await this.repo.save(donor);
+      this.logger.log(
+        `Donor ${donor.id} updated to REFUNDED via webhook (${eventName})`,
+      );
+      return { received: true, event: eventName };
+    }
+
+    // Handle payment failed
+    if (eventName === 'payment.failed') {
+      if (donor.status !== DonationStatus.PAID) {
+        donor.status = DonationStatus.FAILED;
+        await this.repo.save(donor);
+        this.logger.log(
+          `Donor ${donor.id} updated to FAILED via webhook (${eventName})`,
+        );
+      }
+      return { received: true, event: eventName };
+    }
+
+    // Handle payment authorized (auto-capture immediately so Razorpay does not auto-refund after 2 days)
+    if (eventName === 'payment.authorized') {
+      if (paymentId) {
+        try {
+          const amount = paymentEntity?.amount ? Number(paymentEntity.amount) : 0;
+          const currency = paymentEntity?.currency || 'INR';
+          if (amount > 0) {
+            this.logger.log(`Webhook payment.authorized: Capturing ${paymentId}...`);
+            await this.razorpay.capturePayment(paymentId, amount, currency);
+          }
+        } catch (err) {
+          this.logger.error(
+            `Webhook capture failed for ${paymentId}: ${this.razorpayErrorReason(err)}`,
+          );
+        }
+        if (donor.status !== DonationStatus.PAID) {
+          donor.status = DonationStatus.PAID;
+          if (!donor.razorpayPaymentId) {
+            donor.razorpayPaymentId = paymentId;
+          }
+          donor.receiptNumber =
+            donor.receiptNumber || this.buildReceiptNumber(donor.id);
+          Object.assign(donor, DonationEmailQueueService.queuedFields());
+          await this.repo.save(donor);
+          this.logger.log(
+            `Donor ${donor.id} updated to PAID via webhook (${eventName})`,
+          );
+          this.emailQueue.kick();
+        }
+      }
+      return { received: true, event: eventName };
+    }
+
+    // Handle payment captured / order paid fallback
+    if (eventName === 'payment.captured' || eventName === 'order.paid') {
+      if (donor.status !== DonationStatus.PAID) {
+        donor.status = DonationStatus.PAID;
+        if (paymentId && !donor.razorpayPaymentId) {
+          donor.razorpayPaymentId = paymentId;
+        }
+        donor.receiptNumber =
+          donor.receiptNumber || this.buildReceiptNumber(donor.id);
+        Object.assign(donor, DonationEmailQueueService.queuedFields());
+        await this.repo.save(donor);
+        this.logger.log(
+          `Donor ${donor.id} updated to PAID via webhook (${eventName})`,
+        );
+        this.emailQueue.kick();
+      }
+      return { received: true, event: eventName };
+    }
+
+    return { received: true, event: eventName };
   }
 
   private note(value: string, max = 256): string {
