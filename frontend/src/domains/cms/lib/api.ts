@@ -1200,6 +1200,11 @@ export const cmsApi = {
       method: "POST",
     }),
 
+  syncAllDonors: () =>
+    request<ApiEnvelope<{ synced: number; updated: number }>>(`/donors/sync-all`, {
+      method: "POST",
+    }),
+
   listFundraisingCampaigns: (params?: ListQuery) =>
     request<Paginated<FundraisingCampaign>>(
       `/fundraising-campaigns${toQuery({ page: 1, limit: 20, ...params })}`
