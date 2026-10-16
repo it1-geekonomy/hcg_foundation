@@ -12,10 +12,6 @@ import {
   type CardData,
 } from "@/domains/home/constants/project";
 import Typography from "@/lib/Typography";
-import {
-  slideWords,
-  useSlideInLines,
-} from "./slideInWords";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -317,7 +313,10 @@ function MoreDetailsButton({
     <Link
       href={href}
       className={classes}
-      onClick={() => sessionStorage.setItem(PROJECT_FROM_HOME_KEY, "1")}
+      onClick={() => {
+        sessionStorage.setItem(PROJECT_FROM_HOME_KEY, "1");
+        sessionStorage.setItem("came_from_details", "projects");
+      }}
       aria-label={ariaLabel}
       {...(previewMode ? { target: "_blank", rel: "noopener noreferrer" } : {})}
     >
@@ -361,11 +360,6 @@ export default function ProjectsSection({
   const containerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const reduceMotionRef = useRef(false);
-
-  // Header slide-in animations (only active when the header is rendered).
-  const headerActive = showHeader && cards.length > 0;
-  const headingSlide = useSlideInLines(HEADING_TEXT, headerActive);
-  const descSlide = useSlideInLines(DESC_TEXT, headerActive);
 
   const timelineRefs = useRef<(gsap.core.Timeline | null)[]>([]);
 
@@ -802,7 +796,7 @@ export default function ProjectsSection({
         className={`bg-[#FFF6D8] px-8 py-8 text-black sm:px-12 md:px-16 lg:px-6 lg:py-14 xl:px-6 xl:py-30 2xl:px-40 ${className}`}
       >
         {showHeader ? (
-          <div id="projects" className="mb-6 scroll-mt-24">
+          <div className="mb-6">
             <Typography
               variant="heading-2"
               as="h2"
@@ -830,33 +824,23 @@ export default function ProjectsSection({
     >
       <div className="max-w-full">
         {showHeader ? (
-          <div ref={headerRef} id="projects" className="mb-10 flex flex-col gap-4 overflow-x-clip lg:mb-14 lg:flex-row lg:items-start lg:justify-between lg:gap-8 scroll-mt-24">
-            <div ref={headingSlide.wrapRef} className="w-full">
+          <div ref={headerRef} className="mb-10 flex flex-col gap-4 overflow-x-clip lg:mb-14 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+            <div className="w-full">
               <Typography
                 variant="heading-2"
                 as="h2"
                 className="text-left font-tiempos-headline font-medium text-[#382E07]"
               >
-                {slideWords(
-                  HEADING_TEXT,
-                  headingSlide,
-                  "left",
-                  0,
-                  2,
-                  "hidden 2xl:block",
-                )}
+                {HEADING_TEXT}
               </Typography>
             </div>
-            <div
-              ref={descSlide.wrapRef}
-              className="w-full [--slide-x:-80px] lg:max-w-md lg:pt-2 lg:[--slide-x:80px] xl:max-w-xl"
-            >
+            <div className="w-full lg:max-w-md lg:pt-2 xl:max-w-xl">
               <Typography
                 variant="body-2"
                 as="p"
                 className="font-argestadisplay font-normal leading-6 text-black/60 lg:text-left"
               >
-                {slideWords(DESC_TEXT, descSlide, "responsive", 250)}
+                {DESC_TEXT}
               </Typography>
             </div>
           </div>
@@ -1002,8 +986,8 @@ export default function ProjectsSection({
                   alt=""
                   aria-hidden="true"
                   fill
-                  sizes="(max-width: 1023px) 100vw, 0px"
-                  quality={60}
+                  sizes="(max-width: 639px) calc(100vw - 4rem), (max-width: 1023px) 80vw, 0px"
+                  quality={55}
                   className="m-card-image absolute inset-0 h-full w-full object-cover will-change-transform"
                 />
               ) : (

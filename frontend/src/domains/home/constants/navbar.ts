@@ -53,6 +53,6 @@ export const navbarContent = {
   },
   donateButton: {
     label: "Donate Now",
-    href: "",
+    href: "#donate-form",
   },
 };

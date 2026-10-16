@@ -128,10 +128,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           {
             label: "Home",
             href: "/",
-            onClick: () => {
-              sessionStorage.setItem("nav_action", fromHome.current ? "banner_home_section" : "banner_home_top");
-              window.dispatchEvent(new Event("nav_action_event"));
-            }
           },
           { label: "Resources" },
         ]}

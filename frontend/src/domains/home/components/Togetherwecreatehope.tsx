@@ -58,11 +58,14 @@ function TogetherCarousel({ slides }: { slides: CarouselSlide[] }) {
     >
       {slides.map((s, i) =>
         s.image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             key={s.id ?? s.image}
             src={s.image}
             alt={s.title}
+            fill
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            quality={70}
+            priority={i === 0}
             className={`absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-700 ease-in-out ${
               i === active ? "opacity-100" : "opacity-0"
             }`}
