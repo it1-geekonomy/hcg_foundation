@@ -136,6 +136,7 @@ export function FlipCard({
             WebkitBackfaceVisibility: "hidden",
             transformStyle: "preserve-3d",
             WebkitFontSmoothing: "antialiased",
+            transform: "translateZ(0)",
           }}
         >
           {front}
@@ -163,6 +164,7 @@ export function FlipCard({
             WebkitBackfaceVisibility: "hidden",
             transformStyle: "preserve-3d",
             WebkitFontSmoothing: "antialiased",
+            transform: "translateZ(0)",
           }}
         >
           {typeof back === "function" ? back(isFlipped) : back}
