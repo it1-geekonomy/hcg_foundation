@@ -172,3 +172,25 @@ DONATE_INTENT_ANSWER = (
 FOUNDER_INTENT_ANSWER = (
     f"{FOUNDER_NAME} is the {FOUNDER_ROLE} of HCG Foundation."
 )
+
+QUICK_LINKS_ANSWER = (
+    "Here are quick links to explore the HCG Foundation website:\n\n"
+    "- [About Us](/about-us) – Learn about our mission, leadership, and board\n"
+    "- [Patient Aid](/patient-aid) – Financial assistance for cancer patients\n"
+    "- [Awareness & Screening Camps](/awareness-and-screening-camps) – Preventive health & early detection\n"
+    "- [Swasti Art Gallery](/swasti-art-gallery) – Art therapy & fundraising exhibitions\n"
+    "- [Research & Innovation](/innovation-and-technology) – Technology & precision oncology\n"
+    "- [Donate Now](#donate-form) – Support cancer care with 80G tax benefit\n"
+    "- [Volunteer & Internships](/participate) – Join our mission\n"
+    "- [CSR Partnership](/csr-partner) – Collaborate with us\n"
+    "- [Annual Reports & Newsletters](/transparency-and-knowledge-hub) – Financial & impact transparency\n"
+    "- [Contact Us](/contact) – Reach our team directly"
+)
+
+QUICK_LINKS_SOURCES = [
+    {"title": "About Us", "url": "/about-us"},
+    {"title": "Patient Aid", "url": "/patient-aid"},
+    {"title": "Awareness & Screening Camps", "url": "/awareness-and-screening-camps"},
+    {"title": "Donate Now", "url": "#donate-form"},
+    {"title": "Contact Us", "url": "/contact"},
+]

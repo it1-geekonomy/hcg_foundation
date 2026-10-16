@@ -171,22 +171,57 @@ export class DonorsService {
       );
     }
 
-    // Ensure payment is captured on Razorpay so it is not auto-refunded after 2 days
+    // Fetch live payment details from Razorpay to verify capture status
+    let payment: any = null;
     try {
-      const payment = await this.razorpay.fetchPayment(dto.razorpayPaymentId);
-      if (payment && payment.status === 'authorized') {
-        this.logger.log(
-          `Payment ${dto.razorpayPaymentId} is authorized. Auto-capturing on Razorpay...`,
-        );
+      payment = await this.razorpay.fetchPayment(dto.razorpayPaymentId);
+    } catch (err) {
+      const reason = this.razorpayErrorReason(err);
+      this.logger.error(
+        `Could not fetch payment ${dto.razorpayPaymentId} during verification: ${reason}`,
+      );
+      throw new BadRequestException(
+        `Could not verify payment status with gateway: ${reason}`,
+      );
+    }
+
+    if (!payment) {
+      throw new BadRequestException(
+        'Payment details could not be retrieved from Razorpay.',
+      );
+    }
+
+    // If payment is authorized, attempt to capture it immediately
+    if (payment.status === 'authorized') {
+      this.logger.log(
+        `Payment ${dto.razorpayPaymentId} is authorized. Auto-capturing on Razorpay...`,
+      );
+      try {
         await this.razorpay.capturePayment(
           dto.razorpayPaymentId,
           Number(payment.amount),
           payment.currency || 'INR',
         );
+        // Refresh payment status after capture attempt
+        payment = await this.razorpay.fetchPayment(dto.razorpayPaymentId);
+      } catch (err) {
+        const reason = this.razorpayErrorReason(err);
+        this.logger.error(
+          `Failed to capture authorized payment ${dto.razorpayPaymentId}: ${reason}`,
+        );
+        throw new BadRequestException(
+          `Payment authorization succeeded, but payment capture failed (${reason}). The donation cannot be confirmed until captured.`,
+        );
       }
-    } catch (err) {
+    }
+
+    // Strictly ensure status is 'captured' before granting PAID status and sending tax receipt
+    if (payment.status !== 'captured') {
       this.logger.warn(
-        `Failed to check/capture payment ${dto.razorpayPaymentId}: ${this.razorpayErrorReason(err)}`,
+        `Payment ${dto.razorpayPaymentId} status is '${payment.status}', not 'captured'. Refusing to mark PAID.`,
+      );
+      throw new BadRequestException(
+        `Payment status on gateway is '${payment.status}'. Donations can only be confirmed once successfully captured.`,
       );
     }
 
@@ -495,20 +530,6 @@ export class DonorsService {
           this.logger.error(
             `Webhook capture failed for ${paymentId}: ${this.razorpayErrorReason(err)}`,
           );
-        }
-        if (donor.status !== DonationStatus.PAID) {
-          donor.status = DonationStatus.PAID;
-          if (!donor.razorpayPaymentId) {
-            donor.razorpayPaymentId = paymentId;
-          }
-          donor.receiptNumber =
-            donor.receiptNumber || this.buildReceiptNumber(donor.id);
-          Object.assign(donor, DonationEmailQueueService.queuedFields());
-          await this.repo.save(donor);
-          this.logger.log(
-            `Donor ${donor.id} updated to PAID via webhook (${eventName})`,
-          );
-          this.emailQueue.kick();
         }
       }
       return { received: true, event: eventName };
