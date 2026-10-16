@@ -71,10 +71,10 @@ export const FOOTER_INNER_PAGES = [
 
 export const FOOTER_CONTACT_INFO = {
   address: "Ground Floor, Tower Block, Unity Building Complex, Mission Road, Bangalore 560027, Karnataka, India",
-  phone: "+91-80-4660-7760",
-  email: "hcgfoundation@gmail.com",
-  phoneLink: "tel:+918046607760",
-  emailLink: "mailto:hcgfoundation@gmail.com",
+  phone: "+91 8046607760",
+  email: "info@hcgfoundation.org",
+  phoneLink: "tel:+91 8046607760",
+  emailLink: "mailto:info@hcgfoundation.org",
 } as const;
 
 export const FOOTER_SOCIAL_LINKS = [

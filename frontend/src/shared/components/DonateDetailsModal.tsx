@@ -631,7 +631,7 @@ export default function DonateDetailsModal({
                     as="span"
                     className="font-manrope font-light text-white/60"
                   >
-                    Secure Payment • Trusted by Thousands
+                    Secured by Razorpay
                   </Typography>
                 </div>
               </div>

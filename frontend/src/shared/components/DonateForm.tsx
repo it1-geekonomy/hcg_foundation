@@ -358,14 +358,14 @@ export default function DonateSection() {
           as="span"
           className="text-white/60 font-light font-manrope lg:hidden"
         >
-          Secure Payment • Trusted by Thousands
+          Secured by Razorpay
         </Typography>
         <Typography
           variant="brand-2"
           as="span"
           className="text-white/60 font-light font-manrope hidden lg:block"
         >
-          Secure Payment • Trusted by Thousands
+          Secured by Razorpay
         </Typography>
       </DonateItem>
     </>

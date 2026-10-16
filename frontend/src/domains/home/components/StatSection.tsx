@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { STATS } from "@/domains/home/constants/stat";
 import Typography from "@/lib/Typography";
 import StatCard from "./Statcard";
@@ -8,93 +8,9 @@ import StatCard from "./Statcard";
 const DESC_TEXT =
   "Every number represents a life touched, a family supported, and a community strengthened through hope, compassion, and care.";
 
-const FILL_COLOR = "#000000"; // fully filled text color
-
 export default function StatSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const [active, setActive] = useState(false);
-
-  const headingRef = useRef<HTMLDivElement | null>(null);
-  const [headingVisible, setHeadingVisible] = useState(false);
-
-  const descWrapRef = useRef<HTMLParagraphElement | null>(null);
-  const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const rafRef = useRef<number | null>(null);
-
-  const [progress, setProgress] = useState(0);
-  // lineIndexForWord[i] = which visual line word i belongs to
-  const [lineIndexForWord, setLineIndexForWord] = useState<number[]>([]);
-  const [lineCount, setLineCount] = useState(1);
-
-  const words = DESC_TEXT.split(" ");
-
-  // Group words into visual lines by comparing their rendered offsetTop.
-  // Recomputed on resize since wrapping changes with viewport width.
-  const measureLines = useCallback(() => {
-    const tops = wordRefs.current.map((el) => el?.offsetTop ?? 0);
-    if (tops.length === 0) return;
-
-    let currentTop = tops[0];
-    let currentLine = 0;
-    const indices: number[] = [];
-
-    tops.forEach((top) => {
-      if (top > currentTop + 2) {
-        // new visual line detected (allow 2px tolerance for sub-pixel rounding)
-        currentLine += 1;
-        currentTop = top;
-      }
-      indices.push(currentLine);
-    });
-
-    setLineIndexForWord(indices);
-    setLineCount(currentLine + 1);
-  }, []);
-
-  useLayoutEffect(() => {
-    measureLines();
-    const t = setTimeout(measureLines, 100); // catch late font loads
-    window.addEventListener("resize", measureLines);
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("resize", measureLines);
-    };
-  }, [measureLines]);
-
-  const updateProgress = useCallback(() => {
-    const node = descWrapRef.current;
-    rafRef.current = null;
-    if (!node) return;
-
-    const rect = node.getBoundingClientRect();
-    const vh = window.innerHeight;
-
-    // fill starts when element is 90% down the viewport,
-    // completes when it reaches 40% from top
-    const startPx = vh * 0.9;
-    const endPx = vh * 0.4;
-
-    const raw = (startPx - rect.top) / (startPx - endPx);
-    const clamped = Math.min(1, Math.max(0, raw));
-
-    setProgress(clamped);
-  }, []);
-
-  const onScroll = useCallback(() => {
-    if (rafRef.current != null) return;
-    rafRef.current = requestAnimationFrame(updateProgress);
-  }, [updateProgress]);
-
-  useEffect(() => {
-    updateProgress();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
-    };
-  }, [onScroll, updateProgress]);
 
   // Start the stat gifs once, the first time the section enters view.
   useEffect(() => {
@@ -114,55 +30,10 @@ export default function StatSection() {
     return () => observer.disconnect();
   }, []);
 
-  // Heading blur reveal — plays once, the first time it scrolls into view.
-  useEffect(() => {
-    const node = headingRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setHeadingVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.3 },
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  // Divide the scroll range evenly across however many visual lines
-  // exist. Each line ramps smoothly from 0 -> 1 opacity across its own
-  // slice of the scroll range, so one full line finishes filling per
-  // "scroll segment" before the next line starts.
-  const scrollPerLine = 1 / lineCount;
-
-  function opacityForLine(lineIdx: number): number {
-    const lineStart = lineIdx * scrollPerLine;
-    const raw = (progress - lineStart) / scrollPerLine;
-    return Math.min(1, Math.max(0, raw));
-  }
-
   return (
     <section ref={sectionRef} className="relative overflow-hidden px-6 pt-2 lg:pt-2 lg:pb-2">
-      <div ref={headingRef} className="relative max-w-full text-center">
-        <Typography
-          variant="heading-1"
-          as="h2"
-          className="text-[#382E07] motion-reduce:!transition-none"
-          style={{
-            opacity: headingVisible ? 1 : 0,
-            filter: headingVisible ? "blur(0px)" : "blur(14px)",
-            transform: headingVisible
-              ? "translate3d(0,0,0)"
-              : "translate3d(0,32px,0)",
-            transition:
-              "opacity 700ms ease-out, filter 500ms ease-out, transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
-            willChange: "opacity, filter, transform",
-          }}
-        >
+      <div className="relative max-w-full text-center">
+        <Typography variant="heading-1" as="h2" className="text-[#382E07]">
           Our Journey of Impact
         </Typography>
       </div>
@@ -174,22 +45,8 @@ export default function StatSection() {
       </div>
 
       <div className="relative mx-auto mt-14 max-w-4xl">
-        <Typography variant="body-1" as="p" className="relative">
-          <span ref={descWrapRef} className="inline">
-            {words.map((word, i) => (
-              <span
-                key={i}
-                ref={(el) => {
-                  wordRefs.current[i] = el;
-                }}
-                className="transition-opacity duration-150 ease-out"
-                style={{ color: FILL_COLOR, opacity: opacityForLine(lineIndexForWord[i] ?? 0) }}
-              >
-                {word}
-                {i < words.length - 1 ? " " : ""}
-              </span>
-            ))}
-          </span>
+        <Typography variant="body-1" as="p" className="relative text-black">
+          {DESC_TEXT}
         </Typography>
       </div>
     </section>

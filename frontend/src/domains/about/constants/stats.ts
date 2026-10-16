@@ -15,5 +15,5 @@ export const stats: Stat[] = [
   { value: "6,500+", label: withBreak("Patients Assisted", "Financially") },
   { value: "2,000+", label: withBreak("Awareness Program", "Conducted") },
   { value: "90,000+", label: withBreak("People Benefited Through", "Awareness Program") },
-  { value: "4,700+", label: withBreak("Students Benefited Through", "Healthy Habits") },
+  { value: "4,700+", label: withBreak("Students Trained", "on Prevention Programs") },
 ];

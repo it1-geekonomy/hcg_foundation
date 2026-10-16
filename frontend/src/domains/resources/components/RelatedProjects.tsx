@@ -31,7 +31,7 @@ export default function RelatedProjects({ currentProjectId, projects }: RelatedP
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!scrollContainerRef.current) return;
     const target = e.target as HTMLElement;
-    if (target.closest("button, a, [role='button'], [data-no-drag='true']")) {
+    if (target.closest("[data-no-drag='true']")) {
       return;
     }
     setIsDragging(true);
