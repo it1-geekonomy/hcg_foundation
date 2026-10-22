@@ -317,8 +317,7 @@ export default function DonateSection() {
           as="p"
           className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/90"
         >
-          <CountUp to={126} /> kind donors have contributed this month. Join
-          with them today. ❤️
+          <CountUp to={126} /> kind donors have contributed this month. Join them today. ❤️
         </Typography>
       </DonateItem>
 
