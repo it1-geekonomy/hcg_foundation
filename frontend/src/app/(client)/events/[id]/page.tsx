@@ -1,6 +1,5 @@
-"use client";
-
-import React, { use, useState, useEffect } from "react";
+import React from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Calendar, MapPin } from "lucide-react";
 import Typography from "@/lib/Typography";
@@ -12,6 +11,8 @@ import PuzzleImage from "@/shared/components/Puzzleimage";
 import type { EventItem } from "@/domains/resources/components/EventCard";
 import { isMissingContentError, publicEventsApi } from "@/domains/cms/lib/api";
 import ContentNotice, { LOAD_ERROR_MESSAGE } from "@/shared/components/ContentNotice";
+import { detailMetadata } from "@/lib/seo";
+import EventDetailClient from "./EventDetailClient";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
@@ -19,81 +20,89 @@ interface EventDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function EventDetailPage({ params }: EventDetailPageProps) {
-  const resolvedParams = use(params);
-  const [eventItem, setEventItem] = useState<EventItem | null>(null);
-  const [relatedEvents, setRelatedEvents] = useState<EventItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [failed, setFailed] = useState(false);
-  const [attempt, setAttempt] = useState(0);
+export async function generateMetadata({ params }: EventDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const res = await publicEventsApi.getBySlug(id).catch(() => null);
+  const item = res?.data?.detail;
+  return detailMetadata({
+    section: "/events",
+    sectionLabel: "Events",
+    id,
+    item,
+    image: item?.eventBanner || item?.eventMobileBanner,
+  });
+}
 
-  useEffect(() => {
-    let cancelled = false;
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+export default async function EventDetailPage({ params }: EventDetailPageProps) {
+  const resolvedParams = await params;
+  const targetId = resolvedParams.id;
+
+  let eventItem: EventItem | null = null;
+  let relatedEvents: EventItem[] = [];
+  let is404 = false;
+  let failed = false;
+
+  try {
+    const res = await publicEventsApi.getBySlug(targetId);
+    const e = res?.data?.detail;
+    const rel = res?.data?.related?.data ?? [];
+
+    if (e) {
+      eventItem = {
+        id: e.id ?? "",
+        slug: e.slug ?? "",
+        title: e.title ?? "",
+        date: e.eventDate
+          ? new Date(e.eventDate).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })
+          : "",
+        category: "Community Event" as const,
+        summary: e.shortDescription ?? "",
+        fullStory: e.content ?? "",
+        imageUrl: e.eventBanner || e.eventMobileBanner || "",
+        location: e.eventLocation ?? "",
+      };
     }
-    (async () => {
-      setLoading(true);
-      setFailed(false);
-      try {
-        const res = await publicEventsApi.getBySlug(resolvedParams.id);
-        const e = res.data?.detail;
-        const rel = res.data?.related?.data ?? [];
 
-        if (!cancelled && e) {
-          setEventItem({
-            id: e.id ?? "",
-            slug: e.slug ?? "",
-            title: e.title ?? "",
-            date: e.eventDate ? new Date(e.eventDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "",
-            category: "Community Event" as const,
-            summary: e.shortDescription ?? "",
-            fullStory: e.content ?? "",
-            imageUrl: e.eventBanner || e.eventMobileBanner || "",
-            location: e.eventLocation ?? "",
-          });
-        }
+    if (rel.length > 0) {
+      relatedEvents = rel.map((item) => ({
+        id: item.id ?? "",
+        slug: item.slug ?? "",
+        title: item.title ?? "",
+        date: item.eventDate
+          ? new Date(item.eventDate).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })
+          : "",
+        category: "Community Event" as const,
+        summary: item.shortDescription ?? "",
+        fullStory: item.content ?? "",
+        imageUrl: item.eventBanner || item.eventMobileBanner || "",
+        mobileImageUrl: item.eventMobileBanner || item.eventBanner || "",
+        location: item.eventLocation ?? "",
+      }));
+    }
+  } catch (err) {
+    if (isMissingContentError(err)) {
+      is404 = true;
+    } else {
+      failed = true;
+    }
+  }
 
-        if (!cancelled && rel.length > 0) {
-          setRelatedEvents(
-            rel.map((item) => ({
-              id: item.id ?? "",
-              slug: item.slug ?? "",
-              title: item.title ?? "",
-              date: item.eventDate ? new Date(item.eventDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "",
-              category: "Community Event" as const,
-              summary: item.shortDescription ?? "",
-              fullStory: item.content ?? "",
-              imageUrl: item.eventBanner || item.eventMobileBanner || "",
-              mobileImageUrl: item.eventMobileBanner || item.eventBanner || "",
-              location: item.eventLocation ?? "",
-            }))
-          );
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setEventItem(null);
-          setFailed(!isMissingContentError(err));
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [resolvedParams.id, attempt]);
-
-  if (!loading && !eventItem && !failed) {
+  if (is404 || (!eventItem && !failed)) {
     notFound();
   }
 
-  useEffect(() => {
-    sessionStorage.setItem("came_from_details", "events");
-  }, []);
-
   return (
     <main className="min-h-screen bg-[#FFF8E2]">
+      <EventDetailClient />
+
       <Banner
         bgImage="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791296290041-5pkq1-rectangle-186.webp"
         bgImageAlt="Events"
@@ -112,22 +121,9 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
             tone="error"
             title="We couldn't load this event right now"
             message={LOAD_ERROR_MESSAGE}
-            action={{ label: "Try again", onClick: () => setAttempt((n) => n + 1) }}
             className="py-12"
           />
-        ) : loading || !eventItem ? (
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-12 sm:gap-10 lg:gap-14 items-start animate-pulse">
-            <div className="sm:col-span-7 flex flex-col space-y-4">
-              <div className="h-10 bg-black/10 rounded w-3/4"></div>
-              <div className="h-4 bg-black/10 rounded w-full"></div>
-              <div className="h-4 bg-black/10 rounded w-full"></div>
-              <div className="h-4 bg-black/10 rounded w-5/6"></div>
-            </div>
-            <div className="sm:col-span-5 flex flex-col items-start w-full order-first sm:order-last">
-              <div className="relative aspect-[4/3] w-full max-w-[37.5rem] overflow-hidden rounded-xl bg-black/10 shadow-md"></div>
-            </div>
-          </div>
-        ) : (
+        ) : eventItem ? (
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-12 sm:gap-10 lg:gap-14 items-start">
             {/* Left Column: Story Details (7 cols) */}
             <div className="sm:col-span-7 flex flex-col">
@@ -191,9 +187,6 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
             {/* Right Column: Featured Image (5 cols) */}
             <div className="sm:col-span-5 flex flex-col items-start w-full order-first sm:order-last">
               <div className="relative aspect-[4/3] w-full max-w-[37.5rem] overflow-hidden rounded-xl">
-                {/* Puzzle-piece reveal on the detail image only — pieces
-                    fade/scale in at their own cell, in a randomized order,
-                    the moment this box scrolls into view. */}
                 {eventItem.imageUrl ? (
                   <PuzzleImage
                     key={eventItem.id}
@@ -208,7 +201,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
               </div>
             </div>
           </div>
-        )}
+        ) : null}
       </section>
 
       {/* Reusable Related Events Section */}

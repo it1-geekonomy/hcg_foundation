@@ -72,17 +72,19 @@ export function TeamCarousel({
   /** Exact distance (px) between two neighbouring cards, measured from the DOM. */
   const getCardStep = useCallback(() => {
     const el = scrollRef.current;
-    if (!el) return 0;
+    if (!el) return cardWidthPx + CAROUSEL_GAP_PX;
     const cards = el.querySelectorAll<HTMLElement>("[data-card]");
     if (cards.length >= 2) {
-      return (
+      const diff =
         cards[1].getBoundingClientRect().left -
-        cards[0].getBoundingClientRect().left
-      );
+        cards[0].getBoundingClientRect().left;
+      if (diff > 0) return diff;
     }
     const card = cards[0];
-    return card ? card.offsetWidth + CAROUSEL_GAP_PX : el.clientWidth;
-  }, []);
+    return card && card.offsetWidth > 0
+      ? card.offsetWidth + CAROUSEL_GAP_PX
+      : cardWidthPx + CAROUSEL_GAP_PX;
+  }, [cardWidthPx]);
 
   /** Highest valid card index to land on. */
   const getMaxIndex = useCallback(() => {
@@ -90,7 +92,9 @@ export function TeamCarousel({
     if (!el) return 0;
     const step = getCardStep();
     if (step <= 0) return 0;
-    return Math.max(0, Math.round((el.scrollWidth - el.clientWidth) / step));
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll <= 0) return 0;
+    return Math.max(0, Math.round(maxScroll / step));
   }, [getCardStep]);
 
   // Target index of an in-flight smooth scroll, so rapid arrow clicks keep
@@ -103,6 +107,7 @@ export function TeamCarousel({
       const el = scrollRef.current;
       if (!el) return;
       const step = getCardStep();
+      if (step <= 0) return;
       const maxIndex = getMaxIndex();
       const clamped = Math.min(maxIndex, Math.max(0, index));
 
@@ -118,6 +123,11 @@ export function TeamCarousel({
     [getCardStep, getMaxIndex],
   );
 
+  const lastInteractionRef = useRef(0);
+  const recordInteraction = useCallback(() => {
+    lastInteractionRef.current = Date.now();
+  }, []);
+
   /** Advance/retreat by exactly one card, always landing on a card boundary. */
   const scrollByCard = useCallback(
     (dir: 1 | -1) => {
@@ -126,6 +136,7 @@ export function TeamCarousel({
       const step = getCardStep();
       if (step <= 0) return;
       const maxIndex = getMaxIndex();
+      if (maxIndex <= 0) return;
       const base =
         pendingIndexRef.current ?? Math.round(el.scrollLeft / step);
       const nextIndex = base + dir;
@@ -140,32 +151,35 @@ export function TeamCarousel({
     [getCardStep, getMaxIndex, scrollToIndex],
   );
 
-  const goPrev = () => scrollByCard(-1);
-  const goNext = () => scrollByCard(1);
+  const goPrev = () => {
+    recordInteraction();
+    scrollByCard(-1);
+  };
+  const goNext = () => {
+    recordInteraction();
+    scrollByCard(1);
+  };
 
-  const [isHovered, setIsHovered] = useState(false);
-
-  // Auto-scroll every 3 seconds (pauses completely when hovered or reading a flipped card)
+  // Auto-scroll every 3 seconds (pauses when user is reading a flipped card, dragging, or recently interacted)
   useEffect(() => {
-    if (!needsCarousel || isHovered || dragging) return;
+    if (!needsCarousel || dragging) return;
 
     const timer = window.setInterval(() => {
       if (typeof document !== "undefined" && document.hidden) return;
-      const el = scrollRef.current;
-      const container = containerRef.current;
-      // Do not advance if the user is hovering, reading a flipped card, or interacting
-      const isReadingOrHovered =
-        isHovered ||
-        Boolean(el?.querySelector('[data-flipped="true"]')) ||
-        Boolean(container?.matches(":hover")) ||
-        Boolean(el?.matches(":hover"));
+      if (Date.now() - lastInteractionRef.current < 3500) return;
 
-      if (isReadingOrHovered) return;
+      const el = scrollRef.current;
+      if (!el) return;
+
+      // Do not advance if the user is reading a flipped card (focused on biography)
+      const hasFlippedCard = Boolean(el.querySelector('[data-flipped="true"]'));
+      if (hasFlippedCard || isDraggingRef.current) return;
+
       scrollByCard(1);
     }, 3000);
 
     return () => window.clearInterval(timer);
-  }, [needsCarousel, isHovered, dragging, scrollByCard]);
+  }, [needsCarousel, dragging, scrollByCard]);
 
   useEffect(() => {
     return () => {
@@ -188,6 +202,7 @@ export function TeamCarousel({
       const horizontalIntent = Math.abs(e.deltaX) > Math.abs(e.deltaY);
       if (!horizontalIntent) return; // let normal vertical page scroll pass through
       e.preventDefault();
+      recordInteraction();
       if (wheelLocked || Math.abs(e.deltaX) < WHEEL_DELTA_THRESHOLD) return;
 
       wheelLocked = true;
@@ -207,6 +222,7 @@ export function TeamCarousel({
 
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length !== 1) return;
+      recordInteraction();
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
       touchActive = true;
@@ -269,6 +285,7 @@ export function TeamCarousel({
     const el = scrollRef.current;
     if (!el) return;
 
+    recordInteraction();
     e.preventDefault(); // stop native image drag / text selection from hijacking the gesture
     isDraggingRef.current = true;
     dragMovedRef.current = false;
@@ -396,8 +413,6 @@ export function TeamCarousel({
   return (
     <div
       ref={containerRef}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       className="mx-auto -mt-20 flex w-full max-w-full min-w-0 items-start justify-center gap-2"
     >
       {needsCarousel ? arrowRail("left") : null}
@@ -414,12 +429,13 @@ export function TeamCarousel({
           "--track-w": `${trackWidth}px`,
           width: `min(${trackWidth}px, 100%)`,
           touchAction: "pan-y",
-          scrollSnapType: dragging ? "none" : undefined,
+          scrollSnapType:
+            dragging || pendingIndexRef.current !== null ? "none" : undefined,
           containerType: "inline-size",
         } as CSSProperties}
         className={cx(
           "min-w-0 overflow-x-auto pt-20",
-          "snap-x snap-mandatory scroll-smooth",
+          "snap-x snap-proximity",
           "[scrollbar-width:none]",
           "[-ms-overflow-style:none]",
           "[&::-webkit-scrollbar]:hidden",

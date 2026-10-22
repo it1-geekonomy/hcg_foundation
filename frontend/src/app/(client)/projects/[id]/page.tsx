@@ -1,6 +1,5 @@
-"use client";
-
-import React, { use, useState, useEffect, useRef } from "react";
+import React from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Typography from "@/lib/Typography";
 import Banner from "@/shared/components/Herobannersection";
@@ -12,8 +11,8 @@ import PuzzleImage from "@/shared/components/Puzzleimage";
 import { ProjectItem, PROJECTS_DATA } from "@/domains/resources/constants/projects";
 import { isMissingContentError, publicProjectsApi } from "@/domains/cms/lib/api";
 import ContentNotice, { LOAD_ERROR_MESSAGE } from "@/shared/components/ContentNotice";
-import { useDetailPageAnimations } from "@/shared/lib/detailPageAnimations";
-import { PROJECT_FROM_HOME_KEY } from "@/domains/home/constants/project";
+import { detailMetadata } from "@/lib/seo";
+import ProjectDetailClient from "./ProjectDetailClient";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
 
@@ -21,93 +20,79 @@ interface ProjectDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
-  const resolvedParams = use(params);
-  const [projectItem, setProjectItem] = useState<ProjectItem | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [failed, setFailed] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-  const [relatedProjects, setRelatedProjects] = useState<ProjectItem[]>([]);
+export async function generateMetadata({ params }: ProjectDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const res = await publicProjectsApi.getBySlug(id).catch(() => null);
+  const item = res?.data?.detail;
+  return detailMetadata({
+    section: "/projects",
+    sectionLabel: "Projects",
+    id,
+    item,
+    image: item?.projectBanner || item?.projectMobileBanner,
+  });
+}
 
-  const fromHome = useRef(false);
+export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
+  const resolvedParams = await params;
+  const targetId = resolvedParams.id;
 
-  // The flag moves onto this page's history entry: it survives refresh and back/forward
-  // the way a ?from=home query did, without appearing in the URL.
-  useEffect(() => {
-    if (sessionStorage.getItem(PROJECT_FROM_HOME_KEY)) {
-      sessionStorage.removeItem(PROJECT_FROM_HOME_KEY);
-      window.history.replaceState({ ...window.history.state, [PROJECT_FROM_HOME_KEY]: true }, "");
+  let projectItem: ProjectItem | null = null;
+  let relatedProjects: ProjectItem[] = [];
+  let is404 = false;
+  let failed = false;
+
+  try {
+    const res = await publicProjectsApi.getBySlug(targetId);
+    const p = res?.data?.detail;
+    const rel = res?.data?.related?.data ?? [];
+
+    if (p) {
+      projectItem = {
+        id: p.id ?? "",
+        slug: p.slug ?? "",
+        title: p.title ?? "",
+        category: "Projects",
+        summary: p.shortDescription ?? "",
+        fullStory: p.content ?? "",
+        imageUrl: p.projectBanner || p.projectMobileBanner || "",
+        mobileImageUrl: p.projectMobileBanner || p.projectBanner || "",
+      };
     }
-    fromHome.current = Boolean(window.history.state?.[PROJECT_FROM_HOME_KEY]);
-    if (fromHome.current) sessionStorage.setItem("came_from_details", "projects");
-  }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    if (rel.length > 0) {
+      relatedProjects = rel.map((item) => ({
+        id: item.id ?? "",
+        slug: item.slug ?? "",
+        title: item.title ?? "",
+        category: "Projects",
+        summary: item.shortDescription ?? "",
+        fullStory: item.content ?? "",
+        imageUrl: item.projectBanner || item.projectMobileBanner || "",
+        mobileImageUrl: item.projectMobileBanner || item.projectBanner || "",
+      }));
     }
-    (async () => {
-      setLoading(true);
-      setFailed(false);
-      try {
-        const res = await publicProjectsApi.getBySlug(resolvedParams.id);
-        const p = res.data?.detail;
-        const rel = res.data?.related?.data ?? [];
+  } catch (err) {
+    if (isMissingContentError(err)) {
+      is404 = true;
+    } else {
+      failed = true;
+    }
+  }
 
-        if (!cancelled && p) {
-          setProjectItem({
-            id: p.id ?? "",
-            slug: p.slug ?? "",
-            title: p.title ?? "",
-            category: "Projects",
-            summary: p.shortDescription ?? "",
-            fullStory: p.content ?? "",
-            imageUrl: p.projectBanner || p.projectMobileBanner || "",
-            mobileImageUrl: p.projectMobileBanner || p.projectBanner || "",
-          });
-        }
+  // Fallback to static projects data if CMS has no entry or fails
+  if (!projectItem && !is404) {
+    const fallback = PROJECTS_DATA.find(
+      (item) => item.slug === targetId || item.id === targetId
+    );
+    if (fallback) {
+      projectItem = fallback;
+      relatedProjects = PROJECTS_DATA.filter((item) => item.id !== fallback.id).slice(0, 6);
+      failed = false;
+    }
+  }
 
-        if (!cancelled && rel.length > 0) {
-          setRelatedProjects(
-            rel.map((item) => ({
-              id: item.id ?? "",
-              slug: item.slug ?? "",
-              title: item.title ?? "",
-              category: "Projects",
-              summary: item.shortDescription ?? "",
-              fullStory: item.content ?? "",
-              imageUrl: item.projectBanner || item.projectMobileBanner || "",
-              mobileImageUrl: item.projectMobileBanner || item.projectBanner || "",
-            }))
-          );
-        }
-      } catch (err) {
-        if (!cancelled) {
-          const fallback = PROJECTS_DATA.find(
-            (item) => item.slug === resolvedParams.id || item.id === resolvedParams.id
-          );
-          setProjectItem(fallback ?? null);
-          if (fallback) {
-            setRelatedProjects(
-              PROJECTS_DATA.filter((item) => item.id !== fallback.id).slice(0, 6)
-            );
-          } else if (!isMissingContentError(err)) {
-            setFailed(true);
-          }
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [resolvedParams.id, attempt]);
-
-  useDetailPageAnimations(!loading && Boolean(projectItem), projectItem?.id);
-
-  if (!loading && !projectItem && !failed) {
+  if (is404 || (!projectItem && !failed)) {
     notFound();
   }
 
@@ -115,12 +100,14 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     projectItem &&
       (projectItem.slug?.toLowerCase().includes("art-therapy") ||
         projectItem.title?.toLowerCase().includes("art therapy") ||
-        resolvedParams.id?.toLowerCase().includes("art-therapy") ||
-        resolvedParams.id?.toLowerCase().includes("art-gallery"))
+        targetId?.toLowerCase().includes("art-therapy") ||
+        targetId?.toLowerCase().includes("art-gallery"))
   );
 
   return (
     <main className="min-h-screen bg-[#FFF8E2]">
+      <ProjectDetailClient id={projectItem?.id} />
+
       <Banner
         bgImage="/Resources/Resources banner image.png"
         bgImageAlt="Projects"
@@ -141,22 +128,9 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             tone="error"
             title="We couldn't load this project right now"
             message={LOAD_ERROR_MESSAGE}
-            action={{ label: "Try again", onClick: () => setAttempt((n) => n + 1) }}
             className="py-12"
           />
-        ) : loading || !projectItem ? (
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-12 sm:gap-10 lg:gap-14 items-start animate-pulse">
-            <div className="sm:col-span-7 flex flex-col space-y-4">
-              <div className="h-10 bg-black/10 rounded w-3/4"></div>
-              <div className="h-4 bg-black/10 rounded w-full"></div>
-              <div className="h-4 bg-black/10 rounded w-full"></div>
-              <div className="h-4 bg-black/10 rounded w-5/6"></div>
-            </div>
-            <div className="sm:col-span-5 flex flex-col items-start w-full order-first sm:order-last">
-              <div className="relative aspect-[4/3] sm:aspect-[4/3] w-full max-w-[37.5rem] overflow-hidden rounded-xl bg-black/10 shadow-md"></div>
-            </div>
-          </div>
-        ) : (
+        ) : projectItem ? (
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-12 sm:gap-10 lg:gap-14 items-start">
             {/* Left Column: Story Details (7 cols) */}
             <div className="sm:col-span-7 flex flex-col">
@@ -198,9 +172,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             {/* Right Column: Featured Image (5 cols) */}
             <div className="sm:col-span-5 flex flex-col items-start w-full order-first sm:order-last">
               <div className="relative aspect-[4/3] w-full max-w-[37.5rem] overflow-hidden rounded-xl">
-                {/* Puzzle-piece reveal on the detail image only — pieces
-                    fade/scale in at their own cell, in a randomized order,
-                    the moment this box scrolls into view. */}
                 {projectItem.imageUrl ? (
                   <PuzzleImage
                     key={projectItem.id}
@@ -215,10 +186,10 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               </div>
             </div>
           </div>
-        )}
+        ) : null}
 
-        {/* Swasthi Art Gallery & Art Therapy Program (Special section for Art Therapy & Wellness) */}
-        {!loading && projectItem && isArtTherapy && (
+        {/* Swasthi Art Gallery & Art Therapy Program */}
+        {projectItem && isArtTherapy && (
           <SwasthiArtTherapySection />
         )}
       </section>

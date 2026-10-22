@@ -44,6 +44,7 @@ export default function AboutSection() {
           {/* < 640px: centered. sm+ : left-aligned. Compact size below lg. lg+: original. */}
           <Link
             href={ABOUT_CONTENT.cta.href}
+            aria-label="Read more about HCG Foundation"
             className="mt-2 inline-flex w-fit items-stretch max-sm:self-center overflow-hidden rounded border border-[#FFD43B] bg-[#FFD43B] min-h-[44px] lg:min-h-0 lg:h-12 lg:border-[#FCCC2D] lg:bg-[#FCCC2D]"
           >
             <span className="flex items-center px-3.5 py-2 sm:px-3 sm:py-2 lg:h-full lg:px-4 lg:py-0">
