@@ -159,6 +159,7 @@ export function MobileMenuPanel({
           {/* Donate Button — only inside hamburger below sm (640px) */}
           <Link
             href={donateButton.href}
+            aria-label="Donate now to HCG Foundation"
             onClick={(event) => {
               event.preventDefault();
               setIsMenuOpen(false);
