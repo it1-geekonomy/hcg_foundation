@@ -97,30 +97,30 @@ export function CoverflowCarousel({ people, label }: { people: Person[]; label: 
     [count, tweenTo],
   );
 
-  const [isHovered, setIsHovered] = useState(false);
+  const lastInteractionRef = useRef(0);
+  const recordInteraction = useCallback(() => {
+    lastInteractionRef.current = Date.now();
+  }, []);
 
-  // Auto-advance every 3 seconds (pauses completely when hovered or reading a flipped card)
+  // Auto-advance every 3 seconds (pauses when reading a flipped card or recently interacted)
   useEffect(() => {
-    if (count <= 1 || isHovered) return;
+    if (count <= 1) return;
 
     const timer = window.setInterval(() => {
       if (typeof document !== "undefined" && document.hidden) return;
-      const root = rootRef.current;
-      const zone = zoneRef.current;
-      const isReadingOrHovered =
-        isHovered ||
-        Boolean(root?.querySelector('[data-flipped="true"]')) ||
-        Boolean(root?.matches(":hover")) ||
-        Boolean(zone?.matches(":hover"));
+      if (Date.now() - lastInteractionRef.current < 3500) return;
 
-      if (isReadingOrHovered) return;
+      const root = rootRef.current;
+      const hasFlippedCard = Boolean(root?.querySelector('[data-flipped="true"]'));
+      if (hasFlippedCard) return;
+
       const cur = activeRef.current;
       const next = cur >= count - 1 ? 0 : cur + 1;
       settleOn(next);
     }, 3000);
 
     return () => window.clearInterval(timer);
-  }, [count, isHovered, settleOn]);
+  }, [count, settleOn]);
 
   useLayoutEffect(() => {
     reducedMotionRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -170,6 +170,7 @@ export function CoverflowCarousel({ people, label }: { people: Person[]; label: 
 
   const onPointerDown = (e: PointerEvent) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
+    recordInteraction();
     dragRef.current = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), dx: 0, axis: null };
   };
 
@@ -251,8 +252,6 @@ export function CoverflowCarousel({ people, label }: { people: Person[]; label: 
       aria-roledescription="carousel"
       aria-label={label}
       tabIndex={0}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       onKeyDown={onKeyDown}
       className="relative isolate w-full overflow-x-clip outline-none"
     >

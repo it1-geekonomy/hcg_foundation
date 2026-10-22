@@ -216,6 +216,8 @@ export default function PartnerLogosMarquee({
                     key={`${logo.id}-${setIdx}-${idx}`}
                     src={logo.src}
                     alt={logo.alt}
+                    width={120}
+                    height={48}
                     draggable={false}
                     className={`${logoHeight} w-auto object-contain shrink-0 transition-transform duration-300 hover:scale-105 pointer-events-none select-none`}
                   />

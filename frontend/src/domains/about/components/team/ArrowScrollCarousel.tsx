@@ -74,7 +74,13 @@ export function ArrowScrollCarousel({ people }: { people: Person[] }) {
     };
   }, [people.length, labelHeight]);
 
+  const lastInteractionRef = useRef(0);
+  const recordInteraction = () => {
+    lastInteractionRef.current = Date.now();
+  };
+
   const scrollByCard = (dir: 1 | -1) => {
+    recordInteraction();
     const el = scrollRef.current;
     if (!el) return;
     const card = el.querySelector<HTMLElement>("[data-card]");
@@ -88,28 +94,25 @@ export function ArrowScrollCarousel({ people }: { people: Person[] }) {
     }
   };
 
-  const [isHovered, setIsHovered] = useState(false);
-
-  // Auto-scroll every 3 seconds (pauses completely when hovered or reading a flipped card)
+  // Auto-scroll every 3 seconds (pauses when user is reading a flipped card or recently interacted)
   useEffect(() => {
-    if (people.length <= 1 || isHovered) return;
+    if (people.length <= 1) return;
 
     const timer = window.setInterval(() => {
       if (typeof document !== "undefined" && document.hidden) return;
-      const el = scrollRef.current;
-      const root = rootRef.current;
-      const isReadingOrHovered =
-        isHovered ||
-        Boolean(el?.querySelector('[data-flipped="true"]')) ||
-        Boolean(root?.matches(":hover")) ||
-        Boolean(el?.matches(":hover"));
+      if (Date.now() - lastInteractionRef.current < 3500) return;
 
-      if (isReadingOrHovered) return;
+      const el = scrollRef.current;
+      if (!el) return;
+
+      const hasFlippedCard = Boolean(el.querySelector('[data-flipped="true"]'));
+      if (hasFlippedCard) return;
+
       scrollByCard(1);
     }, 3000);
 
     return () => window.clearInterval(timer);
-  }, [people.length, isHovered]);
+  }, [people.length]);
 
   // One-card-per-gesture: take over the horizontal swipe/scroll so a fast
   // flick or a long trackpad swipe still only ever advances a single card.
@@ -144,6 +147,7 @@ export function ArrowScrollCarousel({ people }: { people: Person[] }) {
 
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length !== 1) return;
+      recordInteraction();
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
       dragging = true;
@@ -200,8 +204,6 @@ export function ArrowScrollCarousel({ people }: { people: Person[] }) {
   return (
     <div
       ref={rootRef}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       className={cx(
         "relative mx-auto flex w-full max-w-[1260px] items-start gap-1",
         "max-sm:-mx-8",
@@ -250,7 +252,7 @@ export function ArrowScrollCarousel({ people }: { people: Person[] }) {
         onScroll={updateEdges}
         style={{ touchAction: "pan-y" }}
         className={cx(
-          "min-w-0 flex-1 snap-x snap-mandatory overflow-x-auto scroll-smooth pt-9 pb-2",
+          "min-w-0 flex-1 snap-x snap-proximity overflow-x-auto pt-9 pb-2",
           "[scrollbar-width:none]",
           "[-ms-overflow-style:none]",
           "[&::-webkit-scrollbar]:hidden",

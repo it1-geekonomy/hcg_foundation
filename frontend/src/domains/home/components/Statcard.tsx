@@ -93,6 +93,8 @@ export default function StatCard({ stat, active }: { stat: Stat; active: boolean
           <img
             src={src}
             alt={stat.label.replace("\n", " ")}
+            width={202}
+            height={256}
             className="absolute inset-0 h-full w-full object-contain"
           />
         ) : null}

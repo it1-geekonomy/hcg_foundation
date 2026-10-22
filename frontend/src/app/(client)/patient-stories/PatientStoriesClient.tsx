@@ -178,6 +178,7 @@ export default function PatientStoriesClient({
     <main className="min-h-screen bg-[#FFFBEA] text-[#2F2707] font-manrope">
       {/* Main Patient Stories Grid Section */}
       <section className={`${CONTAINER} pt-7 sm:pt-[6.5rem] lg:pt-[10.25rem] pb-8 sm:pb-10 lg:pb-12`}>
+        <h1 className="sr-only">Cancer Patient Stories &amp; Journeys of Hope | HCG Foundation</h1>
         {/* Search Bar */}
         <div className="mb-10 flex justify-center">
           <div className="relative w-full max-w-lg">
@@ -249,6 +250,7 @@ export default function PatientStoriesClient({
             currentPage={safePage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
+            getPageHref={(page) => (page === 1 ? "/patient-stories" : `/patient-stories?page=${page}`)}
             showArrows={true}
             showNumbers={true}
             className="mt-12 sm:mt-16"

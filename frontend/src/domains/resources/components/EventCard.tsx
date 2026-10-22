@@ -189,6 +189,8 @@ export default function EventCard({
             <img
               src="/Resources/calendar.png"
               alt="Calendar"
+              width={22}
+              height={22}
               className="size-[0.875rem] sm:size-[1.15rem] xl:size-[1.39rem] shrink-0 object-contain"
             />
             <div className="text-left min-w-0 overflow-hidden">

@@ -18,7 +18,7 @@ export async function generateMetadata({
       ...base,
       robots: {
         index: false,
-        follow: false,
+        follow: true,
       },
     };
   }
