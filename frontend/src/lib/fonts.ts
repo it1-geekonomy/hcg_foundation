@@ -1,21 +1,18 @@
 import localFont from "next/font/local";
 
 /**
- * Manrope — interface and body text. Kept local so Docker/Turbopack builds do not depend on
- * next/font/google's generated fetch modules.
+ * Manrope — interface and body text. Variable WOFF2 (latin + latin-ext) sourced from
+ * @fontsource-variable/manrope (Google Fonts / OFL license). Replaces the old static
+ * TTF files: one file covers the full weight axis (200–700).
  */
 export const manrope = localFont({
 	src: [
-		{ path: "../app/Fonts/Manrope-ExtraLight.ttf", weight: "200", style: "normal" },
-		{ path: "../app/Fonts/Manrope-Light.ttf", weight: "300", style: "normal" },
-		{ path: "../app/Fonts/Manrope-Regular.ttf", weight: "400", style: "normal" },
-		{ path: "../app/Fonts/Manrope-Medium.ttf", weight: "500", style: "normal" },
-		{ path: "../app/Fonts/Manrope-SemiBold.ttf", weight: "600", style: "normal" },
-		{ path: "../app/Fonts/Manrope-Bold.ttf", weight: "700", style: "normal" },
+		{ path: "../app/Fonts/Manrope-variable.woff2",     weight: "200 700", style: "normal" },
+		{ path: "../app/Fonts/Manrope-variable-ext.woff2", weight: "200 700", style: "normal" },
 	],
 	variable: "--font-manrope",
 	display: "swap",
-	preload: false,
+	preload: true,
 });
 
 /*
@@ -28,7 +25,7 @@ export const manrope = localFont({
 
 /** Tiempos Fine — italic editorial text. */
 export const tiemposFine = localFont({
-	src: [{ path: "../app/Fonts/TestTiemposFine-MediumItalic-BF66457a511be83.otf", weight: "500", style: "italic" }],
+	src: [{ path: "../app/Fonts/TestTiemposFine-MediumItalic-BF66457a511be83.woff2", weight: "500", style: "italic" }],
 	variable: "--font-tiempos-fine",
 	display: "swap",
 	adjustFontFallback: false,
@@ -36,7 +33,7 @@ export const tiemposFine = localFont({
 
 /** Tiempos Headline — light italic display text. */
 export const tiemposHeadline = localFont({
-	src: [{ path: "../app/Fonts/TestTiemposHeadline-LightItalic-BF66457a5088153.otf", weight: "300", style: "italic" }],
+	src: [{ path: "../app/Fonts/TestTiemposHeadline-LightItalic-BF66457a5088153.woff2", weight: "300", style: "italic" }],
 	variable: "--font-tiempos-headline",
 	display: "swap",
 	adjustFontFallback: false,
@@ -44,7 +41,7 @@ export const tiemposHeadline = localFont({
 
 /** Argesta Display — regular display text. */
 export const argestaDisplay = localFont({
-	src: [{ path: "../app/Fonts/argestadisplay-regular.otf", weight: "400", style: "normal" }],
+	src: [{ path: "../app/Fonts/argestadisplay-regular.woff2", weight: "400", style: "normal" }],
 	variable: "--font-argestadisplay",
 	display: "swap",
 });

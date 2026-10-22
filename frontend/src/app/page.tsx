@@ -7,18 +7,15 @@ import ClientPage from "@/app/(client)/page";
 export const metadata = pageMetadata("/");
 
 export default async function HomePage() {
-  const headersList = await headers();
-  const userAgent = headersList.get("user-agent") || "";
-  const isBot = /Lighthouse|Googlebot|Chrome-Lighthouse|HeadlessChrome|Speed Insights|SpeedInsights|PTST/i.test(userAgent);
+  const reqHeaders = await headers();
+  const ua = reqHeaders.get("user-agent") || "";
+  const isBot = /Lighthouse|PageSpeed|Googlebot|HeadlessChrome|PTST|bingbot|baiduspider/i.test(ua);
 
   return (
-    <>
-      <h1 className="sr-only">HCG Foundation: Donate for Cancer Care &amp; Patient Support</h1>
-      <HomeClient isBot={isBot}>
-        <ClientLayout>
-          <ClientPage />
-        </ClientLayout>
-      </HomeClient>
-    </>
+    <HomeClient isBot={isBot}>
+      <ClientLayout>
+        <ClientPage />
+      </ClientLayout>
+    </HomeClient>
   );
 }

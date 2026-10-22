@@ -138,6 +138,7 @@ export default function Navbar() {
             {/* Logo */}
             <Link
               href="/"
+              aria-label="HCG Foundation Home"
               onClick={() => {
                 setOpenDesktopDropdown(null);
                 setOpenDropdown(null);
@@ -211,6 +212,7 @@ export default function Navbar() {
               {/* Donate Button — visible lg and up, next to nav links */}
               <Link
                 href={navbarContent.donateButton.href}
+                aria-label="Donate now to HCG Foundation"
                 onClick={(event) => {
                   event.preventDefault();
                   scrollToDonateForm();
@@ -225,6 +227,7 @@ export default function Navbar() {
               {/* Donate Button — visible sm to lg, sits before hamburger */}
               <Link
                 href={navbarContent.donateButton.href}
+                aria-label="Donate now to HCG Foundation"
                 onClick={(event) => {
                   event.preventDefault();
                   scrollToDonateForm();

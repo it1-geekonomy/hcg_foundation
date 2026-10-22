@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -36,6 +36,86 @@ export default function PatientStoryCard({
     }
   };
 
+  // Smooth scroll accumulator and animation frame for seamless page scrolling
+  const scrollAccumulatorRef = useRef(0);
+  const rafIdRef = useRef<number | null>(null);
+
+  const startSmoothPageScroll = (delta: number) => {
+    if (
+      (delta > 0 && scrollAccumulatorRef.current < 0) ||
+      (delta < 0 && scrollAccumulatorRef.current > 0)
+    ) {
+      scrollAccumulatorRef.current = 0;
+    }
+
+    scrollAccumulatorRef.current += delta;
+
+    if (rafIdRef.current === null) {
+      const step = () => {
+        if (Math.abs(scrollAccumulatorRef.current) < 1) {
+          if (scrollAccumulatorRef.current !== 0) {
+            window.scrollBy({ top: scrollAccumulatorRef.current, behavior: "auto" });
+          }
+          scrollAccumulatorRef.current = 0;
+          rafIdRef.current = null;
+          return;
+        }
+
+        const move = scrollAccumulatorRef.current * 0.25;
+        window.scrollBy({ top: move, behavior: "auto" });
+        scrollAccumulatorRef.current -= move;
+
+        rafIdRef.current = requestAnimationFrame(step);
+      };
+      rafIdRef.current = requestAnimationFrame(step);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+        scrollAccumulatorRef.current = 0;
+      }
+    };
+  }, [isFlipped]);
+
+  const handleStoryWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    if (!el) return;
+
+    const maxScroll = el.scrollHeight - el.clientHeight;
+
+    if (maxScroll <= 1) {
+      startSmoothPageScroll(e.deltaY);
+      return;
+    }
+
+    const isAtBottom = el.scrollTop >= maxScroll - 1.5;
+    const isAtTop = el.scrollTop <= 0.5;
+
+    if (e.deltaY > 0) {
+      if (isAtBottom) {
+        startSmoothPageScroll(e.deltaY);
+      } else {
+        const remaining = maxScroll - el.scrollTop;
+        if (e.deltaY > remaining) {
+          startSmoothPageScroll(e.deltaY - remaining);
+        }
+      }
+    } else if (e.deltaY < 0) {
+      if (isAtTop) {
+        startSmoothPageScroll(e.deltaY);
+      } else {
+        const remaining = el.scrollTop;
+        if (Math.abs(e.deltaY) > remaining) {
+          startSmoothPageScroll(e.deltaY + remaining);
+        }
+      }
+    }
+  };
+
   const frontContent = (
     <div className="group relative flex flex-col justify-between h-full w-full overflow-hidden rounded-[1.2643rem] border-[0.0527rem] border-[rgba(255,255,255,0.55)] bg-[rgba(0,0,0,0.23)] backdrop-blur-[1.30625rem] pt-[1.15rem] pl-[1.2rem] pr-[1.15rem] pb-0 transition-all duration-500 hover:border-[rgba(255,255,255,0.75)]">
       {/* Inner Image: Rectangle 31 in Figma (21.177rem x 23.021rem, radius 1.2643rem) */}
@@ -56,7 +136,7 @@ export default function PatientStoryCard({
         className="relative z-10 h-[5.25rem] flex items-center justify-between pointer-events-none"
       >
         {/* Left: Patient Name & Date */}
-        <div className="flex flex-col text-white min-w-0 w-full">
+        <div className="flex flex-col text-white min-w-0 w-full [transform:translateZ(0)]">
           <Typography
             variant="body-7"
             as="h3"
@@ -94,7 +174,10 @@ export default function PatientStoryCard({
         />
 
         {/* Scrollable Story Description matching Team & Trustees pattern */}
-        <div className="relative z-10 min-h-0 flex-1 overflow-y-auto pr-1.5 space-y-2.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div
+          onWheel={handleStoryWheel}
+          className="relative z-10 min-h-0 flex-1 overflow-y-auto pr-1.5 space-y-2.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        >
           {(story.excerpt || story.quote || story.fullStory) ? (
             (story.excerpt || story.quote || story.fullStory || "")
               .split("\n\n")
@@ -113,7 +196,7 @@ export default function PatientStoryCard({
         {/* Read More Button Constant at Bottom Center */}
         <div className="relative z-10 w-full flex justify-center shrink-0 pt-3 border-t border-[#E0D4AE]/50 mt-2">
           <div
-            className="inline-flex items-center justify-center whitespace-nowrap h-[2rem] lg:h-[2.35rem] w-auto px-4 lg:px-5 gap-[0.45rem] rounded-[0.375rem] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
+            className="inline-flex items-center justify-center whitespace-nowrap min-h-[44px] sm:min-h-0 h-[2.75rem] sm:h-[2rem] lg:h-[2.35rem] w-auto px-4 lg:px-5 gap-[0.45rem] rounded-[0.375rem] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
           >
             <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
               Read More

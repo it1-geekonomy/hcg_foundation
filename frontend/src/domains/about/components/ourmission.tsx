@@ -3,7 +3,6 @@
 import {
   Fragment,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -18,11 +17,6 @@ import {
 } from "@/domains/about/constants/visionsection";
 
 /* ---------- Animation helpers ---------- */
-const LINE_STEP_MS = 120; // delay between consecutive heading lines
-const SLIDE_TRANSITION =
-  "opacity 700ms ease-out, transform 1000ms cubic-bezier(0.22, 1, 0.36, 1)";
-const BLUR_TRANSITION =
-  "opacity 700ms ease-out, filter 500ms ease-out, transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)";
 const SCATTER_TRANSITION =
   "opacity 700ms ease-out, transform 1200ms cubic-bezier(0.22, 1, 0.36, 1)";
 
@@ -62,24 +56,6 @@ function useInViewOnce<T extends HTMLElement>(threshold: number) {
   return { ref, visible };
 }
 
-// Slide in from the left (HopeSection heading style)
-const slideStyle = (visible: boolean, delayMs = 0): CSSProperties => ({
-  opacity: visible ? 1 : 0,
-  transform: visible ? "translate3d(0,0,0)" : "translate3d(-80px,0,0)",
-  transition: SLIDE_TRANSITION,
-  transitionDelay: `${delayMs}ms`,
-  willChange: "opacity, transform",
-});
-
-// Blur reveal (StatSection heading style)
-const blurRevealStyle = (visible: boolean): CSSProperties => ({
-  opacity: visible ? 1 : 0,
-  filter: visible ? "blur(0px)" : "blur(14px)",
-  transform: visible ? "translate3d(0,0,0)" : "translate3d(0,32px,0)",
-  transition: BLUR_TRANSITION,
-  willChange: "opacity, filter, transform",
-});
-
 // Fly in from a scattered spot and settle into the grid
 const scatterStyle = (visible: boolean, index: number): CSSProperties => {
   const s = GRID_SCATTER[index];
@@ -94,77 +70,12 @@ const scatterStyle = (visible: boolean, index: number): CSSProperties => {
   };
 };
 
-/* Splits text into words, measures which visual line each word wraps onto,
-   and slides each line in from the left one after another. */
-function SlideWords({
-  text,
-  visible,
-  delayMs = 0,
-}: {
-  text: string;
-  visible: boolean;
-  delayMs?: number;
-}) {
-  const words = text.split(" ");
-  const refs = useRef<(HTMLSpanElement | null)[]>([]);
-  const [lines, setLines] = useState<number[]>([]);
-
-  useLayoutEffect(() => {
-    const measure = () => {
-      let line = 0;
-      let prevTop = refs.current[0]?.offsetTop ?? 0;
-      const next = words.map((_, i) => {
-        const top = refs.current[i]?.offsetTop ?? 0;
-        if (top > prevTop + 2) {
-          line += 1;
-          prevTop = top;
-        }
-        return line;
-      });
-      setLines(next);
-    };
-
-    measure();
-    const t = setTimeout(measure, 150); // late font loads
-    window.addEventListener("resize", measure);
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("resize", measure);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [text]);
-
-  return (
-    <>
-      {words.map((w, i) => (
-        <Fragment key={i}>
-          <span
-            ref={(el) => {
-              refs.current[i] = el;
-            }}
-            className="inline-block motion-reduce:!transition-none"
-            style={slideStyle(visible, delayMs + (lines[i] ?? 0) * LINE_STEP_MS)}
-          >
-            {w}
-          </span>
-          {i < words.length - 1 ? " " : ""}
-        </Fragment>
-      ))}
-    </>
-  );
-}
-
 /* ---------- Small icon + text row ---------- */
 function IconItem({ icon, text }: { icon: string; text: string }) {
   const parts = text.split("|");
-  const { ref, visible } = useInViewOnce<HTMLLIElement>(0.3);
 
   return (
-    <li
-      ref={ref}
-      className="flex items-center gap-4 motion-reduce:!transition-none lg:items-start lg:gap-3 xl:gap-4"
-      style={blurRevealStyle(visible)}
-    >
+    <li className="flex items-center gap-4 lg:items-start lg:gap-3 xl:gap-4">
       <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#FFE59B] sm:h-16 sm:w-16 lg:h-12 lg:w-12 xl:h-16 xl:w-16">
         <Image
           src={icon}
@@ -196,13 +107,10 @@ function IconItem({ icon, text }: { icon: string; text: string }) {
 
 /* ---------- Gradient title bar with main icon ---------- */
 function TitleBar({ icon, title }: { icon: string; title: string }) {
-  const { ref, visible } = useInViewOnce<HTMLDivElement>(0.25);
-
   return (
     <div
-      ref={ref}
-      className="flex items-center gap-3 px-3 py-3 motion-reduce:!transition-none sm:max-w-[320px]"
-      style={{ background: BAR_GRADIENT, ...slideStyle(visible) }}
+      className="flex items-center gap-3 px-3 py-3 sm:max-w-[320px]"
+      style={{ background: BAR_GRADIENT }}
     >
       <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#C0A554] sm:h-12 sm:w-12">
         <Image
@@ -229,8 +137,6 @@ export interface MissionVisionProps {
 }
 
 export default function MissionVision({ className = "" }: MissionVisionProps) {
-  const label = useInViewOnce<HTMLDivElement>(0.25);
-  const heading = useInViewOnce<HTMLDivElement>(0.25);
   const grid = useInViewOnce<HTMLDivElement>(0.2);
 
   return (
@@ -242,11 +148,7 @@ export default function MissionVision({ className = "" }: MissionVisionProps) {
         {/* lg:contents lets the label and heading become separate grid items at lg+ */}
         <div className="lg:contents">
           {/* ---------- Label ---------- */}
-          <div
-            ref={label.ref}
-            className="flex items-center gap-2 mb-3 motion-reduce:!transition-none lg:col-start-1 lg:row-start-1"
-            style={slideStyle(label.visible)}
-          >
+          <div className="flex items-center gap-2 mb-3 lg:col-start-1 lg:row-start-1">
             <span className="h-1.5 w-1.5 rounded-full bg-[#FCCC2D]" />
             <Typography
               variant="body-7"
@@ -258,20 +160,13 @@ export default function MissionVision({ className = "" }: MissionVisionProps) {
           </div>
 
           {/* ---------- Heading (wrapper carries the grid placement + width) ---------- */}
-          <div
-            ref={heading.ref}
-            className="lg:col-start-1 lg:row-start-2 lg:max-w-xl"
-          >
+          <div className="lg:col-start-1 lg:row-start-2 lg:max-w-xl">
             <Typography
               variant="heading-2"
               as="h2"
               className="max-w-none font-tiempos-headline text-[#382E07]"
             >
-              <SlideWords
-                text="Care, Hope & Healing for Every Patient"
-                visible={heading.visible}
-                delayMs={LINE_STEP_MS}
-              />
+              Care, Hope &amp; Healing for Every Patient
             </Typography>
           </div>
         </div>

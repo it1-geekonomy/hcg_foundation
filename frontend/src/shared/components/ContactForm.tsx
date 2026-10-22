@@ -94,7 +94,7 @@ export default function ContactForm({ className = "" }: { className?: string }) 
           Send Us a Message
         </Typography>
         <div className="mt-1">
-          <Typography variant="body-8" as="p" className="font-manrope font-normal text-justify text-[#505050]">
+          <Typography variant="body-8" as="p" className="font-manrope font-normal text-left text-[#505050]">
             Have a question or would like to collaborate with us? Fill out the form below, and our team will get back to you as soon as possible.
           </Typography>
         </div>

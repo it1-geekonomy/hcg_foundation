@@ -75,18 +75,14 @@ function FitViewport({
       const available = host.clientHeight;
       let needed = layoutAt(1);
       let next = needed > available + 1 && needed > 0 ? available / needed : 1;
-      if (fillWidth && next < 0.999) {
-        let lo = next;
-        let hi = 1;
-        for (let i = 0; i < 7; i++) {
-          const mid = (lo + hi) / 2;
-          if (layoutAt(mid) * mid <= available) lo = mid;
-          else hi = mid;
-        }
-        next = lo;
-      }
       next = Math.max(next, minScale);
-      needed = layoutAt(next);
+      if (next < 0.999) {
+        needed = layoutAt(next);
+        if (needed * next > available && needed > 0) {
+          next = Math.max(minScale, available / needed);
+          needed = layoutAt(next);
+        }
+      }
       if (next < 0.999) {
         inner.style.transformOrigin = "top center";
         inner.style.transform = `scale(${next})`;
@@ -853,7 +849,7 @@ function ModalBelow1024({
             src={PORTRAIT_SRC_COMPACT}
             alt=""
             fill
-            priority
+            quality={60}
             sizes="(max-width: 1023px) 480px, 0px"
             className="object-cover object-top"
           />

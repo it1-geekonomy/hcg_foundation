@@ -29,19 +29,18 @@ import MirrorReveal from "@/shared/components/MirrorReveal";
 import { DiagonalArrowIcon } from "@/shared/components/icons/ArrowIcons";
 import { publicPatientStoriesApi } from "@/domains/cms/lib/api";
 
-/** Items requested per API call. The loop below keeps fetching pages until none are left. */
-const PAGE_SIZE = 50;
+/** Items requested per API call on home page. */
+const HOME_PAGE_SIZE = 12;
+const FULL_PAGE_SIZE = 50;
 /** Safety net so a misbehaving API can never cause an endless request loop. */
 const MAX_PAGES = 1000;
 /**
  * The track renders: [CLONES tail cards | every story | CLONES head cards].
- * The clones on each side are what you see when the loop restarts or when you
- * drag past either end, so they must cover at least one screen width. The
- * number is re-measured at runtime and only ever grows (up to MAX_CLONES).
- * Lists shorter than the clone count are repeated to fill it.
+ * Clones cover at least one screen width on each side.
+ * Capped to prevent excessive DOM node counts while keeping smooth infinite loop.
  */
-const MIN_CLONES = 16;
-const MAX_CLONES = 80;
+const MIN_CLONES = 6;
+const MAX_CLONES = 12;
 
 /** Pasted CMS HTML carries its own colours/backgrounds; keep it on-brand and compact. */
 const STORY_HTML_CLASS = [
@@ -283,7 +282,7 @@ const StoryCard = memo(function StoryCard({
       </div>
 
       {/* The name sits at the bottom of its 2-line box, right on top of the date. */}
-      <div className="flex flex-1 flex-col justify-start pt-3 pb-3">
+      <div className="flex flex-1 flex-col justify-start pt-3 pb-3 relative z-10 [transform:translateZ(0)]">
         <StoryCardName name={name} />
         {date && date.trim() ? (
           <div className="mt-1 flex items-center gap-1.5 text-white">
@@ -317,6 +316,7 @@ const StoryCard = memo(function StoryCard({
 
         {/* Scrollable Story Description matching Team & Trustees pattern */}
         <div
+          onWheel={handleStoryWheel}
           className={`relative z-10 min-h-0 w-full flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${storyHtml
               ? // Bottom fade hints that the story scrolls; the matching bottom padding
               // lets the last line scroll clear of the fade.
@@ -347,7 +347,7 @@ const StoryCard = memo(function StoryCard({
         {onOpen ? (
           <div className="relative z-10 w-full flex justify-center shrink-0 pt-3 border-t border-[#E0D4AE]/50 mt-2">
             <div
-              className="inline-flex items-center justify-center whitespace-nowrap h-[2rem] lg:h-[2.35rem] w-auto px-4 lg:px-5 gap-[0.45rem] rounded-[0.375rem] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer pointer-events-none"
+              className="inline-flex items-center justify-center whitespace-nowrap min-h-[44px] sm:min-h-0 h-[2.75rem] sm:h-[2rem] lg:h-[2.35rem] w-auto px-4 lg:px-5 gap-[0.45rem] rounded-[0.375rem] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer pointer-events-none"
             >
               <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
                 Read More
@@ -456,10 +456,13 @@ export default function SmileStories({
         let page = 1;
         let totalPages: number | null = null;
 
-        while (page <= MAX_PAGES) {
+        const pageSize = fullStory ? FULL_PAGE_SIZE : HOME_PAGE_SIZE;
+        const maxPages = fullStory ? MAX_PAGES : 1;
+
+        while (page <= maxPages) {
           const res: any = await publicPatientStoriesApi.listPublished({
             page,
-            limit: PAGE_SIZE,
+            limit: pageSize,
           });
           if (cancelled) return;
 
@@ -571,10 +574,6 @@ function SmileStoriesCarousel({
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [hasEntered, setHasEntered] = useState(false);
-
-  // Heading blur reveal — plays once, the first time it scrolls into view.
-  const headingRef = useRef<HTMLDivElement | null>(null);
-  const [headingVisible, setHeadingVisible] = useState(false);
 
   const offsetRef = useRef(0); // kept wrapped inside [0, oneSetWidth)
   const oneSetWidthRef = useRef(0); // length of one full loop (all stories)
@@ -698,25 +697,6 @@ function SmileStoriesCarousel({
       { threshold: 0.3 }
     );
     observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  // Heading blur reveal observer
-  useEffect(() => {
-    const node = headingRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setHeadingVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.3 },
-    );
-
-    observer.observe(node);
     return () => observer.disconnect();
   }, []);
 
@@ -910,21 +890,11 @@ function SmileStoriesCarousel({
       className={`relative w-full scroll-mt-16 sm:scroll-mt-20 lg:scroll-mt-24 ${navigable ? "py-8 sm:py-12 lg:py-20" : "pb-10 lg:pb-16 xl:pb-20"}`}
     >
       {navigable ? (
-        <div ref={headingRef} className="mb-10 lg:mb-14">
+        <div className="mb-10 lg:mb-14">
           <Typography
             variant="heading-3"
             as="h2"
-            className="mx-auto text-center px-4 text-neutral-800 font-medium font-manrope pt-2 sm:pt-4 lg:pt-6 motion-reduce:!transition-none"
-            style={{
-              opacity: headingVisible ? 1 : 0,
-              filter: headingVisible ? "blur(0px)" : "blur(14px)",
-              transform: headingVisible
-                ? "translate3d(0,0,0)"
-                : "translate3d(0,32px,0)",
-              transition:
-                "opacity 700ms ease-out, filter 500ms ease-out, transform 1100ms cubic-bezier(0.22, 1, 0.36, 1)",
-              willChange: "opacity, filter, transform",
-            }}
+            className="mx-auto text-center px-4 text-neutral-800 font-medium font-manrope pt-2 sm:pt-4 lg:pt-6"
           >
             Behind Every <em className="text-neutral-900 font-tiempos-headline">Smile Is a Story</em>
           </Typography>

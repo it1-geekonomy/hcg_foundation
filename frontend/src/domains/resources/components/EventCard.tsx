@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getImageProps } from "next/image";
 import Link from "next/link";
@@ -43,6 +43,86 @@ export default function EventCard({
     if (typeof window !== "undefined") {
       sessionStorage.setItem("events_page_scroll", String(window.scrollY));
       sessionStorage.setItem("came_from_details_type", "events_listing");
+    }
+  };
+
+  // Smooth scroll accumulator and animation frame for seamless page scrolling
+  const scrollAccumulatorRef = useRef(0);
+  const rafIdRef = useRef<number | null>(null);
+
+  const startSmoothPageScroll = (delta: number) => {
+    if (
+      (delta > 0 && scrollAccumulatorRef.current < 0) ||
+      (delta < 0 && scrollAccumulatorRef.current > 0)
+    ) {
+      scrollAccumulatorRef.current = 0;
+    }
+
+    scrollAccumulatorRef.current += delta;
+
+    if (rafIdRef.current === null) {
+      const step = () => {
+        if (Math.abs(scrollAccumulatorRef.current) < 1) {
+          if (scrollAccumulatorRef.current !== 0) {
+            window.scrollBy({ top: scrollAccumulatorRef.current, behavior: "auto" });
+          }
+          scrollAccumulatorRef.current = 0;
+          rafIdRef.current = null;
+          return;
+        }
+
+        const move = scrollAccumulatorRef.current * 0.25;
+        window.scrollBy({ top: move, behavior: "auto" });
+        scrollAccumulatorRef.current -= move;
+
+        rafIdRef.current = requestAnimationFrame(step);
+      };
+      rafIdRef.current = requestAnimationFrame(step);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+        scrollAccumulatorRef.current = 0;
+      }
+    };
+  }, [isFlipped]);
+
+  const handleEventWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    if (!el) return;
+
+    const maxScroll = el.scrollHeight - el.clientHeight;
+
+    if (maxScroll <= 1) {
+      startSmoothPageScroll(e.deltaY);
+      return;
+    }
+
+    const isAtBottom = el.scrollTop >= maxScroll - 1.5;
+    const isAtTop = el.scrollTop <= 0.5;
+
+    if (e.deltaY > 0) {
+      if (isAtBottom) {
+        startSmoothPageScroll(e.deltaY);
+      } else {
+        const remaining = maxScroll - el.scrollTop;
+        if (e.deltaY > remaining) {
+          startSmoothPageScroll(e.deltaY - remaining);
+        }
+      }
+    } else if (e.deltaY < 0) {
+      if (isAtTop) {
+        startSmoothPageScroll(e.deltaY);
+      } else {
+        const remaining = el.scrollTop;
+        if (Math.abs(e.deltaY) > remaining) {
+          startSmoothPageScroll(e.deltaY + remaining);
+        }
+      }
     }
   };
 
@@ -92,7 +172,7 @@ export default function EventCard({
           e.stopPropagation();
           handleCardClick();
         }}
-        className="absolute left-[0.75rem] right-[0.75rem] bottom-[0.75rem] xl:left-[1.1rem] xl:right-[1.28rem] xl:bottom-[1.51rem] flex flex-col justify-center gap-[0.5rem] p-[1rem] lg:py-[1.25rem] lg:px-[1.5rem] xl:pl-[1.74rem] xl:pr-[2rem] rounded-[6px] border border-white/10 bg-[#838383]/40 backdrop-blur-[55px] text-white transition duration-300 group-hover:bg-[#838383]/50 cursor-pointer"
+        className="absolute left-[0.75rem] right-[0.75rem] bottom-[0.75rem] xl:left-[1.1rem] xl:right-[1.28rem] xl:bottom-[1.51rem] flex flex-col justify-center gap-[0.5rem] p-[1rem] lg:py-[1.25rem] lg:px-[1.5rem] xl:pl-[1.74rem] xl:pr-[2rem] rounded-[6px] border border-white/10 bg-[#838383]/40 backdrop-blur-[55px] text-white [transform:translateZ(0)] transition duration-300 group-hover:bg-[#838383]/50 cursor-pointer"
       >
         {/* Title + Date stacked full width */}
         <div className="w-full text-left">
@@ -126,7 +206,10 @@ export default function EventCard({
     <MirrorReveal isOpen={flipped} delay={0} duration={0.82}>
       <div className="relative h-full w-full flex flex-col justify-between items-center p-4 sm:p-5 lg:p-6 rounded-[6px] border border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2]">
         {/* Scrollable Story Description matching Patient Stories pattern */}
-        <div className="min-h-0 flex-1 w-full overflow-y-auto pr-1.5 space-y-2.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div
+          onWheel={handleEventWheel}
+          className="min-h-0 flex-1 w-full overflow-y-auto pr-1.5 space-y-2.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        >
           {event.summary ? (
             event.summary
               .split("\n\n")
@@ -143,28 +226,22 @@ export default function EventCard({
         </div>
 
         <div className="relative z-10 w-full flex justify-center shrink-0 pt-3 border-t border-[#E0D4AE]/50 mt-2">
-          <Link
-            href={detailUrl}
+          <div
             data-no-drag="true"
             onClick={(e) => {
               if (previewMode) {
                 e.stopPropagation();
                 return;
               }
-              e.stopPropagation();
-              if (typeof window !== "undefined") {
-                sessionStorage.setItem("events_page_scroll", String(window.scrollY));
-                sessionStorage.setItem("came_from_details_type", "events_listing");
-              }
+              handleCardClick();
             }}
-            className="inline-flex items-center justify-center whitespace-nowrap h-[1.75rem] lg:h-[2.5rem] xl:h-[3rem] w-auto xl:w-[9.5rem] px-[0.75rem] lg:px-[1.25rem] gap-[0.45rem] rounded-[6px] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
-            {...(previewMode ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            className="inline-flex items-center justify-center whitespace-nowrap min-h-[44px] sm:min-h-0 h-[2.75rem] sm:h-[1.75rem] lg:h-[2.5rem] xl:h-[3rem] w-auto xl:w-[9.5rem] px-[1rem] sm:px-[0.75rem] lg:px-[1.25rem] gap-[0.45rem] rounded-[6px] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
           >
             <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
               Read More
             </Typography>
             <DiagonalArrowIcon className="w-[1rem] h-[0.85rem] sm:w-[1.2rem] sm:h-[0.95rem] xl:w-[1.375rem] xl:h-[1.1rem] text-[#2D2D2D] shrink-0" />
-          </Link>
+          </div>
         </div>
       </div>
     </MirrorReveal>

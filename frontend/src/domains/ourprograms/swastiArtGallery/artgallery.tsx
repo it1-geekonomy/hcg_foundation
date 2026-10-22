@@ -1,16 +1,6 @@
 "use client";
 
-import React, {
-  Children,
-  cloneElement,
-  isValidElement,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from "react";
+import React, { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import Typography from "@/lib/Typography";
 
@@ -40,179 +30,6 @@ const ART_GALLERY_CARDS = [
 const PARAGRAPH_CLASS = "font-argestadisplay font-normal text-left text-[#596D79]";
 const SUBHEADING_CLASS = "font-argestadisplay font-normal text-[#262626]";
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
-
-/* ------------- slide-in text animation (same as InnovationAndTechnology) ------------- */
-
-const LINE_STEP_MS = 120;
-const START_DELAY_MS = 100;
-const SLIDE_TRANSITION =
-  "opacity 700ms ease-out, transform 1000ms cubic-bezier(0.22, 1, 0.36, 1)";
-
-// Direction comes from the --slide-x CSS variable set on the section (always from the left).
-function slideStyle(visible: boolean, delayMs: number): CSSProperties {
-  return {
-    opacity: visible ? 1 : 0,
-    transform: visible ? "translate3d(0,0,0)" : "translate3d(var(--slide-x),0,0)",
-    transition: SLIDE_TRANSITION,
-    transitionDelay: `${delayMs}ms`,
-    willChange: "opacity, transform",
-  };
-}
-
-type SplitCtx = {
-  refs: { current: (HTMLSpanElement | null)[] };
-  groups: number[];
-  lines: number[];
-  visible: boolean;
-  base: number;
-  count: number;
-};
-
-function splitNode(
-  node: ReactNode,
-  group: number,
-  ctx: SplitCtx,
-  wordClass = "",
-): ReactNode {
-  if (node === null || node === undefined || typeof node === "boolean") return null;
-
-  if (typeof node === "string" || typeof node === "number") {
-    return String(node)
-      .split(/(\s+)/)
-      .map((part, k) => {
-        if (part === "") return null;
-        if (/^\s+$/.test(part)) return part;
-        const i = ctx.count++;
-        ctx.groups[i] = group;
-        return (
-          <span
-            key={k}
-            ref={(el) => {
-              ctx.refs.current[i] = el;
-            }}
-            className={`inline-block motion-reduce:!transition-none ${wordClass}`}
-            style={slideStyle(ctx.visible, ctx.base + (ctx.lines[i] ?? 0) * LINE_STEP_MS)}
-          >
-            {part}
-          </span>
-        );
-      });
-  }
-
-  if (Array.isArray(node)) {
-    return Children.map(node, (c) => splitNode(c, group, ctx, wordClass));
-  }
-
-  if (isValidElement(node)) {
-    if (node.type === "br") return node;
-    const children = (node.props as { children?: ReactNode }).children;
-    if (children === undefined) return node;
-    return cloneElement(
-      node,
-      undefined,
-      Children.map(children, (c) => splitNode(c, group, ctx, wordClass)),
-    );
-  }
-
-  return node;
-}
-
-function sameLines(a: number[], b: number[]) {
-  return a.length === b.length && a.every((v, i) => v === b[i]);
-}
-
-type Splitter = {
-  (node: ReactNode, group: number, wordClass?: string): ReactNode;
-};
-
-/**
- * One block = one continuous sequence. Every line in the block (across its
- * heading and all its paragraphs) gets its own step, in reading order, so
- * things animate one after another.
- */
-function SlideBlock({
-  baseDelay = START_DELAY_MS,
-  className,
-  children,
-}: {
-  baseDelay?: number;
-  className?: string;
-  children: (split: Splitter) => ReactNode;
-}) {
-  const wrapRef = useRef<HTMLDivElement | null>(null);
-  const refs = useRef<(HTMLSpanElement | null)[]>([]);
-  const groupsRef = useRef<number[]>([]);
-  const [visible, setVisible] = useState(false);
-  const [lines, setLines] = useState<number[]>([]);
-
-  const measure = () => {
-    let line = -1;
-    let prevGroup = -1;
-    let prevTop = -Infinity;
-    const next = groupsRef.current.map((g, i) => {
-      const top = refs.current[i]?.offsetTop ?? 0;
-      if (g !== prevGroup || top > prevTop + 2) {
-        line += 1;
-        prevGroup = g;
-        prevTop = top;
-      }
-      return line;
-    });
-    setLines((prev) => (sameLines(prev, next) ? prev : next));
-  };
-
-  useLayoutEffect(() => {
-    measure();
-  });
-
-  useEffect(() => {
-    const t = setTimeout(measure, 150);
-    window.addEventListener("resize", measure);
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("resize", measure);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    const node = wrapRef.current;
-    if (!node) return;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setVisible(true);
-          obs.disconnect();
-        }
-      },
-      // small threshold so tall blocks still trigger on short screens
-      { threshold: 0.1 },
-    );
-    obs.observe(node);
-    return () => obs.disconnect();
-  }, []);
-
-  const ctx: SplitCtx = {
-    refs,
-    groups: [],
-    lines,
-    visible,
-    base: baseDelay,
-    count: 0,
-  };
-  const split = ((node: ReactNode, group: number, wordClass?: string) =>
-    splitNode(node, group, ctx, wordClass)) as Splitter;
-
-  const content = children(split);
-  refs.current.length = ctx.count;
-  groupsRef.current = ctx.groups;
-
-  return (
-    <div ref={wrapRef} className={className}>
-      {content}
-    </div>
-  );
-}
 
 /* ------------- card reveal animation (staggered fade-up, plays once) ------------- */
 
@@ -259,108 +76,66 @@ export default function SwasthiArtTherapySection() {
   const { ref: boxRef, visible: cardsVisible } = useInViewOnce<HTMLDivElement>(0.15);
 
   return (
-    <section className="overflow-x-hidden bg-[#FFF8E2] [--slide-x:-80px]">
+    <section className="overflow-x-hidden bg-[#FFF8E2]">
       <div className={`${CONTAINER} py-2 sm:py-4 lg:py-6 flex flex-col space-y-[2rem] sm:space-y-[2.5rem]`}>
-        {/* Title, then intro paragraph (one sequence) */}
-        <SlideBlock className="flex flex-col gap-[2rem] sm:gap-[2.5rem]">
-          {(split) => (
-            <>
-              <Typography
-                variant="heading-2"
-                as="h2"
-                className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
-              >
-                {split("Swasti Art Gallery & Art Therapy Program", 0)}
-              </Typography>
+        {/* Title, then intro paragraph */}
+        <div className="flex flex-col gap-[2rem] sm:gap-[2.5rem]">
+          <Typography
+            variant="heading-2"
+            as="h2"
+            className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
+          >
+            Swasti Art Gallery & Art Therapy Program
+          </Typography>
 
-              <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
-                {split(
-                  "Swasti Art Gallery is HCG Foundation's creative care initiative where art supports patients through their cancer journey. Located within HCG's headquarters at Tower 1, Bengaluru, Swasti Gallery brings together two connected efforts: a contemporary art gallery that channels the power of art into funding cancer care, and a dedicated Art Therapy program that brings the healing process of art making directly to patients.",
-                  1,
-                )}
-              </Typography>
-            </>
-          )}
-        </SlideBlock>
+          <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
+            Swasti Art Gallery is HCG Foundation&apos;s creative care initiative where art supports patients through their cancer journey. Located within HCG&apos;s headquarters at Tower 1, Bengaluru, Swasti Gallery brings together two connected efforts: a contemporary art gallery that channels the power of art into funding cancer care, and a dedicated Art Therapy program that brings the healing process of art making directly to patients.
+          </Typography>
+        </div>
 
         {/* About Swasthi Gallery: heading, then its 2 paragraphs */}
-        <SlideBlock className="flex flex-col">
-          {(split) => (
-            <>
-              <Typography variant="heading-8" as="h3" className={SUBHEADING_CLASS}>
-                {split("About Swasti Gallery", 0)}
-              </Typography>
+        <div className="flex flex-col">
+          <Typography variant="heading-8" as="h3" className={SUBHEADING_CLASS}>
+            About Swasti Gallery
+          </Typography>
 
-              <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
-                {split(
-                  "Launched in 2007, the art space in a hospital gives a positive energy to the patients and their families. Swasti Art Gallery has been actively involved in organizing art shows, camps and workshops which involve artists coming from across the country and outside.",
-                  1,
-                )}
-              </Typography>
+          <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
+            Launched in 2007, the art space in a hospital gives a positive energy to the patients and their families. Swasti Art Gallery has been actively involved in organizing art shows, camps and workshops which involve artists coming from across the country and outside.
+          </Typography>
 
-              <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
-                {split(
-                  "The gallery offers a platform to bring forth young upcoming artists and also organizes shows for renowned artists. Swasti aspires to create a space for art lovers and buyers by exhibiting quality art pieces. They aim at raising funds for the HCG foundation to help support the cancer patients.",
-                  2,
-                )}
-              </Typography>
-            </>
-          )}
-        </SlideBlock>
+          <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
+            The gallery offers a platform to bring forth young upcoming artists and also organizes shows for renowned artists. Swasti aspires to create a space for art lovers and buyers by exhibiting quality art pieces. They aim at raising funds for the HCG foundation to help support the cancer patients.
+          </Typography>
+        </div>
 
         {/* Side-by-side Section: Narrative + 2x2 Feature Box */}
         <div className="flex flex-col lg:flex-row gap-[2rem] xl:gap-[3rem] items-start lg:items-center pt-[0.5rem]">
-          {/* Left Side: heading + all paragraphs, one sequence */}
-          <SlideBlock className="w-full lg:flex-1 flex flex-col">
-            {(split) => (
-              <>
-                <Typography variant="heading-8" as="h3" className={SUBHEADING_CLASS}>
-                  {split("Art Therapy: Healing Through the Creative Process", 0)}
-                </Typography>
+          {/* Left Side: heading + all paragraphs */}
+          <div className="w-full lg:flex-1 flex flex-col">
+            <Typography variant="heading-8" as="h3" className={SUBHEADING_CLASS}>
+              Art Therapy: Healing Through the Creative Process
+            </Typography>
 
-                <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
-                  {split(
-                    "In 2018, Swasti Art Gallery extended its mission from the gallery walls to direct patient care with the launch of its Art Therapy program at HCG Bangalore hospital. Art therapy is a form of expressive therapy that uses the creative process of making art to support a patient's physical, mental, and emotional wellbeing.",
-                    1,
-                  )}
-                </Typography>
+            <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
+              In 2018, Swasti Art Gallery extended its mission from the gallery walls to direct patient care with the launch of its Art Therapy program at HCG Bangalore hospital. Art therapy is a form of expressive therapy that uses the creative process of making art to support a patient&apos;s physical, mental, and emotional wellbeing.
+            </Typography>
 
-                <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
-                  {split(
-                    "Every session is built around the individual. A typical session unfolds in three parts:",
-                    2,
-                  )}
-                </Typography>
+            <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
+              Every session is built around the individual. A typical session unfolds in three parts:
+            </Typography>
 
-                <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
-                  {split(
-                    <>
-                      • <span className="font-normal text-[#262626]">Pre-art conversation</span> : the pre-art component is crucial, especially for the first meeting between the art therapist and the patient. This allows the therapist to get to know and assess the patient
-                    </>,
-                    3,
-                  )}
-                </Typography>
+            <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
+              • <span className="font-normal text-[#262626]">Pre-art conversation</span> : the pre-art component is crucial, especially for the first meeting between the art therapist and the patient. This allows the therapist to get to know and assess the patient
+            </Typography>
 
-                <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
-                  {split(
-                    <>
-                      • <span className="font-normal text-[#262626]">The creative process</span> : the second part is the actual creative process, or the making of a piece or pieces of art. The therapist may teach the patient some art techniques, but the most important thing is to simply create something...
-                    </>,
-                    4,
-                  )}
-                </Typography>
+            <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
+              • <span className="font-normal text-[#262626]">The creative process</span> : the second part is the actual creative process, or the making of a piece or pieces of art. The therapist may teach the patient some art techniques, but the most important thing is to simply create something...
+            </Typography>
 
-                <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
-                  {split(
-                    <>
-                      • <span className="font-normal text-[#262626]">Post-art reflection</span> : Patient and therapist discuss the finished piece together, the patient is expected to talk about their feelings, what led them to create that art, how they felt while making the art and their thoughts post completing it.
-                    </>,
-                    5,
-                  )}
-                </Typography>
-              </>
-            )}
-          </SlideBlock>
+            <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
+              • <span className="font-normal text-[#262626]">Post-art reflection</span> : Patient and therapist discuss the finished piece together, the patient is expected to talk about their feelings, what led them to create that art, how they felt while making the art and their thoughts post completing it.
+            </Typography>
+          </div>
 
           {/* Right Side: 2x2 Feature Box (Figma Rectangle 1673: 762px x 597px) */}
           <div
@@ -455,25 +230,15 @@ export default function SwasthiArtTherapySection() {
         </div>
 
         {/* Bottom Closing Paragraphs */}
-        <SlideBlock className="flex flex-col pt-[0.5rem]">
-          {(split) => (
-            <>
-              <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
-                {split(
-                  "Sessions can be individual, group, or family based allowing patients to process their experience alongside fellow patients navigating the same journey, always with the choice to share only what feels comfortable.",
-                  0,
-                )}
-              </Typography>
+        <div className="flex flex-col pt-[0.5rem]">
+          <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
+            Sessions can be individual, group, or family based allowing patients to process their experience alongside fellow patients navigating the same journey, always with the choice to share only what feels comfortable.
+          </Typography>
 
-              <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
-                {split(
-                  "Together, Swasti Gallery and Art Therapy reflect HCG Foundation's belief that cancer care extends beyond medicine. One raises the funds that make patient support possible; the other puts the healing power of art directly into patient's hands.",
-                  1,
-                )}
-              </Typography>
-            </>
-          )}
-        </SlideBlock>
+          <Typography variant="body-10" as="p" className={PARAGRAPH_CLASS}>
+            Together, Swasti Gallery and Art Therapy reflect HCG Foundation&apos;s belief that cancer care extends beyond medicine. One raises the funds that make patient support possible; the other puts the healing power of art directly into patient&apos;s hands.
+          </Typography>
+        </div>
       </div>
     </section>
   );

@@ -36,6 +36,28 @@ export type DonationCheckout = {
   countryCode: string | null;
 };
 
+export interface CurrentMonthDonorCount {
+  count: number;
+  month: number;
+  year: number;
+  monthName: string;
+}
+
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
 @Injectable()
 export class DonorsService {
   private readonly logger = new Logger(DonorsService.name);
@@ -576,5 +598,48 @@ export class DonorsService {
   private buildReceiptNumber(id: string): string {
     const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     return `HCG-${stamp}-${id.replace(/-/g, '').slice(0, 8).toUpperCase()}`;
+  }
+
+  async getCurrentMonthCount(): Promise<CurrentMonthDonorCount> {
+    const now = new Date();
+    const istParts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric',
+      month: 'numeric',
+    }).formatToParts(now);
+
+    const year = parseInt(
+      istParts.find((p) => p.type === 'year')?.value || `${now.getFullYear()}`,
+      10,
+    );
+    const month = parseInt(
+      istParts.find((p) => p.type === 'month')?.value || `${now.getMonth() + 1}`,
+      10,
+    );
+
+    const m = String(month).padStart(2, '0');
+    const nextYear = month === 12 ? year + 1 : year;
+    const nextMonth = month === 12 ? 1 : month + 1;
+    const nextM = String(nextMonth).padStart(2, '0');
+
+    // Asia/Kolkata (IST) is UTC+05:30
+    const startDate = new Date(`${year}-${m}-01T00:00:00+05:30`);
+    const endDate = new Date(`${nextYear}-${nextM}-01T00:00:00+05:30`);
+
+    const count = await this.repo
+      .createQueryBuilder('donor')
+      .where('donor.status = :status', { status: DonationStatus.PAID })
+      .andWhere('donor.createdAt >= :startDate AND donor.createdAt < :endDate', {
+        startDate,
+        endDate,
+      })
+      .getCount();
+
+    return {
+      count,
+      month,
+      year,
+      monthName: MONTH_NAMES[month - 1] ?? '',
+    };
   }
 }

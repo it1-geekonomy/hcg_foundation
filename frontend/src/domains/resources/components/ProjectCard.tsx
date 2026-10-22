@@ -61,7 +61,7 @@ export default function ProjectCard({
           e.stopPropagation();
           handleCardClick();
         }}
-        className="absolute left-[0.75rem] right-[0.75rem] bottom-[0.75rem] xl:left-[1.1rem] xl:right-[1.28rem] xl:bottom-[1.51rem] flex flex-col justify-center gap-[0.5rem] p-[1rem] lg:py-[1.25rem] lg:px-[1.5rem] xl:pl-[1.74rem] xl:pr-[2rem] rounded-[6px] border border-white/10 bg-[#838383]/40 backdrop-blur-[55px] text-white transition duration-300 group-hover:bg-[#838383]/50 cursor-pointer"
+        className="absolute left-[0.75rem] right-[0.75rem] bottom-[0.75rem] xl:left-[1.1rem] xl:right-[1.28rem] xl:bottom-[1.51rem] flex flex-col justify-center gap-[0.5rem] p-[1rem] lg:py-[1.25rem] lg:px-[1.5rem] xl:pl-[1.74rem] xl:pr-[2rem] rounded-[6px] border border-white/10 bg-[#838383]/40 backdrop-blur-[55px] text-white [transform:translateZ(0)] transition duration-300 group-hover:bg-[#838383]/50 cursor-pointer"
       >
         <div className="w-full text-left">
           <Typography
@@ -107,7 +107,7 @@ export default function ProjectCard({
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }
             }}
-            className="inline-flex items-center justify-center whitespace-nowrap h-[1.75rem] lg:h-[2.5rem] xl:h-[3rem] w-auto xl:w-[9.5rem] px-[0.75rem] lg:px-[1.25rem] gap-[0.45rem] rounded-[6px] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
+            className="inline-flex items-center justify-center whitespace-nowrap min-h-[44px] sm:min-h-0 h-[2.75rem] sm:h-[1.75rem] lg:h-[2.5rem] xl:h-[3rem] w-auto xl:w-[9.5rem] px-[1rem] sm:px-[0.75rem] lg:px-[1.25rem] gap-[0.45rem] rounded-[6px] border border-black/5 bg-[#FCCC2D] text-[#2D2D2D] shadow-xs shrink-0 transition duration-300 hover:bg-[#E9B510] hover:scale-105 cursor-pointer"
             {...(previewMode ? { target: "_blank", rel: "noopener noreferrer" } : {})}
           >
             <Typography variant="button-1" as="span" className="text-[#2D2D2D]">
