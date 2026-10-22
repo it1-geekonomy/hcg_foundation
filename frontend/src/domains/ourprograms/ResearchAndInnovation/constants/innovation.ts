@@ -9,8 +9,8 @@ export const INNOVATION_CONTENT = {
   heading: "Innovation and Technology",
   /** Rendered as separate paragraphs */
   paragraphs: [
-    "A joy filled event with the pediatric patients, with some games and cards making activity for they caretakers and doctors with a heart touching message.",
-    "At Swasti Gallery, the dual celebrations of Childhood Cancer Day and Valentine's Day brought an abundance of love and resilience as pediatric patients came together for a special event. With hearts full of creativity and hope, the children enthusiastically crafted greeting cards and decorated small wooden boards with a kaleidoscope of colorful tapes, stickers, paint, stamps, and whimsical wooden cutouts of flowers, unicorns, and wings. Their artistic endeavors were not only expressions of joy but also reflections of their indomitable spirit in the face of adversity. Amidst shared laughter and the aroma of snacks, the children reveled in a lively photoshoot, capturing precious moments of camaraderie and strength. The celebration was made even more special with the generous donation of a celebration gifts box by Keto, ensuring that each pediatric patient felt cherished and remembered on this memorable occasion. It was a day filled with love, creativity, and unwavering support, highlighting the beauty and resilience of these young warriors in their journey against cancer.",
+    "The innovation and technology vertical of HCG Foundation is delivered through Lumos Health, a customised accelerator running since 2018. Lumos Health combines clinical depth with operational scale to support early-stage startups in oncology, diagnostics, women's health, longevity, genetics and genomics, and medtech, bridging the gap between technology and early detection.",
+    "We have partnered with Anthill Ventures to help startups scale their technology for global markets, so that it can reach larger populations for early detection and bring innovation into everyday healthcare.",
   ],
   companiesHeading: "Companies we support",
 } as const;
