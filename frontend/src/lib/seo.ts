@@ -87,12 +87,12 @@ export const PAGE_SEO = {
       "See where your support goes. Explore HCG Foundation's annual reports and the impact of our cancer awareness, patient support and community care.",
   },
   "/projects": {
-    title: "Projects | HCG Foundation",
+    title: "Cancer Care Projects | HCG Foundation",
     description:
       "Explore HCG Foundation's projects in cancer care, from patient financial aid and screening camps to mobile clinics and HPV vaccination drives.",
   },
   "/events": {
-    title: "Events | HCG Foundation",
+    title: "Charity Events & Programs | HCG Foundation",
     description:
       "Cultural charity events like Arambh and Sur Sandhya raise funds and awareness for cancer care. Be part of the next HCG Foundation event.",
   },
@@ -107,7 +107,7 @@ export const PAGE_SEO = {
       "Read the stories of cancer patients HCG Foundation is helping. See their journeys, understand their needs and support a patient's treatment today.",
   },
   "/contact": {
-    title: "Contact Us | HCG Foundation",
+    title: "Contact HCG Foundation | Get in Touch",
     description:
       "Need patient support or want to partner with HCG Foundation? Reach our team by phone, email or message. We reply as soon as possible.",
   },

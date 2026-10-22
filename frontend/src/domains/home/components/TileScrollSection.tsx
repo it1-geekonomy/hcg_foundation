@@ -237,13 +237,13 @@ function HeroBackground({
     );
   }
 
-  const shared = { alt: "", fill: true as const, quality: 75, sizes: "100vw" };
+  const shared = { alt: "", fill: true as const, sizes: "100vw" };
   const {
     props: { srcSet: desktopSet },
-  } = getImageProps({ ...shared, src: desktopSrc });
+  } = getImageProps({ ...shared, quality: 75, src: desktopSrc });
   const {
     props: { srcSet: mobileSet, ...mobileProps },
-  } = getImageProps({ ...shared, src: mobileSrc });
+  } = getImageProps({ ...shared, quality: 65, src: mobileSrc });
 
   if (priority) {
     const first = (srcSet?: string) => srcSet?.split(",")[0]?.trim().split(" ")[0];
@@ -276,6 +276,8 @@ function HeroBackground({
       <img
         {...mobileProps}
         alt=""
+        width={1920}
+        height={1080}
         fetchPriority={priority ? "high" : "low"}
         loading={priority ? "eager" : "lazy"}
         decoding="async"

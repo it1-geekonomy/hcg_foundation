@@ -193,7 +193,7 @@ export default function SwasthiGallerySection() {
                   className="w-[var(--gallery-tile)] shrink-0 snap-start snap-always lg:w-auto"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img.src} alt={img.alt} loading="lazy" draggable={false} className={TILE} />
+                  <img src={img.src} alt={img.alt} width={360} height={240} loading="lazy" draggable={false} className={TILE} />
                 </div>
               ))}
             </div>
