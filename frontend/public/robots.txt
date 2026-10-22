@@ -1,6 +1,10 @@
 User-Agent: *
-Disallow: /*?page=*
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api
+Disallow: /api/
 Disallow: /*?search=*
 Allow: /
 
 Sitemap: https://www.hcgfoundation.org/sitemap.xml
+

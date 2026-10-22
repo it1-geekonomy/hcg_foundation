@@ -239,9 +239,10 @@ export default function TogetherWeCreateHope() {
             </Typography>
 
             <Link
-  href={TOGETHER_CONTENT.content.cta.href}
-  className="mt-auto mb-4 inline-flex w-fit shrink-0 items-stretch max-sm:self-center overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D] lg:mb-0 lg:h-12"
->
+              href={TOGETHER_CONTENT.content.cta.href}
+              aria-label="View All Events"
+              className="mt-auto mb-4 inline-flex w-fit shrink-0 items-stretch max-sm:self-center overflow-hidden rounded border border-[#FCCC2D] bg-[#FCCC2D] lg:mb-0 lg:h-12"
+            >
               <span className="flex items-center px-2.5 py-1.5 sm:px-3 sm:py-2 lg:h-full lg:px-4 lg:py-0">
                 {/* < lg: same type as the About CTA */}
                 <Typography

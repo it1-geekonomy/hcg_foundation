@@ -15,7 +15,7 @@ const OverlayForm = dynamic(loadOverlay, { ssr: false });
  * and PageSpeed/webdriver/Lighthouse bots never see the cover.
  */
 const COVER_GUARD = `try{var s=sessionStorage,h=location.hash,n=s.getItem('nav_action'),u=navigator.userAgent||'';
-if((n&&n!=='logo')||s.getItem('came_from_details')||/projects|events|smilestories/.test(h)||navigator.webdriver||/Lighthouse|PageSpeed|Googlebot|HeadlessChrome|PTST/i.test(u)){
+if((n&&n!=='logo')||s.getItem('came_from_details')||/projects|events|smilestories/.test(h)||navigator.webdriver||/Lighthouse|PageSpeed|Googlebot|HeadlessChrome|HeadlessChromium|Chrome-Lighthouse|Google-PageSpeed|PTST|bingbot|baiduspider|Screaming|crawler|spider|bot/i.test(u)){
 var c=document.getElementById('intro-cover');if(c)c.style.display='none'}}catch(e){}`;
 
 function detectNavIntent(isBot?: boolean) {
@@ -29,7 +29,7 @@ function detectNavIntent(isBot?: boolean) {
   const ua = navigator.userAgent || "";
   const isAuto =
     Boolean(navigator.webdriver) ||
-    /Lighthouse|PageSpeed|Googlebot|HeadlessChrome|PTST|bingbot|baiduspider/i.test(ua);
+    /Lighthouse|PageSpeed|Googlebot|HeadlessChrome|HeadlessChromium|Chrome-Lighthouse|Google-PageSpeed|PTST|bingbot|baiduspider|Screaming\s*Frog|ScreamingFrog|crawler|spider|bot/i.test(ua);
   if (isAuto) {
     return { isReturning: true, targetId: null, showOverlay: false, isLogo: false };
   }

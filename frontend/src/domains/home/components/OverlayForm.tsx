@@ -53,45 +53,39 @@ function FitViewport({
   const frameRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const frame = frameRef.current;
     const inner = innerRef.current;
     if (!frame || !inner) return;
-
-    const layoutAt = (scale: number) => {
-      const widen = fillWidth && scale < 0.999;
-      inner.style.width = widen ? `${100 / scale}%` : "";
-      inner.style.marginInline = widen ? `${50 - 50 / scale}%` : "";
-      inner.style.flexShrink = widen ? "0" : "";
-      return inner.offsetHeight;
-    };
 
     let frameId = 0;
     const fit = () => {
       const host = frame.closest<HTMLElement>("[data-fit-host]") ?? frame.parentElement;
       if (!host || host.clientHeight === 0) return;
-      inner.style.transform = "none";
-      frame.style.height = "auto";
+
       const available = host.clientHeight;
-      let needed = layoutAt(1);
-      let next = needed > available + 1 && needed > 0 ? available / needed : 1;
-      next = Math.max(next, minScale);
-      if (next < 0.999) {
-        needed = layoutAt(next);
-        if (needed * next > available && needed > 0) {
-          next = Math.max(minScale, available / needed);
-          needed = layoutAt(next);
+      const naturalHeight = inner.scrollHeight;
+      if (naturalHeight <= 0) return;
+
+      if (naturalHeight > available + 1) {
+        const next = Math.max(available / naturalHeight, minScale);
+        if (next < 0.999) {
+          inner.style.transformOrigin = "top center";
+          inner.style.transform = `scale(${next})`;
+          if (fillWidth) {
+            inner.style.width = `${100 / next}%`;
+            inner.style.marginInline = `${50 - 50 / next}%`;
+          }
+          frame.style.height = `${Math.floor(naturalHeight * next)}px`;
+          return;
         }
       }
-      if (next < 0.999) {
-        inner.style.transformOrigin = "top center";
-        inner.style.transform = `scale(${next})`;
-        frame.style.height = `${Math.floor(needed * next)}px`;
-      } else {
-        inner.style.transform = "";
-        inner.style.transformOrigin = "";
-        frame.style.height = "";
-      }
+
+      inner.style.transform = "";
+      inner.style.transformOrigin = "";
+      inner.style.width = "";
+      inner.style.marginInline = "";
+      frame.style.height = "";
     };
 
     const schedule = () => {
@@ -99,10 +93,12 @@ function FitViewport({
       frameId = requestAnimationFrame(fit);
     };
 
-    fit();
+    schedule();
+    const host = frame.closest<HTMLElement>("[data-fit-host]") ?? frame.parentElement;
     const observer = new ResizeObserver(schedule);
-    observer.observe(inner);
+    if (host) observer.observe(host);
     window.addEventListener("resize", schedule);
+
     return () => {
       cancelAnimationFrame(frameId);
       observer.disconnect();
@@ -157,6 +153,8 @@ function PortraitWithBackdrop({
           alt={PORTRAIT_ALT}
           fill
           priority={priority}
+          quality={70}
+          fetchPriority="high"
           sizes={sizes}
           className={`${fit === "cover" ? "object-cover" : "object-contain"} object-left-bottom ${imageClassName}`}
         />
@@ -773,7 +771,7 @@ function Modal1024Up({
             <PortraitWithBackdrop
               className="h-full w-full"
               priority
-              sizes="(min-width: 1536px) 360px, (min-width: 1024px) 340px, 0px"
+              sizes="(min-width: 1024px) 360px, 0px"
             />
           </div>
 
@@ -851,6 +849,7 @@ function ModalBelow1024({
             alt=""
             fill
             priority
+            fetchPriority="high"
             quality={60}
             sizes="(max-width: 1023px) 480px, 0px"
             className="object-cover object-top"
