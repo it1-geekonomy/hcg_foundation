@@ -190,6 +190,7 @@ export default function ProjectsClient({
             currentPage={safePage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
+            getPageHref={(page) => (page === 1 ? "/projects" : `/projects?page=${page}`)}
             className="mt-12 sm:mt-16"
             showArrows={true}
             showNumbers={true}
