@@ -93,16 +93,9 @@ export function PersonCard({
     };
   }, []);
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = () => {
     if (!flipEnabled) return;
-    const isTouch =
-      isTouchRef.current ||
-      (typeof window !== "undefined" && window.matchMedia("(hover: none)").matches) ||
-      (e.nativeEvent as PointerEvent)?.pointerType === "touch";
-
-    if (isTouch) {
-      setFlipped((prev) => !prev);
-    }
+    setFlipped((prev) => !prev);
   };
 
   // On touch devices, tap outside flips the card back

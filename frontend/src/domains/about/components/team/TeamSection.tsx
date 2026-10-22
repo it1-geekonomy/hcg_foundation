@@ -126,10 +126,7 @@ export default function TeamSection({
       {allTrustees.length > 0 ? (
         <>
           <SectionLabel label="Trustees" id="trustees" />
-          <div className="-mx-8 mb-2 sm:hidden">
-            <CoverflowCarousel people={allTrustees} label="Trustees" />
-          </div>
-          <div className="mb-4 hidden sm:block lg:hidden">
+          <div className="mb-4 lg:hidden">
             <ArrowScrollCarousel people={allTrustees} />
           </div>
           <div className="mx-auto mb-16 hidden max-w-[1260px] flex-col gap-16 md:mb-24 lg:flex">
@@ -158,10 +155,7 @@ export default function TeamSection({
       {teamPeople.length > 0 ? (
         <>
           <SectionLabel label="Team" id="team" />
-          <div className="-mx-8 mb-0 sm:hidden">
-            <CoverflowCarousel people={teamPeople} label="Team members" />
-          </div>
-          <div className="hidden sm:block lg:hidden">
+          <div className="mb-4 lg:hidden">
             <ArrowScrollCarousel people={teamPeople} />
           </div>
           <div className="hidden lg:block 2xl:hidden">
