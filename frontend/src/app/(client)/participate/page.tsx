@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import Typography from "@/lib/Typography";
 import DonateForm from "@/shared/components/DonateForm";
 import PartnerWithUsModal from "@/shared/components/PartnerWithUsModal";
@@ -52,7 +53,7 @@ export default function ParticipatePage() {
             <div className="md:max-w-[21rem] lg:max-w-none">
               <Typography
                 variant="heading-2"
-                as="h2"
+                as="h1"
                 className="font-tiempos-headline font-normal italic text-left text-[#0D2838] lg:whitespace-nowrap"
               >
                 Find Your Way to Make an Impact
@@ -81,19 +82,23 @@ export default function ParticipatePage() {
             >
               {/* Card Top: Image Asset */}
               <div className="w-full h-[15rem] sm:h-[16.25rem] md:h-[11rem] lg:h-[16.5rem] xl:h-[22.1875rem] overflow-hidden relative bg-[#EFEAD8]">
-                <img
+                <Image
                   src={card.imageUrl}
                   alt={card.title}
-                  className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
-                  loading="lazy"
+                  fill
+                  priority={card.id === PARTICIPATE_CARDS[0].id}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 400px"
+                  className="object-cover transition duration-500 group-hover:scale-105"
                 />
               </div>
 
               {/* Floating Circular Icon Badge matching Figma Frame 556 */}
               <div className="-mt-8 md:-mt-7 lg:-mt-10 ml-4 md:ml-4 lg:ml-6 relative z-10 size-16 md:size-14 lg:size-20 rounded-full bg-[#FFF3CC] flex items-center justify-center shrink-0 p-3 md:p-2.5 lg:p-4">
-                <img
+                <Image
                   src={card.iconUrl}
                   alt={card.title}
+                  width={48}
+                  height={48}
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -124,10 +129,12 @@ export default function ParticipatePage() {
                     <span className="font-manrope font-semibold text-[0.875rem] sm:text-[1rem] md:text-[0.875rem] lg:text-[1.125rem] leading-[150%] tracking-[0.02em] text-[#2D2D2D]">
                       Apply Now
                     </span>
-                    <img
+                    <Image
                       src="https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1790849562451-vj014-vector-17-.webp"
                       alt=""
                       aria-hidden="true"
+                      width={20}
+                      height={16}
                       className="w-[1rem] h-[0.8rem] md:w-[0.9rem] md:h-[0.75rem] lg:w-[1.2925rem] lg:h-[1.034rem] object-contain shrink-0"
                     />
                   </button>
@@ -145,9 +152,11 @@ export default function ParticipatePage() {
               className="flex items-center gap-3.5 sm:gap-4 lg:gap-[1.3rem]"
             >
               <div className="w-[3.25rem] h-[3.25rem] sm:w-[3.75rem] sm:h-[3.75rem] lg:w-[4.9225rem] lg:h-[4.9225rem] rounded-full border border-[#C2A947] flex items-center justify-center shrink-0 bg-[#FFF3CC]">
-                <img
+                <Image
                   src={benefit.iconUrl}
                   alt={benefit.title}
+                  width={38}
+                  height={38}
                   className="w-[1.625rem] h-[1.625rem] sm:w-[1.875rem] sm:h-[1.875rem] lg:w-[2.38375rem] lg:h-[2.38375rem] object-contain"
                 />
               </div>

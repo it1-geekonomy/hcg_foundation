@@ -147,7 +147,7 @@ export default function TestimonialsPage() {
           <div className="overflow-x-clip">
             <Typography
               variant="heading-2"
-              as="h2"
+              as="h1"
               className="font-tiempos-headline font-normal italic text-left text-[#0D2838]"
             >
               Patient Testimonials
