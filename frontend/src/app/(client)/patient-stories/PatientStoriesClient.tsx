@@ -250,6 +250,7 @@ export default function PatientStoriesClient({
             currentPage={safePage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
+            getPageHref={(page) => (page === 1 ? "/patient-stories" : `/patient-stories?page=${page}`)}
             showArrows={true}
             showNumbers={true}
             className="mt-12 sm:mt-16"
