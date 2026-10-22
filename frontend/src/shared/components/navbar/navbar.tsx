@@ -48,7 +48,15 @@ export default function Navbar() {
     setOpenDesktopDropdown(null);
     setOpenDropdown(null);
     setIsMenuOpen(false);
+    setIsVisible(true);
   }, [pathname]);
+
+  useEffect(() => {
+    document.body.dataset.navbarVisible = isVisible ? "true" : "false";
+    window.dispatchEvent(
+      new CustomEvent("navbar_visibility_change", { detail: { isVisible } })
+    );
+  }, [isVisible]);
 
   useEffect(() => {
     const handleScroll = () => {
