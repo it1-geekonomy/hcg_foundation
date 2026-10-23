@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Check, Lock } from "lucide-react";
 import Typography from "@/lib/Typography";
@@ -23,6 +23,7 @@ import {
   formatDonationAmount,
   getDonationCurrency,
 } from "@/domains/home/constants/donation-currency";
+import { donorsApi } from "@/shared/lib/donors-api";
 import {
   CountUp,
   DonateCard,
@@ -51,6 +52,22 @@ export default function DonateSection() {
   const [termsError, setTermsError] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
   const [countryChanged, setCountryChanged] = useState(false);
+  const [donorCount, setDonorCount] = useState<number>(126);
+
+  useEffect(() => {
+    let cancelled = false;
+    donorsApi
+      .getMonthlyCount()
+      .then((res) => {
+        if (!cancelled && typeof res?.data?.count === "number" && res.data.count > 0) {
+          setDonorCount(res.data.count);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const { ref: sectionRef, inView, live } = useSectionInView<HTMLElement>();
 
@@ -317,7 +334,7 @@ export default function DonateSection() {
           as="p"
           className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/90"
         >
-          <CountUp to={126} /> kind donors have contributed this month. Join them today. ❤️
+          <CountUp to={donorCount} /> kind donors have contributed this month. Join them today. ❤️
         </Typography>
       </DonateItem>
 
@@ -378,6 +395,7 @@ export default function DonateSection() {
             amount={donationAmount}
             currency={currency}
             countryCode={countryCode}
+            donorCount={donorCount}
             onClose={() => setDetailsOpen(false)}
             onAmountChange={(next) => {
               setIsCustom(true);

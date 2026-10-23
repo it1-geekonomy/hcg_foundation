@@ -267,6 +267,13 @@ export type DonationStatus = "pending" | "paid" | "failed" | "refunded";
 
 export type { DonationCategory };
 
+export type DonorCounterSettings = {
+  id: string;
+  count: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type Donor = {
   id: string;
   fullName: string;

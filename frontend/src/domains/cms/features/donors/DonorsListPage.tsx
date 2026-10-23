@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import Typography from "@/lib/Typography";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
 import {
   Card,
   CardContent,
@@ -68,6 +70,59 @@ export default function DonorsListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Donor display counter setting (website counter)
+  const [counterCount, setCounterCount] = useState<number | null>(null);
+  const [counterInput, setCounterInput] = useState<string>("");
+  const [counterLoading, setCounterLoading] = useState(true);
+  const [counterSaving, setCounterSaving] = useState(false);
+  const [counterSuccess, setCounterSuccess] = useState<string | null>(null);
+  const [counterError, setCounterError] = useState<string | null>(null);
+
+  const fetchCounter = useCallback(async () => {
+    setCounterLoading(true);
+    setCounterError(null);
+    try {
+      const res = await cmsApi.getDonorCounterSettings();
+      if (res?.data) {
+        const val = res.data.count ?? 0;
+        setCounterCount(val);
+        setCounterInput(String(val));
+      }
+    } catch (err) {
+      setCounterError(cmsErrorMessage(err, "Failed to load counter settings"));
+    } finally {
+      setCounterLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchCounter();
+  }, [fetchCounter]);
+
+  const handleSaveCounter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = parseInt(counterInput.trim(), 10);
+    if (Number.isNaN(parsed) || parsed < 0) {
+      setCounterError("Please enter a valid non-negative integer (e.g. 1500).");
+      return;
+    }
+    setCounterSaving(true);
+    setCounterError(null);
+    setCounterSuccess(null);
+    try {
+      const res = await cmsApi.updateDonorCounterSettings(parsed);
+      const updated = res.data?.count ?? parsed;
+      setCounterCount(updated);
+      setCounterInput(String(updated));
+      setCounterSuccess(`Counter updated to ${updated}!`);
+      setTimeout(() => setCounterSuccess(null), 4000);
+    } catch (err) {
+      setCounterError(cmsErrorMessage(err, "Failed to update donor counter settings"));
+    } finally {
+      setCounterSaving(false);
+    }
+  };
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -112,6 +167,66 @@ export default function DonorsListPage() {
           {error}
         </Typography>
       ) : null}
+
+      {/* Website Donor Display Counter Settings */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle>Website Donor Display Counter</CardTitle>
+              <CardDescription>
+                Configure the donor count displayed in the website donation form (&ldquo;kind donors have contributed this month&rdquo;).
+              </CardDescription>
+            </div>
+            {counterSuccess ? (
+              <span className="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-1">
+                {counterSuccess}
+              </span>
+            ) : null}
+            {counterError ? (
+              <span className="text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-1">
+                {counterError}
+              </span>
+            ) : null}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSaveCounter} className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <label htmlFor="donor-counter-input" className="text-sm font-medium text-cms-muted">
+                Display Count:
+              </label>
+              <Input
+                id="donor-counter-input"
+                type="number"
+                min="0"
+                step="1"
+                required
+                className="w-36 h-9"
+                value={counterInput}
+                onChange={(e) => setCounterInput(e.target.value)}
+                placeholder="e.g. 1500"
+                disabled={counterLoading || counterSaving}
+              />
+            </div>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={counterLoading || counterSaving}
+              className="bg-cms-primary text-white hover:bg-cms-primary/90"
+            >
+              {counterSaving ? "Saving…" : "Save Counter"}
+            </Button>
+            {counterLoading ? (
+              <span className="text-xs text-cms-muted">Loading count…</span>
+            ) : (
+              <span className="text-xs text-cms-muted">
+                Current active count on website: <strong className="font-semibold text-foreground">{counterCount ?? 0}</strong>
+              </span>
+            )}
+          </form>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
