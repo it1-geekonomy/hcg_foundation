@@ -80,6 +80,7 @@ type Props = {
   countryCode: string;
   /** Where the donor wants the money to go; omitted → General Funds. */
   donationCategory?: DonationCategory;
+  donorCount?: number;
   onClose: () => void;
   onAmountChange?: (amount: number) => void;
 };
@@ -108,6 +109,7 @@ export default function DonateDetailsModal({
   currency,
   countryCode,
   donationCategory,
+  donorCount,
   onClose,
   onAmountChange,
 }: Props) {
@@ -120,6 +122,26 @@ export default function DonateDetailsModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<string | null>(null);
+  const [liveCount, setLiveCount] = useState<number>(donorCount ?? 126);
+
+  useEffect(() => {
+    if (donorCount !== undefined && donorCount > 0) {
+      setLiveCount(donorCount);
+      return;
+    }
+    let cancelled = false;
+    donorsApi
+      .getMonthlyCount()
+      .then((res) => {
+        if (!cancelled && typeof res?.data?.count === "number" && res.data.count > 0) {
+          setLiveCount(res.data.count);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [donorCount]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && !window.Razorpay) {
@@ -602,7 +624,7 @@ export default function DonateDetailsModal({
                   as="p"
                   className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/90"
                 >
-                  126 kind donors have contributed this month. Join with them
+                  {liveCount} kind donors have contributed this month. Join with them
                   today. ❤️
                 </Typography>
               </div>
