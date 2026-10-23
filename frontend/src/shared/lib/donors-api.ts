@@ -88,6 +88,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export type CurrentMonthDonorCount = {
+  count: number;
+  month: number;
+  year: number;
+  monthName: string;
+};
+
 export const donorsApi = {
   createOrder: (payload: CreateDonationPayload) =>
     request<Envelope<DonationCheckout>>("/donors/orders", {
@@ -100,4 +107,8 @@ export const donorsApi = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+
+  getMonthlyCount: () =>
+    request<Envelope<CurrentMonthDonorCount>>("/donors/monthly-count"),
 };
+
