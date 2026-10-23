@@ -380,6 +380,7 @@ export type LeadsInternship = {
   languages?: string | null;
   computerSkills?: string | null;
   message?: string | null;
+  cv?: string | null;
   termsAccepted: boolean;
   deletedAt?: string | null;
   createdAt: string;
@@ -397,6 +398,7 @@ export type UpdateLeadsInternshipPayload = Partial<{
   languages: string;
   computerSkills: string;
   message: string;
+  cv: string;
   termsAccepted: boolean;
 }>;
 

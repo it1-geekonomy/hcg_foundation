@@ -34,7 +34,7 @@ export const PAGE_SEO = {
   "/": {
     title: "HCG Foundation | Donate for Cancer Care & Patient Support",
     description:
-      "HCG Foundation supports cancer patients with financial aid, screening camps, counselling and awareness. 80G approved. Donate and give hope today.",
+      "Support cancer patients in India with HCG Foundation. Help fund cancer treatment, early detection, screening camps and emotional support. Donate today.",
   },
   "/about-us": {
     title: "About HCG Foundation | Cancer Support & Awareness",
