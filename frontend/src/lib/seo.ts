@@ -229,3 +229,17 @@ export function toMetaDescription(text: string | null | undefined, max = 160): s
   const lastSpace = cut.lastIndexOf(" ");
   return `${lastSpace > max / 2 ? cut.slice(0, lastSpace) : cut}…`;
 }
+
+/**
+ * Mapping from project slugs/aliases to their canonical, dedicated program landing pages.
+ * Prevents duplicate H1s, keyword cannibalization, and duplicate indexable URLs.
+ */
+export const PROGRAM_PAGE_MAP: Record<string, SeoPath> = {
+  "patient-aid": "/patient-aid",
+  "awareness-and-screening-camps": "/awareness-and-screening-camps",
+  "awareness-screening": "/awareness-and-screening-camps",
+  "cancer-awareness-screening": "/awareness-and-screening-camps",
+  "swasti-art-gallery": "/swasti-art-gallery",
+  "pink-hope-support-group": "/pink-hope-support-group",
+  "innovation-and-technology": "/innovation-and-technology",
+};

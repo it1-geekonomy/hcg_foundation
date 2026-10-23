@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next";
-import { absoluteUrl, PAGE_SEO } from "@/lib/seo";
+import { absoluteUrl, PAGE_SEO, PROGRAM_PAGE_MAP } from "@/lib/seo";
 import {
   publicPatientStoriesApi,
   publicProjectsApi,
@@ -58,6 +58,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
       if (projectsRes?.data) {
         for (const project of projectsRes.data) {
+          const key = (project.slug || project.id || "").toLowerCase();
+          if (PROGRAM_PAGE_MAP[key]) {
+            continue; // Core program page is already included under static pages
+          }
           routes.push({
             url: absoluteUrl(`/projects/${project.slug || project.id}`),
             lastModified: project.updatedAt
