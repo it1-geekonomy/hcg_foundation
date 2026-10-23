@@ -21,6 +21,8 @@ import { CreateDonationDto } from './dto/create-donation.dto';
 import { ListDonorsQueryDto } from './dto/list-donors-query.dto';
 import { VerifyDonationDto } from './dto/verify-donation.dto';
 import { Donor } from './entities/donor.entity';
+import { DonorCounterSettings } from './entities/donor-counter-settings.entity';
+import { UpdateDonorCounterSettingsDto } from './dto/update-donor-counter-settings.dto';
 import { PatientStory } from '../patient-stories/entities/patient-story.entity';
 import { DonationEmailQueueService } from './donation-email-queue.service';
 import { DonationCategory } from '../../common/enums/donation-category.enum';
@@ -69,6 +71,8 @@ export class DonorsService {
     private readonly repo: Repository<Donor>,
     @InjectRepository(PatientStory)
     private readonly patientStoryRepo: Repository<PatientStory>,
+    @InjectRepository(DonorCounterSettings)
+    private readonly counterSettingsRepo: Repository<DonorCounterSettings>,
     private readonly razorpay: RazorpayService,
     private readonly emailQueue: DonationEmailQueueService,
   ) { }
@@ -646,7 +650,11 @@ export class DonorsService {
     return `HCG-${stamp}-${id.replace(/-/g, '').slice(0, 8).toUpperCase()}`;
   }
 
-  async getCurrentMonthCount(): Promise<CurrentMonthDonorCount> {
+  private getCurrentMonthInfo(): {
+    year: number;
+    month: number;
+    monthName: string;
+  } {
     const now = new Date();
     const istParts = new Intl.DateTimeFormat('en-US', {
       timeZone: 'Asia/Kolkata',
@@ -663,29 +671,52 @@ export class DonorsService {
       10,
     );
 
-    const m = String(month).padStart(2, '0');
-    const nextYear = month === 12 ? year + 1 : year;
-    const nextMonth = month === 12 ? 1 : month + 1;
-    const nextM = String(nextMonth).padStart(2, '0');
+    return {
+      year,
+      month,
+      monthName: MONTH_NAMES[month - 1] ?? '',
+    };
+  }
 
-    // Asia/Kolkata (IST) is UTC+05:30
-    const startDate = new Date(`${year}-${m}-01T00:00:00+05:30`);
-    const endDate = new Date(`${nextYear}-${nextM}-01T00:00:00+05:30`);
+  async getCounterSettings(): Promise<DonorCounterSettings> {
+    const [existing] = await this.counterSettingsRepo.find({
+      order: { createdAt: 'ASC' },
+      take: 1,
+    });
+    if (existing) {
+      return existing;
+    }
+    return await this.counterSettingsRepo.save(
+      this.counterSettingsRepo.create({ count: 0 }),
+    );
+  }
 
-    const count = await this.repo
-      .createQueryBuilder('donor')
-      .where('donor.status = :status', { status: DonationStatus.PAID })
-      .andWhere('donor.createdAt >= :startDate AND donor.createdAt < :endDate', {
-        startDate,
-        endDate,
-      })
-      .getCount();
+  async updateCounterSettings(
+    dto: UpdateDonorCounterSettingsDto,
+  ): Promise<DonorCounterSettings> {
+    const [existing] = await this.counterSettingsRepo.find({
+      order: { createdAt: 'ASC' },
+      take: 1,
+    });
+    const settings =
+      existing ?? this.counterSettingsRepo.create({ count: dto.count });
+    settings.count = dto.count;
+    return await this.counterSettingsRepo.save(settings);
+  }
+
+  async getCurrentMonthCount(): Promise<CurrentMonthDonorCount> {
+    const { year, month, monthName } = this.getCurrentMonthInfo();
+
+    const [settings] = await this.counterSettingsRepo.find({
+      order: { createdAt: 'ASC' },
+      take: 1,
+    });
 
     return {
-      count,
+      count: settings?.count ?? 0,
       month,
       year,
-      monthName: MONTH_NAMES[month - 1] ?? '',
+      monthName,
     };
   }
 }

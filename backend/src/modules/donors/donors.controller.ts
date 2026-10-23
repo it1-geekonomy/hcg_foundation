@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
   RawBodyRequest,
@@ -26,7 +27,9 @@ import { Public } from '../../common/decorators/public.decorator';
 import { CreateDonationDto } from './dto/create-donation.dto';
 import { ListDonorsQueryDto } from './dto/list-donors-query.dto';
 import { VerifyDonationDto } from './dto/verify-donation.dto';
+import { UpdateDonorCounterSettingsDto } from './dto/update-donor-counter-settings.dto';
 import { Donor } from './entities/donor.entity';
+import { DonorCounterSettings } from './entities/donor-counter-settings.entity';
 import { DonorsService } from './donors.service';
 
 @ApiTags(ApiTagsConst.DONATION)
@@ -84,6 +87,40 @@ export class DonorsController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Monthly donor count fetched successfully',
+      data,
+    };
+  }
+
+  @Get('counter-settings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get donor display counter settings (CMS)',
+    description:
+      'Returns the current configured donor count to be displayed on the website.',
+  })
+  @ApiOkResponse({ type: DonorCounterSettings })
+  async getCounterSettings() {
+    const data = await this.service.getCounterSettings();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Donor counter settings fetched successfully',
+      data,
+    };
+  }
+
+  @Patch('counter-settings')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Update donor display count (CMS)',
+    description:
+      'Allows admin in CMS to set the donor count number to display on the website.',
+  })
+  @ApiOkResponse({ type: DonorCounterSettings })
+  async updateCounterSettings(@Body() dto: UpdateDonorCounterSettingsDto) {
+    const data = await this.service.updateCounterSettings(dto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Donor counter settings updated successfully',
       data,
     };
   }
