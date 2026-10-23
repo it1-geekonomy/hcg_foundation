@@ -4,4 +4,5 @@ export enum DonationCategory {
   PSYCHOLOGICAL_SUPPORT = 'Psychological Support',
   RESEARCH_INNOVATION = 'Research & Innovation',
   GENERAL_FUNDS = 'General Funds',
+  PATIENT_SPECIFIC = 'Patient Specific',
 }
