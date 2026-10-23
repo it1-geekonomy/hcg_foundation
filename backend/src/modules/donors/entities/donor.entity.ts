@@ -1,12 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Column, Entity, Index } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/entities/base.entity';
 import { DonationStatus } from '../../../common/enums/donation-status.enum';
 import { DonationCategory } from '../../../common/enums/donation-category.enum';
 import { ReceiptEmailStatus } from '../../../common/enums/receipt-email-status.enum';
+import { PatientStory } from '../../patient-stories/entities/patient-story.entity';
 
 /**
- * Donors — independent table, no FKs, no SEO.
+ * Donors table with optional relation to patient stories.
  */
 @Entity('donors')
 export class Donor extends BaseEntity {
@@ -124,4 +125,13 @@ export class Donor extends BaseEntity {
     default: DonationStatus.PENDING,
   })
   status!: DonationStatus;
+
+  @ApiPropertyOptional({ example: 'b6f63f35-97e3-47a2-99be-78dcb1a13e2e' })
+  @Index('idx_donors_patient_story_id')
+  @Column({ name: 'patient_story_id', type: 'uuid', nullable: true })
+  patientStoryId?: string | null;
+
+  @ManyToOne(() => PatientStory, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'patient_story_id' })
+  patientStory?: PatientStory | null;
 }

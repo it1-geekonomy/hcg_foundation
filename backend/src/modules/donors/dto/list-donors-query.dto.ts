@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
 import { DonationCategory } from '../../../common/enums/donation-category.enum';
 import { DonationStatus } from '../../../common/enums/donation-status.enum';
 import { ReceiptEmailStatus } from '../../../common/enums/receipt-email-status.enum';
@@ -52,4 +52,11 @@ export class ListDonorsQueryDto {
   @IsOptional()
   @IsEnum(ReceiptEmailStatus)
   receiptEmailStatus?: ReceiptEmailStatus;
+
+  @ApiPropertyOptional({
+    description: 'Filter donations by patient story ID',
+  })
+  @IsOptional()
+  @IsUUID()
+  patientStoryId?: string;
 }
