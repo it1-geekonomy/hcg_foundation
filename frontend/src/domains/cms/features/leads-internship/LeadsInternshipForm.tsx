@@ -1,5 +1,6 @@
 "use client";
 
+import { ExternalLink, FileText } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
@@ -22,6 +23,7 @@ export type LeadsInternshipFormValues = {
   languages: string;
   computerSkills: string;
   message: string;
+  cv: string;
   termsAccepted: boolean;
 };
 
@@ -36,6 +38,7 @@ export const emptyLeadsInternshipForm: LeadsInternshipFormValues = {
   languages: "",
   computerSkills: "",
   message: "",
+  cv: "",
   termsAccepted: false,
 };
 
@@ -53,6 +56,7 @@ export function internshipToFormValues(
     languages: row.languages ?? "",
     computerSkills: row.computerSkills ?? "",
     message: row.message ?? "",
+    cv: row.cv ?? "",
     termsAccepted: Boolean(row.termsAccepted),
   };
 }
@@ -71,6 +75,7 @@ export function formValuesToPayload(
     languages: form.languages.trim(),
     computerSkills: form.computerSkills.trim(),
     message: form.message.trim(),
+    cv: form.cv.trim(),
     termsAccepted: form.termsAccepted,
   };
 }
@@ -178,6 +183,28 @@ export default function LeadsInternshipForm({
           value={value.computerSkills}
           onChange={(e) => set("computerSkills")(e.target.value)}
         />
+      </CmsFormField>
+      <CmsFormField label="CV / Resume URL" htmlFor="int-cv">
+        <div className="space-y-2">
+          <Input
+            id="int-cv"
+            value={value.cv}
+            onChange={(e) => set("cv")(e.target.value)}
+            placeholder="https://..."
+          />
+          {value.cv ? (
+            <a
+              href={value.cv}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-cms-primary hover:underline"
+            >
+              <FileText className="size-3.5" />
+              <span>Preview current CV link</span>
+              <ExternalLink className="size-3" />
+            </a>
+          ) : null}
+        </div>
       </CmsFormField>
       <CmsFormField label="Message" htmlFor="int-message">
         <Textarea

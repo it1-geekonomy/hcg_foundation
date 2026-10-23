@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { Eye, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import { ExternalLink, Eye, FileText, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import {
   Card,
@@ -160,6 +160,7 @@ export default function LeadsInternshipListPage() {
                   <TableHead>Name</TableHead>
                   <TableHead>Contact</TableHead>
                   <TableHead>Course</TableHead>
+                  <TableHead>Resume / CV</TableHead>
                   {tab === "deleted" ? (
                     <TableHead>Deleted at</TableHead>
                   ) : (
@@ -171,7 +172,7 @@ export default function LeadsInternshipListPage() {
               <TableBody>
                 {rows.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-cms-muted">
+                    <TableCell colSpan={6} className="text-cms-muted">
                       {tab === "deleted"
                         ? "No deleted internship leads."
                         : "No internship leads yet."}
@@ -201,6 +202,23 @@ export default function LeadsInternshipListPage() {
                         </Typography>
                       </TableCell>
                       <TableCell>{row.currentCourse || "—"}</TableCell>
+                      <TableCell>
+                        {row.cv ? (
+                          <a
+                            href={row.cv}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs font-medium text-cms-primary underline-offset-2 hover:underline"
+                            title="View / Download CV"
+                          >
+                            <FileText className="size-3.5 shrink-0" />
+                            <span>View CV</span>
+                            <ExternalLink className="size-3 shrink-0" />
+                          </a>
+                        ) : (
+                          <span className="text-xs text-cms-faint">—</span>
+                        )}
+                      </TableCell>
                       <TableCell className="whitespace-nowrap text-cms-muted">
                         {tab === "deleted"
                           ? formatCmsDateTime(row.deletedAt)
