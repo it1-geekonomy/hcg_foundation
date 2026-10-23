@@ -1,7 +1,8 @@
 import React from "react";
 import ProjectsClient from "./ProjectsClient";
 import { publicProjectsApi } from "@/domains/cms/lib/api";
-import { ProjectItem } from "@/domains/resources/constants/projects";
+import { ProjectItem, PROJECTS_DATA } from "@/domains/resources/constants/projects";
+import { PROGRAM_PAGE_MAP } from "@/lib/seo";
 
 export default async function ProjectsPage({
   searchParams,
@@ -22,24 +23,35 @@ export default async function ProjectsPage({
     });
 
     if (res?.data && res.data.length > 0) {
-      initialProjects = res.data.map((p) => ({
-        id: p.id ?? "",
-        slug: p.slug ?? "",
-        title: p.title ?? "",
-        category: "Projects",
-        summary: p.shortDescription ?? "",
-        fullStory: p.content ?? "",
-        imageUrl: p.projectBanner || p.projectMobileBanner || "",
-        mobileImageUrl: p.projectMobileBanner || p.projectBanner || "",
-      }));
-      initialTotalCount = res.meta?.total ?? initialProjects.length;
+      const validCms = res.data.filter((p) => {
+        const key = (p.slug || p.id || "").toLowerCase();
+        return !PROGRAM_PAGE_MAP[key];
+      });
+
+      if (validCms.length > 0) {
+        initialProjects = validCms.map((p) => ({
+          id: p.id ?? "",
+          slug: p.slug ?? "",
+          title: p.title ?? "",
+          category: "Projects",
+          summary: p.shortDescription ?? "",
+          fullStory: p.content ?? "",
+          imageUrl: p.projectBanner || p.projectMobileBanner || "",
+          mobileImageUrl: p.projectMobileBanner || p.projectBanner || "",
+        }));
+        initialTotalCount = res.meta?.total ?? validCms.length;
+      } else {
+        // Fallback to static projects catalogue when CMS only has core program entries
+        initialProjects = PROJECTS_DATA.slice(0, 6);
+        initialTotalCount = PROJECTS_DATA.length;
+      }
     } else {
-      initialProjects = [];
-      initialTotalCount = 0;
+      initialProjects = PROJECTS_DATA.slice(0, 6);
+      initialTotalCount = PROJECTS_DATA.length;
     }
   } catch {
-    initialProjects = null;
-    initialTotalCount = null;
+    initialProjects = PROJECTS_DATA.slice(0, 6);
+    initialTotalCount = PROJECTS_DATA.length;
   }
 
   return (

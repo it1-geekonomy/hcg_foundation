@@ -5,8 +5,9 @@ import Banner from "@/shared/components/Herobannersection";
 import DonateForm from "@/shared/components/DonateForm";
 import PaginationControls from "@/shared/components/PaginationControls";
 import ProjectCard from "@/domains/resources/components/ProjectCard";
-import { ProjectItem } from "@/domains/resources/constants/projects";
+import { ProjectItem, PROJECTS_DATA } from "@/domains/resources/constants/projects";
 import { publicProjectsApi } from "@/domains/cms/lib/api";
+import { PROGRAM_PAGE_MAP } from "@/lib/seo";
 import { FolderOpen } from "lucide-react";
 import ContentNotice, { LOAD_ERROR_MESSAGE } from "@/shared/components/ContentNotice";
 
@@ -75,27 +76,40 @@ export default function ProjectsClient({
         if (cancelled) return;
 
         if (res.data && res.data.length > 0) {
-          const mapped: ProjectItem[] = res.data.map((p) => ({
-            id: p.id ?? "",
-            slug: p.slug ?? "",
-            title: p.title ?? "",
-            category: "Projects",
-            summary: p.shortDescription ?? "",
-            fullStory: p.content ?? "",
-            imageUrl: p.projectBanner || p.projectMobileBanner || "",
-            mobileImageUrl: p.projectMobileBanner || p.projectBanner || "",
-          }));
-          setAllProjects(mapped);
-          setTotalCount(res.meta.total);
+          const validCms = res.data.filter((p) => {
+            const key = (p.slug || p.id || "").toLowerCase();
+            return !PROGRAM_PAGE_MAP[key];
+          });
+
+          if (validCms.length > 0) {
+            const mapped: ProjectItem[] = validCms.map((p) => ({
+              id: p.id ?? "",
+              slug: p.slug ?? "",
+              title: p.title ?? "",
+              category: "Projects",
+              summary: p.shortDescription ?? "",
+              fullStory: p.content ?? "",
+              imageUrl: p.projectBanner || p.projectMobileBanner || "",
+              mobileImageUrl: p.projectMobileBanner || p.projectBanner || "",
+            }));
+            setAllProjects(mapped);
+            setTotalCount(res.meta.total);
+          } else {
+            const start = (currentPage - 1) * itemsPerPage;
+            setAllProjects(PROJECTS_DATA.slice(start, start + itemsPerPage));
+            setTotalCount(PROJECTS_DATA.length);
+          }
         } else {
-          setAllProjects([]);
-          setTotalCount(0);
+          const start = (currentPage - 1) * itemsPerPage;
+          setAllProjects(PROJECTS_DATA.slice(start, start + itemsPerPage));
+          setTotalCount(PROJECTS_DATA.length);
         }
       } catch {
         if (!cancelled) {
-          setAllProjects([]);
-          setTotalCount(0);
-          setFailed(true);
+          const start = (currentPage - 1) * itemsPerPage;
+          setAllProjects(PROJECTS_DATA.slice(start, start + itemsPerPage));
+          setTotalCount(PROJECTS_DATA.length);
+          setFailed(false);
         }
       } finally {
         if (!cancelled) {

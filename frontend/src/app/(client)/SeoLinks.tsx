@@ -1,5 +1,5 @@
 import React from "react";
-import { PAGE_SEO } from "@/lib/seo";
+import { PAGE_SEO, PROGRAM_PAGE_MAP } from "@/lib/seo";
 import {
   publicPatientStoriesApi,
   publicProjectsApi,
@@ -70,6 +70,10 @@ async function getSiteLinks(): Promise<SeoLinkItem[]> {
       }
       if (res?.data && res.data.length > 0) {
         for (const project of res.data) {
+          const key = (project.slug || project.id || "").toLowerCase();
+          if (PROGRAM_PAGE_MAP[key]) {
+            continue; // Core program page is already included in static main pages
+          }
           links.push({
             href: `/projects/${project.slug || project.id}`,
             title: project.title || "Project",

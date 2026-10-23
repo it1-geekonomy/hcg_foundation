@@ -11,7 +11,7 @@ import PuzzleImage from "@/shared/components/Puzzleimage";
 import { ProjectItem, PROJECTS_DATA } from "@/domains/resources/constants/projects";
 import { isMissingContentError, publicProjectsApi } from "@/domains/cms/lib/api";
 import ContentNotice, { LOAD_ERROR_MESSAGE } from "@/shared/components/ContentNotice";
-import { detailMetadata } from "@/lib/seo";
+import { detailMetadata, PROGRAM_PAGE_MAP } from "@/lib/seo";
 import ProjectDetailClient from "./ProjectDetailClient";
 
 const CONTAINER = "max-w-[90rem] 2xl:max-w-[97.5rem] mx-auto px-4 sm:px-6 lg:px-8";
@@ -22,6 +22,10 @@ interface ProjectDetailPageProps {
 
 export async function generateMetadata({ params }: ProjectDetailPageProps): Promise<Metadata> {
   const { id } = await params;
+  if (id && PROGRAM_PAGE_MAP[id.toLowerCase()]) {
+    notFound();
+  }
+
   const res = await publicProjectsApi.getBySlug(id).catch(() => null);
   const item = res?.data?.detail;
   return detailMetadata({
@@ -36,6 +40,11 @@ export async function generateMetadata({ params }: ProjectDetailPageProps): Prom
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const resolvedParams = await params;
   const targetId = resolvedParams.id;
+
+  // Dedicated programs have their own standalone pages, not under /projects/
+  if (targetId && PROGRAM_PAGE_MAP[targetId.toLowerCase()]) {
+    notFound();
+  }
 
   let projectItem: ProjectItem | null = null;
   let relatedProjects: ProjectItem[] = [];
