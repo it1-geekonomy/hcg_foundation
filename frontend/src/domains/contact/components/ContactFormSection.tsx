@@ -8,6 +8,7 @@ import {
   isIndiaCountry,
 } from "@/domains/home/constants/countries";
 import { nationalPhoneDigits } from "@/shared/lib/phone";
+import { participateApi } from "@/shared/lib/participate-api";
 
 // NOTE: adjust this to the exact Figma hex if it differs — closest
 // warm-cream card tone matched from the reference screenshots.
@@ -39,6 +40,8 @@ interface FormErrors {
 
 export default function ContactFormSection() {
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
     phone: "",
@@ -99,7 +102,7 @@ export default function ContactFormSection() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const newErrors: FormErrors = {};
@@ -137,7 +140,37 @@ export default function ContactFormSection() {
     }
 
     setErrors({});
-    setFormSubmitted(true);
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const fullPhone = formData.phone.trim()
+        ? `${country.dial} ${formData.phone.trim()}`
+        : "";
+
+      await participateApi.submitContactLead({
+        fullName: formData.fullName.trim(),
+        phone: fullPhone,
+        email: formData.email.trim(),
+        message: formData.message.trim(),
+      });
+
+      setFormSubmitted(true);
+      setFormData({
+        fullName: "",
+        phone: "",
+        email: "",
+        message: "",
+      });
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : "Failed to submit message. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -321,16 +354,31 @@ export default function ContactFormSection() {
 
           <button
             type="submit"
-            className="w-full max-w-[340px] mx-auto lg:max-w-none lg:mx-0 lg:w-full rounded-md bg-[#FCCC2D] py-3 cursor-pointer"
+            disabled={isSubmitting}
+            className={`w-full max-w-[340px] mx-auto lg:max-w-none lg:mx-0 lg:w-full rounded-md bg-[#FCCC2D] py-3 cursor-pointer ${
+              isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+            }`}
           >
             <Typography
               variant="body-8"
               as="span"
               className="font-manrope font-semibold text-[#505050]"
             >
-              Submit Message
+              {isSubmitting ? "Sending Message..." : "Submit Message"}
             </Typography>
           </button>
+
+          {submitError && (
+            <div className="text-center">
+              <Typography
+                variant="caption-2"
+                as="p"
+                className="font-manrope font-semibold text-red-600"
+              >
+                {submitError}
+              </Typography>
+            </div>
+          )}
 
           {formSubmitted && (
             <div className="text-center">

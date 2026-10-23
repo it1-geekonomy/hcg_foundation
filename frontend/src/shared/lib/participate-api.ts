@@ -107,4 +107,11 @@ export const participateApi = {
 
   submitPartnershipInquiry: (payload: PartnershipInquiryPayload) =>
     postJson("/partnership-inquiries", payload),
+
+  submitContactLead: (payload: {
+    fullName: string;
+    phone: string;
+    email: string;
+    message: string;
+  }) => postJson("/leads-contact", payload),
 };
