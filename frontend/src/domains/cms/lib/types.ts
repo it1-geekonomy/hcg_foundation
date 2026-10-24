@@ -299,6 +299,12 @@ export type Donor = {
   receiptEmailNextAttemptAt?: string | null;
   receiptEmailSentAt?: string | null;
   receiptEmailError?: string | null;
+  patientStoryId?: string | null;
+  patientStory?: {
+    id: string;
+    title: string;
+    slug: string;
+  } | null;
   createdAt: string;
   updatedAt: string;
 };

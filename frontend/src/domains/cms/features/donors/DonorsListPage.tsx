@@ -66,7 +66,11 @@ export default function DonorsListPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<DonationStatus | "">("");
   const [category, setCategory] = useState<DonationCategory | "">("");
+  const [patientStoryId, setPatientStoryId] = useState<string>("");
   const [emailStatus, setEmailStatus] = useState<ReceiptEmailStatusValue | "">("");
+  const [patientOptions, setPatientOptions] = useState<
+    Array<{ value: string; label: string }>
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -98,6 +102,30 @@ export default function DonorsListPage() {
   useEffect(() => {
     void fetchCounter();
   }, [fetchCounter]);
+
+  // Derive unique patient options directly from donors returned by the get all donors API
+  useEffect(() => {
+    if (donors.length === 0) return;
+    setPatientOptions((prev) => {
+      const map = new Map<string, string>();
+      for (const opt of prev) {
+        if (opt.value) map.set(opt.value, opt.label);
+      }
+      for (const d of donors) {
+        if (d.patientStory?.id && d.patientStory?.title) {
+          map.set(d.patientStory.id, d.patientStory.title);
+        }
+      }
+      if (map.size === 0) return [];
+      return [
+        { value: "", label: "All patients" },
+        ...Array.from(map.entries()).map(([id, title]) => ({
+          value: id,
+          label: title,
+        })),
+      ];
+    });
+  }, [donors]);
 
   const handleSaveCounter = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,6 +161,7 @@ export default function DonorsListPage() {
         search: search || undefined,
         status: status || undefined,
         donationCategory: category || undefined,
+        patientStoryId: patientStoryId || undefined,
         receiptEmailStatus: emailStatus || undefined,
       });
       setDonors(res.data ?? []);
@@ -142,7 +171,7 @@ export default function DonorsListPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, status, category, emailStatus]);
+  }, [page, search, status, category, patientStoryId, emailStatus]);
 
   useEffect(() => {
     void load();
@@ -267,6 +296,18 @@ export default function DonorsListPage() {
                 setCategory(next as DonationCategory | "");
               }}
             />
+            {patientOptions.length > 0 && (
+              <CmsSelect
+                size="sm"
+                className="sm:w-48"
+                value={patientStoryId}
+                options={patientOptions}
+                onChange={(next) => {
+                  setPage(1);
+                  setPatientStoryId(next);
+                }}
+              />
+            )}
             <CmsSelect
               size="sm"
               className="sm:w-40"
@@ -286,6 +327,7 @@ export default function DonorsListPage() {
                   <TableHead>Name</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Category</TableHead>
+                  <TableHead>Patient</TableHead>
                   <TableHead>Country</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Email</TableHead>
@@ -295,7 +337,7 @@ export default function DonorsListPage() {
               <TableBody>
                 {donors.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-cms-muted">
+                    <TableCell colSpan={8} className="text-cms-muted">
                       No donations yet.
                     </TableCell>
                   </TableRow>
@@ -315,6 +357,19 @@ export default function DonorsListPage() {
                       </TableCell>
                       <TableCell className="whitespace-nowrap">
                         {donor.donationCategory || "General Funds"}
+                      </TableCell>
+                      <TableCell className="max-w-[220px]">
+                        {donor.patientStory?.title ? (
+                          <Link
+                            href={`/admin/patients/${donor.patientStory.id}`}
+                            className="truncate text-sm font-medium text-cms-primary hover:underline block"
+                            title={donor.patientStory.title}
+                          >
+                            {donor.patientStory.title}
+                          </Link>
+                        ) : (
+                          <span className="text-xs text-cms-muted">—</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <span className="block">

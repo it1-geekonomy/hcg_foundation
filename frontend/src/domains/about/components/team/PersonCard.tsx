@@ -355,15 +355,18 @@ export function PersonCard({
           {/* Back panel covering exact same bounds as data-card-image */}
           <div
             className={cx(
-              "absolute inset-x-0 overflow-hidden rounded-md border border-[#E0D4AE]/50 shadow-sm touch-pan-y",
+              "absolute inset-x-0 overflow-hidden rounded-md border border-[#E0D4AE] touch-pan-y",
               CARD_IMAGE_BOTTOM_INSET_CLASS,
               resolvedTopOffsetClass,
             )}
+            style={{
+              WebkitMaskImage: "-webkit-radial-gradient(white, black)",
+            }}
           >
             {/* Bio Content */}
             <div
               className={cx(
-                "relative flex h-full w-full flex-col p-5 sm:p-6 overflow-hidden touch-pan-y",
+                "relative flex h-full w-full flex-col p-5 sm:p-6 overflow-hidden rounded-md touch-pan-y",
                 BACK_PANEL_BG,
               )}
             >
@@ -421,7 +424,7 @@ export function PersonCard({
                 delay: flipped ? 0 : 0.52,
                 ease: flipped ? [0.65, 0, 0.25, 1] : "linear",
               }}
-              className="absolute top-0 bottom-0 left-0 w-1/2 z-30 pointer-events-none overflow-hidden border-r border-[#E0D4AE] shadow-md bg-[#FFF3CD]"
+              className="absolute top-0 bottom-0 left-0 w-1/2 z-30 pointer-events-none overflow-hidden rounded-l-md border-r border-[#E0D4AE] shadow-[0_4px_12px_rgba(56,43,0,0.10)] bg-[#FFF3CD]"
             />
 
             {/* Right Sliding Door: Original Solid #FFF3CD */}
@@ -434,7 +437,7 @@ export function PersonCard({
                 delay: flipped ? 0 : 0.52,
                 ease: flipped ? [0.65, 0, 0.25, 1] : "linear",
               }}
-              className="absolute top-0 bottom-0 right-0 w-1/2 z-30 pointer-events-none overflow-hidden border-l border-[#E0D4AE] shadow-md bg-[#FFF3CD]"
+              className="absolute top-0 bottom-0 right-0 w-1/2 z-30 pointer-events-none overflow-hidden rounded-r-md border-l border-[#E0D4AE] shadow-[0_4px_12px_rgba(56,43,0,0.10)] bg-[#FFF3CD]"
             />
           </div>
         </motion.div>

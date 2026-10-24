@@ -81,6 +81,8 @@ type Props = {
   /** Where the donor wants the money to go; omitted → General Funds. */
   donationCategory?: DonationCategory;
   donorCount?: number;
+  patientStoryId?: string;
+  patientStoryName?: string;
   onClose: () => void;
   onAmountChange?: (amount: number) => void;
 };
@@ -110,6 +112,8 @@ export default function DonateDetailsModal({
   countryCode,
   donationCategory,
   donorCount,
+  patientStoryId,
+  patientStoryName,
   onClose,
   onAmountChange,
 }: Props) {
@@ -263,6 +267,7 @@ export default function DonateDetailsModal({
         message: message.trim() || undefined,
         donationCategory,
         amount: amountValue,
+        patientStoryId: patientStoryId?.trim() || undefined,
       });
 
       const checkout = res.data;
@@ -366,7 +371,9 @@ export default function DonateDetailsModal({
                 as="p"
                 className="mt-3 wrap-break-word px-2 font-argestadisplay font-light leading-snug text-white/70 sm:px-4"
               >
-                Your donation of {formattedAmount} {currency} was received.
+                {patientStoryName
+                  ? `Your donation of ${formattedAmount} ${currency} for ${patientStoryName} was received.`
+                  : `Your donation of ${formattedAmount} ${currency} was received.`}
               </Typography>
               <Typography
                 variant="body-8"
@@ -408,8 +415,9 @@ export default function DonateDetailsModal({
                   as="p"
                   className="hidden max-w-[360px] font-argestadisplay font-light leading-snug text-white/70 [@media(min-width:640px)_and_(min-height:761px)]:block"
                 >
-                  Your support provides cancer care, emotional support, and
-                  financial aid to those in need.
+                  {patientStoryName
+                    ? `Your support provides cancer care, emotional support, and financial aid for ${patientStoryName}.`
+                    : "Your support provides cancer care, emotional support, and financial aid to those in need."}
                 </Typography>
               </div>
 

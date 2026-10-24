@@ -176,7 +176,10 @@ export default async function StoryDetailPage({
 
       {/* Donate Section at the Bottom */}
       <div id="donate-form">
-        <DonateForm />
+        <DonateForm
+          patientStoryId={story?.id}
+          patientStoryName={story?.patientName}
+        />
       </div>
     </main>
   );

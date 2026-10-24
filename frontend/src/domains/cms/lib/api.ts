@@ -64,6 +64,8 @@ export type ListQuery = {
   donationCategory?: DonationCategory;
   /** Donors only — query param `receiptEmailStatus` */
   receiptEmailStatus?: ReceiptEmailStatus;
+  /** Donors only — query param `patientStoryId` */
+  patientStoryId?: string;
   includeDeleted?: boolean;
   onlyDeleted?: boolean;
 };
@@ -81,6 +83,9 @@ function toQuery(params?: ListQuery) {
   }
   if (params?.receiptEmailStatus) {
     q.set("receiptEmailStatus", params.receiptEmailStatus);
+  }
+  if (params?.patientStoryId) {
+    q.set("patientStoryId", params.patientStoryId);
   }
   if (params?.includeDeleted === true) q.set("includeDeleted", "true");
   if (params?.onlyDeleted === true) q.set("onlyDeleted", "true");
