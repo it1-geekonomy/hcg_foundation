@@ -115,7 +115,7 @@ export class DonorsService {
         );
       }
       patientStoryId = story.id;
-      
+
     }
     if (!isInternational && currency !== 'INR') {
       throw new BadRequestException(
@@ -326,6 +326,8 @@ export class DonorsService {
 
     const qb = this.repo
       .createQueryBuilder('donor')
+      .leftJoin('donor.patientStory', 'patientStory')
+      .addSelect(['patientStory.id', 'patientStory.title', 'patientStory.slug'])
       .orderBy('donor.createdAt', 'DESC');
 
     if (query.status) {
@@ -354,7 +356,7 @@ export class DonorsService {
 
     if (query.search) {
       qb.andWhere(
-        '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search OR donor.country ILIKE :search OR donor.countryCode ILIKE :search OR donor.city ILIKE :search)',
+        '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search OR donor.country ILIKE :search OR donor.countryCode ILIKE :search OR donor.city ILIKE :search OR patientStory.title ILIKE :search)',
         { search: `%${query.search}%` },
       );
     }

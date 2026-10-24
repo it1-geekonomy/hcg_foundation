@@ -36,7 +36,15 @@ import {
   useSectionInView,
 } from "./donateAnimation";
 
-export default function DonateSection() {
+export type DonateFormProps = {
+  patientStoryId?: string;
+  patientStoryName?: string;
+};
+
+export default function DonateSection({
+  patientStoryId,
+  patientStoryName,
+}: DonateFormProps = {}) {
   const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
   const country = getDonationCountry(countryCode);
   const currency: DonationCurrencyCode = country.currency;
@@ -153,7 +161,9 @@ export default function DonateSection() {
           as="p"
           className="w-full max-w-sm leading-relaxed text-white/70 font-argestadisplay font-bold"
         >
-          Your support provides cancer care, emotional support, and financial aid to those in need.
+          {patientStoryName
+            ? `Your support provides cancer care, emotional support, and financial aid for ${patientStoryName}.`
+            : "Your support provides cancer care, emotional support, and financial aid to those in need."}
         </Typography>
       </DonateItem>
 
@@ -396,6 +406,8 @@ export default function DonateSection() {
             currency={currency}
             countryCode={countryCode}
             donorCount={donorCount}
+            patientStoryId={patientStoryId}
+            patientStoryName={patientStoryName}
             onClose={() => setDetailsOpen(false)}
             onAmountChange={(next) => {
               setIsCustom(true);

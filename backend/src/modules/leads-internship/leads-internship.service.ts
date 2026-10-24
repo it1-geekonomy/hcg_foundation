@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
@@ -11,6 +16,7 @@ import {
   applyDeletedFilter,
   restoreSoftDeleted,
 } from '../../common/utils/soft-delete';
+import { EmailService } from '../email/email.service';
 import { CreateLeadsInternshipDto } from './dto/create-leads-internship.dto';
 import { UpdateLeadsInternshipDto } from './dto/update-leads-internship.dto';
 import { LeadsInternship } from './entities/leads-internship.entity';
@@ -19,13 +25,19 @@ const CDN_FOLDER = 'leads-internship';
 
 @Injectable()
 export class LeadsInternshipService {
+  private readonly logger = new Logger(LeadsInternshipService.name);
+
   constructor(
     @InjectRepository(LeadsInternship)
     private readonly repo: Repository<LeadsInternship>,
     private readonly cdn: CdnService,
+    private readonly emailService: EmailService,
   ) {}
 
-  async create(dto: CreateLeadsInternshipDto, file?: CdnFile): Promise<LeadsInternship> {
+  async create(
+    dto: CreateLeadsInternshipDto,
+    file?: CdnFile,
+  ): Promise<LeadsInternship> {
     if (!file) {
       throw new BadRequestException('CV file is required');
     }
@@ -34,14 +46,18 @@ export class LeadsInternshipService {
 
     try {
       const entity = this.repo.create({ ...dto, cv: cvUrl });
-      return await this.repo.save(entity);
+      const saved = await this.repo.save(entity);
+      await this.emailService.sendInternshipNotification(saved);
+      return saved;
     } catch (err) {
       await this.cdn.delete(cvUrl);
       throw err;
     }
   }
 
-  async findAll(query: PaginationQueryDto): Promise<PaginatedResult<LeadsInternship>> {
+  async findAll(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResult<LeadsInternship>> {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
 
@@ -81,14 +97,20 @@ export class LeadsInternshipService {
     return entity;
   }
 
-  async update(id: string, dto: UpdateLeadsInternshipDto, file?: CdnFile): Promise<LeadsInternship> {
+  async update(
+    id: string,
+    dto: UpdateLeadsInternshipDto,
+    file?: CdnFile,
+  ): Promise<LeadsInternship> {
     const entity = await this.findOne(id);
     Object.assign(entity, dto);
-    
+
     if (file) {
-      entity.cv = (await this.cdn.replace(entity.cv, file, CDN_FOLDER, 'cv')) ?? entity.cv;
+      entity.cv =
+        (await this.cdn.replace(entity.cv, file, CDN_FOLDER, 'cv')) ??
+        entity.cv;
     }
-    
+
     return await this.repo.save(entity);
   }
 
