@@ -109,13 +109,7 @@ export class DonorsService {
       if (story.status !== ContentStatus.PUBLISHED) {
         throw new BadRequestException('Patient story is not published.');
       }
-      // if (!story.isDonationEnabled) {
-      //   throw new BadRequestException(
-      //     'Donations are currently not enabled for this patient.',
-      //   );
-      // }
       patientStoryId = story.id;
-
     }
     if (!isInternational && currency !== 'INR') {
       throw new BadRequestException(

@@ -39,7 +39,4 @@ export class PatientStory extends SeoContentEntity {
     default: ContentStatus.DRAFT,
   })
   status?: ContentStatus;
-
-  @Column({ name: 'is_donation_enabled', type: 'boolean', default: false })
-  isDonationEnabled?: boolean;
 }
