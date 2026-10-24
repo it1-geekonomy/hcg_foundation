@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RazorpayService } from '../../common/payments/razorpay.service';
 import { DonationStatus } from '../../common/enums/donation-status.enum';
+import { ContentStatus } from '../../common/enums/content-status.enum';
 import {
   buildPaginatedResult,
   PaginatedResult,
@@ -20,6 +21,9 @@ import { CreateDonationDto } from './dto/create-donation.dto';
 import { ListDonorsQueryDto } from './dto/list-donors-query.dto';
 import { VerifyDonationDto } from './dto/verify-donation.dto';
 import { Donor } from './entities/donor.entity';
+import { DonorCounterSettings } from './entities/donor-counter-settings.entity';
+import { UpdateDonorCounterSettingsDto } from './dto/update-donor-counter-settings.dto';
+import { PatientStory } from '../patient-stories/entities/patient-story.entity';
 import { DonationEmailQueueService } from './donation-email-queue.service';
 import { DonationCategory } from '../../common/enums/donation-category.enum';
 
@@ -65,6 +69,10 @@ export class DonorsService {
   constructor(
     @InjectRepository(Donor)
     private readonly repo: Repository<Donor>,
+    @InjectRepository(PatientStory)
+    private readonly patientStoryRepo: Repository<PatientStory>,
+    @InjectRepository(DonorCounterSettings)
+    private readonly counterSettingsRepo: Repository<DonorCounterSettings>,
     private readonly razorpay: RazorpayService,
     private readonly emailQueue: DonationEmailQueueService,
   ) { }
@@ -86,8 +94,29 @@ export class DonorsService {
     const currency = normalizeDonationCurrency(dto.currency, isInternational);
     const pan = isInternational ? '' : dto.pan?.trim() || '';
     const message = dto.message?.trim() || '';
-    const donationCategory = dto.donationCategory || DonationCategory.GENERAL_FUNDS;
+    const donationCategory = dto.patientStoryId
+      ? (dto.donationCategory || DonationCategory.PATIENT_SPECIFIC)
+      : (dto.donationCategory || DonationCategory.GENERAL_FUNDS);
 
+    let patientStoryId: string | null = null;
+    if (dto.patientStoryId) {
+      const story = await this.patientStoryRepo.findOne({
+        where: { id: dto.patientStoryId },
+      });
+      if (!story) {
+        throw new NotFoundException('Patient story not found.');
+      }
+      if (story.status !== ContentStatus.PUBLISHED) {
+        throw new BadRequestException('Patient story is not published.');
+      }
+      if (!story.isDonationEnabled) {
+        throw new BadRequestException(
+          'Donations are currently not enabled for this patient.',
+        );
+      }
+      patientStoryId = story.id;
+
+    }
     if (!isInternational && currency !== 'INR') {
       throw new BadRequestException(
         'Indian donations must use INR. Change country or currency.',
@@ -112,6 +141,7 @@ export class DonorsService {
           donationCategory: this.note(donationCategory, 255),
           amount,
           currency,
+          patientStoryId: patientStoryId ? this.note(patientStoryId, 50) : '',
         },
       });
 
@@ -232,11 +262,18 @@ export class DonorsService {
       return existing;
     }
 
+    const order = await this.razorpay.fetchOrder(dto.razorpayOrderId);
+    const notes = order.notes ?? {};
+    const patientStoryId = notes.patientStoryId?.trim() || null;
+
     if (existing) {
       existing.status = DonationStatus.PAID;
       existing.razorpayPaymentId = dto.razorpayPaymentId;
       existing.receiptNumber =
         existing.receiptNumber || this.buildReceiptNumber(existing.id);
+      if (!existing.patientStoryId && patientStoryId) {
+        existing.patientStoryId = patientStoryId;
+      }
       Object.assign(existing, DonationEmailQueueService.queuedFields());
       const saved = await this.repo.save(existing);
       this.logger.log(
@@ -246,8 +283,6 @@ export class DonorsService {
       return saved;
     }
 
-    const order = await this.razorpay.fetchOrder(dto.razorpayOrderId);
-    const notes = order.notes ?? {};
     const country = notes.country?.trim() || 'India';
     const countryCode = notes.countryCode?.trim().toUpperCase() || null;
     const amount =
@@ -264,12 +299,15 @@ export class DonorsService {
         isInternational: notes.international === 'true',
         pan: notes.pan?.trim() || null,
         message: notes.message?.trim() || null,
-        donationCategory: (notes.donationCategory as DonationCategory) || DonationCategory.GENERAL_FUNDS,
+        donationCategory:
+          (notes.donationCategory as DonationCategory) ||
+          (patientStoryId ? DonationCategory.PATIENT_SPECIFIC : DonationCategory.GENERAL_FUNDS),
         amount,
         currency: notes.currency || order.currency || 'INR',
         status: DonationStatus.PAID,
         razorpayOrderId: dto.razorpayOrderId,
         razorpayPaymentId: dto.razorpayPaymentId,
+        patientStoryId: patientStoryId || null,
       }),
     );
     donor.receiptNumber = this.buildReceiptNumber(donor.id);
@@ -288,6 +326,8 @@ export class DonorsService {
 
     const qb = this.repo
       .createQueryBuilder('donor')
+      .leftJoin('donor.patientStory', 'patientStory')
+      .addSelect(['patientStory.id', 'patientStory.title', 'patientStory.slug'])
       .orderBy('donor.createdAt', 'DESC');
 
     if (query.status) {
@@ -302,6 +342,12 @@ export class DonorsService {
       });
     }
 
+    if (query.patientStoryId) {
+      qb.andWhere('donor.patientStoryId = :patientStoryId', {
+        patientStoryId: query.patientStoryId,
+      });
+    }
+
     if (query.receiptEmailStatus) {
       qb.andWhere('donor.receiptEmailStatus = :receiptEmailStatus', {
         receiptEmailStatus: query.receiptEmailStatus,
@@ -310,7 +356,7 @@ export class DonorsService {
 
     if (query.search) {
       qb.andWhere(
-        '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search OR donor.country ILIKE :search OR donor.countryCode ILIKE :search OR donor.city ILIKE :search)',
+        '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search OR donor.country ILIKE :search OR donor.countryCode ILIKE :search OR donor.city ILIKE :search OR patientStory.title ILIKE :search)',
         { search: `%${query.search}%` },
       );
     }
@@ -324,7 +370,13 @@ export class DonorsService {
   }
 
   async findOne(id: string): Promise<Donor> {
-    const entity = await this.repo.findOne({ where: { id } });
+    const entity = await this.repo
+      .createQueryBuilder('donor')
+      .leftJoin('donor.patientStory', 'patientStory')
+      .addSelect(['patientStory.id', 'patientStory.title', 'patientStory.slug'])
+      .where('donor.id = :id', { id })
+      .getOne();
+
     if (!entity) {
       throw new NotFoundException(
         `Donor not found for id "${id}". Check the id and try again.`,
@@ -600,7 +652,11 @@ export class DonorsService {
     return `HCG-${stamp}-${id.replace(/-/g, '').slice(0, 8).toUpperCase()}`;
   }
 
-  async getCurrentMonthCount(): Promise<CurrentMonthDonorCount> {
+  private getCurrentMonthInfo(): {
+    year: number;
+    month: number;
+    monthName: string;
+  } {
     const now = new Date();
     const istParts = new Intl.DateTimeFormat('en-US', {
       timeZone: 'Asia/Kolkata',
@@ -617,29 +673,52 @@ export class DonorsService {
       10,
     );
 
-    const m = String(month).padStart(2, '0');
-    const nextYear = month === 12 ? year + 1 : year;
-    const nextMonth = month === 12 ? 1 : month + 1;
-    const nextM = String(nextMonth).padStart(2, '0');
+    return {
+      year,
+      month,
+      monthName: MONTH_NAMES[month - 1] ?? '',
+    };
+  }
 
-    // Asia/Kolkata (IST) is UTC+05:30
-    const startDate = new Date(`${year}-${m}-01T00:00:00+05:30`);
-    const endDate = new Date(`${nextYear}-${nextM}-01T00:00:00+05:30`);
+  async getCounterSettings(): Promise<DonorCounterSettings> {
+    const [existing] = await this.counterSettingsRepo.find({
+      order: { createdAt: 'ASC' },
+      take: 1,
+    });
+    if (existing) {
+      return existing;
+    }
+    return await this.counterSettingsRepo.save(
+      this.counterSettingsRepo.create({ count: 0 }),
+    );
+  }
 
-    const count = await this.repo
-      .createQueryBuilder('donor')
-      .where('donor.status = :status', { status: DonationStatus.PAID })
-      .andWhere('donor.createdAt >= :startDate AND donor.createdAt < :endDate', {
-        startDate,
-        endDate,
-      })
-      .getCount();
+  async updateCounterSettings(
+    dto: UpdateDonorCounterSettingsDto,
+  ): Promise<DonorCounterSettings> {
+    const [existing] = await this.counterSettingsRepo.find({
+      order: { createdAt: 'ASC' },
+      take: 1,
+    });
+    const settings =
+      existing ?? this.counterSettingsRepo.create({ count: dto.count });
+    settings.count = dto.count;
+    return await this.counterSettingsRepo.save(settings);
+  }
+
+  async getCurrentMonthCount(): Promise<CurrentMonthDonorCount> {
+    const { year, month, monthName } = this.getCurrentMonthInfo();
+
+    const [settings] = await this.counterSettingsRepo.find({
+      order: { createdAt: 'ASC' },
+      take: 1,
+    });
 
     return {
-      count,
+      count: settings?.count ?? 0,
       month,
       year,
-      monthName: MONTH_NAMES[month - 1] ?? '',
+      monthName,
     };
   }
 }

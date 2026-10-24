@@ -7,6 +7,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   Matches,
   Max,
   MaxLength,
@@ -121,4 +122,12 @@ export class CreateDonationDto {
   @Min(1)
   @Max(9_999_999_999.99)
   amount!: number;
+
+  @ApiPropertyOptional({
+    example: 'b6f63f35-97e3-47a2-99be-78dcb1a13e2e',
+    description: 'Optional ID of patient story this donation is dedicated to',
+  })
+  @IsOptional()
+  @IsUUID()
+  patientStoryId?: string;
 }

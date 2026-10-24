@@ -15,21 +15,6 @@ export interface PatientStory {
   location?: string;
 }
 
-export interface PatientStory {
-  id: string;
-  slug: string;
-  patientName: string;
-  date: string;
-  conditionTag: string;
-  excerpt: string;
-  fullStory: string;
-  quote?: string;
-  imageUrl: string;
-  heroImageUrl: string;
-  age?: number;
-  location?: string;
-}
-
 export const PATIENT_STORIES: PatientStory[] = [
   {
     id: "1",

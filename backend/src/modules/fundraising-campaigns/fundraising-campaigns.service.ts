@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CampaignStatus } from '../../common/enums/campaign-status.enum';
@@ -10,6 +10,7 @@ import {
   applyDeletedFilter,
   restoreSoftDeleted,
 } from '../../common/utils/soft-delete';
+import { EmailService } from '../email/email.service';
 import { CreateFundraisingCampaignDto } from './dto/create-fundraising-campaign.dto';
 import { ListFundraisingCampaignsQueryDto } from './dto/list-fundraising-campaigns-query.dto';
 import { UpdateFundraisingCampaignDto } from './dto/update-fundraising-campaign.dto';
@@ -17,9 +18,12 @@ import { FundraisingCampaign } from './entities/fundraising-campaign.entity';
 
 @Injectable()
 export class FundraisingCampaignsService {
+  private readonly logger = new Logger(FundraisingCampaignsService.name);
+
   constructor(
     @InjectRepository(FundraisingCampaign)
     private readonly repo: Repository<FundraisingCampaign>,
+    private readonly emailService: EmailService,
   ) {}
 
   async create(
@@ -29,7 +33,9 @@ export class FundraisingCampaignsService {
       ...dto,
       status: CampaignStatus.PENDING,
     });
-    return await this.repo.save(entity);
+    const saved = await this.repo.save(entity);
+    await this.emailService.sendFundraisingNotification(saved);
+    return saved;
   }
 
   async findAll(

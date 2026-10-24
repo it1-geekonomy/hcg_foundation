@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import Typography from "@/lib/Typography";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
 import {
   Card,
   CardContent,
@@ -64,9 +66,90 @@ export default function DonorsListPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<DonationStatus | "">("");
   const [category, setCategory] = useState<DonationCategory | "">("");
+  const [patientStoryId, setPatientStoryId] = useState<string>("");
   const [emailStatus, setEmailStatus] = useState<ReceiptEmailStatusValue | "">("");
+  const [patientOptions, setPatientOptions] = useState<
+    Array<{ value: string; label: string }>
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Donor display counter setting (website counter)
+  const [counterCount, setCounterCount] = useState<number | null>(null);
+  const [counterInput, setCounterInput] = useState<string>("");
+  const [counterLoading, setCounterLoading] = useState(true);
+  const [counterSaving, setCounterSaving] = useState(false);
+  const [counterSuccess, setCounterSuccess] = useState<string | null>(null);
+  const [counterError, setCounterError] = useState<string | null>(null);
+
+  const fetchCounter = useCallback(async () => {
+    setCounterLoading(true);
+    setCounterError(null);
+    try {
+      const res = await cmsApi.getDonorCounterSettings();
+      if (res?.data) {
+        const val = res.data.count ?? 0;
+        setCounterCount(val);
+        setCounterInput(String(val));
+      }
+    } catch (err) {
+      setCounterError(cmsErrorMessage(err, "Failed to load counter settings"));
+    } finally {
+      setCounterLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchCounter();
+  }, [fetchCounter]);
+
+  // Derive unique patient options directly from donors returned by the get all donors API
+  useEffect(() => {
+    if (donors.length === 0) return;
+    setPatientOptions((prev) => {
+      const map = new Map<string, string>();
+      for (const opt of prev) {
+        if (opt.value) map.set(opt.value, opt.label);
+      }
+      for (const d of donors) {
+        if (d.patientStory?.id && d.patientStory?.title) {
+          map.set(d.patientStory.id, d.patientStory.title);
+        }
+      }
+      if (map.size === 0) return [];
+      return [
+        { value: "", label: "All patients" },
+        ...Array.from(map.entries()).map(([id, title]) => ({
+          value: id,
+          label: title,
+        })),
+      ];
+    });
+  }, [donors]);
+
+  const handleSaveCounter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = parseInt(counterInput.trim(), 10);
+    if (Number.isNaN(parsed) || parsed < 0) {
+      setCounterError("Please enter a valid non-negative integer (e.g. 1500).");
+      return;
+    }
+    setCounterSaving(true);
+    setCounterError(null);
+    setCounterSuccess(null);
+    try {
+      const res = await cmsApi.updateDonorCounterSettings(parsed);
+      const updated = res.data?.count ?? parsed;
+      setCounterCount(updated);
+      setCounterInput(String(updated));
+      setCounterSuccess(`Counter updated to ${updated}!`);
+      setTimeout(() => setCounterSuccess(null), 4000);
+    } catch (err) {
+      setCounterError(cmsErrorMessage(err, "Failed to update donor counter settings"));
+    } finally {
+      setCounterSaving(false);
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -78,6 +161,7 @@ export default function DonorsListPage() {
         search: search || undefined,
         status: status || undefined,
         donationCategory: category || undefined,
+        patientStoryId: patientStoryId || undefined,
         receiptEmailStatus: emailStatus || undefined,
       });
       setDonors(res.data ?? []);
@@ -87,7 +171,7 @@ export default function DonorsListPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, status, category, emailStatus]);
+  }, [page, search, status, category, patientStoryId, emailStatus]);
 
   useEffect(() => {
     void load();
@@ -112,6 +196,66 @@ export default function DonorsListPage() {
           {error}
         </Typography>
       ) : null}
+
+      {/* Website Donor Display Counter Settings */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle>Website Donor Display Counter</CardTitle>
+              <CardDescription>
+                Configure the donor count displayed in the website donation form (&ldquo;kind donors have contributed this month&rdquo;).
+              </CardDescription>
+            </div>
+            {counterSuccess ? (
+              <span className="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-3 py-1">
+                {counterSuccess}
+              </span>
+            ) : null}
+            {counterError ? (
+              <span className="text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-1">
+                {counterError}
+              </span>
+            ) : null}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSaveCounter} className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <label htmlFor="donor-counter-input" className="text-sm font-medium text-cms-muted">
+                Display Count:
+              </label>
+              <Input
+                id="donor-counter-input"
+                type="number"
+                min="0"
+                step="1"
+                required
+                className="w-36 h-9"
+                value={counterInput}
+                onChange={(e) => setCounterInput(e.target.value)}
+                placeholder="e.g. 1500"
+                disabled={counterLoading || counterSaving}
+              />
+            </div>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={counterLoading || counterSaving}
+              className="bg-cms-primary text-white hover:bg-cms-primary/90"
+            >
+              {counterSaving ? "Saving…" : "Save Counter"}
+            </Button>
+            {counterLoading ? (
+              <span className="text-xs text-cms-muted">Loading count…</span>
+            ) : (
+              <span className="text-xs text-cms-muted">
+                Current active count on website: <strong className="font-semibold text-foreground">{counterCount ?? 0}</strong>
+              </span>
+            )}
+          </form>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -152,6 +296,18 @@ export default function DonorsListPage() {
                 setCategory(next as DonationCategory | "");
               }}
             />
+            {patientOptions.length > 0 && (
+              <CmsSelect
+                size="sm"
+                className="sm:w-48"
+                value={patientStoryId}
+                options={patientOptions}
+                onChange={(next) => {
+                  setPage(1);
+                  setPatientStoryId(next);
+                }}
+              />
+            )}
             <CmsSelect
               size="sm"
               className="sm:w-40"
@@ -171,6 +327,7 @@ export default function DonorsListPage() {
                   <TableHead>Name</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Category</TableHead>
+                  <TableHead>Patient</TableHead>
                   <TableHead>Country</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Email</TableHead>
@@ -180,7 +337,7 @@ export default function DonorsListPage() {
               <TableBody>
                 {donors.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-cms-muted">
+                    <TableCell colSpan={8} className="text-cms-muted">
                       No donations yet.
                     </TableCell>
                   </TableRow>
@@ -200,6 +357,19 @@ export default function DonorsListPage() {
                       </TableCell>
                       <TableCell className="whitespace-nowrap">
                         {donor.donationCategory || "General Funds"}
+                      </TableCell>
+                      <TableCell className="max-w-[220px]">
+                        {donor.patientStory?.title ? (
+                          <Link
+                            href={`/admin/patients/${donor.patientStory.id}`}
+                            className="truncate text-sm font-medium text-cms-primary hover:underline block"
+                            title={donor.patientStory.title}
+                          >
+                            {donor.patientStory.title}
+                          </Link>
+                        ) : (
+                          <span className="text-xs text-cms-muted">—</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <span className="block">

@@ -31,6 +31,7 @@ export const DONATION_CATEGORIES = [
   "Psychological Support",
   "Research & Innovation",
   "General Funds",
+  "Patient Specific",
 ] as const;
 
 export type DonationCategory = (typeof DONATION_CATEGORIES)[number];
@@ -46,9 +47,11 @@ export type CreateDonationPayload = {
   currency?: string;
   pan?: string;
   message?: string;
-  /** Omitted → backend records "General Funds". */
+  /** Omitted → backend records "General Funds" (or "Patient Specific" if patientStoryId is set). */
   donationCategory?: DonationCategory;
   amount: number;
+  /** UUID of the patient story if donated from a patient's story page */
+  patientStoryId?: string;
 };
 
 export type VerifyDonationPayload = {
@@ -88,6 +91,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export type CurrentMonthDonorCount = {
+  count: number;
+  month: number;
+  year: number;
+  monthName: string;
+};
+
 export const donorsApi = {
   createOrder: (payload: CreateDonationPayload) =>
     request<Envelope<DonationCheckout>>("/donors/orders", {
@@ -100,4 +110,8 @@ export const donorsApi = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+
+  getMonthlyCount: () =>
+    request<Envelope<CurrentMonthDonorCount>>("/donors/monthly-count"),
 };
+

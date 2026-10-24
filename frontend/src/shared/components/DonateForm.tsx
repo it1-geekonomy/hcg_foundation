@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Check, Lock } from "lucide-react";
 import Typography from "@/lib/Typography";
@@ -23,6 +23,7 @@ import {
   formatDonationAmount,
   getDonationCurrency,
 } from "@/domains/home/constants/donation-currency";
+import { donorsApi } from "@/shared/lib/donors-api";
 import {
   CountUp,
   DonateCard,
@@ -35,7 +36,15 @@ import {
   useSectionInView,
 } from "./donateAnimation";
 
-export default function DonateSection() {
+export type DonateFormProps = {
+  patientStoryId?: string;
+  patientStoryName?: string;
+};
+
+export default function DonateSection({
+  patientStoryId,
+  patientStoryName,
+}: DonateFormProps = {}) {
   const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
   const country = getDonationCountry(countryCode);
   const currency: DonationCurrencyCode = country.currency;
@@ -51,6 +60,22 @@ export default function DonateSection() {
   const [termsError, setTermsError] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
   const [countryChanged, setCountryChanged] = useState(false);
+  const [donorCount, setDonorCount] = useState<number>(126);
+
+  useEffect(() => {
+    let cancelled = false;
+    donorsApi
+      .getMonthlyCount()
+      .then((res) => {
+        if (!cancelled && typeof res?.data?.count === "number" && res.data.count > 0) {
+          setDonorCount(res.data.count);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const { ref: sectionRef, inView, live } = useSectionInView<HTMLElement>();
 
@@ -136,7 +161,9 @@ export default function DonateSection() {
           as="p"
           className="w-full max-w-sm leading-relaxed text-white/70 font-argestadisplay font-bold"
         >
-          Your support provides cancer care, emotional support, and financial aid to those in need.
+          {patientStoryName
+            ? `Your support provides cancer care, emotional support, and financial aid for ${patientStoryName}.`
+            : "Your support provides cancer care, emotional support, and financial aid to those in need."}
         </Typography>
       </DonateItem>
 
@@ -317,8 +344,7 @@ export default function DonateSection() {
           as="p"
           className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/90"
         >
-          <CountUp to={126} /> kind donors have contributed this month. Join
-          with them today. ❤️
+          <CountUp to={donorCount} /> kind donors have contributed this month. Join them today. ❤️
         </Typography>
       </DonateItem>
 
@@ -379,6 +405,9 @@ export default function DonateSection() {
             amount={donationAmount}
             currency={currency}
             countryCode={countryCode}
+            donorCount={donorCount}
+            patientStoryId={patientStoryId}
+            patientStoryName={patientStoryName}
             onClose={() => setDetailsOpen(false)}
             onAmountChange={(next) => {
               setIsCustom(true);

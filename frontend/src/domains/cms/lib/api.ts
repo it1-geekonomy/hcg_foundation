@@ -34,6 +34,7 @@ import type {
   DonationStatus,
   ReceiptEmailStatus,
   Donor,
+  DonorCounterSettings,
   TeamType,
   UpdateFundraisingCampaignPayload,
   UpdateHomeBannerPayload,
@@ -63,6 +64,8 @@ export type ListQuery = {
   donationCategory?: DonationCategory;
   /** Donors only — query param `receiptEmailStatus` */
   receiptEmailStatus?: ReceiptEmailStatus;
+  /** Donors only — query param `patientStoryId` */
+  patientStoryId?: string;
   includeDeleted?: boolean;
   onlyDeleted?: boolean;
 };
@@ -80,6 +83,9 @@ function toQuery(params?: ListQuery) {
   }
   if (params?.receiptEmailStatus) {
     q.set("receiptEmailStatus", params.receiptEmailStatus);
+  }
+  if (params?.patientStoryId) {
+    q.set("patientStoryId", params.patientStoryId);
   }
   if (params?.includeDeleted === true) q.set("includeDeleted", "true");
   if (params?.onlyDeleted === true) q.set("onlyDeleted", "true");
@@ -1205,6 +1211,15 @@ export const cmsApi = {
       method: "POST",
     }),
 
+  getDonorCounterSettings: () =>
+    request<ApiEnvelope<DonorCounterSettings>>("/donors/counter-settings"),
+
+  updateDonorCounterSettings: (count: number) =>
+    request<ApiEnvelope<DonorCounterSettings>>("/donors/counter-settings", {
+      method: "PATCH",
+      body: JSON.stringify({ count }),
+    }),
+
   listFundraisingCampaigns: (params?: ListQuery) =>
     request<Paginated<FundraisingCampaign>>(
       `/fundraising-campaigns${toQuery({ page: 1, limit: 20, ...params })}`
@@ -1542,27 +1557,31 @@ export const publicAnnualReportsApi = {
 
 /** Public site: published projects */
 export const publicProjectsApi = {
-  listPublished: (params?: Omit<ListQuery, "status">) =>
+  listPublished: (params?: Omit<ListQuery, "status">, init?: RequestInit) =>
     request<Paginated<CmsProject>>(
-      `/projects/published${toQuery({ page: 1, limit: 12, ...params })}`
+      `/projects/published${toQuery({ page: 1, limit: 12, ...params })}`,
+      { next: { revalidate: 60 }, ...init } as RequestInit
     ),
 
-  getBySlug: (slug: string) =>
+  getBySlug: (slug: string, init?: RequestInit) =>
     request<ApiEnvelope<{ detail: CmsProject; related: Paginated<CmsProject> }>>(
-      `/projects/published/slug/${encodeURIComponent(slug)}`
+      `/projects/published/slug/${encodeURIComponent(slug)}`,
+      { next: { revalidate: 60 }, ...init } as RequestInit
     ),
 };
 
 /** Public site: published events */
 export const publicEventsApi = {
-  listPublished: (params?: Omit<ListQuery, "status">) =>
+  listPublished: (params?: Omit<ListQuery, "status">, init?: RequestInit) =>
     request<Paginated<CmsEvent>>(
-      `/events/published${toQuery({ page: 1, limit: 10, ...params })}`
+      `/events/published${toQuery({ page: 1, limit: 10, ...params })}`,
+      { next: { revalidate: 60 }, ...init } as RequestInit
     ),
 
-  getBySlug: (slug: string) =>
+  getBySlug: (slug: string, init?: RequestInit) =>
     request<ApiEnvelope<{ detail: CmsEvent; related: Paginated<CmsEvent> }>>(
-      `/events/published/slug/${encodeURIComponent(slug)}`
+      `/events/published/slug/${encodeURIComponent(slug)}`,
+      { next: { revalidate: 60 }, ...init } as RequestInit
     ),
 };
 
@@ -1582,14 +1601,16 @@ export const publicHomeBannersApi = {
 export const publicLegalApi = {
   getPublishedPrivacyPolicy: async (): Promise<LegalPage | null> => {
     const res = await request<Paginated<LegalPage>>(
-      `/privacy-policy/published${toQuery({ page: 1, limit: 1 })}`
+      `/privacy-policy/published${toQuery({ page: 1, limit: 1 })}`,
+      { next: { revalidate: 3600 } } as RequestInit
     );
     return res.data?.[0] ?? null;
   },
 
   getPublishedTerms: async (): Promise<LegalPage | null> => {
     const res = await request<ApiEnvelope<LegalPage | null>>(
-      "/terms-and-conditions/published"
+      "/terms-and-conditions/published",
+      { next: { revalidate: 3600 } } as RequestInit
     );
     return res.data ?? null;
   },
@@ -1597,22 +1618,25 @@ export const publicLegalApi = {
 
 /** Public site: published patient stories */
 export const publicPatientStoriesApi = {
-  listPublished: (params?: Omit<ListQuery, "status">) =>
+  listPublished: (params?: Omit<ListQuery, "status">, init?: RequestInit) =>
     request<Paginated<PatientStory>>(
-      `/patient-stories/published${toQuery({ page: 1, limit: 12, ...params })}`
+      `/patient-stories/published${toQuery({ page: 1, limit: 12, ...params })}`,
+      { next: { revalidate: 60 }, ...init } as RequestInit
     ),
 
-  getBySlug: (slug: string, limit = 6, page = 1) =>
+  getBySlug: (slug: string, limit = 6, page = 1, init?: RequestInit) =>
     request<ApiEnvelope<{ detail: PatientStory; related: Paginated<PatientStory> }>>(
-      `/patient-stories/published/slug/${encodeURIComponent(slug)}?limit=${limit}&page=${page}`
+      `/patient-stories/published/slug/${encodeURIComponent(slug)}?limit=${limit}&page=${page}`,
+      { next: { revalidate: 60 }, ...init } as RequestInit
     ),
 };
 
 /** Public site: published patient testimonials */
 export const publicPatientTestimonialsApi = {
-  listPublished: (params?: Omit<ListQuery, "status">) =>
+  listPublished: (params?: Omit<ListQuery, "status">, init?: RequestInit) =>
     request<Paginated<PatientTestimonial>>(
-      `/patient-testimonials/published${toQuery({ page: 1, limit: 20, ...params })}`
+      `/patient-testimonials/published${toQuery({ page: 1, limit: 20, ...params })}`,
+      { next: { revalidate: 60 }, ...init } as RequestInit
     ),
 };
 

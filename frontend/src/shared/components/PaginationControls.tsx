@@ -76,6 +76,7 @@ export default function PaginationControls({
         getPageHref && currentPage > 1 ? (
           <Link
             href={getPageHref(currentPage - 1)}
+            rel="nofollow"
             onClick={(e) => {
               handlePrev();
             }}
@@ -113,6 +114,7 @@ export default function PaginationControls({
                 <Link
                   key={pageNum}
                   href={getPageHref(pageNum)}
+                  rel="nofollow"
                   onClick={() => handlePageClick(pageNum)}
                   aria-label={`Go to page ${pageNum}`}
                   className={dotClass}
@@ -160,6 +162,7 @@ export default function PaginationControls({
                 <Link
                   key={pageNum}
                   href={getPageHref(pageNum)}
+                  rel="nofollow"
                   onClick={() => handlePageClick(pageNum)}
                   aria-label={`Go to page ${pageNum}`}
                   aria-current={isActive ? "page" : undefined}
@@ -191,6 +194,7 @@ export default function PaginationControls({
         getPageHref && currentPage < totalPages ? (
           <Link
             href={getPageHref(currentPage + 1)}
+            rel="nofollow"
             onClick={(e) => {
               handleNext();
             }}

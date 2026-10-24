@@ -8,6 +8,7 @@ import {
   isIndiaCountry,
 } from "@/domains/home/constants/countries";
 import { nationalPhoneDigits } from "@/shared/lib/phone";
+import { contactApi } from "@/shared/lib/participate-api";
 
 // NOTE: adjust this to the exact Figma hex if it differs — closest
 // warm-cream card tone matched from the reference screenshots.
@@ -39,6 +40,8 @@ interface FormErrors {
 
 export default function ContactFormSection() {
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
     phone: "",
@@ -57,6 +60,8 @@ export default function ContactFormSection() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    if (submitError) setSubmitError(null);
+    if (formSubmitted) setFormSubmitted(false);
 
     if (name === "fullName") {
       if (/\d/.test(value)) {
@@ -99,7 +104,7 @@ export default function ContactFormSection() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const newErrors: FormErrors = {};
@@ -137,7 +142,35 @@ export default function ContactFormSection() {
     }
 
     setErrors({});
-    setFormSubmitted(true);
+    setSubmitting(true);
+    setSubmitError(null);
+
+    const fullPhone = national ? `${country.dial}${national}` : "";
+
+    try {
+      await contactApi.submit({
+        fullName: formData.fullName.trim(),
+        phone: fullPhone || undefined,
+        email: formData.email.trim() || undefined,
+        message: formData.message.trim() || undefined,
+      });
+
+      setFormSubmitted(true);
+      setFormData({
+        fullName: "",
+        phone: "",
+        email: "",
+        message: "",
+      });
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error && err.message
+          ? err.message
+          : "Failed to submit message. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -319,16 +352,29 @@ export default function ContactFormSection() {
             )}
           </div>
 
+          {submitError && (
+            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-center">
+              <Typography
+                variant="caption-2"
+                as="p"
+                className="font-manrope text-xs text-red-700"
+              >
+                {submitError}
+              </Typography>
+            </div>
+          )}
+
           <button
             type="submit"
-            className="w-full max-w-[340px] mx-auto lg:max-w-none lg:mx-0 lg:w-full rounded-md bg-[#FCCC2D] py-3 cursor-pointer"
+            disabled={submitting}
+            className="w-full max-w-[340px] mx-auto lg:max-w-none lg:mx-0 lg:w-full rounded-md bg-[#FCCC2D] py-3 cursor-pointer hover:bg-[#FCCC2D]/90 disabled:opacity-60 disabled:cursor-not-allowed transition"
           >
             <Typography
               variant="body-8"
               as="span"
               className="font-manrope font-semibold text-[#505050]"
             >
-              Submit Message
+              {submitting ? "Submitting…" : "Submit Message"}
             </Typography>
           </button>
 

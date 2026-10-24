@@ -80,6 +80,9 @@ type Props = {
   countryCode: string;
   /** Where the donor wants the money to go; omitted → General Funds. */
   donationCategory?: DonationCategory;
+  donorCount?: number;
+  patientStoryId?: string;
+  patientStoryName?: string;
   onClose: () => void;
   onAmountChange?: (amount: number) => void;
 };
@@ -108,6 +111,9 @@ export default function DonateDetailsModal({
   currency,
   countryCode,
   donationCategory,
+  donorCount,
+  patientStoryId,
+  patientStoryName,
   onClose,
   onAmountChange,
 }: Props) {
@@ -120,6 +126,26 @@ export default function DonateDetailsModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<string | null>(null);
+  const [liveCount, setLiveCount] = useState<number>(donorCount ?? 126);
+
+  useEffect(() => {
+    if (donorCount !== undefined && donorCount > 0) {
+      setLiveCount(donorCount);
+      return;
+    }
+    let cancelled = false;
+    donorsApi
+      .getMonthlyCount()
+      .then((res) => {
+        if (!cancelled && typeof res?.data?.count === "number" && res.data.count > 0) {
+          setLiveCount(res.data.count);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [donorCount]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && !window.Razorpay) {
@@ -241,6 +267,7 @@ export default function DonateDetailsModal({
         message: message.trim() || undefined,
         donationCategory,
         amount: amountValue,
+        patientStoryId: patientStoryId?.trim() || undefined,
       });
 
       const checkout = res.data;
@@ -344,7 +371,9 @@ export default function DonateDetailsModal({
                 as="p"
                 className="mt-3 wrap-break-word px-2 font-argestadisplay font-light leading-snug text-white/70 sm:px-4"
               >
-                Your donation of {formattedAmount} {currency} was received.
+                {patientStoryName
+                  ? `Your donation of ${formattedAmount} ${currency} for ${patientStoryName} was received.`
+                  : `Your donation of ${formattedAmount} ${currency} was received.`}
               </Typography>
               <Typography
                 variant="body-8"
@@ -386,8 +415,9 @@ export default function DonateDetailsModal({
                   as="p"
                   className="hidden max-w-[360px] font-argestadisplay font-light leading-snug text-white/70 [@media(min-width:640px)_and_(min-height:761px)]:block"
                 >
-                  Your support provides cancer care, emotional support, and
-                  financial aid to those in need.
+                  {patientStoryName
+                    ? `Your support provides cancer care, emotional support, and financial aid for ${patientStoryName}.`
+                    : "Your support provides cancer care, emotional support, and financial aid to those in need."}
                 </Typography>
               </div>
 
@@ -602,7 +632,7 @@ export default function DonateDetailsModal({
                   as="p"
                   className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/90"
                 >
-                  126 kind donors have contributed this month. Join with them
+                  {liveCount} kind donors have contributed this month. Join with them
                   today. ❤️
                 </Typography>
               </div>

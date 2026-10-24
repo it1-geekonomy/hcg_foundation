@@ -6,9 +6,12 @@ import Typography from "@/lib/Typography";
 import FormField from "@/shared/forms/FormField";
 import PhoneInputField from "@/shared/forms/PhoneInputField";
 import FormSubmitButton from "@/shared/forms/FormSubmitButton";
+import { contactApi } from "@/shared/lib/participate-api";
 
 export default function ContactForm({ className = "" }: { className?: string }) {
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -26,6 +29,7 @@ export default function ContactForm({ className = "" }: { className?: string }) 
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    if (submitError) setSubmitError(null);
 
     if (name === "fullName") {
       // Prevent numbers from being entered into the Name field
@@ -59,7 +63,7 @@ export default function ContactForm({ className = "" }: { className?: string }) 
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const newErrors: { fullName?: string; email?: string } = {};
@@ -84,7 +88,33 @@ export default function ContactForm({ className = "" }: { className?: string }) 
     }
 
     setErrors({});
-    setFormSubmitted(true);
+    setSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      await contactApi.submit({
+        fullName: formData.fullName.trim(),
+        phone: formData.phone.trim() || undefined,
+        email: formData.email.trim() || undefined,
+        message: formData.message.trim() || undefined,
+      });
+
+      setFormSubmitted(true);
+      setFormData({
+        fullName: "",
+        phone: "",
+        email: "",
+        message: "",
+      });
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error && err.message
+          ? err.message
+          : "Failed to submit message. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -164,8 +194,23 @@ export default function ContactForm({ className = "" }: { className?: string }) 
             onChange={handleChange}
           />
 
-          <FormSubmitButton className="!mt-1 !py-2.5 sm:!py-3">
-            Submit Message
+          {submitError && (
+            <div className="rounded-md border border-red-200 bg-red-50 p-2.5 text-center">
+              <Typography
+                variant="caption-2"
+                as="p"
+                className="font-manrope text-xs text-red-700"
+              >
+                {submitError}
+              </Typography>
+            </div>
+          )}
+
+          <FormSubmitButton
+            disabled={submitting}
+            className="!mt-1 !py-2.5 sm:!py-3 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {submitting ? "Submitting…" : "Submit Message"}
           </FormSubmitButton>
         </form>
       )}

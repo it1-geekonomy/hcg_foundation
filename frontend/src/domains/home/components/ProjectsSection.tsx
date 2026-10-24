@@ -987,7 +987,7 @@ export default function ProjectsSection({
                   aria-hidden="true"
                   fill
                   sizes="(max-width: 639px) calc(100vw - 4rem), (max-width: 1023px) 80vw, 0px"
-                  quality={55}
+                  quality={50}
                   className="m-card-image absolute inset-0 h-full w-full object-cover will-change-transform"
                 />
               ) : (

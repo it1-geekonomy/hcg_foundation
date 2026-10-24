@@ -267,6 +267,13 @@ export type DonationStatus = "pending" | "paid" | "failed" | "refunded";
 
 export type { DonationCategory };
 
+export type DonorCounterSettings = {
+  id: string;
+  count: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type Donor = {
   id: string;
   fullName: string;
@@ -292,6 +299,12 @@ export type Donor = {
   receiptEmailNextAttemptAt?: string | null;
   receiptEmailSentAt?: string | null;
   receiptEmailError?: string | null;
+  patientStoryId?: string | null;
+  patientStory?: {
+    id: string;
+    title: string;
+    slug: string;
+  } | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -380,6 +393,7 @@ export type LeadsInternship = {
   languages?: string | null;
   computerSkills?: string | null;
   message?: string | null;
+  cv?: string | null;
   termsAccepted: boolean;
   deletedAt?: string | null;
   createdAt: string;
@@ -397,6 +411,7 @@ export type UpdateLeadsInternshipPayload = Partial<{
   languages: string;
   computerSkills: string;
   message: string;
+  cv: string;
   termsAccepted: boolean;
 }>;
 

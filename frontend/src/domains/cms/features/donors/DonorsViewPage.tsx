@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { cmsApi } from "@/domains/cms/lib/api";
 import type { Donor } from "@/domains/cms/lib/types";
@@ -99,6 +100,19 @@ export default function DonorsViewPage() {
               label="Category"
               value={donor.donationCategory || "General Funds"}
             />
+            {donor.patientStory ? (
+              <CmsDetailRow
+                label="Supported patient"
+                value={
+                  <Link
+                    href={`/admin/patients/${donor.patientStory.id}`}
+                    className="font-medium text-cms-primary underline-offset-2 hover:underline"
+                  >
+                    {donor.patientStory.title}
+                  </Link>
+                }
+              />
+            ) : null}
             <CmsDetailRow
               label="Status"
               value={

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
@@ -10,23 +10,31 @@ import {
   applyDeletedFilter,
   restoreSoftDeleted,
 } from '../../common/utils/soft-delete';
+import { EmailService } from '../email/email.service';
 import { CreateLeadsContactDto } from './dto/create-leads-contact.dto';
 import { UpdateLeadsContactDto } from './dto/update-leads-contact.dto';
 import { LeadsContact } from './entities/leads-contact.entity';
 
 @Injectable()
 export class LeadsContactService {
+  private readonly logger = new Logger(LeadsContactService.name);
+
   constructor(
     @InjectRepository(LeadsContact)
     private readonly repo: Repository<LeadsContact>,
+    private readonly emailService: EmailService,
   ) {}
 
   async create(dto: CreateLeadsContactDto): Promise<LeadsContact> {
     const entity = this.repo.create(dto);
-    return await this.repo.save(entity);
+    const saved = await this.repo.save(entity);
+    await this.emailService.sendContactNotification(saved);
+    return saved;
   }
 
-  async findAll(query: PaginationQueryDto): Promise<PaginatedResult<LeadsContact>> {
+  async findAll(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedResult<LeadsContact>> {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
 
