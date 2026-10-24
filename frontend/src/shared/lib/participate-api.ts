@@ -88,6 +88,13 @@ function postJson<T>(path: string, payload: unknown) {
   });
 }
 
+export type ContactLeadPayload = {
+  fullName: string;
+  phone?: string;
+  email?: string;
+  message?: string;
+};
+
 export const participateApi = {
   submitFundraisingCampaign: (payload: FundraisingCampaignPayload) =>
     postJson("/fundraising-campaigns", payload),
@@ -107,4 +114,12 @@ export const participateApi = {
 
   submitPartnershipInquiry: (payload: PartnershipInquiryPayload) =>
     postJson("/partnership-inquiries", payload),
+
+  submitContactLead: (payload: ContactLeadPayload) =>
+    postJson("/leads-contact", payload),
+};
+
+export const contactApi = {
+  submit: (payload: ContactLeadPayload) =>
+    postJson("/leads-contact", payload),
 };

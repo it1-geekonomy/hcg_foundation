@@ -31,6 +31,7 @@ export const DONATION_CATEGORIES = [
   "Psychological Support",
   "Research & Innovation",
   "General Funds",
+  "Patient Specific",
 ] as const;
 
 export type DonationCategory = (typeof DONATION_CATEGORIES)[number];
@@ -46,9 +47,11 @@ export type CreateDonationPayload = {
   currency?: string;
   pan?: string;
   message?: string;
-  /** Omitted → backend records "General Funds". */
+  /** Omitted → backend records "General Funds" (or "Patient Specific" if patientStoryId is set). */
   donationCategory?: DonationCategory;
   amount: number;
+  /** UUID of the patient story if donated from a patient's story page */
+  patientStoryId?: string;
 };
 
 export type VerifyDonationPayload = {
