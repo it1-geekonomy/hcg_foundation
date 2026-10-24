@@ -27,9 +27,13 @@ import { Public } from '../../common/decorators/public.decorator';
 import { CreateDonationDto } from './dto/create-donation.dto';
 import { ListDonorsQueryDto } from './dto/list-donors-query.dto';
 import { VerifyDonationDto } from './dto/verify-donation.dto';
+import { CreateSubscriptionDto } from './dto/create-subscription.dto';
+import { VerifySubscriptionDto } from './dto/verify-subscription.dto';
+import { ListSubscriptionsQueryDto } from './dto/list-subscriptions-query.dto';
 import { UpdateDonorCounterSettingsDto } from './dto/update-donor-counter-settings.dto';
 import { Donor } from './entities/donor.entity';
 import { DonorCounterSettings } from './entities/donor-counter-settings.entity';
+import { DonorSubscription } from './entities/donor-subscription.entity';
 import { DonorsService } from './donors.service';
 
 @ApiTags(ApiTagsConst.DONATION)
@@ -121,6 +125,82 @@ export class DonorsController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Donor counter settings updated successfully',
+      data,
+    };
+  }
+
+  @Public()
+  @Post('subscriptions')
+  @ApiOperation({
+    summary: 'Start recurring donation subscription',
+    description:
+      'Creates Razorpay Customer, Plan, and Subscription. Frontend opens Checkout with `subscription_id` and `keyId`, then calls POST /donors/subscriptions/verify.',
+  })
+  @ApiCreatedResponse({ description: 'Razorpay subscription checkout payload' })
+  async createSubscription(@Body() dto: CreateSubscriptionDto) {
+    const data = await this.service.createSubscription(dto);
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Donation subscription initiated successfully',
+      data,
+    };
+  }
+
+  @Public()
+  @Post('subscriptions/verify')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Verify recurring donation subscription (website)',
+    description:
+      'Call from the Razorpay Checkout success handler. Confirms subscription signature, activates subscription, and creates first month donor receipt.',
+  })
+  async verifySubscription(@Body() dto: VerifySubscriptionDto) {
+    const data = await this.service.verifySubscription(dto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Subscription verified and activated successfully',
+      data,
+    };
+  }
+
+  @Get('subscriptions')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List donation subscriptions (CMS)' })
+  @ApiOkResponse({ description: 'Paginated CMS subscriptions list' })
+  async findAllSubscriptions(@Query() query: ListSubscriptionsQueryDto) {
+    const result = await this.service.findAllSubscriptions(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message:
+        result.meta.total === 0
+          ? 'No subscriptions found'
+          : 'Subscriptions fetched successfully',
+      ...result,
+    };
+  }
+
+  @Get('subscriptions/:id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get subscription by id with donations history (CMS)' })
+  @ApiOkResponse({ type: DonorSubscription })
+  async findOneSubscription(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.findOneSubscription(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Subscription fetched successfully',
+      data,
+    };
+  }
+
+  @Post('subscriptions/:id/cancel')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Cancel recurring donation subscription (CMS / donor)' })
+  async cancelSubscription(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.service.cancelSubscription(id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Subscription cancelled successfully',
       data,
     };
   }

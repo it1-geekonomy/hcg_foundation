@@ -5,9 +5,10 @@ import { DonationStatus } from '../../../common/enums/donation-status.enum';
 import { DonationCategory } from '../../../common/enums/donation-category.enum';
 import { ReceiptEmailStatus } from '../../../common/enums/receipt-email-status.enum';
 import { PatientStory } from '../../patient-stories/entities/patient-story.entity';
+import { DonorSubscription } from './donor-subscription.entity';
 
 /**
- * Donors table with optional relation to patient stories.
+ * Donors table with optional relation to patient stories and subscriptions.
  */
 @Entity('donors')
 export class Donor extends BaseEntity {
@@ -134,4 +135,21 @@ export class Donor extends BaseEntity {
   @ManyToOne(() => PatientStory, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'patient_story_id' })
   patientStory?: PatientStory | null;
+
+  @ApiPropertyOptional({ example: 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d' })
+  @Index('idx_donors_subscription_id')
+  @Column({ name: 'subscription_id', type: 'uuid', nullable: true })
+  subscriptionId?: string | null;
+
+  @ApiPropertyOptional({ example: 'sub_K1234567890' })
+  @Index('idx_donors_razorpay_subscription_id')
+  @Column({ name: 'razorpay_subscription_id', type: 'varchar', length: 255, nullable: true })
+  razorpaySubscriptionId?: string | null;
+
+  @ManyToOne(() => DonorSubscription, (sub) => sub.donations, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'subscription_id' })
+  subscription?: DonorSubscription | null;
 }

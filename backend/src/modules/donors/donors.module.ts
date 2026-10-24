@@ -6,12 +6,18 @@ import { DonorsService } from './donors.service';
 import { DonorsController } from './donors.controller';
 import { Donor } from './entities/donor.entity';
 import { DonorCounterSettings } from './entities/donor-counter-settings.entity';
+import { DonorSubscription } from './entities/donor-subscription.entity';
 import { PatientStory } from '../patient-stories/entities/patient-story.entity';
 import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Donor, PatientStory, DonorCounterSettings]),
+    TypeOrmModule.forFeature([
+      Donor,
+      PatientStory,
+      DonorCounterSettings,
+      DonorSubscription,
+    ]),
     EmailModule,
   ],
   controllers: [DonorsController],
