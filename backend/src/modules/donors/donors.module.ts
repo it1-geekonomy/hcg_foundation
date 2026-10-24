@@ -18,6 +18,7 @@ import { EmailModule } from '../email/email.module';
       DonorCounterSettings,
       DonorSubscription,
     ]),
+    TypeOrmModule.forFeature([Donor, PatientStory]),
     EmailModule,
   ],
   controllers: [DonorsController],

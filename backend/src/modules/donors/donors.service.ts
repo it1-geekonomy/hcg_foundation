@@ -348,8 +348,6 @@ export class DonorsService {
 
     const qb = this.repo
       .createQueryBuilder('donor')
-      .leftJoin('donor.patientStory', 'patientStory')
-      .addSelect(['patientStory.id', 'patientStory.title', 'patientStory.slug'])
       .orderBy('donor.createdAt', 'DESC');
 
     if (query.status) {
@@ -378,7 +376,7 @@ export class DonorsService {
 
     if (query.search) {
       qb.andWhere(
-        '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search OR donor.country ILIKE :search OR donor.countryCode ILIKE :search OR donor.city ILIKE :search OR patientStory.title ILIKE :search)',
+        '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search OR donor.country ILIKE :search OR donor.countryCode ILIKE :search OR donor.city ILIKE :search)',
         { search: `%${query.search}%` },
       );
     }
@@ -582,38 +580,12 @@ export class DonorsService {
       : (dto.donationCategory || DonationCategory.GENERAL_FUNDS);
 
     try {
-      // 1. Check if this donor already has a Razorpay Customer ID in our database
-      let customerId: string | null = null;
-      const normalizedEmail = email ? email.trim().toLowerCase() : '';
-      let existingCustomerSub = await this.subscriptionRepo
-        .createQueryBuilder('sub')
-        .where('LOWER(TRIM(sub.email)) = :email', { email: normalizedEmail })
-        .andWhere('sub.razorpayCustomerId IS NOT NULL')
-        .orderBy('sub.createdAt', 'DESC')
-        .getOne();
-
-      if (!existingCustomerSub && phone) {
-        existingCustomerSub = await this.subscriptionRepo
-          .createQueryBuilder('sub')
-          .where('sub.phone = :phone', { phone })
-          .andWhere('sub.razorpayCustomerId IS NOT NULL')
-          .orderBy('sub.createdAt', 'DESC')
-          .getOne();
-      }
-
-      if (existingCustomerSub?.razorpayCustomerId) {
-        customerId = existingCustomerSub.razorpayCustomerId;
-        this.logger.log(
-          `Reusing existing Razorpay customer ID ${customerId} for ${email}`,
-        );
-      } else {
-        const customer = await this.razorpay.createCustomer({
-          name: fullName,
-          email: normalizedEmail,
-          contact: phone,
-        });
-        customerId = customer.id;
-      }
+      // 1. Create or link customer on Razorpay
+      const customer = await this.razorpay.createCustomer({
+        name: fullName,
+        email,
+        contact: phone,
+      });
 
       // 2. Check for an existing Razorpay Plan or create a new one
       let planId: string | null = null;
@@ -652,7 +624,7 @@ export class DonorsService {
       const rzpSub = await this.razorpay.createSubscription({
         planId,
         totalCount,
-        customerId: customerId || undefined,
+        customerId: customer.id,
         notes: {
           fullName: this.note(fullName),
           phone: this.note(phone, 20),
@@ -685,7 +657,7 @@ export class DonorsService {
           period,
           donationCategory,
           patientStoryId,
-          razorpayCustomerId: customerId,
+          razorpayCustomerId: customer.id,
           razorpayPlanId: planId,
           razorpaySubscriptionId: rzpSub.id,
           status: SubscriptionStatus.CREATED,
