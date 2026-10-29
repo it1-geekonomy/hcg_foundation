@@ -15,6 +15,8 @@ export interface FlipCardProps {
   flipOnHover?: boolean;
   duration?: number;
   returnDuration?: number;
+  /** ms the pointer may leave before the card turns back (stops flicker when brushing the edge). */
+  leaveDelay?: number;
 }
 
 export function FlipCard({
@@ -28,6 +30,7 @@ export function FlipCard({
   flipOnHover = true,
   duration = 0.55,
   returnDuration,
+  leaveDelay = 0,
 }: FlipCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [internalFlipped, setInternalFlipped] = useState(false);
@@ -41,6 +44,16 @@ export function FlipCard({
     : [0.4, 0.0, 0.2, 1];
 
   const isTouchRef = useRef(false);
+  const leaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearLeaveTimeout = () => {
+    if (leaveTimeoutRef.current) {
+      clearTimeout(leaveTimeoutRef.current);
+      leaveTimeoutRef.current = null;
+    }
+  };
+
+  useEffect(() => clearLeaveTimeout, []);
 
   const setFlip = (flipped: boolean) => {
     if (controlledFlipped === undefined) setInternalFlipped(flipped);
@@ -54,13 +67,19 @@ export function FlipCard({
       return;
     }
     isTouchRef.current = false;
+    clearLeaveTimeout();
     setFlip(true);
   };
 
   const handlePointerLeave = (e: React.PointerEvent) => {
     if (!flipOnHover) return;
     if (e.pointerType === "touch") return;
-    setFlip(false);
+    clearLeaveTimeout();
+    if (leaveDelay > 0) {
+      leaveTimeoutRef.current = setTimeout(() => setFlip(false), leaveDelay);
+    } else {
+      setFlip(false);
+    }
   };
 
   // On touch devices, tap outside flips the card back

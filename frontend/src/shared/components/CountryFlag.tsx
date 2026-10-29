@@ -1,11 +1,11 @@
 "use client";
 
-import type { ReactElement } from "react";
-import * as FlagIcons from "country-flag-icons/react/3x2";
 import { hasFlag } from "country-flag-icons";
 
-type FlagComponent = (props: { className?: string }) => ReactElement;
-
+/**
+ * Flags load as images from the /flags route (src/app/flags/[code]/route.ts). Importing the package's
+ * React flags pulls every country's SVG into the page bundle; as images only the visible ones download.
+ */
 export default function CountryFlag({
   code,
   className,
@@ -18,10 +18,16 @@ export default function CountryFlag({
     return <span className={className}>{code}</span>;
   }
 
-  const Flag = (FlagIcons as Record<string, FlagComponent>)[code];
-  if (!Flag) {
-    return <span className={className}>{code}</span>;
-  }
-
-  return <Flag className={className} />;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- tiny static SVG, the image optimizer adds nothing
+    <img
+      src={`/flags/${code}.svg`}
+      alt=""
+      aria-hidden
+      loading="lazy"
+      decoding="async"
+      draggable={false}
+      className={className}
+    />
+  );
 }

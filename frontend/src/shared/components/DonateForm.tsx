@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Check, Lock } from "lucide-react";
 import Typography from "@/lib/Typography";
-import DonateDetailsModal from "@/shared/components/DonateDetailsModal";
 import { Terms80GLink } from "@/shared/components/Terms80GDialog";
 import CountrySelect from "@/shared/components/CountrySelect";
 import {
@@ -35,6 +35,11 @@ import {
   Shake,
   useSectionInView,
 } from "./donateAnimation";
+
+// The details modal (and the phone-number metadata it needs) only opens on click, so it is kept out of the
+// page's initial bundle and fetched once the form scrolls into view.
+const loadDetailsModal = () => import("@/shared/components/DonateDetailsModal");
+const DonateDetailsModal = dynamic(loadDetailsModal, { ssr: false });
 
 export type DonateFormProps = {
   patientStoryId?: string;
@@ -78,6 +83,10 @@ export default function DonateSection({
   }, []);
 
   const { ref: sectionRef, inView, live } = useSectionInView<HTMLElement>();
+
+  useEffect(() => {
+    if (inView) void loadDetailsModal();
+  }, [inView]);
 
   const changeCountry = (nextCode: string) => {
     const next = getDonationCountry(nextCode);
@@ -424,7 +433,6 @@ export default function DonateSection({
               src={donatemobileimg}
               alt="Two people holding hands"
               fill
-              priority
               sizes="100vw"
               className="object-cover object-top"
             />
@@ -445,7 +453,6 @@ export default function DonateSection({
               src={donateBgImage}
               alt="Two people holding hands"
               fill
-              priority
               sizes="100vw"
               className="object-cover"
             />

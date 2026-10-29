@@ -25,7 +25,7 @@ import {
 } from "@/domains/home/constants/smile";
 import { motion } from "framer-motion";
 import FlipCard from "@/shared/components/FlipCard";
-import MirrorReveal from "@/shared/components/MirrorReveal";
+import MirrorReveal, { TEAM_DOOR_REVEAL } from "@/shared/components/MirrorReveal";
 import { DiagonalArrowIcon } from "@/shared/components/icons/ArrowIcons";
 import { publicPatientStoriesApi } from "@/domains/cms/lib/api";
 
@@ -301,7 +301,7 @@ const StoryCard = memo(function StoryCard({
   );
 
   const renderBackContent = (flipped: boolean) => (
-    <MirrorReveal isOpen={flipped} delay={0} duration={0.35}>
+    <MirrorReveal isOpen={flipped} {...TEAM_DOOR_REVEAL}>
       <div
         className={`relative h-full w-full flex flex-col justify-between items-center rounded-[1.2643rem] border-[0.0527rem] border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2] ${storyHtml ? "p-3.5 sm:p-[1.2rem]" : "p-[1.2rem]"
           }`}
@@ -372,6 +372,7 @@ const StoryCard = memo(function StoryCard({
             onFlipChange={handleFlipChange}
             flipOnHover={true}
             duration={0.42}
+            leaveDelay={120}
             front={frontContent}
             back={renderBackContent}
           />
@@ -405,6 +406,7 @@ const StoryCard = memo(function StoryCard({
             }}
             flipOnHover={true}
             duration={0.42}
+            leaveDelay={120}
             front={frontContent}
             back={renderBackContent}
           />
@@ -846,8 +848,12 @@ function SmileStoriesCarousel({
 
   const handleFlip = useCallback(
     (index: number, flipped: boolean) => {
-      setActiveFlippedIndex(flipped ? index : null);
-      isFlippedRef.current = flipped;
+      // A card's delayed un-flip (hover leave) must not close the card the pointer has moved on to.
+      setActiveFlippedIndex((prev) => {
+        const next = flipped ? index : prev === index ? null : prev;
+        isFlippedRef.current = next !== null;
+        return next;
+      });
 
       // Touch screens only: auto-scroll stops while a card is flipped, so a card
       // flipped at the edge would stay half off-screen. Glide it to the centre.

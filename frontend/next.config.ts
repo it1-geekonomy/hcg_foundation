@@ -1,13 +1,21 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // A stray lockfile in a parent folder otherwise makes Next guess the wrong workspace root.
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
+  outputFileTracingRoot: path.resolve(__dirname),
   poweredByHeader: false,
   compress: true,
   allowedDevOrigins: ["10.0.0.216"],
   devIndicators: false,
 
   experimental: {
+    // Ships the (small) stylesheet inside the HTML so first paint doesn't wait on separate CSS requests.
+    inlineCss: true,
     optimizePackageImports: [
       "lucide-react",
       "framer-motion",
