@@ -26,7 +26,9 @@ const nextConfig: NextConfig = {
   },
 
   images: {
-    formats: ["image/avif", "image/webp"],
+    // WebP only: AVIF encodes ~4x slower (~2.4s vs ~0.55s per uncached image on the server), which left
+    // heroes blank on the first visit to a page. Sources are already WebP.
+    formats: ["image/webp"],
     deviceSizes: [360, 480, 640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     qualities: [50, 55, 60, 65, 70, 75],
     // Optimized images keep a long cache. The default 60s is what PageSpeed flags.
