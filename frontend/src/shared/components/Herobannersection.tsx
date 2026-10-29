@@ -54,6 +54,7 @@ export default function Banner({
           width={1920}
           height={1080}
           priority
+          fetchPriority="high"
           sizes="100vw"
           className="col-start-1 row-start-1 block h-auto w-full object-contain lg:!h-[48vw] xl:!h-[42vw] lg:object-cover lg:object-center 2xl:hidden"
         />

@@ -42,7 +42,6 @@ export type HeroResponsiveLayout = {
   isMobile: boolean;
   overlayWidth: string;
   tileWidth: number;
-  tileBorder: number;
   contentTopPx: number;
   contentLeft: number;
   contentRight: number;
@@ -71,7 +70,6 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
       isMobile: true,
       overlayWidth: MOBILE_PANEL_WIDTH,
       tileWidth,
-      tileBorder: 0,
       // Copy starts just under the navbar so the longest stories fit above the chatbot.
       contentTopPx: MOBILE_CONTENT_TOP_PX,
       contentLeft: Math.round(tileWidth * MOBILE_TILE_PANEL_OVERLAP) + 8,
@@ -99,7 +97,6 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
       isMobile: false,
       overlayWidth: "42%",
       tileWidth,
-      tileBorder: 2,
       contentTopPx,
       contentLeft: 14 * mult,
       contentRight: 20 * mult,
@@ -127,7 +124,6 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
       isMobile: false,
       overlayWidth: `${lerp(40, 36, t).toFixed(1)}%`,
       tileWidth,
-      tileBorder: 1,
       contentTopPx,
       contentLeft: paddingLeft * mult,
       contentRight: paddingRight * mult,
@@ -151,7 +147,6 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
     isMobile: false,
     overlayWidth: "35%",
     tileWidth,
-    tileBorder: 1,
     contentTopPx,
     contentLeft: 18 * mult,
     contentRight: 24 * mult,
@@ -218,8 +213,12 @@ function HeroBackground({
   active: boolean;
   priority: boolean;
 }) {
+  // The outgoing photo stays on top and fades out over the new one, so the change looks the same
+  // scrolling down as scrolling up (otherwise a later story's photo would pop in on top).
+  const layer = active ? "z-0" : "z-[1]";
   const className = cn(
-    "absolute inset-0 z-0 h-full w-full object-cover transition-opacity duration-700",
+    "absolute inset-0 h-full w-full object-cover transition-opacity duration-700",
+    layer,
     active ? "opacity-100" : "opacity-0"
   );
 
@@ -230,6 +229,7 @@ function HeroBackground({
         alt=""
         fill
         priority={priority}
+        fetchPriority={priority ? "high" : undefined}
         quality={75}
         sizes="100vw"
         className={className}
@@ -270,7 +270,7 @@ function HeroBackground({
   }
 
   return (
-    <picture className="absolute inset-0 z-0 block">
+    <picture className={cn("absolute inset-0 block", layer)}>
       <source media="(max-width: 639px)" srcSet={mobileSet} sizes="100vw" />
       <source media="(min-width: 640px)" srcSet={desktopSet} sizes="100vw" />
       <img
@@ -318,7 +318,6 @@ function renderWordLines(
   text: string,
   active: boolean,
   exiting: boolean,
-  direction: 1 | -1,
   wordSpacing: string,
   animateWords = true
 ) {
@@ -339,45 +338,25 @@ function renderWordLines(
     );
   }
 
-  const translateIn = direction === 1 ? "translateY(110%)" : "translateY(-110%)";
-  const translateOut = direction === 1 ? "translateY(-110%)" : "translateY(110%)";
   let wordIndex = 0;
 
+  // Transform/opacity/blur/delay per state live in globals.css (.hero-words); each word only carries its index.
   return (
-    <span className="block">
+    <span
+      className="hero-words block"
+      data-state={active ? "active" : exiting ? "exiting" : "idle"}
+      style={{ "--hw-gap": wordSpacing } as CSSProperties}
+    >
       {lines.map((words, lineIdx) => (
         <span key={lineIdx} className="block">
           {words.length === 0 ? <br /> : null}
-          {words.map((word, idx) => {
-            const order = wordIndex++;
-            const delay = active
-              ? `${Math.min(order * 18, 300)}ms`
-              : `${Math.min(order * 8, 120)}ms`;
-
-            return (
-              <span
-                key={idx}
-                style={{ display: "inline-block", overflow: "hidden", verticalAlign: "bottom" }}
-              >
-                <span
-                  style={{
-                    display: "inline-block",
-                    transform: active ? "translateY(0)" : exiting ? translateOut : translateIn,
-                    opacity: active ? 1 : exiting ? 0 : 0,
-                    transition: `transform 650ms cubic-bezier(0.16, 1, 0.3, 1), opacity 400ms ease`,
-                    transitionDelay: delay,
-                    filter: active ? "blur(0px)" : exiting ? "blur(2px)" : "blur(0px)",
-                  }}
-                >
-                  {word}
-                </span>
-                {/* A real space (collapsed inside the fixed-width box) so copied and indexed text keeps word breaks */}
-                {idx < words.length - 1 && (
-                  <span style={{ display: "inline-block", width: wordSpacing }}> </span>
-                )}
-              </span>
-            );
-          })}
+          {words.map((word, idx) => (
+            <span key={idx} className="hw">
+              <span style={{ "--i": wordIndex++ } as CSSProperties}>{word}</span>
+              {/* A real space (collapsed inside the fixed-width box) so copied and indexed text keeps word breaks */}
+              {idx < words.length - 1 && <span className="hs"> </span>}
+            </span>
+          ))}
         </span>
       ))}
     </span>
@@ -388,13 +367,11 @@ function StoryTextBlock({
   step,
   active,
   exiting,
-  direction,
   layout,
 }: {
   step: HeroTileStep;
   active: boolean;
   exiting: boolean;
-  direction: 1 | -1;
   layout: HeroResponsiveLayout;
 }) {
   const frameRef = useRef<HTMLDivElement>(null);
@@ -464,18 +441,20 @@ function StoryTextBlock({
   // Phones animate the story as one block: a per-word cascade over 60+ words stutters and hides text mid-read.
   const animateWords = !layout.isMobile;
   const words = (text: string) =>
-    renderWordLines(text, active, exiting, direction, layout.wordSpacing, animateWords);
-  const blockShift = 14 * direction;
+    renderWordLines(text, active, exiting, layout.wordSpacing, animateWords);
+  // Same motion in both scroll directions: the new story rises in from below, the old one lifts out.
   const blockMotion: CSSProperties = animateWords
     ? {}
     : {
       opacity: active ? 1 : 0,
       transform: active
         ? "translateY(0)"
-        : `translateY(${exiting ? -blockShift : blockShift}px)`,
+        : `translateY(${exiting ? -14 : 14}px)`,
       transition: active
         ? "opacity 420ms ease 140ms, transform 560ms cubic-bezier(0.22,1,0.36,1) 140ms"
-        : "opacity 220ms ease, transform 300ms ease",
+        : exiting
+          ? "opacity 220ms ease, transform 300ms ease"
+          : "none",
     };
 
   return (
@@ -563,7 +542,6 @@ export default function TileScrollSection({
 
   const [activeStep, setActiveStep] = useState(0);
   const [exitStep, setExitStep] = useState<number | null>(null);
-  const [direction, setDirection] = useState<1 | -1>(1);
   // Same value on the server and the first client render (hydration-safe).
   const [layout, setLayout] = useState<HeroResponsiveLayout>(() =>
     initialIsMobile ? getResponsiveValues(390, 800) : getResponsiveValues(1280, 900)
@@ -580,7 +558,8 @@ export default function TileScrollSection({
   const scrollRafRef = useRef(0);
   // PERF: the pinned range only changes on resize, so it is measured then instead of on every scroll event.
   const pinnedRangeRef = useRef(0);
-  const navClearanceRef = useRef(getNavbarClearancePx());
+  // Measured in syncLayout (layout effect). Calling getNavbarClearancePx() here would force a reflow on every render.
+  const navClearanceRef = useRef(96);
   const layoutRef = useRef(layout);
   const layoutSizeRef = useRef("");
 
@@ -640,10 +619,8 @@ export default function TileScrollSection({
     (step: number, force = false) => {
       if (step === currentStepRef.current && !force) return;
       const prev = currentStepRef.current;
-      const dir: 1 | -1 = step > prev ? 1 : -1;
       currentStepRef.current = step;
 
-      setDirection(dir);
       setExitStep(prev);
       setActiveStep(step);
 
@@ -893,7 +870,6 @@ export default function TileScrollSection({
               step={step}
               active={activeStep === i}
               exiting={exitStep === i}
-              direction={direction}
               layout={layout}
             />
           ))}
@@ -921,10 +897,7 @@ export default function TileScrollSection({
               }
               : {
                 width: layout.tileWidth,
-                borderWidth: layout.tileBorder,
-                borderStyle: "solid",
-                borderColor: "white",
-                backgroundColor: "white",
+                backgroundColor: "#2B2410",
                 boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
                 transition: "transform 600ms cubic-bezier(0.4,0,0.2,1)",
                 ...(synced ? { right: layout.overlayWidth } : {}),
@@ -942,7 +915,8 @@ export default function TileScrollSection({
                 quality={65}
                 className={cn(
                   "object-cover transition-[opacity,transform] duration-500",
-                  activeStep === i ? "opacity-100" : "opacity-0",
+                  // Outgoing tile on top, fading out over the new one (same in both scroll directions).
+                  activeStep === i ? "z-0 opacity-100" : "z-[1] opacity-0",
                   layout.isMobile && (activeStep === i ? "scale-100" : "scale-110")
                 )}
                 sizes={`${layout.tileWidth * 2}px`}

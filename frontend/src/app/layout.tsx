@@ -19,9 +19,6 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     locale: "en_IN",
   },
-  icons: {
-    icon: "/hcgfavicon.png",
-  },
 };
 
 export default function RootLayout({

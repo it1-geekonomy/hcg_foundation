@@ -65,7 +65,6 @@ function TogetherCarousel({ slides }: { slides: CarouselSlide[] }) {
             fill
             sizes="(min-width: 1024px) 50vw, 100vw"
             quality={70}
-            priority={i === 0}
             className={`absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-700 ease-in-out ${
               i === active ? "opacity-100" : "opacity-0"
             }`}
