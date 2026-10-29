@@ -73,6 +73,9 @@ services:
       R2_ENDPOINT: ${R2_ENDPOINT}
       R2_PUBLIC_URL: ${R2_PUBLIC_URL}
       R2_REGION: ${R2_REGION:-auto}
+    volumes:
+      # Optimized images survive redeploys; otherwise every deploy makes the first visitor wait for re-encoding.
+      - frontend-image-cache:/app/.next/cache/images
     depends_on:
       - backend
 
@@ -101,3 +104,4 @@ services:
 
 volumes:
   pgdata:
+  frontend-image-cache:
