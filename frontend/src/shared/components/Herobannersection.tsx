@@ -1,5 +1,6 @@
 import React, { type ReactNode } from "react";
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
+import { preload } from "react-dom";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import Typography from "@/lib/Typography";
@@ -28,6 +29,80 @@ export interface BannerProps {
   titleAs?: "h1" | "p";
 }
 
+/** Cropped band below 1536px, full photo at 2xl. */
+const BANNER_IMG_CLASS =
+  "block h-auto w-full object-contain lg:!h-[48vw] xl:!h-[42vw] lg:object-cover lg:object-center 2xl:!h-auto 2xl:object-contain";
+const DESKTOP_MEDIA = "(min-width: 1536px)";
+const MOBILE_MEDIA = "(max-width: 1535px)";
+
+/**
+ * Mobile photo through 1535px, desktop photo from 1536px. A <picture> plus media-scoped preloads means each
+ * visitor downloads only the photo their screen uses (two priority <Image>s fetched both, splitting bandwidth).
+ */
+function BannerImage({
+  mobileSrc,
+  desktopSrc,
+  alt,
+}: {
+  mobileSrc: string;
+  desktopSrc: string;
+  alt: string;
+}) {
+  if (mobileSrc === desktopSrc) {
+    return (
+      <Image
+        src={mobileSrc}
+        alt={alt}
+        width={1920}
+        height={1080}
+        priority
+        fetchPriority="high"
+        sizes="100vw"
+        className={cn("col-start-1 row-start-1", BANNER_IMG_CLASS)}
+      />
+    );
+  }
+
+  const shared = { alt, width: 1920, height: 1080, sizes: "100vw" };
+  const {
+    props: { srcSet: desktopSet, src: desktopHref },
+  } = getImageProps({ ...shared, src: desktopSrc });
+  const {
+    props: { srcSet: mobileSet, src: mobileHref, ...imgProps },
+  } = getImageProps({ ...shared, src: mobileSrc });
+
+  preload(mobileHref, {
+    as: "image",
+    fetchPriority: "high",
+    imageSrcSet: mobileSet,
+    imageSizes: "100vw",
+    media: MOBILE_MEDIA,
+  });
+  preload(desktopHref, {
+    as: "image",
+    fetchPriority: "high",
+    imageSrcSet: desktopSet,
+    imageSizes: "100vw",
+    media: DESKTOP_MEDIA,
+  });
+
+  return (
+    <picture className="col-start-1 row-start-1 block">
+      <source media={DESKTOP_MEDIA} srcSet={desktopSet} sizes="100vw" />
+      <source media={MOBILE_MEDIA} srcSet={mobileSet} sizes="100vw" />
+      <img
+        {...imgProps}
+        alt={alt}
+        src={mobileHref}
+        fetchPriority="high"
+        loading="eager"
+        decoding="async"
+        className={BANNER_IMG_CLASS}
+      />
+    </picture>
+  );
+}
+
 export default function Banner({
   bgImage,
   bgImageMobile,
@@ -46,30 +121,11 @@ export default function Banner({
 
   return (
     <section className={cn("relative isolate grid w-full", className)}>
-      {/* Mobile image through 1535px. Desktop photo starts at 1536px. */}
-      {(bgImageMobile ?? bgImage) ? (
-        <Image
-          src={(bgImageMobile ?? bgImage)!}
-          alt={bgImageAlt}
-          width={1920}
-          height={1080}
-          priority
-          fetchPriority="high"
-          sizes="100vw"
-          className="col-start-1 row-start-1 block h-auto w-full object-contain lg:!h-[48vw] xl:!h-[42vw] lg:object-cover lg:object-center 2xl:hidden"
-        />
-      ) : null}
-      {bgImage ? (
-        <Image
-          src={bgImage}
-          alt={bgImageAlt}
-          width={1920}
-          height={1080}
-          priority
-          sizes="100vw"
-          className="col-start-1 row-start-1 hidden h-auto w-full object-contain 2xl:block"
-        />
-      ) : null}
+      <BannerImage
+        mobileSrc={(bgImageMobile ?? bgImage)!}
+        desktopSrc={(bgImage ?? bgImageMobile)!}
+        alt={bgImageAlt}
+      />
 
       <div
         aria-hidden
