@@ -163,6 +163,7 @@ export default function Navbar() {
                 height={40}
                 className="h-full w-auto"
                 priority
+                fetchPriority="high"
               />
             </Link>
 

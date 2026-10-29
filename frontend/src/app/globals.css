@@ -555,3 +555,37 @@ body[data-nav-menu-open] [data-chatbot] {
   }
   .swasti-card { opacity: 1 !important; }
 }
+
+/* Home hero word-by-word reveal. Every story stays mounted, so the per-word styles live here instead of
+   inline on hundreds of spans. --i is the word index, data-state comes from the story block.
+   Same motion in both scroll directions: words rise in from below, the old story lifts out upward. */
+.hero-words .hw {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+.hero-words .hw > span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(110%);
+  filter: blur(0px);
+  transition: transform 650ms cubic-bezier(0.16, 1, 0.3, 1), opacity 400ms ease;
+  transition-delay: min(calc(var(--i) * 8ms), 120ms);
+}
+.hero-words .hs {
+  display: inline-block;
+  width: var(--hw-gap);
+}
+.hero-words[data-state="idle"] .hw > span {
+  /* Already faded out: reset below instantly so the next entry always starts from the same place. */
+  transition: none;
+}
+.hero-words[data-state="exiting"] .hw > span {
+  transform: translateY(-110%);
+  filter: blur(2px);
+}
+.hero-words[data-state="active"] .hw > span {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: min(calc(var(--i) * 18ms), 300ms);
+}

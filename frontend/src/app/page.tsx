@@ -22,7 +22,9 @@ export default async function HomePage() {
     );
 
   if (!isBot) {
-    // Desktop popup image preload (LCP candidate on desktop when overlay is shown)
+    // The popup opens seconds after the intro, so its photo is fetched early but at low priority:
+    // high priority here would compete with the hero photo (the real LCP) for bandwidth.
+    // Desktop popup image preload
     const {
       props: { srcSet: desktopSet, src: desktopSrc },
     } = getImageProps({
@@ -34,13 +36,13 @@ export default async function HomePage() {
     });
     preload(desktopSrc, {
       as: "image",
-      fetchPriority: "high",
+      fetchPriority: "low",
       imageSrcSet: desktopSet,
       imageSizes: "(min-width: 1024px) 360px, 0px",
       media: "(min-width: 1024px)",
     });
 
-    // Mobile popup image preload (LCP candidate on mobile when overlay is shown)
+    // Mobile popup image preload
     const {
       props: { srcSet: mobileSet, src: mobileSrc },
     } = getImageProps({
@@ -52,7 +54,7 @@ export default async function HomePage() {
     });
     preload(mobileSrc, {
       as: "image",
-      fetchPriority: "high",
+      fetchPriority: "low",
       imageSrcSet: mobileSet,
       imageSizes: "(max-width: 1023px) 480px, 0px",
       media: "(max-width: 1023px)",

@@ -1,7 +1,5 @@
-import { getCountryCallingCode, isSupportedCountry } from "libphonenumber-js";
-import type { CountryCode } from "libphonenumber-js";
-import worldCountries from "world-countries";
 import type { DonationCurrencyCode } from "@/domains/home/constants/donation-currency";
+import { COUNTRY_ROWS } from "./countries.data";
 
 export type DonationCountry = {
   code: string;
@@ -54,47 +52,16 @@ const PINNED_CODES = [
 const DEFAULT_CURRENCY: DonationCurrencyCode = "USD";
 export const DEFAULT_COUNTRY_CODE = "IN";
 
-function toDial(cca2: string, root?: string, suffixes?: string[]) {
-  let dial = "";
-
-  if (isSupportedCountry(cca2 as CountryCode)) {
-    dial = `+${getCountryCallingCode(cca2 as CountryCode)}`;
-  } else if (root) {
-    if (suffixes?.length === 1) {
-      const combined = `${root}${suffixes[0]}`;
-      const digits = combined.replace(/\D/g, "");
-      dial = digits.length <= 4 ? combined : root;
-    } else {
-      dial = root;
-    }
-  }
-
-  // NANP territories (e.g. Jamaica +1876). US/CA stay +1.
-  if (
-    dial === "+1" &&
-    cca2 !== "US" &&
-    cca2 !== "CA" &&
-    suffixes?.length === 1 &&
-    /^\d{3}$/.test(suffixes[0])
-  ) {
-    return `+1${suffixes[0]}`;
-  }
-
-  return dial;
-}
-
 function currencyForCountry(code: string): DonationCurrencyCode {
   return CURRENCY_BY_COUNTRY[code] ?? DEFAULT_CURRENCY;
 }
 
-const worldList: DonationCountry[] = worldCountries
-  .map((country) => ({
-    code: country.cca2,
-    name: country.name.common,
-    dial: toDial(country.cca2, country.idd?.root, country.idd?.suffixes),
-    currency: currencyForCountry(country.cca2),
-  }))
-  .filter((country) => country.code && country.dial);
+const worldList: DonationCountry[] = COUNTRY_ROWS.map(([code, name, dial]) => ({
+  code,
+  name,
+  dial,
+  currency: currencyForCountry(code),
+}));
 
 const pinnedSet = new Set<string>(PINNED_CODES);
 

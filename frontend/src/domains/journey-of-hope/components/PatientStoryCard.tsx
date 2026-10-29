@@ -9,7 +9,7 @@ import Link from "next/link";
 import Typography from "@/lib/Typography";
 import { DiagonalArrowIcon } from "@/shared/components/icons/ArrowIcons";
 import FlipCard from "@/shared/components/FlipCard";
-import MirrorReveal from "@/shared/components/MirrorReveal";
+import MirrorReveal, { TEAM_DOOR_REVEAL } from "@/shared/components/MirrorReveal";
 import { cn } from "@/lib/utils";
 import type { PatientStory } from "@/domains/journey-of-hope/constants/stories";
 
@@ -163,7 +163,7 @@ export default function PatientStoryCard({
   );
 
   const renderBackContent = (flipped: boolean) => (
-    <MirrorReveal isOpen={flipped} delay={0} duration={0.35}>
+    <MirrorReveal isOpen={flipped} {...TEAM_DOOR_REVEAL}>
       <div className="relative h-full w-full flex flex-col justify-between items-center p-4 lg:p-[1.2rem] rounded-[1.2643rem] border-[0.0527rem] border-[#E0D4AE] shadow-sm overflow-hidden bg-[#FFF8E2]">
         {/* Watermark Background Overlay matching Form */}
         <div
@@ -232,6 +232,7 @@ export default function PatientStoryCard({
           onClick={handleCardClick}
           flipOnHover={true}
           duration={0.42}
+          leaveDelay={120}
           front={frontContent}
           back={renderBackContent}
         />
