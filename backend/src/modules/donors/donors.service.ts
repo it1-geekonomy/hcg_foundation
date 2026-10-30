@@ -20,9 +20,15 @@ import {
 import { CreateDonationDto } from './dto/create-donation.dto';
 import { ListDonorsQueryDto } from './dto/list-donors-query.dto';
 import { VerifyDonationDto } from './dto/verify-donation.dto';
+import { CreateSubscriptionDto } from './dto/create-subscription.dto';
+import { VerifySubscriptionDto } from './dto/verify-subscription.dto';
+import { ListSubscriptionsQueryDto } from './dto/list-subscriptions-query.dto';
 import { Donor } from './entities/donor.entity';
 import { DonorCounterSettings } from './entities/donor-counter-settings.entity';
 import { UpdateDonorCounterSettingsDto } from './dto/update-donor-counter-settings.dto';
+import { DonorSubscription } from './entities/donor-subscription.entity';
+import { SubscriptionStatus } from '../../common/enums/subscription-status.enum';
+import { SubscriptionPeriod } from '../../common/enums/subscription-period.enum';
 import { PatientStory } from '../patient-stories/entities/patient-story.entity';
 import { DonationEmailQueueService } from './donation-email-queue.service';
 import { DonationCategory } from '../../common/enums/donation-category.enum';
@@ -32,6 +38,20 @@ export type DonationCheckout = {
   amount: string;
   amountPaise: number;
   currency: string;
+  keyId: string;
+  name: string;
+  email: string;
+  phone: string;
+  isInternational: boolean;
+  countryCode: string | null;
+};
+
+export type SubscriptionCheckout = {
+  subscriptionId: string;
+  amount: string;
+  amountPaise: number;
+  currency: string;
+  period: SubscriptionPeriod;
   keyId: string;
   name: string;
   email: string;
@@ -73,6 +93,8 @@ export class DonorsService {
     private readonly patientStoryRepo: Repository<PatientStory>,
     @InjectRepository(DonorCounterSettings)
     private readonly counterSettingsRepo: Repository<DonorCounterSettings>,
+    @InjectRepository(DonorSubscription)
+    private readonly subscriptionRepo: Repository<DonorSubscription>,
     private readonly razorpay: RazorpayService,
     private readonly emailQueue: DonationEmailQueueService,
   ) { }
@@ -320,8 +342,6 @@ export class DonorsService {
 
     const qb = this.repo
       .createQueryBuilder('donor')
-      .leftJoin('donor.patientStory', 'patientStory')
-      .addSelect(['patientStory.id', 'patientStory.title', 'patientStory.slug'])
       .orderBy('donor.createdAt', 'DESC');
 
     if (query.status) {
@@ -350,7 +370,7 @@ export class DonorsService {
 
     if (query.search) {
       qb.andWhere(
-        '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search OR donor.country ILIKE :search OR donor.countryCode ILIKE :search OR donor.city ILIKE :search OR patientStory.title ILIKE :search)',
+        '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search OR donor.country ILIKE :search OR donor.countryCode ILIKE :search OR donor.city ILIKE :search)',
         { search: `%${query.search}%` },
       );
     }
@@ -488,6 +508,432 @@ export class DonorsService {
     return { synced: donors.length, updated };
   }
 
+  async createSubscription(dto: CreateSubscriptionDto): Promise<SubscriptionCheckout> {
+    const amount = dto.amount.toFixed(2);
+    const amountMinor = toMinorUnits(dto.amount);
+    const fullName = dto.fullName.trim();
+    const phone = dto.phone;
+    const email = dto.email.toLowerCase().trim();
+    const city = dto.city?.trim() || '';
+    const countryCode = dto.countryCode?.trim().toUpperCase() || 'IN';
+    const country = dto.country?.trim() || 'India';
+    const isInternational = this.resolveInternational(
+      country,
+      countryCode,
+      dto.isInternational,
+    );
+    const period = dto.period || SubscriptionPeriod.MONTHLY;
+    const currency = 'INR';
+
+    // Map frequency into Razorpay plan attributes:
+    // Razorpay API only accepts 'daily' | 'weekly' | 'monthly' | 'yearly'.
+    // Quarterly is represented as period='monthly' with interval=3.
+    let rzpPeriod: 'monthly' | 'yearly' = 'monthly';
+    let rzpInterval = 1;
+    let totalCount = 60; // 5 years
+    let periodLabel = 'month';
+
+    if (period === SubscriptionPeriod.YEARLY) {
+      rzpPeriod = 'yearly';
+      rzpInterval = 1;
+      totalCount = 5; // 5 years
+      periodLabel = 'year';
+    } else if (period === SubscriptionPeriod.QUARTERLY) {
+      rzpPeriod = 'monthly';
+      rzpInterval = 3;
+      totalCount = 20; // 5 years (20 quarters)
+      periodLabel = 'quarter';
+    } else {
+      rzpPeriod = 'monthly';
+      rzpInterval = 1;
+      totalCount = 60; // 5 years (60 months)
+      periodLabel = 'month';
+    }
+
+    let patientStoryId: string | null = null;
+    if (dto.patientStoryId) {
+      const story = await this.patientStoryRepo.findOne({
+        where: { id: dto.patientStoryId },
+      });
+      if (!story) {
+        throw new NotFoundException('Patient story not found.');
+      }
+      if (story.status !== ContentStatus.PUBLISHED) {
+        throw new BadRequestException('Patient story is not published.');
+      }
+      if (!story.isDonationEnabled) {
+        throw new BadRequestException(
+          'Donations are currently not enabled for this patient.',
+        );
+      }
+      patientStoryId = story.id;
+    }
+
+    const donationCategory = patientStoryId
+      ? (dto.donationCategory || DonationCategory.PATIENT_SPECIFIC)
+      : (dto.donationCategory || DonationCategory.GENERAL_FUNDS);
+
+    try {
+      // 1. Create or link customer on Razorpay
+      const customer = await this.razorpay.createCustomer({
+        name: fullName,
+        email,
+        contact: phone,
+      });
+
+      // 2. Check for an existing Razorpay Plan or create a new one
+      let planId: string | null = null;
+      const existingPlan = await this.subscriptionRepo
+        .createQueryBuilder('sub')
+        .where('sub.amount = :amount', { amount })
+        .andWhere('sub.period = :period', { period })
+        .andWhere('sub.currency = :currency', { currency })
+        .andWhere('sub.razorpayPlanId IS NOT NULL')
+        .orderBy('sub.createdAt', 'DESC')
+        .getOne();
+
+      if (existingPlan?.razorpayPlanId) {
+        planId = existingPlan.razorpayPlanId;
+        this.logger.log(
+          `Reusing existing Razorpay plan ${planId} for ₹${amount}/${periodLabel}`,
+        );
+      } else {
+        const plan = await this.razorpay.createPlan({
+          period: rzpPeriod,
+          interval: rzpInterval,
+          name: `HCG Foundation Donation - ₹${amount}/${periodLabel}`,
+          amountPaise: amountMinor,
+          currency,
+          description: patientStoryId
+            ? `Recurring donation for patient story #${patientStoryId}`
+            : 'HCG Foundation recurring donation',
+        });
+        planId = plan.id;
+        this.logger.log(
+          `Created new Razorpay plan ${planId} for ₹${amount}/${periodLabel}`,
+        );
+      }
+
+      // 3. Create Subscription on Razorpay
+      const rzpSub = await this.razorpay.createSubscription({
+        planId,
+        totalCount,
+        customerId: customer.id,
+        notes: {
+          fullName: this.note(fullName),
+          phone: this.note(phone, 20),
+          email: this.note(email),
+          city: this.note(city),
+          country: this.note(country, 100),
+          countryCode: this.note(countryCode, 8),
+          international: isInternational ? 'true' : 'false',
+          pan: this.note(dto.pan || '', 20),
+          donationCategory: this.note(donationCategory, 255),
+          patientStoryId: patientStoryId ? this.note(patientStoryId, 50) : '',
+          amount,
+          period,
+        },
+      });
+
+      // 4. Save subscription record in DB
+      await this.subscriptionRepo.save(
+        this.subscriptionRepo.create({
+          fullName,
+          phone,
+          email,
+          city: city || null,
+          country,
+          countryCode,
+          isInternational,
+          pan: dto.pan?.trim() || null,
+          amount,
+          currency,
+          period,
+          donationCategory,
+          patientStoryId,
+          razorpayCustomerId: customer.id,
+          razorpayPlanId: planId,
+          razorpaySubscriptionId: rzpSub.id,
+          status: SubscriptionStatus.CREATED,
+          totalCount,
+          paidCount: 0,
+        }),
+      );
+
+      return {
+        subscriptionId: rzpSub.id,
+        amount,
+        amountPaise: amountMinor,
+        currency,
+        period,
+        keyId: this.razorpay.getKeyId(),
+        name: fullName,
+        email,
+        phone,
+        isInternational,
+        countryCode,
+      };
+    } catch (err) {
+      const reason = this.razorpayErrorReason(err);
+      this.logger.error(`Razorpay subscription creation failed: ${reason}`);
+      throw new BadRequestException(
+        `Could not initiate recurring donation: ${reason}`,
+      );
+    }
+  }
+
+  async verifySubscription(
+    dto: VerifySubscriptionDto,
+  ): Promise<{ subscription: DonorSubscription; donation: Donor }> {
+    const isValid = this.razorpay.verifySubscriptionSignature(
+      dto.razorpaySubscriptionId,
+      dto.razorpayPaymentId,
+      dto.razorpaySignature,
+    );
+    if (!isValid) {
+      this.logger.warn(
+        `Invalid subscription signature for sub=${dto.razorpaySubscriptionId} payment=${dto.razorpayPaymentId}`,
+      );
+      throw new BadRequestException('Payment verification failed.');
+    }
+
+    const sub = await this.subscriptionRepo.findOne({
+      where: { razorpaySubscriptionId: dto.razorpaySubscriptionId },
+    });
+    if (!sub) {
+      throw new NotFoundException('Subscription record not found.');
+    }
+
+    sub.status = SubscriptionStatus.ACTIVE;
+    sub.paidCount = Math.max(sub.paidCount, 1);
+    const savedSub = await this.subscriptionRepo.save(sub);
+
+    // Create the first recurring donation record in donors table
+    let donation = await this.repo.findOne({
+      where: { razorpayPaymentId: dto.razorpayPaymentId },
+    });
+
+    if (!donation) {
+      donation = await this.repo.save(
+        this.repo.create({
+          fullName: sub.fullName,
+          phone: sub.phone,
+          email: sub.email,
+          city: sub.city,
+          country: sub.country,
+          countryCode: sub.countryCode,
+          isInternational: sub.isInternational,
+          pan: sub.pan,
+          donationCategory: sub.donationCategory,
+          amount: sub.amount,
+          currency: sub.currency,
+          status: DonationStatus.PAID,
+          razorpayPaymentId: dto.razorpayPaymentId,
+          razorpaySubscriptionId: sub.razorpaySubscriptionId,
+          subscriptionId: sub.id,
+          patientStoryId: sub.patientStoryId,
+        }),
+      );
+      donation.receiptNumber = this.buildReceiptNumber(donation.id);
+      Object.assign(donation, DonationEmailQueueService.queuedFields());
+      donation = await this.repo.save(donation);
+      this.logger.log(
+        `Subscription first donation paid: donor=${donation.id} sub=${sub.id} receipt=${donation.receiptNumber}`,
+      );
+      this.emailQueue.kick();
+    }
+
+    return { subscription: savedSub, donation };
+  }
+
+  async findAllSubscriptions(
+    query: ListSubscriptionsQueryDto,
+  ): Promise<PaginatedResult<DonorSubscription>> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 20;
+
+    const qb = this.subscriptionRepo
+      .createQueryBuilder('sub')
+      .leftJoin('sub.patientStory', 'patientStory')
+      .addSelect(['patientStory.id', 'patientStory.title', 'patientStory.slug'])
+      .orderBy('sub.createdAt', 'DESC');
+
+    if (query.status) {
+      qb.andWhere('sub.status = :status', { status: query.status });
+    }
+
+    if (query.period) {
+      qb.andWhere('sub.period = :period', { period: query.period });
+    }
+
+    if (query.patientStoryId) {
+      qb.andWhere('sub.patientStoryId = :patientStoryId', {
+        patientStoryId: query.patientStoryId,
+      });
+    }
+
+    if (query.search) {
+      qb.andWhere(
+        '(sub.fullName ILIKE :search OR sub.email ILIKE :search OR sub.phone ILIKE :search OR sub.razorpaySubscriptionId ILIKE :search)',
+        { search: `%${query.search}%` },
+      );
+    }
+
+    const [data, total] = await qb
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    return buildPaginatedResult(data, total, page, limit);
+  }
+
+  async findOneSubscription(id: string): Promise<DonorSubscription> {
+    const sub = await this.subscriptionRepo
+      .createQueryBuilder('sub')
+      .leftJoin('sub.patientStory', 'patientStory')
+      .addSelect(['patientStory.id', 'patientStory.title', 'patientStory.slug'])
+      .leftJoinAndSelect('sub.donations', 'donations')
+      .where('sub.id = :id', { id })
+      .orderBy('donations.createdAt', 'DESC')
+      .getOne();
+
+    if (!sub) {
+      throw new NotFoundException(`Subscription not found for id "${id}".`);
+    }
+    return sub;
+  }
+
+  async cancelSubscription(id: string): Promise<DonorSubscription> {
+    const sub = await this.subscriptionRepo.findOne({ where: { id } });
+    if (!sub) {
+      throw new NotFoundException(`Subscription not found for id "${id}".`);
+    }
+
+    try {
+      await this.razorpay.cancelSubscription(sub.razorpaySubscriptionId, false);
+    } catch (err) {
+      const reason = this.razorpayErrorReason(err);
+      this.logger.error(`Could not cancel Razorpay subscription: ${reason}`);
+      throw new BadRequestException(`Failed to cancel subscription with gateway: ${reason}`);
+    }
+
+    sub.status = SubscriptionStatus.CANCELLED;
+    sub.endedAt = new Date();
+    return await this.subscriptionRepo.save(sub);
+  }
+
+  private async handleSubscriptionWebhookEvent(
+    eventName: string,
+    payload: any,
+  ): Promise<{ received: boolean; event: string; message?: string }> {
+    const subEntity = payload.subscription?.entity;
+    const paymentEntity = payload.payment?.entity;
+    const subId: string | undefined = subEntity?.id;
+
+    if (!subId) {
+      this.logger.warn(`Subscription webhook ${eventName} missing subscription id`);
+      return { received: true, event: eventName, message: 'Missing subscription id' };
+    }
+
+    const sub = await this.subscriptionRepo.findOne({
+      where: { razorpaySubscriptionId: subId },
+    });
+
+    if (!sub) {
+      this.logger.warn(`Subscription ${subId} not found in database for event ${eventName}`);
+      return { received: true, event: eventName, message: 'Subscription not found' };
+    }
+
+    // 1. Subscription Activated / Authenticated
+    if (eventName === 'subscription.activated' || eventName === 'subscription.authenticated') {
+      sub.status = SubscriptionStatus.ACTIVE;
+      if (subEntity.current_start) sub.currentStart = new Date(subEntity.current_start * 1000);
+      if (subEntity.current_end) sub.currentEnd = new Date(subEntity.current_end * 1000);
+      await this.subscriptionRepo.save(sub);
+      this.logger.log(`Subscription ${sub.id} marked ACTIVE via webhook (${eventName})`);
+      return { received: true, event: eventName };
+    }
+
+    // 2. Subscription Charged (Monthly/Quarterly/Yearly Automatic Collection)
+    if (eventName === 'subscription.charged') {
+      sub.status = SubscriptionStatus.ACTIVE;
+      sub.paidCount = subEntity.paid_count ?? (sub.paidCount + 1);
+      if (subEntity.current_start) sub.currentStart = new Date(subEntity.current_start * 1000);
+      if (subEntity.current_end) sub.currentEnd = new Date(subEntity.current_end * 1000);
+      await this.subscriptionRepo.save(sub);
+
+      const paymentId = paymentEntity?.id;
+      if (paymentId) {
+        const existing = await this.repo.findOne({
+          where: { razorpayPaymentId: paymentId },
+        });
+
+        if (!existing) {
+          const amount = paymentEntity?.amount
+            ? (Number(paymentEntity.amount) / 100).toFixed(2)
+            : sub.amount;
+
+          const donor = await this.repo.save(
+            this.repo.create({
+              fullName: sub.fullName,
+              phone: sub.phone,
+              email: sub.email,
+              city: sub.city,
+              country: sub.country,
+              countryCode: sub.countryCode,
+              isInternational: sub.isInternational,
+              pan: sub.pan,
+              donationCategory: sub.donationCategory,
+              amount,
+              currency: paymentEntity?.currency || sub.currency,
+              status: DonationStatus.PAID,
+              razorpayPaymentId: paymentId,
+              razorpaySubscriptionId: sub.razorpaySubscriptionId,
+              subscriptionId: sub.id,
+              patientStoryId: sub.patientStoryId,
+            }),
+          );
+          donor.receiptNumber = this.buildReceiptNumber(donor.id);
+          Object.assign(donor, DonationEmailQueueService.queuedFields());
+          await this.repo.save(donor);
+          this.logger.log(
+            `Recurring donation recorded: donor=${donor.id} receipt=${donor.receiptNumber}`,
+          );
+          this.emailQueue.kick();
+        }
+      }
+      return { received: true, event: eventName };
+    }
+
+    // 3. Subscription Halted
+    if (eventName === 'subscription.halted') {
+      sub.status = SubscriptionStatus.HALTED;
+      await this.subscriptionRepo.save(sub);
+      this.logger.warn(`Subscription ${sub.id} HALTED via webhook`);
+      return { received: true, event: eventName };
+    }
+
+    // 4. Subscription Cancelled
+    if (eventName === 'subscription.cancelled') {
+      sub.status = SubscriptionStatus.CANCELLED;
+      sub.endedAt = new Date();
+      await this.subscriptionRepo.save(sub);
+      this.logger.log(`Subscription ${sub.id} CANCELLED via webhook`);
+      return { received: true, event: eventName };
+    }
+
+    // 5. Subscription Completed
+    if (eventName === 'subscription.completed') {
+      sub.status = SubscriptionStatus.COMPLETED;
+      sub.endedAt = new Date();
+      await this.subscriptionRepo.save(sub);
+      this.logger.log(`Subscription ${sub.id} COMPLETED via webhook`);
+      return { received: true, event: eventName };
+    }
+
+    return { received: true, event: eventName };
+  }
+
   async handleRazorpayWebhook(
     rawBody: string | Buffer,
     signature: string,
@@ -517,6 +963,12 @@ export class DonorsService {
     this.logger.log(`Received Razorpay webhook event: ${eventName}`);
 
     const payload = body.payload ?? {};
+
+    // Handle subscription-specific webhook events
+    if (eventName && eventName.startsWith('subscription.')) {
+      return await this.handleSubscriptionWebhookEvent(eventName, payload);
+    }
+
     const paymentEntity = payload.payment?.entity;
     const refundEntity = payload.refund?.entity;
 
