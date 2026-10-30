@@ -335,19 +335,7 @@ export default function DonateSection({
 
       {/* Social proof */}
       <DonateItem index={4} className="flex min-w-0 items-center gap-3">
-        <div className="flex shrink-0 -space-x-2">
-          {donorAvatars.map((src, i) => (
-            <Image
-              key={src}
-              src={src}
-              alt=""
-              width={24}
-              height={24}
-              style={{ zIndex: donorAvatars.length - i }}
-              className="relative h-[clamp(1.25rem,4vw,1.5rem)] w-[clamp(1.25rem,4vw,1.5rem)] rounded-full border border-white/50"
-            />
-          ))}
-        </div>
+        
         <Typography
           variant="body-8"
           as="p"
