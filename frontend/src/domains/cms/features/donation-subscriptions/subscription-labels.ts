@@ -11,7 +11,7 @@ export const FREQUENCY_LABELS: Record<DonationFrequency, string> = {
 };
 
 export const STATUS_LABELS: Record<SubscriptionStatus, string> = {
-  created: "Awaiting approval",
+  created: "Not completed",
   authenticated: "Approved",
   active: "Active",
   pending: "Payment retrying",
@@ -23,7 +23,8 @@ export const STATUS_LABELS: Record<SubscriptionStatus, string> = {
 };
 
 export const STATUS_HELP: Partial<Record<SubscriptionStatus, string>> = {
-  created: "The donor opened checkout but has not approved the mandate yet.",
+  created:
+    "The donor opened the payment screen but did not complete it. Nothing was charged and nothing will be.",
   authenticated: "Mandate approved; the first charge has not happened yet.",
   pending: "The last charge failed. Razorpay is retrying automatically.",
   halted: "All retries failed. No more charges until the donor updates their payment method.",
@@ -48,10 +49,9 @@ export function formatInr(amount: string) {
 
 export const SUBSCRIPTION_STATUS_FILTER_OPTIONS: CmsSelectOption[] = [
   { value: "", label: "All statuses" },
-  ...(Object.keys(STATUS_LABELS) as SubscriptionStatus[]).map((value) => ({
-    value,
-    label: STATUS_LABELS[value],
-  })),
+  ...(Object.keys(STATUS_LABELS) as SubscriptionStatus[])
+    .filter((value) => value !== "created")
+    .map((value) => ({ value, label: STATUS_LABELS[value] })),
 ];
 
 export const FREQUENCY_FILTER_OPTIONS: CmsSelectOption[] = [

@@ -29,7 +29,10 @@ export class ListSubscriptionsQueryDto {
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ enum: SUBSCRIPTION_STATUSES })
+  @ApiPropertyOptional({
+    enum: SUBSCRIPTION_STATUSES,
+    description: "If omitted, 'created' (checkout never completed) rows are excluded",
+  })
   @IsOptional()
   @IsIn([...SUBSCRIPTION_STATUSES])
   status?: SubscriptionStatus;
