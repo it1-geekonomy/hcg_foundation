@@ -164,7 +164,8 @@ HELP_ANSWER = (
 )
 
 DONATE_INTENT_ANSWER = (
-    "You can support HCG Foundation using the Donate Now form on the website. "
+    "You can support HCG Foundation using the Donate Now form on the website, "
+    "as a one-time gift or a Monthly, Quarterly or Yearly recurring donation. "
     "Eligible donations from Indian donors qualify for an 80G tax receipt. "
     f"Contact: {OFFICIAL_EMAIL}, {OFFICIAL_PHONE}. Address: {OFFICIAL_ADDRESS}."
 )

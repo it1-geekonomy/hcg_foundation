@@ -7,7 +7,14 @@ Eligible donations from Indian donors qualify for an 80G tax receipt. HCG Founda
 Is there a minimum donation or minimum contribution amount?
 No minimum donation amount is published. On the Donate Now form you can pick one of the suggested amounts or enter your own amount. For CSR or large contributions, contact hcgfoundation@gmail.com or +91-80-4660-7760.
 
-Do not invent payment methods such as cash, UPI, cheque, or monthly/recurring giving unless a published CMS page or knowledge document explicitly states them.
+Does HCG Foundation accept monthly or recurring donations?
+Yes. On the Donate Now form, under "Choose Donation Frequency", you can pick One Time, Monthly, Quarterly (every 3 months) or Yearly. For Monthly, Quarterly and Yearly, the chosen amount is charged automatically on that schedule (AutoPay) after you approve it once during checkout.
+- Recurring donations are available for donations in Indian Rupees (INR) from India. Donors outside India can make a One Time donation.
+- AutoPay can be set up with UPI AutoPay, a debit or credit card, or a bank e-mandate (net banking), depending on what your bank supports.
+- A donation receipt is emailed after every successful charge, and eligible Indian donations qualify for the 80G tax benefit each time.
+- You can pause or cancel a recurring donation any time by contacting hcgfoundation@gmail.com or +91-80-4660-7760.
+
+Do not invent payment methods such as cash or cheque unless a published CMS page or knowledge document explicitly states them.
 
 Official contact:
 Email: hcgfoundation@gmail.com
