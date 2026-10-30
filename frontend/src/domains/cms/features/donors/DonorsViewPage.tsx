@@ -124,6 +124,21 @@ export default function DonorsViewPage() {
                 </div>
               }
             />
+            <CmsDetailRow
+              label="Type"
+              value={
+                donor.subscriptionId ? (
+                  <Link
+                    href={`/admin/recurring-donations/${donor.subscriptionId}`}
+                    className="font-medium text-cms-primary underline-offset-2 hover:underline"
+                  >
+                    Recurring donation charge
+                  </Link>
+                ) : (
+                  "One-time donation"
+                )
+              }
+            />
             <CmsDetailRow label="Receipt" value={donor.receiptNumber} />
             <CmsDetailRow label="Receipt email" value={<ReceiptEmailStatus {...donor} />} />
             {donor.receiptEmailError && donor.receiptEmailStatus !== "sent" ? (

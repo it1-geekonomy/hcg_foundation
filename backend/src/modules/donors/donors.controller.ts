@@ -31,11 +31,15 @@ import { UpdateDonorCounterSettingsDto } from './dto/update-donor-counter-settin
 import { Donor } from './entities/donor.entity';
 import { DonorCounterSettings } from './entities/donor-counter-settings.entity';
 import { DonorsService } from './donors.service';
+import { DonationSubscriptionsService } from './donation-subscriptions.service';
 
 @ApiTags(ApiTagsConst.DONATION)
 @Controller('donors')
 export class DonorsController {
-  constructor(private readonly service: DonorsService) {}
+  constructor(
+    private readonly service: DonorsService,
+    private readonly subscriptions: DonationSubscriptionsService,
+  ) {}
 
   @Public()
   @Post('orders')
@@ -202,14 +206,17 @@ export class DonorsController {
   @ApiOperation({
     summary: 'Razorpay webhook receiver',
     description:
-      'Receives webhook events from Razorpay (refund.processed, payment.refunded, payment.failed). Verifies x-razorpay-signature.',
+      'Receives webhook events from Razorpay (payment.*, refund.*, order.paid, and subscription.* for recurring donations). Verifies x-razorpay-signature.',
   })
   async handleWebhook(
     @Req() req: RawBodyRequest<Request>,
     @Headers('x-razorpay-signature') signature: string,
   ) {
     const rawBody = req.rawBody ?? JSON.stringify(req.body);
-    const data = await this.service.handleRazorpayWebhook(rawBody, signature);
+    const { event, payload } = this.service.parseRazorpayWebhook(rawBody, signature);
+    const data = event.startsWith('subscription.')
+      ? await this.subscriptions.handleWebhook(event, payload)
+      : await this.service.handlePaymentWebhook(event, payload);
     return {
       statusCode: HttpStatus.OK,
       message: 'Webhook processed successfully',

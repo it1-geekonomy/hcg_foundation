@@ -305,8 +305,52 @@ export type Donor = {
     title: string;
     slug: string;
   } | null;
+  /** Set when this payment is a charge of a recurring donation. */
+  subscriptionId?: string | null;
   createdAt: string;
   updatedAt: string;
+};
+
+export type DonationFrequency = "monthly" | "quarterly" | "yearly";
+
+/** Razorpay subscription states, as Razorpay reports them. */
+export type SubscriptionStatus =
+  | "created"
+  | "authenticated"
+  | "active"
+  | "pending"
+  | "halted"
+  | "paused"
+  | "cancelled"
+  | "completed"
+  | "expired";
+
+export type DonationSubscription = {
+  id: string;
+  fullName: string;
+  phone?: string | null;
+  email?: string | null;
+  city?: string | null;
+  pan?: string | null;
+  message?: string | null;
+  donationCategory: DonationCategory;
+  patientStoryId?: string | null;
+  frequency: DonationFrequency;
+  amount: string;
+  currency: string;
+  razorpayPlanId: string;
+  razorpaySubscriptionId: string;
+  status: SubscriptionStatus;
+  paidCount: number;
+  totalCount: number;
+  nextChargeAt?: string | null;
+  endedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type DonationSubscriptionDetail = DonationSubscription & {
+  charges: Donor[];
 };
 
 export type ReceiptEmailStatus =

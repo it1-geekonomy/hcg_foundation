@@ -354,6 +354,14 @@ export default function DonorsListPage() {
                       </TableCell>
                       <TableCell>
                         {formatAmount(donor.amount, donor.currency)}
+                        {donor.subscriptionId ? (
+                          <Link
+                            href={`/admin/recurring-donations/${donor.subscriptionId}`}
+                            className="block text-xs text-cms-primary hover:underline"
+                          >
+                            Recurring
+                          </Link>
+                        ) : null}
                       </TableCell>
                       <TableCell className="whitespace-nowrap">
                         {donor.donationCategory || "General Funds"}

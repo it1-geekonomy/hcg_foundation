@@ -7,6 +7,7 @@ export * from "./annual-reports";
 export * from "./legal";
 export * from "./users";
 export * from "./donors";
+export * from "./donation-subscriptions";
 export * from "./campaigns";
 export * from "./partnership-inquiries";
 export * from "./leads-contact";

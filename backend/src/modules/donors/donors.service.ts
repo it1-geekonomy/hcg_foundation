@@ -78,44 +78,22 @@ export class DonorsService {
   ) { }
 
   async createOrder(dto: CreateDonationDto): Promise<DonationCheckout> {
-    const amount = dto.amount.toFixed(2);
-    const amountMinor = toMinorUnits(dto.amount);
-    const fullName = dto.fullName.trim();
-    const phone = dto.phone;
-    const email = dto.email.toLowerCase().trim();
-    const city = dto.city?.trim() || '';
-    const countryCode = dto.countryCode?.trim().toUpperCase() || null;
-    const country = dto.country?.trim() || 'India';
-    const isInternational = this.resolveInternational(
-      country,
+    const {
+      amount,
+      amountMinor,
+      fullName,
+      phone,
+      email,
+      city,
       countryCode,
-      dto.isInternational,
-    );
-    const currency = normalizeDonationCurrency(dto.currency, isInternational);
-    const pan = isInternational ? '' : dto.pan?.trim() || '';
-    const message = dto.message?.trim() || '';
-    const donationCategory = dto.patientStoryId
-      ? (dto.donationCategory || DonationCategory.PATIENT_SPECIFIC)
-      : (dto.donationCategory || DonationCategory.GENERAL_FUNDS);
-
-    let patientStoryId: string | null = null;
-    if (dto.patientStoryId) {
-      const story = await this.patientStoryRepo.findOne({
-        where: { id: dto.patientStoryId },
-      });
-      if (!story) {
-        throw new NotFoundException('Patient story not found.');
-      }
-      if (story.status !== ContentStatus.PUBLISHED) {
-        throw new BadRequestException('Patient story is not published.');
-      }
-      patientStoryId = story.id;
-    }
-    if (!isInternational && currency !== 'INR') {
-      throw new BadRequestException(
-        'Indian donations must use INR. Change country or currency.',
-      );
-    }
+      country,
+      isInternational,
+      currency,
+      pan,
+      message,
+      donationCategory,
+      patientStoryId,
+    } = await this.prepareDonation(dto);
 
     try {
       const order = await this.razorpay.createOrder({
@@ -167,8 +145,67 @@ export class DonorsService {
     }
   }
 
+  /** Normalises donor input and checks the patient story; shared by one-time and recurring donations. */
+  async prepareDonation(dto: CreateDonationDto) {
+    const amount = dto.amount.toFixed(2);
+    const amountMinor = toMinorUnits(dto.amount);
+    const fullName = dto.fullName.trim();
+    const phone = dto.phone;
+    const email = dto.email.toLowerCase().trim();
+    const city = dto.city?.trim() || '';
+    const countryCode = dto.countryCode?.trim().toUpperCase() || null;
+    const country = dto.country?.trim() || 'India';
+    const isInternational = this.resolveInternational(
+      country,
+      countryCode,
+      dto.isInternational,
+    );
+    const currency = normalizeDonationCurrency(dto.currency, isInternational);
+    const pan = isInternational ? '' : dto.pan?.trim() || '';
+    const message = dto.message?.trim() || '';
+    const donationCategory = dto.patientStoryId
+      ? (dto.donationCategory || DonationCategory.PATIENT_SPECIFIC)
+      : (dto.donationCategory || DonationCategory.GENERAL_FUNDS);
+
+    let patientStoryId: string | null = null;
+    if (dto.patientStoryId) {
+      const story = await this.patientStoryRepo.findOne({
+        where: { id: dto.patientStoryId },
+      });
+      if (!story) {
+        throw new NotFoundException('Patient story not found.');
+      }
+      if (story.status !== ContentStatus.PUBLISHED) {
+        throw new BadRequestException('Patient story is not published.');
+      }
+      patientStoryId = story.id;
+    }
+    if (!isInternational && currency !== 'INR') {
+      throw new BadRequestException(
+        'Indian donations must use INR. Change country or currency.',
+      );
+    }
+
+    return {
+      amount,
+      amountMinor,
+      fullName,
+      phone,
+      email,
+      city,
+      countryCode,
+      country,
+      isInternational,
+      currency,
+      pan,
+      message,
+      donationCategory,
+      patientStoryId,
+    };
+  }
+
   /** The Razorpay SDK rejects with `{ statusCode, error: { code, description } }`, not an Error. */
-  private razorpayErrorReason(err: unknown): string {
+  razorpayErrorReason(err: unknown): string {
     if (err instanceof Error) return err.message;
     const e = err as {
       statusCode?: number;
@@ -488,10 +525,10 @@ export class DonorsService {
     return { synced: donors.length, updated };
   }
 
-  async handleRazorpayWebhook(
+  parseRazorpayWebhook(
     rawBody: string | Buffer,
     signature: string,
-  ): Promise<{ received: boolean; event?: string; message?: string }> {
+  ): { event: string; payload: any } {
     if (!signature) {
       throw new BadRequestException('Missing x-razorpay-signature header');
     }
@@ -513,10 +550,15 @@ export class DonorsService {
       throw new BadRequestException('Invalid JSON payload in webhook');
     }
 
-    const eventName: string = body.event;
-    this.logger.log(`Received Razorpay webhook event: ${eventName}`);
+    const event = String(body.event ?? '');
+    this.logger.log(`Received Razorpay webhook event: ${event}`);
+    return { event, payload: body.payload ?? {} };
+  }
 
-    const payload = body.payload ?? {};
+  async handlePaymentWebhook(
+    eventName: string,
+    payload: any,
+  ): Promise<{ received: boolean; event?: string; message?: string }> {
     const paymentEntity = payload.payment?.entity;
     const refundEntity = payload.refund?.entity;
 
@@ -641,7 +683,7 @@ export class DonorsService {
     return !/^india$/i.test(country);
   }
 
-  private buildReceiptNumber(id: string): string {
+  buildReceiptNumber(id: string): string {
     const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     return `HCG-${stamp}-${id.replace(/-/g, '').slice(0, 8).toUpperCase()}`;
   }

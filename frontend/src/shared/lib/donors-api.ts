@@ -60,6 +60,32 @@ export type VerifyDonationPayload = {
   razorpaySignature: string;
 };
 
+export type DonationFrequency = "monthly" | "quarterly" | "yearly";
+
+export type SubscriptionCheckout = {
+  subscriptionId: string;
+  frequency: DonationFrequency;
+  amount: string;
+  amountPaise: number;
+  currency: string;
+  keyId: string;
+  name: string;
+  email: string;
+  phone: string;
+};
+
+export type VerifySubscriptionPayload = {
+  razorpaySubscriptionId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+};
+
+export type SubscriptionVerifyResult = {
+  subscription: { id: string; status: string; nextChargeAt?: string | null };
+  /** Null when the bank only approved the mandate; the first charge follows shortly. */
+  donor: DonorRecord | null;
+};
+
 type Envelope<T> = {
   statusCode: number;
   message: string;
@@ -110,6 +136,23 @@ export const donorsApi = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+
+  createSubscription: (
+    payload: CreateDonationPayload & { frequency: DonationFrequency },
+  ) =>
+    request<Envelope<SubscriptionCheckout>>("/donation-subscriptions", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  verifySubscription: (payload: VerifySubscriptionPayload) =>
+    request<Envelope<SubscriptionVerifyResult>>(
+      "/donation-subscriptions/verify",
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+    ),
 
   getMonthlyCount: () =>
     request<Envelope<CurrentMonthDonorCount>>("/donors/monthly-count"),

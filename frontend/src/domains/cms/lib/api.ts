@@ -35,6 +35,10 @@ import type {
   ReceiptEmailStatus,
   Donor,
   DonorCounterSettings,
+  DonationFrequency,
+  DonationSubscription,
+  DonationSubscriptionDetail,
+  SubscriptionStatus,
   TeamType,
   UpdateFundraisingCampaignPayload,
   UpdateHomeBannerPayload,
@@ -1219,6 +1223,38 @@ export const cmsApi = {
       method: "PATCH",
       body: JSON.stringify({ count }),
     }),
+
+  listDonationSubscriptions: (params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: SubscriptionStatus;
+    frequency?: DonationFrequency;
+  }) => {
+    const q = new URLSearchParams();
+    q.set("page", String(params.page ?? 1));
+    q.set("limit", String(params.limit ?? 10));
+    if (params.search?.trim()) q.set("search", params.search.trim());
+    if (params.status) q.set("status", params.status);
+    if (params.frequency) q.set("frequency", params.frequency);
+    return request<Paginated<DonationSubscription>>(
+      `/donation-subscriptions?${q.toString()}`,
+    );
+  },
+
+  getDonationSubscription: (id: string) =>
+    request<ApiEnvelope<DonationSubscriptionDetail>>(
+      `/donation-subscriptions/${id}`,
+    ),
+
+  updateDonationSubscription: (
+    id: string,
+    action: "cancel" | "pause" | "resume" | "sync",
+  ) =>
+    request<ApiEnvelope<DonationSubscription>>(
+      `/donation-subscriptions/${id}/${action}`,
+      { method: "POST" },
+    ),
 
   listFundraisingCampaigns: (params?: ListQuery) =>
     request<Paginated<FundraisingCampaign>>(
