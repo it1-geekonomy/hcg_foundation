@@ -7,6 +7,18 @@ import { ConfigService } from '@nestjs/config';
 import { createHmac, timingSafeEqual } from 'crypto';
 import Razorpay from 'razorpay';
 
+export type RazorpaySubscriptionInfo = {
+  id: string;
+  plan_id: string;
+  status: string;
+  paid_count: number;
+  total_count: number;
+  /** Unix seconds; end of the current billing cycle, i.e. the next charge. */
+  current_end?: number | null;
+  charge_at?: number | null;
+  ended_at?: number | null;
+};
+
 @Injectable()
 export class RazorpayService {
   private readonly logger = new Logger(RazorpayService.name);
@@ -125,6 +137,88 @@ export class RazorpayService {
     this.assertConfigured();
     const expected = createHmac('sha256', this.keySecret)
       .update(`${orderId}|${paymentId}`)
+      .digest('hex');
+    try {
+      return timingSafeEqual(
+        Buffer.from(expected, 'utf8'),
+        Buffer.from(signature, 'utf8'),
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  async createPlan(params: {
+    period: 'monthly' | 'yearly';
+    interval: number;
+    amountPaise: number;
+    currency: string;
+    name: string;
+  }): Promise<string> {
+    this.assertConfigured();
+    const plan = await this.client.plans.create({
+      period: params.period,
+      interval: params.interval,
+      item: {
+        name: params.name,
+        amount: params.amountPaise,
+        currency: params.currency,
+      },
+    });
+    this.logger.log(`Razorpay plan created: ${plan.id}`);
+    return String(plan.id);
+  }
+
+  async createSubscription(params: {
+    planId: string;
+    totalCount: number;
+    notes?: Record<string, string>;
+  }): Promise<RazorpaySubscriptionInfo> {
+    this.assertConfigured();
+    const sub = await this.client.subscriptions.create({
+      plan_id: params.planId,
+      total_count: params.totalCount,
+      quantity: 1,
+      customer_notify: 1,
+      notes: params.notes,
+    });
+    this.logger.log(`Razorpay subscription created: ${sub.id}`);
+    return sub as unknown as RazorpaySubscriptionInfo;
+  }
+
+  async fetchSubscription(id: string): Promise<RazorpaySubscriptionInfo> {
+    this.assertConfigured();
+    return (await this.client.subscriptions.fetch(id)) as unknown as RazorpaySubscriptionInfo;
+  }
+
+  async cancelSubscription(id: string): Promise<RazorpaySubscriptionInfo> {
+    this.assertConfigured();
+    return (await this.client.subscriptions.cancel(id, false)) as unknown as RazorpaySubscriptionInfo;
+  }
+
+  async pauseSubscription(id: string): Promise<RazorpaySubscriptionInfo> {
+    this.assertConfigured();
+    return (await this.client.subscriptions.pause(id, {
+      pause_at: 'now',
+    })) as unknown as RazorpaySubscriptionInfo;
+  }
+
+  async resumeSubscription(id: string): Promise<RazorpaySubscriptionInfo> {
+    this.assertConfigured();
+    return (await this.client.subscriptions.resume(id, {
+      resume_at: 'now',
+    })) as unknown as RazorpaySubscriptionInfo;
+  }
+
+  /** Checkout signs subscription payments as `payment_id|subscription_id` (order payments use the reverse). */
+  verifySubscriptionSignature(
+    subscriptionId: string,
+    paymentId: string,
+    signature: string,
+  ): boolean {
+    this.assertConfigured();
+    const expected = createHmac('sha256', this.keySecret)
+      .update(`${paymentId}|${subscriptionId}`)
       .digest('hex');
     try {
       return timingSafeEqual(

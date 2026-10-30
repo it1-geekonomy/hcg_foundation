@@ -5,6 +5,7 @@ import { DonationStatus } from '../../../common/enums/donation-status.enum';
 import { DonationCategory } from '../../../common/enums/donation-category.enum';
 import { ReceiptEmailStatus } from '../../../common/enums/receipt-email-status.enum';
 import { PatientStory } from '../../patient-stories/entities/patient-story.entity';
+import { DonationSubscription } from './donation-subscription.entity';
 
 /**
  * Donors table with optional relation to patient stories.
@@ -134,4 +135,13 @@ export class Donor extends BaseEntity {
   @ManyToOne(() => PatientStory, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'patient_story_id' })
   patientStory?: PatientStory | null;
+
+  @ApiPropertyOptional({ description: 'Set when this payment is a recurring-donation charge' })
+  @Index('idx_donors_subscription_id')
+  @Column({ name: 'subscription_id', type: 'uuid', nullable: true })
+  subscriptionId?: string | null;
+
+  @ManyToOne(() => DonationSubscription, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'subscription_id' })
+  subscription?: DonationSubscription | null;
 }
