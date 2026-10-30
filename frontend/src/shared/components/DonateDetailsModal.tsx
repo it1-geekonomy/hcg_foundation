@@ -2,7 +2,7 @@
 
 import { FormEvent, type ReactNode, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Lock, X } from "lucide-react";
+import { Lock, RefreshCw, X } from "lucide-react";
 import Typography from "@/lib/Typography";
 import {
   donateIcon,
@@ -24,7 +24,8 @@ import { nationalPhoneDigits } from "@/shared/lib/phone";
 import CountrySelect from "@/shared/components/CountrySelect";
 
 type RazorpaySuccess = {
-  razorpay_order_id: string;
+  razorpay_order_id?: string;
+  razorpay_subscription_id?: string;
   razorpay_payment_id: string;
   razorpay_signature: string;
 };
@@ -51,6 +52,24 @@ const underlineField =
   "min-w-0 border-b border-white/35 transition-colors focus-within:border-[#FCCC2D]";
 
 const MAX_AMOUNT_DIGITS = 10;
+
+type DonationFrequency = "once" | "monthly" | "quarterly" | "yearly";
+
+const FREQUENCIES: { id: DonationFrequency; label: string }[] = [
+  { id: "once", label: "One Time" },
+  { id: "monthly", label: "Monthly" },
+  { id: "quarterly", label: "Quarterly" },
+  { id: "yearly", label: "Yearly" },
+];
+
+const FREQUENCY_SCHEDULE: Record<
+  Exclude<DonationFrequency, "once">,
+  { button: string; every: string }
+> = {
+  monthly: { button: "Set up Monthly Donation", every: "every month" },
+  quarterly: { button: "Set up Quarterly Donation", every: "every 3 months" },
+  yearly: { button: "Set up Yearly Donation", every: "every year" },
+};
 
 /**
  * Safari/macOS colour fixes:
@@ -155,6 +174,7 @@ export default function DonateDetailsModal({
       document.body.appendChild(script);
     }
   }, []);
+  const [frequency, setFrequency] = useState<DonationFrequency>("once");
   const [amountValue, setAmountValue] = useState(amount);
   const [amountDraft, setAmountDraft] = useState(String(amount));
   const [editingAmount, setEditingAmount] = useState(false);
@@ -163,6 +183,10 @@ export default function DonateDetailsModal({
 
   const currencyMeta = getDonationCurrency(currency);
   const formattedAmount = formatDonationAmount(amountValue, currency);
+  const recurring = frequency === "once" ? null : FREQUENCY_SCHEDULE[frequency];
+  const payLabel = recurring
+    ? `${recurring.button} ${formattedAmount}`
+    : `Pay Securely ${formattedAmount}`;
   // The donation country (picked on the form) decides currency, PAN and 80G;
   // the phone's country only sets the dialling code.
   const country = getDonationCountry(countryCode);
@@ -170,6 +194,7 @@ export default function DonateDetailsModal({
   const [phoneCountryCode, setPhoneCountryCode] = useState(countryCode);
   const phoneCountry = getDonationCountry(phoneCountryCode);
   const indianPhone = isIndiaCountry(phoneCountryCode);
+  const recurringAvailable = !international && currency === "INR";
 
   function startAmountEdit() {
     setEditingAmount(true);
@@ -252,50 +277,71 @@ export default function DonateDetailsModal({
         ? national
         : `${phoneCountry.dial}${national}`;
 
+    const payload = {
+      fullName: fullName.trim(),
+      phone: payloadPhone,
+      email: email.trim(),
+      city: city.trim() || undefined,
+      country: country.name,
+      countryCode,
+      isInternational: international,
+      currency,
+      pan: international ? undefined : pan.replace(/\s/g, "") || undefined,
+      message: message.trim() || undefined,
+      donationCategory,
+      amount: amountValue,
+      patientStoryId: patientStoryId?.trim() || undefined,
+    };
+
     setLoading(true);
     try {
-      const res = await donorsApi.createOrder({
-        fullName: fullName.trim(),
-        phone: payloadPhone,
-        email: email.trim(),
-        city: city.trim() || undefined,
-        country: country.name,
-        countryCode,
-        isInternational: international,
-        currency,
-        pan: international ? undefined : pan.replace(/\s/g, "") || undefined,
-        message: message.trim() || undefined,
-        donationCategory,
-        amount: amountValue,
-        patientStoryId: patientStoryId?.trim() || undefined,
-      });
+      const checkoutOptions =
+        frequency === "once"
+          ? await donorsApi.createOrder(payload).then(({ data }) => ({
+              key: data.keyId,
+              amount: data.amountPaise,
+              currency: data.currency,
+              description: "Donation",
+              order_id: data.orderId,
+              prefill: { name: data.name, email: data.email, contact: data.phone },
+            }))
+          : await donorsApi
+              .createSubscription({ ...payload, frequency })
+              .then(({ data }) => ({
+                key: data.keyId,
+                description: FREQUENCY_SCHEDULE[frequency].button,
+                subscription_id: data.subscriptionId,
+                prefill: { name: data.name, email: data.email, contact: data.phone },
+              }));
 
-      const checkout = res.data;
       if (!window.Razorpay) {
         throw new Error("Payment widget is still loading. Please try again.");
       }
 
       const rzp = new window.Razorpay({
-        key: checkout.keyId,
-        amount: checkout.amountPaise,
-        currency: checkout.currency,
+        ...checkoutOptions,
         name: "HCG Foundation",
-        description: "Donation",
-        order_id: checkout.orderId,
-        prefill: {
-          name: checkout.name,
-          email: checkout.email,
-          contact: checkout.phone,
-        },
         theme: { color: "#FCCC2D" },
         handler: async (response: RazorpaySuccess) => {
           try {
-            const verified = await donorsApi.verify({
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-            });
-            setReceipt(verified.data.receiptNumber || "Payment received");
+            if (response.razorpay_subscription_id) {
+              const verified = await donorsApi.verifySubscription({
+                razorpaySubscriptionId: response.razorpay_subscription_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              });
+              setReceipt(
+                verified.data.donor?.receiptNumber ||
+                  "Emailed after your first charge",
+              );
+            } else {
+              const verified = await donorsApi.verify({
+                razorpayOrderId: response.razorpay_order_id ?? "",
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              });
+              setReceipt(verified.data.receiptNumber || "Payment received");
+            }
           } catch (err) {
             setError(
               err instanceof Error
@@ -371,9 +417,11 @@ export default function DonateDetailsModal({
                 as="p"
                 className="mt-3 wrap-break-word px-2 font-argestadisplay font-light leading-snug text-white/70 sm:px-4"
               >
-                {patientStoryName
-                  ? `Your donation of ${formattedAmount} ${currency} for ${patientStoryName} was received.`
-                  : `Your donation of ${formattedAmount} ${currency} was received.`}
+                {recurring
+                  ? `Your donation of ${formattedAmount} ${recurring.every}${patientStoryName ? ` for ${patientStoryName}` : ""} is set up. You can pause or cancel anytime.`
+                  : patientStoryName
+                    ? `Your donation of ${formattedAmount} ${currency} for ${patientStoryName} was received.`
+                    : `Your donation of ${formattedAmount} ${currency} was received.`}
               </Typography>
               <Typography
                 variant="body-8"
@@ -413,21 +461,56 @@ export default function DonateDetailsModal({
                 <Typography
                   variant="body-7"
                   as="p"
-                  className="hidden max-w-[360px] font-argestadisplay font-light leading-snug text-white/70 [@media(min-width:640px)_and_(min-height:761px)]:block"
+                  className="max-w-[360px] font-argestadisplay font-light leading-snug text-white/70"
                 >
                   {patientStoryName
                     ? `Your support provides cancer care, emotional support, and financial aid for ${patientStoryName}.`
-                    : "Your support provides cancer care, emotional support, and financial aid to those in need."}
+                    : "Your contribution helps us provide care, support and hope to those who need it most."}
                 </Typography>
               </div>
 
               <div className="flex flex-col gap-2">
-                <FieldLabel
-                  htmlFor="donate-amount"
-                  className="sr-only sm:not-sr-only"
+                <Typography
+                  variant="body-8"
+                  as="p"
+                  className="font-manrope font-medium text-white/90"
                 >
-                  Chosen Amount
-                </FieldLabel>
+                  Choose Donation Frequency
+                </Typography>
+                <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+                  {FREQUENCIES.map((item) => {
+                    const active = frequency === item.id;
+                    const unavailable = !recurringAvailable && item.id !== "once";
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        aria-pressed={active}
+                        disabled={unavailable}
+                        title={
+                          unavailable
+                            ? "Recurring donations are available in INR only"
+                            : undefined
+                        }
+                        onClick={() => {
+                          setFrequency(item.id);
+                          setError(null);
+                        }}
+                        className={`min-h-[40px] rounded border px-1 py-2 font-manrope text-[11px] font-semibold leading-tight transition-colors disabled:cursor-not-allowed disabled:opacity-40 sm:text-sm ${
+                          active
+                            ? "border-[#FCCC2D] bg-[#FCCC2D] text-[#3A2E00]"
+                            : "border-[#FCCC2D]/80 bg-transparent text-[#FCCC2D] enabled:hover:bg-[#FCCC2D]/10"
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <FieldLabel htmlFor="donate-amount">Chosen Amount</FieldLabel>
                 <div className="flex items-stretch gap-2 sm:gap-3">
                   <div className="flex min-h-[44px] min-w-0 flex-1 items-center rounded border border-[#FCCC2D] bg-[#8A7A28] px-4">
                     {editingAmount ? (
@@ -497,23 +580,7 @@ export default function DonateDetailsModal({
                   />
                 </div>
 
-                <div className={underlineField}>
-                  <FieldLabel htmlFor="donate-city" className="sr-only">
-                    City
-                  </FieldLabel>
-                  <input
-                    id="donate-city"
-                    required
-                    name="city"
-                    autoComplete="address-level2"
-                    placeholder="City*"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className={underlineInput}
-                  />
-                </div>
-
-                <div className="col-span-2 sm:col-span-1">
+                <div>
                   <FieldLabel htmlFor="donate-phone" className="sr-only">
                     Phone Number
                   </FieldLabel>
@@ -549,7 +616,7 @@ export default function DonateDetailsModal({
                   </div>
                 </div>
 
-                <div className={`col-span-2 sm:col-span-1 ${underlineField}`}>
+                <div className={underlineField}>
                   <FieldLabel htmlFor="donate-email" className="sr-only">
                     Email Address
                   </FieldLabel>
@@ -566,8 +633,24 @@ export default function DonateDetailsModal({
                   />
                 </div>
 
+                <div className={underlineField}>
+                  <FieldLabel htmlFor="donate-city" className="sr-only">
+                    City
+                  </FieldLabel>
+                  <input
+                    id="donate-city"
+                    required
+                    name="city"
+                    autoComplete="address-level2"
+                    placeholder="City*"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className={underlineInput}
+                  />
+                </div>
+
                 {!international ? (
-                  <div className={`col-span-2 sm:col-span-1 ${underlineField}`}>
+                  <div className={`col-span-2 ${underlineField}`}>
                     <FieldLabel htmlFor="donate-pan" className="sr-only">
                       ID Card (PAN or Aadhaar – optional, required only for 80G
                       certificate)
@@ -575,7 +658,7 @@ export default function DonateDetailsModal({
                     <input
                       id="donate-pan"
                       name="pan"
-                      placeholder="PAN / Aadhaar (for 80G)"
+                      placeholder="ID Card (PAN or Aadhaar - Optional)"
                       title="Optional – required only for the 80G tax certificate"
                       value={pan}
                       onChange={(e) => setPan(e.target.value)}
@@ -585,9 +668,7 @@ export default function DonateDetailsModal({
                   </div>
                 ) : null}
 
-                <div
-                  className={`col-span-2 ${international ? "" : "sm:col-span-1"} ${underlineField}`}
-                >
+                <div className={`col-span-2 ${underlineField}`}>
                   <FieldLabel htmlFor="donate-message" className="sr-only">
                     Leave a Message of Hope
                   </FieldLabel>
@@ -596,7 +677,7 @@ export default function DonateDetailsModal({
                     id="donate-message"
                     name="message"
                     rows={1}
-                    placeholder="Message of hope (optional)"
+                    placeholder="Leave a Message of Hope"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     className={`${underlineInput} max-h-[5.5rem] resize-none overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
@@ -613,7 +694,26 @@ export default function DonateDetailsModal({
                 </p>
               ) : null}
 
-              <div className="hidden min-w-0 items-center gap-3 [@media(min-width:640px)_and_(min-height:761px)]:flex">
+              {recurring ? (
+                <div className="flex items-start gap-3 rounded-md border border-[#FCCC2D]/70 px-3 py-3">
+                  <RefreshCw
+                    aria-hidden
+                    className="mt-0.5 h-4 w-4 shrink-0 text-[#FCCC2D]"
+                  />
+                  <div className="min-w-0">
+                    <p className="font-manrope text-sm font-semibold text-white">
+                      AutoPay
+                    </p>
+                    <p className="mt-1 font-manrope text-xs font-light leading-snug text-white/75">
+                      Your chosen amount will be donated automatically{" "}
+                      <span className="font-medium text-[#FCCC2D]">{recurring.every}</span>
+                      . You can pause or cancel anytime.
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="flex min-w-0 items-center gap-3">
                 <div className="flex shrink-0 -space-x-2">
                   {donorAvatars.map((src, i) => (
                     <Image
@@ -648,9 +748,7 @@ export default function DonateDetailsModal({
                     as="span"
                     className="block truncate"
                   >
-                    {loading
-                      ? "Please wait…"
-                      : `Pay Securely ${formattedAmount}`}
+                    {loading ? "Please wait…" : payLabel}
                   </Typography>
                 </button>
 

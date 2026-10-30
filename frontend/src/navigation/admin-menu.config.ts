@@ -19,6 +19,7 @@ import {
   HandHelping,
   Mail,
   MessageSquareQuote,
+  Repeat,
 } from "lucide-react";
 
 export type AdminMenuItem = {
@@ -140,6 +141,11 @@ export const adminMenuGroups: AdminMenuGroup[] = [
         label: "Donations",
         href: "/admin/donations",
         icon: HeartHandshake,
+      },
+      {
+        label: "Recurring Donations",
+        href: "/admin/recurring-donations",
+        icon: Repeat,
       },
     ],
   },
