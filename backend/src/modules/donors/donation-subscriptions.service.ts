@@ -220,7 +220,9 @@ export class DonationSubscriptionsService {
     const limit = query.limit ?? 20;
 
     const qb = this.repo.createQueryBuilder('sub').orderBy('sub.createdAt', 'DESC');
+    // 'created' rows are checkouts the donor closed without approving; only listed when asked for.
     if (query.status) qb.andWhere('sub.status = :status', { status: query.status });
+    else qb.andWhere("sub.status <> 'created'");
     if (query.frequency) {
       qb.andWhere('sub.frequency = :frequency', { frequency: query.frequency });
     }
