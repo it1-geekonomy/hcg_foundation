@@ -714,19 +714,7 @@ export default function DonateDetailsModal({
               ) : null}
 
               <div className="flex min-w-0 items-center gap-3">
-                <div className="flex shrink-0 -space-x-2">
-                  {donorAvatars.map((src, i) => (
-                    <Image
-                      key={src}
-                      src={src}
-                      alt=""
-                      width={24}
-                      height={24}
-                      style={{ zIndex: donorAvatars.length - i }}
-                      className="h-6 w-6 rounded-full border border-white/50"
-                    />
-                  ))}
-                </div>
+                
                 <Typography
                   variant="body-8"
                   as="p"
