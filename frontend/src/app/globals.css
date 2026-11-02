@@ -589,3 +589,12 @@ body[data-nav-menu-open] [data-chatbot] {
   transform: translateY(0);
   transition-delay: min(calc(var(--i) * 18ms), 300ms);
 }
+/* our partners */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
