@@ -120,6 +120,7 @@ export type HomeBanner = {
   id: string;
   name?: string | null;
   title: string;
+  location?: string | null;
   shortDescription?: string | null;
   bannerImageUrl: string;
   mobileBannerImageUrl?: string | null;
