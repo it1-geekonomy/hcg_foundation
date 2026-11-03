@@ -10,7 +10,6 @@ import {
 } from "react";
 import Image, { getImageProps } from "next/image";
 import { preload } from "react-dom";
-import Typography from "@/lib/Typography";
 import { cn } from "@/lib/utils";
 import {
   HERO_CONTENT_INSET_MULTIPLIER,
@@ -61,9 +60,9 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
   const isShort = height < HERO_SHORT_VIEWPORT_PX;
   const contentTopPx = height * HERO_CONTENT_TOP_FRACTION;
 
-  // Phones — same right-hand panel as desktop. The panel is wide enough (66%) for the copy to stay
-  // readable at 13–14px; the tile slides down the photo side of the panel edge.
-  if (width < 640) {
+  // Compact (phones + narrow tablets/devtools). Word-by-word animation and the desktop 50% copy anchor
+  // break in a narrow panel (~671px was clipping text and merging words).
+  if (width <= HERO_COMPACT_MAX_WIDTH_PX) {
     const small = height < 700;
     const tileWidth = small ? 84 : 96;
     return {
@@ -89,30 +88,7 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
     };
   }
 
-  // Tablet
-  if (width < 1024) {
-    const mult = HERO_CONTENT_INSET_MULTIPLIER.tablet;
-    const tileWidth = isShort ? 68 : 72;
-    return {
-      isMobile: false,
-      overlayWidth: "42%",
-      tileWidth,
-      contentTopPx,
-      contentLeft: 14 * mult,
-      contentRight: 20 * mult,
-      contentBottom: isShort ? 24 : 28,
-      gapAfterTile: isShort ? 12 : 14,
-      accentGap: 12,
-      nameSize: isShort ? 18 : 20,
-      taglineSize: isShort ? 12 : 13,
-      bodySize: isShort ? 11 : 12,
-      nameGap: isShort ? 20 : 24,
-      taglineGap: isShort ? 12 : 14,
-      wordSpacing: "0.2em",
-    };
-  }
-
-  // Laptop 1024–1279 — interpolated between tablet and desktop
+  // Laptop 1024–1279 — interpolated between compact and desktop
   if (width < 1280) {
     const t = clamp01((width - 1024) / (1280 - 1024));
     const mult = HERO_CONTENT_INSET_MULTIPLIER.laptop;
@@ -171,6 +147,8 @@ function getNavbarClearancePx(): number {
 }
 
 const XL_BREAKPOINT_PX = 1280;
+/** Viewports below lg use the phone hero (panel width, copy inset, plain text, chatbot clearance). */
+const HERO_COMPACT_MAX_WIDTH_PX = 1023;
 const MIN_TEXT_FIT = 0.8;
 /** Phones: copy may shrink less than on desktop so it never drops to fine print. */
 const MIN_TEXT_FIT_MOBILE = 0.92;
@@ -194,8 +172,8 @@ const HERO_OVERLAY_BG_MOBILE =
  * getResponsiveValues take over.
  * Keep the phone value (66%) in sync with MOBILE_PANEL_WIDTH.
  */
-const HERO_PANEL = "w-[61%] sm:w-[42%] lg:w-[38%] xl:w-[35%]";
-const HERO_PANEL_RIGHT = "right-[61%] sm:right-[42%] lg:right-[38%] xl:right-[35%]";
+const HERO_PANEL = "w-[61%] lg:w-[42%] xl:w-[35%]";
+const HERO_PANEL_RIGHT = "right-[61%] lg:right-[42%] xl:right-[35%]";
 
 /**
  * PERF: picks the phone or desktop photo with <picture> media queries, and preloads only the one that
@@ -255,7 +233,7 @@ function HeroBackground({
         fetchPriority: "high",
         imageSrcSet: mobileSet,
         imageSizes: "100vw",
-        media: "(max-width: 639px)",
+        media: `(max-width: ${HERO_COMPACT_MAX_WIDTH_PX}px)`,
       });
     }
     if (desktopHref && desktopSet) {
@@ -264,15 +242,15 @@ function HeroBackground({
         fetchPriority: "high",
         imageSrcSet: desktopSet,
         imageSizes: "100vw",
-        media: "(min-width: 640px)",
+        media: `(min-width: ${HERO_COMPACT_MAX_WIDTH_PX + 1}px)`,
       });
     }
   }
 
   return (
     <picture className={cn("absolute inset-0 block", layer)}>
-      <source media="(max-width: 639px)" srcSet={mobileSet} sizes="100vw" />
-      <source media="(min-width: 640px)" srcSet={desktopSet} sizes="100vw" />
+      <source media={`(max-width: ${HERO_COMPACT_MAX_WIDTH_PX}px)`} srcSet={mobileSet} sizes="100vw" />
+      <source media={`(min-width: ${HERO_COMPACT_MAX_WIDTH_PX + 1}px)`} srcSet={desktopSet} sizes="100vw" />
       <img
         {...mobileProps}
         alt=""
@@ -301,7 +279,7 @@ function getTileTranslateY(
 ): number {
   const w = typeof window !== "undefined" ? window.innerWidth : 1280;
 
-  const tabletExtra = w >= 640 && w < 1024 ? 28 : 0;
+  const tabletExtra = 0;
   const belowXlOffset = w < XL_BREAKPOINT_PX ? 12 : 0;
 
   const rawY =
@@ -434,14 +412,32 @@ function StoryTextBlock({
     ? { textAlign: "left", hyphens: "none", WebkitHyphens: "none", overflowWrap: "normal" }
     : {};
 
-  // Without a name, the title takes the heading slot so it isn't left at tagline size.
-  const heading = step.name || step.tagline;
+  // Title in the accent row; name on the line below (tagline size). Same styling, swapped slots.
+  const name = step.name.trim();
+  const title = step.tagline.trim();
+  const heading = title || name;
+  const subheading = title && name ? name : "";
   const hasHeading = Boolean(heading);
+  const textColumnOffset = hasHeading ? 4 + layout.accentGap : 0;
 
   // Phones animate the story as one block: a per-word cascade over 60+ words stutters and hides text mid-read.
   const animateWords = !layout.isMobile;
   const words = (text: string) =>
     renderWordLines(text, active, exiting, layout.wordSpacing, animateWords);
+
+  const scaledText = (
+    sizePx: number,
+    extra?: CSSProperties
+  ): CSSProperties =>
+    layout.isMobile
+      ? {
+          fontSize: `calc(var(--fit, 1) * ${sizePx}px)`,
+          ...mobileShadow,
+          ...mobileTextFlow,
+          ...extra,
+        }
+      : { fontSize: sizePx, ...extra };
+
   // Same motion in both scroll directions: the new story rises in from below, the old one lifts out.
   const blockMotion: CSSProperties = animateWords
     ? {}
@@ -479,43 +475,46 @@ function StoryTextBlock({
               style={{ backgroundColor: HERO_NAME_ACCENT_COLOR }}
               aria-hidden
             />
-            <Typography
-              variant="heading-7"
-              as="h2"
-              className="min-w-0 flex-1 text-balance font-manrope text-white"
-              style={
-                layout.isMobile
-                  ? {
-                    fontSize: `calc(var(--fit, 1) * ${layout.nameSize}px)`,
-                    lineHeight: 1.25,
-                    ...mobileShadow,
-                    ...mobileTextFlow,
-                  }
-                  : undefined
-              }
+            <div
+              className="min-w-0 flex-1 break-words font-manrope text-white"
+              style={{
+                ...scaledText(layout.nameSize, { fontWeight: 700, lineHeight: 1.2 }),
+              }}
             >
               {words(heading)}
-            </Typography>
+            </div>
           </div>
         ) : null}
 
-        <Typography
-          variant="body-7"
-          as="p"
-          className="font-manrope text-white pt-3 sm:pt-4"
-          style={
-            layout.isMobile
-              ? {
-                fontSize: `calc(var(--fit, 1) * ${layout.bodySize}px)`,
-                lineHeight: layout.bodyLineHeight,
-                ...mobileShadow,
-                ...mobileTextFlow,
-              }
-              : undefined
-          }
+        {subheading ? (
+          <div
+            className="min-w-0 break-words font-manrope text-white"
+            style={{
+              paddingLeft: textColumnOffset,
+              ...scaledText(layout.taglineSize, {
+                fontWeight: 700,
+                marginTop: layout.nameGap,
+                lineHeight: 1.4,
+              }),
+            }}
+          >
+            {words(subheading)}
+          </div>
+        ) : null}
+
+        <div
+          className="min-w-0 break-words font-manrope text-[rgba(255,255,255,0.95)]"
+          style={{
+            paddingLeft: textColumnOffset,
+            ...scaledText(layout.bodySize, {
+              fontWeight: 400,
+              marginTop: subheading ? layout.taglineGap : layout.nameGap,
+              lineHeight: layout.isMobile ? layout.bodyLineHeight ?? 1.5 : 1.65,
+            }),
+          }}
         >
           {words(step.body)}
-        </Typography>
+        </div>
       </div>
     </div>
   );
@@ -543,9 +542,14 @@ export default function TileScrollSection({
   const [activeStep, setActiveStep] = useState(0);
   const [exitStep, setExitStep] = useState<number | null>(null);
   // Same value on the server and the first client render (hydration-safe).
-  const [layout, setLayout] = useState<HeroResponsiveLayout>(() =>
-    initialIsMobile ? getResponsiveValues(390, 800) : getResponsiveValues(1280, 900)
-  );
+  const [layout, setLayout] = useState<HeroResponsiveLayout>(() => {
+    if (typeof window !== "undefined") {
+      return getResponsiveValues(window.innerWidth, window.innerHeight);
+    }
+    return initialIsMobile
+      ? getResponsiveValues(390, 800)
+      : getResponsiveValues(1280, 900);
+  });
   // False on the server + hydration render: CSS classes position the panel/tile.
   // True after the first real measurement: exact inline values take over.
   const [synced, setSynced] = useState(false);
@@ -910,7 +914,7 @@ export default function TileScrollSection({
               <Image
                 key={`tile-${i}`}
                 src={step.tileImageSrc}
-                alt={step.name || step.tagline}
+                alt={step.tagline || step.name}
                 fill
                 quality={65}
                 className={cn(
