@@ -7,6 +7,7 @@ import HopeSection from "./HopeSection";
 import Community from "./Community";
 import Togetherwecreatehope from "./Togetherwecreatehope";
 import ProjectsSection from "./ProjectsSection";
+import OurPartners from "./ourpartners";
 
 const DonateForm = dynamic(() => import("@/shared/components/DonateForm"));
 const Reelsection = dynamic(() => import("./Reelsection"));
@@ -22,6 +23,7 @@ export default function HomeBelowFoldView({ cards }: { cards: CardData[] }) {
       <div className={gradientClass}>
         <StatSection />
       </div>
+      <OurPartners />
       <div id="projects" className="scroll-mt-24">
         {cards.length === 0 ? (
           <section className="bg-[#FFF6D8] px-8 py-16 text-black sm:px-12 md:px-16 lg:px-6 xl:px-6 2xl:px-40">
