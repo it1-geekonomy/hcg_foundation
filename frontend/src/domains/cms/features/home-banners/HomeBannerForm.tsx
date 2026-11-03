@@ -185,11 +185,11 @@ export default function HomeBannerForm({
           <CmsFormField
             label="Name"
             htmlFor="name"
-            hint="Shown as the heading on the homepage banner."
+            hint="Smaller bold line under the title."
           >
             <Input
               id="name"
-              placeholder="Ananya Nair"
+              placeholder=""
               maxLength={255}
               value={value.name}
               onChange={(e) => onChange({ ...value, name: e.target.value })}
@@ -199,12 +199,12 @@ export default function HomeBannerForm({
           <CmsFormField
             label="Title"
             htmlFor="title"
-            hint="Tagline shown under the name."
+            hint=""
           >
             <Input
               id="title"
               required
-              placeholder="With courage in her heart and hope ahead."
+              placeholder=""
               maxLength={255}
               value={value.title}
               onChange={(e) => onChange({ ...value, title: e.target.value })}
@@ -230,7 +230,7 @@ export default function HomeBannerForm({
           <Textarea
             id="shortDescription"
             rows={5}
-            placeholder="Text shown under the title on the banner"
+            placeholder=""
             value={value.shortDescription}
             onChange={(e) =>
               onChange({ ...value, shortDescription: e.target.value })
