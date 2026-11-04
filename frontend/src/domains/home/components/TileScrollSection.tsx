@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * Home hero — pinned scroll, one CMS banner per step.
+ *
+ * Layout: phone panel (≤1023px wide, or short viewport below 1280px) vs laptop vs desktop.
+ * Profile tile transform is applied imperatively in moveTile() (not via React style) so scroll
+ * steps stay in sync without reconciliation flicker.
+ */
+
 import {
   useCallback,
   useEffect,
@@ -21,9 +29,44 @@ import {
   type HeroTileStep,
 } from "@/domains/home/constants/heroTileScroll";
 import {
+  heroNavInsetCss,
+  measureSiteNavbarBottom,
+  publishSiteNavbarBottom,
+} from "@/domains/home/constants/siteNavClearance";
+import {
   HERO_RESET_EVENT,
   type HeroResetDetail,
 } from "@/domains/home/utils/heroScrollReset";
+
+// ============================================================================
+// CONSTANTS (keep in sync with Tailwind HERO_PANEL* classes below)
+// ============================================================================
+
+const XL_BREAKPOINT_PX = 1280;
+/** Widths at or below this use the 61% text panel + mobile tile track. */
+const HERO_COMPACT_MAX_WIDTH_PX = 1023;
+const MOBILE_PANEL_WIDTH = "45%";
+
+const MIN_TEXT_FIT = 0.8;
+const MIN_TEXT_FIT_MOBILE = 0.92;
+const MOBILE_CONTENT_TOP_PX = 72;
+const MOBILE_TILE_BOTTOM_GAP_PX = 64;
+const MOBILE_TILE_PANEL_OVERLAP = 0.15;
+const MOBILE_TILE_TRANSLATE_X = `${Math.round(MOBILE_TILE_PANEL_OVERLAP * 100)}%`;
+const WIDE_COMPACT_COPY_GAP_PX = 16;
+/** Fixed vertical Donate Now tab (see DonateButton) + margin so hero copy never sits under it. */
+const HERO_SIDE_TAB_CLEARANCE_PX = 76;
+
+function heroPanelRightInsetPx(basePx: number): number {
+  return Math.max(basePx, HERO_SIDE_TAB_CLEARANCE_PX);
+}
+
+const HERO_OVERLAY_BG_MOBILE =
+  "linear-gradient(180deg, rgba(153,115,0,0.74) 0%, rgba(122,92,0,0.86) 100%)";
+
+/** Fallback SSR / first paint; exact width comes from layout inline styles. */
+const HERO_PANEL = "w-[61%] xl:w-[35%]";
+const HERO_PANEL_RIGHT = "right-[61%] xl:right-[35%]";
 
 // ============================================================================
 // RESPONSIVE LAYOUT
@@ -39,6 +82,10 @@ function lerp(a: number, b: number, t: number) {
 
 export type HeroResponsiveLayout = {
   isMobile: boolean;
+  /** Short viewport: top copy anchor, text shrink-to-fit, no word animation. */
+  compactText: boolean;
+  /** Copy column starts under the profile tile (wide + short viewports). */
+  textBelowTile: boolean;
   overlayWidth: string;
   tileWidth: number;
   contentTopPx: number;
@@ -56,39 +103,62 @@ export type HeroResponsiveLayout = {
   wordSpacing: string;
 };
 
+function usesPhoneHeroLayout(width: number, height: number): boolean {
+  const isShort = height < HERO_SHORT_VIEWPORT_PX;
+  return width <= HERO_COMPACT_MAX_WIDTH_PX || (isShort && width < XL_BREAKPOINT_PX);
+}
+
+function heroCopyTopPx(height: number, isShort: boolean, phoneLayout: boolean): number {
+  if (phoneLayout || isShort) return MOBILE_CONTENT_TOP_PX;
+  return height * HERO_CONTENT_TOP_FRACTION;
+}
+
+function phonePanelContentTop(
+  wideCompact: boolean,
+  tileWidth: number,
+  height: number,
+  isShort: boolean
+): number {
+  if (wideCompact) {
+    return MOBILE_CONTENT_TOP_PX + tileWidth + WIDE_COMPACT_COPY_GAP_PX;
+  }
+  return heroCopyTopPx(height, isShort, true);
+}
+
 function getResponsiveValues(width: number, height: number): HeroResponsiveLayout {
   const isShort = height < HERO_SHORT_VIEWPORT_PX;
-  const contentTopPx = height * HERO_CONTENT_TOP_FRACTION;
+  const phoneLayout = usesPhoneHeroLayout(width, height);
 
   // Compact (phones + narrow tablets/devtools). Word-by-word animation and the desktop 50% copy anchor
   // break in a narrow panel (~671px was clipping text and merging words).
-  if (width <= HERO_COMPACT_MAX_WIDTH_PX) {
+  if (phoneLayout) {
     const small = height < 700;
-    const tileWidth = small ? 84 : 96;
+    const wideCompact = width > HERO_COMPACT_MAX_WIDTH_PX;
+    const tileWidth = wideCompact ? 96 : small ? 84 : 96;
     return {
       isMobile: true,
+      compactText: true,
+      textBelowTile: wideCompact,
       overlayWidth: MOBILE_PANEL_WIDTH,
       tileWidth,
-      // Copy starts just under the navbar so the longest stories fit above the chatbot.
-      contentTopPx: MOBILE_CONTENT_TOP_PX,
+      contentTopPx: phonePanelContentTop(wideCompact, tileWidth, height, isShort),
       contentLeft: Math.round(tileWidth * MOBILE_TILE_PANEL_OVERLAP) + 8,
-      // Clears the fixed "Donate Now" side tab (~34px wide on phones) with a ~12px margin.
-      contentRight: 46,
+      contentRight: heroPanelRightInsetPx(wideCompact ? 52 : 46),
       // Clears the chatbot launcher (60px tall, 64px above the bottom edge).
       contentBottom: 160,
       gapAfterTile: 12,
       accentGap: 7,
       nameSize: small ? 18 : 20,
       taglineSize: small ? 13 : 14,
-      bodySize: small ? 13 : 14,
+      bodySize: wideCompact ? 14 : small ? 13 : 14,
       bodyLineHeight: 1.5,
-      nameGap: small ? 7 : 9,
-      taglineGap: small ? 8 : 10,
+      nameGap: wideCompact ? 10 : small ? 7 : 9,
+      taglineGap: wideCompact ? 10 : small ? 8 : 10,
       wordSpacing: "0.2em",
     };
   }
 
-  // Laptop 1024–1279 — interpolated between compact and desktop
+  // Laptop 1024–1279 — interpolated between compact and desktop (tall viewports only)
   if (width < 1280) {
     const t = clamp01((width - 1024) / (1280 - 1024));
     const mult = HERO_CONTENT_INSET_MULTIPLIER.laptop;
@@ -98,12 +168,14 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
 
     return {
       isMobile: false,
+      compactText: isShort,
+      textBelowTile: false,
       overlayWidth: `${lerp(40, 36, t).toFixed(1)}%`,
       tileWidth,
-      contentTopPx,
+      contentTopPx: heroCopyTopPx(height, isShort, false),
       contentLeft: paddingLeft * mult,
-      contentRight: paddingRight * mult,
-      contentBottom: isShort ? 28 : 32,
+      contentRight: heroPanelRightInsetPx(Math.round(paddingRight * mult)),
+      contentBottom: isShort ? 160 : 32,
       gapAfterTile: isShort ? 14 : 16,
       accentGap: 12,
       nameSize: Math.round(lerp(22, 26, t)),
@@ -121,12 +193,17 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
 
   return {
     isMobile: false,
+    compactText: isShort,
+    // Wide + short (e.g. 1536×538): tile sits on the panel seam — copy must start under it, not at 72px.
+    textBelowTile: isShort,
     overlayWidth: "35%",
     tileWidth,
-    contentTopPx,
+    contentTopPx: isShort
+      ? MOBILE_CONTENT_TOP_PX + tileWidth + WIDE_COMPACT_COPY_GAP_PX
+      : height * HERO_CONTENT_TOP_FRACTION,
     contentLeft: 18 * mult,
-    contentRight: 24 * mult,
-    contentBottom: isShort ? 28 : 32,
+    contentRight: heroPanelRightInsetPx(Math.round(24 * mult)),
+    contentBottom: isShort ? 160 : 32,
     gapAfterTile: isShort ? 14 : 16,
     accentGap: 14,
     nameSize: isShort ? 24 : 28,
@@ -139,41 +216,48 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
 }
 
 function getNavbarClearancePx(): number {
-  if (typeof window === "undefined") return 96;
-  const nav = document.getElementById("site-navbar");
-  if (!nav) return 96;
-  const rect = nav.getBoundingClientRect();
-  return rect.bottom > 0 ? rect.bottom + 8 : 96;
+  return measureSiteNavbarBottom();
 }
 
-const XL_BREAKPOINT_PX = 1280;
-/** Viewports below lg use the phone hero (panel width, copy inset, plain text, chatbot clearance). */
-const HERO_COMPACT_MAX_WIDTH_PX = 1023;
-const MIN_TEXT_FIT = 0.8;
-/** Phones: copy may shrink less than on desktop so it never drops to fine print. */
-const MIN_TEXT_FIT_MOBILE = 0.92;
-/** Phones: just below the ~57px navbar. */
-const MOBILE_CONTENT_TOP_PX = 72;
-/** Phones: lowest tile stop stays above the HCG title mark in the bottom-left corner. */
-const MOBILE_TILE_BOTTOM_GAP_PX = 64;
-/** Phones: share of the tile that sits over the panel — just a lip, so the panel keeps its width for the copy. */
-const MOBILE_TILE_PANEL_OVERLAP = 0.15;
-const MOBILE_TILE_TRANSLATE_X = `${Math.round(MOBILE_TILE_PANEL_OVERLAP * 100)}%`;
-/** Phones: panel width. Must match the `w-[66%]` / `right-[66%]` classes below. */
-const MOBILE_PANEL_WIDTH = "61%";
+function minTileTopPx(navClearance: number): number {
+  return Math.max(navClearance, MOBILE_CONTENT_TOP_PX);
+}
 
-/** Phones: deeper at the bottom so long copy stays readable over any photo. */
-const HERO_OVERLAY_BG_MOBILE =
-  "linear-gradient(180deg, rgba(153,115,0,0.74) 0%, rgba(122,92,0,0.86) 100%)";
+/** Never start hero copy under the fixed navbar (all breakpoints). */
+function withNavClearance(
+  layout: HeroResponsiveLayout,
+  navClearance: number
+): HeroResponsiveLayout {
+  const navFloor = minTileTopPx(navClearance);
+  let contentTopPx = Math.max(layout.contentTopPx, navFloor);
+  if (layout.textBelowTile) {
+    contentTopPx = Math.max(
+      contentTopPx,
+      navFloor + layout.tileWidth + WIDE_COMPACT_COPY_GAP_PX
+    );
+  }
+  if (contentTopPx === layout.contentTopPx) return layout;
+  return { ...layout, contentTopPx };
+}
 
-/**
- * PERF: first-paint panel width / tile edge in CSS only, so the server HTML already matches the screen
- * (no layout shift). Once the layout is measured (`synced`), the exact inline values from
- * getResponsiveValues take over.
- * Keep the phone value (66%) in sync with MOBILE_PANEL_WIDTH.
- */
-const HERO_PANEL = "w-[61%] lg:w-[42%] xl:w-[35%]";
-const HERO_PANEL_RIGHT = "right-[61%] lg:right-[42%] xl:right-[35%]";
+function normalizeStorySpaces(text: string): string {
+  return text
+    .replace(/\u00a0/g, " ")
+    .replace(/[^\S\r\n]+/g, " ")
+    .replace(/,(\S)/g, ", $1")
+    .replace(/;(\S)/g, "; $1")
+    .replace(/\.([A-Za-z(])/g, ". $1");
+}
+
+/** CMS: title in accent row, name on the line below (tagline size). */
+function resolveStoryCopy(step: HeroTileStep): { heading: string; subheading: string } {
+  const name = step.name.trim();
+  const title = step.tagline.trim();
+  return {
+    heading: title || name,
+    subheading: title && name ? name : "",
+  };
+}
 
 /**
  * PERF: picks the phone or desktop photo with <picture> media queries, and preloads only the one that
@@ -277,15 +361,24 @@ function getTileTranslateY(
   tileH: number,
   navClearance: number
 ): number {
-  const w = typeof window !== "undefined" ? window.innerWidth : 1280;
+  const belowXlOffset =
+    typeof window !== "undefined" && window.innerWidth < XL_BREAKPOINT_PX ? 12 : 0;
+  const rawY = getHeroTileYFraction(step, count) * vh + belowXlOffset;
+  const minY = minTileTopPx(navClearance);
+  return Math.min(Math.max(rawY, minY), vh - tileH - 24);
+}
 
-  const tabletExtra = 0;
-  const belowXlOffset = w < XL_BREAKPOINT_PX ? 12 : 0;
-
-  const rawY =
-    getHeroTileYFraction(step, count) * vh + belowXlOffset + tabletExtra;
-
-  return Math.min(Math.max(rawY, navClearance), vh - tileH - 24);
+function mobileTileTranslateY(
+  step: number,
+  stepCount: number,
+  vh: number,
+  tileH: number,
+  navClearance: number
+): number {
+  const top = minTileTopPx(navClearance);
+  const bottom = Math.max(top, vh - tileH - MOBILE_TILE_BOTTOM_GAP_PX);
+  if (stepCount <= 1) return top;
+  return top + (step / (stepCount - 1)) * (bottom - top);
 }
 
 // ============================================================================
@@ -362,13 +455,13 @@ function StoryTextBlock({
   // when the browser is idle, and again right away the moment they become active, so a story is always
   // correctly sized before it is shown.
   const needsNow = active || exiting;
-  const isMobile = layout.isMobile;
+  const compactText = layout.compactText;
   useLayoutEffect(() => {
     const frame = frameRef.current;
     const content = contentRef.current;
     if (!frame || !content) return;
     // Phones shrink less, so the copy never turns into fine print.
-    const minFit = isMobile ? MIN_TEXT_FIT_MOBILE : MIN_TEXT_FIT;
+    const minFit = compactText ? MIN_TEXT_FIT_MOBILE : MIN_TEXT_FIT;
     const fit = () => {
       const cs = getComputedStyle(frame);
       const available =
@@ -399,37 +492,47 @@ function StoryTextBlock({
     }
     const id = window.setTimeout(fit, 200);
     return () => window.clearTimeout(id);
-  }, [layout, step, needsNow, isMobile]);
+  }, [layout, step, needsNow, compactText]);
 
   // The phone panel sits over busy photos, so text gets a soft shadow there for legibility.
-  const mobileShadow: CSSProperties = layout.isMobile
+  const mobileShadow: CSSProperties = layout.compactText
     ? { textShadow: "0 1px 3px rgba(0,0,0,0.28)" }
     : {};
 
   // Phones: left-aligned, no hyphenation. Justified + hyphenated text in a narrow column gives
   // big word gaps and broken words ("includ-ing").
-  const mobileTextFlow: CSSProperties = layout.isMobile
-    ? { textAlign: "left", hyphens: "none", WebkitHyphens: "none", overflowWrap: "normal" }
+  const mobileTextFlow: CSSProperties = layout.compactText
+    ? {
+        textAlign: "left",
+        hyphens: "none",
+        WebkitHyphens: "none",
+        overflowWrap: "break-word",
+        wordBreak: "normal",
+        whiteSpace: "normal",
+      }
     : {};
 
-  // Title in the accent row; name on the line below (tagline size). Same styling, swapped slots.
-  const name = step.name.trim();
-  const title = step.tagline.trim();
-  const heading = title || name;
-  const subheading = title && name ? name : "";
+  const { heading, subheading } = resolveStoryCopy(step);
   const hasHeading = Boolean(heading);
   const textColumnOffset = hasHeading ? 4 + layout.accentGap : 0;
 
-  // Phones animate the story as one block: a per-word cascade over 60+ words stutters and hides text mid-read.
-  const animateWords = !layout.isMobile;
+  const animateWords = !layout.compactText;
   const words = (text: string) =>
-    renderWordLines(text, active, exiting, layout.wordSpacing, animateWords);
+    renderWordLines(
+      normalizeStorySpaces(text),
+      active,
+      exiting,
+      layout.wordSpacing,
+      animateWords
+    );
+
+  const navInset = heroNavInsetCss(layout.contentTopPx);
 
   const scaledText = (
     sizePx: number,
     extra?: CSSProperties
   ): CSSProperties =>
-    layout.isMobile
+    layout.compactText
       ? {
           fontSize: `calc(var(--fit, 1) * ${sizePx}px)`,
           ...mobileShadow,
@@ -456,15 +559,15 @@ function StoryTextBlock({
   return (
     <div
       ref={frameRef}
-      className="pointer-events-none absolute inset-x-0 top-0 flex flex-col justify-start overflow-hidden font-manrope"
+      className="pointer-events-none absolute inset-x-0 flex flex-col justify-start overflow-hidden font-manrope"
       style={{
-        // Sized to the small viewport so mobile toolbars never cover the copy or its chatbot clearance.
-        height: `calc(100svh - ${layout.contentTopPx}px)`,
+        // Absolute children ignore parent padding — inset from the viewport top via `top`, not panel paddingTop.
+        top: navInset,
+        height: `calc(100svh - ${navInset})`,
         paddingTop: layout.gapAfterTile,
         paddingBottom: layout.contentBottom,
         paddingLeft: layout.contentLeft,
         paddingRight: layout.contentRight,
-        marginTop: layout.contentTopPx,
       }}
     >
       <div ref={contentRef} className="w-full max-w-full" style={blockMotion}>
@@ -503,13 +606,15 @@ function StoryTextBlock({
         ) : null}
 
         <div
-          className="min-w-0 break-words font-manrope text-[rgba(255,255,255,0.95)]"
+          className="min-w-0 w-full max-w-full break-words font-manrope text-[rgba(255,255,255,0.95)]"
           style={{
             paddingLeft: textColumnOffset,
             ...scaledText(layout.bodySize, {
               fontWeight: 400,
               marginTop: subheading ? layout.taglineGap : layout.nameGap,
-              lineHeight: layout.isMobile ? layout.bodyLineHeight ?? 1.5 : 1.65,
+              lineHeight: layout.compactText ? layout.bodyLineHeight ?? 1.5 : 1.65,
+              overflowWrap: "anywhere",
+              ...(layout.compactText ? mobileTextFlow : {}),
             }),
           }}
         >
@@ -544,7 +649,8 @@ export default function TileScrollSection({
   // Same value on the server and the first client render (hydration-safe).
   const [layout, setLayout] = useState<HeroResponsiveLayout>(() => {
     if (typeof window !== "undefined") {
-      return getResponsiveValues(window.innerWidth, window.innerHeight);
+      const base = getResponsiveValues(window.innerWidth, window.innerHeight);
+      return withNavClearance(base, getNavbarClearancePx());
     }
     return initialIsMobile
       ? getResponsiveValues(390, 800)
@@ -552,8 +658,6 @@ export default function TileScrollSection({
   });
   // False on the server + hydration render: CSS classes position the panel/tile.
   // True after the first real measurement: exact inline values take over.
-  const [synced, setSynced] = useState(false);
-
   const currentStepRef = useRef(0);
   const isAnimatingRef = useRef(false);
   const isResettingRef = useRef(false);
@@ -566,6 +670,9 @@ export default function TileScrollSection({
   const navClearanceRef = useRef(96);
   const layoutRef = useRef(layout);
   const layoutSizeRef = useRef("");
+  useEffect(() => {
+    layoutRef.current = layout;
+  }, [layout]);
 
   const getViewportHeight = useCallback(
     () => viewportProbeRef.current?.offsetHeight || window.innerHeight,
@@ -592,10 +699,11 @@ export default function TileScrollSection({
     navClearanceRef.current = getNavbarClearancePx();
     const width = window.innerWidth;
     const height = getViewportHeight();
-    const size = `${width}x${height}`;
+    const size = `${width}x${height}x${Math.round(navClearanceRef.current)}`;
     if (size === layoutSizeRef.current) return;
     layoutSizeRef.current = size;
-    const next = getResponsiveValues(width, height);
+    const next = withNavClearance(getResponsiveValues(width, height), navClearanceRef.current);
+    publishSiteNavbarBottom(navClearanceRef.current);
     layoutRef.current = next;
     setLayout(next);
   }, [getViewportHeight]);
@@ -603,21 +711,35 @@ export default function TileScrollSection({
   const moveTile = useCallback((step: number) => {
     const tile = tileRef.current;
     if (!tile) return;
+    navClearanceRef.current = getNavbarClearancePx();
     const vh = getViewportHeight();
     const tileH = tile.offsetHeight;
 
     // Phones: evenly spaced stops from just under the navbar down to just above the bottom corner.
-    if (layoutRef.current.isMobile) {
-      const top = MOBILE_CONTENT_TOP_PX;
-      const bottom = Math.max(top, vh - tileH - MOBILE_TILE_BOTTOM_GAP_PX);
-      const y = top + (stepCount > 1 ? (step / (stepCount - 1)) * (bottom - top) : 0);
-      tile.style.transform = `translateX(${MOBILE_TILE_TRANSLATE_X}) translateY(${Math.round(y)}px)`;
-      return;
-    }
+    const y = layoutRef.current.isMobile
+      ? mobileTileTranslateY(step, stepCount, vh, tileH, navClearanceRef.current)
+      : getTileTranslateY(step, stepCount, vh, tileH, navClearanceRef.current);
 
-    const newY = getTileTranslateY(step, stepCount, vh, tileH, navClearanceRef.current);
-    tile.style.transform = `translateX(50%) translateY(${newY}px)`;
+    const translateX = layoutRef.current.isMobile
+      ? MOBILE_TILE_TRANSLATE_X
+      : "50%";
+    tile.style.transform = `translateX(${translateX}) translateY(${Math.round(y)}px)`;
   }, [stepCount, getViewportHeight]);
+
+  const refreshNavClearance = useCallback(() => {
+    navClearanceRef.current = getNavbarClearancePx();
+    layoutSizeRef.current = "";
+    const width = window.innerWidth;
+    const height = getViewportHeight();
+    const next = withNavClearance(
+      getResponsiveValues(width, height),
+      navClearanceRef.current
+    );
+    publishSiteNavbarBottom(navClearanceRef.current);
+    layoutRef.current = next;
+    setLayout(next);
+    moveTile(currentStepRef.current);
+  }, [moveTile, getViewportHeight]);
 
   const applyStep = useCallback(
     (step: number, force = false) => {
@@ -772,10 +894,16 @@ export default function TileScrollSection({
   useLayoutEffect(() => {
     syncLayout();
     measurePinnedRange();
-    setSynced(true);
+    moveTile(currentStepRef.current);
+    const id = requestAnimationFrame(() => refreshNavClearance());
+    return () => cancelAnimationFrame(id);
+  }, [moveTile, syncLayout, measurePinnedRange, refreshNavClearance]);
+
+  useLayoutEffect(() => {
     moveTile(0);
     applyStep(0, true);
-  }, [moveTile, applyStep, syncLayout, measurePinnedRange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Re-place the tile once React has applied the new layout (tile size changes per breakpoint).
   useEffect(() => {
@@ -791,6 +919,14 @@ export default function TileScrollSection({
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, [moveTile, syncLayout, measurePinnedRange]);
+
+  useEffect(() => {
+    const nav = document.getElementById("site-navbar");
+    if (!nav || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => refreshNavClearance());
+    observer.observe(nav);
+    return () => observer.disconnect();
+  }, [refreshNavClearance]);
 
   // Phones: 70svh of scroll per story (was 55svh, which let a normal swipe skip a story).
   // Desktop: 100svh per story.
@@ -854,18 +990,11 @@ export default function TileScrollSection({
         </div>
 
         <div
-          className={cn(
-            "absolute top-0 right-0 z-10 h-full bg-[linear-gradient(180deg,rgba(153,115,0,0.74)_0%,rgba(122,92,0,0.86)_100%)] sm:bg-none sm:bg-[rgba(153,115,0,0.7)]",
-            HERO_PANEL
-          )}
-          style={
-            synced
-              ? {
-                width: layout.overlayWidth,
-                background: layout.isMobile ? HERO_OVERLAY_BG_MOBILE : HERO_OVERLAY_BG,
-              }
-              : undefined
-          }
+          className={cn("absolute top-0 right-0 z-10 box-border h-full", HERO_PANEL)}
+          style={{
+            width: layout.overlayWidth,
+            background: layout.isMobile ? HERO_OVERLAY_BG_MOBILE : HERO_OVERLAY_BG,
+          }}
         >
           {/* All stories stay mounted so each one animates in/out smoothly. */}
           {steps.map((step, i) => (
@@ -889,25 +1018,17 @@ export default function TileScrollSection({
             HERO_PANEL_RIGHT,
             layout.isMobile && "overflow-hidden"
           )}
-          style={
-            layout.isMobile
-              ? {
-                width: layout.tileWidth,
-                boxShadow: "0 12px 30px rgba(0,0,0,0.45)",
-                backgroundColor: "#2B2410",
-                transition: "transform 650ms cubic-bezier(0.22,1,0.36,1)",
-                ...(synced ? { right: layout.overlayWidth } : {}),
-                transform: `translateX(${MOBILE_TILE_TRANSLATE_X}) translateY(0)`,
-              }
-              : {
-                width: layout.tileWidth,
-                backgroundColor: "#2B2410",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
-                transition: "transform 600ms cubic-bezier(0.4,0,0.2,1)",
-                ...(synced ? { right: layout.overlayWidth } : {}),
-                transform: "translateX(50%) translateY(0)",
-              }
-          }
+          style={{
+            width: layout.tileWidth,
+            right: layout.overlayWidth,
+            backgroundColor: "#2B2410",
+            boxShadow: layout.isMobile
+              ? "0 12px 30px rgba(0,0,0,0.45)"
+              : "0 8px 24px rgba(0,0,0,0.35)",
+            transition: layout.isMobile
+              ? "transform 650ms cubic-bezier(0.22,1,0.36,1)"
+              : "transform 600ms cubic-bezier(0.4,0,0.2,1)",
+          }}
         >
           {steps.map((step, i) =>
             i === activeStep || i === exitStep ? (
