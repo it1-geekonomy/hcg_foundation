@@ -62,6 +62,12 @@ function heroPanelRightInsetPx(basePx: number): number {
   return Math.max(basePx, HERO_SIDE_TAB_CLEARANCE_PX);
 }
 
+/** Phone panel right padding — not the 76px donate min (that made the text column too narrow). */
+function mobilePhoneContentRightPx(viewportWidth: number): number {
+  const panelPx = viewportWidth * 0.55;
+  return Math.round(Math.min(50, Math.max(36, panelPx * 0.17)));
+}
+
 const HERO_OVERLAY_BG_MOBILE =
   "linear-gradient(180deg, rgba(153,115,0,0.74) 0%, rgba(122,92,0,0.86) 100%)";
 
@@ -141,6 +147,7 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
     const small = height < 700;
     const wideCompact = width > HERO_COMPACT_MAX_WIDTH_PX;
     const tileWidth = wideCompact ? 96 : small ? 84 : 96;
+    const narrowPhone = width <= HERO_COMPACT_MAX_WIDTH_PX;
     return {
       isMobile: true,
       compactText: true,
@@ -149,9 +156,10 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
       tileWidth,
       contentTopPx: phonePanelContentTop(wideCompact, tileWidth, height, isShort),
       contentLeft: Math.round(tileWidth * MOBILE_TILE_PANEL_OVERLAP) + 8,
-      contentRight: heroPanelRightInsetPx(wideCompact ? 52 : 46),
-      // Clears the chatbot launcher (60px tall, 64px above the bottom edge).
-      contentBottom: 160,
+      contentRight: narrowPhone
+        ? mobilePhoneContentRightPx(width)
+        : heroPanelRightInsetPx(wideCompact ? 52 : 46),
+      contentBottom: narrowPhone ? 168 : 160,
       gapAfterTile: 12,
       accentGap: 7,
       nameSize: small ? 18 : 20,
