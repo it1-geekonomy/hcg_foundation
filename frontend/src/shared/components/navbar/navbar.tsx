@@ -6,6 +6,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Typography from "@/lib/Typography";
 import { navLinks, navbarContent } from "@/domains/home/constants/navbar";
+import {
+  measureSiteNavbarBottom,
+  publishSiteNavbarBottom,
+} from "@/domains/home/constants/siteNavClearance";
 import { scrollHomeToHero } from "@/domains/home/utils/heroScrollReset";
 import DesktopDropdown, { NavLabel } from "./dropdown";
 import { HamburgerButton, MobileMenuPanel } from "./hamburger";
@@ -43,6 +47,22 @@ export default function Navbar() {
   useEffect(() => {
     setIsMac(detectMac());
   }, []);
+
+  useEffect(() => {
+    const syncNavBottom = () => publishSiteNavbarBottom(measureSiteNavbarBottom());
+    syncNavBottom();
+    const nav = document.getElementById("site-navbar");
+    if (!nav) return;
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(syncNavBottom) : null;
+    ro?.observe(nav);
+    window.addEventListener("resize", syncNavBottom, { passive: true });
+    window.addEventListener("scroll", syncNavBottom, { passive: true });
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", syncNavBottom);
+      window.removeEventListener("scroll", syncNavBottom);
+    };
+  }, [isVisible]);
 
   useEffect(() => {
     setOpenDesktopDropdown(null);
