@@ -43,9 +43,10 @@ import {
 // ============================================================================
 
 const XL_BREAKPOINT_PX = 1280;
-/** Widths at or below this use the 61% text panel + mobile tile track. */
+/** Widths at or below this use the wide text panel + mobile tile track. */
 const HERO_COMPACT_MAX_WIDTH_PX = 1023;
-const MOBILE_PANEL_WIDTH = "45%";
+const MOBILE_PANEL_WIDTH = "55%";
+const DESKTOP_PANEL_WIDTH = "50%";
 
 const MIN_TEXT_FIT = 0.8;
 const MIN_TEXT_FIT_MOBILE = 0.92;
@@ -65,8 +66,8 @@ const HERO_OVERLAY_BG_MOBILE =
   "linear-gradient(180deg, rgba(153,115,0,0.74) 0%, rgba(122,92,0,0.86) 100%)";
 
 /** Fallback SSR / first paint; exact width comes from layout inline styles. */
-const HERO_PANEL = "w-[61%] xl:w-[35%]";
-const HERO_PANEL_RIGHT = "right-[61%] xl:right-[35%]";
+const HERO_PANEL = "w-[55%] xl:w-[50%]";
+const HERO_PANEL_RIGHT = "right-[55%] xl:right-[50%]";
 
 // ============================================================================
 // RESPONSIVE LAYOUT
@@ -125,6 +126,11 @@ function phonePanelContentTop(
   return heroCopyTopPx(height, isShort, true);
 }
 
+/** Short viewports: profile tile sits high on the panel seam — copy starts under it. */
+function shortViewportCopyTopPx(tileWidth: number): number {
+  return MOBILE_CONTENT_TOP_PX + tileWidth + WIDE_COMPACT_COPY_GAP_PX;
+}
+
 function getResponsiveValues(width: number, height: number): HeroResponsiveLayout {
   const isShort = height < HERO_SHORT_VIEWPORT_PX;
   const phoneLayout = usesPhoneHeroLayout(width, height);
@@ -169,15 +175,18 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
     return {
       isMobile: false,
       compactText: isShort,
-      textBelowTile: false,
-      overlayWidth: `${lerp(40, 36, t).toFixed(1)}%`,
+      textBelowTile: isShort,
+      overlayWidth: `${lerp(55, 50, t).toFixed(1)}%`,
       tileWidth,
-      contentTopPx: heroCopyTopPx(height, isShort, false),
+      contentTopPx: isShort
+        ? shortViewportCopyTopPx(tileWidth)
+        : height * HERO_CONTENT_TOP_FRACTION,
       contentLeft: paddingLeft * mult,
       contentRight: heroPanelRightInsetPx(Math.round(paddingRight * mult)),
       contentBottom: isShort ? 160 : 32,
       gapAfterTile: isShort ? 14 : 16,
       accentGap: 12,
+      bodyLineHeight: isShort ? 1.5 : undefined,
       nameSize: Math.round(lerp(22, 26, t)),
       taglineSize: Math.round(lerp(15, 17, t)),
       bodySize: Math.round(lerp(14, 15, t)),
@@ -196,10 +205,10 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
     compactText: isShort,
     // Wide + short (e.g. 1536×538): tile sits on the panel seam — copy must start under it, not at 72px.
     textBelowTile: isShort,
-    overlayWidth: "35%",
+    overlayWidth: DESKTOP_PANEL_WIDTH,
     tileWidth,
     contentTopPx: isShort
-      ? MOBILE_CONTENT_TOP_PX + tileWidth + WIDE_COMPACT_COPY_GAP_PX
+      ? shortViewportCopyTopPx(tileWidth)
       : height * HERO_CONTENT_TOP_FRACTION,
     contentLeft: 18 * mult,
     contentRight: heroPanelRightInsetPx(Math.round(24 * mult)),
@@ -209,6 +218,7 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
     nameSize: isShort ? 24 : 28,
     taglineSize: isShort ? 16 : 18,
     bodySize: isShort ? 14 : 16,
+    bodyLineHeight: isShort ? 1.5 : undefined,
     nameGap: isShort ? 22 : 28,
     taglineGap: isShort ? 14 : 16,
     wordSpacing: "0.2em",
@@ -456,10 +466,11 @@ function StoryTextBlock({
   // correctly sized before it is shown.
   const needsNow = active || exiting;
   const compactText = layout.compactText;
+  const showStory = active || exiting;
   useLayoutEffect(() => {
     const frame = frameRef.current;
     const content = contentRef.current;
-    if (!frame || !content) return;
+    if (!frame || !content || !showStory) return;
     // Phones shrink less, so the copy never turns into fine print.
     const minFit = compactText ? MIN_TEXT_FIT_MOBILE : MIN_TEXT_FIT;
     const fit = () => {
@@ -475,24 +486,11 @@ function StoryTextBlock({
       }
     };
 
-    if (needsNow) {
-      fit();
-      const observer = new ResizeObserver(fit);
-      observer.observe(frame);
-      return () => observer.disconnect();
-    }
-
-    const w = window as Window & {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-      cancelIdleCallback?: (id: number) => void;
-    };
-    if (w.requestIdleCallback) {
-      const id = w.requestIdleCallback(fit, { timeout: 1500 });
-      return () => w.cancelIdleCallback?.(id);
-    }
-    const id = window.setTimeout(fit, 200);
-    return () => window.clearTimeout(id);
-  }, [layout, step, needsNow, compactText]);
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, [layout, step, showStory, compactText]);
 
   // The phone panel sits over busy photos, so text gets a soft shadow there for legibility.
   const mobileShadow: CSSProperties = layout.compactText
@@ -568,6 +566,9 @@ function StoryTextBlock({
         paddingBottom: layout.contentBottom,
         paddingLeft: layout.contentLeft,
         paddingRight: layout.contentRight,
+        // Later steps are later in the DOM; without z-index an idle layer can cover the active story.
+        zIndex: active ? 30 : exiting ? 20 : 0,
+        visibility: showStory ? "visible" : "hidden",
       }}
     >
       <div ref={contentRef} className="w-full max-w-full" style={blockMotion}>
