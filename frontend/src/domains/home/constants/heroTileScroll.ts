@@ -4,7 +4,7 @@
  * Clean, responsive-first approach:
  * - No complex clamp functions
  * - Simple asset references
- * - Breakpoint logic handled in component via getResponsiveValues()
+ * - Breakpoint logic: heroResponsiveLayout.ts
  */
 
 import type { HomeBanner } from "@/domains/cms/lib/types";
