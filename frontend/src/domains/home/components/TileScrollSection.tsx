@@ -62,9 +62,9 @@ function heroPanelRightInsetPx(basePx: number): number {
   return Math.max(basePx, HERO_SIDE_TAB_CLEARANCE_PX);
 }
 
-/** Phone panel right padding — not the 76px donate min (that made the text column too narrow). */
-function mobilePhoneContentRightPx(viewportWidth: number): number {
-  const panelPx = viewportWidth * 0.55;
+/** Wide gold panel (55%): scaled right inset — not the 76px donate min (narrows copy too much). */
+function widePanelContentRightPx(viewportWidth: number, panelFraction = 0.55): number {
+  const panelPx = viewportWidth * panelFraction;
   return Math.round(Math.min(50, Math.max(36, panelPx * 0.17)));
 }
 
@@ -147,7 +147,6 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
     const small = height < 700;
     const wideCompact = width > HERO_COMPACT_MAX_WIDTH_PX;
     const tileWidth = wideCompact ? 96 : small ? 84 : 96;
-    const narrowPhone = width <= HERO_COMPACT_MAX_WIDTH_PX;
     return {
       isMobile: true,
       compactText: true,
@@ -156,10 +155,8 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
       tileWidth,
       contentTopPx: phonePanelContentTop(wideCompact, tileWidth, height, isShort),
       contentLeft: Math.round(tileWidth * MOBILE_TILE_PANEL_OVERLAP) + 8,
-      contentRight: narrowPhone
-        ? mobilePhoneContentRightPx(width)
-        : heroPanelRightInsetPx(wideCompact ? 52 : 46),
-      contentBottom: narrowPhone ? 168 : 160,
+      contentRight: widePanelContentRightPx(width),
+      contentBottom: 168,
       gapAfterTile: 12,
       accentGap: 7,
       nameSize: small ? 18 : 20,
@@ -190,8 +187,8 @@ function getResponsiveValues(width: number, height: number): HeroResponsiveLayou
         ? shortViewportCopyTopPx(tileWidth)
         : height * HERO_CONTENT_TOP_FRACTION,
       contentLeft: paddingLeft * mult,
-      contentRight: heroPanelRightInsetPx(Math.round(paddingRight * mult)),
-      contentBottom: isShort ? 160 : 32,
+      contentRight: widePanelContentRightPx(width, parseFloat(lerp(55, 50, t).toFixed(1)) / 100),
+      contentBottom: isShort ? 168 : 120,
       gapAfterTile: isShort ? 14 : 16,
       accentGap: 12,
       bodyLineHeight: isShort ? 1.5 : undefined,
@@ -576,7 +573,6 @@ function StoryTextBlock({
         paddingRight: layout.contentRight,
         // Later steps are later in the DOM; without z-index an idle layer can cover the active story.
         zIndex: active ? 30 : exiting ? 20 : 0,
-        visibility: showStory ? "visible" : "hidden",
       }}
     >
       <div ref={contentRef} className="w-full max-w-full" style={blockMotion}>
@@ -656,15 +652,12 @@ export default function TileScrollSection({
   const [activeStep, setActiveStep] = useState(0);
   const [exitStep, setExitStep] = useState<number | null>(null);
   // Same value on the server and the first client render (hydration-safe).
-  const [layout, setLayout] = useState<HeroResponsiveLayout>(() => {
-    if (typeof window !== "undefined") {
-      const base = getResponsiveValues(window.innerWidth, window.innerHeight);
-      return withNavClearance(base, getNavbarClearancePx());
-    }
-    return initialIsMobile
+  // SSR + hydration must match; real viewport is applied in useLayoutEffect below.
+  const [layout, setLayout] = useState<HeroResponsiveLayout>(() =>
+    initialIsMobile
       ? getResponsiveValues(390, 800)
-      : getResponsiveValues(1280, 900);
-  });
+      : getResponsiveValues(1280, 900)
+  );
   // False on the server + hydration render: CSS classes position the panel/tile.
   // True after the first real measurement: exact inline values take over.
   const currentStepRef = useRef(0);
@@ -703,19 +696,29 @@ export default function TileScrollSection({
     [measurePinnedRange]
   );
 
+  const commitLayoutFromViewport = useCallback(
+    (force = false) => {
+      if (typeof window === "undefined") return;
+      navClearanceRef.current = getNavbarClearancePx();
+      const width = window.innerWidth;
+      const height = getViewportHeight();
+      const size = `${width}x${height}x${Math.round(navClearanceRef.current)}`;
+      if (!force && size === layoutSizeRef.current) return;
+      layoutSizeRef.current = size;
+      const next = withNavClearance(
+        getResponsiveValues(width, height),
+        navClearanceRef.current
+      );
+      publishSiteNavbarBottom(navClearanceRef.current);
+      layoutRef.current = next;
+      setLayout(next);
+    },
+    [getViewportHeight]
+  );
+
   const syncLayout = useCallback(() => {
-    if (typeof window === "undefined") return;
-    navClearanceRef.current = getNavbarClearancePx();
-    const width = window.innerWidth;
-    const height = getViewportHeight();
-    const size = `${width}x${height}x${Math.round(navClearanceRef.current)}`;
-    if (size === layoutSizeRef.current) return;
-    layoutSizeRef.current = size;
-    const next = withNavClearance(getResponsiveValues(width, height), navClearanceRef.current);
-    publishSiteNavbarBottom(navClearanceRef.current);
-    layoutRef.current = next;
-    setLayout(next);
-  }, [getViewportHeight]);
+    commitLayoutFromViewport(false);
+  }, [commitLayoutFromViewport]);
 
   const moveTile = useCallback((step: number) => {
     const tile = tileRef.current;
@@ -734,21 +737,6 @@ export default function TileScrollSection({
       : "50%";
     tile.style.transform = `translateX(${translateX}) translateY(${Math.round(y)}px)`;
   }, [stepCount, getViewportHeight]);
-
-  const refreshNavClearance = useCallback(() => {
-    navClearanceRef.current = getNavbarClearancePx();
-    layoutSizeRef.current = "";
-    const width = window.innerWidth;
-    const height = getViewportHeight();
-    const next = withNavClearance(
-      getResponsiveValues(width, height),
-      navClearanceRef.current
-    );
-    publishSiteNavbarBottom(navClearanceRef.current);
-    layoutRef.current = next;
-    setLayout(next);
-    moveTile(currentStepRef.current);
-  }, [moveTile, getViewportHeight]);
 
   const applyStep = useCallback(
     (step: number, force = false) => {
@@ -815,6 +803,17 @@ export default function TileScrollSection({
     else if (scrolled >= range) applyStep(lastStep);
     else applyStep(Math.round((scrolled / range) * lastStep));
   }, [applyStep, stepCount, getPinnedRange]);
+
+  const syncScrollGeometry = useCallback(() => {
+    measurePinnedRange();
+    moveTile(currentStepRef.current);
+    handleScroll();
+  }, [measurePinnedRange, moveTile, handleScroll]);
+
+  const refreshNavClearance = useCallback(() => {
+    commitLayoutFromViewport(true);
+    syncScrollGeometry();
+  }, [commitLayoutFromViewport, syncScrollGeometry]);
 
   // Mouse wheels and trackpads step one story per gesture while the hero is pinned.
   useEffect(() => {
@@ -900,34 +899,39 @@ export default function TileScrollSection({
     };
   }, [handleScroll]);
 
+  // First paint: replace SSR layout guess with the real viewport (hydration-safe useState above).
   useLayoutEffect(() => {
-    syncLayout();
-    measurePinnedRange();
-    moveTile(currentStepRef.current);
-    const id = requestAnimationFrame(() => refreshNavClearance());
-    return () => cancelAnimationFrame(id);
-  }, [moveTile, syncLayout, measurePinnedRange, refreshNavClearance]);
+    commitLayoutFromViewport(true);
+  }, [commitLayoutFromViewport]);
 
+  // Wrapper height (70svh vs 100svh) depends on `layout` — remeasure scroll range after it commits.
   useLayoutEffect(() => {
-    moveTile(0);
-    applyStep(0, true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    syncScrollGeometry();
+  }, [layout, syncScrollGeometry]);
 
-  // Re-place the tile once React has applied the new layout (tile size changes per breakpoint).
+  // Navbar / svh can settle one frame after load; refresh so first visit matches client nav.
   useEffect(() => {
-    moveTile(currentStepRef.current);
-  }, [layout, moveTile]);
+    let cancelled = false;
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (cancelled) return;
+        refreshNavClearance();
+      });
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(id);
+    };
+  }, [refreshNavClearance]);
 
   useEffect(() => {
     const onResize = () => {
       syncLayout();
-      measurePinnedRange();
-      moveTile(currentStepRef.current);
+      syncScrollGeometry();
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [moveTile, syncLayout, measurePinnedRange]);
+  }, [syncLayout, syncScrollGeometry]);
 
   useEffect(() => {
     const nav = document.getElementById("site-navbar");
