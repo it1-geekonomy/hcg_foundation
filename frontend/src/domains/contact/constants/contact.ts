@@ -8,7 +8,7 @@ export const CONTACT_INFO: ContactInfoItem[] = [
   {
     icon: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791171888800-73088-call-calling.webp",
     title: "Phone Number",
-    lines: ["+91 80 3366 9999"],
+    lines: ["+91 96 6372 7663"],
   },
   {
     icon: "https://pub-bbab4b37d630465e8c49b68c7d045302.r2.dev/website/1791171947668-9y7tq-sms-notification.webp",
