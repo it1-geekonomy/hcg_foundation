@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.resolve(__dirname),
   poweredByHeader: false,
   compress: true,
-  allowedDevOrigins: ["10.0.0.216"],
+  allowedDevOrigins: ["10.0.0.227"],
   devIndicators: false,
 
   experimental: {
