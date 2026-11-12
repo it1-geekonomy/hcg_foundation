@@ -176,7 +176,7 @@ export default function CsrPartnerPage() {
                 as="span"
                 className="font-argestadisplay font-normal text-[#596D79] text-left"
               >
-                +91 8046607760
+                +91 9663727663
               </Typography>
             </div>
           </div>
