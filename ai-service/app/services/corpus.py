@@ -235,13 +235,7 @@ def _static_documents() -> list[dict]:
 
 
 _MOBILE_RE = re.compile(r"(?:\+91[-\s]?)?[6-9]\d{9}")
-_OFFICIAL_VARIANTS = {
-    "08046607760",
-    "080-4660-7760",
-    "+918046607760",
-    "+91-80-4660-7760",
-    "918046607760",
-}
+_OFFICIAL_DIGITS = re.sub(r"\D", "", C.OFFICIAL_PHONE)[-10:]
 
 
 def sanitize_knowledge_text(text: str) -> str:
@@ -270,7 +264,7 @@ def sanitize_knowledge_text(text: str) -> str:
 
         def repl(m: re.Match) -> str:
             digits = re.sub(r"\D", "", m.group(0))
-            if digits in _OFFICIAL_VARIANTS or digits.endswith("8046607760"):
+            if digits.endswith(_OFFICIAL_DIGITS):
                 return C.OFFICIAL_PHONE
             return "[contact via website]"
 
