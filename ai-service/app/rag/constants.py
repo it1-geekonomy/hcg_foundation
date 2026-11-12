@@ -1,5 +1,5 @@
 OFFICIAL_EMAIL = "hcgfoundation@gmail.com"
-OFFICIAL_PHONE = "+91-80-4660-7760"
+OFFICIAL_PHONE = "+91 9663727663"
 OFFICIAL_ADDRESS = (
     "Ground Floor, Tower Block, Unity Building Complex, Mission Road, "
     "Bangalore 560027, Karnataka, India"
