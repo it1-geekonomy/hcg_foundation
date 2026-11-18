@@ -19,6 +19,12 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     locale: "en_IN",
   },
+  icons: {
+    icon: "/hcgfavicon.png",
+  },
+  verification: {
+    google: "R-JM-U0d_JGFu3SUimFHoL2VriaG2Kqcz_MqzneeXqo",
+  },
 };
 
 export default function RootLayout({
