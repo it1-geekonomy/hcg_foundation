@@ -46,7 +46,7 @@ declare global {
 
 // 16px on phones stops iOS Safari from zooming into the focused field.
 const underlineInput =
-  "block w-full min-w-0 bg-transparent py-2 font-manrope text-base leading-6 text-white outline-none placeholder:text-white/55 sm:text-sm";
+  "block w-full min-w-0 bg-transparent py-1.5 sm:py-2 font-manrope text-base leading-6 text-white outline-none placeholder:text-white/55 sm:text-sm";
 
 const underlineField =
   "min-w-0 border-b border-white/35 transition-colors focus-within:border-[#FCCC2D]";
@@ -373,7 +373,7 @@ export default function DonateDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 z-[70] overflow-y-auto overscroll-contain"
+      className="fixed inset-0 z-[70] overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       style={overlayStyle}
       role="dialog"
       aria-modal="true"
@@ -381,9 +381,9 @@ export default function DonateDetailsModal({
       onClick={onClose}
     >
       {/* min-h-full centres the panel when it fits and lets the overlay scroll when it doesn't */}
-      <div className="flex min-h-full items-center justify-center px-3 py-4 sm:p-6">
+      <div className="flex min-h-full items-center justify-center p-2 sm:p-6">
         <div
-          className="relative w-full max-w-[560px] rounded-md border border-white/15 px-5 py-6 shadow-2xl sm:px-10 sm:py-8"
+          className="relative w-full max-w-[560px] rounded-md border border-white/15 px-4 py-3.5 shadow-2xl sm:px-10 sm:py-8"
           style={panelStyle}
           onClick={(e) => e.stopPropagation()}
         >
@@ -439,15 +439,15 @@ export default function DonateDetailsModal({
               </button>
             </div>
           ) : (
-            <form onSubmit={onSubmit} className="flex flex-col gap-4 sm:gap-5">
-              <div className="flex flex-col items-center gap-1.5 px-8 text-center">
+            <form onSubmit={onSubmit} className="flex flex-col gap-2.5 sm:gap-5">
+              <div className="flex flex-col items-center gap-1 px-4 text-center sm:gap-1.5 sm:px-8">
                 <div className="flex items-center gap-2">
                   <Image
                     src={donateIcon}
                     alt=""
                     width={26}
                     height={26}
-                    className="h-6 w-6 sm:h-7 sm:w-7"
+                    className="h-5 w-5 sm:h-7 sm:w-7"
                   />
                   <h3
                     id="donate-details-title"
@@ -461,7 +461,7 @@ export default function DonateDetailsModal({
                 <Typography
                   variant="body-7"
                   as="p"
-                  className="max-w-[360px] font-argestadisplay font-light leading-snug text-white/70"
+                  className="max-w-[360px] font-argestadisplay font-light leading-tight text-white/70 text-xs sm:text-sm"
                 >
                   {patientStoryName
                     ? `Your support provides cancer care, emotional support, and financial aid for ${patientStoryName}.`
@@ -469,11 +469,11 @@ export default function DonateDetailsModal({
                 </Typography>
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1 sm:gap-2">
                 <Typography
                   variant="body-8"
                   as="p"
-                  className="font-manrope font-medium text-white/90"
+                  className="font-manrope text-xs font-medium text-white/90 sm:text-sm"
                 >
                   Choose Donation Frequency
                 </Typography>
@@ -496,7 +496,7 @@ export default function DonateDetailsModal({
                           setFrequency(item.id);
                           setError(null);
                         }}
-                        className={`min-h-[40px] rounded border px-1 py-2 font-manrope text-[11px] font-semibold leading-tight transition-colors disabled:cursor-not-allowed disabled:opacity-40 sm:text-sm ${
+                        className={`min-h-[34px] sm:min-h-[40px] rounded border px-1 py-1 sm:py-2 font-manrope text-[11px] font-semibold leading-tight transition-colors disabled:cursor-not-allowed disabled:opacity-40 sm:text-sm ${
                           active
                             ? "border-[#FCCC2D] bg-[#FCCC2D] text-[#3A2E00]"
                             : "border-[#FCCC2D]/80 bg-transparent text-[#FCCC2D] enabled:hover:bg-[#FCCC2D]/10"
@@ -509,10 +509,10 @@ export default function DonateDetailsModal({
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1 sm:gap-2">
                 <FieldLabel htmlFor="donate-amount">Chosen Amount</FieldLabel>
                 <div className="flex items-stretch gap-2 sm:gap-3">
-                  <div className="flex min-h-[44px] min-w-0 flex-1 items-center rounded border border-[#FCCC2D] bg-[#8A7A28] px-4">
+                  <div className="flex min-h-[38px] sm:min-h-[44px] min-w-0 flex-1 items-center rounded border border-[#FCCC2D] bg-[#8A7A28] px-3 sm:px-4">
                     {editingAmount ? (
                       <div className="flex w-full min-w-0 items-center gap-1">
                         <span className="shrink-0 font-manrope text-base font-medium text-white sm:text-sm">
@@ -546,7 +546,7 @@ export default function DonateDetailsModal({
                       <Typography
                         variant="body-8"
                         as="span"
-                        className="min-w-0 truncate font-manrope font-medium text-white"
+                        className="min-w-0 truncate font-manrope font-medium text-white text-sm sm:text-base"
                       >
                         {formattedAmount}
                       </Typography>
@@ -555,15 +555,15 @@ export default function DonateDetailsModal({
                   <button
                     type="button"
                     onClick={editingAmount ? commitAmount : startAmountEdit}
-                    className="min-h-[44px] w-[72px] shrink-0 rounded border border-white/45 font-manrope text-xs font-semibold tracking-[0.12em] text-white transition hover:border-[#FCCC2D] hover:text-[#FCCC2D] sm:w-20"
+                    className="min-h-[38px] sm:min-h-[44px] w-[64px] sm:w-20 shrink-0 rounded border border-white/45 font-manrope text-xs font-semibold tracking-[0.12em] text-white transition hover:border-[#FCCC2D] hover:text-[#FCCC2D]"
                   >
                     {editingAmount ? "DONE" : "EDIT"}
                   </button>
                 </div>
               </div>
 
-              {/* Placeholders carry the labels (labels stay for screen readers) so every field is a single row */}
-              <div className="grid grid-cols-2 items-start gap-x-4 gap-y-3 sm:gap-x-6 sm:gap-y-4">
+              {/* Placeholders carry the labels (labels stay for screen readers) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 items-start gap-x-4 gap-y-2 sm:gap-y-4">
                 <div className={underlineField}>
                   <FieldLabel htmlFor="donate-full-name" className="sr-only">
                     Full Name
@@ -650,7 +650,7 @@ export default function DonateDetailsModal({
                 </div>
 
                 {!international ? (
-                  <div className={`col-span-2 ${underlineField}`}>
+                  <div className={`col-span-1 sm:col-span-2 ${underlineField}`}>
                     <FieldLabel htmlFor="donate-pan" className="sr-only">
                       ID Card (PAN or Aadhaar – optional, required only for 80G
                       certificate)
@@ -668,7 +668,7 @@ export default function DonateDetailsModal({
                   </div>
                 ) : null}
 
-                <div className={`col-span-2 ${underlineField}`}>
+                <div className={`col-span-1 sm:col-span-2 ${underlineField}`}>
                   <FieldLabel htmlFor="donate-message" className="sr-only">
                     Leave a Message of Hope
                   </FieldLabel>
@@ -680,7 +680,7 @@ export default function DonateDetailsModal({
                     placeholder="Leave a Message of Hope"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    className={`${underlineInput} max-h-[5.5rem] resize-none overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
+                    className={`${underlineInput} max-h-[4rem] resize-none overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
                   />
                 </div>
               </div>
@@ -695,7 +695,7 @@ export default function DonateDetailsModal({
               ) : null}
 
               {recurring ? (
-                <div className="flex items-start gap-3 rounded-md border border-[#FCCC2D]/70 px-3 py-3">
+                <div className="flex items-start gap-3 rounded-md border border-[#FCCC2D]/70 px-3 py-2.5">
                   <RefreshCw
                     aria-hidden
                     className="mt-0.5 h-4 w-4 shrink-0 text-[#FCCC2D]"
@@ -704,7 +704,7 @@ export default function DonateDetailsModal({
                     <p className="font-manrope text-sm font-semibold text-white">
                       AutoPay
                     </p>
-                    <p className="mt-1 font-manrope text-xs font-light leading-snug text-white/75">
+                    <p className="mt-0.5 font-manrope text-xs font-light leading-snug text-white/75">
                       Your chosen amount will be donated automatically{" "}
                       <span className="font-medium text-[#FCCC2D]">{recurring.every}</span>
                       . You can pause or cancel anytime.
@@ -713,23 +713,22 @@ export default function DonateDetailsModal({
                 </div>
               ) : null}
 
-              <div className="flex min-w-0 items-center gap-3">
-                
+              <div className="flex min-w-0 items-center gap-2">
                 <Typography
                   variant="body-8"
                   as="p"
-                  className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/90"
+                  className="min-w-0 flex-1 font-manrope font-light leading-tight text-white/90 text-xs sm:text-sm"
                 >
                   {liveCount} kind donors have contributed this month. Join with them
                   today. ❤️
                 </Typography>
               </div>
 
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-2 sm:gap-2.5">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full cursor-pointer rounded bg-[#FCCC2D] px-4 py-3 font-manrope font-bold text-[#3A2E00] transition-opacity disabled:opacity-60"
+                  className="w-full cursor-pointer rounded bg-[#FCCC2D] px-4 py-2.5 sm:py-3 font-manrope font-bold text-[#3A2E00] transition-opacity disabled:opacity-60"
                 >
                   <Typography
                     variant="button-1"
@@ -741,11 +740,11 @@ export default function DonateDetailsModal({
                 </button>
 
                 <div className="flex items-center justify-center gap-1.5">
-                  <Lock className="h-4 w-4 text-white/70" />
+                  <Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white/70" />
                   <Typography
                     variant="caption-1"
                     as="span"
-                    className="font-manrope font-light text-white/60"
+                    className="font-manrope font-light text-white/60 text-xs"
                   >
                     Secured by Razorpay
                   </Typography>

@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import Typography from "@/lib/Typography";
 
 export default function DonateButton() {
+  const pathname = usePathname();
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
+
+  if (pathname === "/donate") return null;
 
   useEffect(() => {
     const syncVisibility = (e?: Event) => {
