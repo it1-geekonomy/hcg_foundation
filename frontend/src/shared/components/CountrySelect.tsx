@@ -114,7 +114,7 @@ export default function CountrySelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={toggleOpen}
-        className={`flex items-center gap-1.5 bg-transparent text-left font-manrope text-sm ${resolvedText} outline-none ${
+        className={`flex items-center gap-1 sm:gap-1.5 bg-transparent text-left font-manrope text-sm ${resolvedText} outline-none ${
           variant === "dial"
             ? "w-auto shrink-0 py-1"
             : `w-full min-w-0 border ${boxClassName} ${resolvedBorder}`
@@ -123,11 +123,11 @@ export default function CountrySelect({
         <CountryFlag
           code={selected.code}
           title={selected.name}
-          className="h-3.5 w-5 shrink-0 rounded-[1px] object-cover sm:h-4 sm:w-6"
+          className="h-3 w-4 shrink-0 rounded-[1px] object-cover sm:h-4 sm:w-6"
         />
         {variant === "dial" ? (
           showDialInButton ? (
-            <span className="shrink-0 whitespace-nowrap text-[0.82rem] font-medium">
+            <span className="shrink-0 whitespace-nowrap text-xs sm:text-[0.82rem] font-medium">
               {selected.dial}
             </span>
           ) : null
@@ -136,7 +136,7 @@ export default function CountrySelect({
             {selected.name}
           </span>
         )}
-        <ChevronDown className={`h-3.5 w-3.5 shrink-0 ${resolvedChevron}`} />
+        <ChevronDown className={`h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5 ${resolvedChevron}`} />
       </button>
 
       {open ? (
