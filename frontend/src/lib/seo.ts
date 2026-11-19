@@ -111,6 +111,11 @@ export const PAGE_SEO = {
     description:
       "Need patient support or want to partner with HCG Foundation? Reach our team by phone, email or message. We reply as soon as possible.",
   },
+  "/donate": {
+    title: "Donate to HCG Foundation | Support Cancer Patients",
+    description:
+      "Support cancer patients with life-saving treatment, screening camps and care through HCG Foundation. Your donation is eligible for 80G tax benefit.",
+  },
   "/privacy": {
     title: "Privacy Policy | HCG Foundation",
     description:
