@@ -418,11 +418,11 @@ export default function DonateSection({
 
         <div className="relative w-full">
           {hideBackgroundImage ? (
-            <div className="relative z-10 flex justify-center px-4 py-8 sm:px-8 sm:py-12 lg:py-16">
+            <div className="relative z-10 flex justify-center px-3.5 py-4 sm:px-6 sm:py-8 lg:py-12">
               <DonateCard
                 origin="top"
                 glassColor="#3A3A3AEE"
-                className="mx-auto flex w-full max-w-lg flex-col gap-5 overflow-hidden rounded p-6 sm:p-8 lg:w-[560px] lg:p-10 shadow-xl"
+                className="mx-auto flex w-full max-w-lg flex-col gap-4 sm:gap-5 overflow-hidden rounded p-4 sm:p-8 lg:w-[560px] lg:p-10 shadow-xl"
               >
                 {cardContent}
               </DonateCard>
