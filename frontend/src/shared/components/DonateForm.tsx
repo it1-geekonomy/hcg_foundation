@@ -44,11 +44,13 @@ const DonateDetailsModal = dynamic(loadDetailsModal, { ssr: false });
 export type DonateFormProps = {
   patientStoryId?: string;
   patientStoryName?: string;
+  hideBackgroundImage?: boolean;
 };
 
 export default function DonateSection({
   patientStoryId,
   patientStoryName,
+  hideBackgroundImage = false,
 }: DonateFormProps = {}) {
   const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
   const country = getDonationCountry(countryCode);
@@ -415,45 +417,59 @@ export default function DonateSection({
         ) : null}
 
         <div className="relative w-full">
-          {/* Mobile */}
-          <div className="relative w-full overflow-hidden md:hidden">
-            <Image
-              src={donatemobileimg}
-              alt="Two people holding hands"
-              fill
-              sizes="100vw"
-              className="object-cover object-top"
-            />
-            <div className="relative z-10 px-4 py-8 sm:px-8 sm:py-12">
+          {hideBackgroundImage ? (
+            <div className="relative z-10 flex justify-center px-3.5 py-4 sm:px-6 sm:py-8 lg:py-12">
               <DonateCard
                 origin="top"
-                glassColor={donateTheme.glassBg}
-                className="mx-auto flex w-full max-w-lg flex-col gap-5 overflow-hidden rounded p-5 sm:p-8"
+                glassColor="#3A3A3AEE"
+                className="mx-auto flex w-full max-w-lg flex-col gap-4 sm:gap-5 overflow-hidden rounded p-4 sm:p-8 lg:w-[560px] lg:p-10 shadow-xl"
               >
                 {cardContent}
               </DonateCard>
             </div>
-          </div>
+          ) : (
+            <>
+              {/* Mobile */}
+              <div className="relative w-full overflow-hidden md:hidden">
+                <Image
+                  src={donatemobileimg}
+                  alt="Two people holding hands"
+                  fill
+                  sizes="100vw"
+                  className="object-cover object-top"
+                />
+                <div className="relative z-10 px-4 py-8 sm:px-8 sm:py-12">
+                  <DonateCard
+                    origin="top"
+                    glassColor={donateTheme.glassBg}
+                    className="mx-auto flex w-full max-w-lg flex-col gap-5 overflow-hidden rounded p-5 sm:p-8"
+                  >
+                    {cardContent}
+                  </DonateCard>
+                </div>
+              </div>
 
-          {/* Desktop */}
-          <div className="relative hidden w-full overflow-hidden md:block">
-            <Image
-              src={donateBgImage}
-              alt="Two people holding hands"
-              fill
-              sizes="100vw"
-              className="object-cover"
-            />
-            <div className="relative z-10 flex justify-end px-8 py-10 lg:px-16 lg:py-12 xl:px-28 xl:py-14">
-              <DonateCard
-                origin="left"
-                glassColor={donateTheme.glassBg}
-                className="flex w-[460px] flex-col gap-5 overflow-hidden rounded p-8 lg:w-[520px] lg:p-10 xl:w-[560px] xl:gap-6"
-              >
-                {cardContent}
-              </DonateCard>
-            </div>
-          </div>
+              {/* Desktop */}
+              <div className="relative hidden w-full overflow-hidden md:block">
+                <Image
+                  src={donateBgImage}
+                  alt="Two people holding hands"
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                />
+                <div className="relative z-10 flex justify-end px-8 py-10 lg:px-16 lg:py-12 xl:px-28 xl:py-14">
+                  <DonateCard
+                    origin="left"
+                    glassColor={donateTheme.glassBg}
+                    className="flex w-[460px] flex-col gap-5 overflow-hidden rounded p-8 lg:w-[520px] lg:p-10 xl:w-[560px] xl:gap-6"
+                  >
+                    {cardContent}
+                  </DonateCard>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </DonateMotionProvider>
     </section>
