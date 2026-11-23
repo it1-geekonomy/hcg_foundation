@@ -4,7 +4,7 @@ Visitors can donate through the Donate Now flow on the website.
 
 Where are you donating from?
 - India: pay online in INR through Razorpay (one-time or recurring). Eligible Indian donations qualify for an 80G tax receipt. HCG Foundation's 80G approval (URN AAATH6254RF20213) is valid for assessment years 2022-23 to 2026-27.
-- Outside India: online international card checkout is not available through payment gateways. Interested foreign / overseas / NRI donors should email the HCG Foundation Finance Team at accounts.hcgf@hcgel.com. The Finance team will share the process for foreign donations. Never share FCRA bank account numbers, IFSC, or SWIFT in chatbot answers for self-serve remittance.
+- Outside India: Planning to contribute from outside India? Please contact the HCG Foundation Finance Team by email at accounts.hcgf@hcgel.com. Our team will guide you through the donation process and share the necessary bank details and instructions to complete your contribution. Online international card checkout is not available. Never publish FCRA bank account numbers, IFSC, or SWIFT in chatbot answers for self-serve remittance.
 
 Is there a minimum donation or minimum contribution amount?
 No minimum donation amount is published. On the Donate Now form you can pick one of the suggested amounts or enter your own amount. For CSR or large contributions, contact hcgfoundation@gmail.com or +91 9663727663.

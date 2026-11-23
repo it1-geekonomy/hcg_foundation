@@ -384,9 +384,10 @@ export default function DonateSection({
             as="p"
             className="font-manrope font-light leading-snug text-white/75"
           >
-            International donations cannot be completed online through our
-            payment gateway. Continue to email the Finance team — they will
-            share the process for foreign donations.
+            Planning to contribute from outside India? Please contact the HCG
+            Foundation Finance Team by email. Our team will guide you through
+            the donation process and share the necessary bank details and
+            instructions to complete your contribution.
           </Typography>
         </DonateItem>
       )}
