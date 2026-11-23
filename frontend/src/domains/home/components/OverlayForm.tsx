@@ -705,11 +705,13 @@ function OriginBlock({
               onClick={() => changeOrigin(item.id)}
               className={`${pillBase} ${active ? pillActive : pillInactive}`}
             >
-              {active ? <ActivePill /> : null}
+              {active ? <ActivePill layoutId="overlay-origin-pill" /> : null}
               <Typography
                 variant="body-8"
                 as="span"
-                className={`relative font-semibold font-manrope ${LG_FIELD_TEXT}`}
+                className={`relative z-10 font-semibold font-manrope ${LG_FIELD_TEXT} ${
+                  active ? "text-white" : "text-[#2B2B2B]"
+                }`}
               >
                 {item.label}
               </Typography>
