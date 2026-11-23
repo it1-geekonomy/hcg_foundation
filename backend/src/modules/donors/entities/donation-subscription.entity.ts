@@ -43,6 +43,10 @@ export class DonationSubscription extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   city?: string | null;
 
+  @ApiPropertyOptional({ example: '12 MG Road, Bengaluru' })
+  @Column({ type: 'text', nullable: true })
+  address?: string | null;
+
   @ApiPropertyOptional({ example: 'ABCDE1234F' })
   @Column({ type: 'varchar', length: 20, nullable: true })
   pan?: string | null;

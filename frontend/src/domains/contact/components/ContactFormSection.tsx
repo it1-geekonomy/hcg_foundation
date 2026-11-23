@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Typography from "@/lib/Typography";
 import CountrySelect from "@/shared/components/CountrySelect";
 import {
@@ -50,6 +50,18 @@ export default function ContactFormSection() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [selectedCountryCode, setSelectedCountryCode] = useState("IN");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.location.hash !== "#contact-form") return;
+    const el = document.getElementById("contact-form");
+    if (!el) return;
+    // Wait a tick so layout (and any scroll-lock cleanup) settles first.
+    const id = window.setTimeout(() => {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+    return () => window.clearTimeout(id);
+  }, []);
 
   const country = getDonationCountry(selectedCountryCode);
   const international = !isIndiaCountry(selectedCountryCode);
@@ -174,7 +186,10 @@ export default function ContactFormSection() {
   };
 
   return (
-    <div className="lg:col-span-8 w-full lg:h-full lg:flex lg:justify-end">
+    <div
+      id="contact-form"
+      className="scroll-mt-24 lg:col-span-8 w-full lg:h-full lg:flex lg:justify-end"
+    >
       <div
         className="w-full lg:max-w-[40rem] xl:max-w-[46rem] 2xl:max-w-[50rem] h-full flex flex-col rounded-[0.625rem] p-5 sm:p-6 lg:p-8"
         style={{ backgroundColor: FORM_BG }}

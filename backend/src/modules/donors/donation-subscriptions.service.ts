@@ -87,7 +87,7 @@ export class DonationSubscriptionsService {
     const d = await this.donors.prepareDonation(dto);
     if (d.isInternational || d.currency !== 'INR') {
       throw new BadRequestException(
-        'Monthly, quarterly and yearly donations are available in INR only. Please choose One Time.',
+        'Recurring donations are available for India (INR) only. International gifts use FCRA wire transfer.',
       );
     }
 
@@ -111,6 +111,7 @@ export class DonationSubscriptionsService {
           phone: d.phone || null,
           email: d.email || null,
           city: d.city || null,
+          address: d.address || null,
           pan: d.pan || null,
           message: d.message || null,
           donationCategory: d.donationCategory,
@@ -317,6 +318,7 @@ export class DonationSubscriptionsService {
           phone: sub.phone ?? null,
           email: sub.email ?? null,
           city: sub.city ?? null,
+          address: sub.address ?? null,
           country: 'India',
           countryCode: 'IN',
           isInternational: false,

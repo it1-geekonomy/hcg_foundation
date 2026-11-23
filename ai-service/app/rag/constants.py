@@ -1,4 +1,5 @@
 OFFICIAL_EMAIL = "hcgfoundation@gmail.com"
+FINANCE_TEAM_EMAIL = "accounts.hcgf@hcgel.com"
 OFFICIAL_PHONE = "+91 9663727663"
 OFFICIAL_ADDRESS = (
     "Ground Floor, Tower Block, Unity Building Complex, Mission Road, "
@@ -164,8 +165,9 @@ HELP_ANSWER = (
 )
 
 DONATE_INTENT_ANSWER = (
-    "You can support HCG Foundation using the Donate Now form on the website, "
-    "as a one-time gift or a Monthly, Quarterly or Yearly recurring donation. "
+    "You can support HCG Foundation using the Donate Now form on the website. "
+    "From India: one-time or Monthly, Quarterly or Yearly recurring gifts in INR via Razorpay. "
+    f"From outside India: email the Finance team at {FINANCE_TEAM_EMAIL} for the foreign donation process (online international card checkout is not available). "
     "Eligible donations from Indian donors qualify for an 80G tax receipt. "
     f"Contact: {OFFICIAL_EMAIL}, {OFFICIAL_PHONE}. Address: {OFFICIAL_ADDRESS}."
 )

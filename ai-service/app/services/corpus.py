@@ -67,8 +67,8 @@ def _static_documents() -> list[dict]:
                 "Title: Donate Now\nCategory: Page\n\n"
                 "How can I donate to HCG Foundation? Use the Donate Now option on the website. "
                 "Eligible donations from Indian donors qualify for an 80G tax receipt. "
-                "Donations can be One Time or recurring: Monthly, Quarterly or Yearly "
-                "(charged automatically via AutoPay, INR donations from India only). "
+                "India: One Time or recurring (Monthly, Quarterly, Yearly) via Razorpay in INR. "
+                f"Outside India: email Finance team at {C.FINANCE_TEAM_EMAIL} for the foreign donation process — no online international card checkout. "
                 "Do not invent cash or cheque payments unless separately published. "
                 f"Contact: {C.OFFICIAL_EMAIL}, {C.OFFICIAL_PHONE}. Address: {C.OFFICIAL_ADDRESS}."
             ),
@@ -148,7 +148,9 @@ def _static_documents() -> list[dict]:
                 "HCG Foundation maintains charitable registrations commonly referenced as "
                 "12A, 80G, CSR-1, FCRA, and Darpan where applicable. "
                 f"Organisation PAN: {C.OFFICIAL_PAN}. "
-                "For foreign donations, refer to FCRA registration and the FCRA SBI bank account details. "
+                f"For foreign donations, HCG Foundation has FCRA registration; donors should email "
+                f"{C.FINANCE_TEAM_EMAIL} (Finance team) for the remittance process — do not publish "
+                "FCRA bank account numbers for self-serve remittance. "
                 "For Indian tax-exempt receipts, refer to 80G materials. "
                 "Ask the website/CMS published certificate pages for the latest numbers and dates. "
                 f"Contact {C.OFFICIAL_EMAIL} for verification copies."
@@ -171,20 +173,17 @@ def _static_documents() -> list[dict]:
         {
             "table": "static",
             "source_id": "fcra-bank-details",
-            "title": "FCRA Bank Account Details",
-            "url": "/about-us",
+            "title": "Foreign / FCRA Donations",
+            "url": C.DONATE_URL,
             "category": "Page",
             "content": (
-                "Title: FCRA Bank Account Details\nCategory: Page\n\n"
-                "For foreign / overseas / NRI / FCRA remittances:\n"
-                f"Account holder: {C.FCRA_ACCOUNT_HOLDER}\n"
-                f"Bank: {C.FCRA_BANK_NAME}\n"
-                f"Account number: {C.FCRA_ACCOUNT_NUMBER}\n"
-                f"IFSC: {C.FCRA_IFSC}\n"
-                f"SWIFT: {C.FCRA_SWIFT}\n"
-                f"Branch: {C.FCRA_BRANCH}\n"
-                "Share these when visitors ask for bank account details for foreign payment. "
-                "For domestic Indian donations, prefer Donate Now on the website."
+                "Title: Foreign / FCRA Donations\nCategory: Page\n\n"
+                "HCG Foundation is FCRA-registered and can receive foreign / overseas / NRI contributions. "
+                "Online international card checkout is not available. "
+                f"Foreign donors should email the Finance team at {C.FINANCE_TEAM_EMAIL}; "
+                "the Finance team shares the remittance process. "
+                "Do not publish FCRA bank account numbers, IFSC, or SWIFT for self-serve remittance. "
+                "For domestic Indian donations, use Donate Now on the website (Razorpay, INR, 80G)."
             ),
         },
         {

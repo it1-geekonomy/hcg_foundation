@@ -177,6 +177,12 @@ export const RECEIPT_EMAIL_STATUS_FILTER_OPTIONS: CmsSelectOption[] = [
   { value: "skipped", label: "No email" },
 ];
 
+export const DONOR_ORIGIN_FILTER_OPTIONS: CmsSelectOption[] = [
+  { value: "", label: "All origins" },
+  { value: "india", label: "India" },
+  { value: "international", label: "Outside India" },
+];
+
 export const CAMPAIGN_STATUS_OPTIONS: CmsSelectOption[] = [
   { value: "pending", label: "Pending" },
   { value: "approved", label: "Approved" },

@@ -6,18 +6,17 @@ import Image from "next/image";
 import { Check, Lock } from "lucide-react";
 import Typography from "@/lib/Typography";
 import { Terms80GLink } from "@/shared/components/Terms80GDialog";
-import CountrySelect from "@/shared/components/CountrySelect";
 import {
   donateTheme,
   donateIcon,
   donateBgImage,
   donatemobileimg,
-  donorAvatars,
 } from "@/domains/home/constants/donate";
 import {
-  DEFAULT_COUNTRY_CODE,
-  getDonationCountry,
-} from "@/domains/home/constants/countries";
+  type DonationOrigin,
+  OUTSIDE_INDIA_COUNTRY_CODE,
+  OUTSIDE_INDIA_CURRENCY,
+} from "@/domains/home/constants/fcra-bank";
 import {
   type DonationCurrencyCode,
   formatDonationAmount,
@@ -36,10 +35,11 @@ import {
   useSectionInView,
 } from "./donateAnimation";
 
-// The details modal (and the phone-number metadata it needs) only opens on click, so it is kept out of the
-// page's initial bundle and fetched once the form scrolls into view.
 const loadDetailsModal = () => import("@/shared/components/DonateDetailsModal");
 const DonateDetailsModal = dynamic(loadDetailsModal, { ssr: false });
+
+const loadFcraModal = () => import("@/shared/components/FcraRemittanceModal");
+const FcraRemittanceModal = dynamic(loadFcraModal, { ssr: false });
 
 export type DonateFormProps = {
   patientStoryId?: string;
@@ -52,29 +52,38 @@ export default function DonateSection({
   patientStoryName,
   hideBackgroundImage = false,
 }: DonateFormProps = {}) {
-  const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
-  const country = getDonationCountry(countryCode);
-  const currency: DonationCurrencyCode = country.currency;
+  const [origin, setOrigin] = useState<DonationOrigin>("india");
+  const isIndia = origin === "india";
+  const countryCode = isIndia ? "IN" : OUTSIDE_INDIA_COUNTRY_CODE;
+  const currency: DonationCurrencyCode = isIndia ? "INR" : OUTSIDE_INDIA_CURRENCY;
   const currencyMeta = getDonationCurrency(currency);
+
   const [selectedPreset, setSelectedPreset] = useState<number | null>(
     currencyMeta.presets[currencyMeta.presets.length - 1] ?? null,
   );
   const [isCustom, setIsCustom] = useState(false);
   const [customAmount, setCustomAmount] = useState("");
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [fcraOpen, setFcraOpen] = useState(false);
   const [amountError, setAmountError] = useState<string | null>(null);
   const [agreedTo80G, setAgreedTo80G] = useState(false);
   const [termsError, setTermsError] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
-  const [countryChanged, setCountryChanged] = useState(false);
+  const [originChanged, setOriginChanged] = useState(false);
   const [donorCount, setDonorCount] = useState<number>(126);
+
+  const patientLocked = Boolean(patientStoryId);
 
   useEffect(() => {
     let cancelled = false;
     donorsApi
       .getMonthlyCount()
       .then((res) => {
-        if (!cancelled && typeof res?.data?.count === "number" && res.data.count > 0) {
+        if (
+          !cancelled &&
+          typeof res?.data?.count === "number" &&
+          res.data.count > 0
+        ) {
           setDonorCount(res.data.count);
         }
       })
@@ -87,18 +96,24 @@ export default function DonateSection({
   const { ref: sectionRef, inView, live } = useSectionInView<HTMLElement>();
 
   useEffect(() => {
-    if (inView) void loadDetailsModal();
+    if (inView) {
+      void loadDetailsModal();
+      void loadFcraModal();
+    }
   }, [inView]);
 
-  const changeCountry = (nextCode: string) => {
-    const next = getDonationCountry(nextCode);
-    const meta = getDonationCurrency(next.currency);
-    setCountryChanged(true);
-    setCountryCode(next.code);
+  const changeOrigin = (next: DonationOrigin) => {
+    const nextCurrency: DonationCurrencyCode =
+      next === "india" ? "INR" : OUTSIDE_INDIA_CURRENCY;
+    const meta = getDonationCurrency(nextCurrency);
+    setOriginChanged(true);
+    setOrigin(next);
     setIsCustom(false);
     setCustomAmount("");
     setSelectedPreset(meta.presets[meta.presets.length - 1] ?? null);
     setAmountError(null);
+    setTermsError(false);
+    setAgreedTo80G(false);
   };
 
   const pickPreset = (amount: number) => {
@@ -127,25 +142,35 @@ export default function DonateSection({
     return selectedPreset;
   })();
 
-  const readyToDonate = donationAmount >= 1 && agreedTo80G;
+  const readyToDonate =
+    donationAmount >= 1 && (isIndia ? agreedTo80G : true);
 
-  const openDetailsForm = () => {
+  const donationCategory = patientLocked
+    ? ("Patient Specific" as const)
+    : ("General Funds" as const);
+
+  const causeLabel = patientStoryName || "General Funds";
+
+  const openNextStep = () => {
     const amountInvalid = !donationAmount || donationAmount < 1;
 
     setAmountError(amountInvalid ? "Please choose or enter an amount." : null);
-    setTermsError(!agreedTo80G);
+    setTermsError(isIndia && !agreedTo80G);
 
-    if (amountInvalid || !agreedTo80G) {
+    if (amountInvalid || (isIndia && !agreedTo80G)) {
       setShakeKey((k) => k + 1);
       return;
     }
 
-    setDetailsOpen(true);
+    if (isIndia) {
+      setDetailsOpen(true);
+    } else {
+      setFcraOpen(true);
+    }
   };
 
   const cardContent = (
     <>
-      {/* Header */}
       <DonateItem
         index={0}
         className="flex flex-col items-center gap-2 text-center"
@@ -178,30 +203,50 @@ export default function DonateSection({
         </Typography>
       </DonateItem>
 
-      {/* Country */}
       <DonateItem index={1} className="flex flex-col gap-2">
         <Typography
           variant="body-8"
           as="span"
           className="font-medium text-white font-manrope"
         >
-          Country
+          Where are you donating from?
         </Typography>
-        <CountrySelect
-          value={countryCode}
-          onChange={changeCountry}
-          variant="name"
-        />
+        <div className="grid grid-cols-2 gap-2">
+          {(
+            [
+              { id: "india" as const, label: "India" },
+              { id: "outside" as const, label: "Outside India" },
+            ] as const
+          ).map((item) => {
+            const active = origin === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                aria-pressed={active}
+                onClick={() => changeOrigin(item.id)}
+                className={`min-h-[42px] rounded border px-2 py-2.5 font-manrope text-sm font-semibold transition-colors ${
+                  active
+                    ? "border-[#FCCC2D] bg-[#FCCC2D] text-[#3A2E00]"
+                    : "border-white/35 bg-transparent text-white hover:border-white/70"
+                }`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
         <Typography
           variant="caption-1"
           as="span"
           className="font-manrope font-light text-white/55"
         >
-          Currency: {currencyMeta.label}
+          {isIndia
+            ? "Currency: INR · Pay securely with Razorpay"
+            : "Currency: USD (display) · Contact Finance team"}
         </Typography>
       </DonateItem>
 
-      {/* Amounts: values roll in (again on currency change); selected one gets a static gold background */}
       <DonateItem index={2} className="flex flex-col gap-2">
         <Typography
           variant="body-8"
@@ -211,7 +256,6 @@ export default function DonateSection({
           Choose an Amount
         </Typography>
 
-        {/* 3 columns on phones ("Other" spans the last two cells), one row of 5 from sm up */}
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
           {currencyMeta.presets.map((amount, order) => {
             const active = selectedPreset === amount && !isCustom;
@@ -236,7 +280,7 @@ export default function DonateSection({
                     value={formatDonationAmount(amount, currency)}
                     symbol={currencyMeta.symbol}
                     order={order}
-                    replay={countryChanged}
+                    replay={originChanged}
                   />
                 </Typography>
               </button>
@@ -250,7 +294,6 @@ export default function DonateSection({
                   {currencyMeta.symbol}
                 </span>
               ) : null}
-              {/* Empty: full width so the placeholder centres; typing: sized to the digits so symbol + amount stay centred together */}
               <input
                 type="text"
                 inputMode="decimal"
@@ -285,69 +328,80 @@ export default function DonateSection({
         </div>
       </DonateItem>
 
-      {/* 80G terms */}
-      <DonateItem index={3} className="flex flex-col gap-1.5">
-        <label className="flex min-w-0 cursor-pointer items-center gap-3">
-          <span className="relative flex h-4 w-4 shrink-0">
-            <input
-              type="checkbox"
-              checked={agreedTo80G}
-              aria-invalid={termsError}
-              onChange={(e) => {
-                setAgreedTo80G(e.target.checked);
-                if (e.target.checked) setTermsError(false);
-              }}
-              className="peer h-4 w-4 cursor-pointer appearance-none rounded-[3px] border border-[#FCCC2D] bg-transparent transition-colors checked:bg-[#FCCC2D] focus-visible:ring-2 focus-visible:ring-[#FCCC2D]/50 focus-visible:outline-none"
-            />
-            <Check
-              strokeWidth={3}
-              className="pointer-events-none absolute inset-0 m-auto h-3 w-3 text-[#3A2E00] opacity-0 peer-checked:opacity-100"
-            />
-          </span>
-          <Typography
-            variant="caption-1"
-            as="span"
-            className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/80"
-          >
-            I have read and agree to the applicable{" "}
-            <Terms80GLink
-              className="font-semibold text-[#FCCC2D]"
-              onAgree={() => {
-                setAgreedTo80G(true);
-                setTermsError(false);
-              }}
-            />{" "}
-            for this donation.
-          </Typography>
-        </label>
-
-        {termsError ? (
-          <Shake key={`terms-${shakeKey}`}>
+      {isIndia ? (
+        <DonateItem index={3} className="flex flex-col gap-1.5">
+          <label className="flex min-w-0 cursor-pointer items-center gap-3">
+            <span className="relative flex h-4 w-4 shrink-0">
+              <input
+                type="checkbox"
+                checked={agreedTo80G}
+                aria-invalid={termsError}
+                onChange={(e) => {
+                  setAgreedTo80G(e.target.checked);
+                  if (e.target.checked) setTermsError(false);
+                }}
+                className="peer h-4 w-4 cursor-pointer appearance-none rounded-[3px] border border-[#FCCC2D] bg-transparent transition-colors checked:bg-[#FCCC2D] focus-visible:ring-2 focus-visible:ring-[#FCCC2D]/50 focus-visible:outline-none"
+              />
+              <Check
+                strokeWidth={3}
+                className="pointer-events-none absolute inset-0 m-auto h-3 w-3 text-[#3A2E00] opacity-0 peer-checked:opacity-100"
+              />
+            </span>
             <Typography
               variant="caption-1"
-              as="p"
-              role="alert"
-              className="pl-7 font-manrope font-light leading-snug text-[#FFE08A]"
+              as="span"
+              className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/80"
             >
-              Please agree to the 80G Terms &amp; Conditions to continue.
+              I have read and agree to the applicable{" "}
+              <Terms80GLink
+                className="font-semibold text-[#FCCC2D]"
+                onAgree={() => {
+                  setAgreedTo80G(true);
+                  setTermsError(false);
+                }}
+              />{" "}
+              for this donation.
             </Typography>
-          </Shake>
-        ) : null}
-      </DonateItem>
+          </label>
 
-      {/* Social proof */}
+          {termsError ? (
+            <Shake key={`terms-${shakeKey}`}>
+              <Typography
+                variant="caption-1"
+                as="p"
+                role="alert"
+                className="pl-7 font-manrope font-light leading-snug text-[#FFE08A]"
+              >
+                Please agree to the 80G Terms &amp; Conditions to continue.
+              </Typography>
+            </Shake>
+          ) : null}
+        </DonateItem>
+      ) : (
+        <DonateItem index={3} className="flex flex-col gap-1.5">
+          <Typography
+            variant="caption-1"
+            as="p"
+            className="font-manrope font-light leading-snug text-white/75"
+          >
+            International donations cannot be completed online through our
+            payment gateway. Continue to email the Finance team — they will
+            share the process for foreign donations.
+          </Typography>
+        </DonateItem>
+      )}
+
       <DonateItem index={4} className="flex min-w-0 items-center gap-3">
-        
         <Typography
           variant="body-8"
           as="p"
           className="min-w-0 flex-1 font-manrope font-light leading-snug text-white/90"
         >
-          <CountUp to={donorCount} /> kind donors have contributed this month. Join them today. ❤️
+          <CountUp to={donorCount} /> kind donors have contributed this month.
+          Join them today. ❤️
         </Typography>
       </DonateItem>
 
-      {/* Donate button: glows once an amount is chosen and 80G is agreed */}
       <DonateItem index={5} className="flex flex-col items-stretch gap-2">
         {amountError ? (
           <Shake key={`amount-${shakeKey}`}>
@@ -364,11 +418,11 @@ export default function DonateSection({
         <DonateCta
           type="button"
           ready={readyToDonate}
-          onClick={openDetailsForm}
+          onClick={openNextStep}
           className="w-full cursor-pointer rounded bg-[#FCCC2D] py-3 font-bold font-manrope"
         >
           <Typography variant="button-1" as="span">
-            Donate Now
+            {isIndia ? "Donate Now" : "Continue"}
           </Typography>
         </DonateCta>
       </DonateItem>
@@ -381,16 +435,11 @@ export default function DonateSection({
         <Typography
           variant="caption-1"
           as="span"
-          className="text-white/60 font-light font-manrope lg:hidden"
+          className="text-white/60 font-light font-manrope"
         >
-          Secured by Razorpay
-        </Typography>
-        <Typography
-          variant="brand-2"
-          as="span"
-          className="text-white/60 font-light font-manrope hidden lg:block"
-        >
-          Secured by Razorpay
+          {isIndia
+            ? "Secured by Razorpay"
+            : "Foreign donations via Finance team email"}
         </Typography>
       </DonateItem>
     </>
@@ -404,6 +453,7 @@ export default function DonateSection({
             amount={donationAmount}
             currency={currency}
             countryCode={countryCode}
+            donationCategory={donationCategory}
             donorCount={donorCount}
             patientStoryId={patientStoryId}
             patientStoryName={patientStoryName}
@@ -412,6 +462,19 @@ export default function DonateSection({
               setIsCustom(true);
               setCustomAmount(String(next));
               setSelectedPreset(null);
+            }}
+          />
+        ) : null}
+
+        {fcraOpen ? (
+          <FcraRemittanceModal
+            amount={donationAmount}
+            currency={currency}
+            causeLabel={causeLabel}
+            onClose={() => setFcraOpen(false)}
+            onDonateFromIndia={() => {
+              setFcraOpen(false);
+              changeOrigin("india");
             }}
           />
         ) : null}
@@ -429,7 +492,6 @@ export default function DonateSection({
             </div>
           ) : (
             <>
-              {/* Mobile */}
               <div className="relative w-full overflow-hidden md:hidden">
                 <Image
                   src={donatemobileimg}
@@ -449,7 +511,6 @@ export default function DonateSection({
                 </div>
               </div>
 
-              {/* Desktop */}
               <div className="relative hidden w-full overflow-hidden md:block">
                 <Image
                   src={donateBgImage}

@@ -281,6 +281,7 @@ export type Donor = {
   phone?: string | null;
   email?: string | null;
   city?: string | null;
+  address?: string | null;
   country?: string | null;
   countryCode?: string | null;
   isInternational: boolean;
@@ -312,6 +313,26 @@ export type Donor = {
   updatedAt: string;
 };
 
+/** CMS: offline / bank / FCRA / cheque donation (no Razorpay). */
+export type CreateManualDonorPayload = {
+  fullName: string;
+  email: string;
+  phone?: string;
+  city?: string;
+  address?: string;
+  country?: string;
+  countryCode?: string;
+  isInternational?: boolean;
+  currency?: string;
+  pan?: string;
+  paymentReference?: string;
+  message?: string;
+  donationCategory?: DonationCategory;
+  amount: number;
+  patientStoryId?: string;
+  sendReceiptEmail?: boolean;
+};
+
 export type DonationFrequency = "monthly" | "quarterly" | "yearly";
 
 /** Razorpay subscription states, as Razorpay reports them. */
@@ -332,6 +353,7 @@ export type DonationSubscription = {
   phone?: string | null;
   email?: string | null;
   city?: string | null;
+  address?: string | null;
   pan?: string | null;
   message?: string | null;
   donationCategory: DonationCategory;

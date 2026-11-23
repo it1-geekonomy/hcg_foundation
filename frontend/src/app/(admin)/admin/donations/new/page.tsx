@@ -1,14 +1,5 @@
-﻿import Typography from "@/lib/Typography";
+﻿import DonorsCreatePage from "@/domains/cms/features/donors/DonorsCreatePage";
 
-export default function Page() {
-  return (
-    <div className="p-6">
-      <Typography variant="heading-8" as="h1" className="font-semibold">
-        Admin Donations New
-      </Typography>
-      <Typography variant="label-1" as="p" className="text-cms-muted">
-        TODO: implement admin donations new screen.
-      </Typography>
-    </div>
-  );
+export default function AdminDonationsNewPage() {
+  return <DonorsCreatePage />;
 }

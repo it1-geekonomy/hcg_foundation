@@ -25,6 +25,7 @@ import {
 import { ApiTagsConst } from '../../common/constants/api-tags';
 import { Public } from '../../common/decorators/public.decorator';
 import { CreateDonationDto } from './dto/create-donation.dto';
+import { CreateManualDonorDto } from './dto/create-manual-donor.dto';
 import { ListDonorsQueryDto } from './dto/list-donors-query.dto';
 import { VerifyDonationDto } from './dto/verify-donation.dto';
 import { UpdateDonorCounterSettingsDto } from './dto/update-donor-counter-settings.dto';
@@ -152,6 +153,26 @@ export class DonorsController {
     };
   }
 
+  @Post('manual')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Create donor manually (CMS)',
+    description:
+      'Records an offline / bank / FCRA / cheque donation as paid without Razorpay. Optionally queues the receipt email.',
+  })
+  @ApiCreatedResponse({ type: Donor })
+  @ApiUnauthorizedResponse({
+    description: 'Missing, invalid, or expired bearer token',
+  })
+  async createManual(@Body() dto: CreateManualDonorDto) {
+    const data = await this.service.createManual(dto);
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Donor created successfully',
+      data,
+    };
+  }
+
   @Get(':id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get donor by id (CMS)' })
@@ -224,3 +245,4 @@ export class DonorsController {
     };
   }
 }
+

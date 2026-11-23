@@ -8,6 +8,7 @@ import type {
   CmsEvent,
   CmsProject,
   CreateLegalPagePayload,
+  CreateManualDonorPayload,
   CreateUserPayload,
   EventFields,
   FundraisingCampaign,
@@ -70,6 +71,8 @@ export type ListQuery = {
   receiptEmailStatus?: ReceiptEmailStatus;
   /** Donors only — query param `patientStoryId` */
   patientStoryId?: string;
+  /** Donors only — true = Outside India, false = India */
+  isInternational?: boolean;
   includeDeleted?: boolean;
   onlyDeleted?: boolean;
 };
@@ -90,6 +93,9 @@ function toQuery(params?: ListQuery) {
   }
   if (params?.patientStoryId) {
     q.set("patientStoryId", params.patientStoryId);
+  }
+  if (typeof params?.isInternational === "boolean") {
+    q.set("isInternational", String(params.isInternational));
   }
   if (params?.includeDeleted === true) q.set("includeDeleted", "true");
   if (params?.onlyDeleted === true) q.set("onlyDeleted", "true");
@@ -1202,6 +1208,12 @@ export const cmsApi = {
     request<Paginated<Donor>>(
       `/donors${toQuery({ page: 1, limit: 10, ...params })}`
     ),
+
+  createManualDonor: (payload: CreateManualDonorPayload) =>
+    request<ApiEnvelope<Donor>>("/donors/manual", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
 
   getDonor: (id: string) => request<ApiEnvelope<Donor>>(`/donors/${id}`),
 
