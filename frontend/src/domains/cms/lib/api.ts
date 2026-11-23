@@ -10,6 +10,7 @@ import type {
   CreateLegalPagePayload,
   CreateManualDonorPayload,
   CreateUserPayload,
+  UpdateUserPayload,
   EventFields,
   FundraisingCampaign,
   HomeBanner,
@@ -1074,6 +1075,12 @@ export const cmsApi = {
   createUser: (payload: CreateUserPayload) =>
     request<ApiEnvelope<AdminUser>>("/users", {
       method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  updateUser: (id: string, payload: UpdateUserPayload) =>
+    request<ApiEnvelope<AdminUser>>(`/users/${id}`, {
+      method: "PATCH",
       body: JSON.stringify(payload),
     }),
 
