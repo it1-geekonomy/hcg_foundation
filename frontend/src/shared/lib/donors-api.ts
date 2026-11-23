@@ -41,6 +41,7 @@ export type CreateDonationPayload = {
   phone: string;
   email: string;
   city?: string;
+  address?: string;
   country?: string;
   countryCode?: string;
   isInternational?: boolean;

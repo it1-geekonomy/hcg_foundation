@@ -18,6 +18,7 @@ import {
   toMinorUnits,
 } from './donation-currency';
 import { CreateDonationDto } from './dto/create-donation.dto';
+import { CreateManualDonorDto } from './dto/create-manual-donor.dto';
 import { ListDonorsQueryDto } from './dto/list-donors-query.dto';
 import { VerifyDonationDto } from './dto/verify-donation.dto';
 import { Donor } from './entities/donor.entity';
@@ -26,6 +27,7 @@ import { UpdateDonorCounterSettingsDto } from './dto/update-donor-counter-settin
 import { PatientStory } from '../patient-stories/entities/patient-story.entity';
 import { DonationEmailQueueService } from './donation-email-queue.service';
 import { DonationCategory } from '../../common/enums/donation-category.enum';
+import { ReceiptEmailStatus } from '../../common/enums/receipt-email-status.enum';
 
 export type DonationCheckout = {
   orderId: string;
@@ -85,6 +87,7 @@ export class DonorsService {
       phone,
       email,
       city,
+      address,
       countryCode,
       country,
       isInternational,
@@ -105,6 +108,7 @@ export class DonorsService {
           phone: this.note(phone, 20),
           email: this.note(email),
           city: this.note(city),
+          address: this.note(address),
           country: this.note(country, 100),
           countryCode: this.note(countryCode || '', 8),
           international: isInternational ? 'true' : 'false',
@@ -153,6 +157,7 @@ export class DonorsService {
     const phone = dto.phone;
     const email = dto.email.toLowerCase().trim();
     const city = dto.city?.trim() || '';
+    const address = dto.address?.trim() || '';
     const countryCode = dto.countryCode?.trim().toUpperCase() || null;
     const country = dto.country?.trim() || 'India';
     const isInternational = this.resolveInternational(
@@ -161,7 +166,9 @@ export class DonorsService {
       dto.isInternational,
     );
     const currency = normalizeDonationCurrency(dto.currency, isInternational);
-    const pan = isInternational ? '' : dto.pan?.trim() || '';
+    const pan = isInternational
+      ? ''
+      : (dto.pan?.replace(/\s/g, '').toUpperCase() || '');
     const message = dto.message?.trim() || '';
     const donationCategory = dto.patientStoryId
       ? (dto.donationCategory || DonationCategory.PATIENT_SPECIFIC)
@@ -186,6 +193,29 @@ export class DonorsService {
       );
     }
 
+    // International online checkout is disabled; donors outside India use FCRA wire transfer.
+    if (isInternational || currency !== 'INR') {
+      throw new BadRequestException(
+        'International donations must use FCRA wire transfer. Online card checkout is available for India (INR) only.',
+      );
+    }
+
+    if (!address) {
+      throw new BadRequestException(
+        'Address is required for Indian donations.',
+      );
+    }
+
+    // ₹2,000 and above: PAN is mandatory for foundation tax reporting.
+    if (dto.amount >= 2000) {
+      const panNorm = pan.replace(/\s/g, '').toUpperCase();
+      if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(panNorm)) {
+        throw new BadRequestException(
+          'A valid 10-character PAN is required for donations of ₹2,000 or more.',
+        );
+      }
+    }
+
     return {
       amount,
       amountMinor,
@@ -193,6 +223,7 @@ export class DonorsService {
       phone,
       email,
       city,
+      address,
       countryCode,
       country,
       isInternational,
@@ -325,6 +356,7 @@ export class DonorsService {
         phone: notes.phone || null,
         email: notes.email?.toLowerCase().trim() || null,
         city: notes.city?.trim() || null,
+        address: notes.address?.trim() || null,
         country,
         countryCode,
         isInternational: notes.international === 'true',
@@ -385,6 +417,12 @@ export class DonorsService {
       });
     }
 
+    if (typeof query.isInternational === 'boolean') {
+      qb.andWhere('donor.isInternational = :isInternational', {
+        isInternational: query.isInternational,
+      });
+    }
+
     if (query.search) {
       qb.andWhere(
         '(donor.fullName ILIKE :search OR donor.email ILIKE :search OR donor.phone ILIKE :search OR donor.receiptNumber ILIKE :search OR donor.country ILIKE :search OR donor.countryCode ILIKE :search OR donor.city ILIKE :search OR patientStory.title ILIKE :search)',
@@ -414,6 +452,120 @@ export class DonorsService {
       );
     }
     return entity;
+  }
+
+  /**
+   * CMS: record an offline donation (bank / FCRA / cheque / cash) as paid.
+   * Skips Razorpay; optionally queues the receipt email.
+   */
+  async createManual(dto: CreateManualDonorDto): Promise<Donor> {
+    const fullName = dto.fullName.trim();
+    const phone = dto.phone?.trim() || null;
+    const email = dto.email.toLowerCase().trim();
+    const city = dto.city?.trim() || null;
+    const address = dto.address?.trim() || null;
+    const countryCode = dto.countryCode?.trim().toUpperCase() || null;
+    const country = dto.country?.trim() || (dto.isInternational ? null : 'India');
+    const isInternational = this.resolveInternational(
+      country,
+      countryCode,
+      dto.isInternational,
+    );
+    const currency = normalizeDonationCurrency(dto.currency, isInternational);
+    const pan = isInternational
+      ? null
+      : dto.pan?.replace(/\s/g, '').toUpperCase() || null;
+    const amount = dto.amount.toFixed(2);
+    const donationCategory = dto.patientStoryId
+      ? dto.donationCategory || DonationCategory.PATIENT_SPECIFIC
+      : dto.donationCategory || DonationCategory.GENERAL_FUNDS;
+
+    if (!isInternational && currency !== 'INR') {
+      throw new BadRequestException(
+        'Indian donations must use INR. Change country or currency.',
+      );
+    }
+
+    if (!isInternational && !address) {
+      throw new BadRequestException(
+        'Address is required for Indian donations.',
+      );
+    }
+
+    if (!isInternational && dto.amount >= 2000) {
+      if (!pan || !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) {
+        throw new BadRequestException(
+          'A valid 10-character PAN is required for donations of ₹2,000 or more.',
+        );
+      }
+    }
+
+    let patientStoryId: string | null = null;
+    if (dto.patientStoryId) {
+      const story = await this.patientStoryRepo.findOne({
+        where: { id: dto.patientStoryId },
+      });
+      if (!story) {
+        throw new NotFoundException('Patient story not found.');
+      }
+      patientStoryId = story.id;
+    }
+
+    const noteParts: string[] = ['Manual entry (CMS)'];
+    const paymentReference = dto.paymentReference?.trim();
+    if (paymentReference) {
+      noteParts.push(`Payment ref: ${paymentReference}`);
+    }
+    const messageBody = dto.message?.trim();
+    if (messageBody) {
+      noteParts.push(messageBody);
+    }
+
+    const sendReceiptEmail = dto.sendReceiptEmail !== false;
+
+    const donor = await this.repo.save(
+      this.repo.create({
+        fullName,
+        phone,
+        email,
+        city,
+        address,
+        country: country || (isInternational ? 'International' : 'India'),
+        countryCode: isInternational ? countryCode : countryCode || 'IN',
+        isInternational,
+        pan,
+        message: noteParts.join('\n'),
+        donationCategory,
+        amount,
+        currency,
+        status: DonationStatus.PAID,
+        razorpayOrderId: null,
+        razorpayPaymentId: paymentReference || null,
+        patientStoryId,
+      }),
+    );
+
+    donor.receiptNumber = this.buildReceiptNumber(donor.id);
+
+    if (sendReceiptEmail) {
+      Object.assign(donor, DonationEmailQueueService.queuedFields());
+    } else {
+      donor.receiptEmailStatus = ReceiptEmailStatus.SKIPPED;
+      donor.receiptEmailAttempts = 0;
+      donor.receiptEmailNextAttemptAt = null;
+      donor.receiptEmailError = 'Manual entry — receipt email not requested';
+    }
+
+    const saved = await this.repo.save(donor);
+    this.logger.log(
+      `Manual donation recorded. donor=${saved.id} receipt=${saved.receiptNumber} email=${sendReceiptEmail ? 'queued' : 'skipped'}`,
+    );
+
+    if (sendReceiptEmail) {
+      this.emailQueue.kick();
+    }
+
+    return this.findOne(saved.id);
   }
 
   async syncPaymentStatus(id: string): Promise<Donor> {

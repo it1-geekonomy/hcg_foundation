@@ -191,7 +191,8 @@ export default function SubscriptionViewPage() {
             <CmsDetailRow label="Email" value={sub.email} />
             <CmsDetailRow label="Phone" value={sub.phone} />
             <CmsDetailRow label="City" value={sub.city} />
-            <CmsDetailRow label="PAN / Aadhaar" value={sub.pan} />
+            <CmsDetailRow label="Address" value={sub.address} />
+            <CmsDetailRow label="PAN" value={sub.pan} />
             <CmsDetailRow label="Category" value={sub.donationCategory || "General Funds"} />
             <CmsDetailRow
               label="Message"

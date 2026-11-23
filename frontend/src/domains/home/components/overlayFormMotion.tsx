@@ -121,13 +121,17 @@ export function CardReveal({
   );
 }
 
-/* Dark pill that glides to the chosen amount (scope with a LayoutGroup per layout). */
-export function ActivePill() {
+/* Dark pill that glides between options that share the same layoutId. */
+export function ActivePill({
+  layoutId = "overlay-amount-pill",
+}: {
+  layoutId?: string;
+} = {}) {
   const skip = useSkip();
   return (
     <motion.span
       aria-hidden="true"
-      layoutId="overlay-amount-pill"
+      layoutId={layoutId}
       className="absolute inset-0 rounded-full bg-[#1C1C1C]"
       transition={skip ? instant : { type: "spring", stiffness: 520, damping: 38 }}
     />
