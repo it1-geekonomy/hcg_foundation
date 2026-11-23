@@ -747,9 +747,10 @@ function TermsCheckbox({
           as="p"
           className="font-manrope font-normal leading-relaxed text-[#4A4540] lg:!leading-snug"
         >
-          International donations cannot be completed online through our payment
-          gateway. Continue to email the Finance team for the foreign donation
-          process.
+          Planning to contribute from outside India? Please contact the HCG
+          Foundation Finance Team by email. Our team will guide you through the
+          donation process and share the necessary bank details and instructions
+          to complete your contribution.
         </Typography>
       </div>
     );

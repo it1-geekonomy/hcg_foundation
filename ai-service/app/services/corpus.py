@@ -68,7 +68,9 @@ def _static_documents() -> list[dict]:
                 "How can I donate to HCG Foundation? Use the Donate Now option on the website. "
                 "Eligible donations from Indian donors qualify for an 80G tax receipt. "
                 "India: One Time or recurring (Monthly, Quarterly, Yearly) via Razorpay in INR. "
-                f"Outside India: email Finance team at {C.FINANCE_TEAM_EMAIL} for the foreign donation process — no online international card checkout. "
+                f"Outside India: Planning to contribute from outside India? Email the Finance team at {C.FINANCE_TEAM_EMAIL}. "
+                "They will guide you through the donation process and share the necessary bank details and instructions. "
+                "No online international card checkout. "
                 "Do not invent cash or cheque payments unless separately published. "
                 f"Contact: {C.OFFICIAL_EMAIL}, {C.OFFICIAL_PHONE}. Address: {C.OFFICIAL_ADDRESS}."
             ),
@@ -180,8 +182,8 @@ def _static_documents() -> list[dict]:
                 "Title: Foreign / FCRA Donations\nCategory: Page\n\n"
                 "HCG Foundation is FCRA-registered and can receive foreign / overseas / NRI contributions. "
                 "Online international card checkout is not available. "
-                f"Foreign donors should email the Finance team at {C.FINANCE_TEAM_EMAIL}; "
-                "the Finance team shares the remittance process. "
+                f"Planning to contribute from outside India? Email {C.FINANCE_TEAM_EMAIL}. "
+                "The Finance team will guide you and share bank details and instructions. "
                 "Do not publish FCRA bank account numbers, IFSC, or SWIFT for self-serve remittance. "
                 "For domestic Indian donations, use Donate Now on the website (Razorpay, INR, 80G)."
             ),

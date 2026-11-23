@@ -167,7 +167,7 @@ HELP_ANSWER = (
 DONATE_INTENT_ANSWER = (
     "You can support HCG Foundation using the Donate Now form on the website. "
     "From India: one-time or Monthly, Quarterly or Yearly recurring gifts in INR via Razorpay. "
-    f"From outside India: email the Finance team at {FINANCE_TEAM_EMAIL} for the foreign donation process (online international card checkout is not available). "
+    f"Planning to contribute from outside India? Please contact the HCG Foundation Finance Team by email at {FINANCE_TEAM_EMAIL}. Our team will guide you through the donation process and share the necessary bank details and instructions to complete your contribution. Online international card checkout is not available. "
     "Eligible donations from Indian donors qualify for an 80G tax receipt. "
     f"Contact: {OFFICIAL_EMAIL}, {OFFICIAL_PHONE}. Address: {OFFICIAL_ADDRESS}."
 )

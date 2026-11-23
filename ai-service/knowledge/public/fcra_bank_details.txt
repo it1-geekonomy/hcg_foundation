@@ -3,10 +3,10 @@ HCG Foundation — Foreign / FCRA donations
 HCG Foundation is registered under the Foreign Contribution (Regulation) Act (FCRA) and can receive foreign / overseas / NRI contributions.
 
 How foreign donors should proceed:
+- Planning to contribute from outside India? Please contact the HCG Foundation Finance Team by email at accounts.hcgf@hcgel.com.
+- Our team will guide you through the donation process and share the necessary bank details and instructions to complete your contribution.
 - Online international card checkout is not available on the website.
-- Email the HCG Foundation Finance Team at accounts.hcgf@hcgel.com.
-- The Finance team will share the foreign donation / remittance process with that donor.
-- Do not publish FCRA bank account numbers, IFSC, or SWIFT for self-serve remittance unless the Finance team has provided them to that donor.
+- Do not publish FCRA bank account numbers, IFSC, or SWIFT in chatbot answers for self-serve remittance.
 
 For regular Indian donations, use the website Donate Now flow (Razorpay, INR, with 80G where eligible).
 Recurring AutoPay is India / INR only.
