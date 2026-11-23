@@ -2,19 +2,21 @@ Donate Now — HCG Foundation
 
 Visitors can donate through the Donate Now flow on the website.
 
-Eligible donations from Indian donors qualify for an 80G tax receipt. HCG Foundation's 80G approval (URN AAATH6254RF20213) is valid for assessment years 2022-23 to 2026-27.
+Where are you donating from?
+- India: pay online in INR through Razorpay (one-time or recurring). Eligible Indian donations qualify for an 80G tax receipt. HCG Foundation's 80G approval (URN AAATH6254RF20213) is valid for assessment years 2022-23 to 2026-27.
+- Outside India: online international card checkout is not available through payment gateways. Interested foreign / overseas / NRI donors should email the HCG Foundation Finance Team at accounts.hcgf@hcgel.com. The Finance team will share the process for foreign donations. Never share FCRA bank account numbers, IFSC, or SWIFT in chatbot answers for self-serve remittance.
 
 Is there a minimum donation or minimum contribution amount?
 No minimum donation amount is published. On the Donate Now form you can pick one of the suggested amounts or enter your own amount. For CSR or large contributions, contact hcgfoundation@gmail.com or +91 9663727663.
 
 Does HCG Foundation accept monthly or recurring donations?
-Yes. On the Donate Now form, under "Choose Donation Frequency", you can pick One Time, Monthly, Quarterly (every 3 months) or Yearly. For Monthly, Quarterly and Yearly, the chosen amount is charged automatically on that schedule (AutoPay) after you approve it once during checkout.
-- Recurring donations are available for donations in Indian Rupees (INR) from India. Donors outside India can make a One Time donation.
+Yes, for donations from India in INR. On the Donate Now form, under "Choose Donation Frequency", you can pick One Time, Monthly, Quarterly (every 3 months) or Yearly. For Monthly, Quarterly and Yearly, the chosen amount is charged automatically on that schedule (AutoPay) after you approve it once during checkout.
+- Recurring donations are India / INR only. Donors outside India should email accounts.hcgf@hcgel.com (Finance team) for the foreign donation process.
 - AutoPay can be set up with UPI AutoPay, a debit or credit card, or a bank e-mandate (net banking), depending on what your bank supports.
 - A donation receipt is emailed after every successful charge, and eligible Indian donations qualify for the 80G tax benefit each time.
 - You can pause or cancel a recurring donation any time by contacting hcgfoundation@gmail.com or +91 9663727663.
 
-Do not invent payment methods such as cash or cheque unless a published CMS page or knowledge document explicitly states them.
+Do not invent payment methods such as cash or cheque unless a published CMS page or knowledge document explicitly states them. Do not claim that international donors can pay online with Razorpay cards.
 
 Official contact:
 Email: hcgfoundation@gmail.com

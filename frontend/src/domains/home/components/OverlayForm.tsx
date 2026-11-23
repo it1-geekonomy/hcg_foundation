@@ -12,19 +12,17 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { LayoutGroup } from "framer-motion";
-import {
-  IMPACT_ITEMS,
-  OVERLAY_AMOUNT_PRESETS,
-} from "@/domains/home/constants/overlayform";
+import { IMPACT_ITEMS } from "@/domains/home/constants/overlayform";
 import Typography from "@/lib/Typography";
 import DonateDetailsModal from "@/shared/components/DonateDetailsModal";
+import FcraRemittanceModal from "@/shared/components/FcraRemittanceModal";
 import { Terms80GLink } from "@/shared/components/Terms80GDialog";
 import type { DonationCategory } from "@/shared/lib/donors-api";
-import CountrySelect from "@/shared/components/CountrySelect";
 import {
-  DEFAULT_COUNTRY_CODE,
-  getDonationCountry,
-} from "@/domains/home/constants/countries";
+  type DonationOrigin,
+  OUTSIDE_INDIA_COUNTRY_CODE,
+  OUTSIDE_INDIA_CURRENCY,
+} from "@/domains/home/constants/fcra-bank";
 import {
   type DonationCurrencyCode,
   formatDonationAmount,
@@ -168,13 +166,14 @@ function PortraitWithBackdrop({
 /* ------------------------------------------------------------------ */
 
 export default function OverlayForm({ onClose }: { onClose: () => void }) {
-  const [countryCode, setCountryCode] = useState(DEFAULT_COUNTRY_CODE);
-  const country = getDonationCountry(countryCode);
-  const currency: DonationCurrencyCode = country.currency;
+  const [origin, setOrigin] = useState<DonationOrigin>("india");
+  const isIndia = origin === "india";
+  const countryCode = isIndia ? "IN" : OUTSIDE_INDIA_COUNTRY_CODE;
+  const currency: DonationCurrencyCode = isIndia ? "INR" : OUTSIDE_INDIA_CURRENCY;
   const currencyMeta = getDonationCurrency(currency);
 
   const [selectedPreset, setSelectedPreset] = useState<number | null>(
-    OVERLAY_AMOUNT_PRESETS[0],
+    currencyMeta.presets[0] ?? null,
   );
   const [selectedImpact, setSelectedImpact] = useState<DonationCategory | null>(null);
   const [showCustomInput, setShowCustomInput] = useState(false);
@@ -182,6 +181,7 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
   const [agreedTo80G, setAgreedTo80G] = useState(false);
   const [termsError, setTermsError] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [fcraOpen, setFcraOpen] = useState(false);
 
   useEffect(() => {
     const scrollY = window.scrollY;
@@ -206,13 +206,16 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
     };
   }, []);
 
-  const changeCountry = (nextCode: string) => {
-    const next = getDonationCountry(nextCode);
-    setCountryCode(next.code);
+  const changeOrigin = (next: DonationOrigin) => {
+    const nextCurrency: DonationCurrencyCode =
+      next === "india" ? "INR" : OUTSIDE_INDIA_CURRENCY;
+    const meta = getDonationCurrency(nextCurrency);
+    setOrigin(next);
     setShowCustomInput(false);
     setCustomAmount("");
-    setSelectedPreset(OVERLAY_AMOUNT_PRESETS[0]);
+    setSelectedPreset(meta.presets[0] ?? null);
     setTermsError(false);
+    setAgreedTo80G(false);
   };
 
   const pickPreset = (amount: number) => {
@@ -242,10 +245,14 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
 
   const donationAmount = selectedPreset ?? (Number(customAmount) || 0);
 
-  const openDetailsForm = () => {
-    setTermsError(!agreedTo80G);
-    if (!agreedTo80G) return;
-    setDetailsOpen(true);
+  const openNextStep = () => {
+    if (isIndia) {
+      setTermsError(!agreedTo80G);
+      if (!agreedTo80G) return;
+      setDetailsOpen(true);
+      return;
+    }
+    setFcraOpen(true);
   };
 
   const amountProps: AmountProps = {
@@ -257,15 +264,16 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
     onMoreClick: () => setShowCustomInput(true),
     onCustomAmountKeyDown: handleCustomAmountKeyDown,
     onCustomAmountBlur: commitCustomAmount,
-    countryCode,
-    changeCountry,
+    origin,
+    changeOrigin,
+    isIndia,
     currency,
     currencyMeta,
     agreedTo80G,
     setAgreedTo80G,
     termsError,
     setTermsError,
-    onDonateClick: openDetailsForm,
+    onDonateClick: openNextStep,
     selectedImpact,
     onSelectImpact: setSelectedImpact,
   };
@@ -309,6 +317,19 @@ export default function OverlayForm({ onClose }: { onClose: () => void }) {
           }}
         />
       ) : null}
+
+      {fcraOpen ? (
+        <FcraRemittanceModal
+          amount={donationAmount}
+          currency={currency}
+          causeLabel={selectedImpact ?? "General Funds"}
+          onClose={() => setFcraOpen(false)}
+          onDonateFromIndia={() => {
+            setFcraOpen(false);
+            changeOrigin("india");
+          }}
+        />
+      ) : null}
     </>
   );
 }
@@ -326,8 +347,9 @@ type AmountProps = {
   onMoreClick: () => void;
   onCustomAmountKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onCustomAmountBlur: () => void;
-  countryCode: string;
-  changeCountry: (nextCode: string) => void;
+  origin: DonationOrigin;
+  changeOrigin: (next: DonationOrigin) => void;
+  isIndia: boolean;
   currency: DonationCurrencyCode;
   currencyMeta: ReturnType<typeof getDonationCurrency>;
   agreedTo80G: boolean;
@@ -573,7 +595,7 @@ function AmountPicker({
       </Typography>
 
       <div className={gridClassName}>
-        {OVERLAY_AMOUNT_PRESETS.map((amount) => {
+        {currencyMeta.presets.map((amount) => {
           const active = amount === selectedPreset;
           return (
             <button
@@ -632,64 +654,78 @@ function DonateButton({
   className,
   onDonateClick,
   showHeart = true,
+  isIndia = true,
 }: {
   className: string;
   onDonateClick: () => void;
   showHeart?: boolean;
+  isIndia?: boolean;
 }) {
   return (
     <button onClick={onDonateClick} className={className}>
       <Typography variant="button-6" as="span" className="font-bold font-manrope text-gray-900 lg:!text-[0.9375rem]">
-        {showHeart ? "❤️ " : ""}DONATE NOW →
+        {isIndia
+          ? `${showHeart ? "❤️ " : ""}DONATE NOW →`
+          : "CONTINUE →"}
       </Typography>
     </button>
   );
 }
 
-function CountryBlock({
-  countryCode,
-  changeCountry,
+function OriginBlock({
+  origin,
+  changeOrigin,
   currencyMeta,
-  className = "flex flex-col gap-2 mb-3 w-full max-w-[280px] sm:max-w-[320px]",
-  inlineCurrency = false,
-}: Pick<AmountProps, "countryCode" | "changeCountry" | "currencyMeta"> & {
+  className = "flex flex-col gap-2 mb-3 w-full max-w-[320px] sm:max-w-[360px]",
+}: Pick<AmountProps, "origin" | "changeOrigin" | "currencyMeta"> & {
   className?: string;
-  /** Show the currency on the label row instead of its own line under the select. */
-  inlineCurrency?: boolean;
 }) {
-  const currencyNote = (
-    <Typography
-      variant="caption-1"
-      as="span"
-      className="font-manrope font-normal text-[#6F6863]"
-    >
-      Currency: {currencyMeta.label}
-    </Typography>
-  );
-
   return (
     <div className={className}>
-      <div className="flex items-baseline justify-between gap-3">
-        <Typography
-          variant="body-8"
-          as="span"
-          className={`font-semibold font-manrope tracking-normal text-[#1C1C1C] ${LG_FIELD_TEXT}`}
-        >
-          Country
-        </Typography>
-        {inlineCurrency ? currencyNote : null}
+      <Typography
+        variant="body-8"
+        as="span"
+        className={`font-semibold font-manrope tracking-normal text-[#1C1C1C] ${LG_FIELD_TEXT}`}
+      >
+        Where are you donating from?
+      </Typography>
+      <div className="grid grid-cols-2 gap-2">
+        {(
+          [
+            { id: "india" as const, label: "India" },
+            { id: "outside" as const, label: "Outside India" },
+          ] as const
+        ).map((item) => {
+          const active = origin === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              aria-pressed={active}
+              onClick={() => changeOrigin(item.id)}
+              className={`${pillBase} ${active ? pillActive : pillInactive}`}
+            >
+              {active ? <ActivePill /> : null}
+              <Typography
+                variant="body-8"
+                as="span"
+                className={`relative font-semibold font-manrope ${LG_FIELD_TEXT}`}
+              >
+                {item.label}
+              </Typography>
+            </button>
+          );
+        })}
       </div>
-      <CountrySelect
-        value={countryCode}
-        onChange={changeCountry}
-        variant="name"
-        theme="light"
-        borderClassName={`${FIELD_BORDER} ${FIELD_HOVER}`}
-        boxClassName="h-11 gap-2.5 rounded-full bg-[#FBF9F4] px-4 transition-colors lg:h-9"
-        chevronClassName="text-[#6F6863]"
-        textClassName="text-[#1C1C1C]"
-      />
-      {inlineCurrency ? null : currencyNote}
+      <Typography
+        variant="caption-1"
+        as="span"
+        className="font-manrope font-normal text-[#6F6863]"
+      >
+        {origin === "india"
+          ? `Currency: ${currencyMeta.label} · Razorpay`
+          : `Currency: ${currencyMeta.label} · Contact Finance team`}
+      </Typography>
     </div>
   );
 }
@@ -699,7 +735,24 @@ function TermsCheckbox({
   setAgreedTo80G,
   termsError,
   setTermsError,
-}: Pick<AmountProps, "agreedTo80G" | "setAgreedTo80G" | "termsError" | "setTermsError">) {
+  isIndia,
+}: Pick<AmountProps, "agreedTo80G" | "setAgreedTo80G" | "termsError" | "setTermsError" | "isIndia">) {
+  if (!isIndia) {
+    return (
+      <div className="mt-3 lg:mt-2.5">
+        <Typography
+          variant="caption-1"
+          as="p"
+          className="font-manrope font-normal leading-relaxed text-[#4A4540] lg:!leading-snug"
+        >
+          International donations cannot be completed online through our payment
+          gateway. Continue to email the Finance team for the foreign donation
+          process.
+        </Typography>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-3 flex flex-col gap-1 lg:mt-2.5">
       <label className="flex min-w-0 cursor-pointer items-start gap-3">
@@ -750,8 +803,17 @@ function Modal1024Up({
   onClose,
   ...amountProps
 }: AmountProps & { onClose: () => void }) {
-  const { countryCode, changeCountry, currencyMeta, agreedTo80G, setAgreedTo80G, termsError, setTermsError, onDonateClick } =
-    amountProps;
+  const {
+    origin,
+    changeOrigin,
+    isIndia,
+    currencyMeta,
+    agreedTo80G,
+    setAgreedTo80G,
+    termsError,
+    setTermsError,
+    onDonateClick,
+  } = amountProps;
 
   return (
     <CardReveal
@@ -783,11 +845,10 @@ function Modal1024Up({
             />
 
             <div className="mt-3 border-t border-[#EFE9DD] pt-3">
-              <CountryBlock
-                countryCode={countryCode}
-                changeCountry={changeCountry}
+              <OriginBlock
+                origin={origin}
+                changeOrigin={changeOrigin}
                 currencyMeta={currencyMeta}
-                inlineCurrency
                 className="mb-3 flex w-full flex-col gap-1.5"
               />
 
@@ -803,11 +864,13 @@ function Modal1024Up({
                 setAgreedTo80G={setAgreedTo80G}
                 termsError={termsError}
                 setTermsError={setTermsError}
+                isIndia={isIndia}
               />
 
               <DonateButton
                 onDonateClick={onDonateClick}
                 showHeart={false}
+                isIndia={isIndia}
                 className="mt-3 flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#FDC61D] px-10 shadow-[0_8px_20px_-10px_rgba(226,176,0,0.8)] transition-colors hover:bg-[#F2B800]"
               />
             </div>
@@ -826,8 +889,17 @@ function ModalBelow1024({
   onClose,
   ...amountProps
 }: AmountProps & { onClose: () => void }) {
-  const { countryCode, changeCountry, currencyMeta, agreedTo80G, setAgreedTo80G, termsError, setTermsError, onDonateClick } =
-    amountProps;
+  const {
+    origin,
+    changeOrigin,
+    isIndia,
+    currencyMeta,
+    agreedTo80G,
+    setAgreedTo80G,
+    termsError,
+    setTermsError,
+    onDonateClick,
+  } = amountProps;
 
   return (
     <CardReveal
@@ -866,11 +938,10 @@ function ModalBelow1024({
             />
 
             <div className="mt-3 w-full border-t border-[#EFE9DD] pt-3 sm:mt-4 sm:pt-4">
-              <CountryBlock
-                countryCode={countryCode}
-                changeCountry={changeCountry}
+              <OriginBlock
+                origin={origin}
+                changeOrigin={changeOrigin}
                 currencyMeta={currencyMeta}
-                inlineCurrency
                 className="mb-2.5 flex w-full flex-col gap-1.5 sm:mb-3"
               />
 
@@ -886,11 +957,13 @@ function ModalBelow1024({
                 setAgreedTo80G={setAgreedTo80G}
                 termsError={termsError}
                 setTermsError={setTermsError}
+                isIndia={isIndia}
               />
 
               <DonateButton
                 onDonateClick={onDonateClick}
                 showHeart={false}
+                isIndia={isIndia}
                 className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#FDC61D] cursor-pointer shadow-[0_8px_20px_-10px_rgba(226,176,0,0.8)] sm:mt-4 sm:h-12"
               />
             </div>

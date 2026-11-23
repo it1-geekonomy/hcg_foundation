@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { Plus } from "lucide-react";
 import Typography from "@/lib/Typography";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -34,6 +35,7 @@ import CmsSearchInput from "@/domains/cms/ui/CmsSearchInput";
 import CmsSelect, {
   DONATION_CATEGORY_FILTER_OPTIONS,
   DONATION_STATUS_OPTIONS,
+  DONOR_ORIGIN_FILTER_OPTIONS,
   RECEIPT_EMAIL_STATUS_FILTER_OPTIONS,
 } from "@/domains/cms/ui/CmsSelect";
 
@@ -66,6 +68,7 @@ export default function DonorsListPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<DonationStatus | "">("");
   const [category, setCategory] = useState<DonationCategory | "">("");
+  const [origin, setOrigin] = useState<"" | "india" | "international">("");
   const [patientStoryId, setPatientStoryId] = useState<string>("");
   const [emailStatus, setEmailStatus] = useState<ReceiptEmailStatusValue | "">("");
   const [patientOptions, setPatientOptions] = useState<
@@ -163,6 +166,12 @@ export default function DonorsListPage() {
         donationCategory: category || undefined,
         patientStoryId: patientStoryId || undefined,
         receiptEmailStatus: emailStatus || undefined,
+        isInternational:
+          origin === "international"
+            ? true
+            : origin === "india"
+              ? false
+              : undefined,
       });
       setDonors(res.data ?? []);
       setMeta(res.meta ?? emptyMeta);
@@ -171,7 +180,7 @@ export default function DonorsListPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, status, category, patientStoryId, emailStatus]);
+  }, [page, search, status, category, origin, patientStoryId, emailStatus]);
 
   useEffect(() => {
     void load();
@@ -179,13 +188,23 @@ export default function DonorsListPage() {
 
   return (
     <div className="space-y-5">
-      <Typography
-        variant="label-1"
-        as="p"
-        className="max-w-xl text-cms-muted"
-      >
-        Website donations that completed payment.
-      </Typography>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Typography
+          variant="label-1"
+          as="p"
+          className="max-w-xl text-cms-muted"
+        >
+          Website donations that completed payment, plus offline entries added
+          manually.
+        </Typography>
+        <Link
+          href="/admin/donations/new"
+          className="inline-flex h-9 items-center gap-2 rounded-lg bg-cms-primary px-3.5 text-sm font-medium text-white shadow-[0_1px_2px_rgba(16,24,40,0.08)] transition-colors hover:bg-cms-primary-hover"
+        >
+          <Plus className="size-4" />
+          Add donor
+        </Link>
+      </div>
 
       {error ? (
         <Typography
@@ -284,6 +303,16 @@ export default function DonorsListPage() {
               onChange={(next) => {
                 setPage(1);
                 setStatus(next as DonationStatus | "");
+              }}
+            />
+            <CmsSelect
+              size="sm"
+              className="sm:w-44"
+              value={origin}
+              options={DONOR_ORIGIN_FILTER_OPTIONS}
+              onChange={(next) => {
+                setPage(1);
+                setOrigin(next as "" | "india" | "international");
               }}
             />
             <CmsSelect

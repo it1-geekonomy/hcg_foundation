@@ -44,6 +44,15 @@ export class CreateDonationDto {
   @MaxLength(255)
   city?: string;
 
+  @ApiPropertyOptional({
+    example: '12 MG Road, Bengaluru, Karnataka 560001',
+    description: 'Donor postal / residential address',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  address?: string;
+
   @ApiPropertyOptional({ example: 'United States' })
   @IsOptional()
   @IsString()

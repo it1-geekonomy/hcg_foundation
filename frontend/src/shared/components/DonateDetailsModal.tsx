@@ -139,7 +139,7 @@ export default function DonateDetailsModal({
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [city, setCity] = useState("");
+  const [address, setAddress] = useState("");
   const [pan, setPan] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -261,6 +261,25 @@ export default function DonateDetailsModal({
       return;
     }
 
+    // Donations of ₹2,000+ need PAN + address so HCG Foundation can report without extra tax.
+    const needsPanAndAddress = !international && amountValue >= 2000;
+    if (needsPanAndAddress) {
+      if (!address.trim()) {
+        setError("Please enter your address for donations of ₹2,000 or more.");
+        return;
+      }
+      const panValue = pan.replace(/\s/g, "").toUpperCase();
+      if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(panValue)) {
+        setError(
+          "Please enter a valid 10-character PAN for donations of ₹2,000 or more.",
+        );
+        return;
+      }
+    } else if (!international && !address.trim()) {
+      setError("Please enter your address.");
+      return;
+    }
+
     const national = nationalPhoneDigits(phone, phoneCountry.dial);
     if (indianPhone) {
       if (national.length !== 10) {
@@ -281,12 +300,14 @@ export default function DonateDetailsModal({
       fullName: fullName.trim(),
       phone: payloadPhone,
       email: email.trim(),
-      city: city.trim() || undefined,
+      address: address.trim() || undefined,
       country: country.name,
       countryCode,
       isInternational: international,
       currency,
-      pan: international ? undefined : pan.replace(/\s/g, "") || undefined,
+      pan: international
+        ? undefined
+        : pan.replace(/\s/g, "").toUpperCase() || undefined,
       message: message.trim() || undefined,
       donationCategory,
       amount: amountValue,
@@ -633,18 +654,18 @@ export default function DonateDetailsModal({
                   />
                 </div>
 
-                <div className={underlineField}>
-                  <FieldLabel htmlFor="donate-city" className="sr-only">
-                    City
+                <div className={`col-span-1 sm:col-span-2 ${underlineField}`}>
+                  <FieldLabel htmlFor="donate-address" className="sr-only">
+                    Address
                   </FieldLabel>
                   <input
-                    id="donate-city"
+                    id="donate-address"
                     required
-                    name="city"
-                    autoComplete="address-level2"
-                    placeholder="City*"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                    name="address"
+                    autoComplete="street-address"
+                    placeholder="Address*"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
                     className={underlineInput}
                   />
                 </div>
@@ -652,17 +673,18 @@ export default function DonateDetailsModal({
                 {!international ? (
                   <div className={`col-span-1 sm:col-span-2 ${underlineField}`}>
                     <FieldLabel htmlFor="donate-pan" className="sr-only">
-                      ID Card (PAN or Aadhaar – optional, required only for 80G
-                      certificate)
+                      PAN Card Number
                     </FieldLabel>
                     <input
                       id="donate-pan"
                       name="pan"
-                      placeholder="ID Card (PAN or Aadhaar - Optional)"
-                      title="Optional – required only for the 80G tax certificate"
+                      required={amountValue >= 2000}
+                      placeholder={amountValue >= 2000 ? "PAN Card No.*" : "PAN Card No."}
                       value={pan}
-                      onChange={(e) => setPan(e.target.value)}
-                      maxLength={20}
+                      onChange={(e) =>
+                        setPan(e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase())
+                      }
+                      maxLength={10}
                       className={underlineInput}
                     />
                   </div>

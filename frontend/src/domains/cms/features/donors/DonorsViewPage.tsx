@@ -77,6 +77,7 @@ export default function DonorsViewPage() {
             <CmsDetailRow label="Email" value={donor.email} />
             <CmsDetailRow label="Phone" value={donor.phone} />
             <CmsDetailRow label="City" value={donor.city} />
+            <CmsDetailRow label="Address" value={donor.address} />
             <CmsDetailRow
               label="Country"
               value={
@@ -89,7 +90,7 @@ export default function DonorsViewPage() {
               label="Donor type"
               value={donor.isInternational ? "International" : "India"}
             />
-            <CmsDetailRow label="PAN / Aadhaar" value={donor.pan} />
+            <CmsDetailRow label="PAN" value={donor.pan} />
           </dl>
         </CmsDetailCard>
 

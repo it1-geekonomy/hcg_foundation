@@ -30,6 +30,13 @@ export class Donor extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   city?: string | null;
 
+  @ApiPropertyOptional({
+    example: '12 MG Road, Bengaluru, Karnataka 560001',
+    description: 'Donor postal / residential address',
+  })
+  @Column({ type: 'text', nullable: true })
+  address?: string | null;
+
   @ApiPropertyOptional({ example: 'United States' })
   @Column({ type: 'varchar', length: 100, nullable: true })
   country?: string | null;
