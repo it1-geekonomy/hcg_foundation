@@ -152,10 +152,10 @@ export default function FcraRemittanceModal({
                 as="p"
                 className="mx-auto max-w-[400px] font-argestadisplay font-light leading-snug text-white/70"
               >
-                International donations cannot be completed online through our
-                payment gateway right now. Please email the{" "}
-                {FINANCE_TEAM_LABEL} and we will share the process for foreign
-                donations.
+                Planning to contribute from outside India? Please contact the{" "}
+                {FINANCE_TEAM_LABEL} by email. Our team will guide you through
+                the donation process and share the necessary bank details and
+                instructions to complete your contribution.
               </Typography>
             </div>
 
@@ -195,8 +195,8 @@ export default function FcraRemittanceModal({
                 </button>
               </div>
               <p className="mt-2 font-manrope text-xs leading-snug text-white/60">
-                Mention your intended amount and cause. Our Finance team will
-                reply with the donation process and next steps.
+                Mention your intended amount when you write. We will reply with
+                bank details and next steps.
               </p>
             </div>
 
