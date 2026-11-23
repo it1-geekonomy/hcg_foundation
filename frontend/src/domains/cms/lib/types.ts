@@ -69,6 +69,13 @@ export type CreateUserPayload = {
   password: string;
 };
 
+export type UpdateUserPayload = {
+  fullName?: string;
+  email?: string;
+  username?: string;
+  password?: string;
+};
+
 export type AnnualReport = SeoFields & {
   id: string;
   title: string;
